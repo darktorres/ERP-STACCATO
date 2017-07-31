@@ -8,18 +8,18 @@
 #include "ui_cadastrotransportadora.h"
 #include "usersession.h"
 
-CadastroTransportadora::CadastroTransportadora(QWidget *parent)
-    : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
+CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) {
-    connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
-  }
+  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
-  setupTables();
   setupUi();
+  setupTables();
   setupMapper();
   newRegister();
+
+  sdTransportadora = SearchDialog::transportadora(this);
+  connect(sdTransportadora, &SearchDialog::itemSelected, this, &CadastroTransportadora::viewRegisterById);
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
     ui->pushButtonRemover->setDisabled(true);
@@ -33,14 +33,14 @@ void CadastroTransportadora::setupTables() {
   modelVeiculo.setTable("transportadora_has_veiculo");
   modelVeiculo.setEditStrategy(QSqlTableModel::OnManualSubmit);
   modelVeiculo.setHeaderData("modelo", "Modelo");
-  modelVeiculo.setHeaderData("carga", "Carga Kg");
+  modelVeiculo.setHeaderData("capacidade", "Carga Kg");
   modelVeiculo.setHeaderData("placa", "Placa");
+  modelVeiculo.setHeaderData("ufPlaca", "UF Placa");
 
   modelVeiculo.setFilter("idVeiculo = 0");
 
   if (not modelVeiculo.select()) {
-    QMessageBox::critical(this, "Erro!",
-                          "Ocorreu um erro ao acessar a tabela de veículo: " + modelVeiculo.lastError().text());
+    QMessageBox::critical(this, "Erro!", "Ocorreu um erro ao acessar a tabela de veículo: " + modelVeiculo.lastError().text());
   }
 
   ui->tableVeiculo->setModel(&modelVeiculo);
@@ -58,6 +58,7 @@ void CadastroTransportadora::setupTables() {
 void CadastroTransportadora::clearFields() {
   RegisterDialog::clearFields();
   novoEndereco();
+  novoVeiculo();
   setupUi();
 }
 
@@ -91,7 +92,7 @@ void CadastroTransportadora::setupMapper() {
   mapperVeiculo.setModel(&modelVeiculo);
   mapperVeiculo.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
   mapperVeiculo.addMapping(ui->lineEditModelo, modelVeiculo.fieldIndex("modelo"));
-  mapperVeiculo.addMapping(ui->lineEditCarga, modelVeiculo.fieldIndex("carga"));
+  mapperVeiculo.addMapping(ui->lineEditCarga, modelVeiculo.fieldIndex("capacidade"));
   mapperVeiculo.addMapping(ui->lineEditPlaca, modelVeiculo.fieldIndex("placa"));
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
@@ -118,26 +119,29 @@ void CadastroTransportadora::updateMode() {
 
 void CadastroTransportadora::on_pushButtonCadastrar_clicked() { save(); }
 
-void CadastroTransportadora::on_pushButtonAtualizar_clicked() { update(); }
+void CadastroTransportadora::on_pushButtonAtualizar_clicked() { save(); }
 
-void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
+void CadastroTransportadora::on_pushButtonNovoCad_clicked() {
+  newRegister();
+  modelVeiculo.setFilter("0");
+
+  if (not modelVeiculo.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela veiculo: " + modelVeiculo.lastError().text());
+    return;
+  }
+}
 
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 
-void CadastroTransportadora::on_pushButtonBuscar_clicked() {
-  SearchDialog *sdTransportadora = SearchDialog::transportadora(this);
-  connect(sdTransportadora, &SearchDialog::itemSelected, this, &CadastroTransportadora::viewRegisterById);
-  sdTransportadora->show();
-}
+void CadastroTransportadora::on_pushButtonBuscar_clicked() { sdTransportadora->show(); }
 
 void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
-  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-"))
-                                      ? "background-color: rgb(255, 255, 127)"
-                                      : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
+  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "background-color: rgb(255, 255, 127)"
+                                                                                                : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco(false)) {
+  if (not cadastrarEndereco()) {
     QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este endereço!");
     return;
   }
@@ -157,8 +161,7 @@ void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
 void CadastroTransportadora::on_pushButtonEndLimpar_clicked() { novoEndereco(); }
 
 void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?",
-                     QMessageBox::Yes | QMessageBox::No, this);
+  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Remover");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
@@ -177,12 +180,11 @@ void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool &checked) {
-  modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() +
-                     (checked ? "" : " AND desativado = FALSE"));
+void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool checked) {
+  modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
 }
 
-bool CadastroTransportadora::cadastrarEndereco(const bool &isUpdate) {
+bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
   for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
@@ -193,9 +195,9 @@ bool CadastroTransportadora::cadastrarEndereco(const bool &isUpdate) {
     return false;
   }
 
-  rowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
+  currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (not isUpdate) modelEnd.insertRow(rowEnd);
+  if (not isUpdate) modelEnd.insertRow(currentRowEnd);
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) return false;
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) return false;
@@ -209,6 +211,8 @@ bool CadastroTransportadora::cadastrarEndereco(const bool &isUpdate) {
   if (not setDataEnd("desativado", false)) return false;
 
   ui->tableEndereco->resizeColumnsToContents();
+
+  isDirty = true;
 
   return true;
 }
@@ -261,6 +265,7 @@ void CadastroTransportadora::setupUi() {
   ui->lineEditPlaca->setInputMask("AAA-9999;_");
   ui->lineEditCEP->setInputMask("99999-999;_");
   ui->lineEditUF->setInputMask(">AA;_");
+  ui->lineEditUfPlaca->setInputMask(">AA;_");
 
   ui->lineEditCarga->setValidator(new QIntValidator(this));
 }
@@ -289,34 +294,37 @@ bool CadastroTransportadora::viewRegister() {
   return true;
 }
 
-void CadastroTransportadora::successMessage() {
-  QMessageBox::information(this, "Atenção!", "Transportadora cadastrada com sucesso!");
-}
+void CadastroTransportadora::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
 
-void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) {
-  ui->tableEndereco->resizeColumnsToContents();
-}
+void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
-bool CadastroTransportadora::cadastrarVeiculo(const bool &isUpdate) {
+bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
   for (auto const &line : ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
-  int row = isUpdate ? mapperVeiculo.currentIndex() : modelVeiculo.rowCount();
+  const int row = isUpdate ? mapperVeiculo.currentIndex() : modelVeiculo.rowCount();
 
   if (not isUpdate) modelVeiculo.insertRow(row);
 
   if (not modelVeiculo.setData(row, "modelo", ui->lineEditModelo->text())) return false;
-  if (not modelVeiculo.setData(row, "carga", ui->lineEditCarga->text().toInt())) return false;
-  if (not modelVeiculo.setData(row, "placa", ui->lineEditPlaca->text())) return false;
+  if (not modelVeiculo.setData(row, "capacidade", ui->lineEditCarga->text().toInt())) return false;
+
+  if (ui->lineEditPlaca->text() != "-") {
+    if (not modelVeiculo.setData(row, "placa", ui->lineEditPlaca->text())) return false;
+  }
+
+  if (not modelVeiculo.setData(row, "ufPlaca", ui->lineEditUfPlaca->text())) return false;
 
   ui->tableVeiculo->resizeColumnsToContents();
+
+  isDirty = true;
 
   return true;
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
-  if (not cadastrarVeiculo(false)) {
+  if (not cadastrarVeiculo()) {
     QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este veículo!");
     return;
   }
@@ -346,11 +354,11 @@ void CadastroTransportadora::clearVeiculo() {
   ui->lineEditModelo->clear();
   ui->lineEditCarga->clear();
   ui->lineEditPlaca->clear();
+  ui->lineEditUfPlaca->clear();
 }
 
 void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?",
-                     QMessageBox::Yes | QMessageBox::No, this);
+  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Remover");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
@@ -370,46 +378,49 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  if (not verifyFields()) return false;
+  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
 
-  row = isUpdate ? mapper.currentIndex() : model.rowCount();
-
-  if (row == -1) {
-    QMessageBox::critical(this, "Erro!", "Erro linha -1");
+  if (currentRow == -1) {
+    error = "Erro linha -1";
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(row)) return false;
+  if (not isUpdate and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 
   for (int column = 0; column < model.rowCount(); ++column) {
-    QVariant dado = model.data(row, column);
+    const QVariant dado = model.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not model.setData(row, column, dado.toString().toUpper())) return false;
+      if (not model.setData(currentRow, column, dado.toString().toUpper())) return false;
     }
   }
 
   if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + model.lastError().text());
+    error = "Erro: " + model.lastError().text();
     return false;
   }
 
-  primaryId = data(row, primaryKey).isValid() ? data(row, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
+
+  if (primaryId.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "primaryId está vazio!");
+    return false;
+  }
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
     if (not modelEnd.setData(row, primaryKey, primaryId)) return false;
   }
 
   for (int column = 0, columnCount = modelEnd.columnCount(); column < columnCount; ++column) {
-    QVariant dado = modelEnd.data(row, column);
+    const QVariant dado = modelEnd.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not modelEnd.setData(row, column, dado.toString().toUpper())) return false;
+      if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) return false;
     }
   }
 
   if (not modelEnd.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + modelEnd.lastError().text());
+    error = "Erro: " + modelEnd.lastError().text();
     return false;
   }
 
@@ -418,14 +429,14 @@ bool CadastroTransportadora::cadastrar() {
   }
 
   for (int column = 0, columnCount = modelVeiculo.columnCount(); column < columnCount; ++column) {
-    QVariant dado = modelVeiculo.data(row, column);
+    const QVariant dado = modelVeiculo.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not modelVeiculo.setData(row, column, dado.toString().toUpper())) return false;
+      if (not modelVeiculo.setData(currentRow, column, dado.toString().toUpper())) return false;
     }
   }
 
   if (not modelVeiculo.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + modelVeiculo.lastError().text());
+    error = "Erro: " + modelVeiculo.lastError().text();
     return false;
   }
 
@@ -433,11 +444,14 @@ bool CadastroTransportadora::cadastrar() {
 }
 
 bool CadastroTransportadora::save() {
+  if (not verifyFields()) return false;
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     return false;
   }
 
@@ -447,14 +461,13 @@ bool CadastroTransportadora::save() {
 
   viewRegisterById(primaryId);
 
-  if (not silent) successMessage();
+  successMessage();
 
   return true;
 }
 
 void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool checked) {
-  modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() +
-                         (checked ? "" : " AND desativado = FALSE"));
+  modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
 }
 
 void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {
@@ -463,6 +476,4 @@ void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {
   mapperVeiculo.setCurrentModelIndex(index);
 }
 
-void CadastroTransportadora::on_tableVeiculo_entered(const QModelIndex &) {
-  ui->tableVeiculo->resizeColumnsToContents();
-}
+void CadastroTransportadora::on_tableVeiculo_entered(const QModelIndex &) { ui->tableVeiculo->resizeColumnsToContents(); }

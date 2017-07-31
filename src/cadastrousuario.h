@@ -2,6 +2,7 @@
 #define CADASTRARUSUARIO_H
 
 #include "registerdialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class CadastroUsuario;
@@ -26,9 +27,12 @@ private slots:
 
 private:
   // attributes
-  Ui::CadastroUsuario *ui;
+  QString error;
+  SearchDialog *sdUsuario;
   SqlTableModel modelPermissoes;
+  Ui::CadastroUsuario *ui;
   // methods
+  bool cadastrar() override;
   bool viewRegister() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;
@@ -38,7 +42,6 @@ private:
   virtual void setupMapper() override;
   virtual void successMessage() override;
   virtual void updateMode() override;
-  bool cadastrar() override;
   void setupTables();
 };
 

@@ -2,6 +2,7 @@
 #define CADASTROLOJA_H
 
 #include "registeraddressdialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class CadastroLoja;
@@ -15,7 +16,7 @@ public:
   ~CadastroLoja();
 
 private slots:
-  void on_checkBoxMostrarInativos_clicked(const bool &checked);
+  void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_checkBoxMostrarInativosConta_clicked(bool checked);
   void on_lineEditCEP_textChanged(const QString &cep);
   void on_lineEditCNPJ_textEdited(const QString &text);
@@ -30,9 +31,9 @@ private slots:
   void on_pushButtonAtualizarTaxas_clicked();
   void on_pushButtonBuscar_clicked();
   void on_pushButtonCadastrar_clicked();
-  void on_pushButtonCadastrarTipo_clicked();
   void on_pushButtonContaLimpar_clicked();
   void on_pushButtonEndLimpar_clicked();
+  void on_pushButtonLimparSelecao_clicked();
   void on_pushButtonNovoCad_clicked();
   void on_pushButtonRemoveAssociacao_clicked();
   void on_pushButtonRemover_clicked();
@@ -46,22 +47,23 @@ private slots:
 
 private:
   // attributes
-  Ui::CadastroLoja *ui;
-  SqlTableModel modelAssocia1;
-  SqlTableModel modelAssocia2;
-  SqlTableModel modelAlcadas;
-  SqlTableModel modelPermissoes;
-  SqlTableModel modelConta;
-  //
-  SqlTableModel modelPagamentos;
-  SqlTableModel modelTaxas;
-  //
   QDataWidgetMapper mapperConta;
   QDataWidgetMapper mapperPagamento;
+  QString error;
+  SearchDialog *sdLoja;
+  SqlTableModel modelAssocia1;
+  SqlTableModel modelAssocia2;
+  SqlTableModel modelConta;
+  SqlTableModel modelPagamentos;
+  SqlTableModel modelPermissoes;
+  SqlTableModel modelTaxas;
+  Ui::CadastroLoja *ui;
   // methods
+  bool adicionarPagamento();
+  bool atualizarPagamento();
   bool cadastrar() override;
-  bool cadastrarConta(const bool &isUpdate);
-  bool cadastrarEndereco(const bool &isUpdate);
+  bool cadastrarConta(const bool isUpdate = false);
+  bool cadastrarEndereco(const bool isUpdate = false);
   bool viewRegister() override;
   virtual bool newRegister() override;
   virtual bool save() override;

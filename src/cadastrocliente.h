@@ -2,6 +2,7 @@
 #define CADASTROCLIENTE_H
 
 #include "registeraddressdialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class CadastroCliente;
@@ -15,7 +16,8 @@ public:
   ~CadastroCliente();
 
 private slots:
-  void on_checkBoxMostrarInativos_clicked(const bool &checked);
+  void on_checkBoxInscEstIsento_toggled(bool checked);
+  void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_lineEditCEP_textChanged(const QString &cep);
   void on_lineEditCNPJ_textEdited(const QString &text);
   void on_lineEditContatoCPF_textEdited(const QString &text);
@@ -29,16 +31,19 @@ private slots:
   void on_pushButtonNovoCad_clicked();
   void on_pushButtonRemover_clicked();
   void on_pushButtonRemoverEnd_clicked();
-  void on_radioButtonPF_toggled(const bool &checked);
+  void on_radioButtonPF_toggled(const bool checked);
   void on_tableEndereco_clicked(const QModelIndex &index);
   void on_tableEndereco_entered(const QModelIndex &);
 
 private:
   // attributes
-  Ui::CadastroCliente *ui;
+  bool incompleto = false;
   QString tipoPFPJ;
+  SearchDialog *sdCliente;
+  Ui::CadastroCliente *ui;
   // methods
-  bool cadastrarEndereco(const bool &isUpdate);
+  bool cadastrarEndereco(const bool isUpdate = false);
+  virtual bool cadastrar() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;

@@ -2,6 +2,7 @@
 #define CADASTROPROFISSIONAL_H
 
 #include "registeraddressdialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class CadastroProfissional;
@@ -15,7 +16,7 @@ public:
   ~CadastroProfissional();
 
 private slots:
-  void on_checkBoxMostrarInativos_clicked(const bool &checked);
+  void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_lineEditCEP_textChanged(const QString &cep);
   void on_lineEditCNPJ_editingFinished();
   void on_lineEditCNPJ_textEdited(const QString &text);
@@ -35,17 +36,21 @@ private slots:
   void on_pushButtonNovoCad_clicked();
   void on_pushButtonRemover_clicked();
   void on_pushButtonRemoverEnd_clicked();
-  void on_radioButtonPF_toggled(const bool &checked);
+  void on_radioButtonPF_toggled(const bool checked);
   void on_tableEndereco_clicked(const QModelIndex &index);
   void on_tableEndereco_entered(const QModelIndex &);
 
 private:
   // attributes
+  QString error;
   QString tipoPFPJ;
+  SearchDialog *sdProfissional;
   Ui::CadastroProfissional *ui;
   // methods
-  bool cadastrarEndereco(const bool &isUpdate);
+  bool cadastrarEndereco(const bool isUpdate = false);
   bool viewRegister() override;
+  virtual bool cadastrar() override;
+  virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;
   virtual void clearFields() override;

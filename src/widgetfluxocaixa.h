@@ -18,20 +18,25 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
-  void on_tableResumo_entered(const QModelIndex &);
+  void on_groupBoxCaixa1_toggled(const bool checked);
+  void on_groupBoxCaixa2_toggled(const bool checked);
+  void on_tableCaixa_activated(const QModelIndex &index);
   void on_tableCaixa_entered(const QModelIndex &);
+  void on_tableCaixa2_activated(const QModelIndex &index);
+  void on_tableCaixa2_entered(const QModelIndex &);
 
 private:
   // attributes
-  SqlTableModel model;
-  SqlTableModel model2;
+  bool isReady = false;
+  QSqlQueryModel modelCaixa;
+  QSqlQueryModel modelCaixa2;
+  QSqlQueryModel modelFuturo;
   Ui::WidgetFluxoCaixa *ui;
   // methods
   void montaFiltro();
-  void setupTables();
 };
 
 #endif // WIDGETFLUXOCAIXA_H

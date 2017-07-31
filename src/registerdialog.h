@@ -13,6 +13,7 @@ class RegisterDialog : public QDialog {
 public:
   explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
   virtual bool viewRegister();
+  static QVariant getLastInsertId();
 
 public slots:
   virtual bool viewRegisterById(const QVariant &id);
@@ -25,12 +26,10 @@ signals:
 
 protected:
   // attributes
-  bool incompleto = false;
   bool isDirty = false;
   bool isUpdate = false;
-  bool silent = false;
-  int row = -1;
-  int rowEnd = -1;
+  int currentRow = -1;
+  int currentRowEnd = -1;
   QDataWidgetMapper mapper;
   QString primaryId;
   QString primaryKey;
@@ -38,25 +37,24 @@ protected:
   SqlTableModel model;
   // methods
   bool confirmationMessage();
-  bool setData(const QString &key, const QVariant value);
-  bool update();
+  bool setData(const QString &key, const QVariant &value);
   bool validaCNPJ(const QString &text);
   bool validaCPF(const QString &text);
   bool verifyFields(const QList<QLineEdit *> &list);
   QString requiredStyle();
   QStringList getTextKeys() const;
-  QVariant data(const int &row, const QString &key);
+  QVariant data(const int row, const QString &key);
   QVariant data(const QString &key);
-  virtual bool cadastrar();
+  virtual bool cadastrar() = 0;
   virtual bool newRegister();
-  virtual bool save();
+  virtual bool save() = 0;
   virtual bool savingProcedures() = 0;
   virtual bool verifyFields() = 0;
-  virtual bool verifyRequiredField(QLineEdit *line, const bool &silent = false);
+  virtual bool verifyRequiredField(QLineEdit *line, const bool silent = false);
   virtual void clearFields() = 0;
   virtual void registerMode() = 0;
   virtual void setupMapper() = 0;
-  virtual void successMessage();
+  virtual void successMessage() = 0;
   virtual void updateMode() = 0;
   void addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray());
   void closeEvent(QCloseEvent *event) override;

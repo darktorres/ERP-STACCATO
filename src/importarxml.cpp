@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -10,10 +11,8 @@
 #include "reaisdelegate.h"
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
-#include "xml.h"
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent)
-    : QDialog(parent), ui(new Ui::ImportarXML), dataReal(dataReal), idsCompra(idsCompra) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -28,11 +27,12 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque.setHeaderData("status", "Status");
-  modelEstoque.setHeaderData("ordemCompra", "OC");
   modelEstoque.setHeaderData("numeroNFe", "NFe");
-  modelEstoque.setHeaderData("local", "Local");
   modelEstoque.setHeaderData("fornecedor", "Fornecedor");
   modelEstoque.setHeaderData("descricao", "Produto");
+  modelEstoque.setHeaderData("lote", "Lote");
+  modelEstoque.setHeaderData("local", "Local");
+  modelEstoque.setHeaderData("bloco", "Bloco");
   modelEstoque.setHeaderData("quant", "Quant.");
   modelEstoque.setHeaderData("un", "Un.");
   modelEstoque.setHeaderData("caixas", "Cx.");
@@ -50,11 +50,14 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("lote", new SingleEditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("bloco", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("un", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableEstoque->hideColumn("recebidoPor");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("idEstoque");
@@ -99,7 +102,6 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelConsumo.setHeaderData("status", "Status");
-  modelConsumo.setHeaderData("ordemCompra", "OC");
   modelConsumo.setHeaderData("numeroNFe", "NFe");
   modelConsumo.setHeaderData("local", "Local");
   modelConsumo.setHeaderData("fornecedor", "Fornecedor");
@@ -119,6 +121,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   }
 
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelConsumo, this));
+  ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableConsumo->hideColumn("idConsumo");
@@ -188,8 +191,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   modelCompra.setFilter("idCompra = " + idsCompra.join(" OR idCompra = "));
 
   if (not modelCompra.select()) {
-    QMessageBox::critical(this, "Erro!",
-                          "Erro lendo tabela pedido_fornecedor_has_produto: " + modelCompra.lastError().text());
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelCompra.lastError().text());
   }
 
   ui->tableCompra->setModel(new EstoqueProxyModel(&modelCompra, this));
@@ -198,6 +200,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableCompra->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+  ui->tableCompra->hideColumn("idVendaProduto");
   ui->tableCompra->hideColumn("selecionado");
   ui->tableCompra->hideColumn("statusFinanceiro");
   ui->tableCompra->hideColumn("quantUpd");
@@ -218,12 +221,42 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableCompra->hideColumn("dataRealReceb");
   ui->tableCompra->hideColumn("dataPrevEnt");
   ui->tableCompra->hideColumn("dataRealEnt");
+  ui->tableCompra->hideColumn("aliquotaSt");
+  ui->tableCompra->hideColumn("st");
 
   ui->tableCompra->resizeColumnsToContents();
+
+  //
+
+  modelNFe.setTable("nfe");
+  modelNFe.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelNFe.setFilter("0");
+
+  if (not modelNFe.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela nfe: " + modelNFe.lastError().text());
+  }
+
+  modelEstoque_nfe.setTable("estoque_has_nfe");
+  modelEstoque_nfe.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelEstoque_nfe.setFilter("0");
+
+  if (not modelEstoque_nfe.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque_has_nfe: " + modelEstoque_nfe.lastError().text());
+  }
+
+  modelEstoque_compra.setTable("estoque_has_compra");
+  modelEstoque_compra.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelEstoque_compra.setFilter("0");
+
+  if (not modelEstoque_compra.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque_has_compra: " + modelEstoque_compra.lastError().text());
+  }
 }
 
 bool ImportarXML::importar() {
-  //--------------
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     if (not modelEstoque.setData(row, "status", "EM COLETA")) return false;
   }
@@ -247,52 +280,80 @@ bool ImportarXML::importar() {
   }
 
   if (not ok) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma compra pareada!");
+    error = "Nenhuma compra pareada!";
     return false;
   }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    int color = modelEstoque.data(row, "quantUpd").toInt();
+    const int color = modelEstoque.data(row, "quantUpd").toInt();
 
     if (color == Red) {
-      ok = false;
-      break;
+      error = "Nem todos os estoques estão ok!";
+      return false;
     }
   }
 
-  if (not ok) {
-    QMessageBox::critical(this, "Erro!", "Nem todos os estoques estão ok!");
-    return false;
-  }
-
   if (not modelEstoque.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text());
+    error = "Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text();
     return false;
   }
 
   if (not modelCompra.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados da tabela compra: " + modelCompra.lastError().text());
+    error = "Erro salvando dados da tabela compra: " + modelCompra.lastError().text();
     return false;
   }
 
   if (not modelConsumo.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados do consumo: " + modelConsumo.lastError().text());
+    error = "Erro salvando dados do consumo: " + modelConsumo.lastError().text();
     return false;
   }
 
-  // NOTE: todos as linhas em cima devem ser pareadas mas nem todas em baixo precisam ser (como a nota nao pode ser
-  // cadastrada duas vezes seus produtos devem ser todos pareados)
+  if (not modelEstoque_compra.submitAll()) {
+    error = "Erro salvando modelEstoque_compra: " + modelEstoque_compra.lastError().text();
+    return false;
+  }
+
+  if (not modelNFe.submitAll()) {
+    error = "Erro salvando modelNFe: " + modelNFe.lastError().text();
+    return false;
+  }
+
+  if (not modelEstoque_nfe.submitAll()) {
+    error = "Erro salvando modelEstoque_nfe: " + modelEstoque_nfe.lastError().text();
+    return false;
+  }
 
   //------------------------------
+
   QSqlQuery query;
+  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto");
+
+  for (int row = 0; row < modelCompra.rowCount(); ++row) {
+    const int idVendaProduto = modelCompra.data(row, "idVendaProduto").toInt();
+    const int color = modelCompra.data(row, "quantUpd").toInt();
+    const QString status = modelCompra.data(row, "status").toString();
+
+    if (idVendaProduto == 0) continue;
+    if (color == White) continue;
+    if (status != "EM FATURAMENTO") continue;
+
+    query.bindValue(":dataRealFat", dataReal);
+    query.bindValue(":idVendaProduto", modelCompra.data(row, "idVendaProduto"));
+
+    if (not query.exec()) {
+      error = "Erro atualizando status do produto da venda: " + query.lastError().text();
+      return false;
+    }
+  }
+
+  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
+
   for (auto const &idCompra : idsCompra) {
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataRealFat = :dataRealFat, status = 'EM COLETA' WHERE "
-                  "idCompra = :idCompra AND quantUpd = 1");
     query.bindValue(":dataRealFat", dataReal);
     query.bindValue(":idCompra", idCompra);
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro atualizando status da compra: " + query.lastError().text());
+      error = "Erro atualizando status da compra: " + query.lastError().text();
       return false;
     }
   }
@@ -302,13 +363,16 @@ bool ImportarXML::importar() {
 }
 
 void ImportarXML::on_pushButtonImportar_clicked() {
-  QSqlQuery("SAVEPOINT importar").exec();
+  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
+  QSqlQuery("START TRANSACTION").exec();
 
   if (not importar()) {
-    QMessageBox::critical(this, "Erro!", "Erro importando nota!");
-    QSqlQuery("ROLLBACK TO importar").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    QSqlQuery("ROLLBACK").exec();
     return;
   }
+
+  QSqlQuery("COMMIT").exec();
 
   QDialog::accept();
   close();
@@ -316,66 +380,54 @@ void ImportarXML::on_pushButtonImportar_clicked() {
 
 bool ImportarXML::limparAssociacoes() {
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    if (not modelCompra.setData(row, "quantUpd", 0)) return false;
+    const QString status = modelCompra.data(row, "status").toString();
+    const int color = modelCompra.data(row, "quantUpd").toInt();
+
+    if (status != "EM FATURAMENTO" and color == Green) continue;
+
+    if (not modelCompra.setData(row, "quantUpd", White)) return false;
     if (not modelCompra.setData(row, "quantConsumida", 0)) return false;
   }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    if (not modelEstoque.setData(row, "quantUpd", 0)) return false;
+    if (not modelEstoque.setData(row, "quantUpd", White)) return false;
   }
 
-  for (int row = 0; row < modelConsumo.rowCount(); ++row) {
-    QSqlQuery query;
-    query.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO' WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelConsumo.data(row, "idVendaProduto"));
-
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro limpando status do produto da venda: " + query.lastError().text());
-      return false;
-    }
-
-    // TODO: this need submitAll?
-    if (not modelConsumo.removeRow(row)) return false;
+  while (modelConsumo.rowCount() > 0) {
+    if (not modelConsumo.removeRow(0)) return false;
   }
 
   return true;
 }
 
-bool ImportarXML::procurar() {
+void ImportarXML::on_pushButtonProcurar_clicked() {
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+
+  procurar();
+
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+}
+
+void ImportarXML::procurar() {
   const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
 
   if (filePath.isEmpty()) {
     ui->lineEdit->setText(QString());
-    return false;
+    return;
   }
 
   QFile file(filePath);
 
   if (not file.open(QFile::ReadOnly)) {
     QMessageBox::critical(this, "Erro!", "Erro lendo arquivo: " + file.errorString());
-    return false;
+    return;
   }
 
-  if (not lerXML(file)) return false;
+  if (not lerXML(file)) return;
 
   file.close();
 
-  if (not parear()) return false;
-
-  if (not modelEstoque.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text());
-    return false;
-  }
-
-  if (not modelCompra.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados da tabela compra: " + modelCompra.lastError().text());
-    return false;
-  }
-
-  if (not modelConsumo.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados do consumo: " + modelConsumo.lastError().text());
-    return false;
-  }
+  if (not parear()) return;
 
   bool ok = true;
 
@@ -391,24 +443,11 @@ bool ImportarXML::procurar() {
   ui->tableEstoque->resizeColumnsToContents();
   ui->tableConsumo->resizeColumnsToContents();
   ui->tableCompra->resizeColumnsToContents();
-
-  return true;
 }
 
-void ImportarXML::on_pushButtonProcurar_clicked() {
-  QSqlQuery("SAVEPOINT procurar").exec();
-
-  if (not procurar()) {
-    QMessageBox::critical(this, "Erro!", "Erro carregando nota!");
-    QSqlQuery("ROLLBACK TO procurar").exec();
-    return;
-  }
-}
-
-bool ImportarXML::associarItens(int rowCompra, int rowEstoque, double &estoqueConsumido) {
+bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) {
   if (modelEstoque.data(rowEstoque, "quantUpd") == Green) return true;
   if (modelCompra.data(rowCompra, "quantUpd") == Green) return true;
-  if (modelEstoque.data(rowEstoque, "quant").toDouble() < 0) return true;
 
   //-------------------------------
 
@@ -421,168 +460,458 @@ bool ImportarXML::associarItens(int rowCompra, int rowEstoque, double &estoqueCo
   const double quantAdicionar = estoqueDisponivel > espaco ? espaco : estoqueDisponivel;
   estoqueConsumido += quantAdicionar;
 
+  if (not modelCompra.setData(rowCompra, "descricao", modelEstoque.data(rowEstoque, "descricao").toString())) {
+    return false;
+  }
+
   if (not modelCompra.setData(rowCompra, "quantConsumida", quantConsumida + quantAdicionar)) {
     return false;
   }
 
-  if (not modelEstoque.setData(rowEstoque, "quantUpd",
-                               qFuzzyCompare(estoqueConsumido, quantEstoque) ? Green : Yellow)) {
+  if (not modelEstoque.setData(rowEstoque, "quantUpd", qFuzzyCompare(estoqueConsumido, quantEstoque) ? Green : Yellow)) {
     return false;
   }
 
-  if (not modelCompra.setData(rowCompra, "quantUpd",
-                              qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? Green : Yellow)) {
-    return false;
-  }
-
-  if (not modelEstoque.setData(rowEstoque, "ordemCompra", modelCompra.data(rowCompra, "ordemCompra"))) {
+  if (not modelCompra.setData(rowCompra, "quantUpd", qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? Green : Yellow)) {
     return false;
   }
 
   const int idCompra = modelCompra.data(rowCompra, "idCompra").toInt();
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
 
-  QSqlQuery query;
-  query.prepare("SELECT idEstoque FROM estoque_has_compra WHERE idEstoque = :idEstoque AND idCompra = :idCompra");
-  query.bindValue(":idEstoque", idEstoque);
-  query.bindValue(":idCompra", idCompra);
+  bool exists = false;
 
-  if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando em estoque_has_compra: " + query.lastError().text());
+  for (int row = 0; row < modelEstoque_compra.rowCount(); ++row) {
+    const int idEstoque_temp = modelEstoque_compra.data(row, "idEstoque").toInt();
+    const int idCompra_temp = modelEstoque_compra.data(row, "idCompra").toInt();
+
+    if (idEstoque_temp == idEstoque and idCompra_temp == idCompra) exists = true;
+  }
+
+  if (not exists) {
+    const int rowEstoque_compra = modelEstoque_compra.rowCount();
+    modelEstoque_compra.insertRow(rowEstoque_compra);
+
+    if (not modelEstoque_compra.setData(rowEstoque_compra, "idEstoque", idEstoque)) return false;
+    if (not modelEstoque_compra.setData(rowEstoque_compra, "idCompra", idCompra)) return false;
+  }
+
+  if (not criarConsumo2(rowCompra, rowEstoque, quantAdicionar)) return false;
+
+  return true;
+}
+
+bool ImportarXML::verificaCNPJ(const XML &xml) {
+  QSqlQuery queryLoja;
+
+  // TODO: make this not hardcoded but still it shouldnt need the user to set a UserSession flag
+  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro na query CNPJ: " + queryLoja.lastError().text());
     return false;
   }
 
-  if (query.size() == 0) {
-    query.prepare("INSERT INTO estoque_has_compra (idEstoque, idCompra) VALUES (:idEstoque, :idCompra)");
-    query.bindValue(":idEstoque", idEstoque);
-    query.bindValue(":idCompra", idCompra);
+  if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != xml.cnpj) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "CNPJ da nota não é do galpão. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro salvando em estoque_has_compra: " + query.lastError().text());
-      return false;
-    }
+    return msgBox.exec() == QMessageBox::Yes;
   }
+
+  return true;
+}
+
+bool ImportarXML::verificaExiste(XML &xml) {
+  QSqlQuery query;
+  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", xml.chaveAcesso);
+
+  if (not query.exec()) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro verificando se nota já cadastrada: " + query.lastError().text());
+    return false;
+  }
+
+  if (query.first()) {
+    QMessageBox::critical(nullptr, "Erro!", "Nota já cadastrada!");
+    return true;
+  }
+
+  const auto list = modelNFe.match(modelNFe.index(0, modelNFe.fieldIndex("chaveAcesso")), Qt::DisplayRole, xml.chaveAcesso);
+
+  if (list.size() > 0) {
+    QMessageBox::critical(nullptr, "Erro!", "Nota já cadastrada!");
+    return true;
+  }
+
+  return false;
+}
+
+bool ImportarXML::cadastrarNFe(XML &xml) {
+  if (not verificaCNPJ(xml) or verificaExiste(xml)) return false;
+
+  QFile file(xml.fileName);
+
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro lendo arquivo: " + file.errorString());
+    return false;
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT COALESCE(MAX(idNFe), 1) AS idNFe FROM nfe") or not query.first()) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro buscando próximo id: " + query.lastError().text());
+    return false;
+  }
+
+  xml.idNFe = query.value("idNFe").toInt();
+
+  for (int row = 0; row < modelNFe.rowCount(); ++row) {
+    const int id = modelNFe.data(row, "idNFe").toInt();
+    if (id > xml.idNFe) xml.idNFe = id;
+  }
+
+  xml.idNFe++;
+
+  const int row = modelNFe.rowCount();
+  if (not modelNFe.insertRow(row)) return false;
+
+  if (not modelNFe.setData(row, "idNFe", xml.idNFe)) return false;
+  if (not modelNFe.setData(row, "tipo", "ENTRADA")) return false;
+  if (not modelNFe.setData(row, "cnpjDest", xml.cnpj)) return false;
+  if (not modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso)) return false;
+  if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) return false;
+  if (not modelNFe.setData(row, "xml", file.readAll())) return false;
+  if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) return false;
 
   return true;
 }
 
 bool ImportarXML::lerXML(QFile &file) {
   XML xml(file.readAll(), file.fileName());
-  if (not xml.cadastrarNFe("ENTRADA")) return false;
-  if (not xml.mostrarNoSqlModel(modelEstoque)) return false;
+
+  if (not cadastrarNFe(xml)) return false;
+  if (not perguntarLocal(xml)) return false;
+  if (not inserirNoSqlModel(xml, xml.model.item(0, 0))) return false;
+
+  return true;
+}
+
+bool ImportarXML::perguntarLocal(XML &xml) {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT descricao FROM loja WHERE descricao != '' and descricao != 'CD'")) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando lojas: " + query.lastError().text());
+    return false;
+  }
+
+  QStringList lojas{"CD"};
+
+  while (query.next()) lojas << query.value("descricao").toString();
+
+  QInputDialog input;
+  input.setInputMode(QInputDialog::TextInput);
+  input.setCancelButtonText("Cancelar");
+  input.setWindowTitle("Local");
+  input.setLabelText("Local do depósito:");
+  input.setComboBoxItems(lojas);
+  input.setComboBoxEditable(false);
+
+  if (input.exec() != QInputDialog::Accepted) return false;
+
+  xml.local = input.textValue();
+
+  return true;
+}
+
+bool ImportarXML::inserirItemSql(XML &xml) {
+  const auto list = modelEstoque.match(modelEstoque.index(0, modelEstoque.fieldIndex("codComercial")), Qt::DisplayRole, xml.codProd, -1, Qt::MatchFlags(Qt::MatchFixedString | Qt::MatchWrap));
+
+  for (auto const &item : list) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Produto é do mesmo lote da linha " + QString::number(item.row() + 1) + "?", QMessageBox::Yes | QMessageBox::No, nullptr);
+    msgBox.setButtonText(QMessageBox::Yes, "Sim");
+    msgBox.setButtonText(QMessageBox::No, "Não");
+
+    if (msgBox.exec() == QMessageBox::Yes) {
+      const int row = item.row();
+
+      const double newQuant = xml.quant + modelEstoque.data(row, "quant").toDouble();
+
+      if (not modelEstoque.setData(row, "quant", newQuant)) return false;
+
+      return true;
+    }
+  }
+
+  const int row = modelEstoque.rowCount();
+
+  if (not modelEstoque.insertRow(row)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro inserindo linha na tabela: " + modelEstoque.lastError().text());
+    return false;
+  }
+
+  // remove 'A'
+  if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A." and xml.codProd.endsWith("A")) xml.codProd = xml.codProd.left(xml.codProd.size() - 1);
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT COALESCE(MAX(idEstoque), 1) AS idEstoque FROM estoque") or not query.first()) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro buscando próximo id: " + query.lastError().text());
+    return false;
+  }
+
+  int idEstoque = query.value("idEstoque").toInt();
+
+  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+    const int id = modelEstoque.data(row, "idEstoque").toInt();
+    if (id > idEstoque) idEstoque = id;
+  }
+
+  idEstoque++;
+
+  if (not modelEstoque.setData(row, "idEstoque", idEstoque)) return false;
+  if (not modelEstoque.setData(row, "fornecedor", xml.xNome)) return false;
+  if (not modelEstoque.setData(row, "local", xml.local)) return false;
+  if (not modelEstoque.setData(row, "descricao", xml.descricao)) return false;
+  if (not modelEstoque.setData(row, "quant", xml.quant)) return false;
+  if (not modelEstoque.setData(row, "un", xml.un)) return false;
+  if (not modelEstoque.setData(row, "codBarras", xml.codBarras)) return false;
+  if (not modelEstoque.setData(row, "codComercial", xml.codProd)) return false;
+  if (not modelEstoque.setData(row, "ncm", xml.ncm)) return false;
+  if (not modelEstoque.setData(row, "cfop", xml.cfop)) return false;
+  if (not modelEstoque.setData(row, "valorUnid", xml.valorUnid)) return false;
+  if (not modelEstoque.setData(row, "valor", xml.valor)) return false;
+  if (not modelEstoque.setData(row, "codBarrasTrib", xml.codBarrasTrib)) return false;
+  if (not modelEstoque.setData(row, "unTrib", xml.unTrib)) return false;
+  if (not modelEstoque.setData(row, "quantTrib", xml.quantTrib)) return false;
+  if (not modelEstoque.setData(row, "valorTrib", xml.valorTrib)) return false;
+  if (not modelEstoque.setData(row, "desconto", xml.desconto)) return false;
+  if (not modelEstoque.setData(row, "compoeTotal", xml.compoeTotal)) return false;
+  if (not modelEstoque.setData(row, "numeroPedido", xml.numeroPedido)) return false;
+  if (not modelEstoque.setData(row, "itemPedido", xml.itemPedido)) return false;
+  if (not modelEstoque.setData(row, "tipoICMS", xml.tipoICMS)) return false;
+  if (not modelEstoque.setData(row, "orig", xml.orig)) return false;
+  if (not modelEstoque.setData(row, "cstICMS", xml.cstICMS)) return false;
+  if (not modelEstoque.setData(row, "modBC", xml.modBC)) return false;
+  if (not modelEstoque.setData(row, "vBC", xml.vBC)) return false;
+  if (not modelEstoque.setData(row, "pICMS", xml.pICMS)) return false;
+  if (not modelEstoque.setData(row, "vICMS", xml.vICMS)) return false;
+  if (not modelEstoque.setData(row, "modBCST", xml.modBCST)) return false;
+  if (not modelEstoque.setData(row, "pMVAST", xml.pMVAST)) return false;
+  if (not modelEstoque.setData(row, "vBCST", xml.vBCST)) return false;
+  if (not modelEstoque.setData(row, "pICMSST", xml.pICMSST)) return false;
+  if (not modelEstoque.setData(row, "vICMSST", xml.vICMSST)) return false;
+  if (not modelEstoque.setData(row, "cEnq", xml.cEnq)) return false;
+  if (not modelEstoque.setData(row, "cstIPI", xml.cstIPI)) return false;
+  if (not modelEstoque.setData(row, "cstPIS", xml.cstPIS)) return false;
+  if (not modelEstoque.setData(row, "vBCPIS", xml.vBCPIS)) return false;
+  if (not modelEstoque.setData(row, "pPIS", xml.pPIS)) return false;
+  if (not modelEstoque.setData(row, "vPIS", xml.vPIS)) return false;
+  if (not modelEstoque.setData(row, "cstCOFINS", xml.cstCOFINS)) return false;
+  if (not modelEstoque.setData(row, "vBCCOFINS", xml.vBCCOFINS)) return false;
+  if (not modelEstoque.setData(row, "pCOFINS", xml.pCOFINS)) return false;
+  if (not modelEstoque.setData(row, "vCOFINS", xml.vCOFINS)) return false;
+  if (not modelEstoque.setData(row, "status", "TEMP")) return false;
+
+  const int rowNFe = modelEstoque_nfe.rowCount();
+  modelEstoque_nfe.insertRow(rowNFe);
+
+  if (not modelEstoque_nfe.setData(rowNFe, "idEstoque", idEstoque)) return false;
+  if (not modelEstoque_nfe.setData(rowNFe, "idNFe", xml.idNFe)) return false;
+
+  return true;
+}
+
+bool ImportarXML::inserirNoSqlModel(XML &xml, const QStandardItem *item) {
+  for (int row = 0; row < item->rowCount(); ++row) {
+    for (int col = 0; col < item->columnCount(); ++col) {
+      const QStandardItem *child = item->child(row, col);
+      const QString text = child->text();
+
+      if (text.mid(0, 10) == "det nItem=") {
+        xml.lerValores(child);
+        if (not inserirItemSql(xml)) return false;
+      }
+
+      if (child->hasChildren()) inserirNoSqlModel(xml, child);
+    }
+  }
+
+  return true;
+}
+
+bool ImportarXML::criarConsumo2(const int rowCompra, const int rowEstoque, const double quantAdicionar) {
+  const int idVendaProduto = modelCompra.data(rowCompra, "idVendaProduto").toInt();
+  const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
+  const QString codCompra = modelCompra.data(rowCompra, "codComercial").toString();
+  const QString codEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
+
+  if (idVendaProduto == 0) return true;
+  if (codCompra != codEstoque) return true;
+
+  const int rowConsumo = modelConsumo.rowCount();
+  modelConsumo.insertRow(rowConsumo);
+
+  for (int column = 0; column < modelEstoque.columnCount(); ++column) {
+    const QString field = modelEstoque.record().fieldName(column);
+    const int index = modelConsumo.fieldIndex(field);
+
+    if (index == -1) continue;
+
+    if (modelEstoque.fieldIndex("created") == column) continue;
+    if (modelEstoque.fieldIndex("lastUpdated") == column) continue;
+
+    const QVariant value = modelEstoque.data(rowEstoque, column);
+
+    if (not modelConsumo.setData(rowConsumo, index, value)) return false;
+  }
+
+  const double quant = quantAdicionar;
+
+  // -------------------------------------
+
+  QSqlQuery query;
+  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+  query.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando dados do produto: " + query.lastError().text());
+    return false;
+  }
+
+  const QString un = query.value("un").toString();
+  const double m2cx = query.value("m2cx").toDouble();
+  const double pccx = query.value("pccx").toDouble();
+
+  const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
+
+  const double caixas = qRound(quant / unCaixa * 100) / 100;
+
+  const double proporcao = quant / modelEstoque.data(rowEstoque, "quant").toDouble();
+
+  const double desconto = modelEstoque.data(rowEstoque, "desconto").toDouble() * proporcao;
+  const double valor = modelEstoque.data(rowEstoque, "valor").toDouble() * proporcao;
+  const double vBC = modelEstoque.data(rowEstoque, "vBC").toDouble() * proporcao;
+  const double vICMS = modelEstoque.data(rowEstoque, "vICMS").toDouble() * proporcao;
+  const double vBCST = modelEstoque.data(rowEstoque, "vBCST").toDouble() * proporcao;
+  const double vICMSST = modelEstoque.data(rowEstoque, "vICMSST").toDouble() * proporcao;
+  const double vBCPIS = modelEstoque.data(rowEstoque, "vBCPIS").toDouble() * proporcao;
+  const double vPIS = modelEstoque.data(rowEstoque, "vPIS").toDouble() * proporcao;
+  const double vBCCOFINS = modelEstoque.data(rowEstoque, "vBCCOFINS").toDouble() * proporcao;
+  const double vCOFINS = modelEstoque.data(rowEstoque, "vCOFINS").toDouble() * proporcao;
+
+  // -------------------------------------
+
+  if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) return false;
+  if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) return false;
+  if (not modelConsumo.setData(rowConsumo, "quantUpd", DarkGreen)) return false;
+  if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) return false;
+  if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) return false;
+  if (not modelConsumo.setData(rowConsumo, "desconto", desconto)) return false;
+  if (not modelConsumo.setData(rowConsumo, "valor", valor)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vBC", vBC)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vICMS", vICMS)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vBCST", vBCST)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vICMSST", vICMSST)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vBCPIS", vBCPIS)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vPIS", vPIS)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vBCCOFINS", vBCCOFINS)) return false;
+  if (not modelConsumo.setData(rowConsumo, "vCOFINS", vCOFINS)) return false;
 
   return true;
 }
 
 bool ImportarXML::criarConsumo() {
-  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+  for (int rowEstoque = 0; rowEstoque < modelEstoque.rowCount(); ++rowEstoque) {
+    for (int rowCompra = 0; rowCompra < modelCompra.rowCount(); ++rowCompra) {
+      const int idVendaProduto = modelCompra.data(rowCompra, "idVendaProduto").toInt();
+      const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
+      const QString codCompra = modelCompra.data(rowCompra, "codComercial").toString();
+      const QString codEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
 
-    const QString codComercial = modelEstoque.data(row, "codComercial").toString();
-    const int idEstoque = modelEstoque.data(row, "idEstoque").toInt();
+      if (idVendaProduto == 0) continue;
+      if (codCompra != codEstoque) continue;
 
-    QSqlQuery queryIdCompra;
-    queryIdCompra.prepare("SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque");
-    queryIdCompra.bindValue(":idEstoque", idEstoque);
+      bool exists = false;
 
-    if (not queryIdCompra.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando idCompra: " + queryIdCompra.lastError().text());
-      return false;
-    }
+      for (int row = 0; row < modelConsumo.rowCount(); ++row) {
+        const int idVendaProdutoTemp = modelConsumo.data(row, "idVendaProduto").toInt();
+        const int idEstoqueTemp = modelConsumo.data(row, "idEstoque").toInt();
 
-    while (queryIdCompra.next()) {
-      QSqlQuery queryProduto;
-      queryProduto.prepare(
-          "SELECT quant, idVendaProduto, idProduto FROM venda_has_produto WHERE codComercial = :codComercial AND "
-          "idCompra = :idCompra AND status = 'EM FATURAMENTO'");
-      queryProduto.bindValue(":codComercial", codComercial);
-      queryProduto.bindValue(":idCompra", queryIdCompra.value("idCompra"));
+        if (idVendaProduto == idVendaProdutoTemp and idEstoque == idEstoqueTemp) exists = true;
+      }
 
-      if (not queryProduto.exec()) {
-        QMessageBox::critical(this, "Erro!", "Erro buscando idVendaProduto: " + queryIdCompra.lastError().text());
+      if (exists) continue;
+
+      //
+
+      const int rowConsumo = modelConsumo.rowCount();
+      modelConsumo.insertRow(rowConsumo);
+
+      for (int column = 0; column < modelEstoque.columnCount(); ++column) {
+        const QString field = modelEstoque.record().fieldName(column);
+        const int index = modelConsumo.fieldIndex(field);
+
+        if (index == -1) continue;
+
+        if (modelEstoque.fieldIndex("created") == column) continue;
+        if (modelEstoque.fieldIndex("lastUpdated") == column) continue;
+
+        const QVariant value = modelEstoque.data(rowEstoque, column);
+
+        if (not modelConsumo.setData(rowConsumo, index, value)) return false;
+      }
+
+      const double quant = modelCompra.data(rowCompra, "quant").toDouble();
+
+      // -------------------------------------
+
+      QSqlQuery query;
+      query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+      query.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
+
+      if (not query.exec() or not query.first()) {
+        QMessageBox::critical(this, "Erro!", "Erro buscando dados do produto: " + query.lastError().text());
         return false;
       }
 
-      while (queryProduto.next()) {
-        const auto list = modelEstoque.match(modelEstoque.index(0, modelEstoque.fieldIndex("idEstoque")),
-                                             Qt::DisplayRole, idEstoque, -1);
+      const QString un = query.value("un").toString();
+      const double m2cx = query.value("m2cx").toDouble();
+      const double pccx = query.value("pccx").toDouble();
 
-        double quantTemp = 0;
+      const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
 
-        for (auto const &item : list) quantTemp += modelEstoque.data(item.row(), "quant").toDouble();
+      const double caixas = qRound(quant / unCaixa * 100) / 100;
 
-        if (queryProduto.value("quant") > quantTemp) continue;
+      const double proporcao = quant / modelEstoque.data(rowEstoque, "quant").toDouble();
 
-        const int newRow = modelConsumo.rowCount();
-        modelConsumo.insertRow(newRow);
+      const double desconto = modelEstoque.data(rowEstoque, "desconto").toDouble() * proporcao;
+      const double valor = modelEstoque.data(rowEstoque, "valor").toDouble() * proporcao;
+      const double vBC = modelEstoque.data(rowEstoque, "vBC").toDouble() * proporcao;
+      const double vICMS = modelEstoque.data(rowEstoque, "vICMS").toDouble() * proporcao;
+      const double vBCST = modelEstoque.data(rowEstoque, "vBCST").toDouble() * proporcao;
+      const double vICMSST = modelEstoque.data(rowEstoque, "vICMSST").toDouble() * proporcao;
+      const double vBCPIS = modelEstoque.data(rowEstoque, "vBCPIS").toDouble() * proporcao;
+      const double vPIS = modelEstoque.data(rowEstoque, "vPIS").toDouble() * proporcao;
+      const double vBCCOFINS = modelEstoque.data(rowEstoque, "vBCCOFINS").toDouble() * proporcao;
+      const double vCOFINS = modelEstoque.data(rowEstoque, "vCOFINS").toDouble() * proporcao;
 
-        for (int column = 0; column < modelEstoque.columnCount(); ++column) {
-          const QString field = modelEstoque.record().fieldName(column);
-          const int index = modelConsumo.fieldIndex(field);
-          const QVariant value = modelEstoque.data(row, column);
+      // -------------------------------------
 
-          if (index != -1) {
-            if (not modelConsumo.setData(newRow, index, value)) return false;
-          }
-        }
-
-        const double quant = queryProduto.value("quant").toDouble();
-
-        // -------------------------------------
-
-        QSqlQuery queryTemp;
-        queryTemp.prepare("SELECT un, kgcx, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
-        queryTemp.bindValue(":idProduto", queryProduto.value("idProduto"));
-
-        if (not queryTemp.exec()) {
-          QMessageBox::critical(this, "Erro!", "Erro buscando dados do produto: " + queryTemp.lastError().text());
-          return false;
-        }
-
-        int caixas = 0;
-
-        if (queryTemp.first()) {
-          const QString un = queryTemp.value("un").toString();
-          const double kgcx = queryTemp.value("kgcx").toDouble();
-          const double m2cx = queryTemp.value("m2cx").toDouble();
-          const double pccx = queryTemp.value("pccx").toDouble();
-
-          if (un == "KG") {
-            if (kgcx <= 0.) continue;
-
-            caixas = quant / kgcx;
-
-          } else if (un == "M2" or un == "M²") {
-            if (m2cx <= 0.) continue;
-
-            caixas = quant / m2cx;
-
-          } else {
-            if (pccx <= 0.) continue;
-
-            caixas = quant / pccx;
-          }
-        }
-
-        // -------------------------------------
-
-        if (not modelConsumo.setData(newRow, "quant", quant * -1)) return false;
-        if (not modelConsumo.setData(newRow, "caixas", caixas)) return false;
-        if (not modelConsumo.setData(newRow, "quantUpd", DarkGreen)) return false;
-        if (not modelConsumo.setData(newRow, "idVendaProduto", queryProduto.value("idVendaProduto"))) return false;
-        if (not modelConsumo.setData(newRow, "idEstoque", modelEstoque.data(row, "idEstoque"))) return false;
-
-        QSqlQuery query;
-        query.prepare("UPDATE venda_has_produto SET dataRealFat = :dataRealFat, status = 'EM COLETA' WHERE "
-                      "idVendaProduto = :idVendaProduto");
-        query.bindValue(":dataRealFat", dataReal);
-        query.bindValue(":idVendaProduto", queryProduto.value("idVendaProduto"));
-
-        if (not query.exec()) {
-          QMessageBox::critical(this, "Erro!",
-                                "Erro atualizando status do produto da venda: " + query.lastError().text());
-          return false;
-        }
-      }
+      if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) return false;
+      if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) return false;
+      if (not modelConsumo.setData(rowConsumo, "quantUpd", DarkGreen)) return false;
+      if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) return false;
+      if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) return false;
+      if (not modelConsumo.setData(rowConsumo, "desconto", desconto)) return false;
+      if (not modelConsumo.setData(rowConsumo, "valor", valor)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vBC", vBC)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vICMS", vICMS)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vBCST", vBCST)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vICMSST", vICMSST)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vBCPIS", vBCPIS)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vPIS", vPIS)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vBCCOFINS", vBCCOFINS)) return false;
+      if (not modelConsumo.setData(rowConsumo, "vCOFINS", vCOFINS)) return false;
     }
   }
 
@@ -591,83 +920,88 @@ bool ImportarXML::criarConsumo() {
 
 void ImportarXML::on_pushButtonCancelar_clicked() { close(); }
 
-void ImportarXML::on_pushButtonReparear_clicked() {
-  QSqlQuery("SAVEPOINT parear").exec();
+void ImportarXML::WrapParear() { // TODO: terminar de refatorar e homologar
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 
-  if (not parear()) {
-    QMessageBox::critical(this, "Erro!", "Erro pareando!");
-    QSqlQuery("ROLLBACK TO parear").exec();
-    return;
-  }
+  parear();
 
-  ui->tableEstoque->clearSelection();
-  ui->tableCompra->clearSelection();
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 }
 
 bool ImportarXML::parear() {
   if (not limparAssociacoes()) return false;
 
-  for (int rowEstoque = 0; rowEstoque < modelEstoque.rowCount(); ++rowEstoque) {
-    const auto list = modelCompra.match(modelCompra.index(0, modelCompra.fieldIndex("codComercial")), Qt::DisplayRole,
-                                        modelEstoque.data(rowEstoque, "codComercial"), -1,
-                                        Qt::MatchFlags(Qt::MatchFixedString | Qt::MatchWrap));
+  for (int rowEstoque = 0, total = modelEstoque.rowCount(); rowEstoque < total; ++rowEstoque) {
+    QVector<int> listCompra;
 
-    if (list.size() == 0) {
+    for (int row = 0; row < modelCompra.rowCount(); ++row) {
+      if (modelCompra.data(row, "status").toString() == "EM FATURAMENTO" and modelCompra.data(row, "codComercial").toString() == modelEstoque.data(rowEstoque, "codComercial").toString()) {
+        listCompra << row;
+      }
+    }
+
+    if (listCompra.isEmpty()) {
       if (not modelEstoque.setData(rowEstoque, "quantUpd", Red)) return false;
-
       continue;
     }
 
     QSqlQuery query;
-    query.prepare("SELECT idProduto FROM produto WHERE codComercial = :codComercial");
+    query.prepare("SELECT idProduto, m2cx, pccx, UPPER(un) AS un FROM produto WHERE codComercial = :codComercial");
     query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
     if (not query.exec()) {
-      QMessageBox::critical(0, "Erro!", "Erro lendo tabela produto: " + query.lastError().text());
+      QMessageBox::critical(this, "Erro!", "Erro lendo tabela produto: " + query.lastError().text());
       return false;
     }
 
     if (not query.first()) {
-      QMessageBox::critical(0, "Erro!", "Não encontrou o produto!");
+      QMessageBox::critical(this, "Erro!", "Produto não cadastrado: " + modelEstoque.data(rowEstoque, "codComercial").toString());
       return false;
     }
 
-    if (not modelEstoque.setData(rowEstoque, "idProduto", query.value("idProduto"))) return false;
+    const QString un = modelEstoque.data(rowEstoque, "un").toString();
+
+    const double quantCaixa = un == "M2" or un == "M²" or un == "ML" ? query.value("m2cx").toDouble() : query.value("pccx").toDouble();
+
+    const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
+
+    const double caixas = qRound(quant / quantCaixa * 100) / 100;
+
+    //    if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(listCompra.first().row(),
+    //    "idProduto"))) {
+    if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(listCompra.first(), "idProduto"))) {
+      return false;
+    }
+
+    if (not modelEstoque.setData(rowEstoque, "caixas", caixas)) return false;
 
     double estoqueConsumido = 0;
 
     //------------------------ procurar quantidades iguais
-    for (auto const &item : list) {
+    for (auto const &item : listCompra) { // TODO: trocar essa logica por fazer uma busca interna dentro do associarItens()
       const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
-      const double quantCompra = modelCompra.data(item.row(), "quant").toDouble();
+      //      const double quantCompra = modelCompra.data(item.row(), "quant").toDouble();
+      const double quantCompra = modelCompra.data(item, "quant").toDouble();
 
       if (quantEstoque == quantCompra) {
-        if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
+        //          if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
+        if (not associarItens(item, rowEstoque, estoqueConsumido)) return false;
       }
     }
     //------------------------
 
-    for (auto const &item : list) {
-      if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
+    for (auto const &item : listCompra) {
+      //        if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
+      if (not associarItens(item, rowEstoque, estoqueConsumido)) return false;
     }
   }
 
-  //---------------------------
-  if (not criarConsumo()) return false;
-  //---------------------------
-
-  if (not modelEstoque.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando estoque: " + modelEstoque.lastError().text());
-    return false;
-  }
-
-  if (not modelConsumo.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando consumo: " + modelConsumo.lastError().text());
-    return false;
-  }
+  //  if (not criarConsumo()) return false;
 
   ui->tableEstoque->clearSelection();
   ui->tableCompra->clearSelection();
+
+  ui->tableCompra->setFocus(); // for updating proxyModel
 
   return true;
 }
@@ -676,61 +1010,10 @@ void ImportarXML::on_tableEstoque_entered(const QModelIndex &) { ui->tableEstoqu
 
 void ImportarXML::on_tableCompra_entered(const QModelIndex &) { ui->tableCompra->resizeColumnsToContents(); }
 
-void ImportarXML::on_pushButtonRemover_clicked() {
-  auto list = ui->tableEstoque->selectionModel()->selectedRows();
-
-  if (list.size() == 0) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
-    return;
-  }
-
-  for (auto const &item : list) {
-    QSqlQuery query;
-
-    query.prepare("DELETE FROM estoque_has_nfe WHERE idEstoque = :idEstoque");
-    query.bindValue(":idEstoque", modelEstoque.data(item.row(), "idEstoque"));
-
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro removendo de estoque_has_nfe: " + query.lastError().text());
-      return;
-    }
-
-    query.prepare("DELETE FROM estoque_has_compra WHERE idEstoque = :idEstoque");
-    query.bindValue(":idEstoque", modelEstoque.data(item.row(), "idEstoque"));
-
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro removendo de estoque_has_compra: " + query.lastError().text());
-      return;
-    }
-
-    modelEstoque.removeRow(item.row());
-  }
-
-  if (not modelEstoque.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro removendo linhas: " + modelEstoque.lastError().text());
-    return;
-  }
-
-  // TODO: descadastrar nota? (pegar id da nota antes de remover estoque e apos a remocao verificar se nfe ainda possui
-  // algum relacao em estoque_has_nfe, senao houver remover nfe
-}
-
 void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsumo->resizeColumnsToContents(); }
 
-// TODO: corrigir consumo de estoque para consumir parcialmente de forma correta (criar varias linhas:
-// idEstoque 1 - quant -10 // idEstoque 2 - quant - 20
-// NOTE: se filtro por compra, é necessário a coluna 'selecionado' para escolher qual linha parear?
 // NOTE: utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque (para cada linha do model inserir
 // items na arvore?)
-// TODO: setar selecionado 0 antes de salvar a tabela de baixo
-// NOTE: revisar codigo para verificar se ao pesquisar um produto pelo codComercial+status nao estou alterando outros
-// produtos junto
-// TODO: nao mudar status para em coleta dos produtos que nao foram importados (para o caso de vir apenas parte da
-// compra)
-// TODO: se a quantidade nao bater por m2 calcular por pc e vice versa?
-// TODO: os que estiverem verdes em baixo nao modificar em importacoes sequentes
-// TODO: verificar se estou usando nao apenas o codComercial mas tambem o fornecedor para evitar conflitos de codigos
-// repetidos
-// TODO: calcular valores proporcionais para o consumo
-// TODO: deixar no consumo idNFe vazio para posteriormente guardar a nota de saida?
-// TODO: use mysql::savepoints to restore to a point before importing a wrong xml
+// TODO: quando as unidades vierem diferente pedir para usuario converter
+// TODO: substituir 'quantConsumida' por separacao de linha na associacao de nota/compra
+// TODO: avisar se R$ da nota for diferente do R$ da compra

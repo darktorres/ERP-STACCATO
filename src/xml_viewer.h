@@ -2,7 +2,6 @@
 #define XML_VIEWER_H
 
 #include <QDialog>
-#include <QDomElement>
 #include <QStandardItemModel>
 
 namespace Ui {
@@ -17,12 +16,15 @@ public:
   ~XML_Viewer();
   void exibirXML(const QByteArray &fileContent);
 
+private slots:
+  void on_pushButtonDanfe_clicked();
+
 private:
   // attributes
-  Ui::XML_Viewer *ui;
-  QString fileName;
+  QByteArray fileContent;
   QStandardItemModel model;
-  // methods
+  QString fileName;
+  Ui::XML_Viewer *ui;
 };
 
 #endif // XML_VIEWER_H

@@ -9,11 +9,11 @@ class EstoqueProxyModel : public QIdentityProxyModel {
 
 public:
   explicit EstoqueProxyModel(SqlTableModel *model, QObject *parent = 0);
-  ~EstoqueProxyModel();
+  ~EstoqueProxyModel() = default;
   QVariant data(const QModelIndex &proxyIndex, const int role) const override;
 
 private:
-  const int column;
+  const int quantUpd;
 };
 
 #endif // ESTOQUEPROXYMODEL_H

@@ -18,19 +18,20 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
-  void on_radioButtonMaior_toggled(bool checked);
   void on_table_activated(const QModelIndex &index);
   void on_table_entered(const QModelIndex &);
+  void on_pushButtonRelatorio_clicked();
 
 private:
   // attributes
-  Ui::WidgetEstoque *ui;
   SqlTableModel model;
+  Ui::WidgetEstoque *ui;
   // methods
   void setupTables();
+  void montaFiltro();
 };
 
 #endif // WIDGETESTOQUE_H

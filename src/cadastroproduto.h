@@ -2,6 +2,7 @@
 #define CADASTROPRODUTO_H
 
 #include "registerdialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class CadastroProduto;
@@ -24,6 +25,8 @@ private slots:
 
 private:
   // attributes
+  QString error;
+  SearchDialog *sdProduto;
   Ui::CadastroProduto *ui;
   // methods
   virtual bool save() override;
@@ -32,6 +35,7 @@ private:
   virtual void clearFields() override;
   virtual void registerMode() override;
   virtual void setupMapper() override;
+  virtual void successMessage() override;
   virtual void updateMode() override;
   void calcularMarkup();
   bool cadastrar() override;

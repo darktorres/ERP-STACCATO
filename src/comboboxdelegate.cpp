@@ -6,12 +6,10 @@
 #include "comboboxdelegate.h"
 #include "usersession.h"
 
-ComboBoxDelegate::ComboBoxDelegate(Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
-
-ComboBoxDelegate::~ComboBoxDelegate() {}
+ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
 QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
-  QComboBox *editor = new QComboBox(parent);
+  auto *editor = new QComboBox(parent);
 
   QStringList list;
 
@@ -26,13 +24,14 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     list << "PENDENTE"
          << "RECEBIDO"
          << "CANCELADO"
-         << "DEVOLVIDO";
+         << "CONFERIDO";
   }
 
   if (tipo == StatusPagar) {
     list << "PENDENTE"
          << "PAGO"
-         << "CANCELADO";
+         << "CANCELADO"
+         << "CONFERIDO";
   }
 
   if (tipo == Pagamento) {
@@ -61,15 +60,14 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     list << "";
 
     while (query.next()) {
-      list << query.value("banco").toString() + " - " + query.value("agencia").toString() + " - " +
-                  query.value("conta").toString();
+      list << query.value("banco").toString() + " - " + query.value("agencia").toString() + " - " + query.value("conta").toString();
     }
   }
 
   if (tipo == Grupo) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT tipo FROM despesa")) {
+    if (not query.exec("SELECT tipo FROM despesa ORDER BY tipo")) {
       QMessageBox::critical(parent, "Erro!", "Erro lendo grupos de despesa: " + query.lastError().text());
     }
 
@@ -104,7 +102,4 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
   QStyledItemDelegate::setModelData(editor, model, index);
 }
 
-void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                                            const QModelIndex &) const {
-  editor->setGeometry(option.rect);
-}
+void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }

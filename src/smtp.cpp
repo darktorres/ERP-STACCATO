@@ -16,12 +16,11 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#include "smtp.h"
-
 #include <QResource>
 
-Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 &port, const int &timeout)
-    : port(port), timeout(timeout), host(host), pass(pass), user(user) {
+#include "smtp.h"
+
+Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
   socket = new QSslSocket(this);
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
@@ -31,8 +30,7 @@ Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const 
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
 
-void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject,
-                    const QString &body, const QStringList &files) {
+void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files) {
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
   message.append("From: " + from + "\n");
@@ -48,6 +46,8 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.append(body);
   message.append("\n\n");
 
+  // TODO: dont hardcode this
+  // TODO:__project public code
   //
   QFile file("://assinatura conrado.png");
   file.open(QIODevice::ReadOnly);
@@ -68,15 +68,15 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
       if (file.exists()) {
         if (not file.open(QIODevice::ReadOnly)) {
           //          qDebug("Couldn't open the file");
-          QMessageBox::critical(0, "Qt Simple SMTP client", "Erro ao abrir o arquivo do anexo");
+          QMessageBox::critical(nullptr, "Qt Simple SMTP client", "Erro ao abrir o arquivo do anexo!");
+          QMessageBox::critical(nullptr, "Erro!", "Erro: " + file.errorString());
           return;
         }
 
         QByteArray bytes = file.readAll();
         message.append("--frontier\n");
-        message.append("Content-Type: application/octet-stream; name=\"" + QFileInfo(file.fileName()).fileName() +
-                       "\"\nContent-Disposition: attachment; filename=\"" + QFileInfo(file.fileName()).fileName() +
-                       "\";\nContent-Transfer-Encoding: base64\n\n");
+        message.append(R"(Content-Type: application/octet-stream; name=")" + QFileInfo(file.fileName()).fileName() + "\"\nContent-Disposition: attachment; filename=\"" +
+                       QFileInfo(file.fileName()).fileName() + "\";\nContent-Transfer-Encoding: base64\n\n");
         message.append(bytes.toBase64());
         message.append("\n");
       }
@@ -91,8 +91,10 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.replace(QString::fromLatin1("\r\n.\r\n"), QString::fromLatin1("\r\n..\r\n"));
 
   this->from = from;
-  if (not cc.isEmpty()) rcpt = cc.split(";");
-  rcpt.append(to);
+
+  rcpt.append(to.split(";"));
+  if (not cc.isEmpty()) rcpt.append(cc.split(";"));
+
   state = Init;
   socket->connectToHostEncrypted(host, port); //"smtp.gmail.com" and 465 for gmail TLS
 
@@ -227,7 +229,7 @@ void Smtp::readyRead() {
   } else if (state == Rcpt and responseLine == "250") {
     // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way ->
     // <email@gmail.com>
-    //    qDebug() << "list: " << rcpt;
+    //    qDebug() << "RCPT TO:<" << rcpt.first() << ">\r\n";
     *t << "RCPT TO:<" << rcpt.first() << ">\r\n"; // r
     rcpt.removeFirst();
     t->flush();
@@ -255,7 +257,7 @@ void Smtp::readyRead() {
     return;
   } else {
     // something broke.
-    QMessageBox::critical(0, tr("Qt Simple SMTP client"), tr("Unexpected reply from SMTP server:\n\n") + response);
+    QMessageBox::critical(nullptr, tr("Qt Simple SMTP client"), tr("Unexpected reply from SMTP server:\n\n") + response);
     state = Close;
     emit status(tr("Failed to send message"));
   }

@@ -11,7 +11,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Loja
 TEMPLATE = app
 
+VERSION = 0.5
+QMAKE_TARGET_COMPANY = Staccato Revestimentos
+QMAKE_TARGET_PRODUCT = ERP
+QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
+QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
+
 CONFIG += c++14
+
+#QMAKE_CXXFLAGS += -std=c++14
 
 QMAKE_CXXFLAGS += -Wall -Wextra
 QMAKE_CXXFLAGS_DEBUG += -O0
@@ -25,7 +33,7 @@ QMAKE_LFLAGS_RELEASE += -O0
 #QMAKE_LFLAGS += -flto -fuse-linker-plugin
 
 macx{
-QMAKE_CXXFLAGS += -stdlib=libc++ -std=c++11
+QMAKE_CXXFLAGS += -stdlib=libc++ -std=c++14
 QMAKE_LFLAGS += -stdlib=libc++
 }
 
@@ -38,10 +46,11 @@ CONFIG -= console
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.3.11/limereport/limereport.pri)
+include(LimeReport-1.4.11/limereport/limereport.pri)
 
 SOURCES += \
-    src/adiantarrecebimento.cpp \
+    src/acbr.cpp \
+    src/anteciparrecebimento.cpp \
     src/baixaorcamento.cpp \
     src/cadastrarnfe.cpp \
     src/cadastrocliente.cpp \
@@ -60,18 +69,23 @@ SOURCES += \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
     src/doubledelegate.cpp \
-    src/entregascliente.cpp \
     src/estoque.cpp \
+    src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
     src/excel.cpp \
+    src/financeiroproxymodel.cpp \
     src/followup.cpp \
-    src/followupproxy.cpp \
+    src/followupproxymodel.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxy.cpp \
     src/importarxml.cpp \
     src/impressao.cpp \
     src/inputdialog.cpp \
+    src/inputdialogconfirmacao.cpp \
+    src/inputdialogfinanceiro.cpp \
+    src/inputdialogproduto.cpp \
     src/inserirlancamento.cpp \
+    src/inserirtransferencia.cpp \
     src/itembox.cpp \
     src/itemboxdelegate.cpp \
     src/lineeditcep.cpp \
@@ -84,6 +98,7 @@ SOURCES += \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
+    src/pagamentosdia.cpp \
     src/porcentagemdelegate.cpp \
     src/produtospendentes.cpp \
     src/reaisdelegate.cpp \
@@ -101,11 +116,14 @@ SOURCES += \
     src/usersession.cpp \
     src/validadedialog.cpp \
     src/venda.cpp \
+    src/vendaproxymodel.cpp \
+    src/widgetcalendario.cpp \
     src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompradevolucao.cpp \
     src/widgetcomprafaturar.cpp \
     src/widgetcompragerar.cpp \
+    src/widgetcompraoc.cpp \
     src/widgetcomprapendentes.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
@@ -113,8 +131,10 @@ SOURCES += \
     src/widgetfluxocaixa.cpp \
     src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
+    src/widgetlogisticacaminhao.cpp \
     src/widgetlogisticacoleta.cpp \
     src/widgetlogisticaentrega.cpp \
+    src/widgetlogisticaentregues.cpp \
     src/widgetlogisticarecebimento.cpp \
     src/widgetlogisticarepresentacao.cpp \
     src/widgetnfe.cpp \
@@ -122,14 +142,14 @@ SOURCES += \
     src/widgetnfesaida.cpp \
     src/widgetorcamento.cpp \
     src/widgetpagamento.cpp \
-    src/widgetreceberresumo.cpp \
     src/widgetrelatorio.cpp \
     src/widgetvenda.cpp \
     src/xml.cpp \
     src/xml_viewer.cpp
 
 HEADERS  += \
-    src/adiantarrecebimento.h \
+    src/acbr.h \
+    src/anteciparrecebimento.h \
     src/baixaorcamento.h \
     src/cadastrarnfe.h \
     src/cadastrocliente.h \
@@ -148,18 +168,23 @@ HEADERS  += \
     src/dateformatdelegate.h \
     src/devolucao.h \
     src/doubledelegate.h \
-    src/entregascliente.h \
     src/estoque.h \
+    src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
     src/excel.h \
+    src/financeiroproxymodel.h \
     src/followup.h \
-    src/followupproxy.h \
+    src/followupproxymodel.h \
     src/importaprodutos.h \
     src/importaprodutosproxy.h \
     src/importarxml.h \
     src/impressao.h \
     src/inputdialog.h \
+    src/inputdialogconfirmacao.h \
+    src/inputdialogfinanceiro.h \
+    src/inputdialogproduto.h \
     src/inserirlancamento.h \
+    src/inserirtransferencia.h \
     src/itembox.h \
     src/itemboxdelegate.h \
     src/lineeditcep.h \
@@ -171,6 +196,7 @@ HEADERS  += \
     src/noeditdelegate.h \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
+    src/pagamentosdia.h \
     src/porcentagemdelegate.h \
     src/produtospendentes.h \
     src/reaisdelegate.h \
@@ -188,11 +214,14 @@ HEADERS  += \
     src/usersession.h \
     src/validadedialog.h \
     src/venda.h \
+    src/vendaproxymodel.h \
+    src/widgetcalendario.h \
     src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompradevolucao.h \
     src/widgetcomprafaturar.h \
     src/widgetcompragerar.h \
+    src/widgetcompraoc.h \
     src/widgetcomprapendentes.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
@@ -200,8 +229,10 @@ HEADERS  += \
     src/widgetfluxocaixa.h \
     src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
+    src/widgetlogisticacaminhao.h \
     src/widgetlogisticacoleta.h \
     src/widgetlogisticaentrega.h \
+    src/widgetlogisticaentregues.h \
     src/widgetlogisticarecebimento.h \
     src/widgetlogisticarepresentacao.h \
     src/widgetnfe.h \
@@ -209,14 +240,13 @@ HEADERS  += \
     src/widgetnfesaida.h \
     src/widgetorcamento.h \
     src/widgetpagamento.h \
-    src/widgetreceberresumo.h \
     src/widgetrelatorio.h \
     src/widgetvenda.h \
     src/xml.h \
     src/xml_viewer.h
 
 FORMS += \
-    ui/adiantarrecebimento.ui \
+    ui/anteciparrecebimento.ui \
     ui/baixaorcamento.ui \
     ui/cadastrarnfe.ui \
     ui/cadastrocliente.ui \
@@ -229,27 +259,33 @@ FORMS += \
     ui/calendarioentregas.ui \
     ui/contas.ui \
     ui/devolucao.ui \
-    ui/entregascliente.ui \
     ui/estoque.ui \
     ui/followup.ui \
     ui/importaprodutos.ui \
     ui/importarxml.ui \
     ui/inputdialog.ui \
+    ui/inputdialogconfirmacao.ui \
+    ui/inputdialogfinanceiro.ui \
+    ui/inputdialogproduto.ui \
     ui/inserirlancamento.ui \
+    ui/inserirtransferencia.ui \
     ui/logindialog.ui \
     ui/mainwindow.ui \
     ui/orcamento.ui \
+    ui/pagamentosdia.ui \
     ui/produtospendentes.ui \
     ui/searchdialog.ui \
     ui/sendmail.ui \
     ui/userconfig.ui \
     ui/validadedialog.ui \
     ui/venda.ui \
+    ui/widgetcalendario.ui \
     ui/widgetcompra.ui \
     ui/widgetcompraconfirmar.ui \
     ui/widgetcompradevolucao.ui \
     ui/widgetcomprafaturar.ui \
     ui/widgetcompragerar.ui \
+    ui/widgetcompraoc.ui \
     ui/widgetcomprapendentes.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
@@ -257,8 +293,10 @@ FORMS += \
     ui/widgetfluxocaixa.ui \
     ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
+    ui/widgetlogisticacaminhao.ui \
     ui/widgetlogisticacoleta.ui \
     ui/widgetlogisticaentrega.ui \
+    ui/widgetlogisticaentregues.ui \
     ui/widgetlogisticarecebimento.ui \
     ui/widgetlogisticarepresentacao.ui \
     ui/widgetnfe.ui \
@@ -266,8 +304,6 @@ FORMS += \
     ui/widgetnfesaida.ui \
     ui/widgetorcamento.ui \
     ui/widgetpagamento.ui \
-    ui/widgetreceberresumo.ui \
     ui/widgetrelatorio.ui \
     ui/widgetvenda.ui \
     ui/xml_viewer.ui
-

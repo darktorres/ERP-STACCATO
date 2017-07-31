@@ -5,6 +5,7 @@
 
 #include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
+#include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "inserirlancamento.h"
 #include "itembox.h"
@@ -13,8 +14,7 @@
 #include "reaisdelegate.h"
 #include "ui_inserirlancamento.h"
 
-InserirLancamento::InserirLancamento(Tipo tipo, QWidget *parent)
-    : QDialog(parent), ui(new Ui::InserirLancamento), tipo(tipo) {
+InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -41,8 +41,7 @@ void InserirLancamento::setupTables() {
   model.setFilter("0");
 
   if (not model.select()) {
-    QMessageBox::critical(this, "Erro!",
-                          "Erro lendo tabela conta_a_receber_has_pagamento: " + model.lastError().text());
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + model.lastError().text());
   }
 
   ui->table->setModel(&model);
@@ -55,6 +54,10 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
+  ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
+  // TODO: colocar lineEditDelegate para subgrupo
+  ui->table->hideColumn("nfe");
+  ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");
   ui->table->hideColumn("status");
   ui->table->hideColumn("representacao");
@@ -74,7 +77,7 @@ void InserirLancamento::setupTables() {
 }
 
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
-  int row = model.rowCount();
+  const int row = model.rowCount();
   model.insertRow(row);
 
   model.setData(row, "status", "PENDENTE");
@@ -88,7 +91,7 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
-  //  if (not verifyFields()) return;
+  if (not verifyFields()) return;
 
   if (not model.submitAll()) {
     QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + model.lastError().text());
@@ -106,7 +109,6 @@ bool InserirLancamento::verifyFields() {
       return false;
     }
 
-    //    qDebug() << "idLoja: " << model.data(row, "idLoja");
     if (model.data(row, "idLoja").toInt() == 0) {
       QMessageBox::critical(this, "Erro!", "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1));
       return false;
@@ -128,7 +130,7 @@ bool InserirLancamento::verifyFields() {
     }
 
     if (model.data(row, "dataPagamento").toString().isEmpty()) {
-      QMessageBox::critical(this, "Erro!", "Faltou preencher 'Data Pag.' na linha: " + QString::number(row + 1));
+      QMessageBox::critical(this, "Erro!", "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1));
       return false;
     }
 
@@ -140,5 +142,3 @@ bool InserirLancamento::verifyFields() {
 
   return true;
 }
-
-// TODO: fazer consistencia

@@ -18,19 +18,22 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
+  void on_pushButtonCancelarCompra_clicked();
   void on_pushButtonConfirmarCompra_clicked();
   void on_table_entered(const QModelIndex &);
 
 private:
   // attributes
-  Ui::WidgetCompraConfirmar *ui;
+  QString error;
   SqlTableModel model;
+  Ui::WidgetCompraConfirmar *ui;
   // methods
   void setupTables();
-  bool confirmarCompra();
+  bool confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf);
+  bool cancelar(const QModelIndexList &list);
 };
 
 #endif // WIDGETCOMPRACONFIRMAR_H

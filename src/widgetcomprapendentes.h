@@ -18,13 +18,13 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
   void montaFiltro();
-  void on_doubleSpinBoxQuantAvulso_valueChanged(const double &value);
-  void on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double &value);
-  void on_groupBoxStatus_toggled(const bool &enabled);
+  void on_doubleSpinBoxQuantAvulso_valueChanged(const double value);
+  void on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value);
+  void on_groupBoxStatus_toggled(bool enabled);
   void on_pushButtonComprarAvulso_clicked();
   void on_pushButtonExcel_clicked();
   void on_pushButtonPDF_clicked();

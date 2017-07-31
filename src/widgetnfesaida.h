@@ -1,9 +1,9 @@
 #ifndef WIDGETNFESAIDA_H
 #define WIDGETNFESAIDA_H
 
-#include "sqltablemodel.h"
-
 #include <QWidget>
+
+#include "sqltablemodel.h"
 
 namespace Ui {
 class WidgetNfeSaida;
@@ -18,22 +18,23 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
+  void on_pushButtonCancelarNFe_clicked();
+  void on_pushButtonExportar_clicked();
+  void on_pushButtonRelatorio_clicked();
   void on_table_activated(const QModelIndex &index);
-  void on_radioButtonAutorizado_clicked();
-  void on_radioButtonEnviado_clicked();
-  void on_radioButtonTodos_clicked();
-  void on_lineEditBusca_textChanged(const QString &text);
   void on_table_entered(const QModelIndex &);
+  void on_groupBoxStatus_toggled(const bool enabled);
 
 private:
   // attributes
-  Ui::WidgetNfeSaida *ui;
   SqlTableModel model;
+  Ui::WidgetNfeSaida *ui;
   // methods
   void setupTables();
+  void montaFiltro();
 };
 
 #endif // WIDGETNFESAIDA_H

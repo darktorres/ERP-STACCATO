@@ -23,16 +23,6 @@
       <enum>QFrame::Plain</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelPedidosCompra_2">
-        <property name="text">
-         <string>Buscar:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="lineEditBusca"/>
       </item>
@@ -82,6 +72,13 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelPedidosCompra_2">
+        <property name="text">
+         <string>Buscar:</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -92,37 +89,6 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="1" column="4">
-       <widget class="QLineEdit" name="lineEditUn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>0</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Unidade padrão do produto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
        <widget class="QPushButton" name="pushButtonComprarAvulso">
         <property name="enabled">
          <bool>true</bool>
@@ -158,10 +124,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Caixas</string>
+         <string>Produto</string>
         </property>
        </widget>
       </item>
@@ -172,17 +138,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Produto</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Un.</string>
+         <string>Caixas</string>
         </property>
        </widget>
       </item>
@@ -217,33 +176,13 @@
          <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
-         <item row="3" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroFaturamento">
+         <item row="9" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroEntregue">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Em faturamento</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroColeta">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em coleta</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroPendentes">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Pendente</string>
+            <string>Entregue</string>
            </property>
           </widget>
          </item>
@@ -257,6 +196,36 @@
            </property>
           </widget>
          </item>
+         <item row="8" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroEmEntrega">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em entrega</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroColeta">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em coleta</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroFaturamento">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em faturamento</string>
+           </property>
+          </widget>
+         </item>
          <item row="6" column="0">
           <widget class="QCheckBox" name="checkBoxFiltroEstoque">
            <property name="enabled">
@@ -264,6 +233,26 @@
            </property>
            <property name="text">
             <string>Estoque</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroCompra">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em compra</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroPendentes">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Pendente</string>
            </property>
           </widget>
          </item>
@@ -277,13 +266,33 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroCompra">
+         <item row="7" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroEntregaAgend">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Em compra</string>
+            <string>Entrega Agend.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroQuebra">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Quebra</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroSul">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>SUL</string>
            </property>
           </widget>
          </item>

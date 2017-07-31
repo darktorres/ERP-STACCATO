@@ -18,12 +18,12 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
   void montaFiltro();
-  void on_comboBoxLojas_currentIndexChanged(int);
-  void on_groupBoxStatus_toggled(const bool &enabled);
+  void on_comboBoxLojas_currentIndexChanged(const int);
+  void on_groupBoxStatus_toggled(const bool enabled);
   void on_pushButtonCriarOrc_clicked();
   void on_pushButtonFollowup_clicked();
   void on_table_activated(const QModelIndex &index);
@@ -31,12 +31,12 @@ private slots:
 
 private:
   // attributes
-  Ui::WidgetOrcamento *ui;
   SqlTableModel model;
+  Ui::WidgetOrcamento *ui;
   // methods
   void setupTables();
   void setPermissions();
-  void makeConnections();
+  void setupConnections();
 };
 
 #endif // WIDGETORCAMENTO_H

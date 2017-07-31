@@ -18,18 +18,17 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
   void on_tableForn_activated(const QModelIndex &index);
-  void on_tabWidgetLogistica_currentChanged(const int &);
+  void on_tabWidgetLogistica_currentChanged(const int);
 
 private:
   // attributes
-  Ui::WidgetLogistica *ui;
   SqlTableModel model;
+  Ui::WidgetLogistica *ui;
   // methods
-  void setupTables();
 };
 
 #endif // WIDGETLOGISTICA_H

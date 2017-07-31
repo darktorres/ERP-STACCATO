@@ -18,7 +18,7 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
   void on_pushButtonDevolucaoFornecedor_clicked();
@@ -28,10 +28,12 @@ private slots:
 
 private:
   // attributes
+  QString error;
   SqlTableModel model;
   Ui::WidgetCompraDevolucao *ui;
   // methods
   void setupTables();
+  bool retornarEstoque(const QModelIndexList &list);
 };
 
 #endif // WIDGETCOMPRADEVOLUCAO_H

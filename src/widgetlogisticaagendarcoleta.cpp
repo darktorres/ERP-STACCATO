@@ -1,27 +1,39 @@
 #include <QDate>
 #include <QDebug>
+#include <QDesktopServices>
+#include <QFile>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QStandardItemModel>
+#include <QUrl>
 
+#include "acbr.h"
 #include "doubledelegate.h"
+#include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "ui_widgetlogisticaagendarcoleta.h"
+#include "usersession.h"
+#include "venda.h"
 #include "widgetlogisticaagendarcoleta.h"
 
-WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent)
-    : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
+WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
   ui->setupUi(this);
 
   ui->frameCaminhao->hide();
+  ui->pushButtonCancelarCarga->hide();
+
+  ui->dateTimeEdit->setDate(QDate::currentDate());
 }
 
 WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
 
 void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setTable("view_agendar_coleta");
+  modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelEstoque.setFilter("0");
 
   if (not modelEstoque.select()) {
@@ -29,6 +41,8 @@ void WidgetLogisticaAgendarColeta::setupTables() {
     return;
   }
 
+  modelEstoque.setHeaderData("dataRealFat", "Data Faturado");
+  modelEstoque.setHeaderData("idEstoque", "Estoque");
   modelEstoque.setHeaderData("codComercial", "Cód. Com.");
   modelEstoque.setHeaderData("fornecedor", "Fornecedor");
   modelEstoque.setHeaderData("numeroNFe", "NFe");
@@ -40,285 +54,451 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setHeaderData("idVenda", "Venda");
   modelEstoque.setHeaderData("ordemCompra", "OC");
   modelEstoque.setHeaderData("local", "Local");
+  modelEstoque.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  ui->tableEstoque->setModel(&modelEstoque);
+  ui->tableEstoque->setModel(new EstoquePrazoProxyModel(&modelEstoque, this));
   ui->tableEstoque->setItemDelegate(new DoubleDelegate(this));
-  //  ui->tableEstoque->hideColumn("idEstoque");
+  ui->tableEstoque->hideColumn("prazoEntrega");
   ui->tableEstoque->hideColumn("fornecedor");
+  ui->tableEstoque->hideColumn("unCaixa");
+  ui->tableEstoque->hideColumn("formComercial");
+  ui->tableEstoque->hideColumn("idProduto");
+  ui->tableEstoque->hideColumn("idNFe");
+  ui->tableEstoque->hideColumn("ordemCompra");
+  ui->tableEstoque->hideColumn("local");
 
   //
 
-  QSqlQuery query;
+  modelTransp.setTable("veiculo_has_produto");
+  modelTransp.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not query.exec("SELECT modelo FROM transportadora_has_veiculo")) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando dados da transportadora: " + query.lastError().text());
-    return;
-  }
+  modelTransp.setHeaderData("idEstoque", "Estoque");
+  modelTransp.setHeaderData("status", "Status");
+  modelTransp.setHeaderData("produto", "Produto");
+  modelTransp.setHeaderData("caixas", "Cx.");
+  modelTransp.setHeaderData("quant", "Quant.");
+  modelTransp.setHeaderData("un", "Un.");
+  modelTransp.setHeaderData("codComercial", "Cód. Com.");
 
-  //  while (query.next()) ui->comboBox->addItem(query.value("modelo").toString());
-
-  connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-          &WidgetLogisticaAgendarColeta::calcularPeso);
-
-  //
-
-  modelTransp.setTable("transportadora_has_veiculo");
+  modelTransp.setFilter("0");
 
   if (not modelTransp.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela transportadora: " + modelTransp.lastError().text());
     return;
   }
 
-  //  ui->tableTransp->setModel(&modelTransp);
+  ui->tableTransp->setModel(&modelTransp);
+  ui->tableTransp->hideColumn("id");
+  ui->tableTransp->hideColumn("idEvento");
+  ui->tableTransp->hideColumn("idVeiculo");
+  ui->tableTransp->hideColumn("idVendaProduto");
+  ui->tableTransp->hideColumn("idCompra");
+  ui->tableTransp->hideColumn("idNfeSaida");
+  ui->tableTransp->hideColumn("fornecedor");
+  ui->tableTransp->hideColumn("idVenda");
+  ui->tableTransp->hideColumn("idLoja");
+  ui->tableTransp->hideColumn("idProduto");
+  ui->tableTransp->hideColumn("obs");
+  ui->tableTransp->hideColumn("unCaixa");
+  ui->tableTransp->hideColumn("formComercial");
+  ui->tableTransp->hideColumn("data");
 
-  treeModel = new QStandardItemModel(this);
-  treeModel->setColumnCount(5);
+  //
 
-  query.exec("SELECT DISTINCT(razaoSocial) FROM transportadora_has_veiculo tv LEFT JOIN transportadora t ON "
-             "t.idTransportadora = tv.idTransportadora");
+  modelTransp2.setTable("veiculo_has_produto");
+  modelTransp2.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  while (query.next()) {
-    QString razaoSocial = query.value("razaoSocial").toString();
+  modelTransp2.setHeaderData("idEstoque", "Estoque");
+  modelTransp2.setHeaderData("data", "Agendado");
+  modelTransp2.setHeaderData("status", "Status");
+  modelTransp2.setHeaderData("produto", "Produto");
+  modelTransp2.setHeaderData("caixas", "Cx.");
+  modelTransp2.setHeaderData("quant", "Quant.");
+  modelTransp2.setHeaderData("un", "Un.");
+  modelTransp2.setHeaderData("codComercial", "Cód. Com.");
 
-    QSqlQuery query2;
-    query2.prepare("SELECT * FROM transportadora_has_veiculo tv LEFT JOIN transportadora t ON t.idTransportadora = "
-                   "tv.idTransportadora WHERE razaoSocial = :razaoSocial");
-    query2.bindValue(":razaoSocial", razaoSocial);
+  modelTransp2.setFilter("0");
 
-    if (not query2.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando dados da transportadora: " + query2.lastError().text());
-      return;
-    }
-
-    QStandardItem *parent = new QStandardItem(razaoSocial);
-    treeModel->appendRow(parent);
-
-    while (query2.next()) {
-      QString modelo = query2.value("modelo").toString();
-      QString carga = query2.value("carga").toString() + " Kg";
-      QStandardItem *child = new QStandardItem(modelo + " - " + carga);
-      parent->setChild(parent->rowCount(), child);
-    }
+  if (not modelTransp2.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela transportadora: " + modelTransp2.lastError().text());
+    return;
   }
 
-  //  for (int row = 0; row < modelTransp.rowCount(); ++row) {
-  //    QString modelo = modelTransp.data(row, "modelo").toString();
-  //    QString carga = modelTransp.data(row, "carga").toString() + " Kg";
-  //    QStandardItem *parent = new QStandardItem(modelo + " - " + carga);
-  //    treeModel->appendRow(parent);
-  //  }
-
-  ui->tableTransp->setModel(treeModel);
-  //  ui->tableTransp->setItemDelegate(new DoubleDelegate(this));
+  ui->tableTransp2->setModel(&modelTransp2);
+  ui->tableTransp2->hideColumn("id");
+  ui->tableTransp2->hideColumn("idEvento");
+  ui->tableTransp2->hideColumn("idVeiculo");
+  ui->tableTransp2->hideColumn("idVendaProduto");
+  ui->tableTransp2->hideColumn("idCompra");
+  ui->tableTransp2->hideColumn("idNfeSaida");
+  ui->tableTransp2->hideColumn("fornecedor");
+  ui->tableTransp2->hideColumn("idVenda");
+  ui->tableTransp2->hideColumn("idLoja");
+  ui->tableTransp2->hideColumn("idProduto");
+  ui->tableTransp2->hideColumn("unCaixa");
+  ui->tableTransp2->hideColumn("obs");
+  ui->tableTransp2->hideColumn("formComercial");
 }
 
 void WidgetLogisticaAgendarColeta::calcularPeso() {
   double peso = 0;
+  double caixas = 0;
 
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
   for (auto const &item : list) {
     const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
-    const double caixas = modelEstoque.data(item.row(), "caixas").toDouble();
-    peso += kg * caixas;
+    const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
+    peso += kg * caixa;
+    caixas += caixa;
   }
 
-  ui->doubleSpinBox->setValue(peso);
+  ui->doubleSpinBoxPeso->setValue(peso);
+  ui->doubleSpinBoxPeso->setSuffix(" Kg (" + QString::number(caixas) + " Cx.)");
 }
 
 bool WidgetLogisticaAgendarColeta::updateTables() {
-  if (modelEstoque.tableName().isEmpty()) setupTables();
+  if (modelEstoque.tableName().isEmpty()) {
+    setupTables();
 
-  const QString filter = modelEstoque.filter();
+    ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
+
+    connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::calcularPeso);
+  }
 
   if (not modelEstoque.select()) {
     emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
     return false;
   }
 
-  modelEstoque.setFilter(filter);
+  ui->tableEstoque->resizeColumnsToContents();
 
-  //  ui->tableEstoque->resizeColumnsToContents();
+  if (not modelTransp2.select()) {
+    emit errorSignal("Erro lendo tabela veiculo: " + modelTransp2.lastError().text());
+    return false;
+  }
+
+  ui->tableTransp2->resizeColumnsToContents();
 
   return true;
 }
 
-void WidgetLogisticaAgendarColeta::on_pushButtonSendLeft_clicked() {
-  // TODO: fix
-  auto list = ui->tableTransp->selectionModel()->selectedRows();
+void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &fornecedor) {
+  this->fornecedor = fornecedor;
 
-  if (list.size() == 0) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
-    return;
-  }
+  ui->lineEditBusca->clear();
 
-  for (auto const &item : list) {
-    if (item.parent().row() == -1) {
-      QMessageBox::critical(this, "Erro!", "Não pode remover veículo!");
-      return;
-    }
-
-    treeModel->item(item.parent().row())->removeRow(item.row());
-  }
-}
-
-void WidgetLogisticaAgendarColeta::on_pushButtonSendRight_clicked() {
-  auto list = ui->tableEstoque->selectionModel()->selectedRows();
-
-  if (list.size() == 0) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
-    return;
-  }
-
-  qDebug() << "rows: " << ui->tableTransp->selectionModel()->selectedRows();
-
-  const auto list2 = ui->tableTransp->selectionModel()->selectedRows();
-
-  if (list2.size() == 0) {
-    QMessageBox::critical(this, "Erro!", "Nenhum veículo selecionado!");
-    return;
-  }
-
-  if (list2.first().parent().row() == -1) {
-    QMessageBox::critical(this, "Erro!", "Selecione um veículo!");
-    return;
-  }
-
-  qDebug() << "list2.first: " << list2.first();
-
-  auto selectedTransp = treeModel->itemFromIndex(list2.first());
-  //  auto selectedTransp = treeModel->item(list2.first().row());
-
-  qDebug() << "selectedT: " << selectedTransp;
-
-  for (auto const &item : list) {
-    const QString produto = modelEstoque.data(item.row(), "produto").toString();
-    const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
-    const double quant = modelEstoque.data(item.row(), "quant").toDouble();
-    const QString peso = QString::number(kg * quant) + " Kg";
-
-    selectedTransp->insertColumns(item.row(), 2);
-
-    QStandardItem *child = new QStandardItem(produto + " - " + peso);
-    QStandardItem *pesoItem = new QStandardItem(peso);
-    QList<QStandardItem *> listItems;
-    listItems << pesoItem;
-    //    child->appendColumn(listItems);
-    //    treeModel->setItem(0, 0, child);
-    //    treeModel->setItem(0, 1, pesoItem);
-    selectedTransp->setColumnCount(2);
-    int row = selectedTransp->rowCount();
-    selectedTransp->setChild(row, 0, child);
-    selectedTransp->setChild(row, 1, pesoItem);
-    //    selectedTransp->insertColumn(item.row(), listItems);
-    //    selectedTransp->insertColumn(item.row(), listItems);
-  }
-
-  ui->tableTransp->expand(list2.first());
-
-  ui->tableEstoque->clearSelection();
-}
-
-void WidgetLogisticaAgendarColeta::TableFornLogistica_activated(const QString &fornecedor) {
-  modelEstoque.setFilter("fornecedor = '" + fornecedor + "'");
+  modelEstoque.setFilter("fornecedor = '" + fornecedor + "' AND idVenda IS " + QString(ui->checkBoxEstoque->isChecked() ? "NULL" : "NOT NULL"));
 
   if (not modelEstoque.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque: " + modelEstoque.lastError().text());
     return;
   }
 
+  ui->tableEstoque->sortByColumn("prazoEntrega");
+
   ui->tableEstoque->resizeColumnsToContents();
 }
 
-// QTreeView::item { border: 0.5px ; border-style: solid ; border-color: lightgray ;} table stylesheet
-
 void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
-  // TODO: data prevista +8 dias
-  ui->frameCaminhao->show();
-
-  ui->tableTransp->expandAll();
-  ui->tableTransp->resizeColumnToContents(0);
-
-  return;
-
-  if (not ui->frameCaminhao->isVisible()) return;
-
-  ui->frameCaminhao->setVisible(true);
-
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
-
-  if (list.size() == 0) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+  if (not ui->frameCaminhao->isVisible()) {
+    ui->frameCaminhao->setVisible(true);
+    ui->pushButtonAgendarColeta->hide();
+    ui->pushButtonCancelarCarga->show();
     return;
   }
-}
 
-void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
-  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
-
-  if (list.size() == 0) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+  if (modelTransp.rowCount() == 0) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item no veículo!");
     return;
   }
+
+  QModelIndexList list;
+
+  for (int row = 0; row < modelTransp.rowCount(); ++row) list << modelTransp.index(row, 0);
 
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not processRows(list)) {
+  if (not processRows(list, ui->dateTimeEdit->date(), true)) {
     QSqlQuery("ROLLBACK").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     return;
   }
 
   QSqlQuery("COMMIT").exec();
 
-  QMessageBox::information(this, "Aviso!", "Marcado com sucesso!");
   updateTables();
+  QMessageBox::information(this, "Aviso!", "Agendado com sucesso!");
+
+  ui->frameCaminhao->setVisible(false);
 }
 
-bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list) {
-  InputDialog *input = new InputDialog(InputDialog::AgendarColeta, this);
+void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
+  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (input->exec() != InputDialog::Accepted) return false;
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    return;
+  }
 
-  const QDate dataPrevColeta = input->getNextDate();
+  InputDialog input(InputDialog::AgendarColeta, this);
+  // TODO: colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
 
+  if (input.exec() != InputDialog::Accepted) return;
+
+  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
+  QSqlQuery("START TRANSACTION").exec();
+
+  if (not processRows(list, input.getNextDate())) {
+    QSqlQuery("ROLLBACK").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    return;
+  }
+
+  QSqlQuery("COMMIT").exec();
+
+  updateTables();
+  QMessageBox::information(this, "Aviso!", "Agendado com sucesso!");
+}
+
+bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga) {
   for (auto const &item : list) {
+    int idEstoque;
+    QString codComercial;
+
+    if (montarCarga) {
+      QSqlQuery query;
+      query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto");
+      query.first();
+
+      const int idEvento = query.value(0).toInt();
+
+      if (not modelTransp.setData(item.row(), "data", dataPrevColeta)) return false;
+      if (not modelTransp.setData(item.row(), "idEvento", idEvento)) return false;
+
+      idEstoque = modelTransp.data(item.row(), "idEstoque").toInt();
+
+      QSqlQuery queryTemp;
+      queryTemp.prepare("SELECT codComercial FROM estoque WHERE idEstoque = :idEstoque");
+      queryTemp.bindValue(":idEstoque", idEstoque);
+
+      if (not queryTemp.exec() or not queryTemp.first()) {
+        error = "Erro buscando codComercial: " + queryTemp.lastError().text();
+        return false;
+      }
+
+      codComercial = queryTemp.value("codComercial").toString();
+    } else {
+      idEstoque = modelEstoque.data(item.row(), "idEstoque").toInt();
+      codComercial = modelEstoque.data(item.row(), "codComercial").toString();
+    }
+
     QSqlQuery query;
     query.prepare("UPDATE estoque SET status = 'EM COLETA' WHERE idEstoque = :idEstoque");
-    query.bindValue(":idEstoque", modelEstoque.data(item.row(), "idEstoque"));
+    query.bindValue(":idEstoque", idEstoque);
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro salvando status no estoque: " + query.lastError().text());
+      error = "Erro salvando status no estoque: " + query.lastError().text();
       return false;
     }
 
     query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT "
                   "idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
-    query.bindValue(":idEstoque", modelEstoque.data(item.row(), "idEstoque"));
-    query.bindValue(":codComercial", modelEstoque.data(item.row(), "codComercial"));
+    query.bindValue(":idEstoque", idEstoque);
+    query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro salvando status no pedido_fornecedor: " + query.lastError().text());
+      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
       return false;
     }
 
-    query.prepare(
-        "UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM "
-        "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idVendaProduto IN (SELECT "
+                  "idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
-    query.bindValue(":idEstoque", modelEstoque.data(item.row(), "idEstoque"));
-    query.bindValue(":codComercial", modelEstoque.data(item.row(), "codComercial"));
+    query.bindValue(":idEstoque", idEstoque);
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro salvando status na venda_produto: " + query.lastError().text());
+      error = "Erro salvando status na venda_produto: " + query.lastError().text();
       return false;
     }
+  }
+
+  if (not modelTransp.submitAll()) {
+    error = "Erro salvando carga veiculo: " + modelTransp.lastError().text();
+    return false;
   }
 
   return true;
 }
 
-void WidgetLogisticaAgendarColeta::on_tableEstoque_entered(const QModelIndex &) {
-  ui->tableEstoque->resizeColumnsToContents();
+void WidgetLogisticaAgendarColeta::on_tableEstoque_entered(const QModelIndex &) { ui->tableEstoque->resizeColumnsToContents(); }
+
+void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &) {
+  QSqlQuery query;
+  query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
+  query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getValue());
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando dados veiculo: " + query.lastError().text());
+    return;
+  }
+
+  modelTransp2.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
+
+  if (not modelTransp2.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela veiculo: " + modelTransp2.lastError().text());
+    return;
+  }
+
+  ui->tableTransp2->resizeColumnsToContents();
+
+  ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 }
+
+bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list) {
+  for (auto const &item : list) {
+    const int row = modelTransp.rowCount();
+    modelTransp.insertRow(row);
+
+    //
+
+    const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
+    const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
+    const double peso = kg * caixa;
+
+    //
+
+    if (not modelTransp.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) return false;
+    if (not modelTransp.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) return false;
+    if (not modelTransp.setData(row, "formComercial", modelEstoque.data(item.row(), "formComercial"))) return false;
+    if (not modelTransp.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) return false;
+    if (not modelTransp.setData(row, "idEstoque", modelEstoque.data(item.row(), "idEstoque"))) return false;
+    if (not modelTransp.setData(row, "idProduto", modelEstoque.data(item.row(), "idProduto"))) return false;
+    if (not modelTransp.setData(row, "produto", modelEstoque.data(item.row(), "produto"))) return false;
+    if (not modelTransp.setData(row, "codComercial", modelEstoque.data(item.row(), "codComercial"))) return false;
+    if (not modelTransp.setData(row, "un", modelEstoque.data(item.row(), "un"))) return false;
+    if (not modelTransp.setData(row, "caixas", modelEstoque.data(item.row(), "caixas"))) return false;
+    if (not modelTransp.setData(row, "kg", peso)) return false;
+    if (not modelTransp.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) return false;
+    if (not modelTransp.setData(row, "status", "EM COLETA")) return false;
+  }
+
+  ui->tableTransp->resizeColumnsToContents();
+
+  return true;
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
+  if (ui->itemBoxVeiculo->getValue().isNull()) {
+    QMessageBox::critical(this, "Erro!", "Deve escolher uma transportadora antes!");
+    return;
+  }
+
+  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    return;
+  }
+
+  if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxCapacidade->value()) {
+    QMessageBox::critical(this, "Erro!", "Peso maior que capacidade do veículo!");
+    return;
+  }
+
+  if (not adicionarProduto(list)) modelTransp.select();
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
+  const auto list = ui->tableTransp->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    return;
+  }
+
+  for (auto const &item : list) modelTransp.removeRow(item.row());
+
+  modelTransp.submitAll();
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
+  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
+  msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+  if (msgBox.exec() == QMessageBox::No) return;
+
+  ui->frameCaminhao->hide();
+  ui->pushButtonAgendarColeta->show();
+  ui->pushButtonCancelarCarga->hide();
+
+  modelTransp.select();
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
+  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    return;
+  }
+
+  ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt());
+}
+
+void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &text) {
+  modelEstoque.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
+
+  if (not modelEstoque.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelEstoque.lastError().text());
+}
+
+void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date) {
+  if (ui->itemBoxVeiculo->text().isEmpty()) return;
+
+  modelTransp2.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
+
+  if (not modelTransp2.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela veiculo: " + modelTransp2.lastError().text());
+    return;
+  }
+
+  ui->tableTransp2->resizeColumnsToContents();
+}
+
+void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled(bool checked) {
+  modelEstoque.setFilter("fornecedor = '" + fornecedor + "' AND idVenda IS " + QString(checked ? "NULL" : "NOT NULL"));
+
+  if (not modelEstoque.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro: " + modelEstoque.lastError().text());
+    return;
+  }
+}
+
+void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
+  const auto list = ui->tableEstoque->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    return;
+  }
+
+  for (auto const &item : list) {
+    const QString idVenda = modelEstoque.data(item.row(), "idVenda").toString();
+    const QStringList ids = idVenda.split(", ");
+
+    if (ids.isEmpty()) return;
+
+    for (auto const &id : ids) {
+      auto *venda = new Venda(this);
+      venda->setAttribute(Qt::WA_DeleteOnClose);
+      venda->viewRegisterById(id);
+    }
+  }
+}
+
+// TODO: 1poder marcar nota de entrada como cancelada (talvez direto na tela de nfe's e retirar dos fluxos os estoques?)
+// TODO: importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de
+// tranferencia

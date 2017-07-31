@@ -8,7 +8,7 @@
 
 #include "checkboxdelegate.h"
 #include "excel.h"
-#include "inputdialog.h"
+#include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
 #include "ui_widgetcompragerar.h"
@@ -69,9 +69,9 @@ void WidgetCompraGerar::setupTables() {
   modelProdutos.setFilter("0");
 
   ui->tableProdutos->setModel(&modelProdutos);
-  //  ui->tableProdutos->setItemDelegateForColumn("selecionado", new CheckBoxDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+  ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("statusFinanceiro");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("ordemCompra");
@@ -98,9 +98,10 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->hideColumn("dataRealEnt");
   ui->tableProdutos->hideColumn("dataPrevReceb");
   ui->tableProdutos->hideColumn("dataRealReceb");
+  ui->tableProdutos->hideColumn("aliquotaSt");
+  ui->tableProdutos->hideColumn("st");
 
-  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-          &WidgetCompraGerar::calcularPreco);
+  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraGerar::calcularPreco);
 }
 
 bool WidgetCompraGerar::updateTables() {
@@ -138,18 +139,70 @@ bool WidgetCompraGerar::updateTables() {
   return true;
 }
 
-bool WidgetCompraGerar::gerarCompra() {
-  if (UserSession::settings("User/ComprasFolder").toString().isEmpty()) {
-    QMessageBox::critical(this, "Erro!",
-                          "Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!");
+bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &dataCompra, const QDateTime &dataPrevista) {
+  QStringList produtos;
+
+  for (auto const &row : lista) {
+    produtos.append(modelProdutos.data(row, "descricao").toString() + ", Quant: " + modelProdutos.data(row, "quant").toString() + ", R$ " +
+                    modelProdutos.data(row, "preco").toString().replace(".", ","));
+  }
+
+  for (auto const &row : lista) {
+    if (not modelProdutos.setData(row, "status", "EM COMPRA")) return false;
+
+    QSqlQuery queryId;
+
+    if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
+      error = "Erro buscando idCompra: " + queryId.lastError().text();
+      return false;
+    }
+
+    const QString id = queryId.value("idCompra").toString();
+
+    if (not modelProdutos.setData(row, "idCompra", id)) return false;
+    if (not modelProdutos.setData(row, "ordemCompra", oc)) return false;
+    if (not modelProdutos.setData(row, "dataRealCompra", dataCompra)) return false;
+    if (not modelProdutos.setData(row, "dataPrevConf", dataPrevista)) return false;
+
+    // salvar status na venda
+
+    if (modelProdutos.data(row, "idVendaProduto").toInt() != 0) {
+      QSqlQuery queryVenda;
+      queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = "
+                         ":dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto");
+      queryVenda.bindValue(":idCompra", id);
+      queryVenda.bindValue(":dataRealCompra", dataCompra);
+      queryVenda.bindValue(":dataPrevConf", dataPrevista);
+      queryVenda.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+
+      if (not queryVenda.exec()) {
+        error = "Erro atualizando status da venda: " + queryVenda.lastError().text();
+        return false;
+      }
+    }
+  }
+
+  if (not modelProdutos.submitAll()) {
+    error = "Erro salvando dados da tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text();
     return false;
+  }
+
+  return true;
+}
+
+void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
+  // TODO: refatorar essa funcao, dividir em funcoes menores etc
+
+  if (UserSession::settings("User/ComprasFolder").toString().isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!");
+    return;
   }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.size() == 0) {
+  if (list.isEmpty()) {
     QMessageBox::critical(this, "Aviso!", "Nenhum item selecionado!");
-    return false;
+    return;
   }
 
   QList<int> lista;
@@ -160,48 +213,24 @@ bool WidgetCompraGerar::gerarCompra() {
     ids.append(modelProdutos.data(index.row(), "idPedido").toString());
   }
 
-  const QString filtro = modelProdutos.filter();
+  InputDialogProduto inputDlg(InputDialogProduto::GerarCompra);
+  if (not inputDlg.setFilter(ids)) return;
 
-  InputDialog *inputDlg = new InputDialog(InputDialog::GerarCompra, this);
-  if (not inputDlg->setFilter(ids)) return false;
+  if (inputDlg.exec() != InputDialogProduto::Accepted) return;
 
-  if (inputDlg->exec() != InputDialog::Accepted) return false;
+  const QDateTime dataCompra = inputDlg.getDate();
+  const QDateTime dataPrevista = inputDlg.getNextDate();
 
-  const QDate dataCompra = inputDlg->getDate();
-  const QDate dataPrevista = inputDlg->getNextDate();
-
-  modelProdutos.setFilter(filtro);
-  modelProdutos.select();
-
-  QStringList produtos;
-
-  for (auto const &row : lista) {
-    produtos.append(modelProdutos.data(row, "descricao").toString() + ", Quant: " +
-                    modelProdutos.data(row, "quant").toString() + ", R$ " +
-                    modelProdutos.data(row, "preco").toString().replace(".", ","));
-  }
-
-  //------------------------------
-
-  QSqlQuery query;
-  query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  query.bindValue(":razaoSocial", modelProdutos.data(0, "fornecedor").toString());
-
-  if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando dados do fornecedor: " + query.lastError().text());
-    return false;
-  }
-
-  //
+  // oc
 
   QSqlQuery queryOC;
 
-  if (not queryOC.exec("SELECT MAX(ordemCompra) + 1 FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando próximo O.C.!");
-    return false;
+  if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
+    error = "Erro buscando próximo O.C.!";
+    return;
   }
 
-  oc = queryOC.value(0).toInt();
+  oc = queryOC.value("ordemCompra").toInt();
 
   QInputDialog input;
   input.setInputMode(QInputDialog::IntInput);
@@ -211,20 +240,55 @@ bool WidgetCompraGerar::gerarCompra() {
   input.setIntValue(oc);
   input.setLabelText("Qual a OC?");
 
-  if (input.exec() != QInputDialog::Accepted) return false;
+  if (input.exec() != QInputDialog::Accepted) return;
 
   oc = input.intValue();
 
-  //
+  bool ok = false;
+
+  while (not ok) {
+    queryOC.prepare("SELECT ordemCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra LIMIT 1");
+    queryOC.bindValue(":ordemCompra", oc);
+
+    if (not queryOC.exec()) {
+      error = "Erro buscando O.C.!";
+      return;
+    }
+
+    if (not queryOC.first()) {
+      ok = true;
+    } else {
+      QMessageBox msgBox(QMessageBox::Question, "Atenção!", "OC já existe! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
+      msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+      msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+      if (msgBox.exec() == QMessageBox::Yes) {
+        ok = true;
+      } else {
+        if (input.exec() != QInputDialog::Accepted) return;
+        oc = input.intValue();
+      }
+    }
+  }
+
+  // enviar email
+
+  QSqlQuery query;
+  query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
+  query.bindValue(":razaoSocial", modelProdutos.data(0, "fornecedor").toString());
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando dados do fornecedor: " + query.lastError().text());
+    return;
+  }
 
   QString anexo;
 
   const bool isRepresentacao = query.value("representacao").toBool();
 
-  if (not gerarExcel(lista, anexo, isRepresentacao)) return false;
+  if (not gerarExcel(lista, anexo, isRepresentacao)) return;
 
-  QMessageBox msgBox(QMessageBox::Question, "Enviar E-mail?", "Deseja enviar e-mail?",
-                     QMessageBox::Yes | QMessageBox::No, this);
+  QMessageBox msgBox(QMessageBox::Question, "Enviar E-mail?", "Deseja enviar e-mail?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Enviar");
   msgBox.setButtonText(QMessageBox::No, "Pular");
 
@@ -232,83 +296,45 @@ bool WidgetCompraGerar::gerarCompra() {
     const int row = ui->tableForn->selectionModel()->selectedRows().first().row();
     const QString fornecedor = modelForn.data(row, "fornecedor").toString();
 
-    SendMail *mail = new SendMail(this, anexo, fornecedor);
+    auto *mail = new SendMail(this, anexo, fornecedor);
+    mail->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (mail->exec() != SendMail::Accepted) return false;
+    mail->exec();
   }
 
-  modelProdutos.setFilter(filtro);
-  modelProdutos.select();
+  //
 
-  for (auto const &row : lista) {
-    if (not modelProdutos.setData(row, "status", "EM COMPRA")) return false;
-
-    QSqlQuery queryId;
-
-    if (not queryId.exec("SELECT idCompra FROM pedido_fornecedor_has_produto ORDER BY idCompra DESC")) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando idCompra: " + queryId.lastError().text());
-      return false;
-    }
-
-    const QString id = queryId.first() ? QString::number(queryId.value("idCompra").toInt() + 1) : "1";
-
-    if (not modelProdutos.setData(row, "idCompra", id)) return false;
-    if (not modelProdutos.setData(row, "ordemCompra", oc)) return false;
-    if (not modelProdutos.setData(row, "dataRealCompra", dataCompra)) return false;
-    if (not modelProdutos.setData(row, "dataPrevConf", dataPrevista)) return false;
-
-    // salvar status na venda
-    QSqlQuery query;
-    query.prepare("UPDATE venda_has_produto SET idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
-                  ":dataPrevConf, status = 'EM COMPRA' WHERE idProduto = :idProduto AND idVenda = :idVenda");
-    query.bindValue(":idCompra", id);
-    query.bindValue(":dataRealCompra", dataCompra);
-    query.bindValue(":dataPrevConf", dataPrevista);
-    query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
-    query.bindValue(":idVenda", modelProdutos.data(row, "idVenda"));
-
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro atualizando status da venda: " + query.lastError().text());
-      return false;
-    }
-
-    if (not query.exec("CALL update_venda_status()")) {
-      QMessageBox::critical(this, "Erro!", "Erro atualizando status das vendas: " + query.lastError().text());
-      return false;
-    }
-    //
-  }
-
-  if (not modelProdutos.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados da tabela pedido_fornecedor_has_produto: " +
-                                             modelProdutos.lastError().text());
-    return false;
-  }
-
-  return true;
-}
-
-void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not gerarCompra()) {
+  if (not gerarCompra(lista, dataCompra, dataPrevista)) {
     QSqlQuery("ROLLBACK").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     return;
   }
 
   QSqlQuery("COMMIT").exec();
 
-  if (not updateTables()) return;
+  if (not query.exec("CALL update_venda_status()")) {
+    QMessageBox::critical(this, "Erro!", "Erro atualizando status das vendas: " + query.lastError().text());
+    return;
+  }
 
+  updateTables();
   QMessageBox::information(this, "Aviso!", "Compra gerada com sucesso!");
 }
 
-bool WidgetCompraGerar::gerarExcel(QList<int> &lista, QString &anexo, const bool representacao) {
-  if (representacao) {
-    Excel *excel = new Excel(modelProdutos.data(lista.at(0), "idVenda").toString());
-    excel->gerarExcel(oc, true);
-    anexo = excel->getFileName();
+bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, const bool isRepresentacao) {
+  if (isRepresentacao) {
+    if (modelProdutos.data(lista.first(), "idVenda").toString().isEmpty()) {
+      QMessageBox::critical(this, "Erro!", "'Venda' vazio!");
+      return false;
+    }
+
+    Excel excel(modelProdutos.data(lista.at(0), "idVenda").toString());
+    const QString representacao = "OC " + QString::number(oc) + " " + modelProdutos.data(lista.first(), "idVenda").toString() + " " + modelProdutos.data(lista.first(), "fornecedor").toString();
+    if (not excel.gerarExcel(oc, true, representacao)) return false;
+    anexo = excel.getFileName();
     return true;
   }
 
@@ -324,8 +350,7 @@ bool WidgetCompraGerar::gerarExcel(QList<int> &lista, QString &anexo, const bool
     return false;
   }
 
-  const QString fileName = UserSession::settings("User/ComprasFolder").toString() + "/" + QString::number(oc) + " " +
-                           idVenda + " " + fornecedor + ".xlsx";
+  const QString fileName = UserSession::settings("User/ComprasFolder").toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   anexo = fileName;
 
@@ -333,6 +358,7 @@ bool WidgetCompraGerar::gerarExcel(QList<int> &lista, QString &anexo, const bool
 
   if (not file.open(QFile::WriteOnly)) {
     QMessageBox::critical(this, "Erro!", "Não foi possível abrir o arquivo para escrita: " + fileName);
+    QMessageBox::critical(this, "Erro!", "Erro: " + file.errorString());
     return false;
   }
 
@@ -349,8 +375,6 @@ bool WidgetCompraGerar::gerarExcel(QList<int> &lista, QString &anexo, const bool
 
   QXlsx::Document xlsx(arquivoModelo);
 
-  const bool isQuartzo = modelProdutos.data(lista.at(0), "fornecedor").toString() == "QUARTZOBRAS";
-
   xlsx.write("E4", oc);                                                                             // ordem compra
   xlsx.write("E5", idVenda);                                                                        // idVenda
   xlsx.write("E6", modelProdutos.data(lista.at(0), "fornecedor"));                                  // fornecedor
@@ -363,23 +387,26 @@ bool WidgetCompraGerar::gerarExcel(QList<int> &lista, QString &anexo, const bool
     xlsx.write("A" + QString::number(13 + row), QString::number(row + 1));                          // item n. 1,2,3...
     xlsx.write("B" + QString::number(13 + row), modelProdutos.data(lista.at(row), "codComercial")); // cod produto
     QString formato = modelProdutos.data(lista.at(row), "formComercial").toString();
-    QString produto =
-        modelProdutos.data(lista.at(row), "descricao").toString() + (formato.isEmpty() ? "" : " - " + formato);
+    QString produto = modelProdutos.data(lista.at(row), "descricao").toString() + (formato.isEmpty() ? "" : " - " + formato);
     xlsx.write("C" + QString::number(13 + row), produto);                                          // descricao produto
     xlsx.write("E" + QString::number(13 + row), modelProdutos.data(lista.at(row), "prcUnitario")); // prc. unitario
     xlsx.write("F" + QString::number(13 + row), modelProdutos.data(lista.at(row), "un"));          // un.
     xlsx.write("G" + QString::number(13 + row), modelProdutos.data(lista.at(row), "quant"));       // qtd.
     xlsx.write("H" + QString::number(13 + row), modelProdutos.data(lista.at(row), "preco"));       // valor
 
-    if (isQuartzo) {
+    const QString st = modelProdutos.data(lista.at(row), "st").toString();
+
+    if (st == "ST Fornecedor") {
       xlsx.write("I" + QString::number(13 + row), modelProdutos.data(lista.at(row), "idVenda"));
       total += modelProdutos.data(lista.at(row), "preco").toDouble();
     }
   }
 
-  if (isQuartzo) {
+  const QString st = modelProdutos.data(lista.first(), "st").toString();
+
+  if (st == "ST Fornecedor") {
     xlsx.write("G200", "ST:");
-    xlsx.write("H200", total * 4.68 / 100);
+    xlsx.write("H200", total * modelProdutos.data(lista.first(), "aliquotaSt").toDouble() / 100);
   }
 
   for (int row = lista.size() + 13; row < 200; ++row) xlsx.setRowHeight(row, 0);
@@ -395,18 +422,15 @@ bool WidgetCompraGerar::gerarExcel(QList<int> &lista, QString &anexo, const bool
   return true;
 }
 
-void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool &checked) {
-  checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection();
-}
+void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection(); }
 
 void WidgetCompraGerar::on_tableForn_activated(const QModelIndex &index) {
   const QString fornecedor = modelForn.data(index.row(), "fornecedor").toString();
 
-  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
+  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE' AND (idVenda NOT LIKE 'CAMB%' OR idVenda IS NULL)");
 
   if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!",
-                          "Erro lendo tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text());
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text());
     return;
   }
 
@@ -414,3 +438,57 @@ void WidgetCompraGerar::on_tableForn_activated(const QModelIndex &index) {
 }
 
 void WidgetCompraGerar::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
+
+bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
+  for (auto const &index : list) {
+    if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) return false;
+
+    QSqlQuery query;
+    query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'INICIADO'");
+    query.bindValue(":idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"));
+
+    if (not query.exec()) {
+      error = "Erro voltando status do produto: " + query.lastError().text();
+      return false;
+    }
+  }
+
+  if (not modelProdutos.submitAll()) {
+    error = "Erro salvando dados: " + modelProdutos.lastError().text();
+    return false;
+  }
+
+  return true;
+}
+
+void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
+  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    return;
+  }
+
+  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
+  msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+  if (msgBox.exec() == QMessageBox::No) return;
+
+  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
+  QSqlQuery("START TRANSACTION").exec();
+
+  if (not cancelar(list)) {
+    QSqlQuery("ROLLBACK").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    return;
+  }
+
+  QSqlQuery("COMMIT").exec();
+
+  updateTables();
+  QMessageBox::information(this, "Aviso!", "Itens cancelados!");
+}
+
+// TODO: 2vincular compras geradas com loja selecionada em configuracoes
+// TODO: colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas

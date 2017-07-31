@@ -2,6 +2,7 @@
 #define CADASTROFORNECEDOR_H
 
 #include "registeraddressdialog.h"
+#include "searchdialog.h"
 
 namespace Ui {
 class CadastroFornecedor;
@@ -26,19 +27,21 @@ private slots:
   void on_pushButtonNovoCad_clicked();
   void on_pushButtonRemover_clicked();
   void on_pushButtonRemoverEnd_clicked();
+  void on_pushButtonValidade_clicked();
   void on_tableEndereco_clicked(const QModelIndex &index);
   void on_tableEndereco_entered(const QModelIndex &);
 
-public:
-  void clearEndereco();
-  void setupTables();
-
 private:
   // attributes
+  QString error;
+  SearchDialog *sdFornecedor;
   Ui::CadastroFornecedor *ui;
   // methods
-  bool cadastrarEndereco(const bool &isUpdate);
+  bool ajustarValidade(const int newValidade);
+  bool cadastrarEndereco(const bool isUpdate = false);
   bool viewRegister() override;
+  virtual bool cadastrar() override;
+  virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;
   virtual void clearFields() override;
@@ -46,7 +49,9 @@ private:
   virtual void setupMapper() override;
   virtual void successMessage() override;
   virtual void updateMode() override;
+  void clearEndereco();
   void novoEndereco();
+  void setupTables();
   void setupUi();
 };
 

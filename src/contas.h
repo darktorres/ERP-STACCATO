@@ -14,9 +14,9 @@ class Contas : public QDialog {
 
 public:
   enum Tipo { Pagar, Receber };
-  explicit Contas(Tipo tipo, QWidget *parent = 0);
+  explicit Contas(const Tipo tipo, QWidget *parent = 0);
   ~Contas();
-  void viewConta(const QString &idPagamento, const QString contraparte);
+  void viewConta(const QString &idPagamento, const QString &contraparte);
 
 private slots:
   void on_pushButtonSalvar_clicked();
@@ -25,14 +25,15 @@ private slots:
 
 private:
   // attributes
+  const Tipo tipo;
   SqlTableModel modelPendentes;
   SqlTableModel modelProcessados;
-  Tipo tipo;
   Ui::Contas *ui;
-  //  QString idVenda;
   // methods
-  void preencher(const QModelIndex index);
+  bool verifyFields();
+  void preencher(const QModelIndex &index);
   void setupTables();
+  void validarData(const QModelIndex &index);
 };
 
 #endif // CONTAS_H

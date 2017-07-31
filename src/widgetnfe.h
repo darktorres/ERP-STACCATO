@@ -16,11 +16,10 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
-  void on_tabWidgetNfe_currentChanged(const int &);
-  void on_pushButtonExibirXML_clicked();
+  void on_tabWidgetNfe_currentChanged(const int);
 
 private:
   Ui::WidgetNfe *ui;

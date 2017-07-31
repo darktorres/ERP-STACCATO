@@ -18,17 +18,22 @@ public:
   bool updateTables();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
+  void on_lineEditBusca_textChanged(const QString &text);
+  void on_pushButtonCancelarNFe_clicked();
   void on_table_activated(const QModelIndex &index);
   void on_table_entered(const QModelIndex &);
-  void on_lineEditBusca_textChanged(const QString &text);
 
 private:
-  Ui::WidgetNfeEntrada *ui;
+  // attributes
   SqlTableModel model;
+  QString error;
+  Ui::WidgetNfeEntrada *ui;
+  // methods
   void setupTables();
+  bool cancelar(const int row);
 };
 
 #endif // WIDGETNFEENTRADA_H

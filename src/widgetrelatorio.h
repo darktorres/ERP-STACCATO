@@ -16,10 +16,9 @@ public:
   explicit WidgetRelatorio(QWidget *parent = 0);
   ~WidgetRelatorio();
   bool updateTables();
-  void updateTables2();
 
 signals:
-  void errorSignal(QString error);
+  void errorSignal(const QString &error);
 
 private slots:
   void on_dateEditMes_dateChanged(const QDate &);
@@ -30,11 +29,11 @@ private slots:
 
 private:
   // attributes
-  Ui::WidgetRelatorio *ui;
-  SqlTableModel modelRelatorio;
-  SqlTableModel modelTotalVendedor;
-  SqlTableModel modelTotalLoja;
   SqlTableModel modelOrcamento;
+  SqlTableModel modelRelatorio;
+  SqlTableModel modelTotalLoja;
+  SqlTableModel modelTotalVendedor;
+  Ui::WidgetRelatorio *ui;
   // methods
   bool setupTables();
   void setFilterTotaisVendedor();

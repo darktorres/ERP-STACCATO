@@ -7,13 +7,13 @@ class LineEditDelegate : public QStyledItemDelegate {
 
 public:
   enum Tipo { ContraPartePagar, ContraParteReceber, Grupo };
-  explicit LineEditDelegate(Tipo tipo, QObject *parent);
-  ~LineEditDelegate();
+  explicit LineEditDelegate(const Tipo tipo, QObject *parent);
+  ~LineEditDelegate() = default;
 
   virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
 
 private:
-  Tipo tipo;
+  const Tipo tipo;
 
   // QAbstractItemDelegate interface
 public:

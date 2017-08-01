@@ -13,6 +13,8 @@ matrix:
           packages:
             - g++-7
       env: COMPILER=g++-7
+      env: CXX=g++-7
+      env: CC=gcc-7
 #    - compiler: clang
 #      addons:
 #        apt:
@@ -28,14 +30,15 @@ before_install:
   - sudo apt-get update
 
 install:
-  - sudo apt-get install -y qt59-meta-full dh-make
+   - sudo apt-get install -y qt59base dh-make
+#  - sudo apt-get install -y qt59-meta-full dh-make
 #  - sudo apt-get install -y gcc-7 g++-7
 #  - sudo apt-get install -y qt59-meta-full
 #  qt59base qt59script dh-make gcc-7 g++-7
   
 script:
-  - CXX=g++-7
-  - CC=gcc-7
+  - env: CXX=g++-7
+  - env: CC=gcc-7
   - g++ --version
   - source /opt/qt59/bin/qt59-env.sh
   - /opt/qt59/bin/qmake Loja.pro

@@ -13,7 +13,7 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-      env: COMPILER=g++-7
+      env: COMPILER=g++
 #      env: CXX=g++-7
 #      env: CC=gcc-7
     - compiler: clang
@@ -23,7 +23,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.9
-      env: COMPILER=clang++-3.9
+      env: COMPILER=clang++
     
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
@@ -33,15 +33,23 @@ install:
   - sudo apt-get install -y qt59-meta-full dh-make
   
 script:
-  # Link gcc-6 and g++-6 to their standard commands
+  - if [ "${COMPILER}" = "g++" ]; then
+  # Link gcc-7 and g++-7 to their standard commands
+  - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++;
+  else
+  # Link gcc-7 and g++-7 to their standard commands
+  - sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++;
+    fi;
+
+
+  # Link gcc-7 and g++-7 to their standard commands
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
-  # Export CC and CXX to tell cmake which compiler to use
-  #- export CC=/usr/bin/gcc-7
-  #- export CXX=/usr/bin/g++-7
   # Check versions of gcc, g++ and cmake
   - gcc -v && g++ -v
   # Run your build commands next
-  - source /opt/qt59/bin/qt59-env.sh
-  - /opt/qt59/bin/qmake Loja.pro
-  - ccache make -j4
+  #- source /opt/qt59/bin/qt59-env.sh
+  #- /opt/qt59/bin/qmake Loja.pro
+  #- ccache make -j4

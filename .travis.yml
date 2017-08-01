@@ -2,21 +2,24 @@ language: cpp
 
 dist: trusty
 
-env:
-  - QT=qt59
-  - CXX=g++-7
-  - CC=gcc-7
-
-#apt:
-#  sources:
-#  - ubuntu-toolchain-r-test
-#  packages:
-#  - gcc-4.8
-#  - g++-4.8
-
-branches:
-  only:
-    - 'master'
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env: COMPILER=g++-7
+#    - compiler: clang
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - clang-3.9
+#      env: COMPILER=clang++-3.9
     
 before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
@@ -24,9 +27,9 @@ before_install:
   - sudo apt-get update
 
 install:
-  - sudo apt-get install -y dh-make
-  - sudo apt-get install -y gcc-7 g++-7
-  - sudo apt-get install -y qt59-meta-full
+  - sudo apt-get install -y qt59-meta-full dh-make
+#  - sudo apt-get install -y gcc-7 g++-7
+#  - sudo apt-get install -y qt59-meta-full
 #  qt59base qt59script dh-make gcc-7 g++-7;
   
 script:

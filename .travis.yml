@@ -5,23 +5,15 @@ dist: trusty
 
 matrix:
   include:
-#    - compiler: gcc
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#          packages:
-#            - gcc-7
-#            - g++-7
-#      env: COMPILER=g++-7
-    - compiler: clang
+    - compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - clang-3.9
-      env: COMPILER=clang++-3.9
+            - gcc-7
+            - g++-7
+      env: COMPILER=g++-7
     
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
@@ -29,7 +21,8 @@ before_install:
 
 install:
   #- sudo apt-get install -y qt59-meta-full dh-make
-  - "sudo apt-get install -y debhelper dh-apparmor dh-make freetds-common intltool-debian libbluetooth3
+  - sudo apt-get install dh-make
+  - "sudo apt-get install -y debhelper dh-apparmor freetds-common intltool-debian libbluetooth3
   libegl1-mesa-drivers libmail-sendmail-perl libmng2 libmtdev1 libopenal-data
   libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1 libsybdb5
   libsys-hostname-long-perl libwayland-egl1-mesa libwebp5 libwebpdemux1
@@ -45,8 +38,5 @@ install:
   
 script:
   - source /opt/qt59/bin/qt59-env.sh
-  - if [ "$COMPILER" = "g++-7" ]; then /opt/qt59/bin/qmake Loja.pro; fi
-  
-  - if [ "$COMPILER" = "clang++-3.9" ]; then sudo ln -s /usr/bin/clang++-3.9 /usr/bin/clang++; fi
-  - if [ "$COMPILER" = "clang++-3.9" ]; then /opt/qt59/bin/qmake Loja.pro -spec linux-clang-libc++; fi
+  - /opt/qt59/bin/qmake Loja.pro
   - ccache make CXX=$COMPILER -j3

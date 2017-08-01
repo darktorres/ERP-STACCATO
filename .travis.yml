@@ -30,6 +30,6 @@ install:
 
 script:
   - source /opt/qt59/bin/qt59-env.sh;
-  - /opt/qt59/bin/qmake -r Loja.pro
+  - /opt/qt59/bin/qmake Loja.pro
   - make -j4
   - make all;

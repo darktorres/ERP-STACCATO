@@ -53,5 +53,6 @@ script:
   #- gcc -v && g++ -v
   # Run your build commands next
   - source /opt/qt59/bin/qt59-env.sh
-  - /opt/qt59/bin/qmake Loja.pro
+  - if [ "$COMPILER" = "g++-7" ]; then /opt/qt59/bin/qmake Loja.pro; fi
+  - if [ "$COMPILER" = "clang++-3.9" ]; then /opt/qt59/bin/qmake Loja.pro -spec linux-clang; fi
   - ccache make CXX=$COMPILER -j3

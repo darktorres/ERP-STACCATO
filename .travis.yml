@@ -5,15 +5,15 @@ dist: trusty
 
 matrix:
   include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-7
-            - g++-7
-      env: COMPILER=g++-7
+#    - compiler: gcc
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - gcc-7
+#            - g++-7
+#      env: COMPILER=g++-7
     - compiler: clang
       addons:
         apt:
@@ -46,5 +46,7 @@ install:
 script:
   - source /opt/qt59/bin/qt59-env.sh
   - if [ "$COMPILER" = "g++-7" ]; then /opt/qt59/bin/qmake Loja.pro; fi
+  
+  - if [ "$COMPILER" = "clang++-3.9" ]; then sudo ln -s /usr/bin/clang++-3.9 /usr/bin/clang++; fi
   - if [ "$COMPILER" = "clang++-3.9" ]; then /opt/qt59/bin/qmake Loja.pro -spec linux-clang-libc++; fi
   - ccache make CXX=$COMPILER -j3

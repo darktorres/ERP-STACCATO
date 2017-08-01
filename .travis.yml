@@ -40,7 +40,7 @@ script:
   - export CC=/usr/bin/gcc-7
   - export CXX=/usr/bin/g++-7
   # Check versions of gcc, g++ and cmake
-  - gcc -v && g++ -v && cmake --version
+  - gcc -v && g++ -v
   # Run your build commands next
   #- source /opt/qt59/bin/qt59-env.sh
   #- /opt/qt59/bin/qmake Loja.pro

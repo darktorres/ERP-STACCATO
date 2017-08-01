@@ -13,7 +13,7 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-      env: COMPILER=g++
+      env: COMPILER=g++-7
     - compiler: clang
       addons:
         apt:
@@ -21,7 +21,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.9
-      env: COMPILER=clang++
+      env: COMPILER=clang++-3.9
     
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y

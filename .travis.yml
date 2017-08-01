@@ -2,28 +2,29 @@ language: cpp
 cache: ccache
 sudo: required
 dist: trusty
+compiler: gcc clang
 
-matrix:
-  include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-7
-            - g++-7
-      env: QT=g++
+#matrix:
+#  include:
+#    - compiler: gcc
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - gcc-7
+#            - g++-7
+#      env: QT=g++
 #      env: CXX=g++-7
 #      env: CC=gcc-7
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - clang-3.9
-      env: QT=clang++
+#    - compiler: clang
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - clang-3.9
+#      env: QT=clang++
     
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
@@ -33,12 +34,12 @@ install:
   #- sudo apt-get install -y qt59-meta-full dh-make
   
 script:
-  #- if ["$QT" == "g++"]; then echo "g++"; fi
-  - if ["$QT" == "g++"]; then sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc; fi
-  - if ["$QT" == "g++"]; then sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++; fi
-  #- if ["$QT" == "clang++"]; then echo "clang"; fi
-  - if ["$QT" == "clang++"]; then sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc; fi
-  - if ["$QT" == "clang++"]; then sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++; fi
+  #- if ["${compiler}" = "g++"]; then echo "g++"; fi
+  - if ["${compiler}" = "g++"]; then sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc; fi
+  - if ["${compiler}" = "g++"]; then sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++; fi
+  #- if ["${compiler}" = "clang++"]; then echo "clang"; fi
+  - if ["${compiler}" = "clang++"]; then sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc; fi
+  - if ["${compiler}" = "clang++"]; then sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++; fi
 
   # Link gcc-7 and g++-7 to their standard commands
   #- sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc

@@ -42,6 +42,6 @@ script:
   # Check versions of gcc, g++ and cmake
   - gcc -v && g++ -v
   # Run your build commands next
-  #- source /opt/qt59/bin/qt59-env.sh
-  #- /opt/qt59/bin/qmake Loja.pro
-  #- ccache make -j4
+  - source /opt/qt59/bin/qt59-env.sh
+  - /opt/qt59/bin/qmake Loja.pro
+  - ccache make -j4

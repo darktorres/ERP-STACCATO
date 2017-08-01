@@ -33,12 +33,12 @@ install:
   #- sudo apt-get install -y qt59-meta-full dh-make
   
 script:
-  #- if ["$COMPILER" = "g++"]; then echo "g++"; fi
-  - if ["$COMPILER" = "g++"]; then sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc; fi
-  - if ["$COMPILER" = "g++"]; then sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++; fi
-  #- if ["$COMPILER" = "clang++"]; then echo "clang"; fi
-  - if ["$COMPILER" = "clang++"]; then sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc; fi
-  - if ["$COMPILER" = "clang++"]; then sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++; fi
+  #- if ["${COMPILER}" = "g++"]; then echo "g++"; fi
+  - if ["${COMPILER}" = "g++"]; then sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc; fi
+  - if ["${COMPILER}" = "g++"]; then sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++; fi
+  #- if ["${COMPILER}" = "clang++"]; then echo "clang"; fi
+  - if ["${COMPILER}" = "clang++"]; then sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc; fi
+  - if ["${COMPILER}" = "clang++"]; then sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++; fi
 
   # Link gcc-7 and g++-7 to their standard commands
   #- sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc

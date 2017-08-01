@@ -1,6 +1,6 @@
 language: cpp
 cache: ccache
-
+sudo: required
 dist: trusty
 
 matrix:

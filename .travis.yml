@@ -25,33 +25,27 @@ matrix:
     
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
-  #- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
 
 install:
-  #- echo "${compiler}"
-  #- echo "$compiler"
-  - sudo apt-get install -y qt59-meta-full dh-make
-  #- if [[ "${compiler}" == "gcc" ]]; then sudo apt-get install g++-7; fi
-  #- if [[ "${compiler}" == "clang" ]]; then sudo apt-get install clang-3.9; fi
+  #- sudo apt-get install -y qt59-meta-full dh-make
+  - sudo apt-get install -y debhelper dh-apparmor dh-make freetds-common intltool-debian libbluetooth3
+  libegl1-mesa-drivers libmail-sendmail-perl libmng2 libmtdev1 libopenal-data
+  libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1 libsybdb5
+  libsys-hostname-long-perl libwayland-egl1-mesa libwebp5 libwebpdemux1
+  libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
+  libxcb-xinerama0 po-debconf qt59-meta-full 
+  #qt593d
+  qt59base qt59canvas3d
+  qt59connectivity qt59declarative 
+  #qt59doc
+  qt59gamepad qt59graphicaleffects
+  qt59imageformats qt59location qt59multimedia qt59quickcontrols
+  qt59quickcontrols2 qt59remoteobjects qt59script qt59scxml qt59sensors
+  qt59serialbus qt59serialport qt59speech qt59svg qt59tools qt59translations
+  qt59webchannel qt59webengine qt59websockets qt59x11extras qt59xmlpatterns
   
 script:
-  #- if [[ "${compiler}" == "gcc" ]]; then echo "g++"; fi
-  #- if [[ "${compiler}" == "gcc" ]]; then sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc; fi
-  #- if [[ "${compiler}" == "gcc" ]]; then sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++; fi
-  #- if [[ "${compiler}" == "clang" ]]; then echo "clang"; fi
-  #- if [[ "${compiler}" == "clang" ]]; then sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc; fi
-  #- if [[ "${compiler}" == "clang" ]]; then sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++; fi
-  
-  #- if [[ "${compiler}" == "gcc" ]]; then echo "gcc"; fi
-  #- if [[ "${compiler}" == "clang" ]]; then echo "clang"; fi
-
-  # Link gcc-7 and g++-7 to their standard commands
-  #- sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
-  #- sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
-  # Check versions of gcc, g++ and cmake
-  #- gcc -v && g++ -v
-  # Run your build commands next
   - source /opt/qt59/bin/qt59-env.sh
   - if [ "$COMPILER" = "g++-7" ]; then /opt/qt59/bin/qmake Loja.pro; fi
   - if [ "$COMPILER" = "clang++-3.9" ]; then /opt/qt59/bin/qmake Loja.pro -spec linux-clang-libc++; fi

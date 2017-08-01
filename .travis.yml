@@ -11,10 +11,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - gcc-7
             - g++-7
       env: COMPILER=g++-7
-      env: CXX=g++-7
-      env: CC=gcc-7
+#      env: CXX=g++-7
+#      env: CC=gcc-7
     - compiler: clang
       addons:
         apt:
@@ -32,6 +33,15 @@ install:
   - sudo apt-get install -y qt59-meta-full dh-make
   
 script:
-  - source /opt/qt59/bin/qt59-env.sh
-  - /opt/qt59/bin/qmake Loja.pro
-  - ccache make -j4
+  # Link gcc-6 and g++-6 to their standard commands
+  - ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
+  - ln -s /usr/bin/g++-7 /usr/local/bin/g++
+  # Export CC and CXX to tell cmake which compiler to use
+  - export CC=/usr/bin/gcc-7
+  - export CXX=/usr/bin/g++-7
+  # Check versions of gcc, g++ and cmake
+  - gcc -v && g++ -v && cmake --version
+  # Run your build commands next
+  #- source /opt/qt59/bin/qt59-env.sh
+  #- /opt/qt59/bin/qmake Loja.pro
+  #- ccache make -j4

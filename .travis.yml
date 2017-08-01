@@ -22,14 +22,14 @@ before_install:
 install:
   - sudo apt-get install -y qt59base qt59script dh-make;
 
-before_script:
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-      export DISPLAY=:99.0
-      && sh -e /etc/init.d/xvfb start;
-    fi;
+#before_script:
+#  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+#      export DISPLAY=:99.0
+#      && sh -e /etc/init.d/xvfb start;
+#    fi;
 
 script:
-  - source /opt/qt5/bin/qt59-env.sh;
+  - source /opt/qt59/bin/qt59-env.sh;
   - qmake -r Loja.pro
   - make -j4
   - make all;

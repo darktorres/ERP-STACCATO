@@ -37,7 +37,7 @@ script:
   # Link gcc-7 and g++-7 to their standard commands
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++;
-  else
+    else
   # Link gcc-7 and g++-7 to their standard commands
   - sudo ln -s /usr/bin/clang-3.9 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/clang++-3.9 /usr/local/bin/g++;

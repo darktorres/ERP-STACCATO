@@ -22,19 +22,29 @@ before_install:
 install:
   #- sudo apt-get install -y qt59-meta-full dh-make
   - sudo apt-get install dh-make
-  - "sudo apt-get install -y debhelper dh-apparmor freetds-common intltool-debian libbluetooth3
-  libegl1-mesa-drivers libmail-sendmail-perl libmng2 libmtdev1 libopenal-data
-  libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1 libsybdb5
-  libsys-hostname-long-perl libwayland-egl1-mesa libwebp5 libwebpdemux1
-  libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
-  libxcb-xinerama0 po-debconf
-  qt59base qt59canvas3d
-  qt59connectivity qt59declarative 
-  qt59gamepad qt59graphicaleffects
-  qt59imageformats qt59location qt59multimedia qt59quickcontrols
-  qt59quickcontrols2 qt59remoteobjects qt59script qt59scxml qt59sensors
-  qt59serialbus qt59serialport qt59speech qt59svg qt59tools qt59translations
-  qt59webchannel qt59webengine qt59websockets qt59x11extras qt59xmlpatterns"
+  - "sudo apt-get install freetds-common libbluetooth3 libegl1-mesa-drivers libmng2 libmtdev1
+  libopenal-data libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1
+  libsybdb5 libwayland-egl1-mesa libwebp5 libwebpdemux1 libxcb-icccm4
+  libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 qt59base
+  qt59canvas3d qt59connectivity qt59declarative qt59gamepad
+  qt59graphicaleffects qt59imageformats qt59location qt59multimedia
+  qt59quickcontrols qt59quickcontrols2 qt59remoteobjects qt59script qt59scxml
+  qt59sensors qt59serialbus qt59serialport qt59speech qt59svg qt59tools
+  qt59translations qt59webchannel qt59webengine qt59websockets qt59x11extras
+  qt59xmlpatterns"
+  #- "sudo apt-get install -y debhelper dh-apparmor freetds-common intltool-debian libbluetooth3
+  #libegl1-mesa-drivers libmail-sendmail-perl libmng2 libmtdev1 libopenal-data
+  #libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1 libsybdb5
+  #libsys-hostname-long-perl libwayland-egl1-mesa libwebp5 libwebpdemux1
+  #libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
+  #libxcb-xinerama0 po-debconf
+  #qt59base qt59canvas3d
+  #qt59connectivity qt59declarative 
+  #qt59gamepad qt59graphicaleffects
+  #qt59imageformats qt59location qt59multimedia qt59quickcontrols
+  #qt59quickcontrols2 qt59remoteobjects qt59script qt59scxml qt59sensors
+  #qt59serialbus qt59serialport qt59speech qt59svg qt59tools qt59translations
+  #qt59webchannel qt59webengine qt59websockets qt59x11extras qt59xmlpatterns"
   
 script:
   - source /opt/qt59/bin/qt59-env.sh

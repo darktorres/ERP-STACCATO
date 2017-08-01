@@ -4,25 +4,30 @@ dist: trusty
 
 env:
   - QT=qt59
+  - CXX=g++-7
+  - CC=gcc-7
 
-apt:
-  sources:
-  - ubuntu-toolchain-r-test
-  - beineri/opt-qt591-trusty
-  packages:
-  - gcc-6
-  - g++-6
+#apt:
+#  sources:
+#  - ubuntu-toolchain-r-test
+#  packages:
+#  - gcc-4.8
+#  - g++-4.8
 
 branches:
   only:
     - 'master'
     
 before_install:
-  - sudo apt-get update;
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y;
+  - sudo apt-get update
 
 install:
+  - sudo apt-get install -y dh-make
+  - sudo apt-get install -y gcc-7 g++-7
   - sudo apt-get install -y qt59-meta-full
-#  - sudo apt-get install -y qt59base qt59script qttools5-dev qttools5-dev-tools qt5-default libqt5designer5 dh-make;
+#  qt59base qt59script dh-make gcc-7 g++-7;
   
 script:
   - source /opt/qt59/bin/qt59-env.sh;

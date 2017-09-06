@@ -380,4 +380,5 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
   QMessageBox::information(this, "Aviso!", "Validade alterada com sucesso!");
 }
 
-// TODO: criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)
+// TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)
+// TODO: 5poder alterar na tela 'comissao'

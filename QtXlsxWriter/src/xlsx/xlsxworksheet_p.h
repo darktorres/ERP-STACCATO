@@ -61,9 +61,7 @@ class SharedStrings;
 struct XlsxHyperlinkData {
   enum LinkType { External, Internal };
 
-  XlsxHyperlinkData(LinkType linkType = External, const QString &target = QString(),
-                    const QString &location = QString(), const QString &display = QString(),
-                    const QString &tip = QString())
+  XlsxHyperlinkData(LinkType linkType = External, const QString &target = QString(), const QString &location = QString(), const QString &display = QString(), const QString &tip = QString())
       : linkType(linkType), target(target), location(location), display(display), tooltip(tip) {}
 
   LinkType linkType;
@@ -75,12 +73,10 @@ struct XlsxHyperlinkData {
 
 // ECMA-376 Part1 18.3.1.81
 struct XlsxSheetFormatProps {
-  XlsxSheetFormatProps(int baseColWidth = 8, bool customHeight = false, double defaultColWidth = 0.0,
-                       double defaultRowHeight = 15, quint8 outlineLevelCol = 0, quint8 outlineLevelRow = 0,
+  XlsxSheetFormatProps(int baseColWidth = 8, bool customHeight = false, double defaultColWidth = 0.0, double defaultRowHeight = 15, quint8 outlineLevelCol = 0, quint8 outlineLevelRow = 0,
                        bool thickBottom = false, bool thickTop = false, bool zeroHeight = false)
-      : baseColWidth(baseColWidth), customHeight(customHeight), defaultColWidth(defaultColWidth),
-        defaultRowHeight(defaultRowHeight), outlineLevelCol(outlineLevelCol), outlineLevelRow(outlineLevelRow),
-        thickBottom(thickBottom), thickTop(thickTop), zeroHeight(zeroHeight) {}
+      : baseColWidth(baseColWidth), customHeight(customHeight), defaultColWidth(defaultColWidth), defaultRowHeight(defaultRowHeight), outlineLevelCol(outlineLevelCol),
+        outlineLevelRow(outlineLevelRow), thickBottom(thickBottom), thickTop(thickTop), zeroHeight(zeroHeight) {}
 
   int baseColWidth;
   bool customHeight;
@@ -94,8 +90,7 @@ struct XlsxSheetFormatProps {
 };
 
 struct XlsxRowInfo {
-  XlsxRowInfo(double height = 0, const Format &format = Format(), bool hidden = false)
-      : customHeight(false), height(height), format(format), hidden(hidden), outlineLevel(0), collapsed(false) {}
+  XlsxRowInfo(double height = 0, const Format &format = Format(), bool hidden = false) : customHeight(false), height(height), format(format), hidden(hidden), outlineLevel(0), collapsed(false) {}
 
   bool customHeight;
   double height;
@@ -106,10 +101,8 @@ struct XlsxRowInfo {
 };
 
 struct XlsxColumnInfo {
-  XlsxColumnInfo(int firstColumn = 0, int lastColumn = 1, double width = 0, const Format &format = Format(),
-                 bool hidden = false)
-      : firstColumn(firstColumn), lastColumn(lastColumn), customWidth(false), width(width), format(format),
-        hidden(hidden), outlineLevel(0), collapsed(false) {}
+  XlsxColumnInfo(int firstColumn = 0, int lastColumn = 1, double width = 0, const Format &format = Format(), bool hidden = false)
+      : firstColumn(firstColumn), lastColumn(lastColumn), customWidth(false), width(width), format(format), hidden(hidden), outlineLevel(0), collapsed(false) {}
   int firstColumn;
   int lastColumn;
   bool customWidth;
@@ -169,32 +162,32 @@ public:
   QMap<int, CellFormula> sharedFormulaMap;
 
   CellRange dimension;
-  int previous_row;
+  int previous_row = 0;
 
   mutable QMap<int, QString> row_spans;
   QMap<int, double> row_sizes;
   QMap<int, double> col_sizes;
 
-  int outline_row_level;
-  int outline_col_level;
+  int outline_row_level = 0;
+  int outline_col_level = 0;
 
-  int default_row_height;
-  bool default_row_zeroed;
+  int default_row_height = 15;
+  bool default_row_zeroed = false;
 
   XlsxSheetFormatProps sheetFormatProps;
 
-  bool windowProtection;
-  bool showFormulas;
-  bool showGridLines;
-  bool showRowColHeaders;
-  bool showZeros;
-  bool rightToLeft;
-  bool tabSelected;
-  bool showRuler;
-  bool showOutlineSymbols;
-  bool showWhiteSpace;
+  bool windowProtection = false;
+  bool showFormulas = false;
+  bool showGridLines = true;
+  bool showRowColHeaders = true;
+  bool showZeros = true;
+  bool rightToLeft = false;
+  bool tabSelected = false;
+  bool showRuler = false;
+  bool showOutlineSymbols = true;
+  bool showWhiteSpace = true;
 
-  QRegularExpression urlPattern;
+  QRegularExpression urlPattern = QRegularExpression(QStringLiteral("^([fh]tt?ps?://)|(mailto:)|(file://)"));
 
 private:
   static double calculateColWidth(int characters);

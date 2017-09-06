@@ -54,7 +54,7 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("idCompra");
-  ui->table->hideColumn("idNfeSaida");
+  ui->table->hideColumn("idNFeSaida");
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("prcUnitario");
@@ -64,7 +64,9 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("parcialDesc");
   ui->table->hideColumn("descGlobal");
   ui->table->hideColumn("total");
-  ui->table->hideColumn("estoque_promocao");
+  ui->table->hideColumn("reposicao");
+  ui->table->hideColumn("estoque");
+  ui->table->hideColumn("promocao");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
   ui->table->hideColumn("dataPrevConf");
@@ -111,16 +113,16 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   for (auto const &item : list) {
     const QString status = model.data(item.row(), "status").toString();
 
-    // TODO: refazer isso para bloquear o botao
+    // TODO: 5refazer isso para bloquear o botao
     if (status == "PENDENTE" or status == "INICIADO" or status == "EM COMPRA" or status == "EM FATURAMENTO") {
       // se nao faturado nao faz nada
       if (not model.setData(item.row(), "status", "PROCESSADO")) return false;
 
-      // TODO: perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo
+      // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo
       // idVendaProduto)
-      // TODO: colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total
+      // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total
       // alterado
-      // TODO: criar uma tabelinha de coisas pendentes para o financeiro
+      // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
 
     } else {
       //    else if (status == "EM COLETA" or status == "EM RECEBIMENTO" or status == "ESTOQUE") {
@@ -132,7 +134,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       const QString idVenda = model.data(item.row(), "idVenda").toString();
 
       QSqlQuery query;
-      // TODO: verificar se estou pegando o idVendaProduto da devolucao e nao o original
+      // TODO: 0verificar se estou pegando o idVendaProduto da devolucao e nao o original
       query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto "
                     "AND status = 'DEVOLVIDO'");
       query.bindValue(":idVenda", idVenda.left(11));

@@ -158,4 +158,4 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   return true;
 }
 
-// TODO: copiar filtros do widgetnfesaida
+// TODO: 5copiar filtros do widgetnfesaida

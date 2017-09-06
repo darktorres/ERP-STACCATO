@@ -151,12 +151,12 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
-  // TODO: testar essa funcao
-  // TODO: dataPrevEnt nao foi limpa
+  // TODO: 0testar essa funcao
+  // TODO: 0dataPrevEnt nao foi limpa
   QSqlQuery query;
 
-  for (const auto item : list) {
-    // TODO: cancelar no lugar de voltar para em entrega?
+  for (const auto &item : list) {
+    // TODO: 0cancelar no lugar de voltar para em entrega?
     query.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
@@ -165,8 +165,7 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, "
-                  "dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
+    query.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
     if (not query.exec()) {
@@ -178,4 +177,4 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   return true;
 }
 
-// TODO: mostrar quem entregou/recebeu
+// TODO: 0mostrar quem entregou/recebeu

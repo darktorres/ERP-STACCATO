@@ -46,7 +46,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.append(body);
   message.append("\n\n");
 
-  // TODO: dont hardcode this
+  // TODO: 5dont hardcode this
   // TODO:__project public code
   //
   QFile file("://assinatura conrado.png");

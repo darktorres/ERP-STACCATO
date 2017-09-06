@@ -6,4 +6,4 @@ QString ReaisDelegate::displayText(const QVariant &value, const QLocale &locale)
   return value.userType() == QVariant::Double ? "R$ " + QLocale(QLocale::Portuguese).toString(value.toDouble(), 'f', decimais) : QStyledItemDelegate::displayText(value, locale);
 }
 
-// TODO: add a parameter for enabling/disabling editing (also in others delegate so as to remove NoEditDelegate)
+// TODO: 4add a parameter for enabling/disabling editing (also in others delegate so as to remove NoEditDelegate)

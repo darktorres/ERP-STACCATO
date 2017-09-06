@@ -18,7 +18,7 @@ QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) 
   }
 
   if (role == Qt::ForegroundRole) {
-    // TODO: manter o texto escuro quando o fundo for colorido
+    // TODO: 5manter o texto escuro quando o fundo for colorido
     if (QIdentityProxyModel::data(proxyIndex, Qt::BackgroundRole) == QBrush(Qt::black)) return QBrush(Qt::white);
   }
 

@@ -288,8 +288,7 @@ bool CadastroProduto::save() {
   return true;
 }
 
-// TODO: poder alterar nesta tela a quantidade minima/multiplo dos produtos
-// TODO: separar estoque_promocao em duas colunas no bd
-// TODO: nao bloquear a selecao de produtos descontinuados
-// TODO: verificar se estou usando corretamente a tabela 'produto_has_preco'
+// TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
+// TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
+// TODO: 4verificar se posso remover 'un2' de produto

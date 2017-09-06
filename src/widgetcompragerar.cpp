@@ -191,7 +191,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
 }
 
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
-  // TODO: refatorar essa funcao, dividir em funcoes menores etc
+  // TODO: 1refatorar essa funcao, dividir em funcoes menores etc
 
   if (UserSession::settings("User/ComprasFolder").toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!");
@@ -491,4 +491,4 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 }
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes
-// TODO: colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas
+// TODO: 5colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas

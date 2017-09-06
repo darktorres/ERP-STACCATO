@@ -32,7 +32,7 @@ private slots:
   void on_tableCarga_entered(const QModelIndex &);
   void on_pushButtonConsultarNFe_clicked();
 
-  void on_pushButtonTestarProtocolo_clicked();
+  void on_pushButtonProtocoloEntrega_clicked();
 
 private:
   // attributes

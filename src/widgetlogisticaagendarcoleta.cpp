@@ -93,7 +93,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTransp->hideColumn("idVeiculo");
   ui->tableTransp->hideColumn("idVendaProduto");
   ui->tableTransp->hideColumn("idCompra");
-  ui->tableTransp->hideColumn("idNfeSaida");
+  ui->tableTransp->hideColumn("idNFeSaida");
   ui->tableTransp->hideColumn("fornecedor");
   ui->tableTransp->hideColumn("idVenda");
   ui->tableTransp->hideColumn("idLoja");
@@ -130,7 +130,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTransp2->hideColumn("idVeiculo");
   ui->tableTransp2->hideColumn("idVendaProduto");
   ui->tableTransp2->hideColumn("idCompra");
-  ui->tableTransp2->hideColumn("idNfeSaida");
+  ui->tableTransp2->hideColumn("idNFeSaida");
   ui->tableTransp2->hideColumn("fornecedor");
   ui->tableTransp2->hideColumn("idVenda");
   ui->tableTransp2->hideColumn("idLoja");
@@ -243,7 +243,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   }
 
   InputDialog input(InputDialog::AgendarColeta, this);
-  // TODO: colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
+  // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
 
   if (input.exec() != InputDialog::Accepted) return;
 
@@ -435,7 +435,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
   ui->pushButtonAgendarColeta->show();
   ui->pushButtonCancelarCarga->hide();
 
-  modelTransp.select();
+  if (not modelTransp.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelTransp.lastError().text());
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
@@ -500,5 +500,5 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
 }
 
 // TODO: 1poder marcar nota de entrada como cancelada (talvez direto na tela de nfe's e retirar dos fluxos os estoques?)
-// TODO: importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de
+// TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de
 // tranferencia

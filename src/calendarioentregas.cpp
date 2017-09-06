@@ -442,7 +442,7 @@ bool CalendarioEntregas::cancelarEntrega(const QModelIndexList &list) {
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
 // TODO: 1refazer sistema para permitir multiplas notas para uma mesma carga/pedido (notas parciais)
-// TODO: no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'
+// TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'
 
 void CalendarioEntregas::on_tableCarga_entered(const QModelIndex &) { ui->tableCarga->resizeColumnsToContents(); }
 
@@ -544,9 +544,9 @@ bool CalendarioEntregas::consultarNFe(const int idNFe) {
   return true;
 }
 
-// TODO: mudar nome desta classe
+// TODO: 5mudar nome desta classe
 
-void CalendarioEntregas::on_pushButtonTestarProtocolo_clicked() {
+void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {

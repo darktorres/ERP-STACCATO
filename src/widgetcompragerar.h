@@ -30,7 +30,7 @@ private slots:
 
 private:
   // attributes
-  int oc;
+  int oc = 0;
   QString error;
   SqlTableModel modelForn;
   SqlTableModel modelProdutos;

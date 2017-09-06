@@ -22,9 +22,9 @@ void PagamentosDia::setupTables() {
 
   ui->tableView->setModel(&model);
 
-  // TODO: usar outra coluna no lugar de idCompra?
-  // TODO: renomear/esconder colunas de data
-  // TODO: colocar delegates
+  // TODO: 5usar outra coluna no lugar de idCompra?
+  // TODO: 5renomear/esconder colunas de data
+  // TODO: 5colocar delegates
 
   ui->tableView->hideColumn("contaDestino");
   ui->tableView->hideColumn("idConta");

@@ -32,7 +32,7 @@ void WidgetPagamento::setupTables() {
 
   //  model.sort(model.fieldIndex("dataEmissao"), Qt::DescendingOrder);
 
-  // TODO: hide/remove column 'statusFinanceiro'
+  // TODO: 5hide/remove column 'statusFinanceiro'
 
   model.setHeaderData("dataEmissao", "Data Emissão");
   model.setHeaderData("idVenda", "Código");
@@ -112,7 +112,7 @@ void WidgetPagamento::on_table_activated(const QModelIndex &index) {
   QString idPagamento = model.data(index.row(), "idPagamento").toString();
   QString contraparte = model.data(index.row(), "Contraparte").toString();
   contas->viewConta(idPagamento, contraparte);
-  // TODO: poder selecionar mais de um idPagamento (contraParte é estético)
+  // TODO: 2poder selecionar mais de um idPagamento (contraParte é estético)
   // ajustar para selecionar mais de uma linha e ajustar no filtro da Contas
 }
 
@@ -151,7 +151,7 @@ void WidgetPagamento::montaFiltro() {
 
   const QString representacao = tipo == Tipo::Receber ? " AND representacao = 0" : "";
 
-  // TODO: replace 'dataPagamento' with 'dataRealizado'?
+  // TODO: 2replace 'dataPagamento' with 'dataRealizado'?
   const QString ordenacao = tipo == Tipo::Receber ? " ORDER BY `dataPagamento` , `idVenda` , `tipo` , `parcela` DESC" : " ORDER BY `dataPagamento` , `ordemCompra` , `tipo` , `parcela` DESC";
 
   model.setFilter(status + busca + valor + dataPag + loja + representacao + ordenacao);

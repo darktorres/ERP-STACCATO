@@ -159,4 +159,4 @@ void TableView::setModel(QAbstractItemModel *model) {
   hideColumn("lastUpdated");
 }
 
-// TODO: program copy - http://stackoverflow.com/questions/3135737/copying-part-of-qtableview
+// TODO: 4program copy - http://stackoverflow.com/questions/3135737/copying-part-of-qtableview

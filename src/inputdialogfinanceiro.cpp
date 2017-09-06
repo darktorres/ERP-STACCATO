@@ -177,7 +177,7 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
 
   if (representacao) return;
 
-  modelFluxoCaixa.select();
+  if (not modelFluxoCaixa.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelFluxoCaixa.lastError().text());
 
   if (type == Financeiro) {
     for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
@@ -227,11 +227,11 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
   if (ui->doubleSpinBoxFrete->value() > 0) {
     const int row = modelFluxoCaixa.rowCount();
     modelFluxoCaixa.insertRow(row);
-    modelFluxoCaixa.setData(row, "contraParte", ""); // TODO: preencher com 'PROPRIO' do checkbox ou com o que foi digitado ao lado
+    modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"));
     modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime());
     modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"));
     modelFluxoCaixa.setData(row, "idLoja", 1);                           // Geral
-    modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate()); // TODO: redo this with a editable date
+    modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate()); // TODO: 5redo this with a editable date
     modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value());
     modelFluxoCaixa.setData(row, "tipo", "Frete");
     modelFluxoCaixa.setData(row, "parcela", 1);
@@ -644,7 +644,7 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
 
   //
 
-  // TODO: alterar para que apenas na tela do financeiro compra a opcao de corrigir fluxo percorra todas as linhas
+  // TODO: 5alterar para que apenas na tela do financeiro compra a opcao de corrigir fluxo percorra todas as linhas
   // (enquanto na confirmacao de pagamento percorre apenas as linhas selecionadas)
 
   calcularTotal();
@@ -660,8 +660,8 @@ void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(double) {
 
 void InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged(const double value) {
   Q_UNUSED(value);
-  // TODO: fracionar desconto nos itens
-  // TODO: mudanca de selecao deve rodar esse codigo novamente para redistribuir o desconto
+  // TODO: 0fracionar desconto nos itens
+  // TODO: 0mudanca de selecao deve rodar esse codigo novamente para redistribuir o desconto
 
   /*
 
@@ -697,7 +697,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged(const double
                                         QItemSelectionModel::Rows | QItemSelectionModel::SelectCurrent);
   }
 
-  // TODO: percorrer apenas as linhas selecionadas?
+  // TODO: 0percorrer apenas as linhas selecionadas?
 
   for (auto const index : ui->table->selectionModel()->selectedRows()) {
     //  for (int row = 0; row < model.rowCount(); ++row) {
@@ -708,7 +708,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged(const double
 
     model.setData(index.row(), "prcUnitario", valorProporcional / model.data(index.row(), "quant").toDouble());
   }
-  // TODO: lidar com divisao por zero/nan
+  // TODO: 0lidar com divisao por zero/nan
 
   */
 
@@ -972,6 +972,6 @@ void InputDialogFinanceiro::on_dateEditPgtSt_userDateChanged(const QDate &) {
 
 // TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo
 // que vem do fornecedor)
-// TODO: quando for representacao mostrar fluxo de comissao
-// TODO: colocar formas de pagamento 4 e 5
-// TODO: colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
+// TODO: 3quando for representacao mostrar fluxo de comissao
+// TODO: ?colocar formas de pagamento 4 e 5
+// TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)

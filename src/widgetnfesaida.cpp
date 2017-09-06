@@ -33,7 +33,7 @@ WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 bool WidgetNfeSaida::updateTables() {
   if (model.tableName().isEmpty()) setupTables();
 
-  // TODO: refatorar
+  // TODO: 1refatorar
   //  if (not model.select()) {
   //    emit errorSignal("Erro lendo tabela NFe: " + model.lastError().text());
   //    return false;
@@ -75,7 +75,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetNfeSaida::montaFiltro() {
-  // TODO: ordenar por 'data criado'
+  // TODO: 5ordenar por 'data criado'
 
   const QString text = ui->lineEditBusca->text();
 
@@ -103,7 +103,7 @@ void WidgetNfeSaida::montaFiltro() {
 void WidgetNfeSaida::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
-  // TODO: quando cancelar nfe remover ela do venda_has_produto e do veiculo_has_produto
+  // TODO: colocar returns se as operações falharem
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
@@ -137,9 +137,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
     query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
     query.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando nota como cancelada: " + query.lastError().text());
-    }
+    if (not query.exec()) QMessageBox::critical(this, "Erro!", "Erro marcando nota como cancelada: " + query.lastError().text());
   }
 
   QMessageBox::information(this, "Resposta", resposta);
@@ -186,9 +184,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 // TODO: 1botao para gerar relatorio igual ao da receita
 
 void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
-  // TODO: formatar decimais no padrao BR
-  // TODO: perguntar um intervalo de tempo para filtrar as notas
-  // TODO: verificar quais as tags na nota dos campos que faltam preencher
+  // TODO: 3formatar decimais no padrao BR
+  // TODO: 3perguntar um intervalo de tempo para filtrar as notas
+  // TODO: 3verificar quais as tags na nota dos campos que faltam preencher
 
   if (not ui->groupBoxMes->isChecked()) {
     QMessageBox::critical(this, "Erro!", "Selecione um mês para gerar o relatório!");
@@ -200,7 +198,11 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   SqlTableModel view;
   view.setTable("view_relatorio_nfe");
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
-  view.select();
+
+  if (not view.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + view.lastError().text());
+    return;
+  }
 
   report.dataManager()->addModel("view", &view, true);
 
@@ -247,7 +249,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 }
 
 void WidgetNfeSaida::on_pushButtonExportar_clicked() {
-  // TODO: zipar arquivos exportados com nome descrevendo mes/notas/etc
+  // TODO: 5zipar arquivos exportados com nome descrevendo mes/notas/etc
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
@@ -324,5 +326,5 @@ void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
 }
 
 // TODO: 2tela para importar notas de amostra (aba separada)
-// TODO: nao estou guardando o valor na nota
-// TODO: algumas notas nao estao mostrando valor
+// TODO: 0nao estou guardando o valor na nota
+// TODO: 0algumas notas nao estao mostrando valor

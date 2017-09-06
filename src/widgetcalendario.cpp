@@ -119,7 +119,7 @@ bool WidgetCalendario::updateCalendar(const QDate &startDate) {
       text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString();
     }
 
-    // TODO: dont show this to compact screen? or show this only on doubleclick
+    // TODO: 0dont show this to compact screen? or show this only on doubleclick
     text += query.value("text").toString();
 
     text += "\n           Status: " + query.value("status").toString();

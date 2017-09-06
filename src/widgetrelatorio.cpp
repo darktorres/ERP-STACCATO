@@ -27,9 +27,7 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   modelTotalVendedor.setFilter(filter);
 
-  if (not modelTotalVendedor.select()) {
-    emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelTotalVendedor.lastError().text());
-  }
+  if (not modelTotalVendedor.select()) emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelTotalVendedor.lastError().text());
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
@@ -43,14 +41,14 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   modelTotalLoja.setFilter(filter);
 
-  if (not modelTotalLoja.select()) {
-    emit errorSignal("Erro lendo tabela relatorio_loja: " + modelTotalLoja.lastError().text());
-  }
+  if (not modelTotalLoja.select()) emit errorSignal("Erro lendo tabela relatorio_loja: " + modelTotalLoja.lastError().text());
 }
 
 bool WidgetRelatorio::setupTables() {
   modelRelatorio.setTable("view_relatorio");
   modelRelatorio.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelRelatorio.setHeaderData("idVenda", "Venda");
 
   setFilterRelatorio();
 
@@ -103,6 +101,7 @@ bool WidgetRelatorio::setupTables() {
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
   ui->tableTotalLoja->hideColumn("Mês");
   ui->tableTotalLoja->resizeColumnsToContents();
 
@@ -139,9 +138,7 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   modelRelatorio.setFilter(filter);
 
-  if (not modelRelatorio.select()) {
-    emit errorSignal("Erro lendo tabela relatorio: " + modelRelatorio.lastError().text());
-  }
+  if (not modelRelatorio.select()) emit errorSignal("Erro lendo tabela relatorio: " + modelRelatorio.lastError().text());
 }
 
 void WidgetRelatorio::on_dateEditMes_dateChanged(const QDate &) { updateTables(); }
@@ -184,8 +181,10 @@ bool WidgetRelatorio::updateTables() {
     return false;
   }
 
-  query.exec("SELECT @mydate");
-  query.first();
+  if (not query.exec("SELECT @mydate") or not query.first()) {
+    emit errorSignal("Erro comunicando com o banco de dados: " + query.lastError().text());
+    return false;
+  }
 
   modelOrcamento.setTable("view_resumo_relatorio");
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);

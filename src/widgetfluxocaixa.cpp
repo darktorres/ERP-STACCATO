@@ -25,7 +25,7 @@ bool WidgetFluxoCaixa::updateTables() {
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
 
-    // TODO: dont hardcode magic numbers
+    // TODO: 0dont hardcode magic numbers
     ui->itemBoxCaixa1->setValue(3);
     ui->itemBoxCaixa2->setValue(8);
 
@@ -119,10 +119,8 @@ void WidgetFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
-  modelFuturo.setQuery(
-      // TODO: fix empty first row
-      "SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v "
-      "JOIN (SELECT @running_total := 0) r");
+  modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v "
+                       "JOIN (SELECT @running_total := 0) r");
 
   ui->tableFuturo->setModel(&modelFuturo);
   ui->tableFuturo->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));
@@ -173,5 +171,5 @@ void WidgetFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
   montaFiltro();
 }
 
-// TODO: nao agrupar contas no view_fluxo_resumo (apenas quando filtrado)
-// TODO: fazer delegate para reduzir tamanho da fonte
+// TODO: 0nao agrupar contas no view_fluxo_resumo (apenas quando filtrado)
+// TODO: 0fazer delegate para reduzir tamanho da fonte

@@ -75,6 +75,7 @@ void WidgetLogisticaRecebimento::setupTables() {
 }
 
 bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) {
+  // TODO: 4aqui e na funcao de cancelar verificar se é possivel trocar 'IN ()' por idVendaProduto
   QSqlQuery query;
 
   for (auto const &item : list) {

@@ -258,7 +258,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, double quant) {
 
     const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
 
-    const double caixas = qRound(quant / unCaixa * 100) / 100;
+    const double caixas = qRound(quant / unCaixa * 100) / 100.;
 
     const double proporcao = quant / model.data(row, "quant").toDouble();
 
@@ -276,7 +276,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, double quant) {
 
     if (not modelConsumo.setData(newRow, "quant", quant * -1)) return false;
     if (not modelConsumo.setData(newRow, "caixas", caixas)) return false;
-    if (not modelConsumo.setData(newRow, "quantUpd", DarkGreen)) return false; // DarkGreen
+    if (not modelConsumo.setData(newRow, "quantUpd", DarkGreen)) return false;
     if (not modelConsumo.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
     if (not modelConsumo.setData(newRow, "idEstoque", model.data(row, "idEstoque"))) return false;
     if (not modelConsumo.setData(newRow, "status", "CONSUMO")) return false;

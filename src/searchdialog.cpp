@@ -228,7 +228,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 SearchDialog *SearchDialog::produto(bool permitirDescontinuados, QWidget *parent) {
   // TODO: *SUL* pesquisar apenas os produtos com os codigos permitidos de visualizacao da loja atual
 
-  // TODO: retornar um SearchDialogProxy direto aqui? (assim o consumidor do codigo nao precisa saber quando nem que
+  // TODO: 1retornar um SearchDialogProxy direto aqui? (assim o consumidor do codigo nao precisa saber quando nem que
   // precisa usar o proxy)
   SearchDialog *sdProd = new SearchDialog(
       // TODO: 3nao mostrar promocao vencida no descontinuado
@@ -237,21 +237,23 @@ SearchDialog *SearchDialog::produto(bool permitirDescontinuados, QWidget *parent
   sdProd->setPrimaryKey("idProduto");
   sdProd->setTextKeys({"descricao"});
 
-  sdProd->hideColumns({"atualizarTabelaPreco", "cfop", "codBarras", "comissao", "cst",   "custo",       "desativado", "descontinuado", "estoque_promocao", "icms", "idFornecedor", "idProduto",
-                       "idProdutoRelacionado", "ipi",  "markup",    "ncm",      "ncmEx", "observacoes", "origem",     "qtdPallet",     "representacao",    "st",   "temLote"});
+  sdProd->hideColumns(
+      {"idEstoque", "atualizarTabelaPreco", "cfop", "codBarras", "comissao", "cst",   "custo",       "desativado", "descontinuado", "estoque",       "promocao", "icms",   "idFornecedor",
+       "idProduto", "idProdutoRelacionado", "ipi",  "markup",    "ncm",      "ncmEx", "observacoes", "origem",     "qtdPallet",     "representacao", "st",       "temLote"});
 
-  for (int column = 0; column < sdProd->model.columnCount(); ++column) {
+  for (int column = 0, columnCount = sdProd->model.columnCount(); column < columnCount; ++column) {
     if (sdProd->model.record().fieldName(column).endsWith("Upd")) sdProd->ui->table->setColumnHidden(column, true);
   }
 
   sdProd->setHeaderData("fornecedor", "Fornecedor");
   sdProd->setHeaderData("descricao", "Descrição");
-  sdProd->setHeaderData("estoque", "Estoque");
+  sdProd->setHeaderData("estoqueRestante", "Estoque Disp.");
   sdProd->setHeaderData("un", "Un.");
   sdProd->setHeaderData("un2", "Un.2");
   sdProd->setHeaderData("colecao", "Coleção");
   sdProd->setHeaderData("tipo", "Tipo");
   sdProd->setHeaderData("minimo", "Mínimo");
+  sdProd->setHeaderData("multiplo", "Múltiplo");
   sdProd->setHeaderData("m2cx", "M/Cx.");
   sdProd->setHeaderData("pccx", "Pç./Cx.");
   sdProd->setHeaderData("kgcx", "Kg./Cx.");

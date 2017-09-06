@@ -200,7 +200,7 @@ void RegisterDialog::remove() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    setData("desativado", true);
+    if (not setData("desativado", true)) return;
 
     if (not model.submitAll()) {
       QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + model.lastError().text());
@@ -218,7 +218,7 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   QVector<int> sub2;
 
-  for (const auto i : sub) sub2.push_back(i.digitValue());
+  for (const auto &i : sub) sub2.push_back(i.digitValue());
 
   const QVector<int> multiplicadores = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
 
@@ -226,20 +226,21 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   for (int i = 0; i < 12; ++i) soma += sub2.at(i) * multiplicadores.at(i);
 
-  int resto = soma % 11;
+  const int resto = soma % 11;
 
   const int digito1 = resto < 2 ? 0 : 11 - resto;
 
   sub2.push_back(digito1);
 
   const QVector<int> multiplicadores2 = {6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
-  soma = 0;
 
-  for (int i = 0; i < 13; ++i) soma += sub2.at(i) * multiplicadores2.at(i);
+  int soma2 = 0;
 
-  resto = soma % 11;
+  for (int i = 0; i < 13; ++i) soma2 += sub2.at(i) * multiplicadores2.at(i);
 
-  const int digito2 = resto < 2 ? 0 : 11 - resto;
+  const int resto2 = soma2 % 11;
+
+  const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
   if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) {
     QMessageBox::critical(this, "Erro!", "CNPJ inválido!");
@@ -262,7 +263,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   QVector<int> sub2;
 
-  for (const auto i : sub) sub2.push_back(i.digitValue());
+  for (const auto &i : sub) sub2.push_back(i.digitValue());
 
   const QVector<int> multiplicadores = {10, 9, 8, 7, 6, 5, 4, 3, 2};
 
@@ -270,7 +271,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   for (int i = 0; i < 9; ++i) soma += sub2.at(i) * multiplicadores.at(i);
 
-  int resto = soma % 11;
+  const int resto = soma % 11;
 
   const int digito1 = resto < 2 ? 0 : 11 - resto;
 
@@ -281,9 +282,9 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   for (int i = 0; i < 10; ++i) soma += sub2.at(i) * multiplicadores2.at(i);
 
-  resto = soma % 11;
+  const int resto2 = soma % 11;
 
-  const int digito2 = resto < 2 ? 0 : 11 - resto;
+  const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
   if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) {
     QMessageBox::critical(this, "Erro!", "CPF inválido!");
@@ -293,6 +294,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
   return true;
 }
 
+// TODO: no lugar de qualquer alteracao em lineEdit sair marcando dirty fazer uma analise tela por tela do que pode ser considerado edicao
 void RegisterDialog::marcarDirty() { isDirty = true; }
 
 QVariant RegisterDialog::getLastInsertId() {

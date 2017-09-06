@@ -83,10 +83,11 @@ void Devolucao::setupTables() {
   ui->tableProdutos->hideColumn("parcialDesc");
   ui->tableProdutos->hideColumn("descGlobal");
   ui->tableProdutos->hideColumn("descGlobal");
-  ui->tableProdutos->hideColumn("estoque_promocao");
+  ui->tableProdutos->hideColumn("estoque");
+  ui->tableProdutos->hideColumn("promocao");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("idVendaProduto");
-  ui->tableProdutos->hideColumn("idNfeSaida");
+  ui->tableProdutos->hideColumn("idNFeSaida");
   ui->tableProdutos->hideColumn("idLoja");
   ui->tableProdutos->hideColumn("idVenda");
   ui->tableProdutos->hideColumn("item");
@@ -140,7 +141,7 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->hideColumn("descUnitario");
   ui->tableDevolvidos->hideColumn("selecionado");
   ui->tableDevolvidos->hideColumn("idVendaProduto");
-  ui->tableDevolvidos->hideColumn("idNfeSaida");
+  ui->tableDevolvidos->hideColumn("idNFeSaida");
   ui->tableDevolvidos->hideColumn("idLoja");
   ui->tableDevolvidos->hideColumn("idVenda");
   ui->tableDevolvidos->hideColumn("item");
@@ -150,7 +151,8 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->hideColumn("desconto");
   ui->tableDevolvidos->hideColumn("parcialDesc");
   ui->tableDevolvidos->hideColumn("descGlobal");
-  ui->tableDevolvidos->hideColumn("estoque_promocao");
+  ui->tableDevolvidos->hideColumn("estoque");
+  ui->tableDevolvidos->hideColumn("promocao");
   ui->tableDevolvidos->hideColumn("dataPrevCompra");
   ui->tableDevolvidos->hideColumn("dataRealCompra");
   ui->tableDevolvidos->hideColumn("dataPrevConf");
@@ -264,7 +266,7 @@ void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 }
 
 void Devolucao::on_doubleSpinBoxQuant_valueChanged(double) {
-  const double caixas = qRound(ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep() * 100) / 100;
+  const double caixas = qRound(ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep() * 100) / 100.;
 
   if (ui->doubleSpinBoxCaixas->value() != caixas) ui->doubleSpinBoxCaixas->setValue(caixas);
 }
@@ -275,7 +277,7 @@ bool Devolucao::criarDevolucao() {
   const int newRow = modelVenda.rowCount();
   if (not modelVenda.insertRow(newRow)) return false;
 
-  for (int column = 0; column < modelVenda.columnCount(); ++column) {
+  for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
     if (modelVenda.fieldIndex("created") == column) continue;
     if (modelVenda.fieldIndex("lastUpdated") == column) continue;
 
@@ -410,7 +412,7 @@ bool Devolucao::inserirItens(const QModelIndexList &list) {
 }
 
 bool Devolucao::criarContas() {
-  // TODO: considerar a 'conta cliente' e ajustar as telas do financeiro para poder visualizar/trabalhar os dois fluxos
+  // TODO: 0considerar a 'conta cliente' e ajustar as telas do financeiro para poder visualizar/trabalhar os dois fluxos
   // de contas
 
   if (not ui->groupBoxCredito->isChecked()) return true;
@@ -430,7 +432,7 @@ bool Devolucao::criarContas() {
   if (not modelPagamentos.setData(newRowPag, "dataPagamento", QDate::currentDate())) return false;
   if (not modelPagamentos.setData(newRowPag, "dataRealizado", QDate::currentDate())) return false;
   if (not modelPagamentos.setData(newRowPag, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) return false;
-  // TODO: dont hardcode
+  // TODO: 0dont hardcode
   if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) return false;
   //----------------
 
@@ -442,7 +444,7 @@ bool Devolucao::criarContas() {
 
   //    const QString fornecedor = modelProdutos.data(0, "fornecedor").toString();
 
-  // TODO: no lugar de pegar a 'comissaoLoja' pegar a comissao do fluxo e calcular o proporcional
+  // TODO: 0no lugar de pegar a 'comissaoLoja' pegar a comissao do fluxo e calcular o proporcional
 
   //    QSqlQuery query;
   //    query.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
@@ -465,7 +467,7 @@ bool Devolucao::criarContas() {
   //    modelPagamentos.setData(row, "dataEmissao", QDate::currentDate());
   //    modelPagamentos.setData(row, "idVenda", idDevolucao);
   //    modelPagamentos.setData(row, "idLoja", modelVenda.data(0, "idLoja"));
-  // TODO: colocar mesma data do fluxo original
+  // TODO: 0colocar mesma data do fluxo original
   //    modelPagamentos.setData(row, "dataPagamento", QDate::currentDate());
   //    modelPagamentos.setData(row, "valor", valorAjustado);
   //    modelPagamentos.setData(row, "tipo", "1. Comissão");
@@ -621,9 +623,7 @@ void Devolucao::on_groupBoxCredito_toggled(bool) {
 
 // TODO: 2nao criar linha conta
 // TODO: 2criar linha no followup
-// TODO: verificar erro quando a devolucao do item é feita com valor menor, conta_cliente saiu certo mas venda_devolucao
-// saiu com valor cheio
-// TODO: perguntar e guardar data em que ocorreu a devolucao
-// TODO: quando for devolver para o fornecedor perguntar a quantidade
-// TODO: quando fizer devolucao no consumo/estoque alterar os dados no pedido_fornecedor?
-// se as quantidades forem iguais trocar idVenda/idVendaProduto
+// TODO: 0verificar erro quando a devolucao do item é feita com valor menor, conta_cliente saiu certo mas venda_devolucao saiu com valor cheio
+// TODO: 1perguntar e guardar data em que ocorreu a devolucao
+// TODO: 2quando for devolver para o fornecedor perguntar a quantidade
+// TODO: 2quando fizer devolucao no consumo/estoque alterar os dados no pedido_fornecedor? se as quantidades forem iguais trocar idVenda/idVendaProduto

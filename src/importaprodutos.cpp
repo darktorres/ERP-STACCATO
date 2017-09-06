@@ -245,6 +245,7 @@ void ImportaProdutos::setupTables() {
   model.setHeaderData("colecao", "Coleção");
   model.setHeaderData("tipo", "Tipo");
   model.setHeaderData("minimo", "Mínimo");
+  model.setHeaderData("multiplo", "Múltiplo");
   model.setHeaderData("m2cx", "M./Cx.");
   model.setHeaderData("pccx", "Pç./Cx.");
   model.setHeaderData("kgcx", "Kg./Cx.");
@@ -274,6 +275,8 @@ void ImportaProdutos::setupTables() {
   }
 
   ui->tableProdutos->hideColumn("idProduto");
+  ui->tableProdutos->hideColumn("idEstoque");
+  ui->tableProdutos->hideColumn("estoqueRestante");
   ui->tableProdutos->hideColumn("idFornecedor");
   ui->tableProdutos->hideColumn("desativado");
   ui->tableProdutos->hideColumn("descontinuado");
@@ -290,7 +293,8 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->hideColumn("cst");
   ui->tableProdutos->hideColumn("ipi");
   ui->tableProdutos->hideColumn("st");
-  ui->tableProdutos->hideColumn("estoque_promocao");
+  ui->tableProdutos->hideColumn("estoque");
+  ui->tableProdutos->hideColumn("promocao");
   ui->tableProdutos->hideColumn("idProdutoRelacionado");
 
   ui->tableProdutos->setItemDelegateForColumn("validade", new DateFormatDelegate(this));
@@ -316,11 +320,14 @@ void ImportaProdutos::setupTables() {
   modelErro.setHeaderData("fornecedor", "Fornecedor");
   modelErro.setHeaderData("descricao", "Descrição");
   modelErro.setHeaderData("un", "Un.");
+  modelErro.setHeaderData("un2", "Un.2");
   modelErro.setHeaderData("colecao", "Coleção");
   modelErro.setHeaderData("tipo", "Tipo");
   modelErro.setHeaderData("m2cx", "M./Cx.");
   modelErro.setHeaderData("pccx", "Pç./Cx.");
   modelErro.setHeaderData("kgcx", "Kg./Cx.");
+  modelErro.setHeaderData("minimo", "Mínimo");
+  modelErro.setHeaderData("multiplo", "Múltiplo");
   modelErro.setHeaderData("formComercial", "Form. Com.");
   modelErro.setHeaderData("codComercial", "Cód. Com.");
   modelErro.setHeaderData("codBarras", "Cód. Barras");
@@ -347,6 +354,8 @@ void ImportaProdutos::setupTables() {
   }
 
   ui->tableErro->hideColumn("idProduto");
+  ui->tableErro->hideColumn("idEstoque");
+  ui->tableErro->hideColumn("estoqueRestante");
   ui->tableErro->hideColumn("idFornecedor");
   ui->tableErro->hideColumn("desativado");
   ui->tableErro->hideColumn("descontinuado");
@@ -362,8 +371,8 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->hideColumn("icms");
   ui->tableErro->hideColumn("cst");
   ui->tableErro->hideColumn("ipi");
-  ui->tableErro->hideColumn("st");
-  ui->tableErro->hideColumn("estoque_promocao");
+  ui->tableErro->hideColumn("estoque");
+  ui->tableErro->hideColumn("promocao");
   ui->tableErro->hideColumn("idProdutoRelacionado");
 
   ui->tableErro->setItemDelegateForColumn("validade", new DateFormatDelegate(this));
@@ -451,7 +460,7 @@ bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
 
 void ImportaProdutos::contaProdutos() {
   QSqlQuery queryProdSize("SELECT COUNT(*) FROM [BASE$]", db);
-  queryProdSize.first();
+  if (not queryProdSize.first()) return;
   progressDialog->setMaximum(queryProdSize.value(0).toInt());
 }
 
@@ -757,7 +766,7 @@ bool ImportaProdutos::buscarCadastrarFornecedor(const QString &fornecedor, int &
 void ImportaProdutos::salvar() {
   if (not model.submitAll()) {
     QMessageBox::critical(this, "Erro!", "Ocorreu um erro ao salvar os dados: " + model.lastError().text());
-    // TODO: refactor this because after this runs the transaction is no more
+    // TODO: 5refactor this because after this runs the transaction is no more
     QSqlQuery("ROLLBACK").exec();
     return;
   }
@@ -774,7 +783,10 @@ void ImportaProdutos::salvar() {
     return;
   }
 
-  queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE");
+  if (not queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE")) {
+    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + queryPrecos.lastError().text());
+    return;
+  }
 
   QSqlQuery("COMMIT").exec();
 
@@ -845,8 +857,9 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
 // TODO: 2unificar m2cx/pccx em uncx, podendo ter uma segunda coluna pccx/kgcx
 
 // TODO: *SUL*colocar flag na importacao para dizer qual tipo, se é sul ou nao (para diferenciar precos por regiao)
-// TODO: como esta tabela é colorida usar o delegate para pintar texto de branco quando for fundo escuro
-// TODO: markup esta exibindo errado ou salvando errado
-// TODO: nao mostrar promocao descontinuado
-// TODO: se der erro durante a leitura o arquivo nao é fechado
-// TODO: nao marcou produtos representacao com flag 1
+// TODO: 4como esta tabela é colorida usar o delegate para pintar texto de branco quando for fundo escuro
+// TODO: 4markup esta exibindo errado ou salvando errado
+// TODO: 4nao mostrar promocao descontinuado
+// TODO: 0se der erro durante a leitura o arquivo nao é fechado
+// TODO: 0nao marcou produtos representacao com flag 1
+// TODO: 0ler 'multiplo' na importacao (para produtos que usam minimo)

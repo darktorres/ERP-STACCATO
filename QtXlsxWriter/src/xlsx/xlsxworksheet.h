@@ -68,10 +68,8 @@ public:
   bool writeInlineString(int row, int column, const QString &value, const Format &format = Format());
   bool writeNumeric(const CellReference &row_column, double value, const Format &format = Format());
   bool writeNumeric(int row, int column, double value, const Format &format = Format());
-  bool writeFormula(const CellReference &row_column, const CellFormula &formula, const Format &format = Format(),
-                    double result = 0);
-  bool writeFormula(int row, int column, const CellFormula &formula, const Format &format = Format(),
-                    double result = 0);
+  bool writeFormula(const CellReference &row_column, const CellFormula &formula, const Format &format = Format(), double result = 0);
+  bool writeFormula(int row, int column, const CellFormula &formula, const Format &format = Format(), double result = 0);
   bool writeBlank(const CellReference &row_column, const Format &format = Format());
   bool writeBlank(int row, int column, const Format &format = Format());
   bool writeBool(const CellReference &row_column, bool value, const Format &format = Format());
@@ -81,10 +79,8 @@ public:
   bool writeTime(const CellReference &row_column, const QTime &t, const Format &format = Format());
   bool writeTime(int row, int column, const QTime &t, const Format &format = Format());
 
-  bool writeHyperlink(const CellReference &row_column, const QUrl &url, const Format &format = Format(),
-                      const QString &display = QString(), const QString &tip = QString());
-  bool writeHyperlink(int row, int column, const QUrl &url, const Format &format = Format(),
-                      const QString &display = QString(), const QString &tip = QString());
+  bool writeHyperlink(const CellReference &row_column, const QUrl &url, const Format &format = Format(), const QString &display = QString(), const QString &tip = QString());
+  bool writeHyperlink(int row, int column, const QUrl &url, const Format &format = Format(), const QString &display = QString(), const QString &tip = QString());
 
   bool addDataValidation(const DataValidation &validation);
   bool addConditionalFormatting(const ConditionalFormatting &cf);
@@ -123,7 +119,7 @@ public:
   CellRange dimension() const;
 
   bool isWindowProtected() const;
-  void setWindowProtected(bool protect);
+  void setWindowProtected(const bool protect);
   bool isFormulasVisible() const;
   void setFormulasVisible(bool visible);
   bool isGridLinesVisible() const;

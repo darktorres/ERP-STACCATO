@@ -79,6 +79,7 @@ void WidgetLogisticaEntrega::setupTables() {
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataRealEnt");
+  ui->tableProdutos->hideColumn("idConsumo");
 
   //
 
@@ -111,7 +112,7 @@ void WidgetLogisticaEntrega::setupTables() {
   ui->tableTransp->hideColumn("idVeiculo");
   ui->tableTransp->hideColumn("idCompra");
   ui->tableTransp->hideColumn("idVendaProduto");
-  ui->tableTransp->hideColumn("idNfeSaida");
+  ui->tableTransp->hideColumn("idNFeSaida");
   ui->tableTransp->hideColumn("idLoja");
   ui->tableTransp->hideColumn("idProduto");
   ui->tableTransp->hideColumn("obs");
@@ -149,7 +150,7 @@ void WidgetLogisticaEntrega::setupTables() {
   ui->tableTransp2->hideColumn("idVeiculo");
   ui->tableTransp2->hideColumn("idCompra");
   ui->tableTransp2->hideColumn("idVendaProduto");
-  ui->tableTransp2->hideColumn("idNfeSaida");
+  ui->tableTransp2->hideColumn("idNFeSaida");
   ui->tableTransp2->hideColumn("idLoja");
   ui->tableTransp2->hideColumn("idProduto");
   ui->tableTransp2->hideColumn("obs");
@@ -313,8 +314,10 @@ bool WidgetLogisticaEntrega::processRows() {
 
   QSqlQuery query;
 
-  query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto");
-  query.first();
+  if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not query.first()) {
+    error = "Erro comunicando com o banco de dados: " + query.lastError().text();
+    return false;
+  }
 
   const int idEvento = query.value(0).toInt();
 
@@ -570,7 +573,7 @@ bool WidgetLogisticaEntrega::adicionarProdutoParcial(const int row) {
 
   bool ok;
 
-  // TODO: put this outside transaction
+  // TODO: 0put this outside transaction
   const int quantAgendar = QInputDialog::getInt(this, "Agendar", "Quantidade de caixas: ", quantTotal, 0, quantTotal, 1, &ok);
 
   if (quantAgendar == 0 or not ok) return false;
@@ -671,7 +674,10 @@ bool WidgetLogisticaEntrega::quebrarProduto(const int row, const int quantAgenda
 
   const QVariant lastId = RegisterDialog::getLastInsertId();
 
-  modelViewProdutos.select();
+  if (not modelViewProdutos.select()) {
+    error = "Erro lendo tabela: " + modelViewProdutos.lastError().text();
+    return false;
+  }
 
   // refactor below into another function
 
@@ -736,7 +742,7 @@ bool WidgetLogisticaEntrega::quebrarProduto(const int row, const int quantAgenda
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?
-// TODO: adicionar botao para cancelar agendamento (verificar com Anderson)
+// TODO: 5adicionar botao para cancelar agendamento (verificar com Anderson)
 
 void WidgetLogisticaEntrega::on_pushButtonReagendarPedido_clicked() {
   // get idVenda from view_entrega_pendente/modelVendas and set 'novoPrazo'
@@ -813,4 +819,4 @@ void WidgetLogisticaEntrega::on_tableVendas_doubleClicked(const QModelIndex &ind
   }
 }
 
-// TODO: refazer filtros do estoque (casos 'devolvido', 'cancelado', 'em entrega')
+// TODO: 5refazer filtros do estoque (casos 'devolvido', 'cancelado', 'em entrega')

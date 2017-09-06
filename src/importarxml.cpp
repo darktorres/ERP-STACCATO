@@ -504,7 +504,7 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
 bool ImportarXML::verificaCNPJ(const XML &xml) {
   QSqlQuery queryLoja;
 
-  // TODO: make this not hardcoded but still it shouldnt need the user to set a UserSession flag
+  // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
   if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) {
     QMessageBox::critical(nullptr, "Erro!", "Erro na query CNPJ: " + queryLoja.lastError().text());
     return false;
@@ -784,7 +784,7 @@ bool ImportarXML::criarConsumo2(const int rowCompra, const int rowEstoque, const
 
   const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
 
-  const double caixas = qRound(quant / unCaixa * 100) / 100;
+  const double caixas = qRound(quant / unCaixa * 100) / 100.;
 
   const double proporcao = quant / modelEstoque.data(rowEstoque, "quant").toDouble();
 
@@ -880,7 +880,7 @@ bool ImportarXML::criarConsumo() {
 
       const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
 
-      const double caixas = qRound(quant / unCaixa * 100) / 100;
+      const double caixas = qRound(quant / unCaixa * 100) / 100.;
 
       const double proporcao = quant / modelEstoque.data(rowEstoque, "quant").toDouble();
 
@@ -920,7 +920,7 @@ bool ImportarXML::criarConsumo() {
 
 void ImportarXML::on_pushButtonCancelar_clicked() { close(); }
 
-void ImportarXML::WrapParear() { // TODO: terminar de refatorar e homologar
+void ImportarXML::WrapParear() { // TODO: 0terminar de refatorar e homologar
   disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 
   parear();
@@ -965,7 +965,7 @@ bool ImportarXML::parear() {
 
     const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
 
-    const double caixas = qRound(quant / quantCaixa * 100) / 100;
+    const double caixas = qRound(quant / quantCaixa * 100) / 100.;
 
     //    if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(listCompra.first().row(),
     //    "idProduto"))) {
@@ -978,7 +978,7 @@ bool ImportarXML::parear() {
     double estoqueConsumido = 0;
 
     //------------------------ procurar quantidades iguais
-    for (auto const &item : listCompra) { // TODO: trocar essa logica por fazer uma busca interna dentro do associarItens()
+    for (auto const &item : listCompra) { // TODO: 5trocar essa logica por fazer uma busca interna dentro do associarItens()
       const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
       //      const double quantCompra = modelCompra.data(item.row(), "quant").toDouble();
       const double quantCompra = modelCompra.data(item, "quant").toDouble();
@@ -1012,8 +1012,9 @@ void ImportarXML::on_tableCompra_entered(const QModelIndex &) { ui->tableCompra-
 
 void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsumo->resizeColumnsToContents(); }
 
-// NOTE: utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque (para cada linha do model inserir
+// NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque (para cada linha do model inserir
 // items na arvore?)
-// TODO: quando as unidades vierem diferente pedir para usuario converter
-// TODO: substituir 'quantConsumida' por separacao de linha na associacao de nota/compra
-// TODO: avisar se R$ da nota for diferente do R$ da compra
+// TODO: 5quando as unidades vierem diferente pedir para usuario converter
+// TODO: 5substituir 'quantConsumida' por separacao de linha na associacao de nota/compra
+// TODO: 5avisar se R$ da nota for diferente do R$ da compra
+// TODO: 5bloquear a importacao de documentos que nao sejam NFe

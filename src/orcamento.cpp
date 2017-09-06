@@ -1085,7 +1085,6 @@ void Orcamento::on_doubleSpinBoxSubTotalBruto_valueChanged(const double) {
 void Orcamento::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Orçamento cadastrado com sucesso!"); }
 
 void Orcamento::on_comboBoxLoja_currentTextChanged(const QString &) {
-  qDebug() << "a";
   ui->itemBoxVendedorIndicou->clear();
   ui->itemBoxVendedorIndicou->getSearchDialog()->setFilter("idLoja = " + ui->comboBoxLoja->getCurrentValue().toString() + " AND tipo = 'VENDEDOR'");
 }
@@ -1094,9 +1093,7 @@ void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(Q
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque
 // submitAll chama select)
-// NOTE: se produto for estoque permitir vender por peça
+// NOTE: 0se produto for estoque permitir vender por peça
 // TODO: 2orcamento de reposicao nao pode ter profissional associado (bloquear)
-// TODO: 'ax06' nao esta mudando caixa (verificar se o minimo de 3 é caixas ou pecas [numa caixa vem 10 pecas, porque
-// minimo 3?])
-// TODO: quando cadastrar cliente no itemBox mudar para o id dele
-// TODO: permitir que o usuario digite um valor e o sistema faça o calculo na linha?
+// TODO: 4quando cadastrar cliente no itemBox mudar para o id dele
+// TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?

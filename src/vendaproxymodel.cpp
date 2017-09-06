@@ -15,11 +15,7 @@ QVariant VendaProxyModel::data(const QModelIndex &proxyIndex, const int role) co
       const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->status), Qt::DisplayRole).toString();
 
       if (dias >= 5 or status == "ENTREGUE") return QBrush(Qt::green);
-
-      if (dias >= 3 or status == "CANCELADO" or status == "DEVOLVIDO" or status == "PROCESSADO") {
-        return QBrush(Qt::yellow);
-      }
-
+      if (dias >= 3 or status == "CANCELADO" or status == "DEVOLVIDO" or status == "PROCESSADO") return QBrush(Qt::yellow);
       if (dias < 3) return QBrush(Qt::red);
     }
 
@@ -48,9 +44,7 @@ QVariant VendaProxyModel::data(const QModelIndex &proxyIndex, const int role) co
   if (role == Qt::ForegroundRole) {
     const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->status), Qt::DisplayRole).toString();
 
-    if (status == "ENTREGUE" or status == "DEVOLVIDO" or status == "PROCESSADO" or status == "CANCELADO" or proxyIndex.column() == this->dias) {
-      return QBrush(Qt::black);
-    }
+    if (status == "ENTREGUE" or status == "DEVOLVIDO" or status == "PROCESSADO" or status == "CANCELADO" or proxyIndex.column() == this->dias) return QBrush(Qt::black);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

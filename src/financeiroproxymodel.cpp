@@ -23,14 +23,14 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
     if (proxyIndex.column() == this->prazoEntrega) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->prazoEntrega), Qt::DisplayRole).toDate();
 
-      // TODO: se estiver a 5 dias pintar de amarelo
+      // TODO: 0se estiver a 5 dias pintar de amarelo
       if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::red);
     }
 
     if (proxyIndex.column() == this->novoPrazoEntrega) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->novoPrazoEntrega), Qt::DisplayRole).toDate();
 
-      // TODO: se estiver a 5 dias pintar de amarelo
+      // TODO: 0se estiver a 5 dias pintar de amarelo
       if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::red);
     }
   }

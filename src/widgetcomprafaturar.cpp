@@ -96,7 +96,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const QDateTime dataReal = inputDlg.getDate();
 
-  // TODO: quando a sigla CAMB pular
+  // TODO: 0quando a sigla CAMB pular
 
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER" ? true : false;
 
@@ -139,7 +139,7 @@ void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
 }
 
 bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
-  // TODO: nas outras telas com cancelamento verificar se estou filtrando
+  // TODO: 0nas outras telas com cancelamento verificar se estou filtrando
 
   for (auto const &item : list) {
     QSqlQuery query;
@@ -170,7 +170,7 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
       }
     }
 
-    // TODO: verificar como tratar isso
+    // TODO: 5verificar como tratar isso
     //    query.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO' WHERE idCompra = :idCompra");
     //    query.bindValue(":idCompra", model.data(item.row(), "idCompra"));
 
@@ -253,7 +253,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   QMessageBox::information(this, "Aviso!", "Operação realizada com sucesso!");
 }
 
-// TODO: quando importar nota vincular com as contas_pagar
-// TODO: reimportar nota id 4936 que veio com o produto dividido para testar o quantConsumido
-// TODO: reestruturar na medida do possivel de forma que cada estoque tenha apenas uma nota/compra
-// TODO: colocar tela de busca
+// TODO: 4quando importar nota vincular com as contas_pagar
+// TODO: 5reimportar nota id 4936 que veio com o produto dividido para testar o quantConsumido
+// TODO: 5reestruturar na medida do possivel de forma que cada estoque tenha apenas uma nota/compra
+// TODO: 0colocar tela de busca

@@ -35,7 +35,6 @@ private slots:
   void on_actionProdutos_triggered();
   void on_actionPromocao_triggered();
   void on_actionSobre_triggered();
-  void on_pushButton_clicked();
   void on_tabWidget_currentChanged(const int);
   void showStatusBarMessage();
 

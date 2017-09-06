@@ -105,9 +105,9 @@ void CadastrarNFe::setupTables() {
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
-  // TODO: ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
+  // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
 
-  // TODO: refatorar funcao
+  // TODO: 1refatorar funcao
 
   // se acbr enviar nota para receita mas nao receber a autor., consultar nota para atualizar com a autor.
   // 1. enviar comando para acbr criar/assinar/enviar xml
@@ -115,7 +115,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // 3. se acbr perder a conexao/nao responder guardar o xml nao autorizado (ele ficara na pasta do acbr)
   // TODO: 4. criar um botao para consultar notas pendentes (o acbr atualiza o xml com a autorizacao)
 
-  //  modelLoja.setData(0, "cnpj", "99999090910270"); // TODO: test only, remove later
+  //  modelLoja.setData(0, "cnpj", "99999090910270"); // TODO: 5test only, remove later
 
   if (not validar()) return;
 
@@ -294,9 +294,9 @@ bool CadastrarNFe::cadastrar(const QVariant &id) {
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNfeSaida = :idNfeSaida WHERE "
-                  "idVendaProduto = :idVendaProduto");
-    query.bindValue(":idNfeSaida", id);
+    // TODO: 0isso precisa ser feito antes para que possa ser feita a consulta, guardar pelo menos o idNFe
+    query.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+    query.bindValue(":idNFeSaida", id);
     query.bindValue(":idVendaProduto", modelProd.data(row, "idVendaProduto"));
 
     if (not query.exec()) {
@@ -304,10 +304,9 @@ bool CadastrarNFe::cadastrar(const QVariant &id) {
       return false;
     }
 
-    query.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNfeSaida = :idNfeSaida WHERE idVendaProduto "
-                  "= :idVendaProduto");
+    query.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":idVendaProduto", modelProd.data(row, "idVendaProduto"));
-    query.bindValue(":idNfeSaida", id);
+    query.bindValue(":idNFeSaida", id);
 
     if (not query.exec()) {
       error = "Erro atualizando carga veiculo: " + query.lastError().text();
@@ -1350,7 +1349,7 @@ bool CadastrarNFe::validar() {
 
   // validacao do model
 
-  // TODO: recalcular todos os valores dos itens para verificar se os dados batem (usar o 174058 de referencia)
+  // TODO: 5recalcular todos os valores dos itens para verificar se os dados batem (usar o 174058 de referencia)
 
   //
 
@@ -1650,12 +1649,12 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
   ui->lineEditEmitenteUF->setText(queryEmitenteEndereco.value("uf").toString());
   ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
 
-  // TODO: pedir para trocar cartao e rodar teste no acbr para verificar se esta tudo ok e funcionando
+  // TODO: 0pedir para trocar cartao e rodar teste no acbr para verificar se esta tudo ok e funcionando
 }
 
-// TODO: colocar NCM para poder ser alterado na caixinha em baixo
+// TODO: 5colocar NCM para poder ser alterado na caixinha em baixo
 // TODO: 2gerar protocolo entrega
 // TODO: 3criar logo para nota
-// TODO: verificar com Anderson rateamento de frete
-// TODO: bloquear edicao direto na tabela
+// TODO: 5verificar com Anderson rateamento de frete
+// TODO: 5bloquear edicao direto na tabela
 // usar dois campos de texto, um read-only com as informacoes geradas pelo sistema

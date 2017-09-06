@@ -857,9 +857,8 @@ void Format::setLocked(bool locked) { setProperty(FormatPrivate::P_Protection_Lo
 bool Format::hasProtectionData() const {
   if (not d) return false;
 
-  if (hasProperty(FormatPrivate::P_Protection_Hidden or FormatPrivate::P_Protection_Locked)) {
-    return true;
-  }
+  if (hasProperty(FormatPrivate::P_Protection_Hidden) or hasProperty(FormatPrivate::P_Protection_Locked)) return true;
+
   return false;
 }
 

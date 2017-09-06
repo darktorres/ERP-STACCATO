@@ -17,7 +17,10 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   setupTables();
 
   QSqlQuery query;
-  query.exec("SELECT DISTINCT(SUBSTRING(tipo FROM 4)) AS tipo FROM view_conta_receber");
+
+  if (not query.exec("SELECT DISTINCT(SUBSTRING(tipo FROM 4)) AS tipo FROM view_conta_receber")) {
+    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + query.lastError().text());
+  }
 
   ui->comboBox->addItem("");
 
@@ -137,8 +140,8 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
   isBlockedPresente = true;
   const double valor = descTotal / prazoMedio * 30 * 100;
   ui->doubleSpinBoxDescMes->setValue(valor != valor ? 0 : valor); // if nan set zero
-  //qDebug() << "comparison: " << (valor != valor);
-  //qDebug() << "isnan: " << qIsNaN(valor);
+  // qDebug() << "comparison: " << (valor != valor);
+  // qDebug() << "isnan: " << qIsNaN(valor);
   isBlockedPresente = false;
 }
 

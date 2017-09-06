@@ -77,8 +77,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
 bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {
   QSqlQuery query;
-  // TODO: change selecionado to 'TRUE'?
-  query.prepare("SELECT idPedido, idVendaProduto FROM pedido_fornecedor_has_produto WHERE idCompra = :idCompra AND selecionado = 1");
+  query.prepare("SELECT idPedido, idVendaProduto FROM pedido_fornecedor_has_produto WHERE idCompra = :idCompra AND selecionado = TRUE");
   query.bindValue(":idCompra", idCompra);
 
   if (not query.exec()) {
@@ -88,9 +87,8 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 
   while (query.next()) {
     QSqlQuery queryUpdate;
-    // TODO: change selecionado = 'FALSE'
     queryUpdate.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, "
-                        "dataPrevFat = :dataPrevFat, selecionado = 0 WHERE idPedido = :idPedido");
+                        "dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE idPedido = :idPedido");
     queryUpdate.bindValue(":dataRealConf", dataConf);
     queryUpdate.bindValue(":dataPrevFat", dataPrevista);
     queryUpdate.bindValue(":idPedido", query.value("idPedido"));
@@ -158,7 +156,7 @@ bool WidgetCompraConfirmar::cancelar(const QModelIndexList &list) {
 }
 
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
-  // TODO: cancelar itens individuais no lugar da compra toda?
+  // TODO: 5cancelar itens individuais no lugar da compra toda?
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
@@ -188,9 +186,13 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 }
 
 // NOTE: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)
-// NOTE: 1permitir na tela de compras alterar uma venda para quebrar um produto em dois para os casos de lotes
-// diferentes: 50 -> 40+10
-// TODO: colocar data para frete/st e se elas são inclusas nas parcelas ou separadas
-// TODO: mesmo bug do gerarcompra/produtospendentes em que o prcUnitario é multiplicado pela quantidade total e nao a da
-// linha
-// TODO: cancelar nesta tela nao altera status para pendente
+// NOTE: 1permitir na tela de compras alterar uma venda para quebrar um produto em dois para os casos de lotes diferentes: 50 -> 40+10
+// TODO: 0colocar data para frete/st e se elas são inclusas nas parcelas ou separadas
+// TODO: 0mesmo bug do gerarcompra/produtospendentes em que o prcUnitario é multiplicado pela quantidade total e nao a da linha
+// TODO: 0cancelar nesta tela nao altera status para pendente
+
+void WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled(bool checked) {
+  model.setFilter(checked ? "(Venda LIKE '%CAMB%')" : "(Venda NOT LIKE '%CAMB%' OR Venda IS NULL)");
+
+  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+}

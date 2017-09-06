@@ -24,7 +24,7 @@ private slots:
 
 private:
   // attributes
-  // TODO: refactor those out
+  // TODO: 0refactor those out
   bool isBlockedPresente = false;
   bool isBlockedMes = false;
   SqlTableModel model;

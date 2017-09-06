@@ -90,6 +90,8 @@ bool WidgetCompraPendentes::updateTables() {
 }
 
 void WidgetCompraPendentes::setupTables() {
+  // TODO: 5verificar setupTables com select
+
   model.setTable("view_venda_produto");
 
   if (not model.select()) {
@@ -155,9 +157,7 @@ void WidgetCompraPendentes::montaFiltro() {
   QString filtroCheck;
 
   for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) {
-      filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'";
-    }
+    if (child->isChecked()) filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'";
   }
 
   filtroCheck = filtroCheck.isEmpty() ? "" : "(" + filtroCheck + ")";
@@ -174,9 +174,7 @@ void WidgetCompraPendentes::montaFiltro() {
 
   model.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0" + textoSul);
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro na busca: " + model.lastError().text());
-  }
+  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro na busca: " + model.lastError().text());
 
   ui->table->resizeColumnsToContents();
 }

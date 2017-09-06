@@ -55,7 +55,7 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
-  // TODO: colocar lineEditDelegate para subgrupo
+  // TODO: 5colocar lineEditDelegate para subgrupo
   ui->table->hideColumn("nfe");
   ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");
@@ -74,6 +74,7 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("idVenda");
   ui->table->hideColumn("created");
   ui->table->hideColumn("lastUpdated");
+  ui->table->hideColumn("desativado");
 }
 
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {

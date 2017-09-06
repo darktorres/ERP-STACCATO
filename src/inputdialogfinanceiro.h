@@ -44,7 +44,7 @@ private slots:
 private:
   // attributes
   bool representacao;
-  // TODO: refactor those out
+  // TODO: 0refactor those out
   bool isBlockedStDate = false;
   bool isBlockedFluxoCaixa = false;
   const Type type;

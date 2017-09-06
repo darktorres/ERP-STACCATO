@@ -130,7 +130,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   const double subLiq = query.value("subTotalLiq").toDouble();
   const double subBru = query.value("subTotalBru").toDouble();
   const double desconto = query.value("descontoPorc").toDouble();
-  // TODO: no lugar de calcular valores, usar os do BD
+  // TODO: 0no lugar de calcular valores, usar os do BD
   xlsx.write("N113", subLiq > subBru ? "R$ " + locale.toString(subLiq, 'f', 2) : "R$ " + locale.toString(subBru, 'f', 2) + " (R$ " + locale.toString(subLiq, 'f', 2) + ")"); // soma
   xlsx.write("N114", locale.toString(desconto, 'f', 2) + "%");                                                                                                               // desconto
   xlsx.write("N115", "R$ " + locale.toString(subLiq - (desconto / 100. * subLiq), 'f', 2));                                                                                  // total
@@ -215,7 +215,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   xlsx.write("B119", query.value("observacao").toString().replace("\n", " "));
 
-  // TODO: refator this to start at 12
+  // TODO: 5refator this to start at 12
   int row = 0;
   queryProduto.first();
 

@@ -33,7 +33,7 @@ bool WidgetFinanceiro::updateTables() {
   return true;
 }
 
-// TODO: a cada dia colocar em 'maintenance' um job para enviar o relatorio das financas de 3 dias antes
+// TODO: 0a cada dia colocar em 'maintenance' um job para enviar o relatorio das financas de 3 dias antes
 
 // select cp.dataEmissao, cp.dataRealizado, cp.valorReal, concat(lhc.banco, ' - ', lhc.agencia, ' - ', lhc.conta) AS
 // 'Conta', cp.observacao, cp.contraParte, cp.grupo, cp.subGrupo
@@ -49,4 +49,4 @@ bool WidgetFinanceiro::updateTables() {
 // left join loja_has_conta lhc on cr.contaDestino = lhc.idConta
 // where cr.valorReal is not null
 // order by cr.dataRealizado;
-// TODO: poder deixar 'agencia' e 'conta' como nulo nos casos em que nao existem
+// TODO: 0poder deixar 'agencia' e 'conta' como nulo nos casos em que nao existem

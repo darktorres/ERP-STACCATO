@@ -31,9 +31,7 @@ ProdutosPendentes::~ProdutosPendentes() { delete ui; }
 void ProdutosPendentes::recalcularQuantidade() {
   double quant = 0;
 
-  for (auto const &item : ui->tableProdutos->selectionModel()->selectedRows()) {
-    quant += modelViewProdutos.data(item.row(), "quant").toDouble();
-  }
+  for (auto const &item : ui->tableProdutos->selectionModel()->selectedRows()) quant += modelViewProdutos.data(item.row(), "quant").toDouble();
 
   ui->doubleSpinBoxComprar->setValue(quant);
 }
@@ -261,7 +259,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturado ainda (provavelmente vou restaurar o
   // processo antigo e sincronizar as tabelas)
 
-  const double consumir = qMin(quantEstoque, quantConsumir); // TODO: maybe dont need min, quantConsumir is already limited to quantEstoque
+  const double consumir = qMin(quantEstoque, quantConsumir); // TODO: 0maybe dont need min, quantConsumir is already limited to quantEstoque
 
   auto *estoque = new Estoque(this);
   if (not estoque->viewRegisterById(modelEstoque.data(rowEstoque, "idEstoque").toString(), false)) return false;
@@ -404,7 +402,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
 }
 
 bool ProdutosPendentes::atualizarVendaCompra(const int row, const QDate &dataPrevista) {
-  // TODO: fix this so it is made later, somehow make this submitAll go after the for(...)
+  // TODO: 5fix this so it is made later, somehow make this submitAll go after the for(...)
 
   if (ui->doubleSpinBoxComprar->value() < modelViewProdutos.data(row, "quant").toDouble()) {
     if (not quebrarVenda(row, dataPrevista)) return false;

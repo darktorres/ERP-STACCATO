@@ -56,7 +56,7 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent
 
 InputDialogConfirmacao::~InputDialogConfirmacao() { delete ui; }
 
-// TODO: should be QDate?
+// TODO: 5should be QDate?
 QDateTime InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->dateTime(); }
 
 QDateTime InputDialogConfirmacao::getNextDate() const { return ui->dateEditProximo->dateTime(); }
@@ -210,7 +210,7 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("idEstoque");
     ui->tableLogistica->hideColumn("idVendaProduto");
     ui->tableLogistica->hideColumn("idCompra");
-    ui->tableLogistica->hideColumn("idNfeSaida");
+    ui->tableLogistica->hideColumn("idNFeSaida");
     ui->tableLogistica->hideColumn("idLoja");
     ui->tableLogistica->hideColumn("idProduto");
   }
@@ -294,7 +294,7 @@ bool InputDialogConfirmacao::processarQuebra(const int row) {
 }
 
 bool InputDialogConfirmacao::quebraRecebimento(const int row) {
-  // TODO: finish this part
+  // TODO: 0finish this part
 
   // model is estoque
   // perguntar quant. quebrada - QInputDialog
@@ -322,7 +322,7 @@ bool InputDialogConfirmacao::quebraRecebimento(const int row) {
 
   QInputDialog input;
   bool ok = false;
-  // TODO: put this outside transaction
+  // TODO: 0put this outside transaction
   caixasDefeito = input.getInt(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 
   if (not ok or caixasDefeito == 0) return false;
@@ -366,7 +366,7 @@ bool InputDialogConfirmacao::quebraEntrega(const int row) {
 
   QInputDialog input;
   bool ok = false;
-  // TODO: put this outside transaction
+  // TODO: 0put this outside transaction
   caixasDefeito = input.getInt(this, produto, "Caixas quebradas: ", 0, 0, caixas, 1, &ok); // *
 
   if (not ok or caixasDefeito == 0) return false;
@@ -387,13 +387,13 @@ bool InputDialogConfirmacao::quebraEntrega(const int row) {
     if (model.fieldIndex("created") == col) continue;
     if (model.fieldIndex("lastUpdated") == col) continue;
 
-    model.setData(rowQuebrado, col, model.data(row, col));
+    if (not model.setData(rowQuebrado, col, model.data(row, col))) return false;
   }
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  model.setData(rowQuebrado, "caixas", caixasDefeito);
-  model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa);
-  model.setData(rowQuebrado, "status", "QUEBRADO");
+  if (not model.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
+  if (not model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
+  if (not model.setData(rowQuebrado, "status", "QUEBRADO")) return false;
 
   // perguntar se gerar credito ou reposicao
 
@@ -418,8 +418,7 @@ bool InputDialogConfirmacao::quebraEntrega(const int row) {
   }
   //
 
-  if (choice == QMessageBox::Yes) criarReposicaoCliente();
-  if (choice == QMessageBox::No) gerarCreditoCliente();
+  choice == QMessageBox::Yes ? criarReposicaoCliente() : gerarCreditoCliente();
 
   return true;
 }
@@ -467,7 +466,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente() {
     if (modelVenda.fieldIndex("idVendaProduto") == col) continue;
     if (modelVenda.fieldIndex("entregou") == col) continue;
     if (modelVenda.fieldIndex("idCompra") == col) continue;
-    if (modelVenda.fieldIndex("idNfeSaida") == col) continue;
+    if (modelVenda.fieldIndex("idNFeSaida") == col) continue;
     if (modelVenda.fieldIndex("dataPrevCompra") == col) continue;
     if (modelVenda.fieldIndex("dataRealCompra") == col) continue;
     if (modelVenda.fieldIndex("dataPrevConf") == col) continue;
@@ -501,6 +500,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente() {
 }
 
 bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
+  // TODO: 5ao marcar caixas quebradas e só houver uma nao dividir em duas linhas (para nao ficar linha zerado)
   // diminuir quant. da linha selecionada
 
   if (not model.setData(row, "caixas", caixas - caixasDefeito)) return false;
@@ -604,6 +604,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
       const int caixas = query.value("caixas").toInt();
 
       QSqlQuery query2;
+      // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
       query2.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
       query2.bindValue(":idConsumo", query.value("idConsumo"));
 
@@ -624,24 +625,6 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
       if (sobra >= 0) break;
     }
   }
-
-  // TODO: verificar como lidar com reposicao nesse caso
-  //  if (sobra > 0) {
-  //    // criar orcamento reposicao
-  //    // colocar qual o estoque na observacao do produto
-
-  //    QMessageBox msgBox(QMessageBox::Question, "Atenção!",
-  //                       "Restaram " + QString::number(sobra) +
-  //                           " caixas quebradas que não foram vendidas. Deseja fazer um pedido de reposição?",
-  //                       QMessageBox::Yes | QMessageBox::No, this);
-  //    msgBox.setButtonText(QMessageBox::Yes, "Sim");
-  //    msgBox.setButtonText(QMessageBox::No, "Não");
-
-  //    if (msgBox.exec() == QMessageBox::Yes) {
-  //      Orcamento *orcamento = new Orcamento(this);
-  //      orcamento->exec();
-  //    }
-  //  }
 
   return true;
 }

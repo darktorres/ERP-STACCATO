@@ -394,9 +394,9 @@ void Contas::on_tablePendentes_entered(const QModelIndex &) { ui->tablePendentes
 
 void Contas::on_tableProcessados_entered(const QModelIndex &) { ui->tableProcessados->resizeColumnsToContents(); }
 
-// TODO: adicionar coluna 'boleto' para dizer onde foi pago
-// TODO: fazer somatoria dos valores
-// TODO: mostrar nfe que é mostrada na tela do widgetpagamentos
-// TODO: verificar centroCusto que usa dois campos (idLoja/centroCusto)
-// TODO: a funcao de marcar 'conferido' nao deixa voltar para pendente
-// TODO: funcao de marcar 'conferido' marca na linha de baixo
+// TODO: 5adicionar coluna 'boleto' para dizer onde foi pago
+// TODO: 5fazer somatoria dos valores
+// TODO: 5mostrar nfe que é mostrada na tela do widgetpagamentos
+// TODO: 5verificar centroCusto que usa dois campos (idLoja/centroCusto)
+// TODO: 5a funcao de marcar 'conferido' nao deixa voltar para pendente
+// TODO: 5funcao de marcar 'conferido' marca na linha de baixo

@@ -84,7 +84,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   timer = new QTimer(this);
 
-  ui->pushButton->hide();
 
   gerarEnviarRelatorio();
 }
@@ -92,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::gerarEnviarRelatorio() {
-  // TODO: finish
+  // TODO: 0finish
   // verificar em que etapa eu guardo a linha do dia seguinte no BD
 
   QSqlQuery query;
@@ -353,105 +352,10 @@ void MainWindow::on_actionPromocao_triggered() {
   importa->importarPromocao();
 }
 
-void MainWindow::on_pushButton_clicked() {
-  // TODO: funcao usada para gerar nota de transferencia, guardar codigo em arquivo e apagar funcao
-  const QString filePath = QFileDialog::getOpenFileName(this, "Transferencia", QDir::currentPath(), "Excel (*.xlsx)");
-
-  if (filePath.isEmpty()) {
-    return;
-  }
-
-  QFile file(filePath);
-
-  if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo arquivo: " + file.errorString());
-    return;
-  }
-
-  file.close();
-
-  QXlsx::Document xlsx(filePath);
-
-  if (not xlsx.selectSheet("TRANSFERIR")) {
-    QMessageBox::critical(this, "Erro!", "Erro selecionando planilha 'TRANSFERIR'");
-    return;
-  }
-
-  // A - ncm
-  // B - codigo
-  // C - descricao
-  // D - un
-  // E - quant
-  // F - valorUnid
-  // G - valor
-
-  QFile txt("test.txt");
-
-  if (not txt.open(QFile::WriteOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo arquivo: " + txt.errorString());
-    return;
-  }
-
-  QTextStream stream(&txt);
-
-  for (int row = 1; row < 90; ++row) {
-    const QString numProd = QString("%1").arg(row, 3, 10, QChar('0')); // padding with zeros
-    stream << "[Produto" + numProd + "]" << endl;
-
-    stream << "CFOP = 5409" << endl;
-    stream << "CEST = 1003001" << endl;
-    stream << "NCM = " << xlsx.read("A" + QString::number(row)).toString() << endl;
-    stream << "Codigo = " << xlsx.read("B" + QString::number(row)).toString() << endl;
-    stream << "Descricao = " << xlsx.read("C" + QString::number(row)).toString() << endl;
-    stream << "Unidade = " << xlsx.read("D" + QString::number(row)).toString() << endl;
-    stream << "Quantidade = " << xlsx.read("E" + QString::number(row)).toString() << endl;
-    stream << "ValorUnitario = " << xlsx.read("F" + QString::number(row)).toString() << endl;
-    stream << "ValorTotal = " << xlsx.read("G" + QString::number(row)).toString() << endl;
-    stream << "vFrete = 0" << endl;
-
-    stream << endl;
-
-    stream << "[ICMS" + numProd + "]" << endl;
-    stream << "CST = 60" << endl;
-    stream << "Modalidade = 0" << endl;
-    stream << "ValorBase = 0" << endl;
-    stream << "Aliquota = 0" << endl;
-    stream << "Valor = 0" << endl;
-
-    stream << endl;
-
-    stream << "[IPI" + numProd + "]" << endl;
-    stream << "ClasseEnquadramento = 0" << endl;
-    stream << "CST = 0" << endl;
-
-    stream << endl;
-
-    stream << "[PIS" + numProd + "]" << endl;
-    stream << "CST = 49" << endl;
-    stream << "ValorBase = 0" << endl;
-    stream << "Aliquota = 0" << endl;
-    stream << "Valor = 0" << endl;
-
-    stream << endl;
-
-    stream << "[COFINS" + numProd + "]" << endl;
-    stream << "CST = 49" << endl;
-    stream << "ValorBase = 0" << endl;
-    stream << "Aliquota = 0" << endl;
-    stream << "Valor = 0" << endl;
-
-    stream << endl;
-  }
-
-  stream.flush();
-
-  txt.close();
-}
-
-// TODO: montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
+// TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
 // NOTE: colocar logo da staccato na mainwindow
 
 // NOTE: prioridades atuais:
 // NOTE: -logistica da devolucao
-// NOTE: -email/nfe acbr
-// TODO: alguns elementos graficos estao incorretos com o tema escuro
+// TODO: 5alguns elementos graficos estao incorretos com o tema escuro
+// TODO: 0verificar com Conrado os itens da MADEBENE para anotar a quantidade correta de minimo/multiplo (por enquanto tem apenas minimo)

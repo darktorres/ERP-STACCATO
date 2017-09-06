@@ -506,5 +506,5 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
   }
 }
 
-// TODO: ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
-// TODO: nao deixar cadastrar endereco sem numero, se necessario colocar 'S/N'
+// TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
+// TODO: 0nao deixar cadastrar endereco sem numero, se necessario colocar 'S/N'

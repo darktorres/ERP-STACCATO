@@ -110,13 +110,10 @@ QString createSafeSheetName(const QString &nameProposal) {
   if (nameProposal.isEmpty()) return QString();
 
   QString ret = nameProposal;
-  if (nameProposal.length() > 2 and nameProposal.startsWith(QLatin1Char('\'')) and
-      nameProposal.endsWith(QLatin1Char('\'')))
-    ret = unescapeSheetName(ret);
+  if (nameProposal.length() > 2 and nameProposal.startsWith(QLatin1Char('\'')) and nameProposal.endsWith(QLatin1Char('\''))) ret = unescapeSheetName(ret);
 
   // Replace invalid chars with space.
-  if (nameProposal.contains(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]"))))
-    ret.replace(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")), QStringLiteral(" "));
+  if (nameProposal.contains(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")))) ret.replace(QRegularExpression(QStringLiteral("[/\\\\?*\\][:]")), QStringLiteral(" "));
   if (ret.startsWith(QLatin1Char('\''))) ret[0] = QLatin1Char(' ');
   if (ret.endsWith(QLatin1Char('\''))) ret[ret.size() - 1] = QLatin1Char(' ');
 
@@ -143,8 +140,7 @@ QString escapeSheetName(const QString &sheetName) {
 /*
 */
 QString unescapeSheetName(const QString &sheetName) {
-  Q_ASSERT(sheetName.length() > 2 and sheetName.startsWith(QLatin1Char('\'')) and
-           sheetName.endsWith(QLatin1Char('\'')));
+  Q_ASSERT(sheetName.length() > 2 and sheetName.startsWith(QLatin1Char('\'')) and sheetName.endsWith(QLatin1Char('\'')));
 
   QString name = sheetName.mid(1, sheetName.length() - 2);
   name.replace(QLatin1String(R"('')"), QLatin1String(R"(')"));
@@ -235,8 +231,8 @@ QString convertSharedFormula(const QString &rootFormula, const CellReference &ro
     // qDebug()<<p.first<<p.second;
     if (p.second != -1 and p.second != 3) {
       CellReference oldRef(p.first);
-      const int row = p.second & 0x02 ? oldRef.row() : oldRef.row() - rootCell.row() + cell.row();
-      const int col = p.second & 0x01 ? oldRef.column() : oldRef.column() - rootCell.column() + cell.column();
+      const int row = (p.second & 0x02) ? oldRef.row() : oldRef.row() - rootCell.row() + cell.row();
+      const int col = (p.second & 0x01) ? oldRef.column() : oldRef.column() - rootCell.column() + cell.column();
       result.append(CellReference(row, col).toString(p.second & 0x02, p.second & 0x01));
     } else {
       result.append(p.first);

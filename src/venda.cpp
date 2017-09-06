@@ -19,8 +19,6 @@
 #include "usersession.h"
 #include "venda.h"
 
-#define NAO_HA 1
-
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
@@ -190,28 +188,31 @@ void Venda::setupTables() {
     return;
   }
 
-  ui->tableVenda->setModel(&modelItem);
-  ui->tableVenda->hideColumn("recebeu");
-  ui->tableVenda->hideColumn("entregou");
-  ui->tableVenda->hideColumn("descUnitario");
-  ui->tableVenda->hideColumn("estoque_promocao");
-  ui->tableVenda->hideColumn("idCompra");
-  ui->tableVenda->hideColumn("idNfeSaida");
-  ui->tableVenda->hideColumn("idVendaProduto");
-  ui->tableVenda->hideColumn("selecionado");
-  ui->tableVenda->hideColumn("idVenda");
-  ui->tableVenda->hideColumn("idLoja");
-  ui->tableVenda->hideColumn("idProduto");
-  ui->tableVenda->hideColumn("comissao");
-  ui->tableVenda->setItemDelegate(new DoubleDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
-  ui->tableVenda->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this));
-  ui->tableVenda->setItemDelegateForColumn("total", new ReaisDelegate(this));
+  ui->tableProdutos->setModel(new SearchDialogProxy(&modelItem, this));
+  ui->tableProdutos->hideColumn("recebeu");
+  ui->tableProdutos->hideColumn("entregou");
+  ui->tableProdutos->hideColumn("descUnitario");
+  ui->tableProdutos->hideColumn("estoque");
+  ui->tableProdutos->hideColumn("promocao");
+  ui->tableProdutos->hideColumn("idCompra");
+  ui->tableProdutos->hideColumn("idNFeSaida");
+  ui->tableProdutos->hideColumn("idVendaProduto");
+  ui->tableProdutos->hideColumn("selecionado");
+  ui->tableProdutos->hideColumn("idVenda");
+  ui->tableProdutos->hideColumn("idLoja");
+  ui->tableProdutos->hideColumn("idProduto");
+  ui->tableProdutos->hideColumn("comissao");
+  ui->tableProdutos->hideColumn("reposicao");
+
+  ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
   modelFluxoCaixa.setTable("conta_a_receber_has_pagamento");
   modelFluxoCaixa.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -376,6 +377,8 @@ void Venda::resetarPagamentos() {
 }
 
 void Venda::prepararVenda(const QString &idOrcamento) {
+  // TODO: verificar se as quantidades de produto_estoque ainda estão disponiveis
+
   this->idOrcamento = idOrcamento;
   isUpdate = true;
 
@@ -436,7 +439,10 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     for (int column = 0, columnCount = queryProdutos.record().count(); column < columnCount; ++column) {
       const QString field = queryProdutos.record().fieldName(column);
 
+      if (field == "created") continue;
+      if (field == "lastUpdated") continue;
       if (modelItem.fieldIndex(field) == -1) continue;
+
       if (not modelItem.setData(rowItem, field, queryProdutos.value(field))) return;
     }
 
@@ -477,7 +483,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->itemBoxProfissional->setValue(queryOrc.value("idProfissional"));
   ui->itemBoxEndereco->setValue(queryOrc.value("idEnderecoEntrega"));
 
-  ui->tableVenda->resizeColumnsToContents();
+  ui->tableProdutos->resizeColumnsToContents();
 
   QSqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
@@ -1088,7 +1094,7 @@ bool Venda::viewRegister() {
     ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
   }
 
-  ui->tableVenda->resizeColumnsToContents();
+  ui->tableProdutos->resizeColumnsToContents();
   ui->tableFluxoCaixa->resizeColumnsToContents();
   ui->tableFluxoCaixa2->resizeColumnsToContents();
 
@@ -1148,12 +1154,19 @@ void Venda::on_pushButtonVoltar_clicked() {
 }
 
 void Venda::montarFluxoCaixa() {
-  // TODO: nao calcular comissao para profissional 'NAO HA'
+  // TODO: 0nao calcular comissao para profissional 'NAO HA'
 
   if (ui->framePagamentos_2->isHidden()) return;
 
-  modelFluxoCaixa.select();
-  modelFluxoCaixa2.select();
+  if (not modelFluxoCaixa.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + modelFluxoCaixa.lastError().text());
+    return;
+  }
+
+  if (not modelFluxoCaixa2.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + modelFluxoCaixa2.lastError().text());
+    return;
+  }
 
   if (financeiro) {
     for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
@@ -1446,7 +1459,7 @@ bool Venda::cadastrar() {
     query.bindValue(":tipo", "1. Dinheiro");
     query.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
     // 01-15 paga dia 30, 16-30 paga prox dia 15
-    query.bindValue(":grupo", "RT´s");
+    query.bindValue(":grupo", "RT's");
 
     if (not query.exec()) {
       error = "Erro cadastrando pontuação: " + query.lastError().text();
@@ -1580,7 +1593,7 @@ bool Venda::cancelamento() {
     }
   }
 
-  // TODO: nao deixar cancelar se tiver ocorrido algum evento de conta
+  // TODO: 0nao deixar cancelar se tiver ocorrido algum evento de conta
 
   query.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1831,7 +1844,7 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
     //    ui->doubleSpinBoxPontuacao->setEnabled(true);
   }
 
-  // TODO: criar linha em contas_pagar de comissao/rt
+  // TODO: 5criar linha em contas_pagar de comissao/rt
 }
 
 void Venda::on_checkBoxPontuacaoIsento_toggled(bool checked) {
@@ -1853,14 +1866,14 @@ void Venda::on_checkBoxRT_toggled(bool checked) {
 
 void Venda::on_itemBoxProfissional_textChanged(const QString &) { on_checkBoxPontuacaoPadrao_toggled(ui->checkBoxPontuacaoPadrao->isChecked()); }
 
-// TODO: hide 'nfe' field from tables that use conta_a_receber
-// TODO: nao gerar RT quando o total for zero (e apagar os zerados quando nao houver profissional)
-// TODO: se o pedido estiver cancelado ou devolvido bloquear os botoes correspondentes
-// TODO: no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao
+// TODO: 0hide 'nfe' field from tables that use conta_a_receber
+// TODO: 0nao gerar RT quando o total for zero (e apagar os zerados quando nao houver profissional)
+// TODO: 0se o pedido estiver cancelado ou devolvido bloquear os botoes correspondentes
+// TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao
 // sao de representacao
-// TODO: verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado'
+// TODO: 5verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado'
 // ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
-// TODO: quando for 'MATR' nao criar fluxo caixa
+// TODO: 0quando for 'MATR' nao criar fluxo caixa
 // NOTE: prazoEntrega por produto
 // NOTE: bloquear desconto maximo por classe de funcionario
 // TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?

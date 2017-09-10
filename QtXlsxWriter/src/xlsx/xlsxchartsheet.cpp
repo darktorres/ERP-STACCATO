@@ -34,6 +34,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <ciso646>
+
 QT_BEGIN_NAMESPACE_XLSX
 
 ChartsheetPrivate::ChartsheetPrivate(Chartsheet *p, Chartsheet::CreateFlag flag) : AbstractSheetPrivate(p, flag), chart(nullptr) {}

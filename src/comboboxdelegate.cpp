@@ -6,6 +6,8 @@
 #include "comboboxdelegate.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
 QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {

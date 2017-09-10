@@ -16,6 +16,8 @@
 #include "widgetnfesaida.h"
 #include "xml_viewer.h"
 
+#include <ciso646>
+
 WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) {
   ui->setupUi(this);
 

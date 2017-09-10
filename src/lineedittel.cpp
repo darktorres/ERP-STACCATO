@@ -1,5 +1,7 @@
 #include "lineedittel.h"
 
+#include <ciso646>
+
 LineEditTel::LineEditTel(QWidget *parent) : QLineEdit(parent) {
   setPlaceholderText("(99)99999-9999");
   connect(this, &QLineEdit::textEdited, this, &LineEditTel::processTel);

@@ -1,5 +1,7 @@
 #include "singleeditdelegate.h"
 
+#include <ciso646>
+
 SingleEditDelegate::SingleEditDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 QWidget *SingleEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const { return QStyledItemDelegate::createEditor(parent, option, index); }

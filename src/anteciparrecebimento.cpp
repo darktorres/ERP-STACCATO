@@ -9,6 +9,8 @@
 #include "reaisdelegate.h"
 #include "ui_anteciparrecebimento.h"
 
+#include <ciso646>
+
 AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), ui(new Ui::AnteciparRecebimento) {
   ui->setupUi(this);
 
@@ -27,8 +29,8 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   while (query.next()) ui->comboBox->addItem(query.value("tipo").toString());
 
   ui->dateEditEvento->setDate(QDate::currentDate());
-
-  connect(ui->doubleSpinBoxDescMes, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
+	  
+  connect(ui->doubleSpinBoxDescMes, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
 }

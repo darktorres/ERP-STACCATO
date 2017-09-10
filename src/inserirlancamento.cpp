@@ -14,6 +14,8 @@
 #include "reaisdelegate.h"
 #include "ui_inserirlancamento.h"
 
+#include <ciso646>
+
 InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
   ui->setupUi(this);
 

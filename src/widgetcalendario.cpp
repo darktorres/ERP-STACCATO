@@ -7,6 +7,8 @@
 #include "ui_widgetcalendario.h"
 #include "widgetcalendario.h"
 
+#include <ciso646>
+
 WidgetCalendario::WidgetCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCalendario) { ui->setupUi(this); }
 
 WidgetCalendario::~WidgetCalendario() { delete ui; }

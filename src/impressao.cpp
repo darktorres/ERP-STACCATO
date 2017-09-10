@@ -10,6 +10,8 @@
 #include "impressao.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 Impressao::Impressao(const QString &id) : id(id) {
   verificaTipo();
 

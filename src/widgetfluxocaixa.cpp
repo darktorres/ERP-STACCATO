@@ -9,6 +9,8 @@
 #include "ui_widgetfluxocaixa.h"
 #include "widgetfluxocaixa.h"
 
+#include <ciso646>
+
 WidgetFluxoCaixa::WidgetFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFluxoCaixa) { ui->setupUi(this); }
 
 WidgetFluxoCaixa::~WidgetFluxoCaixa() { delete ui; }

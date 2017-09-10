@@ -10,6 +10,8 @@
 #include "singleeditdelegate.h"
 #include "ui_inputdialogproduto.h"
 
+#include <ciso646>
+
 InputDialogProduto::InputDialogProduto(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 

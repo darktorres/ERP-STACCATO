@@ -27,6 +27,8 @@
 #include "usersession.h"
 #include "xlsxdocument.h"
 
+#include <ciso646>
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 

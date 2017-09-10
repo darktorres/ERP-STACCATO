@@ -29,6 +29,8 @@
 #include <QTextDocument>
 #include <QTextFragment>
 
+#include <ciso646>
+
 QT_BEGIN_NAMESPACE_XLSX
 
 RichStringPrivate::RichStringPrivate() : _dirty(true) {}

@@ -11,6 +11,8 @@
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
 
+#include <ciso646>
+
 WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
 
 WidgetVenda::~WidgetVenda() { delete ui; }

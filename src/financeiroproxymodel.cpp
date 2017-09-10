@@ -4,6 +4,8 @@
 
 #include "financeiroproxymodel.h"
 
+#include <ciso646>
+
 FinanceiroProxyModel::FinanceiroProxyModel(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), statusFinanceiro(model->fieldIndex("statusFinanceiro")), prazoEntrega(model->fieldIndex("prazoEntrega")),
       novoPrazoEntrega(model->fieldIndex("novoPrazoEntrega")) {

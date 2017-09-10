@@ -26,6 +26,8 @@
 #define XLSXGLOBAL_H
 #include <QtGlobal>
 
+#include <ciso646>
+
 #define QT_BEGIN_NAMESPACE_XLSX namespace QXlsx {
 #define QT_END_NAMESPACE_XLSX }
 #define QTXLSX_USE_NAMESPACE using namespace QXlsx;

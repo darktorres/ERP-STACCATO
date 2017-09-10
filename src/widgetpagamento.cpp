@@ -14,6 +14,8 @@
 #include "ui_widgetpagamento.h"
 #include "widgetpagamento.h"
 
+#include <ciso646>
+
 WidgetPagamento::WidgetPagamento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamento) {
   ui->setupUi(this);
 
@@ -71,7 +73,7 @@ void WidgetPagamento::makeConnections() {
   connect(ui->radioButtonRecebido, &QRadioButton::toggled, this, &WidgetPagamento::montaFiltro);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetPagamento::montaFiltro);
   connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetPagamento::montaFiltro);
-  connect(ui->doubleSpinBoxAte, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamento::montaFiltro);
+  connect(ui->doubleSpinBoxAte, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamento::montaFiltro);
   connect(ui->itemBoxLojas, &ItemBox::textChanged, this, &WidgetPagamento::montaFiltro);
   connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetPagamento::montaFiltro);
   connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetPagamento::montaFiltro);

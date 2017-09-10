@@ -9,6 +9,8 @@
 
 #include "acbr.h"
 
+#include <ciso646>
+
 ACBr::ACBr(QObject *parent) : QObject(parent) {}
 
 bool ACBr::gerarDanfe(const int idNFe) {

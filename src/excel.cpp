@@ -10,6 +10,8 @@
 #include "usersession.h"
 #include "xlsxdocument.h"
 
+#include <ciso646>
+
 Excel::Excel(const QString &id, QWidget *parent) : id(id), parent(parent) { verificaTipo(); }
 
 void Excel::verificaTipo() {

@@ -8,6 +8,8 @@
 #include "ui_widgetcompraoc.h"
 #include "widgetcompraoc.h"
 
+#include <ciso646>
+
 WidgetCompraOC::WidgetCompraOC(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
 
 WidgetCompraOC::~WidgetCompraOC() { delete ui; }

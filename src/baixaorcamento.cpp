@@ -4,6 +4,8 @@
 #include "baixaorcamento.h"
 #include "ui_baixaorcamento.h"
 
+#include <ciso646>
+
 BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent)
     : QDialog(parent), ui(new Ui::BaixaOrcamento) {
   ui->setupUi(this);

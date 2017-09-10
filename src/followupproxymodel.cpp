@@ -3,6 +3,8 @@
 
 #include "followupproxymodel.h"
 
+#include <ciso646>
+
 FollowUpProxyModel::FollowUpProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforo(model->fieldIndex("semaforo")) { setSourceModel(model); }
 
 QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const {

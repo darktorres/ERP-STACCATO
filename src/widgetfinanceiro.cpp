@@ -3,6 +3,8 @@
 #include "ui_widgetfinanceiro.h"
 #include "widgetfinanceiro.h"
 
+#include <ciso646>
+
 WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiro) {
   ui->setupUi(this);
 

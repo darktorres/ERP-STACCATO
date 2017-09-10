@@ -8,6 +8,8 @@
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
 
+#include <ciso646>
+
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }

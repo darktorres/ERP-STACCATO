@@ -13,6 +13,7 @@
 #include "widgetcomprafaturar.h"
 
 WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) { ui->setupUi(this); }
+#include <ciso646>
 
 WidgetCompraFaturar::~WidgetCompraFaturar() { delete ui; }
 

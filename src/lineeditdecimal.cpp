@@ -2,6 +2,8 @@
 
 #include "lineeditdecimal.h"
 
+#include <ciso646>
+
 LineEditDecimal::LineEditDecimal(QWidget *parent) : QLineEdit(parent) {
   setAlignment(Qt::AlignRight);
   setProperty("value", 0.);

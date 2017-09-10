@@ -5,6 +5,8 @@
 
 #include "sqltablemodel.h"
 
+#include <ciso646>
+
 SqlTableModel::SqlTableModel(QObject *parent) : QSqlRelationalTableModel(parent) {}
 
 QVariant SqlTableModel::data(const int row, const int column) const { return QSqlTableModel::data(QSqlTableModel::index(row, column)); }

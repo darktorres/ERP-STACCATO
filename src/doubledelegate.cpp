@@ -1,5 +1,7 @@
 #include "doubledelegate.h"
 
+#include <ciso646>
+
 DoubleDelegate::DoubleDelegate(QObject *parent, const int decimais) : QStyledItemDelegate(parent), decimais(decimais) {}
 
 QString DoubleDelegate::displayText(const QVariant &value, const QLocale &locale) const {

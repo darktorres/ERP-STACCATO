@@ -4,6 +4,8 @@
 #include "logindialog.h"
 #include "mainwindow.h"
 
+#include <ciso646>
+
 int main(int argc, char *argv[]) {
 
 #ifdef QT_DEBUG

@@ -9,6 +9,8 @@
 #include "ui_logindialog.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
 

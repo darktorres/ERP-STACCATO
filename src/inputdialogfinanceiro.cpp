@@ -11,6 +11,8 @@
 #include "ui_inputdialogfinanceiro.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 InputDialogFinanceiro::InputDialogFinanceiro(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);
 
@@ -458,7 +460,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (type == ConfirmarCompra) {
     connect(&model, &SqlTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
     connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
-    connect(ui->doubleSpinBoxTotalPag, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::resetarPagamentos);
+    connect(ui->doubleSpinBoxTotalPag, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::resetarPagamentos);
   }
 
   //

@@ -30,6 +30,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <ciso646>
+
 namespace QXlsx {
 
 ContentTypes::ContentTypes(CreateFlag flag) : AbstractOOXmlFile(flag) {

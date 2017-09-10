@@ -4,6 +4,8 @@
 
 #include "lineeditdelegate.h"
 
+#include <ciso646>
+
 LineEditDelegate::LineEditDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
 QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {

@@ -26,6 +26,8 @@
 #define QXLSX_XLSXCELLREFERENCE_H
 #include "xlsxglobal.h"
 
+#include <ciso646>
+
 QT_BEGIN_NAMESPACE_XLSX
 
 class Q_XLSX_EXPORT CellReference {

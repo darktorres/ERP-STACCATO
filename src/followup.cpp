@@ -6,6 +6,8 @@
 #include "ui_followup.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
   ui->setupUi(this);
 

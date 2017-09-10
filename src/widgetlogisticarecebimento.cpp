@@ -11,6 +11,8 @@
 #include "venda.h"
 #include "widgetlogisticarecebimento.h"
 
+#include <ciso646>
+
 WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
 
 WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }

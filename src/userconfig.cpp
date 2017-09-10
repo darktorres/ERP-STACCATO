@@ -6,6 +6,8 @@
 #include "userconfig.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 

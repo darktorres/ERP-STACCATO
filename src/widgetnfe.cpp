@@ -5,6 +5,8 @@
 #include "widgetnfe.h"
 #include "xml_viewer.h"
 
+#include <ciso646>
+
 WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
   ui->setupUi(this);
 

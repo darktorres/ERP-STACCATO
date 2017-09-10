@@ -79,6 +79,8 @@
 
 #include "qsimpleupdater.h"
 
+#include <ciso646>
+
 /*! \internal
  * Initializes and configures the class.
  */

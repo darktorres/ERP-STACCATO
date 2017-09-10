@@ -7,6 +7,8 @@
 #include "ui_cadastroproduto.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
 

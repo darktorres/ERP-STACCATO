@@ -1,5 +1,7 @@
 #include "combobox.h"
 
+#include <ciso646>
+
 ComboBox::ComboBox(QWidget *parent) : QComboBox(parent) {}
 
 QVariant ComboBox::getCurrentValue() const { return (currentData()); }

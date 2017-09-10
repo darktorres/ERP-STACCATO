@@ -26,6 +26,8 @@
 
 #include <QString>
 
+#include <ciso646>
+
 namespace QXlsx {
 
 bool NumFormatParser::isDateTime(const QString &formatCode) {

@@ -10,6 +10,7 @@
 #include "widgetcompraconfirmar.h"
 
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) { ui->setupUi(this); }
+#include <ciso646>
 
 WidgetCompraConfirmar::~WidgetCompraConfirmar() { delete ui; }
 

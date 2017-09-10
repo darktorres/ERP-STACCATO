@@ -1,5 +1,7 @@
 #include "porcentagemdelegate.h"
 
+#include <ciso646>
+
 PorcentagemDelegate::PorcentagemDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 QString PorcentagemDelegate::displayText(const QVariant &value, const QLocale &locale) const {

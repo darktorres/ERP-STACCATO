@@ -8,6 +8,8 @@
 #include "ui_cadastrotransportadora.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
   ui->setupUi(this);
 

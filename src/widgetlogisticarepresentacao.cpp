@@ -9,6 +9,8 @@
 #include "ui_widgetlogisticarepresentacao.h"
 #include "widgetlogisticarepresentacao.h"
 
+#include <ciso646>
+
 WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
 
 WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }

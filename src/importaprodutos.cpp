@@ -13,6 +13,8 @@
 #include "ui_importaprodutos.h"
 #include "validadedialog.h"
 
+#include <ciso646>
+
 ImportaProdutos::ImportaProdutos(QWidget *parent) : QDialog(parent), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
 

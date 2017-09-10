@@ -5,6 +5,8 @@
 
 #include "cepcompleter.h"
 
+#include <ciso646>
+
 bool CepCompleter::buscaCEP(const QString &cep) {
   QSqlQuery query;
   query.prepare("SELECT log_logradouro.log_tipo_logradouro, log_logradouro.log_no AS logradouro, log_bairro.bai_no AS "

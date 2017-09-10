@@ -8,6 +8,8 @@
 #include "orcamento.h"
 #include "ui_inputdialogconfirmacao.h"
 
+#include <ciso646>
+
 InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
 

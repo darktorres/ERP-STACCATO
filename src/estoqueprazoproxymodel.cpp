@@ -3,6 +3,8 @@
 
 #include "estoqueprazoproxymodel.h"
 
+#include <ciso646>
+
 EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), dias(model->fieldIndex("prazoEntrega")) {
   setSourceModel(model);
 }

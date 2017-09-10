@@ -14,6 +14,8 @@
 #include "usersession.h"
 #include "widgetlogisticaentrega.h"
 
+#include <ciso646>
+
 WidgetLogisticaEntrega::WidgetLogisticaEntrega(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntrega) {
   ui->setupUi(this);
 

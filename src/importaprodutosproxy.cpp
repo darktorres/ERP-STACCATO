@@ -2,6 +2,8 @@
 
 #include "importaprodutosproxy.h"
 
+#include <ciso646>
+
 ImportaProdutosProxy::ImportaProdutosProxy(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuado(model->fieldIndex("descontinuado")) { setSourceModel(model); }
 
 QVariant ImportaProdutosProxy::data(const QModelIndex &proxyIndex, const int role) const {

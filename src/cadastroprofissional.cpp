@@ -8,6 +8,8 @@
 #include "ui_cadastroprofissional.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
 

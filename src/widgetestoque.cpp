@@ -12,6 +12,8 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
+#include <ciso646>
+
 WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
   ui->setupUi(this);
 

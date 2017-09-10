@@ -14,6 +14,8 @@
 #include "ui_widgetcomprapendentes.h"
 #include "widgetcomprapendentes.h"
 
+#include <ciso646>
+
 WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
   ui->setupUi(this);
 

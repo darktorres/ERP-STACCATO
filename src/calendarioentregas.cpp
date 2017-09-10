@@ -20,6 +20,8 @@
 #include "ui_calendarioentregas.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CalendarioEntregas::CalendarioEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::CalendarioEntregas) {
   ui->setupUi(this);
 

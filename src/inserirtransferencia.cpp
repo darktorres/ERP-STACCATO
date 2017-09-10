@@ -5,6 +5,8 @@
 #include "inserirtransferencia.h"
 #include "ui_inserirtransferencia.h"
 
+#include <ciso646>
+
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
 

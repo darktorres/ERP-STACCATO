@@ -31,6 +31,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <ciso646>
+
 namespace QXlsx {
 
 Drawing::Drawing(AbstractSheet *sheet, CreateFlag flag) : AbstractOOXmlFile(flag), sheet(sheet) {

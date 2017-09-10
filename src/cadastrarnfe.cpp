@@ -10,6 +10,8 @@
 #include "ui_cadastrarnfe.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 

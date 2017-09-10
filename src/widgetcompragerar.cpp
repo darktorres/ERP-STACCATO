@@ -16,6 +16,8 @@
 #include "widgetcompragerar.h"
 #include "xlsxdocument.h"
 
+#include <ciso646>
+
 WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);
 

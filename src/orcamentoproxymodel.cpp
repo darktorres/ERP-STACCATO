@@ -2,6 +2,8 @@
 
 #include "orcamentoproxymodel.h"
 
+#include <ciso646>
+
 OrcamentoProxyModel::OrcamentoProxyModel(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), dias(model->fieldIndex("Dias restantes")), status(model->fieldIndex("status")), followup(model->fieldIndex("Observação")), semaforo(model->fieldIndex("semaforo")) {
   setSourceModel(model);

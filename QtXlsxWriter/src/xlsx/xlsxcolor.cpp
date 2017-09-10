@@ -7,6 +7,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <ciso646>
+
 namespace QXlsx {
 
 XlsxColor::XlsxColor(const QColor &color) {

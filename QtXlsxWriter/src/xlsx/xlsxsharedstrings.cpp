@@ -34,6 +34,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <ciso646>
+
 namespace QXlsx {
 
 /*

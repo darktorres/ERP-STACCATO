@@ -13,6 +13,8 @@
 #include "reaisdelegate.h"
 #include "ui_produtospendentes.h"
 
+#include <ciso646>
+
 ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
 

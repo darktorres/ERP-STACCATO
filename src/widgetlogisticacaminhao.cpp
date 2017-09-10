@@ -5,6 +5,8 @@
 #include "ui_widgetlogisticacaminhao.h"
 #include "widgetlogisticacaminhao.h"
 
+#include <ciso646>
+
 WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
 
 WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }

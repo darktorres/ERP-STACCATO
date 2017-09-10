@@ -10,6 +10,8 @@
 #include "venda.h"
 #include "widgetlogisticacoleta.h"
 
+#include <ciso646>
+
 WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) { ui->setupUi(this); }
 
 WidgetLogisticaColeta::~WidgetLogisticaColeta() { delete ui; }

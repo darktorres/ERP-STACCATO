@@ -2,6 +2,8 @@
 
 #include "estoqueproxymodel.h"
 
+#include <ciso646>
+
 EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpd(model->fieldIndex("quantUpd")) {
   setSourceModel(model);
 }

@@ -10,6 +10,8 @@
 #include "ui_estoque.h"
 #include "xml_viewer.h"
 
+#include <ciso646>
+
 Estoque::Estoque(QWidget *parent) : QDialog(parent), ui(new Ui::Estoque) {
   ui->setupUi(this);
 

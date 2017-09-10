@@ -21,6 +21,7 @@ CONFIG += c++14
 
 #QMAKE_CXXFLAGS += -std=c++14
 
+gcc {
 QMAKE_CXXFLAGS += -Wall -Wextra
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast
@@ -31,6 +32,7 @@ QMAKE_LFLAGS_RELEASE += -O0
 
 #QMAKE_CXXFLAGS += -flto
 #QMAKE_LFLAGS += -flto -fuse-linker-plugin
+}
 
 macx{
 QMAKE_CXXFLAGS += -stdlib=libc++ -std=c++14

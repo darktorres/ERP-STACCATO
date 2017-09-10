@@ -7,6 +7,8 @@
 #include "reaisdelegate.h"
 #include "ui_pagamentosdia.h"
 
+#include <ciso646>
+
 PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::PagamentosDia) {
   ui->setupUi(this);
 

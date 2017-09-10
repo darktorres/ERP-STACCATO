@@ -3,6 +3,8 @@
 
 #include "checkboxdelegate.h"
 
+#include <ciso646>
+
 CheckBoxDelegate::CheckBoxDelegate(QObject *parent, const bool readOnly) : QStyledItemDelegate(parent), readOnly(readOnly) {}
 
 QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {

@@ -12,6 +12,8 @@
 #include "ui_searchdialog.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, bool permitirDescontinuados, QWidget *parent)
     : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), ui(new Ui::SearchDialog) {
   ui->setupUi(this);

@@ -10,6 +10,8 @@
 #include "usersession.h"
 #include "widgetorcamento.h"
 
+#include <ciso646>
+
 WidgetOrcamento::WidgetOrcamento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
 
 WidgetOrcamento::~WidgetOrcamento() { delete ui; }

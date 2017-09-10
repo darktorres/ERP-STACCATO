@@ -1,5 +1,7 @@
 #include "reaisdelegate.h"
 
+#include <ciso646>
+
 ReaisDelegate::ReaisDelegate(QObject *parent, const double decimais) : QStyledItemDelegate(parent), decimais(decimais) {}
 
 QString ReaisDelegate::displayText(const QVariant &value, const QLocale &locale) const {

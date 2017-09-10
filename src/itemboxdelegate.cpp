@@ -3,6 +3,8 @@
 #include "itembox.h"
 #include "itemboxdelegate.h"
 
+#include <ciso646>
+
 ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), isReadOnly(isReadOnly), tipo(tipo) {}
 
 QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {

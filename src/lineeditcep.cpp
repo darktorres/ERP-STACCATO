@@ -1,5 +1,7 @@
 #include "lineeditcep.h"
 
+#include <ciso646>
+
 LineEditCEP::LineEditCEP(QWidget *parent) : QLineEdit(parent) { setProperty("value", ""); }
 
 bool LineEditCEP::isValid() const { return (text().size() == 9); }

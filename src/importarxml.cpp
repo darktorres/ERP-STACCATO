@@ -12,6 +12,8 @@
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
+#include <ciso646>
+
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 

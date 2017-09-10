@@ -2,6 +2,8 @@
 
 #include "dateformatdelegate.h"
 
+#include <ciso646>
+
 DateFormatDelegate::DateFormatDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toDate().toString("dd/MM/yyyy"); }

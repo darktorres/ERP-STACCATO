@@ -1,6 +1,8 @@
 #include "widgetcompra.h"
 #include "ui_widgetcompra.h"
 
+#include <ciso646>
+
 WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompra) {
   ui->setupUi(this);
 

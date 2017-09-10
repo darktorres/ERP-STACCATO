@@ -3,6 +3,8 @@
 
 #include "searchdialogproxy.h"
 
+#include <ciso646>
+
 SearchDialogProxy::SearchDialogProxy(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), estoque_promocao(model->fieldIndex("estoque_promocao")), descontinuado(model->fieldIndex("descontinuado")), validade(model->fieldIndex("validadeProdutos")) {
   setSourceModel(model);

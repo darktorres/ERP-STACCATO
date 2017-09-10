@@ -3,6 +3,8 @@
 
 #include "itembox.h"
 
+#include <ciso646>
+
 ItemBox::ItemBox(QWidget *parent) : QLineEdit(parent) {
   setReadOnly(true);
 

@@ -6,6 +6,8 @@
 
 #include "tableview.h"
 
+#include <ciso646>
+
 TableView::TableView(QWidget *parent) : QTableView(parent) {
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);

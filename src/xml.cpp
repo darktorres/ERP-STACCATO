@@ -2,6 +2,8 @@
 
 #include "xml.h"
 
+#include <ciso646>
+
 XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(model); }
 
 void XML::readChild(QDomElement &element, QStandardItem *elementItem) {

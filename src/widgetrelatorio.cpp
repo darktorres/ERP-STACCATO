@@ -9,6 +9,7 @@
 #include "usersession.h"
 #include "widgetrelatorio.h"
 #include <xlsxdocument.h>
+#include <ciso646>
 
 WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 

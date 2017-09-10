@@ -10,6 +10,8 @@
 #include "ui_cadastrousuario.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
 

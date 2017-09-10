@@ -32,6 +32,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <ciso646>
+
 namespace QXlsx {
 
 DocPropsApp::DocPropsApp(CreateFlag flag) : AbstractOOXmlFile(flag) {}

@@ -19,6 +19,8 @@
 #include "venda.h"
 #include "widgetlogisticaagendarcoleta.h"
 
+#include <ciso646>
+
 WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
   ui->setupUi(this);
 

@@ -11,6 +11,8 @@
 #include "ui_inputdialog.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialog) {
   ui->setupUi(this);
 

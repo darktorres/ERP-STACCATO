@@ -10,6 +10,8 @@
 #include "ui_cadastrofornecedor.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);
 

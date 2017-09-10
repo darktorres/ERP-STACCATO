@@ -26,6 +26,8 @@
 #include "xlsxabstractsheet_p.h"
 #include "xlsxworkbook.h"
 
+#include <ciso646>
+
 QT_BEGIN_NAMESPACE_XLSX
 
 AbstractSheetPrivate::AbstractSheetPrivate(AbstractSheet *p, AbstractSheet::CreateFlag flag)

@@ -7,6 +7,8 @@
 #include "usersession.h"
 
 SendMail::SendMail(QWidget *parent, const QString &arquivo, const QString &fornecedor) : QDialog(parent), fornecedor(fornecedor), ui(new Ui::SendMail) {
+#include <ciso646>
+
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos
   ui->setupUi(this);
 

@@ -10,6 +10,8 @@
 #include "ui_cadastrocliente.h"
 #include "usersession.h"
 
+#include <ciso646>
+
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
 

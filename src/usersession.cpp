@@ -6,6 +6,8 @@
 
 #include "usersession.h"
 
+#include <ciso646>
+
 QSqlQuery *UserSession::query = nullptr;
 
 QSettings m_settings("Staccato", "ERP");

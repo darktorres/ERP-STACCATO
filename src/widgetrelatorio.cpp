@@ -2,14 +2,14 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "ui_widgetrelatorio.h"
 #include "usersession.h"
 #include "widgetrelatorio.h"
-#include <xlsxdocument.h>
-#include <ciso646>
+#include "xlsxdocument.h"
 
 WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 
@@ -248,6 +248,10 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
   file.close();
 
   QXlsx::Document xlsx(arquivoModelo);
+
+  //  xlsx.currentWorksheet()->setFitToPage(true);
+  //  xlsx.currentWorksheet()->setFitToHeight(true);
+  //  xlsx.currentWorksheet()->setOrientationVertical(false);
 
   xlsx.selectSheet("Sheet1");
 

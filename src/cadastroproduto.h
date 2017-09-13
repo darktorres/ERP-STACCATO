@@ -39,6 +39,7 @@ private:
   virtual void updateMode() override;
   void calcularMarkup();
   bool cadastrar() override;
+  bool viewRegister() override;
 };
 
 #endif // CADASTROPRODUTO_H

@@ -22,7 +22,6 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxdocpropsapp_p.h"
 
 #include <QBuffer>
 #include <QDateTime>
@@ -31,8 +30,9 @@
 #include <QVariant>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
 #include <ciso646>
+
+#include "xlsxdocpropsapp_p.h"
 
 namespace QXlsx {
 
@@ -72,8 +72,7 @@ void DocPropsApp::saveToXmlFile(QIODevice *device) const {
 
   writer.writeStartDocument(QStringLiteral("1.0"), true);
   writer.writeStartElement(QStringLiteral("Properties"));
-  writer.writeDefaultNamespace(
-      QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"));
+  writer.writeDefaultNamespace(QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"));
   writer.writeNamespace(vt, QStringLiteral("vt"));
   writer.writeTextElement(QStringLiteral("Application"), QStringLiteral("Microsoft Excel"));
   writer.writeTextElement(QStringLiteral("DocSecurity"), QStringLiteral("0"));
@@ -102,12 +101,9 @@ void DocPropsApp::saveToXmlFile(QIODevice *device) const {
   writer.writeEndElement(); // vt:vector
   writer.writeEndElement(); // TitlesOfParts
 
-  if (m_properties.contains(QStringLiteral("manager")))
-    writer.writeTextElement(QStringLiteral("Manager"), m_properties[QStringLiteral("manager")]);
+  if (m_properties.contains(QStringLiteral("manager"))) writer.writeTextElement(QStringLiteral("Manager"), m_properties[QStringLiteral("manager")]);
   // Not like "manager", "company" always exists for Excel generated file.
-  writer.writeTextElement(QStringLiteral("Company"), m_properties.contains(QStringLiteral("company"))
-                                                         ? m_properties[QStringLiteral("company")]
-                                                         : QString());
+  writer.writeTextElement(QStringLiteral("Company"), m_properties.contains(QStringLiteral("company")) ? m_properties[QStringLiteral("company")] : QString());
   writer.writeTextElement(QStringLiteral("LinksUpToDate"), QStringLiteral("false"));
   writer.writeTextElement(QStringLiteral("SharedDoc"), QStringLiteral("false"));
   writer.writeTextElement(QStringLiteral("HyperlinksChanged"), QStringLiteral("false"));

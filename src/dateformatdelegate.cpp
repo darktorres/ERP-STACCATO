@@ -1,8 +1,7 @@
 #include <QDateTimeEdit>
+#include <ciso646>
 
 #include "dateformatdelegate.h"
-
-#include <ciso646>
 
 DateFormatDelegate::DateFormatDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 

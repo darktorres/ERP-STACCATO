@@ -3,14 +3,13 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "ui_widgetlogisticacoleta.h"
 #include "venda.h"
 #include "widgetlogisticacoleta.h"
-
-#include <ciso646>
 
 WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) { ui->setupUi(this); }
 

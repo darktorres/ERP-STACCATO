@@ -22,14 +22,14 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxrichstring.h"
-#include "xlsxformat_p.h"
-#include "xlsxrichstring_p.h"
 #include <QDebug>
 #include <QTextDocument>
 #include <QTextFragment>
-
 #include <ciso646>
+
+#include "xlsxformat_p.h"
+#include "xlsxrichstring.h"
+#include "xlsxrichstring_p.h"
 
 QT_BEGIN_NAMESPACE_XLSX
 

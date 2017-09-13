@@ -3,13 +3,12 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"
 #include "ui_widgetfluxocaixa.h"
 #include "widgetfluxocaixa.h"
-
-#include <ciso646>
 
 WidgetFluxoCaixa::WidgetFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFluxoCaixa) { ui->setupUi(this); }
 
@@ -76,12 +75,12 @@ void WidgetFluxoCaixa::montaFiltro() {
 
   QSqlQuery query;
 
-  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1") or not query.first()) {
+  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
     emit errorSignal("Erro buscando saldo: " + query.lastError().text());
     return;
   }
 
-  ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble());
+  if (query.first()) ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble());
 
   // ----------------------------------------------------------------------------------------------------------
 
@@ -112,12 +111,12 @@ void WidgetFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1") or not query.first()) {
+  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
     emit errorSignal("Erro buscando saldo: " + query.lastError().text());
     return;
   }
 
-  ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble());
+  if (query.first()) ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble());
 
   // ----------------------------------------------------------------------------------------------------------
 
@@ -138,8 +137,8 @@ void WidgetFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCai
 void WidgetFluxoCaixa::on_tableCaixa2_entered(const QModelIndex &) { ui->tableCaixa2->resizeColumnsToContents(); }
 
 void WidgetFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
-  const QDate date = modelCaixa2.data(modelCaixa2.index(index.row(), modelCaixa2.record().indexOf("Data"))).toDate();
-  const QString idConta = modelCaixa2.data(modelCaixa2.index(index.row(), modelCaixa2.record().indexOf("idConta"))).toString();
+  const QDate date = modelCaixa2.data(index.row(), "Data").toDate();
+  const QString idConta = modelCaixa2.data(index.row(), "idConta").toString();
 
   auto *dia = new PagamentosDia(this);
   dia->setFilter(date, idConta);
@@ -147,8 +146,8 @@ void WidgetFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
 }
 
 void WidgetFluxoCaixa::on_tableCaixa_activated(const QModelIndex &index) {
-  const QDate date = modelCaixa.data(modelCaixa.index(index.row(), modelCaixa.record().indexOf("Data"))).toDate();
-  const QString idConta = modelCaixa.data(modelCaixa.index(index.row(), modelCaixa.record().indexOf("idConta"))).toString();
+  const QDate date = modelCaixa.data(index.row(), "Data").toDate();
+  const QString idConta = modelCaixa.data(index.row(), "idConta").toString();
 
   auto *dia = new PagamentosDia(this);
   dia->setFilter(date, idConta);

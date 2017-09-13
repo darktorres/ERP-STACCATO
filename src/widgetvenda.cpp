@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "followup.h"
 #include "reaisdelegate.h"
@@ -10,8 +11,6 @@
 #include "venda.h"
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
-
-#include <ciso646>
 
 WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
 
@@ -125,7 +124,7 @@ void WidgetVenda::setPermissions() {
   ui->dateEdit->setDate(QDate::currentDate());
 }
 
-void WidgetVenda::makeConnections() {
+void WidgetVenda::setConnections() {
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
@@ -153,7 +152,7 @@ bool WidgetVenda::updateTables() {
     setPermissions();
     setupTables();
     montaFiltro();
-    makeConnections();
+    setConnections();
   }
 
   if (not model.select()) {

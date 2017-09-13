@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "devolucao.h"
@@ -11,8 +12,6 @@
 #include "reaisdelegate.h"
 #include "ui_devolucao.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);

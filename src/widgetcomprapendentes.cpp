@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "excel.h"
@@ -14,8 +15,6 @@
 #include "ui_widgetcomprapendentes.h"
 #include "widgetcomprapendentes.h"
 
-#include <ciso646>
-
 WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
   ui->setupUi(this);
 
@@ -25,7 +24,8 @@ WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent),
   connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
 
   ui->checkBoxFiltroPendentes->setChecked(true);
-  ui->checkBoxFiltroQuebra->setChecked(true);
+  ui->checkBoxFiltroRepoEntrega->setChecked(true);
+  ui->checkBoxFiltroRepoReceb->setChecked(true);
 }
 
 WidgetCompraPendentes::~WidgetCompraPendentes() { delete ui; }
@@ -69,7 +69,8 @@ void WidgetCompraPendentes::makeConnections() {
   connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroEntregaAgend, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroEntregue, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroQuebra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
+  connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroSul, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
 }
@@ -88,6 +89,13 @@ bool WidgetCompraPendentes::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
+  if (not modelResumo.select()) {
+    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
+    return false;
+  }
+
+  ui->tableResumo->resizeColumnsToContents();
+
   return true;
 }
 
@@ -96,9 +104,7 @@ void WidgetCompraPendentes::setupTables() {
 
   model.setTable("view_venda_produto");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
-  }
+  //  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
 
   model.setHeaderData("data", "Data");
   model.setHeaderData("fornecedor", "Fornecedor");
@@ -121,12 +127,23 @@ void WidgetCompraPendentes::setupTables() {
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->table->resizeColumnsToContents();
+
+  modelResumo.setTable("view_fornecedor_compra");
+
+  modelResumo.setHeaderData("fornecedor", "Forn.");
+
+  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
+
+  //  if (not modelResumo.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela resumo: " + modelResumo.lastError().text());
+
+  ui->tableResumo->setModel(&modelResumo);
+  ui->tableResumo->hideColumn("idVenda");
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   const QString status = model.data(index.row(), "status").toString();
 
-  if (status != "PENDENTE" and status != "QUEBRA") {
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") {
     QMessageBox::critical(this, "Erro!", "Produto não está PENDENTE!");
     return;
   }

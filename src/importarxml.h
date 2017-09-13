@@ -51,20 +51,21 @@ private:
   // methods
   bool associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido);
   bool cadastrarNFe(XML &xml);
+  bool cadastrarProdutoEstoque();
   bool criarConsumo();
+  bool criarConsumo2(const int rowCompra, const int rowEstoque, const double quantAdicionar);
   bool importar();
   bool inserirItemSql(XML &xml);
   bool inserirNoSqlModel(XML &xml, const QStandardItem *item);
   bool lerXML(QFile &file);
   bool limparAssociacoes();
-  void WrapParear();
+  bool parear();
   bool perguntarLocal(XML &xml);
   bool verificaCNPJ(const XML &xml);
   bool verificaExiste(XML &xml);
-  void setupTables(const QStringList &idsCompra);
-  bool criarConsumo2(const int rowCompra, const int rowEstoque, const double quantAdicionar);
   void procurar();
-  bool parear();
+  void setupTables(const QStringList &idsCompra);
+  void WrapParear();
 };
 
 #endif // IMPORTARXML_H

@@ -75,20 +75,6 @@
           <string>NFe</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_35">
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelNatureza">
-            <property name="text">
-             <string>Natureza operação</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="labelModelo">
-            <property name="text">
-             <string>Modelo</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
            <widget class="QLabel" name="labelSerie">
             <property name="text">
@@ -103,6 +89,13 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="labelModelo">
+            <property name="text">
+             <string>Modelo</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="1">
            <widget class="QLineEdit" name="lineEditModelo">
             <property name="text">
@@ -110,17 +103,17 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelNatureza">
+            <property name="text">
+             <string>Natureza operação</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="2">
            <widget class="QLineEdit" name="lineEditSerie">
             <property name="text">
              <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="labelCodigo">
-            <property name="text">
-             <string>Código</string>
             </property>
            </widget>
           </item>
@@ -138,14 +131,21 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="labelCodigo">
+            <property name="text">
+             <string>Código</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLineEdit" name="lineEditEmissao"/>
+          </item>
           <item row="5" column="0">
            <widget class="QLineEdit" name="lineEditCodigo"/>
           </item>
           <item row="5" column="1">
            <widget class="QLineEdit" name="lineEditNumero"/>
-          </item>
-          <item row="5" column="2">
-           <widget class="QLineEdit" name="lineEditEmissao"/>
           </item>
           <item row="6" column="0">
            <widget class="QLabel" name="labelSaida">
@@ -161,6 +161,13 @@
             </property>
            </widget>
           </item>
+          <item row="7" column="1">
+           <widget class="QLineEdit" name="lineEditTipo">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
           <item row="6" column="2">
            <widget class="QLabel" name="labelFormatoPagina">
             <property name="text">
@@ -171,17 +178,39 @@
           <item row="7" column="0">
            <widget class="QLineEdit" name="lineEditSaida"/>
           </item>
-          <item row="7" column="1">
-           <widget class="QLineEdit" name="lineEditTipo">
+          <item row="7" column="2">
+           <widget class="QLineEdit" name="lineEditFormatoPagina">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="7" column="2">
-           <widget class="QLineEdit" name="lineEditFormatoPagina">
+          <item row="9" column="0">
+           <widget class="QComboBox" name="comboBoxDestinoOperacao">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>1 Operação interna</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2 Operação interestadual</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3 Operação com exterior</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="labelSaida_2">
             <property name="text">
-             <string/>
+             <string>Destino da operação</string>
             </property>
            </widget>
           </item>

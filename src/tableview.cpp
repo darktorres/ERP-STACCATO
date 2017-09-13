@@ -3,10 +3,11 @@
 #include <QIdentityProxyModel>
 #include <QSqlRecord>
 #include <QSqlTableModel>
-
-#include "tableview.h"
-
 #include <ciso646>
+
+#include "sqlquerymodel.h"
+#include "sqltablemodel.h"
+#include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
   verticalHeader()->setResizeContentsPrecision(0);
@@ -22,18 +23,18 @@ void TableView::hideColumn(const QString &column) {
       return;
     }
 
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
       QTableView::hideColumn(sourceModel->record().indexOf(column));
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::hideColumn(model->fieldIndex(column));
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlQueryModel *>(QTableView::model())) {
     QTableView::hideColumn(model->record().indexOf(column));
     return;
   }
@@ -46,18 +47,18 @@ void TableView::showColumn(const QString &column) {
       return;
     }
 
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
       QTableView::showColumn(sourceModel->record().indexOf(column));
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::showColumn(model->fieldIndex(column));
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlQueryModel *>(QTableView::model())) {
     QTableView::showColumn(model->record().indexOf(column));
     return;
   }
@@ -65,23 +66,23 @@ void TableView::showColumn(const QString &column) {
 
 void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) {
   if (auto *model = qobject_cast<QIdentityProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlTableModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlTableModel *>(model->sourceModel())) {
       QTableView::setItemDelegateForColumn(sourceModel->fieldIndex(column), delegate);
       return;
     }
 
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
       QTableView::setItemDelegateForColumn(sourceModel->record().indexOf(column), delegate);
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::setItemDelegateForColumn(model->fieldIndex(column), delegate);
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlQueryModel *>(QTableView::model())) {
     QTableView::setItemDelegateForColumn(model->record().indexOf(column), delegate);
     return;
   }
@@ -89,23 +90,23 @@ void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDel
 
 void TableView::openPersistentEditor(const int row, const QString &column) {
   if (auto *model = qobject_cast<QIdentityProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlTableModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlTableModel *>(model->sourceModel())) {
       QTableView::openPersistentEditor(model->index(row, sourceModel->fieldIndex(column)));
       return;
     }
 
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
       QTableView::openPersistentEditor(model->index(row, sourceModel->record().indexOf(column)));
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, model->fieldIndex(column)));
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlQueryModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, model->record().indexOf(column)));
     return;
   }
@@ -117,12 +118,12 @@ void TableView::openPersistentEditor(const int row, const int column) {
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, column));
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlQueryModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, column));
     return;
   }
@@ -137,18 +138,18 @@ void TableView::sortByColumn(const QString &column, Qt::SortOrder order) {
       return;
     }
 
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
       QTableView::sortByColumn(sourceModel->record().indexOf(column), order);
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::sortByColumn(model->fieldIndex(column), order);
     return;
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlQueryModel *>(QTableView::model())) {
     QTableView::sortByColumn(model->record().indexOf(column), order);
     return;
   }

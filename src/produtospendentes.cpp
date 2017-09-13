@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "estoque.h"
@@ -12,8 +13,6 @@
 #include "produtospendentes.h"
 #include "reaisdelegate.h"
 #include "ui_produtospendentes.h"
-
-#include <ciso646>
 
 ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
@@ -40,16 +39,17 @@ void ProdutosPendentes::recalcularQuantidade() {
 
 void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &idVenda) {
   // NOTE: put this in the constructor because this object always use this function?
+
   this->codComercial = codComercial;
 
-  modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'QUEBRA')");
+  modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
 
   if (not modelProdutos.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelProdutos.lastError().text());
     return;
   }
 
-  modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'QUEBRA')");
+  modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
 
   if (not modelViewProdutos.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela view_produto_pendente: " + modelViewProdutos.lastError().text());
@@ -85,12 +85,32 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   const QString fornecedor = modelViewProdutos.data(0, "fornecedor").toString();
 
-  modelEstoque.setFilter("restante > 0 AND codComercial = '" + codComercial + "' AND fornecedor = '" + fornecedor + "' AND status != 'CANCELADO' AND status != 'QUEBRADO'");
+  modelEstoque.setQuery(
+      "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, (`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) AS `restante`, `e`.`un` AS "
+      "`unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`m2cx`), ((`e`.`quant` + "
+      "COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM "
+      "(((((`estoque` `e` LEFT JOIN `estoque_has_consumo` `ec` ON ((`e`.`idEstoque` = `ec`.`idEstoque`))) LEFT JOIN `produto` `p` ON ((`e`.`idProduto` = `p`.`idProduto`))) LEFT "
+      "JOIN `venda_has_produto` `vp` ON ((`ec`.`idVendaProduto` = `vp`.`idVendaProduto`))) LEFT JOIN `estoque_has_nfe` `ehn` ON ((`e`.`idEstoque` = `ehn`.`idEstoque`))) LEFT JOIN `nfe` `n` ON "
+      "((`ehn`.`idNFe` = `n`.`idNFe`))) WHERE ((`e`.`status` <> 'CANCELADO') AND (`e`.`status` <> 'QUEBRADO')) AND p.fornecedor = '" +
+      fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
-  if (not modelEstoque.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela compra: " + modelEstoque.lastError().text());
+  if (modelEstoque.lastError().isValid()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque: " + modelEstoque.lastError().text());
     return;
   }
+
+  modelEstoque.setHeaderData("status", "Status");
+  modelEstoque.setHeaderData("idEstoque", "Estoque");
+  modelEstoque.setHeaderData("descricao", "Descrição");
+  modelEstoque.setHeaderData("restante", "Disponível");
+  modelEstoque.setHeaderData("unEst", "Un.");
+  modelEstoque.setHeaderData("codComercial", "Cód. Com.");
+  modelEstoque.setHeaderData("lote", "Lote");
+  modelEstoque.setHeaderData("local", "Local");
+  modelEstoque.setHeaderData("bloco", "Bloco");
+
+  ui->tableEstoque->setModel(&modelEstoque);
+  ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
 
   ui->tableEstoque->resizeColumnsToContents();
 }
@@ -125,32 +145,6 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->resizeColumnsToContents();
-
-  modelEstoque.setTable("view_estoque");
-  modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelEstoque.setHeaderData("status", "Status");
-  modelEstoque.setHeaderData("idEstoque", "Estoque");
-  modelEstoque.setHeaderData("descricao", "Descrição");
-  modelEstoque.setHeaderData("restante", "Disponível");
-  modelEstoque.setHeaderData("unEst", "Un.");
-  modelEstoque.setHeaderData("codComercial", "Cód. Com.");
-  modelEstoque.setHeaderData("lote", "Lote");
-  modelEstoque.setHeaderData("local", "Local");
-  modelEstoque.setHeaderData("bloco", "Bloco");
-
-  ui->tableEstoque->setModel(&modelEstoque);
-  ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
-  ui->tableEstoque->hideColumn("cnpjDest");
-  ui->tableEstoque->hideColumn("unProd");
-  ui->tableEstoque->hideColumn("idCompra");
-  ui->tableEstoque->hideColumn("fornecedor");
-  ui->tableEstoque->hideColumn("nfe");
-  ui->tableEstoque->hideColumn("restante est");
-  ui->tableEstoque->hideColumn("dataPrevColeta");
-  ui->tableEstoque->hideColumn("dataRealColeta");
-  ui->tableEstoque->hideColumn("dataPrevReceb");
-  ui->tableEstoque->hideColumn("dataRealReceb");
 }
 
 bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
@@ -171,9 +165,12 @@ bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
 }
 
 void ProdutosPendentes::recarregarTabelas() {
-  modelProdutos.select();
-  modelViewProdutos.select();
-  modelEstoque.select();
+  if (not modelProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro recarregando modelProdutos: " + modelProdutos.lastError().text());
+  if (not modelViewProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro recarregando modelViewProdutos: " + modelViewProdutos.lastError().text());
+
+  modelEstoque.setQuery(modelEstoque.query().executedQuery());
+
+  if (modelEstoque.lastError().isValid()) QMessageBox::critical(this, "Erro!", "Erro recarregando modelEstoque: " + modelEstoque.lastError().text());
 
   double quant = 0;
 
@@ -263,8 +260,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 
   const double consumir = qMin(quantEstoque, quantConsumir); // TODO: 0maybe dont need min, quantConsumir is already limited to quantEstoque
 
-  auto *estoque = new Estoque(this);
-  if (not estoque->viewRegisterById(modelEstoque.data(rowEstoque, "idEstoque").toString(), false)) return false;
+  auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
   if (not estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto").toInt(), consumir)) return false;
 
   // separar venda se quantidade nao bate
@@ -274,6 +270,8 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   }
 
   if (not modelProdutos.setData(rowProduto, "status", modelEstoque.data(rowEstoque, "status").toString())) return false;
+
+  // TODO: 0fazer vinculo no pedido_fornecedor (quebrar as linhas)
 
   // model submit
   if (not modelProdutos.submitAll()) {
@@ -327,6 +325,13 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   }
 
   QSqlQuery("COMMIT").exec();
+
+  QSqlQuery query;
+
+  if (not query.exec("CALL update_venda_status()")) {
+    QMessageBox::critical(this, "Erro!", "Erro atualizando status das vendas: " + query.lastError().text());
+    return;
+  }
 
   QMessageBox::information(this, "Aviso!", "Consumo criado com sucesso!");
 

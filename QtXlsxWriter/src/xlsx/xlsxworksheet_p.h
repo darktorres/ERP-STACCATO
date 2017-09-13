@@ -176,6 +176,9 @@ public:
 
   XlsxSheetFormatProps sheetFormatProps;
 
+  bool orientation = true; // vertical // TODO: convert this to enum
+  bool fitToPage = false;
+  bool fitToHeight = false;
   bool windowProtection = false;
   bool showFormulas = false;
   bool showGridLines = true;

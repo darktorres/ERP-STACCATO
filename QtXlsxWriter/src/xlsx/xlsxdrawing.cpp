@@ -23,21 +23,18 @@
 **
 ****************************************************************************/
 
+#include <QBuffer>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+#include <ciso646>
+
 #include "xlsxabstractsheet.h"
 #include "xlsxdrawing_p.h"
 #include "xlsxdrawinganchor_p.h"
 
-#include <QBuffer>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
-#include <ciso646>
-
 namespace QXlsx {
 
-Drawing::Drawing(AbstractSheet *sheet, CreateFlag flag) : AbstractOOXmlFile(flag), sheet(sheet) {
-  workbook = sheet->workbook();
-}
+Drawing::Drawing(AbstractSheet *sheet, CreateFlag flag) : AbstractOOXmlFile(flag), sheet(sheet) { workbook = sheet->workbook(); }
 
 Drawing::~Drawing() { qDeleteAll(anchors); }
 
@@ -48,10 +45,8 @@ void Drawing::saveToXmlFile(QIODevice *device) const {
 
   writer.writeStartDocument(QStringLiteral("1.0"), true);
   writer.writeStartElement(QStringLiteral("xdr:wsDr"));
-  writer.writeAttribute(QStringLiteral("xmlns:xdr"),
-                        QStringLiteral("http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"));
-  writer.writeAttribute(QStringLiteral("xmlns:a"),
-                        QStringLiteral("http://schemas.openxmlformats.org/drawingml/2006/main"));
+  writer.writeAttribute(QStringLiteral("xmlns:xdr"), QStringLiteral("http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"));
+  writer.writeAttribute(QStringLiteral("xmlns:a"), QStringLiteral("http://schemas.openxmlformats.org/drawingml/2006/main"));
 
   for (auto const &anchor : anchors) anchor->saveToXml(writer);
 

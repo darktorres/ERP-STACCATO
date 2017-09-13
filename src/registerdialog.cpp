@@ -4,10 +4,9 @@
 #include <QShortcut>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "registerdialog.h"
-
-#include <ciso646>
 
 RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(primaryKey), model(this) {
   setWindowModality(Qt::NonModal);
@@ -193,7 +192,9 @@ bool RegisterDialog::newRegister() {
 }
 
 void RegisterDialog::clearFields() {
-  for (auto const &line : findChildren<QLineEdit *>()) line->clear();
+  for (auto const &line : findChildren<QLineEdit *>()) {
+    if (not line->isReadOnly()) line->clear();
+  }
 }
 
 void RegisterDialog::remove() {

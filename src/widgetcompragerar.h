@@ -23,16 +23,17 @@ signals:
 private slots:
   void calcularPreco();
   void on_checkBoxMarcarTodos_clicked(const bool checked);
+  void on_checkBoxMostrarSul_toggled(bool checked);
   void on_pushButtonCancelarCompra_clicked();
   void on_pushButtonGerarCompra_clicked();
-  void on_tableForn_activated(const QModelIndex &index);
+  void on_tableResumo_activated(const QModelIndex &index);
   void on_tableProdutos_entered(const QModelIndex &);
 
 private:
   // attributes
   int oc = 0;
   QString error;
-  SqlTableModel modelForn;
+  SqlTableModel modelResumo;
   SqlTableModel modelProdutos;
   Ui::WidgetCompraGerar *ui;
   // methods

@@ -8,6 +8,7 @@
 #include <QStyleFactory>
 #include <QTimer>
 #include <QUrl>
+#include <ciso646>
 
 #include "acbr.h"
 #include "cadastrarnfe.h"
@@ -21,13 +22,12 @@
 #include "importaprodutos.h"
 #include "mainwindow.h"
 #include "orcamento.h"
+#include "precoestoque.h"
 #include "sendmail.h"
 #include "ui_mainwindow.h"
 #include "userconfig.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
-
-#include <ciso646>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->actionCadastrarUsuario->setDisabled(true);
     ui->actionCadastrarProfissional->setDisabled(true);
     ui->actionCadastrarFornecedor->setDisabled(true);
+    ui->actionGerenciar_preco_estoque->setDisabled(true);
   }
 
   //
@@ -86,7 +87,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   timer = new QTimer(this);
 
-
   gerarEnviarRelatorio();
 }
 
@@ -112,6 +112,10 @@ void MainWindow::gerarEnviarRelatorio() {
     //
 
     QXlsx::Document xlsxPagar(relatorioPagar);
+
+    //    xlsx.currentWorksheet()->setFitToPage(true);
+    //    xlsx.currentWorksheet()->setFitToHeight(true);
+    //    xlsx.currentWorksheet()->setOrientationVertical(false);
 
     QSqlQuery queryView;
 
@@ -147,6 +151,10 @@ void MainWindow::gerarEnviarRelatorio() {
     //
 
     QXlsx::Document xlsxReceber(relatorioReceber);
+
+    //    xlsx.currentWorksheet()->setFitToPage(true);
+    //    xlsx.currentWorksheet()->setFitToHeight(true);
+    //    xlsx.currentWorksheet()->setOrientationVertical(false);
 
     if (not queryView.exec("SELECT * FROM view_relatorio_receber")) {
       QMessageBox::critical(this, "Erro!", "Erro lendo relatorio receber: " + queryView.lastError().text());
@@ -361,3 +369,8 @@ void MainWindow::on_actionPromocao_triggered() {
 // NOTE: -logistica da devolucao
 // TODO: 5alguns elementos graficos estao incorretos com o tema escuro
 // TODO: 0verificar com Conrado os itens da MADEBENE para anotar a quantidade correta de minimo/multiplo (por enquanto tem apenas minimo)
+
+void MainWindow::on_actionGerenciar_preco_estoque_triggered() {
+  auto *estoque = new PrecoEstoque(this);
+  estoque->setAttribute(Qt::WA_DeleteOnClose);
+}

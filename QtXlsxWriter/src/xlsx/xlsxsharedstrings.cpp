@@ -22,19 +22,19 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxcolor_p.h"
-#include "xlsxformat_p.h"
-#include "xlsxrichstring.h"
-#include "xlsxsharedstrings_p.h"
-#include "xlsxutility_p.h"
 #include <QBuffer>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
 #include <ciso646>
+
+#include "xlsxcolor_p.h"
+#include "xlsxformat_p.h"
+#include "xlsxrichstring.h"
+#include "xlsxsharedstrings_p.h"
+#include "xlsxutility_p.h"
 
 namespace QXlsx {
 
@@ -102,9 +102,7 @@ void SharedStrings::removeSharedString(const RichString &string) {
   }
 }
 
-int SharedStrings::getSharedStringIndex(const QString &string) const {
-  return getSharedStringIndex(RichString(string));
-}
+int SharedStrings::getSharedStringIndex(const QString &string) const { return getSharedStringIndex(RichString(string)); }
 
 int SharedStrings::getSharedStringIndex(const RichString &string) const {
   if (m_stringTable.contains(string)) return m_stringTable[string].index;
@@ -185,8 +183,7 @@ void SharedStrings::saveToXmlFile(QIODevice *device) const {
 
   writer.writeStartDocument(QStringLiteral("1.0"), true);
   writer.writeStartElement(QStringLiteral("sst"));
-  writer.writeAttribute(QStringLiteral("xmlns"),
-                        QStringLiteral("http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
+  writer.writeAttribute(QStringLiteral("xmlns"), QStringLiteral("http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
   writer.writeAttribute(QStringLiteral("count"), QString::number(m_stringCount));
   writer.writeAttribute(QStringLiteral("uniqueCount"), QString::number(m_stringList.size()));
 
@@ -202,8 +199,7 @@ void SharedStrings::saveToXmlFile(QIODevice *device) const {
           writer.writeEndElement(); // rPr
         }
         writer.writeStartElement(QStringLiteral("t"));
-        if (isSpaceReserveNeeded(string.fragmentText(i)))
-          writer.writeAttribute(QStringLiteral("xml:space"), QStringLiteral("preserve"));
+        if (isSpaceReserveNeeded(string.fragmentText(i))) writer.writeAttribute(QStringLiteral("xml:space"), QStringLiteral("preserve"));
         writer.writeCharacters(string.fragmentText(i));
         writer.writeEndElement(); // t
 
@@ -228,8 +224,7 @@ void SharedStrings::readString(QXmlStreamReader &reader) {
 
   RichString richString;
 
-  while (not reader.atEnd() and
-         not(reader.name() == QLatin1String("si") and reader.tokenType() == QXmlStreamReader::EndElement)) {
+  while (not reader.atEnd() and not(reader.name() == QLatin1String("si") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("r"))
@@ -249,8 +244,7 @@ void SharedStrings::readRichStringPart(QXmlStreamReader &reader, RichString &ric
 
   QString text;
   Format format;
-  while (not reader.atEnd() and
-         not(reader.name() == QLatin1String("r") and reader.tokenType() == QXmlStreamReader::EndElement)) {
+  while (not reader.atEnd() and not(reader.name() == QLatin1String("r") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("rPr")) {
@@ -275,8 +269,7 @@ void SharedStrings::readPlainStringPart(QXmlStreamReader &reader, RichString &ri
 Format SharedStrings::readRichStringPart_rPr(QXmlStreamReader &reader) {
   Q_ASSERT(reader.name() == QLatin1String("rPr"));
   Format format;
-  while (not reader.atEnd() and
-         not(reader.name() == QLatin1String("rPr") and reader.tokenType() == QXmlStreamReader::EndElement)) {
+  while (not reader.atEnd() and not(reader.name() == QLatin1String("rPr") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       QXmlStreamAttributes attributes = reader.attributes();
@@ -339,8 +332,7 @@ bool SharedStrings::loadFromXmlFile(QIODevice *device) {
     if (token == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("sst")) {
         QXmlStreamAttributes attributes = reader.attributes();
-        if ((hasUniqueCountAttr = attributes.hasAttribute(QLatin1String("uniqueCount"))))
-          count = attributes.value(QLatin1String("uniqueCount")).toString().toInt();
+        if ((hasUniqueCountAttr = attributes.hasAttribute(QLatin1String("uniqueCount")))) count = attributes.value(QLatin1String("uniqueCount")).toString().toInt();
       } else if (reader.name() == QLatin1String("si")) {
         readString(reader);
       }

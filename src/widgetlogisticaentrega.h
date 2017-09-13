@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 namespace Ui {
@@ -31,9 +32,8 @@ private slots:
   void on_tableProdutos_entered(const QModelIndex &);
   void on_tableTransp2_entered(const QModelIndex &);
   void on_tableVendas_clicked(const QModelIndex &index);
-  void on_tableVendas_entered(const QModelIndex &);
-
   void on_tableVendas_doubleClicked(const QModelIndex &index);
+  void on_tableVendas_entered(const QModelIndex &);
 
 private:
   // attributes
@@ -43,7 +43,7 @@ private:
   SqlTableModel modelTransp;
   SqlTableModel modelTransp2;
   SqlTableModel modelVendas;
-  SqlTableModel modelViewProdutos;
+  SqlQueryModel modelViewProdutos;
   Ui::WidgetLogisticaEntrega *ui;
   // methods
   bool adicionarProduto(const QModelIndexList &list);

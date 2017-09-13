@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 namespace Ui {
@@ -27,7 +28,8 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
+  //  SqlTableModel model;
+  SqlQueryModel model;
   Ui::WidgetEstoque *ui;
   // methods
   void setupTables();

@@ -13,7 +13,8 @@ public:
   QVariant data(const QModelIndex &proxyIndex, int role) const override;
 
 private:
-  const int estoque_promocao;
+  const int estoque;
+  const int promocao;
   const int descontinuado;
   const int validade;
 };

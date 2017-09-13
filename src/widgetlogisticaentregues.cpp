@@ -1,14 +1,13 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "ui_widgetlogisticaentregues.h"
 #include "usersession.h"
 #include "vendaproxymodel.h"
 #include "widgetlogisticaentregues.h"
-
-#include <ciso646>
 
 WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
 

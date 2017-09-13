@@ -1,21 +1,24 @@
 #include <QDebug>
 #include <QFileDialog>
+#include <ciso646>
 
 #include "cadastrousuario.h"
 #include "ui_userconfig.h"
 #include "userconfig.h"
 #include "usersession.h"
 
-#include <ciso646>
-
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
   ui->itemBoxLoja->setValue(UserSession::settings("User/lojaACBr"));
+  // TODO: remove these two
+  ui->lineEditEmailContabilidade->setText(UserSession::settings("User/emailContabilidade").toString());
+  ui->lineEditEmailLogistica->setText(UserSession::settings("User/emailLogistica").toString());
 
   ui->lineEditServidorSMTP->setText(UserSession::settings("User/servidorSMTP").toString());
   ui->lineEditPortaSMTP->setText(UserSession::settings("User/portaSMTP").toString());
+  // TODO: rename this to email
   ui->lineEditEmail->setText(UserSession::settings("User/emailCompra").toString());
   ui->lineEditEmailSenha->setText(UserSession::settings("User/emailSenha").toString());
   ui->lineEditEmailCopia->setText(UserSession::settings("User/emailCopia").toString());
@@ -28,10 +31,16 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();
-    ui->groupBoxEmailCompra->hide();
+    ui->groupBoxEmail->hide();
     ui->labelCompras->hide();
     ui->lineEditComprasFolder->hide();
     ui->pushButtonComprasFolder->hide();
+    ui->labelEntregas->hide();
+    ui->lineEditEntregasPdfFolder->hide();
+    ui->pushButtonEntregasPdfFolder->hide();
+    ui->labelEntregas_2->hide();
+    ui->lineEditEntregasXmlFolder->hide();
+    ui->pushButtonEntregasXmlFolder->hide();
   }
 
   adjustSize();
@@ -49,6 +58,8 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 
 void UserConfig::on_pushButtonSalvar_clicked() {
   UserSession::setSettings("User/lojaACBr", ui->itemBoxLoja->getValue());
+  UserSession::setSettings("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
+  UserSession::setSettings("User/emailLogistica", ui->lineEditEmailLogistica->text());
 
   UserSession::setSettings("User/servidorSMTP", ui->lineEditServidorSMTP->text());
   UserSession::setSettings("User/portaSMTP", ui->lineEditPortaSMTP->text());

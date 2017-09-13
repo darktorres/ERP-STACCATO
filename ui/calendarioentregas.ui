@@ -36,6 +36,9 @@
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectRows</enum>
       </property>
@@ -73,7 +76,7 @@
          <item row="0" column="2">
           <widget class="QPushButton" name="pushButtonConsultarNFe">
            <property name="enabled">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="text">
             <string>Consultar NFe</string>
@@ -121,12 +124,12 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QPushButton" name="pushButtonTestarProtocolo">
+          <widget class="QPushButton" name="pushButtonProtocoloEntrega">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Testar Protocolo</string>
+            <string>Protocolo Entrega</string>
            </property>
           </widget>
          </item>

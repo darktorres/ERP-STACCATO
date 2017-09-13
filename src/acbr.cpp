@@ -6,10 +6,9 @@
 #include <QSqlQuery>
 #include <QTcpSocket>
 #include <QUrl>
+#include <ciso646>
 
 #include "acbr.h"
-
-#include <ciso646>
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {}
 

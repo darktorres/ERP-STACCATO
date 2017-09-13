@@ -1,14 +1,13 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "itembox.h"
 #include "ui_cadastroprofissional.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);

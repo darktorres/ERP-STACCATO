@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "followup.h"
 #include "orcamento.h"
@@ -9,8 +10,6 @@
 #include "ui_widgetorcamento.h"
 #include "usersession.h"
 #include "widgetorcamento.h"
-
-#include <ciso646>
 
 WidgetOrcamento::WidgetOrcamento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
 

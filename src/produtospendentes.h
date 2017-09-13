@@ -3,6 +3,7 @@
 
 #include <QDialog>
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 namespace Ui {
@@ -28,7 +29,7 @@ private:
   QString error;
   SqlTableModel modelProdutos;
   SqlTableModel modelViewProdutos;
-  SqlTableModel modelEstoque;
+  SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods
   bool insere(const QDateTime &dataPrevista);

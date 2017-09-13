@@ -22,16 +22,15 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
+#include <ciso646>
+
 #include "xlsxabstractsheet.h"
 #include "xlsxabstractsheet_p.h"
 #include "xlsxworkbook.h"
 
-#include <ciso646>
-
 QT_BEGIN_NAMESPACE_XLSX
 
-AbstractSheetPrivate::AbstractSheetPrivate(AbstractSheet *p, AbstractSheet::CreateFlag flag)
-    : AbstractOOXmlFilePrivate(p, flag) {
+AbstractSheetPrivate::AbstractSheetPrivate(AbstractSheet *p, AbstractSheet::CreateFlag flag) : AbstractOOXmlFilePrivate(p, flag) {
   type = AbstractSheet::ST_WorkSheet;
   sheetState = AbstractSheet::SS_Visible;
 }
@@ -69,8 +68,7 @@ AbstractSheetPrivate::AbstractSheetPrivate(AbstractSheet *p, AbstractSheet::Crea
 /*!
  * \internal
  */
-AbstractSheet::AbstractSheet(const QString &name, int id, Workbook *workbook, AbstractSheetPrivate *d)
-    : AbstractOOXmlFile(d) {
+AbstractSheet::AbstractSheet(const QString &name, int id, Workbook *workbook, AbstractSheetPrivate *d) : AbstractOOXmlFile(d) {
   d_func()->name = name;
   d_func()->id = id;
   d_func()->workbook = workbook;

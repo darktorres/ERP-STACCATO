@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "estoque.h"
@@ -10,14 +11,14 @@
 #include "ui_estoque.h"
 #include "xml_viewer.h"
 
-#include <ciso646>
-
-Estoque::Estoque(QWidget *parent) : QDialog(parent), ui(new Ui::Estoque) {
+Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(idEstoque), ui(new Ui::Estoque) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
 
   setupTables();
+
+  viewRegisterById(idEstoque, showWindow);
 }
 
 Estoque::~Estoque() { delete ui; }
@@ -155,7 +156,7 @@ void Estoque::calcularRestante() {
   ui->doubleSpinBoxRestante->setSuffix(" " + model.data(0, "un").toString());
 }
 
-bool Estoque::viewRegisterById(const QString &idEstoque, bool showWindow) {
+bool Estoque::viewRegisterById(const QString &idEstoque, const bool showWindow) {
   if (idEstoque.isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Estoque não encontrado!");
     return false;
@@ -209,7 +210,9 @@ void Estoque::exibirNota() {
   }
 }
 
-bool Estoque::criarConsumo(const int idVendaProduto, double quant) {
+bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
+  // TODO: relacionar o consumo quebrando a linha em pedido_fornecedor_has_produto e setar o idVenda/idVendaProduto
+
   if (model.filter().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não setou idEstoque!");
     return false;
@@ -217,20 +220,8 @@ bool Estoque::criarConsumo(const int idVendaProduto, double quant) {
 
   bool consumed = false;
 
+  // TODO: refactor this to remove the loop, supposedly there is only one line
   for (int row = 0; row < model.rowCount(); ++row) {
-    if (quant == 0) {
-      QSqlQuery queryQuant;
-      queryQuant.prepare("SELECT quant FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
-      queryQuant.bindValue(":idVendaProduto", idVendaProduto);
-
-      if (not queryQuant.exec() or not queryQuant.first()) {
-        QMessageBox::critical(this, "Erro!", "Erro buscando em venda_has_produto: " + model.lastError().text());
-        return false;
-      }
-
-      quant = queryQuant.value("quant").toDouble();
-    }
-
     if (quant > model.data(row, "quant").toDouble()) continue;
 
     const int newRow = modelConsumo.rowCount();

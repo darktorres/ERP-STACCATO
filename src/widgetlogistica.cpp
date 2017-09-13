@@ -2,11 +2,10 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "ui_widgetlogistica.h"
 #include "widgetlogistica.h"
-
-#include <ciso646>
 
 WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {
   ui->setupUi(this);

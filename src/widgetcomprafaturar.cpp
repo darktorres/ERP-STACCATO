@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "importarxml.h"
 #include "inputdialog.h"
@@ -12,15 +13,30 @@
 #include "ui_widgetcomprafaturar.h"
 #include "widgetcomprafaturar.h"
 
-WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) { ui->setupUi(this); }
-#include <ciso646>
+WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {
+  ui->setupUi(this);
+
+  ui->splitter->setStretchFactor(0, 0);
+  ui->splitter->setStretchFactor(1, 1);
+}
 
 WidgetCompraFaturar::~WidgetCompraFaturar() { delete ui; }
 
 void WidgetCompraFaturar::setupTables() {
+  modelResumo.setTable("view_fornecedor_compra_faturar");
+
+  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
+
+  modelResumo.setHeaderData("fornecedor", "Forn.");
+
+  ui->tableResumo->setModel(&modelResumo);
+  ui->tableResumo->hideColumn("idVenda");
+
   model.setTable("view_faturamento");
 
-  model.setFilter("representacao = " + QString(ui->checkBoxRepresentacao->isChecked() ? "1" : "0"));
+  montaFiltro();
+
+  //  model.setFilter("representacao = " + QString(ui->checkBoxRepresentacao->isChecked() ? "1" : "0"));
 
   model.setHeaderData("dataPrevFat", "Prev. Fat.");
 
@@ -28,10 +44,20 @@ void WidgetCompraFaturar::setupTables() {
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("representacao");
+
+  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
+  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
 }
 
 bool WidgetCompraFaturar::updateTables() {
   if (model.tableName().isEmpty()) setupTables();
+
+  if (not modelResumo.select()) {
+    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
+    return false;
+  }
+
+  ui->tableResumo->resizeColumnsToContents();
 
   if (not model.select()) {
     emit errorSignal("Erro lendo tabela faturamento: " + model.lastError().text());
@@ -133,8 +159,17 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
 void WidgetCompraFaturar::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
-  model.setFilter("representacao = " + QString(checked ? "1" : "0"));
+// void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
+//  model.setFilter("representacao = " + QString(checked ? "1" : "0"));
+
+//  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+//}
+
+void WidgetCompraFaturar::montaFiltro() {
+  const bool representacao = ui->checkBoxRepresentacao->isChecked();
+  const bool sul = ui->checkBoxMostrarSul->isChecked();
+
+  model.setFilter("representacao = " + QString(representacao ? "1" : "0") + " AND " + QString(sul ? "(Código LIKE 'CAMB%' OR Código IS NULL)" : "(Código NOT LIKE 'CAMB%' OR Código IS NULL)"));
 
   if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
 }

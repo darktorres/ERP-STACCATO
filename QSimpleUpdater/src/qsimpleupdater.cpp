@@ -77,16 +77,15 @@
  * and proccessing the version data and changelog data.
  */
 
-#include "qsimpleupdater.h"
-
 #include <ciso646>
+
+#include "qsimpleupdater.h"
 
 /*! \internal
  * Initializes and configures the class.
  */
 
-QSimpleUpdater::QSimpleUpdater(QObject *parent)
-    : QObject(parent), m_silent(false), m_show_newest_version(true), m_show_update_available(true), m_new_version_available(false) {
+QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_silent(false), m_show_newest_version(true), m_show_update_available(true), m_new_version_available(false) {
 
   m_progressDialog = new ProgressDialog();
   m_downloadDialog = new DownloadDialog();
@@ -340,8 +339,7 @@ void QSimpleUpdater::onCheckingFinished() {
     _message.setDetailedText(changeLog());
     _message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     _message.setText("<b>" + tr("Uma nova versão de %1 está disponível!").arg(qApp->applicationName()) + "</b>");
-    _message.setInformativeText(
-        tr("%1 %2 está disponível - você tem %3. Gostaria de baixar ela agora?").arg(qApp->applicationName()).arg(latestVersion()).arg(installedVersion()));
+    _message.setInformativeText(tr("%1 %2 está disponível - você tem %3. Gostaria de baixar ela agora?").arg(qApp->applicationName()).arg(latestVersion()).arg(installedVersion()));
     _message.setButtonText(QMessageBox::Yes, "Baixar");
     _message.setButtonText(QMessageBox::No, "Pular");
 

@@ -1,9 +1,8 @@
 #include <QBrush>
 #include <QDebug>
+#include <ciso646>
 
 #include "followupproxymodel.h"
-
-#include <ciso646>
 
 FollowUpProxyModel::FollowUpProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforo(model->fieldIndex("semaforo")) { setSourceModel(model); }
 

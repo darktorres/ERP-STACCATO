@@ -3,12 +3,11 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "inputdialogconfirmacao.h"
 #include "orcamento.h"
 #include "ui_inputdialogconfirmacao.h"
-
-#include <ciso646>
 
 InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
@@ -493,7 +492,8 @@ bool InputDialogConfirmacao::criarReposicaoCliente() {
   if (not modelVenda.setData(newRow, "parcialDesc", 0)) return false;
   if (not modelVenda.setData(newRow, "descGlobal", 0)) return false;
   if (not modelVenda.setData(newRow, "total", 0)) return false;
-  if (not modelVenda.setData(newRow, "status", "QUEBRA")) return false;
+  if (not modelVenda.setData(newRow, "status", "REPO. ENTREGA")) return false;
+  if (not modelVenda.setData(newRow, "reposicao", true)) return false;
 
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
   if (not modelVenda.setData(newRow, "obs", obs)) return false;
@@ -615,7 +615,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
         return false;
       }
 
-      query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto");
+      query2.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.' WHERE idVendaProduto = :idVendaProduto");
       query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
       if (not query2.exec()) {

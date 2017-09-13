@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "estoqueproxymodel.h"
 #include "importarxml.h"
@@ -11,8 +12,6 @@
 #include "reaisdelegate.h"
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
-
-#include <ciso646>
 
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
@@ -42,6 +41,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   modelEstoque.setHeaderData("codComercial", "Cód. Com.");
   modelEstoque.setHeaderData("valorUnid", "R$ Unid.");
   modelEstoque.setHeaderData("valor", "R$");
+  modelEstoque.setHeaderData("vICMSST", "ST");
 
   modelEstoque.setFilter("status = 'TEMP'");
 
@@ -59,6 +59,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableEstoque->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
   ui->tableEstoque->hideColumn("recebidoPor");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("idNFe");
@@ -86,7 +87,6 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableEstoque->hideColumn("pMVAST");
   ui->tableEstoque->hideColumn("vBCST");
   ui->tableEstoque->hideColumn("pICMSST");
-  ui->tableEstoque->hideColumn("vICMSST");
   ui->tableEstoque->hideColumn("cEnq");
   ui->tableEstoque->hideColumn("cstIPI");
   ui->tableEstoque->hideColumn("cstPIS");
@@ -258,7 +258,45 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   }
 }
 
+bool ImportarXML::cadastrarProdutoEstoque() {
+  QSqlQuery query;
+  query.prepare(
+      "INSERT INTO produto SELECT NULL, p.idProdutoUpd, :idEstoque, p.idFornecedor, p.idFornecedorUpd, p.fornecedor, p.fornecedorUpd, CONCAT(p.descricao, ' (ESTOQUE)'), p.descricaoUpd, "
+      ":estoqueRestante, p.estoqueRestanteUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, p.multiploUpd, p.m2cx, p.m2cxUpd, "
+      "p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, p.ncmEx, p.ncmExUpd, p.cfop, "
+      "p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, p.custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, "
+      "p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, '2020-12-31', p.validadeUpd, 0, p.descontinuadoUpd, "
+      "p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
+
+  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+    double consumo = 0;
+
+    for (int row2 = 0; row2 < modelConsumo.rowCount(); ++row2) {
+      if (modelConsumo.data(row2, "idEstoque").toInt() != modelEstoque.data(row, "idEstoque").toInt()) continue;
+
+      consumo += modelConsumo.data(row2, "quant").toDouble();
+    }
+
+    const double estoqueRestante = modelEstoque.data(row, "quant").toDouble() + consumo;
+
+    if (estoqueRestante == 0) continue;
+
+    query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
+    query.bindValue(":idEstoque", modelEstoque.data(row, "idEstoque"));
+    query.bindValue(":estoqueRestante", estoqueRestante);
+
+    if (not query.exec()) {
+      error = "Erro criando produto_estoque: " + query.lastError().text();
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool ImportarXML::importar() {
+  if (not cadastrarProdutoEstoque()) return false;
+
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     if (not modelEstoque.setData(row, "status", "EM COLETA")) return false;
   }
@@ -326,7 +364,6 @@ bool ImportarXML::importar() {
   }
 
   //------------------------------
-
   QSqlQuery query;
   query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto");
 
@@ -368,11 +405,15 @@ void ImportarXML::on_pushButtonImportar_clicked() {
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+
   if (not importar()) {
     if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     QSqlQuery("ROLLBACK").exec();
     return;
   }
+
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 
   QSqlQuery("COMMIT").exec();
 
@@ -398,6 +439,8 @@ bool ImportarXML::limparAssociacoes() {
   while (modelConsumo.rowCount() > 0) {
     if (not modelConsumo.removeRow(0)) return false;
   }
+
+  if (not modelConsumo.submitAll()) return false;
 
   return true;
 }
@@ -1020,3 +1063,4 @@ void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsum
 // TODO: 5substituir 'quantConsumida' por separacao de linha na associacao de nota/compra
 // TODO: 5avisar se R$ da nota for diferente do R$ da compra
 // TODO: 5bloquear a importacao de documentos que nao sejam NFe
+// TODO: verificar se o valor total da nota bate com o valor total da compra (bater impostos/st)

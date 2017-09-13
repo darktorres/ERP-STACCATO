@@ -1,6 +1,6 @@
-#include "singleeditdelegate.h"
-
 #include <ciso646>
+
+#include "singleeditdelegate.h"
 
 SingleEditDelegate::SingleEditDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 

@@ -1,11 +1,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
+#include <ciso646>
 
 #include "ui_widgetnfe.h"
 #include "widgetnfe.h"
 #include "xml_viewer.h"
-
-#include <ciso646>
 
 WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
   ui->setupUi(this);

@@ -1,14 +1,13 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "acbr.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
 #include "ui_widgetcompraoc.h"
 #include "widgetcompraoc.h"
-
-#include <ciso646>
 
 WidgetCompraOC::WidgetCompraOC(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
 

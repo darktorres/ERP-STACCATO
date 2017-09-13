@@ -3,14 +3,13 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "acbr.h"
 #include "cadastrarnfe.h"
 #include "reaisdelegate.h"
 #include "ui_cadastrarnfe.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
@@ -69,9 +68,13 @@ void CadastrarNFe::setupTables() {
   modelVenda.setEditStrategy(QSqlTableModel::OnManualSubmit);
   modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
-  if (not modelVenda.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela de vendas: " + modelVenda.lastError().text());
-  }
+  if (not modelVenda.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela de vendas: " + modelVenda.lastError().text());
+
+  modelLoja.setTable("loja");
+  modelLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelLoja.setFilter("idLoja = " + UserSession::settings("User/lojaACBr").toString());
+
+  if (not modelLoja.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela de lojas: " + modelLoja.lastError().text());
 
   modelProd.setTable("view_produto_estoque");
   modelProd.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -96,14 +99,6 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
   ui->tableItens->hideColumn("idProduto");
   ui->tableItens->hideColumn("idVendaProduto");
-
-  modelLoja.setTable("loja");
-  modelLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  modelLoja.setFilter("idLoja = " + UserSession::settings("User/lojaACBr").toString());
-
-  if (not modelLoja.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela de lojas: " + modelLoja.lastError().text());
-  }
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
@@ -175,12 +170,15 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   }
 
   QSqlQuery queryNota;
-  queryNota.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, chaveAcesso, valor) VALUES (:numeroNFe, :tipo, "
-                    ":xml, :status, :chaveAcesso, :valor)");
+  // TODO: 5ao guardar esta nota como pendente ela deve ser consultada:
+  // - caso nao conste na base da receita deve ser deletada
+  // - caso conste validar a nota, se ela nao estiver autorizada deletar
+  // - caso esteja validada atualizar
+  queryNota.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, chaveAcesso, valor) VALUES (:numeroNFe, :tipo, :xml, :status, :chaveAcesso, :valor)");
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":tipo", "SAÍDA");
   queryNota.bindValue(":xml", xml);
-  queryNota.bindValue(":status", "PENDENTE");
+  queryNota.bindValue(":status", "NOTA PENDENTE");
   queryNota.bindValue(":chaveAcesso", chaveNum);
   queryNota.bindValue(":valor", ui->doubleSpinBoxValorNota->value());
 
@@ -205,23 +203,21 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
     QMessageBox::critical(this, "Resposta EnviarNFe", resposta);
 
-    // se envio da nota falhar tentar consultar
-
-    // se receita retornar 'nota nao consta no banco de dados' reenviar
-    // XMotivo=Rejeição: NF-e não consta na base de dados da SEFAZ
-
     ACBr::enviarComando("NFE.ConsultarNFe(" + fileName + ")", resposta);
 
-    QMessageBox::information(this, "ConsultarNFe", resposta);
+    if (resposta.contains("XMotivo=Rejeição: NF-e não consta na base de dados da SEFAZ")) {
+      // se receita retornar 'nota nao consta no banco de dados' reenviar
+      // XMotivo=Rejeição: NF-e não consta na base de dados da SEFAZ
 
-    if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-      QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);
-      return;
+      ACBr::enviarComando("NFE.EnviarNFe(" + fileName + ", 1, 1, 0, 1)", resposta);
+
+      if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
+        // verificar o erro
+        QMessageBox::critical(this, "Resposta EnviarNFe", resposta);
+        return;
+      }
     }
   }
-
-  // se consulta falhar pedir para o usuario consultar manualmente depois
-  // TODO: e mudar status para 'NOTA PENDENTE' para habilitar o botao de consulta
 
   {
     QFile file(fileName);
@@ -252,8 +248,10 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   {
     // TODO:__project public code
-    const QString email = "fiscal5@ellycontabil.com.br";
-    const QString copia = "logistica@staccatorevestimentos.com.br";
+    //      const QString email = "fiscal5@ellycontabil.com.br";
+    //      const QString copia = "logistica@staccatorevestimentos.com.br";
+    const QString email = UserSession::settings("User/emailContabilidade").toString();
+    const QString copia = UserSession::settings("User/emailLogistica").toString();
     const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
     const QString comando = "NFE.EnviarEmail(" + email + "," + fileName + ",1,'" + assunto + "', " + copia + ")";
@@ -372,7 +370,7 @@ bool CadastrarNFe::preencherNumeroNFe() {
   QSqlQuery queryNfe;
 
   if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE tipo = 'SAÍDA' AND status = 'AUTORIZADO' AND mid(chaveAcesso, 7, 14) = '" + cnpj +
-                        "' AND created BETWEEN DATE_ADD(CURDATE(), INTERVAL - 30 DAY) AND CURDATE()") or
+                        "' AND created BETWEEN DATE_ADD(CURDATE(), INTERVAL - 30 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)") or
       not queryNfe.first()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando idNFe: " + queryNfe.lastError().text());
     return false;
@@ -562,12 +560,9 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   //
 
   QSqlQuery queryTransp;
-  queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, "
-                      "the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM veiculo_has_produto vhp "
-                      "LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN "
-                      "transportadora t ON thv.idTransportadora = t.idTransportadora LEFT JOIN "
-                      "transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE "
-                      "idVendaProduto = :idVendaProduto");
+  queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
+                      "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
+                      "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE idVendaProduto = :idVendaProduto");
   queryTransp.bindValue(":idVendaProduto", items.first());
 
   if (not queryTransp.exec() or not queryTransp.first()) {
@@ -646,6 +641,8 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   //
 
   updateImpostos();
+
+  setConnections();
 }
 
 bool CadastrarNFe::criarChaveAcesso() {
@@ -699,6 +696,7 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
   stream << "Saida = " + QDate::currentDate().toString("dd/MM/yyyy") << endl;
   stream << "Tipo = " + ui->lineEditTipo->text() << endl;
   stream << "FormaPag = " + ui->lineEditFormatoPagina->text() << endl;
+  stream << "idDest = " + ui->comboBoxDestinoOperacao->currentText().left(1) << endl;
   stream << "indPres = 1" << endl;
   stream << "indFinal = 1" << endl;
 }
@@ -794,6 +792,41 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     stream << "ValorBase = " + modelProd.data(row, "vBCCOFINS").toString() << endl;
     stream << "Aliquota = " + modelProd.data(row, "pCOFINS").toString() << endl;
     stream << "Valor = " + modelProd.data(row, "vCOFINS").toString() << endl;
+
+    // TODO: 5implementar tabela no sql para busca de porcentagens de icms interna e inter
+    // buscar aliquotas e usar no codigo abaixo
+
+    // PARTILHA ICMS
+
+    // se destino operacao comecar com 2 (interestadual) fazer partilha
+
+    //    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+    //      stream << "[ICMSUFDest" + numProd + "]" << endl;
+    //      stream << "vBCUFDest = " + modelProd.data(row, "total").toString() << endl;
+    //      stream << "pFCPUFDest = 2" << endl;
+    //      stream << "pICMSInter = 12" << endl;
+
+    //      stream << "pICMSInterPart = 60" << endl;
+    //      stream << "vFCPUFDest = " + QString::number(modelProd.data(row, "total").toDouble() * 0.02) << endl;
+    //      stream << "vICMSUFDest = " + QString::number(modelProd.data(row, "total").toDouble() * 0.08 * 0.4) << endl;
+    //      stream << "vICMSUFRemet = " + QString::number(modelProd.data(row, "total").toDouble() * 0.08 * 0.6) << endl;
+    //    }
+
+    // consultar a tabela de icms
+
+    //    <!-- Grupo de Tributação do ICMS para a UF de destino -->
+    //        <ICMSUFDest>
+    //            <vBCUFDest>1000.00</vBCUFDest>
+    //            <pFCPUFDest>2.00</pFCPUFDest>
+    //            <pICMSUFDest>18.00</pICMSUFDest>
+    //            <pICMSInter>4.00</pICMSInter>
+
+    //        <!-- Percentual referente ao ano de 2016 (40%) -->
+    //            <pICMSInterPart>40</pICMSInterPart>
+    //            <vFCPUFDest>20.00</vFCPUFDest>
+    //            <vICMSUFDest>56.00</vICMSUFDest>
+    //            <vICMSUFRemet>84.00</vICMSUFRemet>
+    //        </ICMSUFDest>
   }
 }
 
@@ -807,6 +840,36 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProduto->value(), 'f', 2) << endl;
   stream << "ValorFrete = " + QString::number(ui->doubleSpinBoxValorFrete->value(), 'f', 2) << endl;
   stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
+
+  // PARTILHA ICMS
+
+  // TODO: 5implementar tabela no sql para busca de porcentagens de icms interna e inter
+  // buscar aliquotas e usar no codigo abaixo
+
+  //  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+  //    double totalfcp = 0;
+  //    double totalicmsdest = 0;
+  //    double totalicmsorig = 0;
+
+  //    for (int row = 0; row < modelProd.rowCount(); ++row) {
+  //      totalfcp += modelProd.data(row, "total").toDouble() * 0.02;
+  //      totalicmsdest += modelProd.data(row, "total").toDouble() * 0.08 * 0.4;
+  //      totalicmsorig += modelProd.data(row, "total").toDouble() * 0.08 * 0.6;
+  //    }
+
+  //    stream << "vFCPUFDest = " + QString::number(totalfcp) << endl;
+  //    stream << "vICMSUFDest = " + QString::number(totalicmsdest) << endl;
+  //    stream << "vICMSUFRemet = " + QString::number(totalicmsorig) << endl;
+  //  }
+
+  //  <!-- Valor total do ICMS relativo Fundo de Combate à Pobreza (FCP) da UF de destino -->
+  //      <vFCPUFDest>20.00</vFCPUFDest>
+
+  //  <!-- Valor total do ICMS Interestadual para a UF de destino -->
+  //      <vICMSUFDest>56.00</vICMSUFDest>
+
+  //  <!-- Valor total do ICMS Interestadual para a UF do remetente -->
+  //      <vICMSUFRemet>84.00</vICMSUFRemet>
 }
 
 void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
@@ -861,9 +924,9 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelProd.data(index.row(), "cstCOFINS").toString(), Qt::MatchStartsWith));
 
   QSqlQuery query;
-  query.prepare("SELECT tipoICMS, cfop, orig, cstICMS, modBC, vBC, pICMS, vICMS, modBCST, pMVAST, vBCST, pICMSST, vICMSST, "
-                "cEnq, cstIPI, cstPIS, vBCPIS, pPIS, vPIS, cstCOFINS, vBCCOFINS, pCOFINS, vCOFINS FROM "
-                "view_produto_estoque WHERE idVendaProduto = :idVendaProduto");
+  query.prepare(
+      "SELECT tipoICMS, cfop, orig, cstICMS, modBC, vBC, pICMS, vICMS, modBCST, pMVAST, vBCST, pICMSST, vICMSST, cEnq, cstIPI, cstPIS, vBCPIS, pPIS, vPIS, cstCOFINS, vBCCOFINS, pCOFINS, vCOFINS FROM "
+      "view_produto_estoque WHERE idVendaProduto = :idVendaProduto");
   query.bindValue(":idVendaProduto", modelProd.data(index.row(), "idVendaProduto"));
 
   if (not query.exec() or not query.first()) {
@@ -1652,6 +1715,42 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
   ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
 
   // TODO: 0pedir para trocar cartao e rodar teste no acbr para verificar se esta tudo ok e funcionando
+}
+
+void CadastrarNFe::setConnections() {
+  connect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged);
+  connect(ui->comboBoxCOFINScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged);
+  connect(ui->comboBoxICMSModBc, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged);
+  connect(ui->comboBoxICMSModBcSt, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged);
+  connect(ui->comboBoxICMSOrig, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged);
+  connect(ui->comboBoxIPIcst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxIPIcst_currentTextChanged);
+  connect(ui->comboBoxPIScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxPIScst_currentTextChanged);
+  connect(ui->comboBoxRegime_2, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxRegime_2_currentTextChanged);
+  connect(ui->comboBoxRegime, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxRegime_currentTextChanged);
+  connect(ui->comboBoxSituacaoTributaria_2, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxSituacaoTributaria_2_currentTextChanged);
+  connect(ui->comboBoxSituacaoTributaria, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged);
+  connect(ui->doubleSpinBoxCOFINSpcofins, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged);
+  connect(ui->doubleSpinBoxCOFINSvbc, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged);
+  connect(ui->doubleSpinBoxCOFINSvcofins, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged);
+  connect(ui->doubleSpinBoxICMSpicms, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged);
+  connect(ui->doubleSpinBoxICMSpicmsst, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged);
+  connect(ui->doubleSpinBoxICMSvbc, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged);
+  connect(ui->doubleSpinBoxICMSvbcst, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged);
+  connect(ui->doubleSpinBoxICMSvicms, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged);
+  connect(ui->doubleSpinBoxICMSvicmsst, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged);
+  connect(ui->doubleSpinBoxPISppis, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged);
+  connect(ui->doubleSpinBoxPISvbc, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged);
+  connect(ui->doubleSpinBoxPISvpis, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged);
+  connect(ui->doubleSpinBoxValorFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged);
+  connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxCliente_textChanged);
+  connect(ui->itemBoxEnderecoEntrega, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged);
+  connect(ui->itemBoxEnderecoFaturamento, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged);
+  connect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
+  connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
+  connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
+  connect(ui->tableItens, &TableView::entered, this, &CadastrarNFe::on_tableItens_entered);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
 }
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo

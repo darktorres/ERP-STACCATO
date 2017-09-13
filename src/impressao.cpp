@@ -6,11 +6,10 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "impressao.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 Impressao::Impressao(const QString &id) : id(id) {
   verificaTipo();
@@ -80,6 +79,8 @@ void Impressao::print() {
                                                                   queryEndFat.value("complemento").toString() + " - " + queryEndFat.value("bairro").toString() + " - " +
                                                                   queryEndFat.value("cidade").toString() + " - " + queryEndFat.value("uf").toString());
   report->dataManager()->setReportVariable("CEPEntrega", queryEndEnt.value("cep"));
+
+  // TODO: refactor this to avoid the ' - - - - '
   report->dataManager()->setReportVariable("EndEntrega", query.value("idEnderecoEntrega").toInt() == 1
                                                              ? "Não há/Retira"
                                                              : queryEndEnt.value("logradouro").toString() + " - " + queryEndEnt.value("numero").toString() + " - " +

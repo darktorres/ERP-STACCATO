@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 namespace Ui {
@@ -31,9 +32,9 @@ private slots:
 private:
   // attributes
   bool isReady = false;
-  QSqlQueryModel modelCaixa;
-  QSqlQueryModel modelCaixa2;
-  QSqlQueryModel modelFuturo;
+  SqlQueryModel modelCaixa;
+  SqlQueryModel modelCaixa2;
+  SqlQueryModel modelFuturo;
   Ui::WidgetFluxoCaixa *ui;
   // methods
   void montaFiltro();

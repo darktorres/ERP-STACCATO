@@ -2,10 +2,9 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "sqltablemodel.h"
-
-#include <ciso646>
 
 SqlTableModel::SqlTableModel(QObject *parent) : QSqlRelationalTableModel(parent) {}
 

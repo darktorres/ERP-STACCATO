@@ -3,19 +3,35 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "ui_widgetcompraconfirmar.h"
 #include "widgetcompraconfirmar.h"
 
-WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) { ui->setupUi(this); }
-#include <ciso646>
+WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {
+  ui->setupUi(this);
+
+  ui->splitter->setStretchFactor(0, 0);
+  ui->splitter->setStretchFactor(1, 1);
+}
 
 WidgetCompraConfirmar::~WidgetCompraConfirmar() { delete ui; }
 
 void WidgetCompraConfirmar::setupTables() {
+  modelResumo.setTable("view_fornecedor_compra_confirmar");
+
+  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
+
+  modelResumo.setHeaderData("fornecedor", "Forn.");
+
+  ui->tableResumo->setModel(&modelResumo);
+  ui->tableResumo->hideColumn("idVenda");
+
   model.setTable("view_compras");
+
+  model.setFilter("(Venda NOT LIKE '%CAMB%' OR Venda IS NULL)");
 
   model.setHeaderData("dataPrevConf", "Prev. Conf.");
 
@@ -26,6 +42,13 @@ void WidgetCompraConfirmar::setupTables() {
 
 bool WidgetCompraConfirmar::updateTables() {
   if (model.tableName().isEmpty()) setupTables();
+
+  if (not modelResumo.select()) {
+    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
+    return false;
+  }
+
+  ui->tableResumo->resizeColumnsToContents();
 
   if (not model.select()) {
     emit errorSignal("Erro lendo tabela compras: " + model.lastError().text());

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 namespace Ui {
@@ -40,8 +41,8 @@ private slots:
 private:
   // attributes
   SqlTableModel model;
-  QSqlQueryModel modelVencidos;
-  QSqlQueryModel modelVencer;
+  SqlQueryModel modelVencidos;
+  SqlQueryModel modelVencer;
   Tipo tipo = Tipo::Nulo;
   Ui::WidgetPagamento *ui;
   // methods

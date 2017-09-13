@@ -1,10 +1,9 @@
 #include <QApplication>
 #include <QDebug>
+#include <ciso646>
 
 #include "logindialog.h"
 #include "mainwindow.h"
-
-#include <ciso646>
 
 int main(int argc, char *argv[]) {
 
@@ -17,7 +16,7 @@ int main(int argc, char *argv[]) {
   app.setOrganizationName("Staccato");
   app.setApplicationName("ERP");
   app.setWindowIcon(QIcon("Staccato.ico"));
-  app.setApplicationVersion("0.5.11");
+  app.setApplicationVersion("0.5.34");
   app.setStyle("Fusion");
 
   LoginDialog dialog;

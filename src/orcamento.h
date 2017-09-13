@@ -22,6 +22,8 @@ private slots:
 private:
   // attributes
   bool isReadOnly = false;
+  bool currentItemIsEstoque = false;
+  bool currentItemIsPromocao = false;
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;
@@ -64,7 +66,7 @@ private:
   void on_doubleSpinBoxTotal_valueChanged(const double total);
   void on_doubleSpinBoxTotalItem_valueChanged(const double);
   void on_itemBoxCliente_textChanged(const QString &);
-  void on_itemBoxProduto_textChanged(const QString &);
+  void on_itemBoxProduto_valueChanged(const QVariant &);
   void on_itemBoxVendedor_textChanged(const QString &);
   void on_pushButtonAdicionarItem_clicked();
   void on_pushButtonApagarOrc_clicked();

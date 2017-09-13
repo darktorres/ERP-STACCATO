@@ -13,11 +13,11 @@
  *
  */
 
-#include "download_dialog.h"
-#include "ui_download_dialog.h"
-
 #include <QMutex>
 #include <ciso646>
+
+#include "download_dialog.h"
+#include "ui_download_dialog.h"
 
 DownloadDialog::DownloadDialog(QWidget *parent) : QWidget(parent), ui(new Ui::DownloadDialog) {
 
@@ -167,8 +167,7 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
       _received_string = tr("%1 MB").arg(_received);
     }
 
-    ui->downloadLabel->setText(tr("Baixando atualizações") + " (" + _received_string + " " + tr("de") + " " +
-                               _total_string + ")");
+    ui->downloadLabel->setText(tr("Baixando atualizações") + " (" + _received_string + " " + tr("de") + " " + _total_string + ")");
 
     uint _diff = QDateTime::currentDateTime().toTime_t() - m_start_time;
 

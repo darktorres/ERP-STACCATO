@@ -2,10 +2,9 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "cepcompleter.h"
-
-#include <ciso646>
 
 bool CepCompleter::buscaCEP(const QString &cep) {
   QSqlQuery query;

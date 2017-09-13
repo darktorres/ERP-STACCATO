@@ -3,14 +3,13 @@
 #include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "cadastrocliente.h"
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "ui_cadastrocliente.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);

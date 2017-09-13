@@ -24,11 +24,13 @@ private slots:
   void on_pushButtonCancelarCompra_clicked();
   void on_pushButtonConfirmarCompra_clicked();
   void on_table_entered(const QModelIndex &);
+  void on_checkBoxMostrarSul_toggled(bool checked);
 
 private:
   // attributes
   QString error;
   SqlTableModel model;
+  SqlTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
   void setupTables();

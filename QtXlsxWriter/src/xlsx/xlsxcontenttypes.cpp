@@ -22,15 +22,15 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxcontenttypes_p.h"
 #include <QBuffer>
 #include <QDebug>
 #include <QFile>
 #include <QMapIterator>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
 #include <ciso646>
+
+#include "xlsxcontenttypes_p.h"
 
 namespace QXlsx {
 
@@ -46,74 +46,37 @@ void ContentTypes::addDefault(const QString &key, const QString &value) { m_defa
 
 void ContentTypes::addOverride(const QString &key, const QString &value) { m_overrides.insert(key, value); }
 
-void ContentTypes::addDocPropApp() {
-  addOverride(QStringLiteral("/docProps/app.xml"), m_document_prefix + QStringLiteral("extended-properties+xml"));
-}
+void ContentTypes::addDocPropApp() { addOverride(QStringLiteral("/docProps/app.xml"), m_document_prefix + QStringLiteral("extended-properties+xml")); }
 
-void ContentTypes::addDocPropCore() {
-  addOverride(QStringLiteral("/docProps/core.xml"), m_package_prefix + QStringLiteral("core-properties+xml"));
-}
+void ContentTypes::addDocPropCore() { addOverride(QStringLiteral("/docProps/core.xml"), m_package_prefix + QStringLiteral("core-properties+xml")); }
 
-void ContentTypes::addStyles() {
-  addOverride(QStringLiteral("/xl/styles.xml"), m_document_prefix + QStringLiteral("spreadsheetml.styles+xml"));
-}
+void ContentTypes::addStyles() { addOverride(QStringLiteral("/xl/styles.xml"), m_document_prefix + QStringLiteral("spreadsheetml.styles+xml")); }
 
-void ContentTypes::addTheme() {
-  addOverride(QStringLiteral("/xl/theme/theme1.xml"), m_document_prefix + QStringLiteral("theme+xml"));
-}
+void ContentTypes::addTheme() { addOverride(QStringLiteral("/xl/theme/theme1.xml"), m_document_prefix + QStringLiteral("theme+xml")); }
 
-void ContentTypes::addWorkbook() {
-  addOverride(QStringLiteral("/xl/workbook.xml"), m_document_prefix + QStringLiteral("spreadsheetml.sheet.main+xml"));
-}
+void ContentTypes::addWorkbook() { addOverride(QStringLiteral("/xl/workbook.xml"), m_document_prefix + QStringLiteral("spreadsheetml.sheet.main+xml")); }
 
-void ContentTypes::addWorksheetName(const QString &name) {
-  addOverride(QStringLiteral("/xl/worksheets/%1.xml").arg(name),
-              m_document_prefix + QStringLiteral("spreadsheetml.worksheet+xml"));
-}
+void ContentTypes::addWorksheetName(const QString &name) { addOverride(QStringLiteral("/xl/worksheets/%1.xml").arg(name), m_document_prefix + QStringLiteral("spreadsheetml.worksheet+xml")); }
 
-void ContentTypes::addChartsheetName(const QString &name) {
-  addOverride(QStringLiteral("/xl/chartsheets/%1.xml").arg(name),
-              m_document_prefix + QStringLiteral("spreadsheetml.chartsheet+xml"));
-}
+void ContentTypes::addChartsheetName(const QString &name) { addOverride(QStringLiteral("/xl/chartsheets/%1.xml").arg(name), m_document_prefix + QStringLiteral("spreadsheetml.chartsheet+xml")); }
 
-void ContentTypes::addDrawingName(const QString &name) {
-  addOverride(QStringLiteral("/xl/drawings/%1.xml").arg(name), m_document_prefix + QStringLiteral("drawing+xml"));
-}
+void ContentTypes::addDrawingName(const QString &name) { addOverride(QStringLiteral("/xl/drawings/%1.xml").arg(name), m_document_prefix + QStringLiteral("drawing+xml")); }
 
-void ContentTypes::addChartName(const QString &name) {
-  addOverride(QStringLiteral("/xl/charts/%1.xml").arg(name), m_document_prefix + QStringLiteral("drawingml.chart+xml"));
-}
+void ContentTypes::addChartName(const QString &name) { addOverride(QStringLiteral("/xl/charts/%1.xml").arg(name), m_document_prefix + QStringLiteral("drawingml.chart+xml")); }
 
-void ContentTypes::addCommentName(const QString &name) {
-  addOverride(QStringLiteral("/xl/%1.xml").arg(name), m_document_prefix + QStringLiteral("spreadsheetml.comments+xml"));
-}
+void ContentTypes::addCommentName(const QString &name) { addOverride(QStringLiteral("/xl/%1.xml").arg(name), m_document_prefix + QStringLiteral("spreadsheetml.comments+xml")); }
 
-void ContentTypes::addTableName(const QString &name) {
-  addOverride(QStringLiteral("/xl/tables/%1.xml").arg(name),
-              m_document_prefix + QStringLiteral("spreadsheetml.table+xml"));
-}
+void ContentTypes::addTableName(const QString &name) { addOverride(QStringLiteral("/xl/tables/%1.xml").arg(name), m_document_prefix + QStringLiteral("spreadsheetml.table+xml")); }
 
-void ContentTypes::addExternalLinkName(const QString &name) {
-  addOverride(QStringLiteral("/xl/externalLinks/%1.xml").arg(name),
-              m_document_prefix + QStringLiteral("spreadsheetml.externalLink+xml"));
-}
+void ContentTypes::addExternalLinkName(const QString &name) { addOverride(QStringLiteral("/xl/externalLinks/%1.xml").arg(name), m_document_prefix + QStringLiteral("spreadsheetml.externalLink+xml")); }
 
-void ContentTypes::addSharedString() {
-  addOverride(QStringLiteral("/xl/sharedStrings.xml"),
-              m_document_prefix + QStringLiteral("spreadsheetml.sharedStrings+xml"));
-}
+void ContentTypes::addSharedString() { addOverride(QStringLiteral("/xl/sharedStrings.xml"), m_document_prefix + QStringLiteral("spreadsheetml.sharedStrings+xml")); }
 
-void ContentTypes::addVmlName() {
-  addOverride(QStringLiteral("vml"), m_document_prefix + QStringLiteral("vmlDrawing"));
-}
+void ContentTypes::addVmlName() { addOverride(QStringLiteral("vml"), m_document_prefix + QStringLiteral("vmlDrawing")); }
 
-void ContentTypes::addCalcChain() {
-  addOverride(QStringLiteral("/xl/calcChain.xml"), m_document_prefix + QStringLiteral("spreadsheetml.calcChain+xml"));
-}
+void ContentTypes::addCalcChain() { addOverride(QStringLiteral("/xl/calcChain.xml"), m_document_prefix + QStringLiteral("spreadsheetml.calcChain+xml")); }
 
-void ContentTypes::addVbaProject() {
-  addOverride(QStringLiteral("bin"), QStringLiteral("application/vnd.ms-office.vbaProject"));
-}
+void ContentTypes::addVbaProject() { addOverride(QStringLiteral("bin"), QStringLiteral("application/vnd.ms-office.vbaProject")); }
 
 void ContentTypes::clearOverrides() { m_overrides.clear(); }
 
@@ -122,8 +85,7 @@ void ContentTypes::saveToXmlFile(QIODevice *device) const {
 
   writer.writeStartDocument(QStringLiteral("1.0"), true);
   writer.writeStartElement(QStringLiteral("Types"));
-  writer.writeAttribute(QStringLiteral("xmlns"),
-                        QStringLiteral("http://schemas.openxmlformats.org/package/2006/content-types"));
+  writer.writeAttribute(QStringLiteral("xmlns"), QStringLiteral("http://schemas.openxmlformats.org/package/2006/content-types"));
 
   {
     QMapIterator<QString, QString> it(m_defaults);

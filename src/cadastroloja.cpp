@@ -2,6 +2,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "cadastroloja.h"
 #include "cepcompleter.h"
@@ -9,8 +10,6 @@
 #include "searchdialog.h"
 #include "ui_cadastroloja.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);

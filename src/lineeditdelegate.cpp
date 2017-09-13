@@ -1,17 +1,16 @@
 #include <QCompleter>
 #include <QLineEdit>
-#include <QSqlQueryModel>
+#include <ciso646>
 
 #include "lineeditdelegate.h"
-
-#include <ciso646>
+#include "sqlquerymodel.h"
 
 LineEditDelegate::LineEditDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 
 QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
   auto *editor = new QLineEdit(parent);
 
-  auto *model = new QSqlQueryModel(parent);
+  auto *model = new SqlQueryModel(parent);
 
   if (tipo == ContraPartePagar) model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_pagar_has_pagamento");
   if (tipo == ContraParteReceber) model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_receber_has_pagamento");

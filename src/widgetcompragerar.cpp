@@ -5,6 +5,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "excel.h"
@@ -15,8 +16,6 @@
 #include "usersession.h"
 #include "widgetcompragerar.h"
 #include "xlsxdocument.h"
-
-#include <ciso646>
 
 WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);
@@ -38,12 +37,15 @@ void WidgetCompraGerar::calcularPreco() {
 }
 
 void WidgetCompraGerar::setupTables() {
-  modelForn.setTable("view_fornecedor_compra");
+  modelResumo.setTable("view_fornecedor_compra_gerar");
 
-  modelForn.setHeaderData("fornecedor", "Fornecedor");
-  modelForn.setHeaderData("COUNT(fornecedor)", "Itens");
+  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
 
-  ui->tableForn->setModel(&modelForn);
+  modelResumo.setHeaderData("fornecedor", "Fornecedor");
+  modelResumo.setHeaderData("COUNT(fornecedor)", "Itens");
+
+  ui->tableResumo->setModel(&modelResumo);
+  ui->tableResumo->hideColumn("idVenda");
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
   modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -107,22 +109,22 @@ void WidgetCompraGerar::setupTables() {
 }
 
 bool WidgetCompraGerar::updateTables() {
-  if (modelForn.tableName().isEmpty()) setupTables();
+  if (modelResumo.tableName().isEmpty()) setupTables();
 
-  const auto selection = ui->tableForn->selectionModel()->selectedRows();
+  const auto selection = ui->tableResumo->selectionModel()->selectedRows();
 
   const auto index = selection.size() > 0 ? selection.first() : QModelIndex();
 
-  const QString filter = modelForn.filter();
+  const QString filter = modelResumo.filter();
 
-  if (not modelForn.select()) {
-    emit errorSignal("Erro lendo tabela fornecedores: " + modelForn.lastError().text());
+  if (not modelResumo.select()) {
+    emit errorSignal("Erro lendo tabela fornecedores: " + modelResumo.lastError().text());
     return false;
   }
 
-  modelForn.setFilter(filter);
+  modelResumo.setFilter(filter);
 
-  ui->tableForn->resizeColumnsToContents();
+  ui->tableResumo->resizeColumnsToContents();
 
   const QString filter2 = modelProdutos.filter();
 
@@ -134,8 +136,8 @@ bool WidgetCompraGerar::updateTables() {
   modelProdutos.setFilter(filter2);
 
   if (selection.size() > 0) {
-    on_tableForn_activated(index);
-    ui->tableForn->selectRow(index.row());
+    on_tableResumo_activated(index);
+    ui->tableResumo->selectRow(index.row());
   }
 
   return true;
@@ -295,10 +297,10 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Pular");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    const int row = ui->tableForn->selectionModel()->selectedRows().first().row();
-    const QString fornecedor = modelForn.data(row, "fornecedor").toString();
+    const int row = ui->tableResumo->selectionModel()->selectedRows().first().row();
+    const QString fornecedor = modelResumo.data(row, "fornecedor").toString();
 
-    auto *mail = new SendMail(this, anexo, fornecedor);
+    auto *mail = new SendMail(SendMail::GerarCompra, anexo, fornecedor, this);
     mail->setAttribute(Qt::WA_DeleteOnClose);
 
     mail->exec();
@@ -377,6 +379,10 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
 
   QXlsx::Document xlsx(arquivoModelo);
 
+  //  xlsx.currentWorksheet()->setFitToPage(true);
+  //  xlsx.currentWorksheet()->setFitToHeight(true);
+  //  xlsx.currentWorksheet()->setOrientationVertical(false);
+
   xlsx.write("E4", oc);                                                                             // ordem compra
   xlsx.write("E5", idVenda);                                                                        // idVenda
   xlsx.write("E6", modelProdutos.data(lista.at(0), "fornecedor"));                                  // fornecedor
@@ -426,10 +432,12 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
 
 void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection(); }
 
-void WidgetCompraGerar::on_tableForn_activated(const QModelIndex &index) {
-  const QString fornecedor = modelForn.data(index.row(), "fornecedor").toString();
+void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
+  const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
+  const bool checked = ui->checkBoxMostrarSul->isChecked();
 
-  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE' AND (idVenda NOT LIKE 'CAMB%' OR idVenda IS NULL)");
+  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE' AND " +
+                          QString(checked ? "(idVenda LIKE 'CAMB%' OR idVenda IS NULL)" : "(idVenda NOT LIKE 'CAMB%' OR idVenda IS NULL)"));
 
   if (not modelProdutos.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text());
@@ -494,3 +502,9 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes
 // TODO: 5colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas
+
+void WidgetCompraGerar::on_checkBoxMostrarSul_toggled(bool checked) {
+  modelResumo.setFilter(checked ? "(idVenda LIKE '%CAMB%')" : "(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
+
+  if (not modelResumo.select()) QMessageBox::critical(this, "Erro!", "Erro ao ler tabela: " + modelResumo.lastError().text());
+}

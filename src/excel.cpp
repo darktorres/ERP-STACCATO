@@ -5,12 +5,11 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "excel.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
-
-#include <ciso646>
 
 Excel::Excel(const QString &id, QWidget *parent) : id(id), parent(parent) { verificaTipo(); }
 
@@ -76,6 +75,10 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QLocale locale;
 
   QXlsx::Document xlsx(arquivoModelo);
+
+  xlsx.currentWorksheet()->setFitToPage(true);
+  xlsx.currentWorksheet()->setFitToHeight(true);
+  xlsx.currentWorksheet()->setOrientationVertical(false);
 
   const QString endLoja = queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + " " + queryLojaEnd.value("complemento").toString() + " - " +
                           queryLojaEnd.value("bairro").toString() + "\n" + queryLojaEnd.value("cidade").toString() + " - " + queryLojaEnd.value("uf").toString() + " - CEP: " +

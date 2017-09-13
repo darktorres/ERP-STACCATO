@@ -37,7 +37,7 @@ private:
   Ui::WidgetVenda *ui;
   // methods
   void montaFiltro();
-  void makeConnections();
+  void setConnections();
   void setPermissions();
   void setupTables();
 };

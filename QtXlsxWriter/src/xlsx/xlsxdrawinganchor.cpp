@@ -23,19 +23,18 @@
 **
 ****************************************************************************/
 
+#include <QBuffer>
+#include <QDir>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+#include <ciso646>
+
 #include "xlsxchart.h"
 #include "xlsxdrawing_p.h"
 #include "xlsxdrawinganchor_p.h"
 #include "xlsxmediafile_p.h"
 #include "xlsxutility_p.h"
 #include "xlsxworkbook.h"
-
-#include <QBuffer>
-#include <QDir>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
-#include <ciso646>
 
 namespace QXlsx {
 
@@ -182,7 +181,7 @@ void DrawingAnchor::loadXmlObjectGraphicFrame(QXmlStreamReader &reader) {
 
         bool exist = false;
         QList<QSharedPointer<Chart>> cfs = m_drawing->workbook->chartFiles();
-        for (auto & cf : cfs) {
+        for (auto &cf : cfs) {
           if (cf->filePath() == path) {
             // already exist
             exist = true;
@@ -218,7 +217,7 @@ void DrawingAnchor::loadXmlObjectPicture(QXmlStreamReader &reader) {
 
         bool exist = false;
         QList<QSharedPointer<MediaFile>> mfs = m_drawing->workbook->mediaFiles();
-        for (auto & mf : mfs) {
+        for (auto &mf : mfs) {
           if (mf->fileName() == path) {
             // already exist
             exist = true;
@@ -327,8 +326,7 @@ void DrawingAnchor::saveXmlObjectPicture(QXmlStreamWriter &writer) const {
 
   writer.writeEndElement(); // xdr:nvPicPr
 
-  m_drawing->relationships()->addDocumentRelationship(QStringLiteral("/image"),
-                                                      QStringLiteral("../media/image%1.%2").arg(m_pictureFile->index() + 1).arg(m_pictureFile->suffix()));
+  m_drawing->relationships()->addDocumentRelationship(QStringLiteral("/image"), QStringLiteral("../media/image%1.%2").arg(m_pictureFile->index() + 1).arg(m_pictureFile->suffix()));
 
   writer.writeStartElement(QStringLiteral("xdr:blipFill"));
   writer.writeEmptyElement(QStringLiteral("a:blip"));

@@ -35,6 +35,7 @@ private slots:
 private:
   // attributes
   SqlTableModel model;
+  SqlTableModel modelResumo;
   Ui::WidgetCompraPendentes *ui;
   // methods
   bool insere(const QDate &dataPrevista);

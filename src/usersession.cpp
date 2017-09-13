@@ -3,10 +3,9 @@
 #include <QSettings>
 #include <QSqlError>
 #include <QVariant>
+#include <ciso646>
 
 #include "usersession.h"
-
-#include <ciso646>
 
 QSqlQuery *UserSession::query = nullptr;
 
@@ -21,7 +20,8 @@ QString UserSession::nome() { return (query->value("nome").toString()); }
 bool UserSession::login(const QString &user, const QString &password, Tipo tipo) {
   if (tipo == Tipo::Autorizacao) {
     QSqlQuery query;
-    query.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND tipo LIKE '%GERENTE%'");
+    query.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE "
+                  "AND (tipo LIKE '%GERENTE%' OR tipo = 'ADMINISTRADOR' OR tipo = 'DIRETOR')");
     query.bindValue(":user", user);
     query.bindValue(":password", password);
 

@@ -1,9 +1,8 @@
 #include <QDebug>
 #include <QMouseEvent>
+#include <ciso646>
 
 #include "itembox.h"
-
-#include <ciso646>
 
 ItemBox::ItemBox(QWidget *parent) : QLineEdit(parent) {
   setReadOnly(true);
@@ -84,6 +83,8 @@ void ItemBox::setValue(const QVariant &value) {
   if (searchDialog) setText(searchDialog->getText(value));
 
   QLineEdit::setToolTip(text());
+
+  emit valueChanged(value);
 }
 
 void ItemBox::setReadOnlyItemBox(const bool isReadOnly) {

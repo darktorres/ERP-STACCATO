@@ -1,12 +1,11 @@
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "ui_widgetfinanceirocompra.h"
 #include "widgetfinanceirocompra.h"
-
-#include <ciso646>
 
 WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 

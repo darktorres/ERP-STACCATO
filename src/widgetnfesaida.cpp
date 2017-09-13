@@ -1,22 +1,23 @@
 #include <QDebug>
 #include <QDesktopServices>
+#include <QDir>
 #include <QFile>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
+#include <ciso646>
 
 #include "acbr.h"
 #include "doubledelegate.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
+#include "sendmail.h"
 #include "ui_widgetnfesaida.h"
 #include "usersession.h"
 #include "widgetnfesaida.h"
 #include "xml_viewer.h"
-
-#include <ciso646>
 
 WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) {
   ui->setupUi(this);
@@ -127,6 +128,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
     return;
   }
 
+  const int idNFe = model.data(list.first().row(), "idNFe").toInt();
+  const int numeroNFe = model.data(list.first().row(), "NFe").toInt();
+
   const QString chaveAcesso = model.data(list.first().row(), "chaveAcesso").toString();
 
   const QString comando = "NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")";
@@ -144,42 +148,41 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   QMessageBox::information(this, "Resposta", resposta);
 
-  // TODO: enviar resposta xml do cancelamento para a contabilidade
+  QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
 
-  // TODO: enviar comando para ACBr enviar email
-
-  //  NFE.EnviarEmail( cPara, cArquivo, [ nEnviaDanfePDF ], [ cTituloEmail], [ cEmailCopia] )
-  //  cPara = endereço de e-mail para quem você vai enviar a NFe.
-  //  cArquivo = caminho e nome do arquivo xML da NFe que será enviada.
-  //  nEnviaDanfePDF = indica se deverá ser enviado PDF junto ao Arquivo XML da NFe no email. Deverá ser passado 1 para
-  //  enviar e 0 para não enviar o PDF (opcional).
-  //  cTituloEmail = título do e-mail que será enviado (opcional).
-  //  cEmailCopia = parâmetro opcional que poderá conter diversos emails separados por ; para enviar cópia do email
-  //  enviado ao Email de Destino. Por exemplo, para o escritório de contabilidade.
-
-  // Assunto: NFe - 1234... - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA
-
-  {
-    //    const QString email = "fiscal5@ellycontabil.com.br";
-    //    const QString copia = "logistica@staccatorevestimentos.com.br";
-    //    const QString assunto =
-    //        "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
-
-    //    const QString comando = "NFE.EnviarEmail(" + email + ", " + fileName + ", 1, '" + assunto + "', " + copia +
-    //    ")";
-
-    //    QString resposta;
-
-    //    ACBr::enviarComando(comando, resposta);
-
-    //    if (not resposta.contains("OK: Email enviado com sucesso")) {
-    //      QMessageBox::critical(this, "Resposta EnviarEmail", resposta);
-
-    //      // perguntar se deseja tentar enviar novamente?
-    //    }
-
-    //    QMessageBox::information(this, "Resposta", resposta);
+  if (not arquivo.open(QFile::WriteOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita: " + arquivo.errorString());
+    return;
   }
+
+  QTextStream stream(&arquivo);
+
+  stream << resposta;
+
+  arquivo.close();
+
+  QSqlQuery query;
+  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.',idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) {
+    QMessageBox::critical(this, "Erro!", "Erro removendo NFe da venda_produto: " + query.lastError().text());
+  }
+
+  query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) {
+    QMessageBox::critical(this, "Erro!", "Erro removendo NFe do veiculo_produto: " + query.lastError().text());
+  }
+
+  const QString anexo = QDir::currentPath() + "/cancelamento.xml";
+
+  // TODO: 0enviar resposta xml do cancelamento para a contabilidade
+  auto *mail = new SendMail(SendMail::CancelarNFe, anexo, QString(), this);
+  mail->setAttribute(Qt::WA_DeleteOnClose);
+
+  mail->exec();
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -238,14 +241,13 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   report.dataManager()->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
   report.dataManager()->setReportVariable("TotalIssqn", "R$ XXX");
 
-  // TODO: change to current directory
-  if (not report.printToPDF("C:/temp/relatorio.pdf")) {
+  if (not report.printToPDF(QDir::currentPath() + "relatorio.pdf")) {
     QMessageBox::critical(this, "Erro!", "Erro gerando relatório!");
     return;
   }
 
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile("C:/temp/relatorio.pdf"))) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo 'C:/temp/relatorio.pdf'!");
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "relatorio.pdf"))) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo: " + QDir::currentPath() + "relatorio.pdf'!");
     return;
   }
 }

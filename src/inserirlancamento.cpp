@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
@@ -13,8 +14,6 @@
 #include "lineeditdelegate.h"
 #include "reaisdelegate.h"
 #include "ui_inserirlancamento.h"
-
-#include <ciso646>
 
 InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
   ui->setupUi(this);

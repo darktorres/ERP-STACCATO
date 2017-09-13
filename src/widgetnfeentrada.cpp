@@ -2,13 +2,12 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "ui_widgetnfeentrada.h"
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
-
-#include <ciso646>
 
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
@@ -62,8 +61,6 @@ void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &text) {
 }
 
 void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
-  // TODO: 1quando cancelar nota pegar os estoques e cancelar/remover da logistica (exceto quando estiverem entregues?)
-  // TODO: confirmar antes de cancelar
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -135,17 +132,20 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   }
 
   while (query.next()) {
+    // TODO: 1quando cancelar nota pegar os estoques e cancelar/remover da logistica (exceto quando estiverem entregues?)
+    // se existir linhas de consumo pode ser que existam linhas de entrega, tratar
+
     QSqlQuery query2;
-    query2.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
+    query2.prepare("UPDATE estoque_has_consumo SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
     if (not query2.exec()) {
-      error = "Erro removendo consumos: " + query.lastError().text();
+      error = "Erro cancelando consumos: " + query.lastError().text();
       return false;
     }
 
     // voltar status para pendente
-    query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', dataPrevCompra = NULL, dataRealCompra = NULL, "
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, "
                    "dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, "
                    "dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, "
                    "dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");

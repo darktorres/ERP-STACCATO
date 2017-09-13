@@ -1,8 +1,7 @@
 #include <QMessageBox>
+#include <ciso646>
 
 #include "xml.h"
-
-#include <ciso646>
 
 XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(model); }
 

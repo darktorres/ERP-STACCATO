@@ -21,7 +21,7 @@ signals:
   void errorSignal(const QString &error);
 
 private slots:
-  void on_checkBoxRepresentacao_toggled(bool checked);
+  //  void on_checkBoxRepresentacao_toggled(bool checked);
   void on_pushButtonCancelarCompra_clicked();
   void on_pushButtonMarcarFaturado_clicked();
   void on_pushButtonReagendar_clicked();
@@ -31,11 +31,13 @@ private:
   // attributes
   QString error;
   SqlTableModel model;
+  SqlTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
   bool cancelar(const QModelIndexList &list);
   bool faturarCompra(const QDateTime &dataReal, const QStringList &idsCompra);
   void setupTables();
+  void montaFiltro();
 };
 
 #endif // WIDGETCOMPRAFATURAR_H

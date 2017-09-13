@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <ciso646>
 
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
@@ -10,8 +11,6 @@
 #include "ui_widgetlogisticarecebimento.h"
 #include "venda.h"
 #include "widgetlogisticarecebimento.h"
-
-#include <ciso646>
 
 WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
 

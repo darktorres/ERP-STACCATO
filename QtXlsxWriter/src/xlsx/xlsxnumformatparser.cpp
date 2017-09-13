@@ -22,11 +22,11 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxnumformatparser_p.h"
 
 #include <QString>
-
 #include <ciso646>
+
+#include "xlsxnumformatparser_p.h"
 
 namespace QXlsx {
 

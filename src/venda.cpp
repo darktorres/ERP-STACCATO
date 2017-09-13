@@ -2,11 +2,13 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
 #include "devolucao.h"
 #include "doubledelegate.h"
+#include "estoque.h"
 #include "excel.h"
 #include "impressao.h"
 #include "logindialog.h"
@@ -18,8 +20,6 @@
 #include "ui_venda.h"
 #include "usersession.h"
 #include "venda.h"
-
-#include <ciso646>
 
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
@@ -385,10 +385,8 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   isUpdate = true;
 
   QSqlQuery queryOrc;
-  queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioIndicou, idCliente, idEnderecoEntrega, "
-                   "idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, descontoPorc, "
-                   "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE "
-                   "idOrcamento = :idOrcamento");
+  queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioIndicou, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, descontoPorc, "
+                   "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
   if (not queryOrc.exec() or not queryOrc.first()) {
@@ -448,7 +446,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
       if (not modelItem.setData(rowItem, field, queryProdutos.value(field))) return;
     }
 
-    if (not modelItem.setData(rowItem, "status", "PENDENTE")) return;
+    if (not modelItem.setData(rowItem, "status", modelItem.data(rowItem, "estoque").toBool() ? "ESTOQUE" : "PENDENTE")) return;
   }
 
   ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
@@ -1446,18 +1444,18 @@ bool Venda::cadastrar() {
   // inserir rt em contas_pagar
 
   const QDate date = ui->dateTimeEdit->date();
-  const double valor = ui->doubleSpinBoxSubTotalDesc->value() * ui->doubleSpinBoxPontuacao->value() / 100;
+  const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
 
   QSqlQuery query;
 
-  if (valor > 0 and ui->itemBoxProfissional->getValue() > NAO_HA) {
-    query.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
-                  ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+  if (ui->checkBoxPontuacaoPadrao->isChecked()) {
+    query.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
+                  "VALUES (:dataEmissao, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
     query.bindValue(":dataEmissao", date);
     query.bindValue(":contraParte", ui->itemBoxProfissional->text());
     query.bindValue(":idLoja", data("idLoja"));
     query.bindValue(":centroCusto", data("idLoja"));
-    query.bindValue(":valor", ui->doubleSpinBoxSubTotalDesc->value() * ui->doubleSpinBoxPontuacao->value() / 100);
+    query.bindValue(":valor", valor);
     query.bindValue(":tipo", "1. Dinheiro");
     query.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
     // 01-15 paga dia 30, 16-30 paga prox dia 15
@@ -1506,6 +1504,33 @@ bool Venda::cadastrar() {
 
   if (not modelItem.submitAll()) {
     error = "Erro salvando dados na tabela venda_has_produto: " + modelItem.lastError().text();
+    return false;
+  }
+
+  query.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p on p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque = TRUE");
+  query.bindValue(":idVenda", ui->lineEditVenda->text());
+
+  if (not query.exec()) {
+    error = "Erro buscando produtos estoque: " + query.lastError().text();
+    return false;
+  }
+
+  while (query.next()) {
+    auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
+
+    if (not estoque->criarConsumo(query.value("idVendaProduto").toInt(), query.value("quant").toDouble())) {
+      error = "Erro criando consumo!";
+      return false;
+    }
+  }
+
+  if (not query.exec("CALL update_produto_estoque_quant()")) {
+    error = "Erro atualizando produto estoque: " + query.lastError().text();
+    return false;
+  }
+
+  if (not query.exec("CALL update_venda_status()")) {
+    error = "Erro atualizando status das vendas: " + query.lastError().text();
     return false;
   }
 

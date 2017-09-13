@@ -9,6 +9,7 @@
 #include <QSqlQuery>
 #include <QStandardItemModel>
 #include <QUrl>
+#include <ciso646>
 
 #include "acbr.h"
 #include "doubledelegate.h"
@@ -18,8 +19,6 @@
 #include "usersession.h"
 #include "venda.h"
 #include "widgetlogisticaagendarcoleta.h"
-
-#include <ciso646>
 
 WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
   ui->setupUi(this);

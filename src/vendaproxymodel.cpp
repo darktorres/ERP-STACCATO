@@ -1,8 +1,7 @@
 #include <QBrush>
+#include <ciso646>
 
 #include "vendaproxymodel.h"
-
-#include <ciso646>
 
 VendaProxyModel::VendaProxyModel(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), dias(model->fieldIndex("Dias restantes")), status(model->fieldIndex("Status")), followup(model->fieldIndex("Observação")), semaforo(model->fieldIndex("semaforo")),

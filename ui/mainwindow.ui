@@ -113,13 +113,6 @@
       </widget>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>Transferencia</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -169,6 +162,7 @@
     <addaction name="actionCadastrarUsuario"/>
     <addaction name="actionCadastrarFornecedor"/>
     <addaction name="actionCadastrarProdutos"/>
+    <addaction name="actionGerenciar_preco_estoque"/>
    </widget>
    <widget class="QMenu" name="menuVenda">
     <property name="title">
@@ -296,6 +290,11 @@
   <action name="actionPromocao">
    <property name="text">
     <string>Promoção</string>
+   </property>
+  </action>
+  <action name="actionGerenciar_preco_estoque">
+   <property name="text">
+    <string>Gerenciar preço estoque</string>
    </property>
   </action>
  </widget>

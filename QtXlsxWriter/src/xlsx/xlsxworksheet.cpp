@@ -211,6 +211,54 @@ Worksheet::~Worksheet() {}
 /*!
  * Returns whether sheet is protected.
  */
+bool Worksheet::isOrientationVertical() const {
+  Q_D(const Worksheet);
+  return d->orientation;
+}
+
+/*!
+ * Protects/unprotects the sheet based on \a protect.
+ */
+void Worksheet::setOrientationVertical(bool isVertical) {
+  Q_D(Worksheet);
+  d->orientation = isVertical;
+}
+
+/*!
+ * Returns whether sheet is protected.
+ */
+bool Worksheet::isFitToPage() const {
+  Q_D(const Worksheet);
+  return d->fitToPage;
+}
+
+/*!
+ * Protects/unprotects the sheet based on \a protect.
+ */
+void Worksheet::setFitToPage(bool fitToPage) {
+  Q_D(Worksheet);
+  d->fitToPage = fitToPage;
+}
+
+/*!
+ * Returns whether sheet is protected.
+ */
+bool Worksheet::isFitToHeight() const {
+  Q_D(const Worksheet);
+  return d->fitToHeight;
+}
+
+/*!
+ * Protects/unprotects the sheet based on \a protect.
+ */
+void Worksheet::setFitToHeight(bool fitToHeight) {
+  Q_D(Worksheet);
+  d->fitToHeight = fitToHeight;
+}
+
+/*!
+ * Returns whether sheet is protected.
+ */
 bool Worksheet::isWindowProtected() const {
   Q_D(const Worksheet);
   return d->windowProtection;
@@ -1019,6 +1067,13 @@ void Worksheet::saveToXmlFile(QIODevice *device) const {
   //    writer.writeAttribute("xmlns:x14ac", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
   //    writer.writeAttribute("mc:Ignorable", "x14ac");
 
+  writer.writeStartElement(QStringLiteral("sheetPr"));
+  writer.writeStartElement(QStringLiteral("pageSetUpPr"));
+  writer.writeAttribute("fitToPage", d->fitToPage ? "1" : "0");
+  writer.writeAttribute("fitToHeight", d->fitToHeight ? "1" : "0");
+  writer.writeEndElement(); // pageSetUpPr
+  writer.writeEndElement(); // sheetPr
+
   writer.writeStartElement(QStringLiteral("dimension"));
   writer.writeAttribute(QStringLiteral("ref"), d->generateDimensionString());
   writer.writeEndElement(); // dimension
@@ -1077,6 +1132,12 @@ void Worksheet::saveToXmlFile(QIODevice *device) const {
   for (auto const &cf : d->conditionalFormattingList) cf.saveToXml(writer);
   d->saveXmlDataValidations(writer);
   d->saveXmlHyperlinks(writer);
+
+  writer.writeStartElement("pageSetup");
+  writer.writeAttribute("paperSize", "9");
+  writer.writeAttribute("orientation", isOrientationVertical() ? "vertical" : "landscape");
+  writer.writeEndElement(); // pageSetup
+
   d->saveXmlDrawings(writer);
 
   writer.writeEndElement(); // worksheet

@@ -17,10 +17,9 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
 #include <QResource>
+#include <ciso646>
 
 #include "smtp.h"
-
-#include <ciso646>
 
 Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
   socket = new QSslSocket(this);
@@ -32,7 +31,7 @@ Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const 
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
 
-void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files) {
+void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
   message.append("From: " + from + "\n");
@@ -51,14 +50,22 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   // TODO: 5dont hardcode this
   // TODO:__project public code
   //
-  QFile file("://assinatura conrado.png");
-  file.open(QIODevice::ReadOnly);
-  QByteArray bytes = file.readAll();
-  message.append("--frontier\n");
-  message.append("Content-Type: image/png\nContent-ID: <assinatura.png@gmail.com>\nContent-Disposition: inline; "
-                 "filename=assinatura.png;\nContent-Transfer-Encoding: base64\n\n");
-  message.append(bytes.toBase64());
-  message.append("\n");
+  if (not assinatura.isEmpty()) {
+    //    QFile file("://assinatura conrado.png");
+    QFile file(assinatura);
+
+    if (not file.open(QIODevice::ReadOnly)) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo: " + file.errorString());
+      return;
+    }
+
+    QByteArray bytes = file.readAll();
+    message.append("--frontier\n");
+    message.append("Content-Type: image/png\nContent-ID: <assinatura.png@gmail.com>\nContent-Disposition: inline; "
+                   "filename=assinatura.png;\nContent-Transfer-Encoding: base64\n\n");
+    message.append(bytes.toBase64());
+    message.append("\n");
+  }
   //
 
   if (not files.isEmpty()) {

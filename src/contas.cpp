@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QtMath>
+#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
@@ -15,8 +16,6 @@
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "ui_contas.h"
-
-#include <ciso646>
 
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);

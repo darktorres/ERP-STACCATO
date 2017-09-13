@@ -1,9 +1,9 @@
-#include "xml_viewer.h"
+#include <ciso646>
+
 #include "acbr.h"
 #include "ui_xml_viewer.h"
 #include "xml.h"
-
-#include <ciso646>
+#include "xml_viewer.h"
 
 XML_Viewer::XML_Viewer(QWidget *parent) : QDialog(parent), ui(new Ui::XML_Viewer) {
   ui->setupUi(this);

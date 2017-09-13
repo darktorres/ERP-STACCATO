@@ -1,13 +1,10 @@
 #include <QBrush>
 #include <QDate>
+#include <ciso646>
 
 #include "estoqueprazoproxymodel.h"
 
-#include <ciso646>
-
-EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), dias(model->fieldIndex("prazoEntrega")) {
-  setSourceModel(model);
-}
+EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), dias(model->fieldIndex("prazoEntrega")) { setSourceModel(model); }
 
 QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {

@@ -46,7 +46,7 @@ private:
   bool confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu);
   bool reagendar(const QModelIndexList &list, const QDate &dataPrevEnt);
   void setupTables();
-  bool consultarNFe(const int idNFe);
+  bool consultarNFe(const int idNFe, const QString &xml);
 };
 
 #endif // CALENDARIOENTREGAS_H

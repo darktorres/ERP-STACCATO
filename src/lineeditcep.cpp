@@ -1,6 +1,6 @@
-#include "lineeditcep.h"
-
 #include <ciso646>
+
+#include "lineeditcep.h"
 
 LineEditCEP::LineEditCEP(QWidget *parent) : QLineEdit(parent) { setProperty("value", ""); }
 

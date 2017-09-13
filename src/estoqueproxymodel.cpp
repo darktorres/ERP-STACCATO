@@ -1,17 +1,15 @@
 #include <QBrush>
+#include <ciso646>
 
 #include "estoqueproxymodel.h"
 
-#include <ciso646>
-
-EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpd(model->fieldIndex("quantUpd")) {
-  setSourceModel(model);
-}
+EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpd(model->fieldIndex("quantUpd")) { setSourceModel(model); }
 
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {
     const int quantUpd = QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt();
 
+    // TODO: create a enum
     if (quantUpd == 1) return QBrush(Qt::green);         // Ok
     if (quantUpd == 2) return QBrush(Qt::yellow);        // Quant difere
     if (quantUpd == 3) return QBrush(Qt::red);           // Não encontrado

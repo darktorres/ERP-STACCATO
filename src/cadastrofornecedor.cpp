@@ -3,14 +3,13 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "cadastrofornecedor.h"
 #include "cepcompleter.h"
 #include "searchdialog.h"
 #include "ui_cadastrofornecedor.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);

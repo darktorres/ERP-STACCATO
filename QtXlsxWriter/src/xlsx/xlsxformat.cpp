@@ -22,14 +22,14 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxformat.h"
-#include "xlsxcolor_p.h"
-#include "xlsxformat_p.h"
-#include "xlsxnumformatparser_p.h"
 #include <QDataStream>
 #include <QDebug>
-
 #include <ciso646>
+
+#include "xlsxcolor_p.h"
+#include "xlsxformat.h"
+#include "xlsxformat_p.h"
+#include "xlsxnumformatparser_p.h"
 
 QT_BEGIN_NAMESPACE_XLSX
 

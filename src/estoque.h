@@ -13,10 +13,9 @@ class Estoque : public QDialog {
   Q_OBJECT
 
 public:
-  explicit Estoque(QWidget *parent = 0);
+  Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = 0);
   ~Estoque();
-  bool criarConsumo(const int idVendaProduto, double quant = 0);
-  bool viewRegisterById(const QString &idEstoque, bool showWindow = true);
+  bool criarConsumo(const int idVendaProduto, const double quant = 0);
 
 private slots:
   void on_pushButtonExibirNfe_clicked();
@@ -26,6 +25,7 @@ private slots:
 
 private:
   // attributes
+  const QString idEstoque;
   SqlTableModel model;
   SqlTableModel modelConsumo;
   SqlTableModel modelViewConsumo;
@@ -41,6 +41,7 @@ private:
   };
 
   // methods
+  bool viewRegisterById(const QString &idEstoque, const bool showWindow = true);
   void calcularRestante();
   void exibirNota();
   void setupTables();

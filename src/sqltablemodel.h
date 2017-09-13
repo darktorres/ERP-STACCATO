@@ -4,6 +4,7 @@
 #include <QSqlRelationalTableModel>
 
 class SqlTableModel : public QSqlRelationalTableModel {
+  Q_OBJECT
 
 public:
   explicit SqlTableModel(QObject *parent = 0);

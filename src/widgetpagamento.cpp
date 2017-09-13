@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "anteciparrecebimento.h"
 #include "checkboxdelegate.h"
@@ -13,8 +14,6 @@
 #include "reaisdelegate.h"
 #include "ui_widgetpagamento.h"
 #include "widgetpagamento.h"
-
-#include <ciso646>
 
 WidgetPagamento::WidgetPagamento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamento) {
   ui->setupUi(this);

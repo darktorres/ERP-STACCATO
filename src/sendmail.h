@@ -12,7 +12,8 @@ class SendMail : public QDialog {
   Q_OBJECT
 
 public:
-  explicit SendMail(QWidget *parent = 0, const QString &arquivo = QString(), const QString &fornecedor = QString());
+  enum Tipo { GerarCompra, CancelarNFe, Vazio };
+  explicit SendMail(const Tipo tipo, const QString &arquivo = QString(), const QString &fornecedor = QString(), QWidget *parent = 0);
   ~SendMail();
 
 private slots:
@@ -25,6 +26,7 @@ private:
   const QString fornecedor;
   QProgressDialog *progress;
   QStringList files;
+  Tipo tipo;
   Ui::SendMail *ui;
   // methods
   void failureStatus(const QString &status);

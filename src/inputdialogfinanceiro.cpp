@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
@@ -10,8 +11,6 @@
 #include "singleeditdelegate.h"
 #include "ui_inputdialogfinanceiro.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);

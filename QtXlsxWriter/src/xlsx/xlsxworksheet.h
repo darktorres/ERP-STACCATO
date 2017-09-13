@@ -118,6 +118,12 @@ public:
   bool groupColumns(const CellRange &range, bool collapsed = true);
   CellRange dimension() const;
 
+  bool isOrientationVertical() const;
+  void setOrientationVertical(bool isVertical);
+  bool isFitToPage() const;
+  void setFitToPage(bool fitToPage);
+  bool isFitToHeight() const;
+  void setFitToHeight(bool fitToHeight);
   bool isWindowProtected() const;
   void setWindowProtected(const bool protect);
   bool isFormulasVisible() const;

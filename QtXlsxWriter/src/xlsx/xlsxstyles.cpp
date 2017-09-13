@@ -22,10 +22,6 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxcolor_p.h"
-#include "xlsxformat_p.h"
-#include "xlsxstyles_p.h"
-#include "xlsxutility_p.h"
 #include <QBuffer>
 #include <QDataStream>
 #include <QDebug>
@@ -33,8 +29,12 @@
 #include <QMap>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
 #include <ciso646>
+
+#include "xlsxcolor_p.h"
+#include "xlsxformat_p.h"
+#include "xlsxstyles_p.h"
+#include "xlsxutility_p.h"
 
 namespace QXlsx {
 
@@ -43,8 +43,7 @@ When loading from existing .xlsx file. we should create a clean styles object.
 otherwise, default formats should be added.
 
 */
-Styles::Styles(CreateFlag flag)
-    : AbstractOOXmlFile(flag), m_nextCustomNumFmtId(176), m_isIndexedColorsDefault(true), m_emptyFormatAdded(false) {
+Styles::Styles(CreateFlag flag) : AbstractOOXmlFile(flag), m_nextCustomNumFmtId(176), m_isIndexedColorsDefault(true), m_emptyFormatAdded(false) {
   //! Fix me. Should the custom num fmt Id starts with 164 or 176 or others??
 
   //! Fix me! Where should we put these register code?
@@ -84,8 +83,7 @@ Format Styles::dxfFormat(int idx) const {
 void Styles::fixNumFmt(const Format &format) {
   if (not format.hasNumFmtData()) return;
 
-  if (format.hasProperty(FormatPrivate::P_NumFmt_Id) and
-      not format.stringProperty(FormatPrivate::P_NumFmt_FormatCode).isEmpty()) {
+  if (format.hasProperty(FormatPrivate::P_NumFmt_Id) and not format.stringProperty(FormatPrivate::P_NumFmt_FormatCode).isEmpty()) {
     return;
   }
 
@@ -267,8 +265,7 @@ void Styles::saveToXmlFile(QIODevice *device) const {
 
   writer.writeStartDocument(QStringLiteral("1.0"), true);
   writer.writeStartElement(QStringLiteral("styleSheet"));
-  writer.writeAttribute(QStringLiteral("xmlns"),
-                        QStringLiteral("http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
+  writer.writeAttribute(QStringLiteral("xmlns"), QStringLiteral("http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
 
   writeNumFmts(writer);
   writeFonts(writer);
@@ -331,7 +328,7 @@ void Styles::writeNumFmts(QXmlStreamWriter &writer) const {
 void Styles::writeFonts(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("fonts"));
   writer.writeAttribute(QStringLiteral("count"), QString::number(m_fontsList.count()));
-  for (const auto & i : m_fontsList) writeFont(writer, i, false);
+  for (const auto &i : m_fontsList) writeFont(writer, i, false);
   writer.writeEndElement(); // fonts
 }
 
@@ -412,7 +409,7 @@ void Styles::writeFills(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("fills"));
   writer.writeAttribute(QStringLiteral("count"), QString::number(m_fillsList.size()));
 
-  for (const auto & i : m_fillsList) writeFill(writer, i);
+  for (const auto &i : m_fillsList) writeFill(writer, i);
 
   writer.writeEndElement(); // fills
 }
@@ -447,19 +444,14 @@ void Styles::writeFill(QXmlStreamWriter &writer, const Format &fill, bool isDxf)
   // For normal fill formats, Excel prefer to outputing the default "none" attribute
   // But for dxf, Excel prefer to omiting the default "none"
   // Though not make any difference, but it make easier to compare origin files with generate files during debug
-  if (not(pattern == Format::PatternNone and isDxf))
-    writer.writeAttribute(QStringLiteral("patternType"), patternStrings[pattern]);
+  if (not(pattern == Format::PatternNone and isDxf)) writer.writeAttribute(QStringLiteral("patternType"), patternStrings[pattern]);
   // For a solid fill, Excel reverses the role of foreground and background colours
   if (fill.fillPattern() == Format::PatternSolid) {
-    if (fill.hasProperty(FormatPrivate::P_Fill_BgColor))
-      fill.property(FormatPrivate::P_Fill_BgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("fgColor"));
-    if (fill.hasProperty(FormatPrivate::P_Fill_FgColor))
-      fill.property(FormatPrivate::P_Fill_FgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("bgColor"));
+    if (fill.hasProperty(FormatPrivate::P_Fill_BgColor)) fill.property(FormatPrivate::P_Fill_BgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("fgColor"));
+    if (fill.hasProperty(FormatPrivate::P_Fill_FgColor)) fill.property(FormatPrivate::P_Fill_FgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("bgColor"));
   } else {
-    if (fill.hasProperty(FormatPrivate::P_Fill_FgColor))
-      fill.property(FormatPrivate::P_Fill_FgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("fgColor"));
-    if (fill.hasProperty(FormatPrivate::P_Fill_BgColor))
-      fill.property(FormatPrivate::P_Fill_BgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("bgColor"));
+    if (fill.hasProperty(FormatPrivate::P_Fill_FgColor)) fill.property(FormatPrivate::P_Fill_FgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("fgColor"));
+    if (fill.hasProperty(FormatPrivate::P_Fill_BgColor)) fill.property(FormatPrivate::P_Fill_BgColor).value<XlsxColor>().saveToXml(writer, QStringLiteral("bgColor"));
   }
   writer.writeEndElement(); // patternFill
   writer.writeEndElement(); // fill
@@ -468,7 +460,7 @@ void Styles::writeFill(QXmlStreamWriter &writer, const Format &fill, bool isDxf)
 void Styles::writeBorders(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("borders"));
   writer.writeAttribute(QStringLiteral("count"), QString::number(m_bordersList.count()));
-  for (const auto & i : m_bordersList) writeBorder(writer, i);
+  for (const auto &i : m_bordersList) writeBorder(writer, i);
   writer.writeEndElement(); // borders
 }
 
@@ -486,19 +478,13 @@ void Styles::writeBorder(QXmlStreamWriter &writer, const Format &border, bool is
     }
   }
 
-  writeSubBorder(writer, QStringLiteral("left"), border.leftBorderStyle(),
-                 border.property(FormatPrivate::P_Border_LeftColor).value<XlsxColor>());
-  writeSubBorder(writer, QStringLiteral("right"), border.rightBorderStyle(),
-                 border.property(FormatPrivate::P_Border_RightColor).value<XlsxColor>());
-  writeSubBorder(writer, QStringLiteral("top"), border.topBorderStyle(),
-                 border.property(FormatPrivate::P_Border_TopColor).value<XlsxColor>());
-  writeSubBorder(writer, QStringLiteral("bottom"), border.bottomBorderStyle(),
-                 border.property(FormatPrivate::P_Border_BottomColor).value<XlsxColor>());
+  writeSubBorder(writer, QStringLiteral("left"), border.leftBorderStyle(), border.property(FormatPrivate::P_Border_LeftColor).value<XlsxColor>());
+  writeSubBorder(writer, QStringLiteral("right"), border.rightBorderStyle(), border.property(FormatPrivate::P_Border_RightColor).value<XlsxColor>());
+  writeSubBorder(writer, QStringLiteral("top"), border.topBorderStyle(), border.property(FormatPrivate::P_Border_TopColor).value<XlsxColor>());
+  writeSubBorder(writer, QStringLiteral("bottom"), border.bottomBorderStyle(), border.property(FormatPrivate::P_Border_BottomColor).value<XlsxColor>());
 
   // Condition DXF formats don't allow diagonal style
-  if (not isDxf)
-    writeSubBorder(writer, QStringLiteral("diagonal"), border.diagonalBorderStyle(),
-                   border.property(FormatPrivate::P_Border_DiagonalColor).value<XlsxColor>());
+  if (not isDxf) writeSubBorder(writer, QStringLiteral("diagonal"), border.diagonalBorderStyle(), border.property(FormatPrivate::P_Border_DiagonalColor).value<XlsxColor>());
 
   if (isDxf) {
     //        writeSubBorder(wirter, QStringLiteral("vertical"), );
@@ -604,14 +590,10 @@ void Styles::writeCellXfs(QXmlStreamWriter &writer) const {
           break;
         }
       }
-      if (format.hasProperty(FormatPrivate::P_Alignment_Indent))
-        writer.writeAttribute(QStringLiteral("indent"), QString::number(format.indent()));
-      if (format.hasProperty(FormatPrivate::P_Alignment_Wrap) and format.textWrap())
-        writer.writeAttribute(QStringLiteral("wrapText"), QStringLiteral("1"));
-      if (format.hasProperty(FormatPrivate::P_Alignment_ShinkToFit) and format.shrinkToFit())
-        writer.writeAttribute(QStringLiteral("shrinkToFit"), QStringLiteral("1"));
-      if (format.hasProperty(FormatPrivate::P_Alignment_Rotation))
-        writer.writeAttribute(QStringLiteral("textRotation"), QString::number(format.rotation()));
+      if (format.hasProperty(FormatPrivate::P_Alignment_Indent)) writer.writeAttribute(QStringLiteral("indent"), QString::number(format.indent()));
+      if (format.hasProperty(FormatPrivate::P_Alignment_Wrap) and format.textWrap()) writer.writeAttribute(QStringLiteral("wrapText"), QStringLiteral("1"));
+      if (format.hasProperty(FormatPrivate::P_Alignment_ShinkToFit) and format.shrinkToFit()) writer.writeAttribute(QStringLiteral("shrinkToFit"), QStringLiteral("1"));
+      if (format.hasProperty(FormatPrivate::P_Alignment_Rotation)) writer.writeAttribute(QStringLiteral("textRotation"), QString::number(format.rotation()));
     }
 
     writer.writeEndElement(); // xf
@@ -668,8 +650,7 @@ bool Styles::readNumFmts(QXmlStreamReader &reader) {
   int count = hasCount ? attributes.value(QLatin1String("count")).toString().toInt() : -1;
 
   // Read utill we find the numFmts end tag or ....
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("numFmts"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("numFmts"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("numFmt")) {
@@ -696,8 +677,7 @@ bool Styles::readFonts(QXmlStreamReader &reader) {
   QXmlStreamAttributes attributes = reader.attributes();
   bool hasCount = attributes.hasAttribute(QLatin1String("count"));
   int count = hasCount ? attributes.value(QLatin1String("count")).toString().toInt() : -1;
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("fonts"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("fonts"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("font")) {
@@ -717,8 +697,7 @@ bool Styles::readFonts(QXmlStreamReader &reader) {
 
 bool Styles::readFont(QXmlStreamReader &reader, Format &format) {
   Q_ASSERT(reader.name() == QLatin1String("font"));
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("font"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("font"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       QXmlStreamAttributes attributes = reader.attributes();
@@ -779,8 +758,7 @@ bool Styles::readFills(QXmlStreamReader &reader) {
   QXmlStreamAttributes attributes = reader.attributes();
   bool hasCount = attributes.hasAttribute(QLatin1String("count"));
   int count = hasCount ? attributes.value(QLatin1String("count")).toString().toInt() : -1;
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("fills"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("fills"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("fill")) {
@@ -824,8 +802,7 @@ bool Styles::readFill(QXmlStreamReader &reader, Format &fill) {
     patternValues[QStringLiteral("lightGrid")] = Format::PatternLightGrid;
   }
 
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("fill"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("fill"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("patternFill")) {
@@ -835,9 +812,7 @@ bool Styles::readFill(QXmlStreamReader &reader, Format &fill) {
           fill.setFillPattern(patternValues.contains(pattern) ? patternValues[pattern] : Format::PatternNone);
 
           // parse foreground and background colors if they exist
-          while (not reader.atEnd() and
-                 not(reader.tokenType() == QXmlStreamReader::EndElement and
-                     reader.name() == QLatin1String("patternFill"))) {
+          while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("patternFill"))) {
             reader.readNextStartElement();
             if (reader.tokenType() == QXmlStreamReader::StartElement) {
               if (reader.name() == QLatin1String("fgColor")) {
@@ -871,8 +846,7 @@ bool Styles::readBorders(QXmlStreamReader &reader) {
   QXmlStreamAttributes attributes = reader.attributes();
   bool hasCount = attributes.hasAttribute(QLatin1String("count"));
   int count = hasCount ? attributes.value(QLatin1String("count")).toString().toInt() : -1;
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("borders"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("borders"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("border")) {
@@ -905,12 +879,10 @@ bool Styles::readBorder(QXmlStreamReader &reader, Format &border) {
   else if (isDown)
     border.setDiagonalBorderType(Format::DiagonalBorderDown);
 
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("border"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("border"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
-      if (reader.name() == QLatin1String("left") or reader.name() == QLatin1String("right") or
-          reader.name() == QLatin1String("top") or reader.name() == QLatin1String("bottom") or
+      if (reader.name() == QLatin1String("left") or reader.name() == QLatin1String("right") or reader.name() == QLatin1String("top") or reader.name() == QLatin1String("bottom") or
           reader.name() == QLatin1String("diagonal")) {
         Format::BorderStyle style(Format::BorderNone);
         XlsxColor color;
@@ -941,8 +913,7 @@ bool Styles::readBorder(QXmlStreamReader &reader, Format &border) {
   return true;
 }
 
-bool Styles::readSubBorder(QXmlStreamReader &reader, const QString &name, Format::BorderStyle &style,
-                           XlsxColor &color) {
+bool Styles::readSubBorder(QXmlStreamReader &reader, const QString &name, Format::BorderStyle &style, XlsxColor &color) {
   Q_ASSERT(reader.name() == name);
 
   static QMap<QString, Format::BorderStyle> stylesStringsMap;
@@ -986,8 +957,7 @@ bool Styles::readCellXfs(QXmlStreamReader &reader) {
   QXmlStreamAttributes attributes = reader.attributes();
   bool hasCount = attributes.hasAttribute(QLatin1String("count"));
   int count = hasCount ? attributes.value(QLatin1String("count")).toString().toInt() : -1;
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("cellXfs"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("cellXfs"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("xf")) {
@@ -1120,8 +1090,7 @@ bool Styles::readDxfs(QXmlStreamReader &reader) {
   QXmlStreamAttributes attributes = reader.attributes();
   bool hasCount = attributes.hasAttribute(QLatin1String("count"));
   int count = hasCount ? attributes.value(QLatin1String("count")).toString().toInt() : -1;
-  while (not reader.atEnd() and
-         not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("dxfs"))) {
+  while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QLatin1String("dxfs"))) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("dxf")) readDxf(reader);
@@ -1137,8 +1106,7 @@ bool Styles::readDxfs(QXmlStreamReader &reader) {
 bool Styles::readDxf(QXmlStreamReader &reader) {
   Q_ASSERT(reader.name() == QLatin1String("dxf"));
   Format format;
-  while (not reader.atEnd() and
-         !(reader.name() == QLatin1String("dxf") and reader.tokenType() == QXmlStreamReader::EndElement)) {
+  while (not reader.atEnd() and !(reader.name() == QLatin1String("dxf") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("numFmt")) {
@@ -1161,8 +1129,7 @@ bool Styles::readDxf(QXmlStreamReader &reader) {
 
 bool Styles::readColors(QXmlStreamReader &reader) {
   Q_ASSERT(reader.name() == QLatin1String("colors"));
-  while (not reader.atEnd() and
-         not(reader.name() == QLatin1String("colors") and reader.tokenType() == QXmlStreamReader::EndElement)) {
+  while (not reader.atEnd() and not(reader.name() == QLatin1String("colors") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("indexedColors")) {
@@ -1177,8 +1144,7 @@ bool Styles::readColors(QXmlStreamReader &reader) {
 bool Styles::readIndexedColors(QXmlStreamReader &reader) {
   Q_ASSERT(reader.name() == QLatin1String("indexedColors"));
   m_indexedColors.clear();
-  while (not reader.atEnd() and
-         not(reader.name() == QLatin1String("indexedColors") and reader.tokenType() == QXmlStreamReader::EndElement)) {
+  while (not reader.atEnd() and not(reader.name() == QLatin1String("indexedColors") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("rgbColor")) {
@@ -1226,22 +1192,14 @@ bool Styles::loadFromXmlFile(QIODevice *device) {
 
 QColor Styles::getColorByIndex(int idx) {
   if (m_indexedColors.isEmpty()) {
-    m_indexedColors << QColor("#000000") << QColor("#FFFFFF") << QColor("#FF0000") << QColor("#00FF00")
-                    << QColor("#0000FF") << QColor("#FFFF00") << QColor("#FF00FF") << QColor("#00FFFF")
-                    << QColor("#000000") << QColor("#FFFFFF") << QColor("#FF0000") << QColor("#00FF00")
-                    << QColor("#0000FF") << QColor("#FFFF00") << QColor("#FF00FF") << QColor("#00FFFF")
-                    << QColor("#800000") << QColor("#008000") << QColor("#000080") << QColor("#808000")
-                    << QColor("#800080") << QColor("#008080") << QColor("#C0C0C0") << QColor("#808080")
-                    << QColor("#9999FF") << QColor("#993366") << QColor("#FFFFCC") << QColor("#CCFFFF")
-                    << QColor("#660066") << QColor("#FF8080") << QColor("#0066CC") << QColor("#CCCCFF")
-                    << QColor("#000080") << QColor("#FF00FF") << QColor("#FFFF00") << QColor("#00FFFF")
-                    << QColor("#800080") << QColor("#800000") << QColor("#008080") << QColor("#0000FF")
-                    << QColor("#00CCFF") << QColor("#CCFFFF") << QColor("#CCFFCC") << QColor("#FFFF99")
-                    << QColor("#99CCFF") << QColor("#FF99CC") << QColor("#CC99FF") << QColor("#FFCC99")
-                    << QColor("#3366FF") << QColor("#33CCCC") << QColor("#99CC00") << QColor("#FFCC00")
-                    << QColor("#FF9900") << QColor("#FF6600") << QColor("#666699") << QColor("#969696")
-                    << QColor("#003366") << QColor("#339966") << QColor("#003300") << QColor("#333300")
-                    << QColor("#993300") << QColor("#993366") << QColor("#333399") << QColor("#333333");
+    m_indexedColors << QColor("#000000") << QColor("#FFFFFF") << QColor("#FF0000") << QColor("#00FF00") << QColor("#0000FF") << QColor("#FFFF00") << QColor("#FF00FF") << QColor("#00FFFF")
+                    << QColor("#000000") << QColor("#FFFFFF") << QColor("#FF0000") << QColor("#00FF00") << QColor("#0000FF") << QColor("#FFFF00") << QColor("#FF00FF") << QColor("#00FFFF")
+                    << QColor("#800000") << QColor("#008000") << QColor("#000080") << QColor("#808000") << QColor("#800080") << QColor("#008080") << QColor("#C0C0C0") << QColor("#808080")
+                    << QColor("#9999FF") << QColor("#993366") << QColor("#FFFFCC") << QColor("#CCFFFF") << QColor("#660066") << QColor("#FF8080") << QColor("#0066CC") << QColor("#CCCCFF")
+                    << QColor("#000080") << QColor("#FF00FF") << QColor("#FFFF00") << QColor("#00FFFF") << QColor("#800080") << QColor("#800000") << QColor("#008080") << QColor("#0000FF")
+                    << QColor("#00CCFF") << QColor("#CCFFFF") << QColor("#CCFFCC") << QColor("#FFFF99") << QColor("#99CCFF") << QColor("#FF99CC") << QColor("#CC99FF") << QColor("#FFCC99")
+                    << QColor("#3366FF") << QColor("#33CCCC") << QColor("#99CC00") << QColor("#FFCC00") << QColor("#FF9900") << QColor("#FF6600") << QColor("#666699") << QColor("#969696")
+                    << QColor("#003366") << QColor("#339966") << QColor("#003300") << QColor("#333300") << QColor("#993300") << QColor("#993366") << QColor("#333399") << QColor("#333333");
     m_isIndexedColorsDefault = true;
   }
   if (idx < 0 or idx >= m_indexedColors.size()) return QColor();

@@ -8,8 +8,9 @@
 #include <QProgressDialog>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QUrl>
-#include <xlsxdocument.h>
+#include <ciso646>
 
 #include "acbr.h"
 #include "cadastrarnfe.h"
@@ -17,10 +18,10 @@
 #include "doubledelegate.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
+#include "sqlquerymodel.h"
 #include "ui_calendarioentregas.h"
 #include "usersession.h"
-
-#include <ciso646>
+#include "xlsxdocument.h"
 
 CalendarioEntregas::CalendarioEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::CalendarioEntregas) {
   ui->setupUi(this);
@@ -254,30 +255,30 @@ void CalendarioEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->tableProdutos->resizeColumnsToContents();
 
   const QString status = modelCarga.data(index.row(), "status").toString();
+  //  const QString nfeStatus = modelCarga.data(index.row(), "NFe Status").toString();
 
   ui->pushButtonReagendar->setEnabled(true);
   ui->pushButtonCancelarEntrega->setEnabled(true);
 
   if (status == "ENTREGA AGEND.") {
     ui->pushButtonGerarNFeEntregar->setEnabled(true);
-    ui->pushButtonConsultarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
   if (status == "EM ENTREGA") {
     ui->pushButtonGerarNFeEntregar->setDisabled(true);
-    ui->pushButtonConsultarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setEnabled(true);
   }
 
   if (status == "NOTA PENDENTE") {
     ui->pushButtonGerarNFeEntregar->setDisabled(true);
-    ui->pushButtonConsultarNFe->setEnabled(true);
     ui->pushButtonConfirmarEntrega->setDisabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
+
+  //  ui->pushButtonConsultarNFe->setEnabled(nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
 }
 
 bool CalendarioEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
@@ -467,9 +468,7 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
     return;
   }
 
-  // TODO:__project public code - change this to use current .exe directory
-  //  QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
-  QFile file("C:/ERP-Staccato/temp.xml");
+  QFile file(QDir::currentPath() + "/temp.xml");
 
   if (not file.open(QFile::WriteOnly)) {
     QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
@@ -491,10 +490,21 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
     return;
   }
 
+  QFile newFile(QDir::currentPath() + "/temp.xml");
+
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para leitura: " + file.errorString());
+    return;
+  }
+
+  const QString xml = newFile.readAll();
+
+  QMessageBox::information(this, "Aviso!", resposta);
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not consultarNFe(idNFe)) {
+  if (not consultarNFe(idNFe, xml)) {
     QSqlQuery("ROLLBACK").exec();
     if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     return;
@@ -503,11 +513,12 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
   QSqlQuery("COMMIT").exec();
 }
 
-bool CalendarioEntregas::consultarNFe(const int idNFe) {
+bool CalendarioEntregas::consultarNFe(const int idNFe, const QString &xml) {
   // alterar status da nota para 'autorizado'
 
   QSqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'AUTORIZADO' WHERE idNFe = :idNFe");
+  query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
@@ -557,14 +568,15 @@ void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
   }
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
+  const QString idEvento = modelCarga.data(list.first().row(), "idEvento").toString();
 
-  QList<int> lista;
-
-  for (int row = 0; row < modelProdutos.rowCount(); ++row) lista.append(modelProdutos.data(row, "idVendaProduto").toInt());
+  SqlQueryModel modelProdutosAgrupado;
+  modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, produto, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, un FROM view_calendario_produto WHERE idVenda = '" +
+                                 idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY produto");
 
   //-------------------------------------------------------------------------
 
-  if (modelProdutos.rowCount() > 20) {
+  if (modelProdutosAgrupado.rowCount() > 20) {
     QMessageBox::critical(this, "Erro!", "Mais produtos do que cabe no modelo do Excel!");
     return;
   }
@@ -587,7 +599,7 @@ void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
     return;
   }
 
-  const QString arquivoModelo = "protocolo entrega.xlsx";
+  const QString arquivoModelo = "espelho_entrega.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
@@ -610,31 +622,49 @@ void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   QXlsx::Document xlsx(arquivoModelo);
 
+  xlsx.currentWorksheet()->setFitToPage(true);
+  xlsx.currentWorksheet()->setFitToHeight(true);
+  xlsx.currentWorksheet()->setOrientationVertical(true);
+
   QSqlQuery query;
-  query.prepare("SELECT nome_razao, logradouro, numero, complemento, bairro, cidade, cep FROM cliente c LEFT JOIN cliente_has_endereco che ON c.idCliente = che.idCliente WHERE c.idCliente = (SELECT "
-                "idCliente FROM venda WHERE idVenda = :idVenda)");
+  query.prepare("SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idVenda);
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + query.lastError().text());
+    QMessageBox::critical(this, "Erro!", "Erro buscando endereço entrega: " + query.lastError().text());
     return;
   }
 
-  xlsx.write("E8", QDate::currentDate());
-  xlsx.write("E10", idVenda);
-  xlsx.write("B11", query.value("nome_razao"));
-  xlsx.write("B12", query.value("logradouro").toString() + " " + query.value("numero").toString() + " " + query.value("complemento").toString() + " - " + query.value("bairro").toString() + ", " +
-                        query.value("cidade").toString());
-  xlsx.write("B13", query.value("cep"));
-  //  xlsx.write("C40", "NFe: ");
+  if (query.value("idEnderecoEntrega").toInt() == 1) {
+    QMessageBox::critical(this, "Erro!", R"(Endereço é "NÃO HÁ!")");
+    return;
+  }
 
-  for (int row = 19, remain = 18 + modelProdutos.rowCount(), index = 0; row <= remain; ++row, ++index) {
-    xlsx.write("A" + QString::number(row), index + 1);                                                                                        // item
-    xlsx.write("B" + QString::number(row), modelProdutos.data(index, "fornecedor"));                                                          // marca
-    xlsx.write("C" + QString::number(row), modelProdutos.data(index, "produto"));                                                             // produto
-    xlsx.write("D" + QString::number(row), modelProdutos.data(index, "quant").toString() + " " + modelProdutos.data(index, "un").toString()); // quant
-    xlsx.write("E" + QString::number(row), modelProdutos.data(index, "caixas"));                                                              // caixas
-    xlsx.write("F" + QString::number(row), "LOTE");                                                                                           // lote
+  query.prepare("SELECT nome_razao, logradouro, numero, complemento, bairro, cidade, cep, tel, telCel FROM cliente c LEFT JOIN cliente_has_endereco che ON c.idCliente = che.idCliente WHERE "
+                "c.idCliente = (SELECT idCliente FROM venda WHERE idVenda = :idVenda) AND che.idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
+  query.bindValue(":idVenda", idVenda);
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando dados cliente: " + query.lastError().text());
+    return;
+  }
+
+  const QString tel = query.value("tel").toString();
+  const QString telCel = query.value("telCel").toString();
+  const QString tels = tel.isEmpty() ? "" : tel + (telCel.isEmpty() ? "" : " - " + telCel);
+
+  xlsx.write("AA5", idVenda);
+  xlsx.write("G11", query.value("nome_razao"));
+  xlsx.write("Y11", tels);
+  xlsx.write("J19", query.value("logradouro").toString() + " " + query.value("numero").toString() + " " + query.value("complemento").toString() + " - " + query.value("bairro").toString() + ", " +
+                        query.value("cidade").toString());
+  xlsx.write("I17", query.value("cep"));
+
+  for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row = row + 2, ++index) {
+    xlsx.write("D" + QString::number(row), modelProdutosAgrupado.data(index, "fornecedor"));
+    xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto"));                                                                     // produto
+    xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString()); // quant
+    xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                     // caixas
   }
 
   if (not xlsx.saveAs(fileName)) {

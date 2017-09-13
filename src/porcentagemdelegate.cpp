@@ -1,6 +1,6 @@
-#include "porcentagemdelegate.h"
-
 #include <ciso646>
+
+#include "porcentagemdelegate.h"
 
 PorcentagemDelegate::PorcentagemDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 

@@ -31,6 +31,7 @@ private slots:
   void on_actionEscuro_triggered();
   void on_actionEstoque_triggered();
   void on_actionGerenciar_Lojas_triggered();
+  void on_actionGerenciar_preco_estoque_triggered();
   void on_actionGerenciar_Transportadoras_triggered();
   void on_actionProdutos_triggered();
   void on_actionPromocao_triggered();

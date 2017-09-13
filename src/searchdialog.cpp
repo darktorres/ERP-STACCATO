@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <ciso646>
 
 #include "doubledelegate.h"
 #include "porcentagemdelegate.h"
@@ -11,8 +12,6 @@
 #include "searchdialogproxy.h"
 #include "ui_searchdialog.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, bool permitirDescontinuados, QWidget *parent)
     : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), ui(new Ui::SearchDialog) {
@@ -89,7 +88,7 @@ void SearchDialog::sendUpdateMessage() {
 }
 
 void SearchDialog::show() {
-  model.setFilter(filter + " LIMIT 50");
+  model.setFilter(filter);
 
   if (not model.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela " + model.tableName() + ": " + model.lastError().text());

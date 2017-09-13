@@ -22,6 +22,9 @@ public:
   void setSearchDialog(SearchDialog *value);
   void setValue(const QVariant &value);
 
+signals:
+  void valueChanged(const QVariant &value);
+
 private:
   Q_PROPERTY(QVariant value READ getValue WRITE setValue STORED false)
   // attributes

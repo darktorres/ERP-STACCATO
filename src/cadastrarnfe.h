@@ -20,7 +20,42 @@ public:
   ~CadastrarNFe();
   void prepararNFe(const QList<int> &items);
 
-private slots:
+private:
+  // attributes
+  // int cnpjCertificado;
+  const QString idVenda;
+  QDataWidgetMapper mapper;
+  QSqlQuery queryCliente;
+  QSqlQuery queryEndereco;
+  QSqlQuery queryIBGE;
+  QSqlQuery queryLojaEnd;
+  QString arquivo;
+  QString chaveNum;
+  QString error;
+  QString xml;
+  SqlTableModel modelLoja;
+  SqlTableModel modelProd;
+  SqlTableModel modelVenda;
+  Ui::CadastrarNFe *ui;
+  // methods
+  bool cadastrar(const QVariant &id);
+  bool calculaDigitoVerificador(QString &chave);
+  bool criarChaveAcesso();
+  bool preencherNumeroNFe();
+  bool validar();
+  QString clearStr(const QString &str) const;
+  void alterarCertificado(const QString &text);
+  void setConnections();
+  void setupTables();
+  void updateImpostos();
+  void writeDestinatario(QTextStream &stream) const;
+  void writeEmitente(QTextStream &stream) const;
+  void writeIdentificacao(QTextStream &stream) const;
+  void writeProduto(QTextStream &stream) const;
+  void writeTotal(QTextStream &stream) const;
+  void writeTransportadora(QTextStream &stream) const;
+  void writeVolume(QTextStream &stream) const;
+  //
   void on_comboBoxCfop_currentTextChanged(const QString &text);
   void on_comboBoxCOFINScst_currentTextChanged(const QString &text);
   void on_comboBoxICMSModBc_currentIndexChanged(int index);
@@ -54,41 +89,6 @@ private slots:
   void on_tableItens_clicked(const QModelIndex &index);
   void on_tableItens_entered(const QModelIndex &);
   void on_tabWidget_currentChanged(int index);
-  void updateImpostos();
-  void alterarCertificado(const QString &text);
-
-private:
-  // attributes
-  //int cnpjCertificado;
-  const QString idVenda;
-  QDataWidgetMapper mapper;
-  QSqlQuery queryCliente;
-  QSqlQuery queryEndereco;
-  QSqlQuery queryIBGE;
-  QSqlQuery queryLojaEnd;
-  QString arquivo;
-  QString chaveNum;
-  QString error;
-  QString xml;
-  SqlTableModel modelLoja;
-  SqlTableModel modelProd;
-  SqlTableModel modelVenda;
-  Ui::CadastrarNFe *ui;
-  // methods
-  bool cadastrar(const QVariant &id);
-  bool calculaDigitoVerificador(QString &chave);
-  bool criarChaveAcesso();
-  bool preencherNumeroNFe();
-  bool validar();
-  QString clearStr(const QString &str) const;
-  void setupTables();
-  void writeDestinatario(QTextStream &stream) const;
-  void writeEmitente(QTextStream &stream) const;
-  void writeIdentificacao(QTextStream &stream) const;
-  void writeProduto(QTextStream &stream) const;
-  void writeTotal(QTextStream &stream) const;
-  void writeTransportadora(QTextStream &stream) const;
-  void writeVolume(QTextStream &stream) const;
 };
 
 #endif // CADASTRARNFE_H

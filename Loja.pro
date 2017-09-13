@@ -102,6 +102,7 @@ SOURCES += \
     src/orcamentoproxymodel.cpp \
     src/pagamentosdia.cpp \
     src/porcentagemdelegate.cpp \
+    src/precoestoque.cpp \
     src/produtospendentes.cpp \
     src/reaisdelegate.cpp \
     src/registeraddressdialog.cpp \
@@ -200,6 +201,7 @@ HEADERS  += \
     src/orcamentoproxymodel.h \
     src/pagamentosdia.h \
     src/porcentagemdelegate.h \
+    src/precoestoque.h \
     src/produtospendentes.h \
     src/reaisdelegate.h \
     src/registeraddressdialog.h \
@@ -275,6 +277,7 @@ FORMS += \
     ui/mainwindow.ui \
     ui/orcamento.ui \
     ui/pagamentosdia.ui \
+    ui/precoestoque.ui \
     ui/produtospendentes.ui \
     ui/searchdialog.ui \
     ui/sendmail.ui \

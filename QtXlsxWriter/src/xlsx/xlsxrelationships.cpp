@@ -22,14 +22,14 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include "xlsxrelationships_p.h"
 #include <QBuffer>
 #include <QDir>
 #include <QFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
 #include <ciso646>
+
+#include "xlsxrelationships_p.h"
 
 namespace QXlsx {
 
@@ -53,9 +53,7 @@ void Relationships::addPackageRelationship(const QString &relativeType, const QS
 
 QList<XlsxRelationship> Relationships::worksheetRelationships(const QString &relativeType) const { return relationships(schema_doc + relativeType); }
 
-void Relationships::addWorksheetRelationship(const QString &relativeType, const QString &target, const QString &targetMode) {
-  addRelationship(schema_doc + relativeType, target, targetMode);
-}
+void Relationships::addWorksheetRelationship(const QString &relativeType, const QString &target, const QString &targetMode) { addRelationship(schema_doc + relativeType, target, targetMode); }
 
 QList<XlsxRelationship> Relationships::relationships(const QString &type) const {
   QList<XlsxRelationship> res;

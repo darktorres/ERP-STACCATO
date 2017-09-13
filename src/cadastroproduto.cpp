@@ -1,13 +1,12 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <ciso646>
 
 #include "cadastrofornecedor.h"
 #include "cadastroproduto.h"
 #include "ui_cadastroproduto.h"
 #include "usersession.h"
-
-#include <ciso646>
 
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
@@ -47,6 +46,14 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 }
 
 CadastroProduto::~CadastroProduto() { delete ui; }
+
+bool CadastroProduto::viewRegister() {
+  if (not RegisterDialog::viewRegister()) return false;
+
+  // TODO: implement necessary stuff here
+
+  return true;
+}
 
 void CadastroProduto::clearFields() {
   for (auto const &line : findChildren<QLineEdit *>()) line->clear();
@@ -145,7 +152,7 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->dateEditValidade, "validade");
   addMapping(ui->doubleSpinBoxComissao, "comissao", "value");
   addMapping(ui->doubleSpinBoxCusto, "custo", "value");
-  addMapping(ui->doubleSpinBoxEstoque, "estoque");
+  addMapping(ui->doubleSpinBoxEstoque, "estoqueRestante");
   addMapping(ui->doubleSpinBoxIPI, "ipi", "value");
   addMapping(ui->doubleSpinBoxKgCx, "kgcx");
   addMapping(ui->doubleSpinBoxM2Cx, "m2cx", "value");
@@ -166,6 +173,8 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->radioButtonDesc, "descontinuado");
   addMapping(ui->radioButtonLote, "temLote");
   addMapping(ui->textEditObserv, "observacoes", "plainText");
+  addMapping(ui->checkBoxEstoque, "estoque");
+  addMapping(ui->checkBoxPromocao, "promocao");
 }
 
 void CadastroProduto::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
@@ -178,7 +187,7 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("cst", ui->comboBoxCST->currentText())) return false;
   if (not setData("custo", ui->doubleSpinBoxCusto->value())) return false;
   if (not setData("descricao", ui->lineEditDescricao->text())) return false;
-  if (not setData("estoque", ui->doubleSpinBoxEstoque->value())) return false;
+  if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) return false;
   if (not setData("formComercial", ui->lineEditFormComer->text())) return false;
   if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) return false;
   if (not setData("icms", ui->lineEditICMS->text())) return false;

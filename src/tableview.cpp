@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QHeaderView>
 #include <QIdentityProxyModel>
+#include <QSortFilterProxyModel>
 #include <QSqlRecord>
 #include <QSqlTableModel>
 #include <ciso646>
@@ -24,6 +25,13 @@ void TableView::hideColumn(const QString &column) {
     }
 
     if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
+      QTableView::hideColumn(sourceModel->record().indexOf(column));
+      return;
+    }
+  }
+
+  if (auto *model = qobject_cast<QSortFilterProxyModel *>(QTableView::model())) {
+    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::hideColumn(sourceModel->record().indexOf(column));
       return;
     }
@@ -53,6 +61,13 @@ void TableView::showColumn(const QString &column) {
     }
   }
 
+  if (auto *model = qobject_cast<QSortFilterProxyModel *>(QTableView::model())) {
+    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+      QTableView::showColumn(sourceModel->record().indexOf(column));
+      return;
+    }
+  }
+
   if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::showColumn(model->fieldIndex(column));
     return;
@@ -72,6 +87,13 @@ void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDel
     }
 
     if (auto *sourceModel = qobject_cast<SqlQueryModel *>(model->sourceModel())) {
+      QTableView::setItemDelegateForColumn(sourceModel->record().indexOf(column), delegate);
+      return;
+    }
+  }
+
+  if (auto *model = qobject_cast<QSortFilterProxyModel *>(QTableView::model())) {
+    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::setItemDelegateForColumn(sourceModel->record().indexOf(column), delegate);
       return;
     }
@@ -101,6 +123,13 @@ void TableView::openPersistentEditor(const int row, const QString &column) {
     }
   }
 
+  if (auto *model = qobject_cast<QSortFilterProxyModel *>(QTableView::model())) {
+    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+      QTableView::openPersistentEditor(model->index(row, sourceModel->record().indexOf(column)));
+      return;
+    }
+  }
+
   if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, model->fieldIndex(column)));
     return;
@@ -114,6 +143,11 @@ void TableView::openPersistentEditor(const int row, const QString &column) {
 
 void TableView::openPersistentEditor(const int row, const int column) {
   if (auto *model = qobject_cast<QIdentityProxyModel *>(QTableView::model())) {
+    QTableView::openPersistentEditor(model->index(row, column));
+    return;
+  }
+
+  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, column));
     return;
   }
@@ -144,6 +178,13 @@ void TableView::sortByColumn(const QString &column, Qt::SortOrder order) {
     }
   }
 
+  if (auto *model = qobject_cast<QSortFilterProxyModel *>(QTableView::model())) {
+    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+      QTableView::sortByColumn(sourceModel->record().indexOf(column), order);
+      return;
+    }
+  }
+
   if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
     QTableView::sortByColumn(model->fieldIndex(column), order);
     return;
@@ -163,3 +204,4 @@ void TableView::setModel(QAbstractItemModel *model) {
 }
 
 // TODO: 4program copy - http://stackoverflow.com/questions/3135737/copying-part-of-qtableview
+// TODO: make sure I covered all the cases (and if I should use a default in the end of functions)

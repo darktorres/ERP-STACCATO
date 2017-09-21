@@ -125,7 +125,7 @@ void WidgetCompraOC::on_pushButtonDanfe_clicked() {
     return;
   }
 
-  ACBr::gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt());
+  if (not ACBr::gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) return;
 }
 
 void WidgetCompraOC::on_tablePedido_entered(const QModelIndex &) { ui->tablePedido->resizeColumnsToContents(); }

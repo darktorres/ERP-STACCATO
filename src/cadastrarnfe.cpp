@@ -1623,7 +1623,7 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   QString resposta;
 
-  ACBr::enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")", resposta);
+  if (not ACBr::enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")", resposta)) return;
 
   if (resposta.contains("xMotivo=Consulta cadastro com uma ocorrência")) {
     QStringList list = resposta.mid(resposta.indexOf("IE=")).split("\n");
@@ -1671,7 +1671,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
     return;
   }
 
-  ACBr::enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")", resposta);
+  if (not ACBr::enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")", resposta)) return;
 
   if (not resposta.contains("OK")) {
     QMessageBox::critical(this, "Erro!", resposta);

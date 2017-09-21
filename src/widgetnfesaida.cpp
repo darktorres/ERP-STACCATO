@@ -136,7 +136,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const QString comando = "NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")";
 
   QString resposta;
-  ACBr::enviarComando(comando, resposta);
+  if (not ACBr::enviarComando(comando, resposta)) return;
 
   if (resposta.contains("XMotivo=Evento registrado e vinculado a NF-e")) {
     QSqlQuery query;
@@ -298,7 +298,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     // mandar xml para acbr gerar pdf
 
     QString pdfOrigem;
-    ACBr::gerarDanfe(query.value("xml").toByteArray(), pdfOrigem, false);
+    if (not ACBr::gerarDanfe(query.value("xml").toByteArray(), pdfOrigem, false)) return;
 
     if (pdfOrigem.isEmpty()) {
       QMessageBox::critical(this, "Erro!", "pdf is empty!");

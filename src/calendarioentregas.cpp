@@ -369,7 +369,7 @@ void CalendarioEntregas::on_pushButtonImprimirDanfe_clicked() {
     return;
   }
 
-  ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt());
+  if (not ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) return;
 }
 
 void CalendarioEntregas::on_lineEditBuscar_textChanged(const QString &text) {
@@ -483,7 +483,7 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
 
   QString resposta;
 
-  ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")", resposta);
+  if (not ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")", resposta)) return;
 
   if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
     QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);

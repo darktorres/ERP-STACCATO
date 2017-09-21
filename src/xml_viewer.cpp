@@ -33,5 +33,5 @@ void XML_Viewer::exibirXML(const QByteArray &fileContent) {
 
 void XML_Viewer::on_pushButtonDanfe_clicked() {
   QString resposta;
-  ACBr::gerarDanfe(fileContent, resposta);
+  if (not ACBr::gerarDanfe(fileContent, resposta)) return;
 }

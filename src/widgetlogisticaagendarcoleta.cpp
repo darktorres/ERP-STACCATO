@@ -447,7 +447,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
     return;
   }
 
-  ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt());
+  if (not ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) return;
 }
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &text) {

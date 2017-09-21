@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include <QSqlError>
 #include <QSqlRecord>
 #include <ciso646>
@@ -154,8 +155,6 @@ bool WidgetLogisticaEntrega::updateTables() {
   if (modelVendas.tableName().isEmpty()) {
     setupTables();
 
-    connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntrega::calcularPeso);
-
     connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaEntrega::montaFiltro);
     connect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaEntrega::montaFiltro);
     connect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaEntrega::montaFiltro);
@@ -223,7 +222,11 @@ void WidgetLogisticaEntrega::on_tableVendas_clicked(const QModelIndex &index) {
   modelViewProdutos.setHeaderData("formComercial", "Form. Com.");
   modelViewProdutos.setHeaderData("dataPrevEnt", "Prev. Ent.");
 
-  ui->tableProdutos->setModel(&modelViewProdutos);
+  auto *proxyFilter = new QSortFilterProxyModel(this);
+  proxyFilter->setDynamicSortFilter(true);
+  proxyFilter->setSourceModel(&modelViewProdutos);
+
+  ui->tableProdutos->setModel(proxyFilter);
 
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
@@ -231,6 +234,8 @@ void WidgetLogisticaEntrega::on_tableVendas_clicked(const QModelIndex &index) {
   ui->tableProdutos->hideColumn("idConsumo");
 
   ui->tableProdutos->resizeColumnsToContents();
+
+  connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntrega::calcularPeso);
 
   if (modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") QMessageBox::warning(this, "Aviso!", "Financeiro não liberou!");
 }

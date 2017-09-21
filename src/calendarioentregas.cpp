@@ -255,7 +255,7 @@ void CalendarioEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->tableProdutos->resizeColumnsToContents();
 
   const QString status = modelCarga.data(index.row(), "status").toString();
-  //  const QString nfeStatus = modelCarga.data(index.row(), "NFe Status").toString();
+  const QString nfeStatus = modelCarga.data(index.row(), "NFe Status").toString();
 
   ui->pushButtonReagendar->setEnabled(true);
   ui->pushButtonCancelarEntrega->setEnabled(true);
@@ -278,7 +278,7 @@ void CalendarioEntregas::on_tableCarga_clicked(const QModelIndex &index) {
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
-  //  ui->pushButtonConsultarNFe->setEnabled(nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
+  ui->pushButtonConsultarNFe->setEnabled(nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
 }
 
 bool CalendarioEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
@@ -492,8 +492,8 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
 
   QFile newFile(QDir::currentPath() + "/temp.xml");
 
-  if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para leitura: " + file.errorString());
+  if (not newFile.open(QFile::ReadOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
     return;
   }
 

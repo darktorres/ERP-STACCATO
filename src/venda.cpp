@@ -205,6 +205,7 @@ void Venda::setupTables() {
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("comissao");
   ui->tableProdutos->hideColumn("reposicao");
+  ui->tableProdutos->hideColumn("mostrarDesconto");
 
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
@@ -385,8 +386,9 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   isUpdate = true;
 
   QSqlQuery queryOrc;
-  queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioIndicou, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, descontoPorc, "
-                   "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
+  queryOrc.prepare(
+      "SELECT idUsuario, idOrcamento, idLoja, idUsuarioIndicou, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, freteManual, descontoPorc, "
+      "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
   if (not queryOrc.exec() or not queryOrc.first()) {
@@ -1368,7 +1370,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) {
   unsetConnections();
 
-  [=]() {
+  [=]() { // TODO: put this on totalChanged too
     const double liq = ui->doubleSpinBoxSubTotalLiq->value();
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {

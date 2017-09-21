@@ -19,7 +19,7 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
   if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
 
   mapper.setModel(&model);
-  mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
+  mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit); // NOTE: shouldnt this be manual?
 
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close);
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, &RegisterDialog::saveSlot);

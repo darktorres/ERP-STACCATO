@@ -14,7 +14,7 @@ class SearchDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, bool permitirDescontinuados, QWidget *parent = 0);
+  explicit SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent = 0);
   ~SearchDialog();
   void show();
   void showMaximized();
@@ -30,7 +30,7 @@ public:
   static SearchDialog *enderecoCliente(QWidget *parent);
   static SearchDialog *fornecedor(QWidget *parent);
   static SearchDialog *loja(QWidget *parent);
-  static SearchDialog *produto(bool permitirDescontinuados, QWidget *parent);
+  static SearchDialog *produto(const bool permitirDescontinuados, QWidget *parent);
   static SearchDialog *profissional(QWidget *parent);
   static SearchDialog *transportadora(QWidget *parent);
   static SearchDialog *usuario(QWidget *parent);

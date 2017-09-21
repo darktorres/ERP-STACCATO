@@ -862,3 +862,4 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
 // TODO: 0se der erro durante a leitura o arquivo nao é fechado
 // TODO: 0nao marcou produtos representacao com flag 1
 // TODO: 0ler 'multiplo' na importacao (para produtos que usam minimo)
+// TODO: mostrar os totais na tela e nao apenas na caixa de dialogo

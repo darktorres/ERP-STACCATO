@@ -124,6 +124,6 @@ void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {
 void WidgetLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }
 
 // NOTE: tela para guardar imagens (fotos/documentos scaneados)
-// NOTE: 1followup das entregas (no lugar de followup colocar campo observacao no inputDialog?)
+// TODO: 1followup das entregas (no lugar de followup colocar campo observacao no inputDialog?)
 // TODO: 5colocar aba para fazer cotacao frete, puxar os orcamentos abertos com o peso das caixas para calcular frete
 // TODO: 0verificar nos cancelamentos se estou removendo as datas/previsoes corretamente

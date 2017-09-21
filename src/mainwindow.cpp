@@ -366,11 +366,33 @@ void MainWindow::on_actionPromocao_triggered() {
 // NOTE: colocar logo da staccato na mainwindow
 
 // NOTE: prioridades atuais:
-// NOTE: -logistica da devolucao
-// TODO: 5alguns elementos graficos estao incorretos com o tema escuro
-// TODO: 0verificar com Conrado os itens da MADEBENE para anotar a quantidade correta de minimo/multiplo (por enquanto tem apenas minimo)
+// TODO: logistica da devolucao
 
 void MainWindow::on_actionGerenciar_preco_estoque_triggered() {
   auto *estoque = new PrecoEstoque(this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
 }
+
+// TASK: cancelamento de nfe: terminar de arrumar formato do email
+// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
+// autorizacao e os status)
+// TASK: verificar porque os estoques 10649, 10650 e 10651 nao mudaram de status (pararam em 'em coleta')
+// TASK: anotar alteracoes que Anderson pediu nos audios do whats
+// TASK: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
+// TASK: arrumar items no workbench na tabela pf que possuam idVendaProduto mas nao idVenda
+// TASK: terminar a parte de alteracao de certificado
+//         alterar emitente
+//         pedir para alterar cartao
+// TASK: -reescrever view_estoque para retroativo (usar view_estoque2)
+// TASK: botao de consultarNFe nao esta atualizando corretamente o xml
+// TASK: protocolo entrega (falta o Anderson validar antes de integrar com a geracao da nota)
+// TASK: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
+// TASK: verificar load balancing com proxysql
+// TASK: montar chart do faturamento dia/mes (foto no skype)
+// TASK: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
+// TASK: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
+// TASK: pendencias conrado - nfe 118248
+// TASK: terminar funcao de marcar caixas quebradas no recebimento
+// TASK: verificar os 3 pedidos com totalItem que nao corresponde ao valor correto
+// TASK: bloquear acesso dos usuarios apenas pela intranet (permissoes mysql) precisa de ip fixo primeiro
+// TASK: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco

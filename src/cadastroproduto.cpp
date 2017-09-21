@@ -303,3 +303,4 @@ bool CadastroProduto::save() {
 // TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
 // TODO: 4verificar se posso remover 'un2' de produto
+// TODO: colocar logica para trabalhar a tabela produto_has_preco para que os produtos nao sejam descontinuados com validade ativa

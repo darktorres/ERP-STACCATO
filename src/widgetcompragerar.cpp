@@ -508,3 +508,5 @@ void WidgetCompraGerar::on_checkBoxMostrarSul_toggled(bool checked) {
 
   if (not modelResumo.select()) QMessageBox::critical(this, "Erro!", "Erro ao ler tabela: " + modelResumo.lastError().text());
 }
+
+// TODO: avulso

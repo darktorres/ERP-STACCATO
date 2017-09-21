@@ -13,7 +13,7 @@
 #include "ui_searchdialog.h"
 #include "usersession.h"
 
-SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, bool permitirDescontinuados, QWidget *parent)
+SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
     : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
@@ -226,7 +226,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   return sdLoja;
 }
 
-SearchDialog *SearchDialog::produto(bool permitirDescontinuados, QWidget *parent) {
+SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, QWidget *parent) {
   // TODO: *SUL* pesquisar apenas os produtos com os codigos permitidos de visualizacao da loja atual
 
   // TODO: 1retornar um SearchDialogProxy direto aqui? (assim o consumidor do codigo nao precisa saber quando nem que

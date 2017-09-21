@@ -437,7 +437,7 @@ bool Devolucao::criarContas() {
   if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) return false;
   //----------------
 
-  // NOTE: verificar quando devo criar comissao negativa (quando gera credito ou sempre?)
+  // TODO: verificar quando devo criar comissao negativa (quando gera credito ou sempre?)
 
   //  if (modelVenda.data(0, "representacao").toBool()) {
   //    const int row = modelPagamentos.rowCount();

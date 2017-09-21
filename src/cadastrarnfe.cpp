@@ -347,8 +347,7 @@ void CadastrarNFe::updateImpostos() {
                                      ui->lineEditDestinatarioCEP_2->text();
 
   const QString texto = "Venda de código " + modelVenda.data(0, "idVenda").toString() + ";END. ENTREGA: " + endereco +
-                        ";Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO "
-                        "313Y;Total Aproximado de tributos federais, estaduais e municipais: R$ " +
+                        ";Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;Total Aproximado de tributos federais, estaduais e municipais: R$ " +
                         QLocale(QLocale::Portuguese).toString(total);
   ui->infCompSistema->setPlainText(texto);
 }
@@ -438,8 +437,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   ui->lineEditEmitenteTel2->setText(queryEmitente.value("tel2").toString());
 
   QSqlQuery queryEmitenteEndereco;
-  queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM "
-                                "loja_has_endereco WHERE idLoja = :idLoja");
+  queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getValue());
 
   if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) {
@@ -480,8 +478,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   ui->itemBoxEnderecoFaturamento->setValue(modelVenda.data(0, "idEnderecoFaturamento"));
 
   QSqlQuery queryDestinatarioEndereco;
-  queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM "
-                                    "cliente_has_endereco WHERE idEndereco = :idEndereco");
+  queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoFaturamento"));
 
   if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
@@ -502,8 +499,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   ui->itemBoxEnderecoEntrega->getSearchDialog()->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
   ui->itemBoxEnderecoEntrega->setValue(modelVenda.data(0, "idEnderecoEntrega"));
 
-  queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM "
-                                    "cliente_has_endereco WHERE idEndereco = :idEndereco");
+  queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
 
   if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
@@ -548,12 +544,12 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
     modelProd.setData(row, "vBCPIS", total + freteProporcional);
     modelProd.setData(row, "cstPIS", "01");
-    modelProd.setData(row, "pPIS", 1.65);
+    modelProd.setData(row, "pPIS", 1.65); // TODO: dont hardcode
     modelProd.setData(row, "vPIS", modelProd.data(row, "vBCPIS").toDouble() * modelProd.data(row, "pPIS").toDouble() / 100);
 
     modelProd.setData(row, "vBCCOFINS", total + freteProporcional);
     modelProd.setData(row, "cstCOFINS", "01");
-    modelProd.setData(row, "pCOFINS", 7.6);
+    modelProd.setData(row, "pCOFINS", 7.6); // TODO: dont hardcode
     modelProd.setData(row, "vCOFINS", modelProd.data(row, "vBCCOFINS").toDouble() * modelProd.data(row, "pCOFINS").toDouble() / 100);
   }
 
@@ -620,9 +616,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
     ui->comboBoxCfop->clear();
 
-    while (queryCfop.next()) {
-      ui->comboBoxCfop->addItem(queryCfop.value("CFOP_DE").toString() + " - " + queryCfop.value("NAT").toString());
-    }
+    while (queryCfop.next()) ui->comboBoxCfop->addItem(queryCfop.value("CFOP_DE").toString() + " - " + queryCfop.value("NAT").toString());
   } else {
     QSqlQuery queryCfop;
 
@@ -633,9 +627,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
     ui->comboBoxCfop->clear();
 
-    while (queryCfop.next()) {
-      ui->comboBoxCfop->addItem(queryCfop.value("CFOP_FE").toString() + " - " + queryCfop.value("NAT").toString());
-    }
+    while (queryCfop.next()) ui->comboBoxCfop->addItem(queryCfop.value("CFOP_FE").toString() + " - " + queryCfop.value("NAT").toString());
   }
 
   //
@@ -906,8 +898,7 @@ void CadastrarNFe::writeVolume(QTextStream &stream) const {
   stream << "PesoBruto = " << QString::number(ui->doubleSpinBoxVolumesPesoBruto->value()) << endl;
 }
 
-// TODO: 1criar tela para configurar emails de saida: inicialmente para contabilidade, posteriormente para cliente
-// tambem
+// TODO: 1criar tela para configurar emails de saida: inicialmente para contabilidade, posteriormente para cliente tambem
 
 void CadastrarNFe::on_tableItens_entered(const QModelIndex &) { ui->tableItens->resizeColumnsToContents(); }
 
@@ -1002,8 +993,7 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(double) { ui->doub
 
 void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   QSqlQuery queryDestinatarioEndereco;
-  queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM "
-                                    "cliente_has_endereco WHERE idEndereco = :idEndereco");
+  queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getValue());
 
   if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
@@ -1022,8 +1012,7 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
 
 void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
   QSqlQuery queryDestinatarioEndereco;
-  queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM "
-                                    "cliente_has_endereco WHERE idEndereco = :idEndereco");
+  queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getValue());
 
   if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) {
@@ -1044,33 +1033,33 @@ void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
 
 void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
   if (text == "Tributação Normal") {
-    QStringList list = {"00 - Tributada integralmente",
-                        "10 - Tributada e com cobrança do ICMS por substituição tributária",
-                        "20 - Com redução de base de cálculo",
-                        "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária",
-                        "40 - Isenta",
-                        "41 - Não tributada",
-                        "50 - Suspensão",
-                        "51 - Diferimento",
-                        "60 - ICMS cobrado anteriormente por substituição tributária",
-                        "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária",
-                        "90 - Outras"};
+    const QStringList list = {"00 - Tributada integralmente",
+                              "10 - Tributada e com cobrança do ICMS por substituição tributária",
+                              "20 - Com redução de base de cálculo",
+                              "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária",
+                              "40 - Isenta",
+                              "41 - Não tributada",
+                              "50 - Suspensão",
+                              "51 - Diferimento",
+                              "60 - ICMS cobrado anteriormente por substituição tributária",
+                              "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária",
+                              "90 - Outras"};
 
     ui->comboBoxSituacaoTributaria->clear();
     ui->comboBoxSituacaoTributaria->addItems(list);
   }
 
   if (text == "Simples Nacional") {
-    QStringList list = {"101 - Tributada pelo Simples Nacional com permissão de crédito",
-                        "102 - Tributada pelo Simples Nacional sem permissão de crédito",
-                        "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta",
-                        "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária",
-                        "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária",
-                        "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária",
-                        "300 - Imune",
-                        "400 - Não tributada pelo Simples Nacional",
-                        "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação",
-                        "900 - Outros"};
+    const QStringList list = {"101 - Tributada pelo Simples Nacional com permissão de crédito",
+                              "102 - Tributada pelo Simples Nacional sem permissão de crédito",
+                              "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta",
+                              "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária",
+                              "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária",
+                              "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária",
+                              "300 - Imune",
+                              "400 - Não tributada pelo Simples Nacional",
+                              "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação",
+                              "900 - Outros"};
 
     ui->comboBoxSituacaoTributaria->clear();
     ui->comboBoxSituacaoTributaria->addItems(list);
@@ -1079,33 +1068,33 @@ void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
 
 void CadastrarNFe::on_comboBoxRegime_2_currentTextChanged(const QString &text) {
   if (text == "Tributação Normal") {
-    QStringList list = {"00 - Tributada integralmente",
-                        "10 - Tributada e com cobrança do ICMS por substituição tributária",
-                        "20 - Com redução de base de cálculo",
-                        "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária",
-                        "40 - Isenta",
-                        "41 - Não tributada",
-                        "50 - Suspensão",
-                        "51 - Diferimento",
-                        "60 - ICMS cobrado anteriormente por substituição tributária",
-                        "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária",
-                        "90 - Outras"};
+    const QStringList list = {"00 - Tributada integralmente",
+                              "10 - Tributada e com cobrança do ICMS por substituição tributária",
+                              "20 - Com redução de base de cálculo",
+                              "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária",
+                              "40 - Isenta",
+                              "41 - Não tributada",
+                              "50 - Suspensão",
+                              "51 - Diferimento",
+                              "60 - ICMS cobrado anteriormente por substituição tributária",
+                              "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária",
+                              "90 - Outras"};
 
     ui->comboBoxSituacaoTributaria_2->clear();
     ui->comboBoxSituacaoTributaria_2->addItems(list);
   }
 
   if (text == "Simples Nacional") {
-    QStringList list = {"101 - Tributada pelo Simples Nacional com permissão de crédito",
-                        "102 - Tributada pelo Simples Nacional sem permissão de crédito",
-                        "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta",
-                        "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária",
-                        "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária",
-                        "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária",
-                        "300 - Imune",
-                        "400 - Não tributada pelo Simples Nacional",
-                        "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação",
-                        "900 - Outros"};
+    const QStringList list = {"101 - Tributada pelo Simples Nacional com permissão de crédito",
+                              "102 - Tributada pelo Simples Nacional sem permissão de crédito",
+                              "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta",
+                              "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária",
+                              "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária",
+                              "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária",
+                              "300 - Imune",
+                              "400 - Não tributada pelo Simples Nacional",
+                              "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação",
+                              "900 - Outros"};
 
     ui->comboBoxSituacaoTributaria_2->clear();
     ui->comboBoxSituacaoTributaria_2->addItems(list);
@@ -1518,8 +1507,7 @@ bool CadastrarNFe::validar() {
     }
   }
 
-  queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE "
-                        "idEndereco = :idEndereco");
+  queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getValue());
 
   if (not queryEndereco.exec() or not queryEndereco.first()) {
@@ -1755,8 +1743,6 @@ void CadastrarNFe::setConnections() {
 }
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo
-// TODO: 2gerar protocolo entrega
 // TODO: 3criar logo para nota
 // TODO: 5verificar com Anderson rateamento de frete
 // TODO: 5bloquear edicao direto na tabela
-// usar dois campos de texto, um read-only com as informacoes geradas pelo sistema

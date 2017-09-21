@@ -1134,7 +1134,8 @@ void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(Q
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque
 // submitAll chama select)
-// NOTE: 0se produto for estoque permitir vender por peça
+// TODO: 0se produto for estoque permitir vender por peça (setar minimo/multiplo)
 // TODO: 2orcamento de reposicao nao pode ter profissional associado (bloquear)
 // TODO: 4quando cadastrar cliente no itemBox mudar para o id dele
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
+// TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete

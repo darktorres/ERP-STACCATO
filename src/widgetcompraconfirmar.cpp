@@ -209,8 +209,8 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   QMessageBox::information(this, "Aviso!", "Itens cancelados!");
 }
 
-// NOTE: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)
-// NOTE: 1permitir na tela de compras alterar uma venda para quebrar um produto em dois para os casos de lotes diferentes: 50 -> 40+10
+// TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)
+// TODO: 1permitir na tela de compras alterar uma venda para quebrar um produto em dois para os casos de lotes diferentes: 50 -> 40+10
 // TODO: 0colocar data para frete/st e se elas são inclusas nas parcelas ou separadas
 // TODO: 0mesmo bug do gerarcompra/produtospendentes em que o prcUnitario é multiplicado pela quantidade total e nao a da linha
 // TODO: 0cancelar nesta tela nao altera status para pendente

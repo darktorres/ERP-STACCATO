@@ -94,12 +94,6 @@ void FollowUp::setupTables() {
     return;
   }
 
-  //  if (tipo == Orcamento) {
-  //    ui->table->setModel(new FollowUpProxyModel(&model, this));
-  //  } else {
-  //    ui->table->setModel(new Esto);
-  //  }
-
   ui->table->setModel(new FollowUpProxyModel(&model, this));
   ui->table->hideColumn("semaforo");
 

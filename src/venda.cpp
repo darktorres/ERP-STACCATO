@@ -468,6 +468,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   if (not model.setData(row, "subTotalBru", queryOrc.value("subTotalBru"))) return;
   if (not model.setData(row, "subTotalLiq", queryOrc.value("subTotalLiq"))) return;
   if (not model.setData(row, "frete", queryOrc.value("frete"))) return;
+  if (not model.setData(row, "freteManual", queryOrc.value("freteManual"))) return;
   if (not model.setData(row, "descontoPorc", queryOrc.value("descontoPorc"))) return;
   if (not model.setData(row, "descontoReais", queryOrc.value("descontoReais"))) return;
   if (not model.setData(row, "total", queryOrc.value("total"))) return;
@@ -680,13 +681,14 @@ void Venda::calcPrecoGlobalTotal() {
 void Venda::clearFields() {}
 
 void Venda::setupMapper() {
+  addMapping(ui->checkBoxFreteManual, "freteManual");
   addMapping(ui->dateTimeEdit, "data");
   addMapping(ui->dateTimeEditOrc, "dataOrc");
-  addMapping(ui->doubleSpinBoxSubTotalBruto, "subTotalBru");
-  addMapping(ui->doubleSpinBoxSubTotalLiq, "subTotalLiq");
   addMapping(ui->doubleSpinBoxDescontoGlobal, "descontoPorc");
   addMapping(ui->doubleSpinBoxDescontoGlobalReais, "descontoReais");
   addMapping(ui->doubleSpinBoxFrete, "frete");
+  addMapping(ui->doubleSpinBoxSubTotalBruto, "subTotalBru");
+  addMapping(ui->doubleSpinBoxSubTotalLiq, "subTotalLiq");
   addMapping(ui->doubleSpinBoxTotal, "total");
   addMapping(ui->itemBoxCliente, "idCliente", "value");
   addMapping(ui->itemBoxEndereco, "idEnderecoEntrega", "value");
@@ -695,8 +697,8 @@ void Venda::setupMapper() {
   addMapping(ui->itemBoxVendedor, "idUsuario", "value");
   addMapping(ui->lineEditIdOrcamento, "idOrcamento");
   addMapping(ui->lineEditVenda, "idVenda");
-  addMapping(ui->spinBoxPrazoEntrega, "prazoEntrega");
   addMapping(ui->plainTextEdit, "observacao");
+  addMapping(ui->spinBoxPrazoEntrega, "prazoEntrega");
 }
 
 void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }

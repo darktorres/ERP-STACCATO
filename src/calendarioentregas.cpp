@@ -499,8 +499,6 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
 
   const QString xml = newFile.readAll();
 
-  QMessageBox::information(this, "Aviso!", resposta);
-
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
@@ -511,6 +509,8 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
   }
 
   QSqlQuery("COMMIT").exec();
+
+  QMessageBox::information(this, "Aviso!", resposta);
 }
 
 bool CalendarioEntregas::consultarNFe(const int idNFe, const QString &xml) {
@@ -672,6 +672,6 @@ void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
     return;
   }
 
-  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
 }

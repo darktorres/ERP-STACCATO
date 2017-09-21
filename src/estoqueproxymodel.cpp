@@ -1,4 +1,6 @@
+#include <QApplication>
 #include <QBrush>
+#include <QStyle>
 #include <ciso646>
 
 #include "estoqueproxymodel.h"
@@ -18,8 +20,16 @@ QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) 
   }
 
   if (role == Qt::ForegroundRole) {
-    // TODO: 5manter o texto escuro quando o fundo for colorido
-    if (QIdentityProxyModel::data(proxyIndex, Qt::BackgroundRole) == QBrush(Qt::black)) return QBrush(Qt::white);
+    const int quantUpd = QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt();
+
+    // TODO: create a enum
+    if (quantUpd == 1) return QBrush(Qt::black); // Ok
+    if (quantUpd == 2) return QBrush(Qt::black); // Quant difere
+    if (quantUpd == 3) return QBrush(Qt::black); // Não encontrado
+    if (quantUpd == 4) return QBrush(Qt::black); // Consumo
+    if (quantUpd == 5) return QBrush(Qt::black); // Devolução
+
+    return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

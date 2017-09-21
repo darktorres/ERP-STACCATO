@@ -1,4 +1,6 @@
+#include <QApplication>
 #include <QBrush>
+#include <QStyle>
 #include <ciso646>
 
 #include "vendaproxymodel.h"
@@ -43,9 +45,37 @@ QVariant VendaProxyModel::data(const QModelIndex &proxyIndex, const int role) co
   }
 
   if (role == Qt::ForegroundRole) {
-    const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->status), Qt::DisplayRole).toString();
+    if (proxyIndex.column() == this->dias) {
+      const int dias = QIdentityProxyModel::data(index(proxyIndex.row(), this->dias), Qt::DisplayRole).toInt();
+      const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->status), Qt::DisplayRole).toString();
 
-    if (status == "ENTREGUE" or status == "DEVOLVIDO" or status == "PROCESSADO" or status == "CANCELADO" or proxyIndex.column() == this->dias) return QBrush(Qt::black);
+      if (dias >= 5 or status == "ENTREGUE") return QBrush(Qt::black);
+      if (dias >= 3 or status == "CANCELADO" or status == "DEVOLVIDO" or status == "PROCESSADO") return QBrush(Qt::black);
+      if (dias < 3) return QBrush(Qt::black);
+    }
+
+    if (proxyIndex.column() == this->followup) {
+      const int semaforo = QIdentityProxyModel::data(index(proxyIndex.row(), this->semaforo), Qt::DisplayRole).toInt();
+
+      if (semaforo == Quente) return QBrush(Qt::black);
+      if (semaforo == Morno) return QBrush(Qt::black);
+      if (semaforo == Frio) return QBrush(Qt::black);
+    }
+
+    if (proxyIndex.column() == this->financeiro) {
+      const QString financeiro = QIdentityProxyModel::data(index(proxyIndex.row(), this->financeiro), Qt::DisplayRole).toString();
+
+      if (financeiro == "PENDENTE") return QBrush(Qt::black);
+      if (financeiro == "CONFERIDO") return QBrush(Qt::black);
+      if (financeiro == "LIBERADO") return QBrush(Qt::black);
+    }
+
+    const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->status), Qt::DisplayRole).toString();
+    if (status == "ENTREGUE") return QBrush(Qt::black);
+    if (status == "CANCELADO" or status == "DEVOLVIDO" or status == "PROCESSADO") return QBrush(Qt::black);
+    if (status == "PERDIDO") return QBrush(Qt::black);
+
+    return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

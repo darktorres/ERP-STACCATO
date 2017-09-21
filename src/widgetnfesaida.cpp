@@ -332,3 +332,86 @@ void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
 // TODO: 2tela para importar notas de amostra (aba separada)
 // TODO: 0nao estou guardando o valor na nota
 // TODO: 0algumas notas nao estao mostrando valor
+
+void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    return;
+  }
+
+  if (model.data(selection.first().row(), "status").toString() != "NOTA PENDENTE") {
+    QMessageBox::critical(this, "Erro!", "Nota não está pendente!");
+    return;
+  }
+
+  const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
+
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando XML: " + query.lastError().text());
+    return;
+  }
+
+  QFile file(QDir::currentPath() + "/temp.xml");
+
+  if (not file.open(QFile::WriteOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
+    return;
+  }
+
+  QTextStream stream(&file);
+
+  stream << query.value("xml").toString();
+
+  file.close();
+
+  QString resposta;
+
+  if (not ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")", resposta)) return;
+
+  if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
+    QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);
+    return;
+  }
+
+  QFile newFile(QDir::currentPath() + "/temp.xml");
+
+  if (not newFile.open(QFile::ReadOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
+    return;
+  }
+
+  const QString xml = newFile.readAll();
+
+  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
+  QSqlQuery("START TRANSACTION").exec();
+
+  if (not atualizarNFe(idNFe, xml)) {
+    QSqlQuery("ROLLBACK").exec();
+    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    return;
+  }
+
+  QSqlQuery("COMMIT").exec();
+
+  QMessageBox::information(this, "Aviso!", resposta);
+}
+
+bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
+  QSqlQuery query;
+  query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  query.bindValue(":xml", xml);
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) {
+    error = "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text();
+    return false;
+  }
+
+  return true;
+}

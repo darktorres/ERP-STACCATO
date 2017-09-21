@@ -21,20 +21,23 @@ signals:
   void errorSignal(const QString &error);
 
 private slots:
+  void on_groupBoxStatus_toggled(const bool enabled);
   void on_pushButtonCancelarNFe_clicked();
+  void on_pushButtonConsultarNFe_clicked();
   void on_pushButtonExportar_clicked();
   void on_pushButtonRelatorio_clicked();
   void on_table_activated(const QModelIndex &index);
   void on_table_entered(const QModelIndex &);
-  void on_groupBoxStatus_toggled(const bool enabled);
 
 private:
   // attributes
+  QString error;
   SqlTableModel model;
   Ui::WidgetNfeSaida *ui;
   // methods
-  void setupTables();
+  bool atualizarNFe(const int idNFe, const QString &xml);
   void montaFiltro();
+  void setupTables();
 };
 
 #endif // WIDGETNFESAIDA_H

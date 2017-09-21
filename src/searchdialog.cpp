@@ -135,6 +135,14 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
     return;
   }
 
+  if (model.tableName() == "produto") {
+    const auto selection = ui->table->selectionModel()->selection().indexes();
+
+    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) {
+      QMessageBox::warning(this, "Aviso!", "Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!");
+    }
+  }
+
   sendUpdateMessage();
   close();
 }

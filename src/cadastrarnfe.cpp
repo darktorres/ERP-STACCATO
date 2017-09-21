@@ -101,30 +101,9 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->hideColumn("idVendaProduto");
 }
 
-void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
-  // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
-
-  // TODO: 1refatorar funcao
-
-  // se acbr enviar nota para receita mas nao receber a autor., consultar nota para atualizar com a autor.
-  // 1. enviar comando para acbr criar/assinar/enviar xml
-  // 2. se acbr retornar ok/autorizado guardar nota normalmente
-  // 3. se acbr perder a conexao/nao responder guardar o xml nao autorizado (ele ficara na pasta do acbr)
-  // TODO: 4. criar um botao para consultar notas pendentes (o acbr atualiza o xml com a autorizacao)
-
-  //  modelLoja.setData(0, "cnpj", "99999090910270"); // TODO: 5test only, remove later
-
-  if (not validar()) return;
-
-  if (not criarChaveAcesso()) return;
-
+QString CadastrarNFe::gravarNota() {
   QString nfe;
   QTextStream stream(&nfe);
-
-  // primeiro usar apenas o comando de criar nota
-  // pegar o path do arquivo e mandar o comando de enviar nota
-  // se ok continuar
-  // se nao tiver resposta tentar consultar nota
 
   stream << R"(NFE.CriarNFe(")" << endl;
 
@@ -145,35 +124,20 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   stream << "\r\n.\r\n";
   stream.flush();
 
-  QString resposta;
+  return nfe;
+}
 
-  ACBr::enviarComando(nfe, resposta);
+bool CadastrarNFe::preCadastrarNota(const QString &fileName, QVariant &id) {
+  QFile file(fileName);
 
-  //  QMessageBox::information(this, "Criar nota", resposta);
-
-  if (not resposta.contains("OK")) {
-    QMessageBox::critical(this, "Resposta CriarNFe", resposta);
-    return;
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo XML: " + file.errorString());
+    return false;
   }
 
-  const QString fileName = QString(resposta).remove("OK: ").remove("\r").remove("\n");
-
-  {
-    QFile file(fileName);
-
-    if (not file.open(QFile::ReadOnly)) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo XML: " + file.errorString());
-      return;
-    }
-
-    xml = file.readAll();
-  }
+  xml = file.readAll();
 
   QSqlQuery queryNota;
-  // TODO: 5ao guardar esta nota como pendente ela deve ser consultada:
-  // - caso nao conste na base da receita deve ser deletada
-  // - caso conste validar a nota, se ela nao estiver autorizada deletar
-  // - caso esteja validada atualizar
   queryNota.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, chaveAcesso, valor) VALUES (:numeroNFe, :tipo, :xml, :status, :chaveAcesso, :valor)");
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":tipo", "SAÍDA");
@@ -184,53 +148,96 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not queryNota.exec()) {
     error = "Erro guardando nota: " + queryNota.lastError().text();
-    return;
+    return false;
   }
 
-  const QVariant id = queryNota.lastInsertId();
+  id = queryNota.lastInsertId();
 
   if (queryNota.lastInsertId().isNull()) {
     QMessageBox::critical(this, "Erro!", "Erro lastInsertId");
+    return false;
+  }
+
+  return true;
+}
+
+bool CadastrarNFe::processarResposta(QString &resposta, const QString &fileName, const QVariant &id) {
+  if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
+    if (not ACBr::enviarComando("NFE.ConsultarNFe(" + fileName + ")", resposta)) return false;
+
+    if (resposta.contains("XMotivo=Rejeição")) {
+      QSqlQuery queryNota;
+      queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+      queryNota.bindValue(":idNFe", id);
+
+      if (not queryNota.exec()) {
+        error = "Erro removendo nota: " + queryNota.lastError().text();
+        return false;
+      }
+
+      QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);
+    }
+  }
+
+  // reread the file now authorized
+  QFile file(fileName);
+
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo XML: " + file.errorString());
+    return false;
+  }
+
+  xml = file.readAll();
+
+  return true;
+}
+
+void CadastrarNFe::sendEmail(const QString &fileName) {
+  const QString email = UserSession::settings("User/emailContabilidade").toString();
+  const QString copia = UserSession::settings("User/emailLogistica").toString();
+  const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+
+  const QString comando = "NFE.EnviarEmail(" + email + "," + fileName + ",1,'" + assunto + "', " + copia + ")";
+
+  QString resposta;
+
+  if (not ACBr::enviarComando(comando, resposta)) return;
+
+  if (not resposta.contains("OK: Email enviado com sucesso")) {
+    QMessageBox::critical(this, "Resposta EnviarEmail", resposta);
+    // perguntar se deseja tentar enviar novamente?
+  }
+
+  QMessageBox::information(this, "Resposta", resposta);
+}
+
+void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
+  // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
+
+  if (not validar()) return;
+
+  if (not criarChaveAcesso()) return;
+
+  const QString criarNFe = gravarNota();
+
+  QString resposta;
+
+  if (not ACBr::enviarComando(criarNFe, resposta)) return;
+
+  if (not resposta.contains("OK")) {
+    QMessageBox::critical(this, "Resposta CriarNFe", resposta);
     return;
   }
 
-  // enviar nota
+  const QString fileName = QString(resposta).remove("OK: ").remove("\r").remove("\n");
 
-  ACBr::enviarComando("NFE.EnviarNFe(" + fileName + ", 1, 1, 0, 1)", resposta);
+  QVariant id;
 
-  //  QMessageBox::information(this, "EnviarNFe", resposta);
+  if (not preCadastrarNota(fileName, id)) return;
 
-  if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    QMessageBox::critical(this, "Resposta EnviarNFe", resposta);
+  if (not ACBr::enviarComando("NFE.EnviarNFe(" + fileName + ", 1, 1, 0, 1)", resposta)) return;
 
-    ACBr::enviarComando("NFE.ConsultarNFe(" + fileName + ")", resposta);
-
-    if (resposta.contains("XMotivo=Rejeição: NF-e não consta na base de dados da SEFAZ")) {
-      // se receita retornar 'nota nao consta no banco de dados' reenviar
-      // XMotivo=Rejeição: NF-e não consta na base de dados da SEFAZ
-
-      ACBr::enviarComando("NFE.EnviarNFe(" + fileName + ", 1, 1, 0, 1)", resposta);
-
-      if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-        // verificar o erro
-        QMessageBox::critical(this, "Resposta EnviarNFe", resposta);
-        return;
-      }
-    }
-  }
-
-  {
-    QFile file(fileName);
-
-    if (not file.open(QFile::ReadOnly)) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo XML: " + file.errorString());
-      return;
-    }
-
-    xml = file.readAll();
-  }
-
-  // -------------------------------------------------
+  if (not processarResposta(resposta, fileName, id)) return;
 
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
@@ -246,30 +253,9 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   QMessageBox::information(this, "Aviso!", resposta);
 
-  {
-    // TODO:__project public code
-    //      const QString email = "fiscal5@ellycontabil.com.br";
-    //      const QString copia = "logistica@staccatorevestimentos.com.br";
-    const QString email = UserSession::settings("User/emailContabilidade").toString();
-    const QString copia = UserSession::settings("User/emailLogistica").toString();
-    const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+  sendEmail(fileName);
 
-    const QString comando = "NFE.EnviarEmail(" + email + "," + fileName + ",1,'" + assunto + "', " + copia + ")";
-
-    QString resposta;
-
-    ACBr::enviarComando(comando, resposta);
-
-    if (not resposta.contains("OK: Email enviado com sucesso")) {
-      QMessageBox::critical(this, "Resposta EnviarEmail", resposta);
-
-      // perguntar se deseja tentar enviar novamente?
-    }
-
-    QMessageBox::information(this, "Resposta", resposta);
-  }
-
-  ACBr::gerarDanfe(xml.toLatin1(), resposta);
+  if (not ACBr::gerarDanfe(xml.toLatin1(), resposta)) return;
 
   close();
 }

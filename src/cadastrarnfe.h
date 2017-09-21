@@ -56,6 +56,9 @@ private:
   void writeTransportadora(QTextStream &stream) const;
   void writeVolume(QTextStream &stream) const;
   //
+  bool preCadastrarNota(const QString &fileName, QVariant &id);
+  bool processarResposta(QString &resposta, const QString &fileName, const QVariant &id);
+  QString gravarNota();
   void on_comboBoxCfop_currentTextChanged(const QString &text);
   void on_comboBoxCOFINScst_currentTextChanged(const QString &text);
   void on_comboBoxICMSModBc_currentIndexChanged(int index);
@@ -89,6 +92,7 @@ private:
   void on_tableItens_clicked(const QModelIndex &index);
   void on_tableItens_entered(const QModelIndex &);
   void on_tabWidget_currentChanged(int index);
+  void sendEmail(const QString &fileName);
 };
 
 #endif // CADASTRARNFE_H

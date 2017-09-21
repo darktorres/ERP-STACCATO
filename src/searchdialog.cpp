@@ -52,7 +52,7 @@ void SearchDialog::setupTables(const QString &table, const QString &filter) {
 }
 
 void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
-  const QString text = ui->lineEditBusca->text().replace("-", " ");
+  const QString text = ui->lineEditBusca->text().replace("-", " ").replace("(", "").replace(")", "");
 
   if (text.isEmpty()) {
     model.setFilter(filter);

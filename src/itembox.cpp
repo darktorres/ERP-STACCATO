@@ -77,6 +77,7 @@ QVariant ItemBox::getValue() const { return value; }
 
 void ItemBox::setValue(const QVariant &value) {
   if (value.isNull()) return;
+  if (this->value == value) return;
 
   this->value = value;
 

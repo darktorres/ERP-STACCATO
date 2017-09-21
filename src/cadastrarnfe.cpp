@@ -1547,8 +1547,9 @@ bool CadastrarNFe::validar() {
     return false;
   }
 
-  queryIBGE.prepare("SELECT CT_IBGE FROM cidade WHERE CT_NOME = :cidade"); // add uf to filter
+  queryIBGE.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
   queryIBGE.bindValue(":cidade", queryEndereco.value("cidade"));
+  queryIBGE.bindValue(":uf", queryEndereco.value("uf"));
 
   if (not queryIBGE.exec() or not queryIBGE.first()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando código do munícipio");

@@ -292,6 +292,6 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
     return;
   }
 
-  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
 }

@@ -216,8 +216,8 @@ void Impressao::print() {
   file.close();
 
   report->printToPDF(fileName);
-  QMessageBox::information(nullptr, "Ok!", "Arquivo salvo como " + fileName);
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  QMessageBox::information(nullptr, "Ok!", "Arquivo salvo como " + fileName);
 }
 
 bool Impressao::setQuerys() {

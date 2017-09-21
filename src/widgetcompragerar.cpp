@@ -424,8 +424,8 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
     return false;
   }
 
-  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
 
   return true;
 }

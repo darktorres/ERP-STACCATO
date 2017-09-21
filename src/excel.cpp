@@ -269,8 +269,8 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     return false;
   }
 
-  QMessageBox::information(parent, "Ok!", "Arquivo salvo como " + fileName);
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  QMessageBox::information(parent, "Ok!", "Arquivo salvo como " + fileName);
 
   return true;
 }

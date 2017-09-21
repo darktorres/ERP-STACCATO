@@ -29,6 +29,7 @@ private:
   bool dbConnect();
   void storeSelection();
   void updater();
+  void darkTheme();
 };
 
 #endif // LOGINDIALOG_H

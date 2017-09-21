@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QSimpleUpdater>
 #include <QSqlError>
+#include <QStyleFactory>
 #include <ciso646>
 
 #include "logindialog.h"
@@ -12,6 +13,8 @@
 
 LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
+
+  if (UserSession::settings("User/tema").toString() == "escuro") darkTheme();
 
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
@@ -42,6 +45,31 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
+
+void LoginDialog::darkTheme() {
+  qApp->setStyle(QStyleFactory::create("Fusion"));
+
+  QPalette darkPalette;
+  darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+  darkPalette.setColor(QPalette::WindowText, Qt::white);
+  darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+  darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+  darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+  darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+  darkPalette.setColor(QPalette::Text, Qt::white);
+  darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+  darkPalette.setColor(QPalette::ButtonText, Qt::white);
+  darkPalette.setColor(QPalette::BrightText, Qt::red);
+  darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+  darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(120, 120, 120));
+
+  darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+  darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+  qApp->setPalette(darkPalette);
+
+  qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+}
 
 void LoginDialog::on_pushButtonConfig_clicked() {
   ui->labelHostname->setVisible(not ui->labelHostname->isVisible());

@@ -61,8 +61,6 @@ private:
   void on_doubleSpinBoxFrete_valueChanged(const double frete);
   void on_doubleSpinBoxQuant_editingFinished();
   void on_doubleSpinBoxQuant_valueChanged(const double);
-  void on_doubleSpinBoxSubTotalBruto_valueChanged(const double);
-  void on_doubleSpinBoxSubTotalLiq_valueChanged(const double);
   void on_doubleSpinBoxTotal_valueChanged(const double total);
   void on_doubleSpinBoxTotalItem_valueChanged(const double);
   void on_itemBoxCliente_textChanged(const QString &);

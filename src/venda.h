@@ -1,6 +1,11 @@
 #ifndef VENDA_H
 #define VENDA_H
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDateEdit>
+#include <QDoubleSpinBox>
+
 #include "registerdialog.h"
 
 namespace Ui {
@@ -16,13 +21,22 @@ public:
   void prepararVenda(const QString &idOrcamento);
   void setFinanceiro();
 
+private slots:
+  void on_pushButtonAdicionarPagamento_clicked();
+
 private:
   // attributes
   bool financeiro = false;
   double minimoFrete;
   double porcFrete;
-  QString idOrcamento;
+  QList<QCheckBox *> listCheckBoxRep;
+  QList<QComboBox *> listComboParc;
+  QList<QComboBox *> listComboPgt;
+  QList<QDateEdit *> listDatePgt;
+  QList<QDoubleSpinBox *> listDoubleSpinPgt;
+  QList<QLineEdit *> listLinePgt;
   QString error;
+  QString idOrcamento;
   SqlTableModel modelFluxoCaixa;
   SqlTableModel modelFluxoCaixa2;
   SqlTableModel modelItem;
@@ -43,30 +57,17 @@ private:
   virtual void successMessage() override;
   virtual void updateMode() override;
   void calcPrecoGlobalTotal();
-  void calculoSpinBox1();
-  void calculoSpinBox2();
-  void calculoSpinBox3();
-  void calculoSpinBox4();
-  void makeConnectionsToFluxoCaixa();
   void montarFluxoCaixa();
   void on_checkBoxFreteManual_clicked(const bool checked);
   void on_checkBoxPontuacaoIsento_toggled(bool checked);
   void on_checkBoxPontuacaoPadrao_toggled(bool checked);
   void on_checkBoxRT_toggled(bool checked);
-  void on_comboBoxPgt1_currentTextChanged(const QString &text);
-  void on_comboBoxPgt2_currentTextChanged(const QString &text);
-  void on_comboBoxPgt3_currentTextChanged(const QString &text);
-  void on_comboBoxPgt4_currentTextChanged(const QString &text);
-  void on_comboBoxPgt5_currentTextChanged(const QString &text);
+  void on_comboBoxPgt_currentTextChanged(const int index, const QString text);
   void on_dateTimeEdit_dateTimeChanged(const QDateTime &);
   void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
   void on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto);
   void on_doubleSpinBoxFrete_valueChanged(const double frete);
-  void on_doubleSpinBoxPgt1_valueChanged(double);
-  void on_doubleSpinBoxPgt2_valueChanged(double);
-  void on_doubleSpinBoxPgt3_valueChanged(double);
-  void on_doubleSpinBoxPgt4_valueChanged(double);
-  void on_doubleSpinBoxPgt5_valueChanged(double);
+  void on_doubleSpinBoxPgt_valueChanged();
   void on_doubleSpinBoxTotal_valueChanged(const double total);
   void on_itemBoxProfissional_textChanged(const QString &);
   void on_pushButtonCadastrarPedido_clicked();

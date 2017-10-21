@@ -2,7 +2,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
-#include <ciso646>
 
 #include "sqltablemodel.h"
 

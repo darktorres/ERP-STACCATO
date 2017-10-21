@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <ciso646>
 
 #include "ui_widgetfinanceiro.h"
 #include "widgetfinanceiro.h"

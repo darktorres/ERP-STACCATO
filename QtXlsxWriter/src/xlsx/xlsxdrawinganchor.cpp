@@ -27,7 +27,6 @@
 #include <QDir>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxchart.h"
 #include "xlsxdrawing_p.h"

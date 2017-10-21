@@ -22,8 +22,6 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
 ****************************************************************************/
-#include <ciso646>
-
 #include "xlsxabstractsheet.h"
 #include "xlsxabstractsheet_p.h"
 #include "xlsxworkbook.h"

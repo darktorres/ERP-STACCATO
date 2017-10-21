@@ -1,5 +1,4 @@
 #include <QDateTimeEdit>
-#include <ciso646>
 
 #include "dateformatdelegate.h"
 

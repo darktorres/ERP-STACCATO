@@ -1,7 +1,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "cadastrofornecedor.h"
 #include "cadastroproduto.h"

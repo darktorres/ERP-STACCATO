@@ -6,7 +6,6 @@
 #include <QSqlQuery>
 #include <QTcpSocket>
 #include <QUrl>
-#include <ciso646>
 
 #include "acbr.h"
 

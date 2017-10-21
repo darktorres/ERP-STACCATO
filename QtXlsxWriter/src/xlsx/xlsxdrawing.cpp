@@ -26,7 +26,6 @@
 #include <QBuffer>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxabstractsheet.h"
 #include "xlsxdrawing_p.h"

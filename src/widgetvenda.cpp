@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "followup.h"
 #include "reaisdelegate.h"

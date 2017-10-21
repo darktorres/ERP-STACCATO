@@ -1,6 +1,5 @@
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"

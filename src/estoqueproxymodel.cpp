@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QBrush>
 #include <QStyle>
-#include <ciso646>
 
 #include "estoqueproxymodel.h"
 

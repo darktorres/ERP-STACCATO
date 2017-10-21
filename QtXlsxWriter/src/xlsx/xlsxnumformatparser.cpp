@@ -24,7 +24,6 @@
 ****************************************************************************/
 
 #include <QString>
-#include <ciso646>
 
 #include "xlsxnumformatparser_p.h"
 

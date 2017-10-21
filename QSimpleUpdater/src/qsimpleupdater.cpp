@@ -77,8 +77,6 @@
  * and proccessing the version data and changelog data.
  */
 
-#include <ciso646>
-
 #include "qsimpleupdater.h"
 
 /*! \internal

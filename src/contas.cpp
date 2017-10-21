@@ -4,7 +4,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QtMath>
-#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "comboboxdelegate.h"

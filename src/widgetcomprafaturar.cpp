@@ -4,7 +4,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "importarxml.h"
 #include "inputdialog.h"

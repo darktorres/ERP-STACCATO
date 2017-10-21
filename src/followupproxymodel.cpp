@@ -2,7 +2,6 @@
 #include <QBrush>
 #include <QDebug>
 #include <QStyle>
-#include <ciso646>
 
 #include "followupproxymodel.h"
 

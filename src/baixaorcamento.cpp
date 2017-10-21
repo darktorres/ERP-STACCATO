@@ -1,6 +1,5 @@
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "baixaorcamento.h"
 #include "ui_baixaorcamento.h"

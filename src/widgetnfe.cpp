@@ -1,6 +1,5 @@
 #include <QFileDialog>
 #include <QMessageBox>
-#include <ciso646>
 
 #include "ui_widgetnfe.h"
 #include "widgetnfe.h"

@@ -1,5 +1,3 @@
-#include <ciso646>
-
 #include "doubledelegate.h"
 
 DoubleDelegate::DoubleDelegate(QObject *parent, const int decimais) : QStyledItemDelegate(parent), decimais(decimais) {}

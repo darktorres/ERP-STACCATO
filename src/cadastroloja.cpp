@@ -2,7 +2,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "cadastroloja.h"
 #include "cepcompleter.h"

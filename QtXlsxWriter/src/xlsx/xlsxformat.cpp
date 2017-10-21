@@ -24,7 +24,6 @@
 ****************************************************************************/
 #include <QDataStream>
 #include <QDebug>
-#include <ciso646>
 
 #include "xlsxcolor_p.h"
 #include "xlsxformat.h"

@@ -5,7 +5,6 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "excel.h"
 #include "usersession.h"

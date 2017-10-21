@@ -1,5 +1,4 @@
 #include <QLocale>
-#include <ciso646>
 
 #include "lineeditdecimal.h"
 

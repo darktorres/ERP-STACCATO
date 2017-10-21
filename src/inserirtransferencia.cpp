@@ -1,7 +1,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "inserirtransferencia.h"
 #include "ui_inserirtransferencia.h"

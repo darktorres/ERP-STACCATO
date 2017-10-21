@@ -28,7 +28,6 @@
 #include <QMapIterator>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxcontenttypes_p.h"
 

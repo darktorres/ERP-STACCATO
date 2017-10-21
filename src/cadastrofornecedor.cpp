@@ -3,7 +3,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "cadastrofornecedor.h"
 #include "cepcompleter.h"

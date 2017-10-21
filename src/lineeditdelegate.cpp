@@ -1,6 +1,5 @@
 #include <QCompleter>
 #include <QLineEdit>
-#include <ciso646>
 
 #include "lineeditdelegate.h"
 #include "sqlquerymodel.h"

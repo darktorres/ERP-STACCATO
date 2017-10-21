@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"

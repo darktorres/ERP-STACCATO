@@ -4,7 +4,6 @@
 #include <QSortFilterProxyModel>
 #include <QSqlRecord>
 #include <QSqlTableModel>
-#include <ciso646>
 
 #include "sqlquerymodel.h"
 #include "sqltablemodel.h"

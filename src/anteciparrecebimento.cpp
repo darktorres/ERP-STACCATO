@@ -2,7 +2,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "anteciparrecebimento.h"
 #include "checkboxdelegate.h"

@@ -1,5 +1,3 @@
-#include <ciso646>
-
 #include "ui_widgetcompra.h"
 #include "widgetcompra.h"
 

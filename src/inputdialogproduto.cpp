@@ -2,7 +2,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "inputdialogproduto.h"
 #include "noeditdelegate.h"

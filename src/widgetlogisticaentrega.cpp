@@ -5,7 +5,6 @@
 #include <QSortFilterProxyModel>
 #include <QSqlError>
 #include <QSqlRecord>
-#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "doubledelegate.h"

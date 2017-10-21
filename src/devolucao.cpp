@@ -4,7 +4,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <ciso646>
 
 #include "checkboxdelegate.h"
 #include "devolucao.h"

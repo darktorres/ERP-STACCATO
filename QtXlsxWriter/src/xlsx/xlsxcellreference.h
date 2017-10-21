@@ -24,7 +24,6 @@
 ****************************************************************************/
 #ifndef QXLSX_XLSXCELLREFERENCE_H
 #define QXLSX_XLSXCELLREFERENCE_H
-#include <ciso646>
 
 #include "xlsxglobal.h"
 

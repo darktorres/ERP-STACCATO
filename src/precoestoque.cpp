@@ -1,7 +1,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
-#include <ciso646>
 
 #include "noeditdelegate.h"
 #include "precoestoque.h"

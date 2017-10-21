@@ -3,7 +3,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "doubledelegate.h"
 #include "excel.h"

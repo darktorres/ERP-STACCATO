@@ -3,7 +3,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "cadastrousuario.h"
 #include "checkboxdelegate.h"

@@ -5,7 +5,6 @@
 #include <QSimpleUpdater>
 #include <QSqlError>
 #include <QStyleFactory>
-#include <ciso646>
 
 #include "logindialog.h"
 #include "ui_logindialog.h"

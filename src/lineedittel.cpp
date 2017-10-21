@@ -1,5 +1,3 @@
-#include <ciso646>
-
 #include "lineedittel.h"
 
 LineEditTel::LineEditTel(QWidget *parent) : QLineEdit(parent) {

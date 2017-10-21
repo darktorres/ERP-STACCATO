@@ -3,7 +3,6 @@
 #include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "cadastrocliente.h"
 #include "cadastroprofissional.h"

@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QMouseEvent>
-#include <ciso646>
 
 #include "itembox.h"
 

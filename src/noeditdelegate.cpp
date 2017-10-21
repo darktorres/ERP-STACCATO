@@ -1,5 +1,3 @@
-#include <ciso646>
-
 #include "noeditdelegate.h"
 
 NoEditDelegate::NoEditDelegate(QObject *parent) : QStyledItemDelegate(parent) {}

@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QFileDialog>
-#include <ciso646>
 
 #include "cadastrousuario.h"
 #include "ui_userconfig.h"

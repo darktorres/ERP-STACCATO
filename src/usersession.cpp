@@ -3,7 +3,6 @@
 #include <QSettings>
 #include <QSqlError>
 #include <QVariant>
-#include <ciso646>
 
 #include "usersession.h"
 

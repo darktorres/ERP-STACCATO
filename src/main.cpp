@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QDebug>
-#include <ciso646>
 
 #include "logindialog.h"
 #include "mainwindow.h"

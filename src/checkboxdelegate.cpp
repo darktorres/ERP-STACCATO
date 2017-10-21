@@ -1,6 +1,5 @@
 #include <QCheckBox>
 #include <QDebug>
-#include <ciso646>
 
 #include "checkboxdelegate.h"
 

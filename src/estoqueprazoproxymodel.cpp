@@ -2,7 +2,6 @@
 #include <QBrush>
 #include <QDate>
 #include <QStyle>
-#include <ciso646>
 
 #include "estoqueprazoproxymodel.h"
 

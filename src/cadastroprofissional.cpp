@@ -1,7 +1,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"

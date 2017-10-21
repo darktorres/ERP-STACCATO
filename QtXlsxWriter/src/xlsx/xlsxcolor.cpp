@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxcolor_p.h"
 #include "xlsxstyles_p.h"

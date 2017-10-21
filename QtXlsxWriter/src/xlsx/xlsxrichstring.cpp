@@ -25,7 +25,6 @@
 #include <QDebug>
 #include <QTextDocument>
 #include <QTextFragment>
-#include <ciso646>
 
 #include "xlsxformat_p.h"
 #include "xlsxrichstring.h"

@@ -3,7 +3,6 @@
 #include <QDate>
 #include <QDebug>
 #include <QStyle>
-#include <ciso646>
 
 #include "financeiroproxymodel.h"
 

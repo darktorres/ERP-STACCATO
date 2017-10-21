@@ -1,6 +1,5 @@
 #include <QFileDialog>
 #include <QSqlError>
-#include <ciso646>
 
 #include "sendmail.h"
 #include "smtp.h"

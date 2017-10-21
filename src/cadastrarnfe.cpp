@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "acbr.h"
 #include "cadastrarnfe.h"

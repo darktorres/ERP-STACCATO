@@ -14,7 +14,6 @@
  */
 
 #include <QMutex>
-#include <ciso646>
 
 #include "download_dialog.h"
 #include "ui_download_dialog.h"

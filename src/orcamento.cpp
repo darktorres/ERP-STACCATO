@@ -3,7 +3,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QtMath>
-#include <ciso646>
 
 #include "baixaorcamento.h"
 #include "cadastrocliente.h"

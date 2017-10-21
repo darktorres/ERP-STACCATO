@@ -9,7 +9,6 @@
 #include <QSqlQuery>
 #include <QStandardItemModel>
 #include <QUrl>
-#include <ciso646>
 
 #include "acbr.h"
 #include "doubledelegate.h"

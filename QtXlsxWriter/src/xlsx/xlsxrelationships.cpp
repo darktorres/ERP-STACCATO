@@ -27,7 +27,6 @@
 #include <QFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxrelationships_p.h"
 

@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <ciso646>
 
 #include "itembox.h"
 #include "itemboxdelegate.h"

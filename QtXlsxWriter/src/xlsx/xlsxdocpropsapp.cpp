@@ -30,7 +30,6 @@
 #include <QVariant>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxdocpropsapp_p.h"
 

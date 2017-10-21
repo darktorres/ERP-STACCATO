@@ -1,5 +1,3 @@
-#include <ciso646>
-
 #include "acbr.h"
 #include "ui_xml_viewer.h"
 #include "xml.h"

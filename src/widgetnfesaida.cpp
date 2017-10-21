@@ -7,7 +7,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
-#include <ciso646>
 
 #include "acbr.h"
 #include "doubledelegate.h"

@@ -3,7 +3,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <ciso646>
 
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"

@@ -1,6 +1,5 @@
 #include <QMessageBox>
 #include <QSqlError>
-#include <ciso646>
 
 #include "followup.h"
 #include "followupproxymodel.h"

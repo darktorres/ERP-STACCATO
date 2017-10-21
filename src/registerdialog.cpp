@@ -4,7 +4,6 @@
 #include <QShortcut>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <ciso646>
 
 #include "registerdialog.h"
 

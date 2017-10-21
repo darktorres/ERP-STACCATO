@@ -30,7 +30,6 @@
 #include <QFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <ciso646>
 
 #include "xlsxdocpropscore_p.h"
 

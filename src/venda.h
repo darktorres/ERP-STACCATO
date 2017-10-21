@@ -22,6 +22,7 @@ public:
   void setFinanceiro();
 
 private slots:
+  void on_doubleSpinBoxTotalPag_valueChanged(double);
   void on_pushButtonAdicionarPagamento_clicked();
 
 private:

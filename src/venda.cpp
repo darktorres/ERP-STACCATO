@@ -2,7 +2,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
-#include <ciso646>
 
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
@@ -249,8 +248,18 @@ void Venda::setupTables() {
 
 void Venda::resetarPagamentos() {
   ui->doubleSpinBoxTotalPag->setValue(0);
+  ui->doubleSpinBoxTotalPag->setMaximum(ui->doubleSpinBoxTotal->value());
 
-  // TODO: remover todos os pagamentos
+  for (auto item : ui->scrollAreaWidgetContents->children()) {
+    if (qobject_cast<QFrame *>(item)) delete item;
+  }
+
+  listCheckBoxRep.clear();
+  listComboParc.clear();
+  listComboPgt.clear();
+  listDatePgt.clear();
+  listDoubleSpinPgt.clear();
+  listLinePgt.clear();
 
   montarFluxoCaixa();
 }
@@ -398,7 +407,18 @@ bool Venda::verifyFields() {
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
 
+  if (ui->framePagamentos_2->isHidden()) return true;
+
   if (ui->doubleSpinBoxTotalPag->value() != ui->doubleSpinBoxTotal->value()) {
+    QMessageBox::critical(this, "Erro!", "Total dos pagamentos difere do total do pedido!");
+    return false;
+  }
+
+  double sum = 0;
+
+  for (const auto &spinbox : listDoubleSpinPgt) sum += spinbox->value();
+
+  if (sum != ui->doubleSpinBoxTotalPag->value()) {
     QMessageBox::critical(this, "Erro!", "Valor dos pagamentos difere do total!");
     return false;
   }
@@ -615,9 +635,7 @@ bool Venda::viewRegister() {
     return false;
   }
 
-  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-    ui->tableFluxoCaixa->openPersistentEditor(row, "representacao");
-  }
+  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) ui->tableFluxoCaixa->openPersistentEditor(row, "representacao");
 
   if (financeiro) {
     // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
@@ -767,13 +785,11 @@ void Venda::montarFluxoCaixa() {
           return;
         }
 
-        const double comissao = query.value("comissaoLoja").toDouble() / 100;
+        const double taxaComissao = query.value("comissaoLoja").toDouble() / 100;
+        const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
+        double valorAjustado = taxaComissao * (valorComissao - (valorComissao / data("total").toDouble() * data("frete").toDouble()));
 
-        const double valor = modelFluxoCaixa.data(z, "valor").toDouble();
-
-        double valorAjustado = comissao * (valor - (valor / data("total").toDouble() * data("frete").toDouble()));
-
-        if (modelFluxoCaixa.data(0, "observacao").toString() == "FRETE") valorAjustado = valor * comissao;
+        if (modelFluxoCaixa.data(0, "observacao").toString() == "FRETE") valorAjustado = valorComissao * taxaComissao;
 
         const int row = modelFluxoCaixa2.rowCount();
         modelFluxoCaixa2.insertRow(row);
@@ -1256,16 +1272,20 @@ void Venda::on_tableFluxoCaixa2_entered(const QModelIndex &) { ui->tableFluxoCai
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { resetarPagamentos(); }
 
 void Venda::on_pushButtonFreteLoja_clicked() {
+  if (ui->doubleSpinBoxFrete->value() == 0) {
+    QMessageBox::critical(this, "Erro!", "Não há frete!");
+    return;
+  }
+
   resetarPagamentos();
 
-  // TODO: redo this
+  on_pushButtonAdicionarPagamento_clicked();
 
-  //  ui->checkBoxRep1->setChecked(false);
-  //  ui->lineEditPgt1->setText("Frete");
-  //  ui->lineEditPgt1->setReadOnly(true);
-
-  //  ui->doubleSpinBoxPgt1->setValue(ui->doubleSpinBoxFrete->value());
-  //  ui->doubleSpinBoxPgt1->setReadOnly(true);
+  listCheckBoxRep.at(0)->setChecked(false);
+  listLinePgt.at(0)->setText("Frete");
+  listLinePgt.at(0)->setReadOnly(true);
+  listDoubleSpinPgt.at(0)->setValue(ui->doubleSpinBoxFrete->value());
+  listDoubleSpinPgt.at(0)->setReadOnly(true);
 }
 
 void Venda::on_pushButtonPgtLoja_clicked() {
@@ -1273,15 +1293,7 @@ void Venda::on_pushButtonPgtLoja_clicked() {
 
   if (dialog.exec() == QDialog::Rejected) return;
 
-  resetarPagamentos();
-
-  // TODO: redo this
-
-  //  ui->checkBoxRep1->setChecked(false);
-  //  ui->checkBoxRep2->setChecked(false);
-  //  ui->checkBoxRep3->setChecked(false);
-  //  ui->checkBoxRep4->setChecked(false);
-  //  ui->checkBoxRep5->setChecked(false);
+  for (auto item : listCheckBoxRep) item->setChecked(false);
 }
 
 void Venda::setFinanceiro() {
@@ -1326,6 +1338,8 @@ bool Venda::financeiroSalvar() {
 }
 
 void Venda::on_pushButtonFinanceiroSalvar_clicked() {
+  if (not verifyFields()) return;
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
@@ -1360,6 +1374,12 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   ui->doubleSpinBoxCreditoTotal->setValue(credito);
 
   //
+
+  if (not data("representacao").toBool()) {
+    ui->pushButtonFreteLoja->hide();
+    ui->pushButtonPgtLoja->hide();
+    ui->tableFluxoCaixa->hideColumn("representacao");
+  }
 
   ui->framePagamentos_2->show();
   resetarPagamentos();
@@ -1407,11 +1427,11 @@ void Venda::on_pushButtonAdicionarPagamento_clicked() {
   QFrame *frame = new QFrame(this);
   frame->setLayout(new QHBoxLayout(frame));
   // label
-  QLabel *labelPagamento = new QLabel(this);
+  QLabel *labelPagamento = new QLabel(frame);
   labelPagamento->setText("Pgt. " + QString::number(ui->scrollAreaWidgetContents->children().size()));
   frame->layout()->addWidget(labelPagamento);
   // checkbox
-  QCheckBox *checkboxRep = new QCheckBox(this);
+  QCheckBox *checkboxRep = new QCheckBox(frame);
   checkboxRep->setText("Fornecedor");
   checkboxRep->setVisible(data("representacao").toBool());
   checkboxRep->setChecked(data("representacao").toBool());
@@ -1420,14 +1440,14 @@ void Venda::on_pushButtonAdicionarPagamento_clicked() {
   frame->layout()->addWidget(checkboxRep);
   listCheckBoxRep << checkboxRep;
   // combo
-  QComboBox *comboBoxPgt = new QComboBox(this);
+  QComboBox *comboBoxPgt = new QComboBox(frame);
   comboBoxPgt->setMinimumWidth(140);
 
   QSqlQuery queryOrc;
   queryOrc.prepare(
       "SELECT idUsuario, idOrcamento, idLoja, idUsuarioIndicou, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, freteManual, descontoPorc, "
       "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
-  queryOrc.bindValue(":idOrcamento", idOrcamento);
+  queryOrc.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
   if (not queryOrc.exec() or not queryOrc.first()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando orçamento: " + queryOrc.lastError().text());
@@ -1455,24 +1475,24 @@ void Venda::on_pushButtonAdicionarPagamento_clicked() {
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listComboPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listComboPgt << comboBoxPgt;
   // combo
-  QComboBox *comboboxPgtParc = new QComboBox(this);
+  QComboBox *comboboxPgtParc = new QComboBox(frame);
   comboboxPgtParc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   comboboxPgtParc->setMaximumWidth(45);
   connect(comboboxPgtParc, &QComboBox::currentTextChanged, this, &Venda::montarFluxoCaixa);
   frame->layout()->addWidget(comboboxPgtParc);
   listComboParc << comboboxPgtParc;
   // doublespinbox
-  QDoubleSpinBox *doubleSpinBoxPgt = new QDoubleSpinBox(this);
+  QDoubleSpinBox *doubleSpinBoxPgt = new QDoubleSpinBox(frame);
   doubleSpinBoxPgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   doubleSpinBoxPgt->setMinimumWidth(80);
   doubleSpinBoxPgt->setPrefix("R$ ");
-  doubleSpinBoxPgt->setMaximum(999999.990000);
+  doubleSpinBoxPgt->setMaximum(ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value());
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
   frame->layout()->addWidget(doubleSpinBoxPgt);
   connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxPgt_valueChanged);
   listDoubleSpinPgt << doubleSpinBoxPgt;
   // dateedit
-  QDateEdit *dateEditPgt = new QDateEdit(this);
+  QDateEdit *dateEditPgt = new QDateEdit(frame);
   dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   dateEditPgt->setDisplayFormat("dd/MM/yy");
   dateEditPgt->setCalendarPopup(true);
@@ -1481,13 +1501,28 @@ void Venda::on_pushButtonAdicionarPagamento_clicked() {
   frame->layout()->addWidget(dateEditPgt);
   listDatePgt << dateEditPgt;
   // lineedit
-  QLineEdit *lineEditPgt = new QLineEdit(this);
+  QLineEdit *lineEditPgt = new QLineEdit(frame);
   lineEditPgt->setPlaceholderText("Observação");
   connect(lineEditPgt, &QLineEdit::textChanged, this, &Venda::montarFluxoCaixa);
   frame->layout()->addWidget(lineEditPgt);
   listLinePgt << lineEditPgt;
   //
   ui->scrollAreaWidgetContents->layout()->addWidget(frame);
+}
+
+void Venda::on_doubleSpinBoxTotalPag_valueChanged(double) {
+  double sumWithoutLast = 0;
+
+  for (auto &item : listDoubleSpinPgt) {
+    item->setMaximum(ui->doubleSpinBoxTotal->value());
+    sumWithoutLast += item->value();
+  }
+
+  auto lastSpinBox = listDoubleSpinPgt.at(listDoubleSpinPgt.size() - 1);
+
+  sumWithoutLast -= lastSpinBox->value();
+
+  lastSpinBox->setMaximum(ui->doubleSpinBoxTotal->value() - sumWithoutLast);
 }
 
 // TODO: 0hide 'nfe' field from tables that use conta_a_receber

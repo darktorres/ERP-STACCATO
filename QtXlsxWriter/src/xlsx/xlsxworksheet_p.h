@@ -176,7 +176,7 @@ public:
 
   XlsxSheetFormatProps sheetFormatProps;
 
-  bool orientation = true; // vertical // TODO: convert this to enum
+  Worksheet::Orientation orientation;
   bool fitToPage = false;
   bool fitToHeight = false;
   bool windowProtection = false;

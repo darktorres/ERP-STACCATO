@@ -11,7 +11,7 @@
 #include "ui_inputdialog.h"
 #include "usersession.h"
 
-InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialog) {
+InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -19,7 +19,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
   ui->dateEditEvento->setDate(QDate::currentDate());
   ui->dateEditProximo->setDate(QDate::currentDate());
 
-  if (type == Carrinho) {
+  if (tipo == Tipo::Carrinho) {
     ui->labelEvento->hide();
     ui->dateEditEvento->hide();
     ui->labelObservacao->hide();
@@ -28,7 +28,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista compra:");
   }
 
-  if (type == Faturamento) {
+  if (tipo == Tipo::Faturamento) {
     ui->labelEvento->hide();
     ui->dateEditEvento->hide();
     ui->labelObservacao->hide();
@@ -37,7 +37,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista faturamento:");
   }
 
-  if (type == AgendarColeta) {
+  if (tipo == Tipo::AgendarColeta) {
     ui->labelEvento->hide();
     ui->dateEditEvento->hide();
     ui->labelProximoEvento->show();
@@ -49,7 +49,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
     ui->dateEditProximo->setDate(QDate::currentDate().addDays(8));
   }
 
-  if (type == Coleta) {
+  if (tipo == Tipo::Coleta) {
     ui->labelObservacao->hide();
     ui->lineEditObservacao->hide();
 
@@ -57,7 +57,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista recebimento:");
   }
 
-  if (type == AgendarRecebimento) {
+  if (tipo == Tipo::AgendarRecebimento) {
     ui->labelObservacao->hide();
     ui->lineEditObservacao->hide();
     ui->labelEvento->hide();
@@ -68,7 +68,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista recebimento:");
   }
 
-  if (type == AgendarEntrega) {
+  if (tipo == Tipo::AgendarEntrega) {
     ui->labelEvento->hide();
     ui->dateEditEvento->hide();
     ui->labelProximoEvento->show();
@@ -79,7 +79,7 @@ InputDialog::InputDialog(const Type &type, QWidget *parent) : QDialog(parent), t
     ui->labelProximoEvento->setText("Data prevista entrega:");
   }
 
-  if (type == ReagendarPedido) {
+  if (tipo == Tipo::ReagendarPedido) {
     ui->labelEvento->hide();
     ui->dateEditEvento->hide();
     ui->labelProximoEvento->show();
@@ -108,7 +108,7 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
 }
 
 void InputDialog::on_pushButtonSalvar_clicked() {
-  if (type == ReagendarPedido) {
+  if (tipo == Tipo::ReagendarPedido) {
     if (ui->lineEditObservacao->text().isEmpty()) {
       QMessageBox::critical(this, "Erro!", "Observação não pode estar vazio!");
       return;

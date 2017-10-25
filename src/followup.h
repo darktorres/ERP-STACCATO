@@ -13,7 +13,7 @@ class FollowUp : public QDialog {
   Q_OBJECT
 
 public:
-  enum Tipo { Orcamento, Venda };
+  enum class Tipo { Orcamento, Venda };
   explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent = 0);
   ~FollowUp();
 

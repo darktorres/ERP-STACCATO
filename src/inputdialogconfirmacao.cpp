@@ -8,7 +8,7 @@
 #include "orcamento.h"
 #include "ui_inputdialogconfirmacao.h"
 
-InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogConfirmacao) {
+InputDialogConfirmacao::InputDialogConfirmacao(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -18,7 +18,7 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent
   ui->dateEditEvento->setDateTime(QDateTime::currentDateTime());
   ui->dateEditProximo->setDateTime(QDateTime::currentDateTime());
 
-  if (type == Recebimento) {
+  if (tipo == Tipo::Recebimento) {
     ui->labelProximoEvento->hide();
     ui->dateEditProximo->hide();
 
@@ -28,14 +28,14 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent
     ui->lineEditEntregou->hide();
   }
 
-  if (type == Entrega) {
+  if (tipo == Tipo::Entrega) {
     ui->labelProximoEvento->hide();
     ui->dateEditProximo->hide();
 
     ui->labelEvento->setText("Data entrega:");
   }
 
-  if (type == Representacao) {
+  if (tipo == Tipo::Representacao) {
     ui->labelAviso->hide();
 
     ui->labelProximoEvento->hide();
@@ -43,8 +43,8 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent
 
     ui->tableLogistica->hide();
 
-    ui->labelRecebeu->hide();
-    ui->lineEditRecebeu->hide();
+    ui->labelEntregou->hide();
+    ui->lineEditEntregou->hide();
 
     ui->frameQuebrado->hide();
 
@@ -56,7 +56,7 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Type &type, QWidget *parent
 
 InputDialogConfirmacao::~InputDialogConfirmacao() { delete ui; }
 
-// TODO: 5should be QDate?
+// REFAC: 5should be QDate?
 QDateTime InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->dateTime(); }
 
 QDateTime InputDialogConfirmacao::getNextDate() const { return ui->dateEditProximo->dateTime(); }
@@ -85,17 +85,17 @@ bool InputDialogConfirmacao::cadastrar() {
 }
 
 void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
-  if ((type == Recebimento or type == Entrega) and ui->lineEditRecebeu->text().isEmpty()) {
+  if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega) and ui->lineEditRecebeu->text().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Faltou preencher quem recebeu!");
     return;
   }
 
-  if (type == Entrega and ui->lineEditEntregou->text().isEmpty()) {
+  if (tipo == Tipo::Entrega and ui->lineEditEntregou->text().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Faltou preencher quem entregou!");
     return;
   }
 
-  if (type != Representacao) {
+  if (tipo != Tipo::Representacao) {
     QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
     QSqlQuery("START TRANSACTION").exec();
 
@@ -119,7 +119,7 @@ void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate &date) {
 void InputDialogConfirmacao::setupTables() {
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (type == Recebimento) {
+  if (tipo == Tipo::Recebimento) {
     model.setTable("estoque");
     model.setHeaderData("status", "Status");
     model.setHeaderData("local", "Local");
@@ -133,7 +133,7 @@ void InputDialogConfirmacao::setupTables() {
     model.setHeaderData("bloco", "Bloco");
   }
 
-  if (type == Entrega) {
+  if (tipo == Tipo::Entrega) {
     model.setTable("veiculo_has_produto");
     model.setHeaderData("idVenda", "Venda");
     model.setHeaderData("status", "Status");
@@ -149,7 +149,7 @@ void InputDialogConfirmacao::setupTables() {
     model.setHeaderData("formComercial", "Form. Com.");
   }
 
-  if (type != Representacao) {
+  if (tipo != Tipo::Representacao) {
     model.setFilter("0");
 
     if (not model.select()) {
@@ -160,7 +160,7 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->setModel(&model);
   }
 
-  if (type == Recebimento) {
+  if (tipo == Tipo::Recebimento) {
     ui->tableLogistica->hideColumn("idEstoque");
     ui->tableLogistica->hideColumn("recebidoPor");
     ui->tableLogistica->hideColumn("idProduto");
@@ -202,7 +202,7 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("vCOFINS");
   }
 
-  if (type == Entrega) {
+  if (tipo == Tipo::Entrega) {
     ui->tableLogistica->hideColumn("id");
     ui->tableLogistica->hideColumn("data");
     ui->tableLogistica->hideColumn("idEvento");
@@ -287,8 +287,9 @@ void InputDialogConfirmacao::on_pushButtonQuebradoFaltando_clicked() {
 }
 
 bool InputDialogConfirmacao::processarQuebra(const int row) {
-  if (type == Recebimento and not quebraRecebimento(row)) return false;
-  if (type == Entrega and not quebraEntrega(row)) return false;
+  // TODO: ao quebrar linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
+  if (tipo == Tipo::Recebimento and not quebraRecebimento(row)) return false;
+  if (tipo == Tipo::Entrega and not quebraEntrega(row)) return false;
 
   return true;
 }
@@ -495,7 +496,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente() {
   if (not modelVenda.setData(newRow, "reposicao", true)) return false;
 
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
-  if (not modelVenda.setData(newRow, "obs", obs)) return false;
+  if (not modelVenda.setData(newRow, "obs", "(REPO. ENTREGA) " + obs)) return false;
 
   return true;
 }
@@ -520,6 +521,9 @@ bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
     model.setData(rowQuebrado, col, model.data(row, col));
   }
 
+  const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
+
+  model.setData(rowQuebrado, "observacao", "(REPO. RECEB.) " + obs);
   model.setData(rowQuebrado, "caixas", caixasDefeito);
   model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa);
   model.setData(rowQuebrado, "status", "QUEBRADO");
@@ -575,8 +579,7 @@ bool InputDialogConfirmacao::criarConsumo(const int row) {
 
 bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
   QSqlQuery query;
-  query.prepare("SELECT COALESCE(e.caixas - SUM(ehc.caixas), 0) AS sobra FROM estoque_has_consumo ehc LEFT JOIN "
-                "estoque e ON ehc.idEstoque = e.idEstoque WHERE ehc.idEstoque = :idEstoque");
+  query.prepare("SELECT COALESCE(e.caixas - SUM(ehc.caixas), 0) AS sobra FROM estoque_has_consumo ehc LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque WHERE ehc.idEstoque = :idEstoque");
   query.bindValue(":idEstoque", idEstoque);
 
   if (not query.exec() or not query.first()) {
@@ -591,9 +594,8 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
   if (sobra < 0) {
     // faltando pecas para consumo, desfazer os consumos com prazo maior
 
-    query.prepare("SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM "
-                  "estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = vp.idVendaProduto "
-                  "LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
+    query.prepare("SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = "
+                  "vp.idVendaProduto LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
     query.bindValue(":idEstoque", idEstoque);
 
     if (not query.exec()) {

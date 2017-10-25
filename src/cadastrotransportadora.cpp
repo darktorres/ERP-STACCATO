@@ -294,7 +294,7 @@ bool CadastroTransportadora::viewRegister() {
   return true;
 }
 
-void CadastroTransportadora::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
+void CadastroTransportadora::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
 
 void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
@@ -378,14 +378,14 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
+  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
     error = "Erro linha -1";
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 

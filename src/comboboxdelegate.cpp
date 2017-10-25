@@ -13,28 +13,28 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   QStringList list;
 
-  if (tipo == Status) {
+  if (tipo == Tipo::Status) {
     list << "PENDENTE"
          << "COMPRAR"
          << "PAGO"
          << "RECEBIDO";
   }
 
-  if (tipo == StatusReceber) {
+  if (tipo == Tipo::StatusReceber) {
     list << "PENDENTE"
          << "RECEBIDO"
          << "CANCELADO"
          << "CONFERIDO";
   }
 
-  if (tipo == StatusPagar) {
+  if (tipo == Tipo::StatusPagar) {
     list << "PENDENTE"
          << "PAGO"
          << "CANCELADO"
          << "CONFERIDO";
   }
 
-  if (tipo == Pagamento) {
+  if (tipo == Tipo::Pagamento) {
     QSqlQuery query;
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
     query.bindValue(":idLoja", UserSession::idLoja());
@@ -50,7 +50,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     list << "Conta Cliente";
   }
 
-  if (tipo == Conta) {
+  if (tipo == Tipo::Conta) {
     QSqlQuery query;
 
     if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) {
@@ -64,7 +64,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     }
   }
 
-  if (tipo == Grupo) {
+  if (tipo == Tipo::Grupo) {
     QSqlQuery query;
 
     if (not query.exec("SELECT tipo FROM despesa ORDER BY tipo")) {

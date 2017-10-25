@@ -14,6 +14,7 @@ public:
 
 private:
   const int descontinuado;
+  enum class Status { Novo = 1, Atualizado, ForaPadrao, Errado };
 };
 
 #endif // IMPORTAPRODUTOSPROXY_H

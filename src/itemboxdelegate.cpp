@@ -10,8 +10,8 @@ QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
   editor->setReadOnlyItemBox(isReadOnly);
 
-  if (tipo == Loja) editor->setSearchDialog(SearchDialog::loja(parent));
-  if (tipo == Conta) editor->setSearchDialog(SearchDialog::conta(parent));
+  if (tipo == Tipo::Loja) editor->setSearchDialog(SearchDialog::loja(parent));
+  if (tipo == Tipo::Conta) editor->setSearchDialog(SearchDialog::conta(parent));
 
   connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitAndCloseEditor);
 

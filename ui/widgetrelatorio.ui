@@ -90,9 +90,6 @@
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
-         <property name="sortingEnabled">
-          <bool>false</bool>
-         </property>
         </widget>
        </item>
       </layout>

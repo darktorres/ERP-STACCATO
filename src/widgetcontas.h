@@ -1,5 +1,5 @@
-#ifndef WIDGETPAGAMENTO_H
-#define WIDGETPAGAMENTO_H
+#ifndef WIDGETCONTAS_H
+#define WIDGETCONTAS_H
 
 #include <QWidget>
 
@@ -10,13 +10,13 @@ namespace Ui {
 class WidgetPagamento;
 }
 
-class WidgetPagamento : public QWidget {
+class WidgetContas : public QWidget {
   Q_OBJECT
 
 public:
   enum class Tipo { Nulo, Receber, Pagar };
-  explicit WidgetPagamento(QWidget *parent = 0);
-  ~WidgetPagamento();
+  explicit WidgetContas(QWidget *parent = 0);
+  ~WidgetContas();
   bool updateTables();
   void setTipo(const Tipo &value);
 
@@ -51,4 +51,4 @@ private:
   void setupTables();
 };
 
-#endif // WIDGETPAGAMENTO_H
+#endif // WIDGETCONTAS_H

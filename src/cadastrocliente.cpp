@@ -75,7 +75,7 @@ bool CadastroCliente::verifyFields() {
     return false;
   }
 
-  if (not isUpdate) {
+  if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
     query.prepare("SELECT cpf, cnpj FROM cliente WHERE cpf = :cpf OR cnpj = :cnpj");
     query.bindValue(":cpf", ui->lineEditCPF->text());
@@ -255,7 +255,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
   }
 }
 
-bool CadastroCliente::cadastrarEndereco(const bool isUpdate) {
+bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
   for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
@@ -272,9 +272,9 @@ bool CadastroCliente::cadastrarEndereco(const bool isUpdate) {
     return false;
   }
 
-  currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
+  currentRowEnd = tipo == Tipo::Atualizar ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (not isUpdate) modelEnd.insertRow(currentRowEnd);
+  if (tipo == Tipo::Cadastrar) modelEnd.insertRow(currentRowEnd);
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) return false;
   if (not setDataEnd("cep", ui->lineEditCEP->text())) return false;
@@ -295,14 +295,14 @@ bool CadastroCliente::cadastrarEndereco(const bool isUpdate) {
 }
 
 bool CadastroCliente::cadastrar() {
-  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
+  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
     QMessageBox::critical(this, "Erro!", "Erro linha -1");
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 
@@ -354,7 +354,7 @@ void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
 }
 
 void CadastroCliente::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(true)) {
+  if (not cadastrarEndereco(Tipo::Atualizar)) {
     QMessageBox::critical(this, "Erro!", "Não foi possível atualizar este endereço!");
     return;
   }
@@ -490,7 +490,7 @@ bool CadastroCliente::save() {
   return true;
 }
 
-void CadastroCliente::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
+void CadastroCliente::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
 
 void CadastroCliente::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

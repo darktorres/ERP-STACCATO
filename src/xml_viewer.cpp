@@ -16,12 +16,12 @@ XML_Viewer::XML_Viewer(QWidget *parent) : QDialog(parent), ui(new Ui::XML_Viewer
 
 XML_Viewer::~XML_Viewer() { delete ui; }
 
-void XML_Viewer::exibirXML(const QByteArray &fileContent) {
-  if (fileContent.isEmpty()) return;
+void XML_Viewer::exibirXML(const QByteArray &content) {
+  if (content.isEmpty()) return;
 
-  this->fileContent = fileContent;
+  fileContent = content;
 
-  XML xml(fileContent);
+  XML xml(content);
   xml.montarArvore(model);
 
   ui->treeView->expandAll();

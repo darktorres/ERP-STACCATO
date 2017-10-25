@@ -36,7 +36,8 @@ public:
   Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port = 465, const int timeout = 10000);
   ~Smtp();
 
-  void sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files = QStringList(), const QString &assinatura = QString());
+  void sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files = QStringList(),
+                const QString &assinatura = QString());
 
 signals:
   void status(const QString &);
@@ -49,13 +50,12 @@ private slots:
   void stateChanged(QAbstractSocket::SocketState socketState);
 
 private:
-  enum states { Tls, HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close };
+  enum class States { Tls, HandShake, Auth, User, Pass, Rcpt, Mail, Data, Init, Body, Quit, Close } state;
   const int timeout;
   const QString host;
   const QString pass;
   const QString user;
   const quint16 port;
-  int state;
   QSslSocket *socket;
   QString from;
   QString message;

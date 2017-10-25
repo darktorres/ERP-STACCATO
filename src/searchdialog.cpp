@@ -234,8 +234,6 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, QWidget *parent) {
-  // TODO: *SUL* pesquisar apenas os produtos com os codigos permitidos de visualizacao da loja atual
-
   // TODO: 1retornar um SearchDialogProxy direto aqui? (assim o consumidor do codigo nao precisa saber quando nem que
   // precisa usar o proxy)
   SearchDialog *sdProd = new SearchDialog(

@@ -46,8 +46,8 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.append(body);
   message.append("\n\n");
 
-  // TODO: 5dont hardcode this
-  // TODO:__project public code
+  // REFAC: 5dont hardcode this
+  // REFAC:__project public code
   //
   if (not assinatura.isEmpty()) {
     //    QFile file("://assinatura conrado.png");
@@ -58,7 +58,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
       return;
     }
 
-    QByteArray bytes = file.readAll();
+    const QByteArray bytes = file.readAll();
     message.append("--frontier\n");
     message.append("Content-Type: image/png\nContent-ID: <assinatura.png@gmail.com>\nContent-Disposition: inline; "
                    "filename=assinatura.png;\nContent-Transfer-Encoding: base64\n\n");
@@ -81,7 +81,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
           return;
         }
 
-        QByteArray bytes = file.readAll();
+        const QByteArray bytes = file.readAll();
         message.append("--frontier\n");
         message.append(R"(Content-Type: application/octet-stream; name=")" + QFileInfo(file.fileName()).fileName() + "\"\nContent-Disposition: attachment; filename=\"" +
                        QFileInfo(file.fileName()).fileName() + "\";\nContent-Transfer-Encoding: base64\n\n");
@@ -103,7 +103,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   rcpt.append(to.split(";"));
   if (not cc.isEmpty()) rcpt.append(cc.split(";"));
 
-  state = Init;
+  state = States::Init;
   socket->connectToHostEncrypted(host, port); //"smtp.gmail.com" and 465 for gmail TLS
 
   if (not socket->waitForConnected(timeout)) {
@@ -159,7 +159,7 @@ void Smtp::readyRead() {
   //  qDebug() << "Server response: " << response;
   //  qDebug() << "State: " << state;
 
-  if (state == Close) {
+  if (state == States::Close) {
     return;
   }
 
@@ -167,13 +167,13 @@ void Smtp::readyRead() {
     return;
   }
 
-  if (state == Init and responseLine == "220") {
+  if (state == States::Init and responseLine == "220") {
     // banner was okay, let's go on
     *t << "EHLO localhost"
        << "\r\n";
     t->flush();
 
-    state = HandShake;
+    state = States::HandShake;
   }
 
   // No need, because I'm using socket->startClienEncryption() which makes the SSL handshake for you
@@ -186,12 +186,12 @@ void Smtp::readyRead() {
       state = HandShake;
   }*/
 
-  else if (state == HandShake and responseLine == "250") {
+  else if (state == States::HandShake and responseLine == "250") {
     socket->startClientEncryption();
 
     if (not socket->waitForEncrypted(timeout)) {
       //      qDebug() << socket->errorString();
-      state = Close;
+      state = States::Close;
     }
 
     // Send EHLO once again but now encrypted
@@ -199,8 +199,8 @@ void Smtp::readyRead() {
     *t << "EHLO localhost"
        << "\r\n";
     t->flush();
-    state = Auth;
-  } else if (state == Auth and responseLine == "250") {
+    state = States::Auth;
+  } else if (state == States::Auth and responseLine == "250") {
     // Trying AUTH
     //    qDebug() << "Auth";
     // NOTE: try using AUTH XOAUTH2 as described in the developers.google below
@@ -208,8 +208,8 @@ void Smtp::readyRead() {
        //      *t << "AUTH XOAUTH2 + base64("user=" {User} "^Aauth=Bearer " {Access Token} "^A^A")"
        << "\r\n";
     t->flush();
-    state = User;
-  } else if (state == User and responseLine == "334") {
+    state = States::User;
+  } else if (state == States::User and responseLine == "334") {
     // Trying User
     //    qDebug() << "Username";
     // GMAIL is using XOAUTH2 protocol, which basically means that password and username has to be sent in base64 coding
@@ -217,15 +217,15 @@ void Smtp::readyRead() {
     *t << QByteArray().append(user).toBase64() << "\r\n";
     t->flush();
 
-    state = Pass;
-  } else if (state == Pass and responseLine == "334") {
+    state = States::Pass;
+  } else if (state == States::Pass and responseLine == "334") {
     // Trying pass
     //    qDebug() << "Pass";
     *t << QByteArray().append(pass).toBase64() << "\r\n";
     t->flush();
 
-    state = Mail;
-  } else if (state == Mail and responseLine == "235") {
+    state = States::Mail;
+  } else if (state == States::Mail and responseLine == "235") {
     // HELO response was okay (well, it has to be)
 
     // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way ->
@@ -233,8 +233,8 @@ void Smtp::readyRead() {
     //    qDebug() << "MAIL FROM:<" << from << ">";
     *t << "MAIL FROM:<" << from << ">\r\n";
     t->flush();
-    state = Rcpt;
-  } else if (state == Rcpt and responseLine == "250") {
+    state = States::Rcpt;
+  } else if (state == States::Rcpt and responseLine == "250") {
     // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way ->
     // <email@gmail.com>
     //    qDebug() << "RCPT TO:<" << rcpt.first() << ">\r\n";
@@ -242,31 +242,31 @@ void Smtp::readyRead() {
     rcpt.removeFirst();
     t->flush();
     //    qDebug() << "size: " << rcpt.size();
-    state = rcpt.size() > 0 ? Rcpt : Data;
-  } else if (state == Data and responseLine == "250") {
+    state = rcpt.size() > 0 ? States::Rcpt : States::Data;
+  } else if (state == States::Data and responseLine == "250") {
 
     *t << "DATA\r\n";
     t->flush();
-    state = Body;
-  } else if (state == Body and responseLine == "354") {
+    state = States::Body;
+  } else if (state == States::Body and responseLine == "354") {
 
     *t << message << "\r\n.\r\n";
     t->flush();
-    state = Quit;
-  } else if (state == Quit and responseLine == "250") {
+    state = States::Quit;
+  } else if (state == States::Quit and responseLine == "250") {
 
     *t << "QUIT\r\n";
     t->flush();
     // here, we just close.
-    state = Close;
+    state = States::Close;
     emit status(tr("Message sent"));
-  } else if (state == Close) {
+  } else if (state == States::Close) {
     deleteLater();
     return;
   } else {
     // something broke.
     QMessageBox::critical(nullptr, tr("Qt Simple SMTP client"), tr("Unexpected reply from SMTP server:\n\n") + response);
-    state = Close;
+    state = States::Close;
     emit status(tr("Failed to send message"));
   }
 

@@ -210,7 +210,7 @@ void Estoque::exibirNota() {
 }
 
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
-  // TODO: relacionar o consumo quebrando a linha em pedido_fornecedor_has_produto e setar o idVenda/idVendaProduto
+  // TODO: [*** Conrado/Anderson] relacionar o consumo quebrando a linha em pedido_fornecedor_has_produto e setar o idVenda/idVendaProduto
 
   if (model.filter().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não setou idEstoque!");
@@ -231,6 +231,9 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
       const QString field = model.record().fieldName(column);
       const int index = modelConsumo.fieldIndex(field);
       const QVariant value = model.data(row, column);
+
+      if (field == "created") continue;
+      if (field == "lastUpdated") continue;
 
       if (index != -1 and not modelConsumo.setData(newRow, index, value)) return false;
     }
@@ -268,7 +271,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
 
     if (not modelConsumo.setData(newRow, "quant", quant * -1)) return false;
     if (not modelConsumo.setData(newRow, "caixas", caixas)) return false;
-    if (not modelConsumo.setData(newRow, "quantUpd", DarkGreen)) return false;
+    if (not modelConsumo.setData(newRow, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) return false;
     if (not modelConsumo.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
     if (not modelConsumo.setData(newRow, "idEstoque", model.data(row, "idEstoque"))) return false;
     if (not modelConsumo.setData(newRow, "status", "CONSUMO")) return false;

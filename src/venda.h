@@ -30,12 +30,12 @@ private:
   bool financeiro = false;
   double minimoFrete;
   double porcFrete;
-  QList<QCheckBox *> listCheckBoxRep;
-  QList<QComboBox *> listComboParc;
-  QList<QComboBox *> listComboPgt;
-  QList<QDateEdit *> listDatePgt;
-  QList<QDoubleSpinBox *> listDoubleSpinPgt;
-  QList<QLineEdit *> listLinePgt;
+  //  QList<QCheckBox *> listCheckBoxRep;
+  //  QList<QComboBox *> listComboParc;
+  //  QList<QComboBox *> listComboPgt;
+  //  QList<QDateEdit *> listDatePgt;
+  //  QList<QDoubleSpinBox *> listDoubleSpinPgt;
+  //  QList<QLineEdit *> listLinePgt;
   QString error;
   QString idOrcamento;
   SqlTableModel modelFluxoCaixa;
@@ -63,7 +63,7 @@ private:
   void on_checkBoxPontuacaoIsento_toggled(bool checked);
   void on_checkBoxPontuacaoPadrao_toggled(bool checked);
   void on_checkBoxRT_toggled(bool checked);
-  void on_comboBoxPgt_currentTextChanged(const int index, const QString text);
+  void on_comboBoxPgt_currentTextChanged(const int index, const QString &text);
   void on_dateTimeEdit_dateTimeChanged(const QDateTime &);
   void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
   void on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto);

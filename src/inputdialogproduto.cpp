@@ -10,7 +10,7 @@
 #include "singleeditdelegate.h"
 #include "ui_inputdialogproduto.h"
 
-InputDialogProduto::InputDialogProduto(const Type &type, QWidget *parent) : QDialog(parent), type(type), ui(new Ui::InputDialogProduto) {
+InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -25,14 +25,14 @@ InputDialogProduto::InputDialogProduto(const Type &type, QWidget *parent) : QDia
   ui->dateEditEvento->setDate(QDate::currentDate());
   ui->dateEditProximo->setDate(QDate::currentDate());
 
-  if (type == GerarCompra) {
+  if (tipo == Tipo::GerarCompra) {
     ui->labelEvento->setText("Data compra:");
     ui->labelProximoEvento->setText("Data prevista confirmação:");
 
     connect(&model, &SqlTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
-  if (type == Faturamento) {
+  if (tipo == Tipo::Faturamento) {
     ui->labelProximoEvento->hide();
     ui->dateEditProximo->hide();
     ui->comboBoxST->hide();
@@ -102,7 +102,7 @@ void InputDialogProduto::setupTables() {
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
 
-  if (type == GerarCompra) {
+  if (tipo == Tipo::GerarCompra) {
     ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
   }
 }
@@ -116,8 +116,8 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   QString filter;
 
-  if (type == GerarCompra) filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'";
-  if (type == Faturamento) filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'";
+  if (tipo == Tipo::GerarCompra) filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'";
+  if (tipo == Tipo::Faturamento) filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'";
 
   if (filter.isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Filtro vazio!");
@@ -147,7 +147,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
 
-  if (type == GerarCompra) QMessageBox::information(this, "Aviso!", "Ajustar preço e quantidade se necessário.");
+  if (tipo == Tipo::GerarCompra) QMessageBox::information(this, "Aviso!", "Ajustar preço e quantidade se necessário.");
 
   return true;
 }

@@ -79,7 +79,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::Coleta);
+  InputDialog input(InputDialog::Tipo::Coleta);
 
   if (input.exec() != InputDialog::Accepted) return;
 
@@ -119,8 +119,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = "
-                  ":dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM "
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM "
                   "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":dataRealColeta", dataColeta);
     query.bindValue(":dataPrevReceb", dataPrevReceb);
@@ -133,9 +132,8 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
     }
 
     // salvar status na venda
-    query.prepare("UPDATE venda_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, "
-                  "dataPrevReceb = :dataPrevReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE "
-                  "idEstoque = :idEstoque)");
+    query.prepare("UPDATE venda_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM "
+                  "estoque_has_consumo WHERE idEstoque = :idEstoque)");
     query.bindValue(":dataRealColeta", dataColeta);
     query.bindValue(":dataPrevReceb", dataPrevReceb);
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
@@ -179,7 +177,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::AgendarColeta);
+  InputDialog input(InputDialog::Tipo::AgendarColeta);
 
   if (input.exec() != InputDialog::Accepted) return;
 

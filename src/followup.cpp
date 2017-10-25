@@ -13,12 +13,12 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
 
   setupTables();
 
-  setWindowTitle((tipo == Orcamento ? "Orçamento: " : "Pedido: ") + id);
+  setWindowTitle((tipo == Tipo::Orcamento ? "Orçamento: " : "Pedido: ") + id);
 
   ui->dateFollowup->setDateTime(QDateTime::currentDateTime());
   ui->dateProxFollowup->setDateTime(QDateTime::currentDateTime().addDays(1));
 
-  if (tipo == Venda) ui->frameOrcamento->hide();
+  if (tipo == Tipo::Venda) ui->frameOrcamento->hide();
 }
 
 FollowUp::~FollowUp() { delete ui; }
@@ -29,7 +29,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) return;
 
   QSqlQuery query;
-  if (tipo == Orcamento) {
+  if (tipo == Tipo::Orcamento) {
     query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idLoja, idUsuario, semaforo, observacao, "
                   "dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idLoja, :idUsuario, :semaforo, :observacao, "
                   ":dataFollowup, :dataProxFollowup)");
@@ -42,7 +42,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataProxFollowup", ui->dateProxFollowup->dateTime());
   }
 
-  if (tipo == Venda) {
+  if (tipo == Tipo::Venda) {
     query.prepare("INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, observacao, dataFollowup) VALUES "
                   "(:idVenda, :idLoja, :idUsuario, :observacao, :dataFollowup)");
     query.bindValue(":idVenda", id);
@@ -62,7 +62,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
 }
 
 bool FollowUp::verifyFields() {
-  if (tipo == Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
+  if (tipo == Tipo::Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
     QMessageBox::critical(this, "Erro!", "Deve selecionar uma temperatura!");
     return false;
   }
@@ -76,7 +76,7 @@ bool FollowUp::verifyFields() {
 }
 
 void FollowUp::setupTables() {
-  model.setTable("view_followup_" + QString(tipo == Orcamento ? "orcamento" : "venda"));
+  model.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
   model.setEditStrategy(SqlTableModel::OnManualSubmit);
 
   model.setHeaderData("idOrcamento", "Orçamento");
@@ -86,7 +86,7 @@ void FollowUp::setupTables() {
   model.setHeaderData("dataFollowup", "Data");
   model.setHeaderData("dataProxFollowup", "Próx. Data");
 
-  model.setFilter(tipo == Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
+  model.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
   if (not model.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela followup: " + model.lastError().text());

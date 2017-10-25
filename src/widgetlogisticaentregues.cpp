@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include <QSqlError>
 
 #include "doubledelegate.h"
@@ -32,7 +33,9 @@ bool WidgetLogisticaEntregues::updateTables() {
 
   ui->tableVendas->resizeColumnsToContents();
 
-  if (not modelProdutos.select()) {
+  modelProdutos.setQuery(modelProdutos.query().executedQuery());
+
+  if (modelProdutos.lastError().isValid()) {
     emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
     return false;
   }
@@ -72,9 +75,19 @@ void WidgetLogisticaEntregues::setupTables() {
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 
   if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") ui->tableVendas->hideColumn("Indicou");
+}
 
-  modelProdutos.setTable("view_entrega_produtos");
-  modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
+void WidgetLogisticaEntregues::on_tableVendas_activated(const QModelIndex &index) {
+  modelProdutos.setQuery("SELECT `vp`.`idVendaProduto` AS `idVendaProduto`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` "
+                         "AS `status`, `vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`produto` AS `produto`, `vp`.`caixas` AS `caixas`, `vp`.`quant` AS `quant`, `vp`.`un` AS "
+                         "`un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial` AS `formComercial`, `ehc`.`idConsumo` AS `idConsumo` FROM "
+                         "(`mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON ((`vp`.`idVendaProduto` = `ehc`.`idVendaProduto`))) WHERE idVenda = '" +
+                         modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`");
+
+  if (modelProdutos.lastError().isValid()) {
+    QMessageBox::critical(this, "Erro!", "Erro: " + modelProdutos.lastError().text());
+    return;
+  }
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -88,24 +101,14 @@ void WidgetLogisticaEntregues::setupTables() {
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");
 
-  modelProdutos.setFilter("0");
+  auto *proxyFilter = new QSortFilterProxyModel(this);
+  proxyFilter->setDynamicSortFilter(true);
+  proxyFilter->setSourceModel(&modelProdutos);
 
-  if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
-  }
-
-  ui->tableProdutos->setModel(&modelProdutos);
+  ui->tableProdutos->setModel(proxyFilter);
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataPrevEnt");
-}
-
-void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {
-  modelProdutos.setFilter("idVenda = '" + modelVendas.data(index.row(), "idVenda").toString() + "'");
-
-  if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelProdutos.lastError().text());
-  }
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) ui->tableProdutos->openPersistentEditor(row, "selecionado");
 

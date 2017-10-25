@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetPagamento</class>
- <widget class="QWidget" name="WidgetPagamento">
+ <class>WidgetContas</class>
+ <widget class="QWidget" name="WidgetContas">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -300,9 +300,6 @@
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-         <property name="sortingEnabled">
-          <bool>false</bool>
          </property>
          <attribute name="horizontalHeaderCascadingSectionResizes">
           <bool>true</bool>

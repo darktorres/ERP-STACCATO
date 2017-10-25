@@ -193,7 +193,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
     return;
   }
 
-  InputDialog inputDlg(InputDialog::Carrinho);
+  InputDialog inputDlg(InputDialog::Tipo::Carrinho);
   if (inputDlg.exec() != InputDialog::Accepted) return;
 
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
@@ -257,7 +257,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturado ainda (provavelmente vou restaurar o
   // processo antigo e sincronizar as tabelas)
 
-  const double consumir = qMin(quantEstoque, quantConsumir); // TODO: 0maybe dont need min, quantConsumir is already limited to quantEstoque
+  const double consumir = qMin(quantEstoque, quantConsumir); // REFAC: 0maybe dont need min, quantConsumir is already limited to quantEstoque
 
   auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
   if (not estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto").toInt(), consumir)) return false;

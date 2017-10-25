@@ -112,16 +112,16 @@ void DownloadDialog::downloadFinished() {
   ui->downloadLabel->setText(tr("Download completo!"));
   ui->timeLabel->setText(tr("O instalador vai abrir em uma janela separada..."));
 
-  QByteArray data = m_reply->readAll();
+  const QByteArray replyData = m_reply->readAll();
 
-  if (not data.isEmpty()) {
-    QStringList list = m_reply->url().toString().split("/");
+  if (not replyData.isEmpty()) {
+    const QStringList list = m_reply->url().toString().split("/");
     QFile file(QDir::tempPath() + "/" + list.at(list.count() - 1));
     QMutex _mutex;
 
     if (file.open(QIODevice::WriteOnly)) {
       _mutex.lock();
-      file.write(data);
+      file.write(replyData);
       m_path = file.fileName();
       file.close();
       _mutex.unlock();
@@ -137,7 +137,7 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(100);
 
-    int _progress = (int)((received * 100) / total);
+    const int _progress = static_cast<int>((received * 100) / total);
     ui->progressBar->setValue(_progress);
 
     QString _total_string;
@@ -168,11 +168,11 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
 
     ui->downloadLabel->setText(tr("Baixando atualizações") + " (" + _received_string + " " + tr("de") + " " + _total_string + ")");
 
-    uint _diff = QDateTime::currentDateTime().toTime_t() - m_start_time;
+    const uint _diff = QDateTime::currentDateTime().toTime_t() - m_start_time;
 
     if (_diff > 0) {
       QString _time_string;
-      float _time_remaining = total / (received / _diff);
+      double _time_remaining = total / (received / _diff);
 
       if (_time_remaining > 7200) {
         _time_remaining /= 3600;

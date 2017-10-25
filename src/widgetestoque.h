@@ -28,7 +28,6 @@ private slots:
 
 private:
   // attributes
-  //  SqlTableModel model;
   SqlQueryModel model;
   Ui::WidgetEstoque *ui;
   // methods

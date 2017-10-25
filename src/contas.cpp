@@ -49,12 +49,12 @@ void Contas::validarData(const QModelIndex &index) {
 
     if (oldDate.isNull()) return;
 
-    if (tipo == Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
+    if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
       QMessageBox::critical(this, "Erro!", "Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
       modelPendentes.setData(index.row(), "dataPagamento", oldDate);
     }
 
-    if (tipo == Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
+    if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
       QMessageBox::critical(this, "Erro!", "Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
       modelPendentes.setData(index.row(), "dataPagamento", oldDate);
     }
@@ -82,7 +82,7 @@ void Contas::preencher(const QModelIndex &index) {
   }
 
   if (index.column() == modelPendentes.fieldIndex("dataRealizado")) {
-    modelPendentes.setData(index.row(), "status", tipo == Receber ? "RECEBIDO" : "PAGO");
+    modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO");
     modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"));
     modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"));
     modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"));
@@ -98,7 +98,7 @@ void Contas::preencher(const QModelIndex &index) {
       if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) continue;
 
       modelPendentes.setData(indexMatch.row(), "dataRealizado", modelPendentes.data(index.row(), "dataRealizado"));
-      modelPendentes.setData(indexMatch.row(), "status", tipo == Receber ? "RECEBIDO" : "PAGO");
+      modelPendentes.setData(indexMatch.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO");
       modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"));
       modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"));
       modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"));
@@ -115,7 +115,7 @@ void Contas::preencher(const QModelIndex &index) {
 }
 
 void Contas::setupTables() {
-  modelPendentes.setTable(tipo == Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
+  modelPendentes.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
   modelPendentes.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
@@ -151,11 +151,11 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(this));
 
-  if (tipo == Receber) {
+  if (tipo == Tipo::Receber) {
     //    ui->tablePendentes->setItemDelegateForColumn("contraParte",
     //                                                 new LineEditDelegate(LineEditDelegate::ContraParteReceber,
     //                                                 this));
-    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::StatusReceber, this));
+    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
     //    ui->tablePendentes->setItemDelegateForColumn("contaDestino",
     //                                                 new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
     //    ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
@@ -164,10 +164,10 @@ void Contas::setupTables() {
     //    ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Grupo, this));
   }
 
-  if (tipo == Pagar) {
+  if (tipo == Tipo::Pagar) {
     //    ui->tablePendentes->setItemDelegateForColumn("contraParte",
     //                                                 new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
-    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::StatusPagar, this));
+    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusPagar, this));
     //    ui->tablePendentes->setItemDelegateForColumn("contaDestino",
     //                                                 new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
     //    ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
@@ -177,10 +177,10 @@ void Contas::setupTables() {
   }
 
   //  ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
+  ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-  ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
-  ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Grupo, this));
+  ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
+  ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
 
   ui->tablePendentes->hideColumn("idCompra");
   ui->tablePendentes->hideColumn("representacao");
@@ -197,7 +197,7 @@ void Contas::setupTables() {
 
   //
 
-  modelProcessados.setTable(tipo == Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
+  modelProcessados.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
   modelProcessados.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
@@ -221,10 +221,10 @@ void Contas::setupTables() {
 
   ui->tableProcessados->setModel(&modelProcessados);
   ui->tableProcessados->setItemDelegate(new DoubleDelegate(this));
-  ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::StatusReceber, this));
-  ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Conta, true, this));
+  ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
+  ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-  ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Loja, true, this));
+  ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
   ui->tableProcessados->hideColumn("representacao");
   ui->tableProcessados->hideColumn("idPagamento");
   ui->tableProcessados->hideColumn("idVenda");
@@ -241,7 +241,7 @@ void Contas::setupTables() {
 
 bool Contas::verifyFields() {
   for (int row = 0; row < modelPendentes.rowCount(); ++row) {
-    if ((tipo == Pagar and modelPendentes.data(row, "status").toString() == "PAGO") or (tipo == Receber and modelPendentes.data(row, "status").toString() == "RECEBIDO")) {
+    if ((tipo == Tipo::Pagar and modelPendentes.data(row, "status").toString() == "PAGO") or (tipo == Tipo::Receber and modelPendentes.data(row, "status").toString() == "RECEBIDO")) {
       if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) {
         QMessageBox::critical(this, "Erro!", "'Data Realizado' vazio!");
         return false;
@@ -294,7 +294,7 @@ void Contas::on_pushButtonSalvar_clicked() {
 }
 
 void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
-  if (tipo == Receber) {
+  if (tipo == Tipo::Receber) {
     QSqlQuery query;
     query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
@@ -341,7 +341,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     ui->tableProcessados->resizeColumnsToContents();
   }
 
-  if (tipo == Pagar) {
+  if (tipo == Tipo::Pagar) {
     QSqlQuery query;
     query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN "
                   "pedido_fornecedor_has_produto pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");

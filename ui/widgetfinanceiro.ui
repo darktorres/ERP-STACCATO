@@ -35,7 +35,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0">
-        <widget class="WidgetPagamento" name="widgetPagar" native="true"/>
+        <widget class="WidgetContas" name="widgetPagar" native="true"/>
        </item>
       </layout>
      </widget>
@@ -45,7 +45,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="0">
-        <widget class="WidgetPagamento" name="widgetReceber" native="true"/>
+        <widget class="WidgetContas" name="widgetReceber" native="true"/>
        </item>
       </layout>
      </widget>
@@ -87,9 +87,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetPagamento</class>
+   <class>WidgetContas</class>
    <extends>QWidget</extends>
-   <header>src/widgetpagamento.h</header>
+   <header>src/widgetcontas.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

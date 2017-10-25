@@ -24,12 +24,14 @@ private slots:
 private:
   // attributes
   const Tipo tipo;
+  QHash<QString, QString> hash;
   Ui::LoginDialog *ui;
   // methods
   bool dbConnect();
   void storeSelection();
   void updater();
   void darkTheme();
+  void readSettingsFile();
 };
 
 #endif // LOGINDIALOG_H

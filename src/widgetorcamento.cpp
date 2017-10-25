@@ -94,6 +94,8 @@ bool WidgetOrcamento::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
+  qDebug() << "filter: " << model.filter();
+
   return true;
 }
 
@@ -150,7 +152,7 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
     return;
   }
 
-  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Orcamento, this);
+  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

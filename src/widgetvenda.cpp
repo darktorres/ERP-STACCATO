@@ -206,7 +206,7 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
     return;
   }
 
-  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Venda, this);
+  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
@@ -217,5 +217,3 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
     child->setChecked(enabled);
   }
 }
-
-// TODO: 4quando marcar linha de verde zerar dias restantes

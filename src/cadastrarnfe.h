@@ -29,6 +29,8 @@ private:
   QSqlQuery queryEndereco;
   QSqlQuery queryIBGE;
   QSqlQuery queryLojaEnd;
+  QSqlQuery queryPartilhaInter;
+  QSqlQuery queryPartilhaIntra;
   QString arquivo;
   QString chaveNum;
   QString error;

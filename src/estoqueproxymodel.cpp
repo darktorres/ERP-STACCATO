@@ -8,25 +8,28 @@ EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QI
 
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {
-    const int quantUpd = QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt();
+    const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt());
 
-    // TODO: create a enum
-    if (quantUpd == 1) return QBrush(Qt::green);         // Ok
-    if (quantUpd == 2) return QBrush(Qt::yellow);        // Quant difere
-    if (quantUpd == 3) return QBrush(Qt::red);           // Não encontrado
-    if (quantUpd == 4) return QBrush(QColor(0, 190, 0)); // Consumo
-    if (quantUpd == 5) return QBrush(Qt::cyan);          // Devolução
+    if (quantUpd == Status::Ok) return QBrush(Qt::green);
+    if (quantUpd == Status::QuantDifere) return QBrush(Qt::yellow);
+    if (quantUpd == Status::NaoEncontrado) return QBrush(Qt::red);
+    if (quantUpd == Status::Consumo) return QBrush(QColor(0, 190, 0));
+    if (quantUpd == Status::Devolucao) return QBrush(Qt::cyan);
   }
 
   if (role == Qt::ForegroundRole) {
-    const int quantUpd = QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt();
 
-    // TODO: create a enum
-    if (quantUpd == 1) return QBrush(Qt::black); // Ok
-    if (quantUpd == 2) return QBrush(Qt::black); // Quant difere
-    if (quantUpd == 3) return QBrush(Qt::black); // Não encontrado
-    if (quantUpd == 4) return QBrush(Qt::black); // Consumo
-    if (quantUpd == 5) return QBrush(Qt::black); // Devolução
+    // those paint the text as black if the background is colored
+
+    const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt());
+
+    if (quantUpd == Status::Ok) return QBrush(Qt::black);
+    if (quantUpd == Status::QuantDifere) return QBrush(Qt::black);
+    if (quantUpd == Status::NaoEncontrado) return QBrush(Qt::black);
+    if (quantUpd == Status::Consumo) return QBrush(Qt::black);
+    if (quantUpd == Status::Devolucao) return QBrush(Qt::black);
+
+    //
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

@@ -25,7 +25,7 @@ bool WidgetFluxoCaixa::updateTables() {
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
 
-    // TODO: 0dont hardcode magic numbers
+    // REFAC: 0dont hardcode magic numbers
     ui->itemBoxCaixa1->setValue(3);
     ui->itemBoxCaixa2->setValue(8);
 

@@ -312,7 +312,7 @@ bool ImportarXML::importar() {
   bool ok = false;
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    if (modelCompra.data(row, "quantUpd") == Green) {
+    if (modelCompra.data(row, "quantUpd") == static_cast<int>(FieldColors::Green)) {
       ok = true;
       break;
     }
@@ -324,9 +324,9 @@ bool ImportarXML::importar() {
   }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    const int color = modelEstoque.data(row, "quantUpd").toInt();
+    const FieldColors color = static_cast<FieldColors>(modelEstoque.data(row, "quantUpd").toInt());
 
-    if (color == Red) {
+    if (color == FieldColors::Red) {
       error = "Nem todos os estoques estão ok!";
       return false;
     }
@@ -368,11 +368,11 @@ bool ImportarXML::importar() {
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
     const int idVendaProduto = modelCompra.data(row, "idVendaProduto").toInt();
-    const int color = modelCompra.data(row, "quantUpd").toInt();
+    const FieldColors color = static_cast<FieldColors>(modelCompra.data(row, "quantUpd").toInt());
     const QString status = modelCompra.data(row, "status").toString();
 
     if (idVendaProduto == 0) continue;
-    if (color == White) continue;
+    if (color == FieldColors::White) continue;
     if (status != "EM FATURAMENTO") continue;
 
     query.bindValue(":dataRealFat", dataReal);
@@ -425,14 +425,14 @@ bool ImportarXML::limparAssociacoes() {
     const QString status = modelCompra.data(row, "status").toString();
     const int color = modelCompra.data(row, "quantUpd").toInt();
 
-    if (status != "EM FATURAMENTO" and color == Green) continue;
+    if (status != "EM FATURAMENTO" and color == static_cast<int>(FieldColors::Green)) continue;
 
-    if (not modelCompra.setData(row, "quantUpd", White)) return false;
+    if (not modelCompra.setData(row, "quantUpd", static_cast<int>(FieldColors::White))) return false;
     if (not modelCompra.setData(row, "quantConsumida", 0)) return false;
   }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    if (not modelEstoque.setData(row, "quantUpd", White)) return false;
+    if (not modelEstoque.setData(row, "quantUpd", static_cast<int>(FieldColors::White))) return false;
   }
 
   while (modelConsumo.rowCount() > 0) {
@@ -476,7 +476,7 @@ void ImportarXML::procurar() {
   bool ok = true;
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    if (modelCompra.data(row, "quantUpd") != Green) {
+    if (static_cast<FieldColors>(modelCompra.data(row, "quantUpd").toInt()) != FieldColors::Green) {
       ok = false;
       break;
     }
@@ -490,8 +490,8 @@ void ImportarXML::procurar() {
 }
 
 bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) {
-  if (modelEstoque.data(rowEstoque, "quantUpd") == Green) return true;
-  if (modelCompra.data(rowCompra, "quantUpd") == Green) return true;
+  if (static_cast<FieldColors>(modelEstoque.data(rowEstoque, "quantUpd").toInt()) == FieldColors::Green) return true;
+  if (static_cast<FieldColors>(modelCompra.data(rowCompra, "quantUpd").toInt()) == FieldColors::Green) return true;
 
   //-------------------------------
 
@@ -512,11 +512,11 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
     return false;
   }
 
-  if (not modelEstoque.setData(rowEstoque, "quantUpd", qFuzzyCompare(estoqueConsumido, quantEstoque) ? Green : Yellow)) {
+  if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoqueConsumido, quantEstoque) ? FieldColors::Green : FieldColors::Yellow))) {
     return false;
   }
 
-  if (not modelCompra.setData(rowCompra, "quantUpd", qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? Green : Yellow)) {
+  if (not modelCompra.setData(rowCompra, "quantUpd", static_cast<int>(qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? FieldColors::Green : FieldColors::Yellow))) {
     return false;
   }
 
@@ -686,9 +686,9 @@ bool ImportarXML::inserirItemSql(XML &xml) {
     }
   }
 
-  const int row = modelEstoque.rowCount();
+  const int newRow = modelEstoque.rowCount();
 
-  if (not modelEstoque.insertRow(row)) {
+  if (not modelEstoque.insertRow(newRow)) {
     QMessageBox::critical(nullptr, "Erro!", "Erro inserindo linha na tabela: " + modelEstoque.lastError().text());
     return false;
   }
@@ -712,49 +712,49 @@ bool ImportarXML::inserirItemSql(XML &xml) {
 
   idEstoque++;
 
-  if (not modelEstoque.setData(row, "idEstoque", idEstoque)) return false;
-  if (not modelEstoque.setData(row, "fornecedor", xml.xNome)) return false;
-  if (not modelEstoque.setData(row, "local", xml.local)) return false;
-  if (not modelEstoque.setData(row, "descricao", xml.descricao)) return false;
-  if (not modelEstoque.setData(row, "quant", xml.quant)) return false;
-  if (not modelEstoque.setData(row, "un", xml.un)) return false;
-  if (not modelEstoque.setData(row, "codBarras", xml.codBarras)) return false;
-  if (not modelEstoque.setData(row, "codComercial", xml.codProd)) return false;
-  if (not modelEstoque.setData(row, "ncm", xml.ncm)) return false;
-  if (not modelEstoque.setData(row, "cfop", xml.cfop)) return false;
-  if (not modelEstoque.setData(row, "valorUnid", xml.valorUnid)) return false;
-  if (not modelEstoque.setData(row, "valor", xml.valor)) return false;
-  if (not modelEstoque.setData(row, "codBarrasTrib", xml.codBarrasTrib)) return false;
-  if (not modelEstoque.setData(row, "unTrib", xml.unTrib)) return false;
-  if (not modelEstoque.setData(row, "quantTrib", xml.quantTrib)) return false;
-  if (not modelEstoque.setData(row, "valorTrib", xml.valorTrib)) return false;
-  if (not modelEstoque.setData(row, "desconto", xml.desconto)) return false;
-  if (not modelEstoque.setData(row, "compoeTotal", xml.compoeTotal)) return false;
-  if (not modelEstoque.setData(row, "numeroPedido", xml.numeroPedido)) return false;
-  if (not modelEstoque.setData(row, "itemPedido", xml.itemPedido)) return false;
-  if (not modelEstoque.setData(row, "tipoICMS", xml.tipoICMS)) return false;
-  if (not modelEstoque.setData(row, "orig", xml.orig)) return false;
-  if (not modelEstoque.setData(row, "cstICMS", xml.cstICMS)) return false;
-  if (not modelEstoque.setData(row, "modBC", xml.modBC)) return false;
-  if (not modelEstoque.setData(row, "vBC", xml.vBC)) return false;
-  if (not modelEstoque.setData(row, "pICMS", xml.pICMS)) return false;
-  if (not modelEstoque.setData(row, "vICMS", xml.vICMS)) return false;
-  if (not modelEstoque.setData(row, "modBCST", xml.modBCST)) return false;
-  if (not modelEstoque.setData(row, "pMVAST", xml.pMVAST)) return false;
-  if (not modelEstoque.setData(row, "vBCST", xml.vBCST)) return false;
-  if (not modelEstoque.setData(row, "pICMSST", xml.pICMSST)) return false;
-  if (not modelEstoque.setData(row, "vICMSST", xml.vICMSST)) return false;
-  if (not modelEstoque.setData(row, "cEnq", xml.cEnq)) return false;
-  if (not modelEstoque.setData(row, "cstIPI", xml.cstIPI)) return false;
-  if (not modelEstoque.setData(row, "cstPIS", xml.cstPIS)) return false;
-  if (not modelEstoque.setData(row, "vBCPIS", xml.vBCPIS)) return false;
-  if (not modelEstoque.setData(row, "pPIS", xml.pPIS)) return false;
-  if (not modelEstoque.setData(row, "vPIS", xml.vPIS)) return false;
-  if (not modelEstoque.setData(row, "cstCOFINS", xml.cstCOFINS)) return false;
-  if (not modelEstoque.setData(row, "vBCCOFINS", xml.vBCCOFINS)) return false;
-  if (not modelEstoque.setData(row, "pCOFINS", xml.pCOFINS)) return false;
-  if (not modelEstoque.setData(row, "vCOFINS", xml.vCOFINS)) return false;
-  if (not modelEstoque.setData(row, "status", "TEMP")) return false;
+  if (not modelEstoque.setData(newRow, "idEstoque", idEstoque)) return false;
+  if (not modelEstoque.setData(newRow, "fornecedor", xml.xNome)) return false;
+  if (not modelEstoque.setData(newRow, "local", xml.local)) return false;
+  if (not modelEstoque.setData(newRow, "descricao", xml.descricao)) return false;
+  if (not modelEstoque.setData(newRow, "quant", xml.quant)) return false;
+  if (not modelEstoque.setData(newRow, "un", xml.un)) return false;
+  if (not modelEstoque.setData(newRow, "codBarras", xml.codBarras)) return false;
+  if (not modelEstoque.setData(newRow, "codComercial", xml.codProd)) return false;
+  if (not modelEstoque.setData(newRow, "ncm", xml.ncm)) return false;
+  if (not modelEstoque.setData(newRow, "cfop", xml.cfop)) return false;
+  if (not modelEstoque.setData(newRow, "valorUnid", xml.valorUnid)) return false;
+  if (not modelEstoque.setData(newRow, "valor", xml.valor)) return false;
+  if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) return false;
+  if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) return false;
+  if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) return false;
+  if (not modelEstoque.setData(newRow, "valorTrib", xml.valorTrib)) return false;
+  if (not modelEstoque.setData(newRow, "desconto", xml.desconto)) return false;
+  if (not modelEstoque.setData(newRow, "compoeTotal", xml.compoeTotal)) return false;
+  if (not modelEstoque.setData(newRow, "numeroPedido", xml.numeroPedido)) return false;
+  if (not modelEstoque.setData(newRow, "itemPedido", xml.itemPedido)) return false;
+  if (not modelEstoque.setData(newRow, "tipoICMS", xml.tipoICMS)) return false;
+  if (not modelEstoque.setData(newRow, "orig", xml.orig)) return false;
+  if (not modelEstoque.setData(newRow, "cstICMS", xml.cstICMS)) return false;
+  if (not modelEstoque.setData(newRow, "modBC", xml.modBC)) return false;
+  if (not modelEstoque.setData(newRow, "vBC", xml.vBC)) return false;
+  if (not modelEstoque.setData(newRow, "pICMS", xml.pICMS)) return false;
+  if (not modelEstoque.setData(newRow, "vICMS", xml.vICMS)) return false;
+  if (not modelEstoque.setData(newRow, "modBCST", xml.modBCST)) return false;
+  if (not modelEstoque.setData(newRow, "pMVAST", xml.pMVAST)) return false;
+  if (not modelEstoque.setData(newRow, "vBCST", xml.vBCST)) return false;
+  if (not modelEstoque.setData(newRow, "pICMSST", xml.pICMSST)) return false;
+  if (not modelEstoque.setData(newRow, "vICMSST", xml.vICMSST)) return false;
+  if (not modelEstoque.setData(newRow, "cEnq", xml.cEnq)) return false;
+  if (not modelEstoque.setData(newRow, "cstIPI", xml.cstIPI)) return false;
+  if (not modelEstoque.setData(newRow, "cstPIS", xml.cstPIS)) return false;
+  if (not modelEstoque.setData(newRow, "vBCPIS", xml.vBCPIS)) return false;
+  if (not modelEstoque.setData(newRow, "pPIS", xml.pPIS)) return false;
+  if (not modelEstoque.setData(newRow, "vPIS", xml.vPIS)) return false;
+  if (not modelEstoque.setData(newRow, "cstCOFINS", xml.cstCOFINS)) return false;
+  if (not modelEstoque.setData(newRow, "vBCCOFINS", xml.vBCCOFINS)) return false;
+  if (not modelEstoque.setData(newRow, "pCOFINS", xml.pCOFINS)) return false;
+  if (not modelEstoque.setData(newRow, "vCOFINS", xml.vCOFINS)) return false;
+  if (not modelEstoque.setData(newRow, "status", "TEMP")) return false;
 
   const int rowNFe = modelEstoque_nfe.rowCount();
   modelEstoque_nfe.insertRow(rowNFe);
@@ -847,7 +847,7 @@ bool ImportarXML::criarConsumo2(const int rowCompra, const int rowEstoque, const
 
   if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) return false;
   if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) return false;
-  if (not modelConsumo.setData(rowConsumo, "quantUpd", DarkGreen)) return false;
+  if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) return false;
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) return false;
   if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) return false;
   if (not modelConsumo.setData(rowConsumo, "desconto", desconto)) return false;
@@ -943,7 +943,7 @@ bool ImportarXML::criarConsumo() {
 
       if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) return false;
       if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) return false;
-      if (not modelConsumo.setData(rowConsumo, "quantUpd", DarkGreen)) return false;
+      if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) return false;
       if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) return false;
       if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) return false;
       if (not modelConsumo.setData(rowConsumo, "desconto", desconto)) return false;
@@ -985,7 +985,7 @@ bool ImportarXML::parear() {
     }
 
     if (listCompra.isEmpty()) {
-      if (not modelEstoque.setData(rowEstoque, "quantUpd", Red)) return false;
+      if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(FieldColors::Red))) return false;
       continue;
     }
 

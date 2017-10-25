@@ -138,7 +138,10 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   QString resposta;
   if (not ACBr::enviarComando(comando, resposta)) return;
 
-  if (resposta.contains("XMotivo=Evento registrado e vinculado a NF-e")) {
+  // REFAC: if not contains return?
+
+  if (resposta.contains("xEvento=Cancelamento registrado")) {
+    //  if (resposta.contains("XMotivo=Evento registrado e vinculado a NF-e")) {
     QSqlQuery query;
     query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
     query.bindValue(":chaveAcesso", chaveAcesso);
@@ -162,7 +165,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   arquivo.close();
 
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.',idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
+  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
@@ -179,7 +182,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const QString anexo = QDir::currentPath() + "/cancelamento.xml";
 
   // TODO: 0enviar resposta xml do cancelamento para a contabilidade
-  auto *mail = new SendMail(SendMail::CancelarNFe, anexo, QString(), this);
+  auto *mail = new SendMail(SendMail::Tipo::CancelarNFe, anexo, QString(), this);
   mail->setAttribute(Qt::WA_DeleteOnClose);
 
   mail->exec();
@@ -329,10 +332,6 @@ void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
   }
 }
 
-// TODO: 2tela para importar notas de amostra (aba separada)
-// TODO: 0nao estou guardando o valor na nota
-// TODO: 0algumas notas nao estao mostrando valor
-
 void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
@@ -341,10 +340,10 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
     return;
   }
 
-  if (model.data(selection.first().row(), "status").toString() != "NOTA PENDENTE") {
-    QMessageBox::critical(this, "Erro!", "Nota não está pendente!");
-    return;
-  }
+  //  if (model.data(selection.first().row(), "status").toString() != "NOTA PENDENTE") {
+  //    QMessageBox::critical(this, "Erro!", "Nota não está pendente!");
+  //    return;
+  //  }
 
   const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
 
@@ -415,3 +414,9 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
 
   return true;
 }
+
+// TODO: guardar idVenda/outros dados na nfe para quando cancelar nao perder os vinculos
+// TODO: 2tela para importar notas de amostra (aba separada)
+// TODO: 0nao estou guardando o valor na nota
+// TODO: 0algumas notas nao estao mostrando valor
+// TODO: nesta tela colocar um campo dizendo qual loja que emitiu a nota (nao precisa mostrar o cnpj, apenas o nome da loja) (e talvez poder filtrar pela loja)

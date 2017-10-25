@@ -13,9 +13,9 @@ class InputDialogProduto : public QDialog {
   Q_OBJECT
 
 public:
-  enum Type { GerarCompra, Faturamento };
+  enum class Tipo { GerarCompra, Faturamento };
 
-  explicit InputDialogProduto(const Type &type, QWidget *parent = 0);
+  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = 0);
   ~InputDialogProduto();
   QDateTime getDate() const;
   QDateTime getNextDate() const;
@@ -32,7 +32,7 @@ private slots:
 private:
   // attributes
   bool isBlockedAliquota = false;
-  const Type type;
+  const Tipo tipo;
   SqlTableModel model;
   Ui::InputDialogProduto *ui;
   // methods

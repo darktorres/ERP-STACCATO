@@ -11,13 +11,13 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
   ui->itemBoxLoja->setValue(UserSession::settings("User/lojaACBr"));
-  // TODO: remove these two
+  // REFAC: remove these two
   ui->lineEditEmailContabilidade->setText(UserSession::settings("User/emailContabilidade").toString());
   ui->lineEditEmailLogistica->setText(UserSession::settings("User/emailLogistica").toString());
 
   ui->lineEditServidorSMTP->setText(UserSession::settings("User/servidorSMTP").toString());
   ui->lineEditPortaSMTP->setText(UserSession::settings("User/portaSMTP").toString());
-  // TODO: rename this to email
+  // REFAC: rename this to email
   ui->lineEditEmail->setText(UserSession::settings("User/emailCompra").toString());
   ui->lineEditEmailSenha->setText(UserSession::settings("User/emailSenha").toString());
   ui->lineEditEmailCopia->setText(UserSession::settings("User/emailCopia").toString());

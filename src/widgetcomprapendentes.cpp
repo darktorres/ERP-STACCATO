@@ -99,7 +99,7 @@ bool WidgetCompraPendentes::updateTables() {
 }
 
 void WidgetCompraPendentes::setupTables() {
-  // TODO: 5verificar setupTables com select
+  // REFAC: 5verificar setupTables com select
 
   model.setTable("view_venda_produto");
 
@@ -208,7 +208,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
     return;
   }
 
-  InputDialog inputDlg(InputDialog::Carrinho);
+  InputDialog inputDlg(InputDialog::Tipo::Carrinho);
 
   if (inputDlg.exec() != InputDialog::Accepted) return;
 
@@ -288,3 +288,5 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   Impressao impressao(model.data(list.first().row(), "idVenda").toString());
   impressao.print();
 }
+
+// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para o Conrado confirmar, apenas com um botão de ok ou cancelar.

@@ -13,12 +13,12 @@ SearchDialogProxy::SearchDialogProxy(SqlTableModel *model, QObject *parent)
 
 QVariant SearchDialogProxy::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole) {
-    const int descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toInt();
+    const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 
     if (descontinuado == true) return QBrush(Qt::red); // descontinuado
 
-    const int estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toInt();
-    const int promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toInt();
+    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
+    const bool promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toBool();
 
     if (estoque == true) return QBrush(Qt::yellow); // estoque
     if (promocao == true) return QBrush(Qt::green); // promocao
@@ -31,21 +31,26 @@ QVariant SearchDialogProxy::data(const QModelIndex &proxyIndex, int role) const 
   }
 
   if (role == Qt::ForegroundRole) {
-    const int descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toInt();
 
-    if (descontinuado == true) return QBrush(Qt::black); // descontinuado
+    // those paint the text as black if the background is colored
 
-    const int estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toInt();
-    const int promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toInt();
+    const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 
-    if (estoque == true) return QBrush(Qt::black);  // estoque
-    if (promocao == true) return QBrush(Qt::black); // promocao
+    if (descontinuado == true) return QBrush(Qt::black);
+
+    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
+    const bool promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toBool();
+
+    if (estoque == true) return QBrush(Qt::black);
+    if (promocao == true) return QBrush(Qt::black);
 
     if (proxyIndex.column() == this->validade) {
       const QDate validade = QIdentityProxyModel::data(index(proxyIndex.row(), this->validade), Qt::DisplayRole).toDate();
 
       if (validade < QDate::currentDate()) return QBrush(Qt::black);
     }
+
+    //
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

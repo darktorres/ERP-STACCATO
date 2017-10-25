@@ -137,7 +137,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   for (auto const &item : list) ids.append(model.data(item.row(), "idEstoque").toString());
 
-  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Recebimento);
+  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento);
   inputDlg.setFilter(ids);
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) return;
@@ -185,7 +185,7 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::AgendarRecebimento);
+  InputDialog input(InputDialog::Tipo::AgendarRecebimento);
 
   if (input.exec() != InputDialog::Accepted) return;
 

@@ -211,7 +211,7 @@ Worksheet::~Worksheet() {}
 /*!
  * Returns whether sheet is protected.
  */
-bool Worksheet::isOrientationVertical() const {
+Worksheet::Orientation Worksheet::orientation() const {
   Q_D(const Worksheet);
   return d->orientation;
 }
@@ -219,9 +219,9 @@ bool Worksheet::isOrientationVertical() const {
 /*!
  * Protects/unprotects the sheet based on \a protect.
  */
-void Worksheet::setOrientationVertical(bool isVertical) {
+void Worksheet::setOrientation(const Orientation orientation) {
   Q_D(Worksheet);
-  d->orientation = isVertical;
+  d->orientation = orientation;
 }
 
 /*!
@@ -1135,7 +1135,7 @@ void Worksheet::saveToXmlFile(QIODevice *device) const {
 
   writer.writeStartElement("pageSetup");
   writer.writeAttribute("paperSize", "9");
-  writer.writeAttribute("orientation", isOrientationVertical() ? "vertical" : "landscape");
+  writer.writeAttribute("orientation", (orientation() == Orientation::Vertical ? "vertical" : "landscape"));
   writer.writeEndElement(); // pageSetup
 
   d->saveXmlDrawings(writer);

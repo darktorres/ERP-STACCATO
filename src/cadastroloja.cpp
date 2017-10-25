@@ -403,19 +403,19 @@ bool CadastroLoja::viewRegister() {
   return true;
 }
 
-void CadastroLoja::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
+void CadastroLoja::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
 
 void CadastroLoja::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroLoja::cadastrar() {
-  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
+  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
     error = "Erro linha -1";
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 
@@ -504,7 +504,7 @@ void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
 bool CadastroLoja::newRegister() {
   if (not confirmationMessage()) return false;
 
-  isUpdate = false;
+  tipo = Tipo::Cadastrar;
 
   clearFields();
   registerMode();
@@ -624,12 +624,12 @@ bool CadastroLoja::adicionarPagamento() {
   const int id = getLastInsertId().toInt();
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
-    const int row = modelTaxas.rowCount();
-    if (not modelTaxas.insertRow(row)) return false;
+    const int rowTaxas = modelTaxas.rowCount();
+    if (not modelTaxas.insertRow(rowTaxas)) return false;
 
-    if (not modelTaxas.setData(row, "idPagamento", id)) return false;
-    if (not modelTaxas.setData(row, "parcela", i + 1)) return false;
-    if (not modelTaxas.setData(row, "taxa", 0)) return false;
+    if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) return false;
+    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) return false;
+    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) return false;
   }
 
   if (not modelTaxas.submitAll()) {
@@ -717,12 +717,12 @@ bool CadastroLoja::atualizarPagamento() {
   if (not modelTaxas.removeRows(0, modelTaxas.rowCount())) return false;
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
-    const int row = modelTaxas.rowCount();
-    if (not modelTaxas.insertRow(row)) return false;
+    const int rowTaxas = modelTaxas.rowCount();
+    if (not modelTaxas.insertRow(rowTaxas)) return false;
 
-    if (not modelTaxas.setData(row, "idPagamento", modelPagamentos.data(row, "idPagamento"))) return false;
-    if (not modelTaxas.setData(row, "parcela", i + 1)) return false;
-    if (not modelTaxas.setData(row, "taxa", 0)) return false;
+    if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(rowTaxas, "idPagamento"))) return false;
+    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) return false;
+    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) return false;
   }
 
   if (not modelPagamentos.submitAll()) {
@@ -837,6 +837,3 @@ void CadastroLoja::on_pushButtonLimparSelecao_clicked() {
 
   ui->tablePagamentos->clearSelection();
 }
-
-// TODO: *SUL*colocar uma opcao para dizer quais tipos de produto a loja consegue visualizar (para diferenciar loja do
-// sul)

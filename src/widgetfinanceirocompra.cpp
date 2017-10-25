@@ -33,7 +33,7 @@ void WidgetFinanceiroCompra::setupTables() {
 }
 
 void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
-  InputDialogFinanceiro input(InputDialogFinanceiro::Financeiro);
+  InputDialogFinanceiro input(InputDialogFinanceiro::Tipo::Financeiro);
   input.setFilter(model.data(index.row(), "Compra").toString());
 
   if (input.exec() != InputDialogFinanceiro::Accepted) return;

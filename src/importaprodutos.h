@@ -28,9 +28,9 @@ private slots:
   void on_tabWidget_currentChanged(const int index);
 
 private:
-  enum Tipo { Produto = 0, Estoque = 1, Promocao = 2 };
+  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 };
 
-  enum FieldColors {
+  enum class FieldColors {
     White = 0,  // no change
     Green = 1,  // new value
     Yellow = 2, // value changed
@@ -59,6 +59,7 @@ private:
   QVariantMap variantMap;
   SqlTableModel model;
   SqlTableModel modelErro;
+  // REFAC: a tabela no BD nao usa mais uma unica coluna, nao é mais (1,2,3) e sim 3 colunas separadas
   Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods

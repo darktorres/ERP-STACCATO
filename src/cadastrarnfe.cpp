@@ -55,8 +55,6 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
 
   connect(&modelProd, &QAbstractItemModel::dataChanged, this, &CadastrarNFe::updateImpostos);
 
-  ui->comboBoxRegime->setCurrentIndex(1);
-
   ui->comboBoxFreteConta->setCurrentIndex(1);
 }
 
@@ -162,20 +160,23 @@ bool CadastrarNFe::preCadastrarNota(const QString &fileName, QVariant &id) {
 
 bool CadastrarNFe::processarResposta(QString &resposta, const QString &fileName, const QVariant &id) {
   if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    if (not ACBr::enviarComando("NFE.ConsultarNFe(" + fileName + ")", resposta)) return false;
+    QMessageBox::critical(this, "Resposta EnviarNFe: ", resposta);
+    return false;
 
-    if (resposta.contains("XMotivo=Rejeição")) {
-      QSqlQuery queryNota;
-      queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-      queryNota.bindValue(":idNFe", id);
+    //    if (not ACBr::enviarComando("NFE.ConsultarNFe(" + fileName + ")", resposta)) return false;
 
-      if (not queryNota.exec()) {
-        error = "Erro removendo nota: " + queryNota.lastError().text();
-        return false;
-      }
+    //    if (resposta.contains("XMotivo=Rejeição")) {
+    //      QSqlQuery queryNota;
+    //      queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+    //      queryNota.bindValue(":idNFe", id);
 
-      QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);
-    }
+    //      if (not queryNota.exec()) {
+    //        error = "Erro removendo nota: " + queryNota.lastError().text();
+    //        return false;
+    //      }
+
+    //      QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);
+    //    }
   }
 
   // reread the file now authorized
@@ -395,7 +396,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   preencherNumeroNFe();
 
-  ui->lineEditNatureza->setText("VENDA");
+  //  ui->lineEditNatureza->setText("VENDA");
   ui->lineEditModelo->setText("55");
   ui->lineEditSerie->setText("001");
   ui->lineEditEmissao->setText(QDate::currentDate().toString("dd/MM/yy"));
@@ -529,12 +530,12 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
     modelProd.setData(row, "vBCPIS", total + freteProporcional);
     modelProd.setData(row, "cstPIS", "01");
-    modelProd.setData(row, "pPIS", 1.65); // TODO: dont hardcode
+    modelProd.setData(row, "pPIS", UserSession::fromLoja("porcentagemPIS"));
     modelProd.setData(row, "vPIS", modelProd.data(row, "vBCPIS").toDouble() * modelProd.data(row, "pPIS").toDouble() / 100);
 
     modelProd.setData(row, "vBCCOFINS", total + freteProporcional);
     modelProd.setData(row, "cstCOFINS", "01");
-    modelProd.setData(row, "pCOFINS", 7.6); // TODO: dont hardcode
+    modelProd.setData(row, "pCOFINS", UserSession::fromLoja("porcentagemCOFINS"));
     modelProd.setData(row, "vCOFINS", modelProd.data(row, "vBCCOFINS").toDouble() * modelProd.data(row, "pCOFINS").toDouble() / 100);
   }
 
@@ -664,7 +665,7 @@ bool CadastrarNFe::calculaDigitoVerificador(QString &chave) {
 
 void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
   stream << "[Identificacao]" << endl;
-  stream << "NaturezaOperacao = " + ui->lineEditNatureza->text() << endl;
+  stream << "NaturezaOperacao = " + ui->comboBoxNatureza->currentText() << endl;
   stream << "Modelo = " + ui->lineEditModelo->text() << endl;
   stream << "Serie = " + ui->lineEditSerie->text() << endl;
   stream << "Codigo = " << ui->lineEditCodigo->text() << endl; // 1
@@ -717,7 +718,7 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "Numero = " + queryEndereco.value("numero").toString() << endl;
   stream << "Complemento = " + queryEndereco.value("complemento").toString().left(60) << endl;
   stream << "Bairro = " + queryEndereco.value("bairro").toString() << endl;
-  stream << "cMun = " + queryIBGE.value("CT_IBGE").toString() << endl;
+  stream << "cMun = " + queryIBGE.value("codigo").toString() << endl;
   stream << "Cidade = " + queryEndereco.value("cidade").toString() << endl;
   stream << "UF = " + queryEndereco.value("uf").toString() << endl;
 }
@@ -770,40 +771,25 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     stream << "Aliquota = " + modelProd.data(row, "pCOFINS").toString() << endl;
     stream << "Valor = " + modelProd.data(row, "vCOFINS").toString() << endl;
 
-    // TODO: 5implementar tabela no sql para busca de porcentagens de icms interna e inter
-    // buscar aliquotas e usar no codigo abaixo
-
     // PARTILHA ICMS
 
-    // se destino operacao comecar com 2 (interestadual) fazer partilha
+    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+      stream << "[ICMSUFDest" + numProd + "]" << endl;
+      stream << "vBCUFDest = " + modelProd.data(row, "total").toString() << endl;
+      stream << "pFCPUFDest = 2" << endl; // REFAC: dont hardcode (2% FCP)
+      stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
+      stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() << endl;
 
-    //    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
-    //      stream << "[ICMSUFDest" + numProd + "]" << endl;
-    //      stream << "vBCUFDest = " + modelProd.data(row, "total").toString() << endl;
-    //      stream << "pFCPUFDest = 2" << endl;
-    //      stream << "pICMSInter = 12" << endl;
+      const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
+      const double difal = modelProd.data(row, "total").toDouble() * diferencaICMS;
 
-    //      stream << "pICMSInterPart = 60" << endl;
-    //      stream << "vFCPUFDest = " + QString::number(modelProd.data(row, "total").toDouble() * 0.02) << endl;
-    //      stream << "vICMSUFDest = " + QString::number(modelProd.data(row, "total").toDouble() * 0.08 * 0.4) << endl;
-    //      stream << "vICMSUFRemet = " + QString::number(modelProd.data(row, "total").toDouble() * 0.08 * 0.6) << endl;
-    //    }
+      stream << "pICMSInterPart = 60" << endl;                                                             // REFAC: o valor depende do ano atual
+      stream << "vFCPUFDest = " + QString::number(modelProd.data(row, "total").toDouble() * 0.02) << endl; // 2% FCP
+      stream << "vICMSUFDest = " + QString::number(difal * 0.6) << endl;
+      stream << "vICMSUFRemet = " + QString::number(difal * 0.4) << endl;
+    }
 
-    // consultar a tabela de icms
-
-    //    <!-- Grupo de Tributação do ICMS para a UF de destino -->
-    //        <ICMSUFDest>
-    //            <vBCUFDest>1000.00</vBCUFDest>
-    //            <pFCPUFDest>2.00</pFCPUFDest>
-    //            <pICMSUFDest>18.00</pICMSUFDest>
-    //            <pICMSInter>4.00</pICMSInter>
-
-    //        <!-- Percentual referente ao ano de 2016 (40%) -->
-    //            <pICMSInterPart>40</pICMSInterPart>
-    //            <vFCPUFDest>20.00</vFCPUFDest>
-    //            <vICMSUFDest>56.00</vICMSUFDest>
-    //            <vICMSUFRemet>84.00</vICMSUFRemet>
-    //        </ICMSUFDest>
+    //    http://www.asseinfo.com.br/blog/difal-diferencial-de-aliquota-icms/
   }
 }
 
@@ -820,33 +806,26 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
 
   // PARTILHA ICMS
 
-  // TODO: 5implementar tabela no sql para busca de porcentagens de icms interna e inter
-  // buscar aliquotas e usar no codigo abaixo
+  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+    double totalfcp = 0;
+    double totalicmsdest = 0;
+    double totalicmsorig = 0;
 
-  //  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
-  //    double totalfcp = 0;
-  //    double totalicmsdest = 0;
-  //    double totalicmsorig = 0;
+    const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
 
-  //    for (int row = 0; row < modelProd.rowCount(); ++row) {
-  //      totalfcp += modelProd.data(row, "total").toDouble() * 0.02;
-  //      totalicmsdest += modelProd.data(row, "total").toDouble() * 0.08 * 0.4;
-  //      totalicmsorig += modelProd.data(row, "total").toDouble() * 0.08 * 0.6;
-  //    }
+    for (int row = 0; row < modelProd.rowCount(); ++row) {
+      totalfcp += modelProd.data(row, "total").toDouble() * 0.02;
 
-  //    stream << "vFCPUFDest = " + QString::number(totalfcp) << endl;
-  //    stream << "vICMSUFDest = " + QString::number(totalicmsdest) << endl;
-  //    stream << "vICMSUFRemet = " + QString::number(totalicmsorig) << endl;
-  //  }
+      const double difal = modelProd.data(row, "total").toDouble() * diferencaICMS;
 
-  //  <!-- Valor total do ICMS relativo Fundo de Combate à Pobreza (FCP) da UF de destino -->
-  //      <vFCPUFDest>20.00</vFCPUFDest>
+      totalicmsdest += difal * 0.6;
+      totalicmsorig += difal * 0.4;
+    }
 
-  //  <!-- Valor total do ICMS Interestadual para a UF de destino -->
-  //      <vICMSUFDest>56.00</vICMSUFDest>
-
-  //  <!-- Valor total do ICMS Interestadual para a UF do remetente -->
-  //      <vICMSUFRemet>84.00</vICMSUFRemet>
+    stream << "vFCPUFDest = " + QString::number(totalfcp) << endl;
+    stream << "vICMSUFDest = " + QString::number(totalicmsdest) << endl;
+    stream << "vICMSUFRemet = " + QString::number(totalicmsorig) << endl;
+  }
 }
 
 void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
@@ -911,8 +890,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   }
 
   ui->comboBoxRegime_2->setCurrentIndex(query.value("tipoICMS").toString().length() == 6 ? 1 : 2); // ICMSXX : ICMSSQN
-
-  ui->comboBoxRegime->setCurrentText(query.value("tipoICMS").toString().length() == 6 ? "Tributação Normal" : "Simples Nacional");
+  ui->comboBoxRegime_2->setCurrentText(query.value("tipoICMS").toString().length() == 6 ? "Tributação Normal" : "Simples Nacional");
 
   QSqlQuery queryCfop;
   queryCfop.prepare("SELECT NAT FROM cfop_sai WHERE cfop_de = :cfop OR cfop_fe = :cfop");
@@ -956,6 +934,10 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   //
 
   mapper.setCurrentModelIndex(index);
+
+  //
+
+  ui->comboBoxRegime->setCurrentText("Tributação Normal");
 }
 
 void CadastrarNFe::on_tabWidget_currentChanged(int index) {
@@ -1536,6 +1518,24 @@ bool CadastrarNFe::validar() {
 
   if (queryEndereco.value("uf").toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "UF cliente vazio!");
+    return false;
+  }
+
+  queryPartilhaInter.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
+  queryPartilhaInter.bindValue(":origem", queryLojaEnd.value("uf"));
+  queryPartilhaInter.bindValue(":destino", queryEndereco.value("uf"));
+
+  if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text());
+    return false;
+  }
+
+  queryPartilhaIntra.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
+  queryPartilhaIntra.bindValue(":origem", queryEndereco.value("uf"));
+  queryPartilhaIntra.bindValue(":destino", queryEndereco.value("uf"));
+
+  if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text());
     return false;
   }
 

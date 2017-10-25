@@ -13,51 +13,60 @@ FinanceiroProxyModel::FinanceiroProxyModel(SqlTableModel *model, QObject *parent
 
 QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole) {
-    if (proxyIndex.column() == this->statusFinanceiro) {
-      const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->statusFinanceiro), Qt::DisplayRole).toString();
+    if (proxyIndex.column() == statusFinanceiro) {
+      const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), statusFinanceiro), Qt::DisplayRole).toString();
 
       if (status == "PENDENTE") return QBrush(Qt::red);
       if (status == "CONFERIDO") return QBrush(Qt::yellow);
       if (status == "LIBERADO") return QBrush(Qt::green);
     }
 
-    if (proxyIndex.column() == this->prazoEntrega) {
-      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->prazoEntrega), Qt::DisplayRole).toDate();
+    if (proxyIndex.column() == prazoEntrega) {
+      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), prazoEntrega), Qt::DisplayRole).toDate();
+      const int dias = QDate::currentDate().daysTo(prazo);
 
-      // TODO: 0se estiver a 5 dias pintar de amarelo
-      if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::red);
+      if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::yellow);
+      if (not prazo.isNull() and dias < 3) return QBrush(Qt::red);
     }
 
-    if (proxyIndex.column() == this->novoPrazoEntrega) {
-      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->novoPrazoEntrega), Qt::DisplayRole).toDate();
+    if (proxyIndex.column() == novoPrazoEntrega) {
+      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), novoPrazoEntrega), Qt::DisplayRole).toDate();
+      const int dias = QDate::currentDate().daysTo(prazo);
 
-      // TODO: 0se estiver a 5 dias pintar de amarelo
-      if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::red);
+      if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::yellow);
+      if (not prazo.isNull() and dias < 3) return QBrush(Qt::red);
     }
   }
 
   if (role == Qt::ForegroundRole) {
-    if (proxyIndex.column() == this->statusFinanceiro) {
-      const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), this->statusFinanceiro), Qt::DisplayRole).toString();
+
+    // those paint the text as black if the background is colored
+
+    if (proxyIndex.column() == statusFinanceiro) {
+      const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), statusFinanceiro), Qt::DisplayRole).toString();
 
       if (status == "PENDENTE") return QBrush(Qt::black);
       if (status == "CONFERIDO") return QBrush(Qt::black);
       if (status == "LIBERADO") return QBrush(Qt::black);
     }
 
-    if (proxyIndex.column() == this->prazoEntrega) {
-      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->prazoEntrega), Qt::DisplayRole).toDate();
+    if (proxyIndex.column() == prazoEntrega) {
+      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), prazoEntrega), Qt::DisplayRole).toDate();
+      const int dias = QDate::currentDate().daysTo(prazo);
 
-      // TODO: 0se estiver a 5 dias pintar de amarelo
-      if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::black);
+      if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::black);
+      if (not prazo.isNull() and dias < 3) return QBrush(Qt::black);
     }
 
-    if (proxyIndex.column() == this->novoPrazoEntrega) {
-      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->novoPrazoEntrega), Qt::DisplayRole).toDate();
+    if (proxyIndex.column() == novoPrazoEntrega) {
+      const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), novoPrazoEntrega), Qt::DisplayRole).toDate();
+      const int dias = QDate::currentDate().daysTo(prazo);
 
-      // TODO: 0se estiver a 5 dias pintar de amarelo
-      if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::black);
+      if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::black);
+      if (not prazo.isNull() and dias < 3) return QBrush(Qt::black);
     }
+
+    // those paint the text as black if the background is colored
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

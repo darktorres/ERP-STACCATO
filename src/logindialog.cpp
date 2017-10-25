@@ -18,6 +18,8 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
 
+  readSettingsFile();
+
   ui->lineEditUser->setFocus();
 
   if (UserSession::settingsContains("User/lastuser")) {
@@ -41,6 +43,19 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   storeSelection();
   adjustSize();
   accept();
+}
+
+void LoginDialog::readSettingsFile() {
+  QFile file("lojas.txt");
+
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo configurações: " + file.errorString());
+    return;
+  }
+
+  const QStringList lines = QString(file.readAll()).split("\r\n");
+
+  for (int i = 0; i < lines.size(); i += 2) hash.insert(lines.at(i), lines.at(i + 1));
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
@@ -199,28 +214,15 @@ void LoginDialog::updater() {
 
 void LoginDialog::storeSelection() {
   if (UserSession::settings("Login/hostname").toString().isEmpty()) {
-    QStringList items;
-    items << "Alphaville"
-          << "Gabriel"
-          << "Granja";
+    const QStringList items = {"Alphaville", "Gabriel", "Granja"};
 
-    QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
+    const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
 
-    // TODO:__project public code
-    if (loja == "Alphaville") UserSession::setSettings("Login/hostname", "192.168.2.144");
-    if (loja == "Gabriel") UserSession::setSettings("Login/hostname", "192.168.1.101");
-    if (loja == "Granja") UserSession::setSettings("Login/hostname", "192.168.0.6");
+    UserSession::setSettings("Login/hostname", hash.value(loja));
   }
 }
 
-void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) {
-  // TODO:__project public code
-  if (loja == "Localhost") ui->lineEditHostname->setText("localhost");
-  if (loja == "Alphaville") ui->lineEditHostname->setText("192.168.2.144");
-  if (loja == "Gabriel") ui->lineEditHostname->setText("192.168.1.101");
-  if (loja == "Granja") ui->lineEditHostname->setText("192.168.0.6");
-  if (loja == "Acesso Externo") ui->lineEditHostname->setText("177.139.188.75");
-}
+void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(hash.value(loja)); }
 
 void LoginDialog::on_lineEditHostname_textChanged(const QString &) {
   UserSession::setSettings("Login/hostname", ui->lineEditHostname->text());

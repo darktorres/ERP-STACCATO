@@ -77,14 +77,14 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
     return;
   }
 
-  InputDialogConfirmacao input(InputDialogConfirmacao::Representacao);
+  InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao);
 
   if (input.exec() != InputDialogConfirmacao::Accepted) return;
 
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not processRows(list, input.getDate())) {
+  if (not processRows(list, input.getDate(), input.getRecebeu())) {
     QSqlQuery("ROLLBACK").exec();
     if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     return;
@@ -96,14 +96,12 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   QMessageBox::information(this, "Aviso!", "Atualizado!");
 }
 
-bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega) {
+bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) {
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', "
-                 "dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
 
-  QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt "
-                "WHERE idVendaProduto = :idVendaProduto");
+  QSqlQuery query2;
+  query2.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE idVendaProduto = :idVendaProduto");
 
   for (auto const &item : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);
@@ -114,11 +112,12 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
       return false;
     }
 
-    query.bindValue(":dataRealEnt", dataEntrega);
-    query.bindValue(":idVendaProduto", model.data(item.row(), "idVendaProduto"));
+    query2.bindValue(":dataRealEnt", dataEntrega);
+    query2.bindValue(":idVendaProduto", model.data(item.row(), "idVendaProduto"));
+    query2.bindValue(":recebeu", recebeu);
 
-    if (not query.exec()) {
-      error = "Erro salvando status na venda_produto: " + query.lastError().text();
+    if (not query2.exec()) {
+      error = "Erro salvando status na venda_produto: " + query2.lastError().text();
       return false;
     }
   }

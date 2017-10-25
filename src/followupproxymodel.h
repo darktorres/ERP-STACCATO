@@ -15,7 +15,7 @@ public:
 private:
   const int semaforo;
 
-  enum FieldColors { Quente = 1, Morno = 2, Frio = 3 };
+  enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
 };
 
 #endif // FOLLOWUPPROXYMODEL_H

@@ -42,7 +42,7 @@ private:
   SearchDialog *sdCliente;
   Ui::CadastroCliente *ui;
   // methods
-  bool cadastrarEndereco(const bool isUpdate = false);
+  bool cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar);
   virtual bool cadastrar() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;

@@ -46,6 +46,7 @@ void WidgetLogisticaEntrega::setupTables() {
   modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
   modelVendas.setHeaderData("novoPrazoEntrega", "Novo Prazo");
+  modelVendas.setHeaderData("dataRealReceb", "Receb.");
 
   ui->tableVendas->setModel(new FinanceiroProxyModel(&modelVendas, this));
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
@@ -236,7 +237,8 @@ void WidgetLogisticaEntrega::on_tableVendas_clicked(const QModelIndex &index) {
 
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaEntrega::calcularPeso);
 
-  if (modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") QMessageBox::warning(this, "Aviso!", "Financeiro não liberou!");
+  ui->lineEditAviso->setText(modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO" ? "Financeiro não liberou!" : "");
+  //  if (modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") QMessageBox::warning(this, "Aviso!", "Financeiro não liberou!");
 }
 
 void WidgetLogisticaEntrega::montaFiltro() {
@@ -318,37 +320,41 @@ bool WidgetLogisticaEntrega::processRows() {
 
   const int idEvento = query.value(0).toInt();
 
+  QSqlQuery query1;
+  query1.prepare("SELECT idVenda, codComercial FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query3;
+  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
+
   for (int row = 0; row < modelTransp.rowCount(); ++row) {
     if (not modelTransp.setData(row, "data", dataPrevEnt)) return false;
     if (not modelTransp.setData(row, "idEvento", idEvento)) return false;
 
     const int idVendaProduto = modelTransp.data(row, "idVendaProduto").toInt();
 
-    query.prepare("SELECT idVenda, codComercial FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", idVendaProduto);
+    query1.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query.exec() or not query.first()) {
-      error = "Erro buscando dados do produto: " + query.lastError().text();
+    if (not query1.exec() or not query1.first()) {
+      error = "Erro buscando dados do produto: " + query1.lastError().text();
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.', "
-                  "dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":dataPrevEnt", dataPrevEnt);
-    query.bindValue(":idVenda", idVendaProduto);
+    query2.bindValue(":dataPrevEnt", dataPrevEnt);
+    query2.bindValue(":idVenda", idVendaProduto);
 
-    if (not query.exec()) {
-      error = "Erro atualizando status da compra: " + query.lastError().text();
+    if (not query2.exec()) {
+      error = "Erro atualizando status da compra: " + query2.lastError().text();
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE "
-                  "idVendaProduto = :idVendaProduto");
-    query.bindValue(":dataPrevEnt", dataPrevEnt);
-    query.bindValue(":idVendaProduto", idVendaProduto);
+    query3.bindValue(":dataPrevEnt", dataPrevEnt);
+    query3.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query.exec()) {
-      error = "Erro atualizando produtos venda: " + query.lastError().text();
+    if (not query3.exec()) {
+      error = "Erro atualizando produtos venda: " + query3.lastError().text();
       return false;
     }
   }
@@ -423,9 +429,9 @@ void WidgetLogisticaEntrega::on_pushButtonAdicionarProduto_clicked() {
   for (auto const &item : list) {
     const int idVendaProduto = modelViewProdutos.data(item.row(), "idVendaProduto").toInt();
 
-    auto list = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
+    auto listMatch = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
 
-    if (list.size() > 0) {
+    if (listMatch.size() > 0) {
       QMessageBox::critical(this, "Erro!", "Item já inserido!");
       return;
     }
@@ -764,7 +770,7 @@ void WidgetLogisticaEntrega::on_pushButtonReagendarPedido_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::ReagendarPedido);
+  InputDialog input(InputDialog::Tipo::ReagendarPedido);
 
   if (input.exec() != InputDialog::Accepted) return;
 
@@ -823,7 +829,7 @@ void WidgetLogisticaEntrega::on_tableVendas_doubleClicked(const QModelIndex &ind
       return;
     }
 
-    FollowUp *followup = new FollowUp(modelVendas.data(list.first().row(), "idVenda").toString(), FollowUp::Venda, this);
+    FollowUp *followup = new FollowUp(modelVendas.data(list.first().row(), "idVenda").toString(), FollowUp::Tipo::Venda, this);
     followup->setAttribute(Qt::WA_DeleteOnClose);
     followup->show();
   }

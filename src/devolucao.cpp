@@ -350,36 +350,36 @@ bool Devolucao::inserirItens(const QModelIndexList &list) {
     //------------------------------------
 
     if (restante > 0) {
-      const int newRow = modelProdutos.rowCount();
-      if (not modelProdutos.insertRow(newRow)) return false;
+      const int newRowRestante = modelProdutos.rowCount();
+      if (not modelProdutos.insertRow(newRowRestante)) return false;
 
       for (int column = 0; column < modelProdutos.columnCount(); ++column) {
         if (modelProdutos.fieldIndex("idVendaProduto") == column) continue;
         if (modelProdutos.fieldIndex("created") == column) continue;
         if (modelProdutos.fieldIndex("lastUpdated") == column) continue;
 
-        if (not modelProdutos.setData(newRow, column, modelProdutos.data(currentRow, column))) return false;
+        if (not modelProdutos.setData(newRowRestante, column, modelProdutos.data(currentRow, column))) return false;
       }
 
-      if (not modelProdutos.setData(newRow, "idVenda", idVenda)) return false;
-      if (not modelProdutos.setData(newRow, "caixas", restante / step)) return false;
-      if (not modelProdutos.setData(newRow, "quant", restante)) return false;
+      if (not modelProdutos.setData(newRowRestante, "idVenda", idVenda)) return false;
+      if (not modelProdutos.setData(newRowRestante, "caixas", restante / step)) return false;
+      if (not modelProdutos.setData(newRowRestante, "quant", restante)) return false;
 
-      const double quant2 = modelProdutos.data(newRow, "quant").toDouble();
-      const double prcUnitario = modelProdutos.data(newRow, "prcUnitario").toDouble();
+      const double quant2 = modelProdutos.data(newRowRestante, "quant").toDouble();
+      const double prcUnitario = modelProdutos.data(newRowRestante, "prcUnitario").toDouble();
       const double parcial = quant2 * prcUnitario;
 
-      if (not modelProdutos.setData(newRow, "parcial", parcial)) return false;
+      if (not modelProdutos.setData(newRowRestante, "parcial", parcial)) return false;
 
-      const double desconto = modelProdutos.data(newRow, "desconto").toDouble();
+      const double desconto = modelProdutos.data(newRowRestante, "desconto").toDouble();
       const double parcialDesc = parcial * (1 - (desconto / 100));
 
-      if (not modelProdutos.setData(newRow, "parcialDesc", parcialDesc)) return false;
+      if (not modelProdutos.setData(newRowRestante, "parcialDesc", parcialDesc)) return false;
 
-      const double descGlobal = modelProdutos.data(newRow, "descGlobal").toDouble();
+      const double descGlobal = modelProdutos.data(newRowRestante, "descGlobal").toDouble();
       const double total = parcialDesc * (1 - (descGlobal / 100));
 
-      if (not modelProdutos.setData(newRow, "total", total)) return false;
+      if (not modelProdutos.setData(newRowRestante, "total", total)) return false;
     }
 
     if (not modelProdutos.setData(currentRow, "caixas", quantDevolvida / step)) return false;
@@ -432,7 +432,7 @@ bool Devolucao::criarContas() {
   if (not modelPagamentos.setData(newRowPag, "dataPagamento", QDate::currentDate())) return false;
   if (not modelPagamentos.setData(newRowPag, "dataRealizado", QDate::currentDate())) return false;
   if (not modelPagamentos.setData(newRowPag, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) return false;
-  // TODO: 0dont hardcode
+  // REFAC: 0dont hardcode
   if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) return false;
   //----------------
 

@@ -467,10 +467,13 @@ color: rgb(0, 0, 0);</string>
            <item row="2" column="0">
             <widget class="QFrame" name="framePagamentos_2">
              <layout class="QGridLayout" name="gridLayout_9">
-              <item row="1" column="0">
-               <widget class="QPushButton" name="pushButtonAdicionarPagamento">
+              <item row="2" column="0" colspan="2">
+               <widget class="WidgetPagamentos" name="widgetPgts" native="true"/>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="pushButtonFreteLoja">
                 <property name="text">
-                 <string>Adicionar pagamento</string>
+                 <string>Frete pago à loja</string>
                 </property>
                 <property name="autoDefault">
                  <bool>false</bool>
@@ -526,16 +529,6 @@ color: rgb(0, 0, 0);</string>
                 </item>
                </layout>
               </item>
-              <item row="3" column="0">
-               <widget class="QPushButton" name="pushButtonFreteLoja">
-                <property name="text">
-                 <string>Frete pago à loja</string>
-                </property>
-                <property name="autoDefault">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="1">
                <widget class="QPushButton" name="pushButtonPgtLoja">
                 <property name="text">
@@ -585,22 +578,14 @@ color: rgb(0, 0, 0);</string>
                 </item>
                </layout>
               </item>
-              <item row="2" column="0" colspan="2">
-               <widget class="QScrollArea" name="scrollArea">
-                <property name="widgetResizable">
-                 <bool>true</bool>
+              <item row="1" column="0" colspan="2">
+               <widget class="QPushButton" name="pushButtonAdicionarPagamento">
+                <property name="text">
+                 <string>Adicionar pagamento</string>
                 </property>
-                <widget class="QWidget" name="scrollAreaWidgetContents">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>499</width>
-                   <height>68</height>
-                  </rect>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_3"/>
-                </widget>
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1231,6 +1216,12 @@ color: rgb(0, 0, 0);</string>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>WidgetPagamentos</class>
+   <extends>QWidget</extends>
+   <header>src/widgetpagamentos.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

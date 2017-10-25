@@ -116,7 +116,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     return;
   }
 
-  InputDialogProduto inputDlg(InputDialogProduto::Faturamento);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento);
   if (not inputDlg.setFilter(idsCompra)) return;
   if (inputDlg.exec() != InputDialogProduto::Accepted) return;
 
@@ -255,7 +255,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::Faturamento);
+  InputDialog input(InputDialog::Tipo::Faturamento);
   if (input.exec() != InputDialog::Accepted) return;
 
   const QDate dataPrevista = input.getNextDate();

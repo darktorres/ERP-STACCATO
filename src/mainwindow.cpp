@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   timer = new QTimer(this);
 
-  gerarEnviarRelatorio();
+  //  gerarEnviarRelatorio();
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -395,3 +395,7 @@ void MainWindow::on_actionGerenciar_preco_estoque_triggered() {
 // TASK: verificar os 3 pedidos com totalItem que nao corresponde ao valor correto
 // TASK: bloquear acesso dos usuarios apenas pela intranet (permissoes mysql) precisa de ip fixo primeiro
 // TASK: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
+// TASK: alterar consumo de estoque para fazer as ligacoes idVenda/idVendaProduto na tabela de compra
+// TASK: terminar de implantar quebra/reposicao
+// TASK: reimportar notas do pedido 172646
+// TODO: na reposicao concatenar '(REPOSICAO)' no comeco da descricao do produto

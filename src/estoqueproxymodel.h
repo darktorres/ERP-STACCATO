@@ -14,6 +14,7 @@ public:
 
 private:
   const int quantUpd;
+  enum class Status { Ok = 1, QuantDifere, NaoEncontrado, Consumo, Devolucao };
 };
 
 #endif // ESTOQUEPROXYMODEL_H

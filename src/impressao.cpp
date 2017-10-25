@@ -13,10 +13,10 @@
 Impressao::Impressao(const QString &id) : id(id) {
   verificaTipo();
 
-  modelItem.setTable((type == Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
+  modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
   modelItem.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelItem.setFilter(type == Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
+  modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
   if (not modelItem.select()) QMessageBox::critical(nullptr, "Erro!", "Erro lendo tabela: " + modelItem.lastError().text());
 
@@ -33,11 +33,11 @@ void Impressao::verificaTipo() {
     return;
   }
 
-  type = query.first() ? Orcamento : Venda;
+  tipo = query.first() ? Tipo::Orcamento : Tipo::Venda;
 }
 
 void Impressao::print() {
-  const QString folder = type == Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
+  const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
   if (UserSession::settings(folder).toString().isEmpty()) {
     QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
@@ -51,9 +51,9 @@ void Impressao::print() {
     return;
   }
 
-  report->dataManager()->addModel(type == Orcamento ? "orcamento" : "venda", &modelItem, true);
+  report->dataManager()->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
-  if (not report->loadFromFile(type == Orcamento ? "orcamento.lrxml" : "venda.lrxml")) {
+  if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) {
     QMessageBox::critical(nullptr, "Erro!", "Não encontrou o modelo de impressão!");
     return;
   }
@@ -79,7 +79,7 @@ void Impressao::print() {
                                                                   queryEndFat.value("cidade").toString() + " - " + queryEndFat.value("uf").toString());
   report->dataManager()->setReportVariable("CEPEntrega", queryEndEnt.value("cep"));
 
-  // TODO: refactor this to avoid the ' - - - - '
+  // REFAC: refactor this to avoid the ' - - - - '
   report->dataManager()->setReportVariable("EndEntrega", query.value("idEnderecoEntrega").toInt() == 1
                                                              ? "Não há/Retira"
                                                              : queryEndEnt.value("logradouro").toString() + " - " + queryEndEnt.value("numero").toString() + " - " +
@@ -101,17 +101,14 @@ void Impressao::print() {
   report->dataManager()->setReportVariable("TotalFinal", locale.toString(query.value("total").toDouble(), 'f', 2));
   report->dataManager()->setReportVariable("Observacao", query.value("observacao").toString().replace("\n", " "));
 
-  if (type == Orcamento) {
+  if (tipo == Tipo::Orcamento) {
     report->dataManager()->setReportVariable("Orcamento", id);
     report->dataManager()->setReportVariable("Validade", query.value("validade").toString() + " dias");
   }
 
-  if (type == Venda) {
+  if (tipo == Tipo::Venda) {
     report->dataManager()->setReportVariable("Pedido", id);
     report->dataManager()->setReportVariable("Orcamento", query.value("idOrcamento"));
-
-    QLocale locale;
-
     report->dataManager()->setReportVariable("PrazoEntrega", query.value("prazoEntrega").toString() + " dias");
 
     QSqlQuery queryPgt1("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
@@ -220,14 +217,14 @@ void Impressao::print() {
 }
 
 bool Impressao::setQuerys() {
-  if (type == Orcamento) {
+  if (tipo == Tipo::Orcamento) {
     query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, "
                   "idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, prazoEntrega "
                   "FROM orcamento WHERE idOrcamento = :idOrcamento");
     query.bindValue(":idOrcamento", id);
   }
 
-  if (type == Venda) {
+  if (tipo == Tipo::Venda) {
     query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, idOrcamento, data, idEnderecoFaturamento, "
                   "idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, prazoEntrega "
                   "FROM venda WHERE idVenda = :idVenda");
@@ -258,7 +255,7 @@ bool Impressao::setQuerys() {
 
   queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco "
                       "WHERE idEndereco = :idEndereco");
-  queryEndFat.bindValue(":idEndereco", query.value(type == Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
+  queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
   if (not queryEndFat.exec() or not queryEndFat.first()) {
     QMessageBox::critical(nullptr, "Erro!", "Erro buscando dados do endereço: " + queryEndFat.lastError().text());

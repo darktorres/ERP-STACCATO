@@ -124,7 +124,7 @@ bool CadastroProduto::verifyFields() {
     return false;
   }
 
-  if (not isUpdate) {
+  if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE fornecedor = :fornecedor AND codComercial = :codComercial");
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
@@ -176,7 +176,7 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->checkBoxPromocao, "promocao");
 }
 
-void CadastroProduto::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
+void CadastroProduto::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
 
 bool CadastroProduto::savingProcedures() {
   if (not setData("codBarras", ui->lineEditCodBarras->text())) return false;
@@ -242,14 +242,14 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
+  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
     error = "Erro: linha -1 RegisterDialog!";
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 

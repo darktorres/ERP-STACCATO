@@ -60,7 +60,7 @@ bool RegisterAddressDialog::newRegister() {
     return false;
   }
 
-  isUpdate = false;
+  tipo = Tipo::Cadastrar;
 
   clearFields();
   registerMode();

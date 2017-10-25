@@ -150,14 +150,14 @@ void CadastroUsuario::on_pushButtonRemover_clicked() { remove(); }
 void CadastroUsuario::on_pushButtonBuscar_clicked() { sdUsuario->show(); }
 
 bool CadastroUsuario::cadastrar() {
-  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
+  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    error = "Linha -1 usuário: " + QString::number(isUpdate) + "\nMapper: " + QString::number(mapper.currentIndex()) + "\nModel: " + QString::number(model.rowCount());
+    error = "Linha -1 usuário: " + QString::number(static_cast<int>(Tipo::Atualizar)) + "\nMapper: " + QString::number(mapper.currentIndex()) + "\nModel: " + QString::number(model.rowCount());
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 
@@ -180,7 +180,7 @@ bool CadastroUsuario::cadastrar() {
     return false;
   }
 
-  if (not isUpdate) {
+  if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
     query.prepare("CREATE USER :user@'%' IDENTIFIED BY '1234'");
     query.bindValue(":user", ui->lineEditUser->text().toLower());
@@ -213,7 +213,7 @@ bool CadastroUsuario::cadastrar() {
     }
   }
 
-  if (isUpdate) {
+  if (tipo == Tipo::Atualizar) {
     if (not modelPermissoes.submitAll()) {
       error = "Erro salvando permissões: " + modelPermissoes.lastError().text();
       return false;
@@ -246,7 +246,7 @@ bool CadastroUsuario::save() {
   return true;
 }
 
-void CadastroUsuario::successMessage() { QMessageBox::information(this, "Aviso!", isUpdate ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
+void CadastroUsuario::successMessage() { QMessageBox::information(this, "Aviso!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   QSqlQuery query;

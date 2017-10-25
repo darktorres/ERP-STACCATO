@@ -2,6 +2,7 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -28,12 +29,14 @@ WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::Widg
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
 void WidgetEstoque::setupTables() {
+  // TODO: [Conrado] arrumar ordenacao que nao esta funcionando (tem outra tela que usei um proxy para ordenar)
+
   model.setQuery(
       "SELECT n.cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = `p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', "
       "`p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, "
       "0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` "
       "SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS `dataRealColeta`, `vp`.`dataPrevReceb` AS "
-      "`dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT * FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS "
+      "`dataPrevReceb`, `vp`.`dataRealReceb` AS `datRealReceb` FROM (SELECT * FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS "
       "consumo, ec.idEstoque, ec.idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT * FROM produto p) p ON p.idProduto = "
       "e.idProduto LEFT JOIN (SELECT * FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT * FROM estoque_has_nfe ehn) ehn ON e.idEstoque = "
       "ehn.idEstoque LEFT JOIN (SELECT * FROM nfe n) n ON ehn.idNFe = n.idNFe GROUP BY e.idEstoque HAVING restante > 0");
@@ -62,7 +65,11 @@ void WidgetEstoque::setupTables() {
   model.setHeaderData("dataPrevEnt", "Prev. Ent.");
   model.setHeaderData("dataRealEnt", "Entrega");
 
-  ui->table->setModel(&model);
+  auto *proxyFilter = new QSortFilterProxyModel(this);
+  proxyFilter->setDynamicSortFilter(true);
+  proxyFilter->setSourceModel(&model);
+
+  ui->table->setModel(proxyFilter);
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("restante est");
   ui->table->setItemDelegate(new DoubleDelegate(this));
@@ -200,3 +207,4 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 // TODO: -1verificar se o custo do pedido_fornecedor bate com os valores do estoque/consumo
 // TODO: reimplementar estoque_contabil
 // TODO: terminar de arrumar relatorio estoque
+// TODO: [Conrado] colocar filtro/tela para buscar por pedido e mostrar os estoques em que foi consumido

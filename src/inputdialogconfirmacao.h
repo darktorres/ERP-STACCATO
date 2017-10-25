@@ -13,9 +13,9 @@ class InputDialogConfirmacao : public QDialog {
   Q_OBJECT
 
 public:
-  enum Type { Recebimento, Entrega, Representacao };
+  enum class Tipo { Recebimento, Entrega, Representacao };
 
-  explicit InputDialogConfirmacao(const Type &type, QWidget *parent = 0);
+  explicit InputDialogConfirmacao(const Tipo &tipo, QWidget *parent = 0);
   ~InputDialogConfirmacao();
   QDateTime getDate() const;
   QDateTime getNextDate() const;
@@ -31,9 +31,9 @@ private slots:
 
 private:
   // attributes
-  const Type type;
+  const Tipo tipo;
   QString error;
-  SqlTableModel model; // separate this into 2 models? one for each table
+  SqlTableModel model; // REFAC: separate this into 2 models? one for each table
   SqlTableModel modelCliente;
   SqlTableModel modelVenda;
   Ui::InputDialogConfirmacao *ui;

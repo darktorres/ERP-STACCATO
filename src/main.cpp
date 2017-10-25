@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   app.setOrganizationName("Staccato");
   app.setApplicationName("ERP");
   app.setWindowIcon(QIcon("Staccato.ico"));
-  app.setApplicationVersion("0.5.38");
+  app.setApplicationVersion("0.5.41");
   app.setStyle("Fusion");
 
   LoginDialog dialog;
@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
 
 // NOTE: evitar divisoes por zero
 // NOTE: verificar comparacoes double: substituir por qFuzzyCompare ou floats
-// TODO: verificar todos os QSqlQuery.exec
-// TODO: pesquisar setData e selects/submits sem verificacao
-// TODO: criar um delegate unidade para concatenar a unidade na coluna quant?
+// REFAC: verificar todos os QSqlQuery.exec
+// REFAC: pesquisar setData e selects/submits sem verificacao
+// REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?
 // NOTE: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
 // NOTE: use initializer lists?

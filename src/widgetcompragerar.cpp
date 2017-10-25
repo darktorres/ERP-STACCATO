@@ -216,7 +216,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
     ids.append(modelProdutos.data(index.row(), "idPedido").toString());
   }
 
-  InputDialogProduto inputDlg(InputDialogProduto::GerarCompra);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra);
   if (not inputDlg.setFilter(ids)) return;
 
   if (inputDlg.exec() != InputDialogProduto::Accepted) return;
@@ -299,7 +299,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
     const int row = ui->tableResumo->selectionModel()->selectedRows().first().row();
     const QString fornecedor = modelResumo.data(row, "fornecedor").toString();
 
-    auto *mail = new SendMail(SendMail::GerarCompra, anexo, fornecedor, this);
+    auto *mail = new SendMail(SendMail::Tipo::GerarCompra, anexo, fornecedor, this);
     mail->setAttribute(Qt::WA_DeleteOnClose);
 
     mail->exec();

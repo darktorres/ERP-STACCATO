@@ -17,11 +17,16 @@ QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int r
   }
 
   if (role == Qt::ForegroundRole) {
+
+    // those paint the text as black if the background is colored
+
     if (proxyIndex.column() == this->dias) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->dias), Qt::DisplayRole).toDate();
 
       if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::black);
     }
+
+    //
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

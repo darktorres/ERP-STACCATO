@@ -77,9 +77,7 @@ void CalendarioEntregas::setupTables() {
   modelCalendario.setHeaderData("kg", "Kg.");
   modelCalendario.setHeaderData("idVenda", "Venda");
 
-  if (not modelCalendario.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela calendario: " + modelCalendario.lastError().text());
-  }
+  if (not modelCalendario.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela calendario: " + modelCalendario.lastError().text());
 
   ui->tableCalendario->setModel(&modelCalendario);
   ui->tableCalendario->hideColumn("idVeiculo");
@@ -99,9 +97,7 @@ void CalendarioEntregas::setupTables() {
 
   modelCarga.setFilter("0");
 
-  if (not modelCarga.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela cargas: " + modelCarga.lastError().text());
-  }
+  if (not modelCarga.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela cargas: " + modelCarga.lastError().text());
 
   ui->tableCarga->setModel(&modelCarga);
   ui->tableCarga->hideColumn("idEvento");
@@ -124,9 +120,7 @@ void CalendarioEntregas::setupTables() {
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
-  }
+  if (not modelProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
 
   ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("idEvento");
@@ -143,7 +137,7 @@ void CalendarioEntregas::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::AgendarEntrega);
+  InputDialog input(InputDialog::Tipo::AgendarEntrega);
 
   if (input.exec() != InputDialog::Accepted) return;
 
@@ -225,17 +219,13 @@ void CalendarioEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
 
   modelCarga.setFilter("DATE_FORMAT(dataPrevEnt, '%d-%m-%Y') = '" + data + "' AND idVeiculo = " + veiculo);
 
-  if (not modelCarga.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela entregas: " + modelCarga.lastError().text());
-  }
+  if (not modelCarga.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela entregas: " + modelCarga.lastError().text());
 
   ui->tableCarga->resizeColumnsToContents();
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
-  }
+  if (not modelProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
 
   ui->pushButtonReagendar->setDisabled(true);
   ui->pushButtonConfirmarEntrega->setDisabled(true);
@@ -247,9 +237,7 @@ void CalendarioEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
 void CalendarioEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
 
-  if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
-  }
+  if (not modelProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
 
   ui->tableProdutos->resizeColumnsToContents();
 
@@ -329,7 +317,7 @@ void CalendarioEntregas::on_pushButtonConfirmarEntrega_clicked() {
     return;
   }
 
-  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Entrega);
+  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega);
   inputDlg.setFilter(modelCarga.data(list.first().row(), "idVenda").toString(), modelCarga.data(list.first().row(), "idEvento").toString());
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) return;
@@ -623,7 +611,7 @@ void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   xlsx.currentWorksheet()->setFitToPage(true);
   xlsx.currentWorksheet()->setFitToHeight(true);
-  xlsx.currentWorksheet()->setOrientationVertical(true);
+  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Horizontal);
 
   QSqlQuery query;
   query.prepare("SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda");

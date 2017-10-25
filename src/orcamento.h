@@ -47,7 +47,7 @@ private:
   virtual void setupMapper() override;
   virtual void successMessage() override;
   virtual void updateMode() override;
-  void adicionarItem(const bool isUpdate = false);
+  void adicionarItem(const bool isUpdate = false); // REFAC: refac this to enum
   void atualizarItem();
   void calcPrecoGlobalTotal();
   void novoItem();

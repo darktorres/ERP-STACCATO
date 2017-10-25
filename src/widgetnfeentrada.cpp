@@ -160,3 +160,4 @@ bool WidgetNfeEntrada::cancelar(const int row) {
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
+// TODO: fazer sistema para trocar notas futuras pela nota real

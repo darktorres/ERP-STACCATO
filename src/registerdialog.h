@@ -27,7 +27,7 @@ signals:
 protected:
   // attributes
   bool isDirty = false;
-  bool isUpdate = false;
+  enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
   int currentRow = -1;
   int currentRowEnd = -1;
   QDataWidgetMapper mapper;

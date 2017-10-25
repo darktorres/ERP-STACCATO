@@ -33,7 +33,7 @@ private:
   QString error;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
-  bool processRows(const QModelIndexList &list, const QDateTime &dataEntrega);
+  bool processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu);
   void setupTables();
 };
 

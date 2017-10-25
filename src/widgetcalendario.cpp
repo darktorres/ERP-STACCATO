@@ -103,9 +103,9 @@ bool WidgetCalendario::updateCalendar(const QDate &startDate) {
 
     if (row == -1) continue;
 
-    const int dia = query.value("data").toDate().dayOfWeek();
+    const int diaSemana = query.value("data").toDate().dayOfWeek();
 
-    QTableWidgetItem *item = ui->tableWidget->item(row, dia) ? ui->tableWidget->item(row, dia) : new QTableWidgetItem();
+    QTableWidgetItem *item = ui->tableWidget->item(row, diaSemana) ? ui->tableWidget->item(row, diaSemana) : new QTableWidgetItem();
 
     const QString oldText = item->text();
 
@@ -126,7 +126,7 @@ bool WidgetCalendario::updateCalendar(const QDate &startDate) {
 
     item->setText(text);
 
-    if (not ui->tableWidget->item(row, dia)) ui->tableWidget->setItem(row, dia, item);
+    if (not ui->tableWidget->item(row, diaSemana)) ui->tableWidget->setItem(row, diaSemana, item);
   }
 
   ui->tableWidget->resizeColumnsToContents();

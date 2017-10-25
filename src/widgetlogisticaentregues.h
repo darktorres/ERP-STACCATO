@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 namespace Ui {
@@ -21,12 +22,12 @@ signals:
   void errorSignal(const QString &error);
 
 private slots:
-  void on_tableVendas_clicked(const QModelIndex &index);
+  void on_tableVendas_activated(const QModelIndex &index);
   void on_pushButtonCancelar_clicked();
 
 private:
   // attributes
-  SqlTableModel modelProdutos;
+  SqlQueryModel modelProdutos;
   SqlTableModel modelVendas;
   QString error;
   Ui::WidgetLogisticaEntregues *ui;

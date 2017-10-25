@@ -155,14 +155,14 @@ bool CadastroProfissional::viewRegister() {
 }
 
 bool CadastroProfissional::cadastrar() {
-  currentRow = isUpdate ? mapper.currentIndex() : model.rowCount();
+  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
     QMessageBox::critical(this, "Erro!", "Erro: linha -1 RegisterDialog!");
     return false;
   }
 
-  if (not isUpdate and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
 
   if (not savingProcedures()) return false;
 
@@ -408,7 +408,7 @@ void CadastroProfissional::on_lineEditCNPJBancario_textEdited(const QString &tex
   ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroProfissional::successMessage() { QMessageBox::information(this, "Atenção!", isUpdate ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
+void CadastroProfissional::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
 
 void CadastroProfissional::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

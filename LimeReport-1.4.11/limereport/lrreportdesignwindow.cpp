@@ -658,6 +658,7 @@ bool ReportDesignWindow::checkNeedToSave() {
       break;
     case QMessageBox::Yes:
       if (!m_reportDesignWidget->save()) break;
+      [[fallthrough]];
     default:
       return true;
     }
@@ -957,6 +958,7 @@ void ReportDesignWindow::slotBandAdded(PageDesignIntf *, BandDesignIntf *band) {
       break;
     case BandDesignIntf::ReportFooter:
       m_newReportFooter->setDisabled(true);
+      [[fallthrough]];
     case BandDesignIntf::TearOffBand:
       m_newTearOffBand->setDisabled(true);
     default:
@@ -979,6 +981,7 @@ void ReportDesignWindow::slotBandDeleted(PageDesignIntf *, BandDesignIntf *band)
       break;
     case BandDesignIntf::ReportFooter:
       m_newReportFooter->setEnabled(true);
+      [[fallthrough]];
     case BandDesignIntf::TearOffBand:
       m_newTearOffBand->setEnabled(true);
     default:
@@ -1009,6 +1012,7 @@ void ReportDesignWindow::updateAvaibleBands() {
       break;
     case BandDesignIntf::ReportFooter:
       m_newReportFooter->setEnabled(false);
+      [[fallthrough]];
     case BandDesignIntf::TearOffBand:
       m_newTearOffBand->setEnabled(false);
     default:

@@ -26,6 +26,8 @@ void Excel::verificaTipo() {
 }
 
 bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &representacao) {
+  // REFAC: dear god, divide this into smaller funcs
+
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
   if (UserSession::settings(folder).toString().isEmpty()) {
@@ -77,7 +79,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   xlsx.currentWorksheet()->setFitToPage(true);
   xlsx.currentWorksheet()->setFitToHeight(true);
-  xlsx.currentWorksheet()->setOrientationVertical(false);
+  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Horizontal);
 
   const QString endLoja = queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + " " + queryLojaEnd.value("complemento").toString() + " - " +
                           queryLojaEnd.value("bairro").toString() + "\n" + queryLojaEnd.value("cidade").toString() + " - " + queryLojaEnd.value("uf").toString() + " - CEP: " +

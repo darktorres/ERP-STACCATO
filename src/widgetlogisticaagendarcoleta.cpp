@@ -242,7 +242,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
     return;
   }
 
-  InputDialog input(InputDialog::AgendarColeta, this);
+  InputDialog input(InputDialog::Tipo::AgendarColeta, this);
   // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
 
   if (input.exec() != InputDialog::Accepted) return;
@@ -303,8 +303,8 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT "
-                  "idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial "
+                  "= :codComercial");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
@@ -314,8 +314,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idVendaProduto IN (SELECT "
-                  "idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+    query.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
     query.bindValue(":idEstoque", idEstoque);
 

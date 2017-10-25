@@ -40,7 +40,7 @@ private:
   SqlTableModel modelNFe;
   Ui::ImportarXML *ui;
 
-  enum FieldColors {
+  enum class FieldColors {
     White = 0,     // Não processado
     Green = 1,     // Ok
     Yellow = 2,    // Quant difere

@@ -49,7 +49,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 }
 
 bool RegisterDialog::viewRegister() {
-  isUpdate = true;
+  tipo = Tipo::Atualizar;
 
   if (not confirmationMessage()) return false;
 

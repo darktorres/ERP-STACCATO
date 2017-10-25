@@ -25,15 +25,17 @@
 #ifndef XLSXWORKSHEET_H
 #define XLSXWORKSHEET_H
 
-#include "xlsxabstractsheet.h"
-#include "xlsxcell.h"
-#include "xlsxcellrange.h"
-#include "xlsxcellreference.h"
 #include <QMap>
 #include <QPointF>
 #include <QSharedPointer>
 #include <QStringList>
 #include <QVariant>
+
+#include "xlsxabstractsheet.h"
+#include "xlsxcell.h"
+#include "xlsxcellrange.h"
+#include "xlsxcellreference.h"
+
 class QIODevice;
 class QDateTime;
 class QUrl;
@@ -118,8 +120,10 @@ public:
   bool groupColumns(const CellRange &range, bool collapsed = true);
   CellRange dimension() const;
 
-  bool isOrientationVertical() const;
-  void setOrientationVertical(bool isVertical);
+  enum Orientation { Horizontal, Vertical };
+
+  Orientation orientation() const;
+  void setOrientation(const Orientation orientation);
   bool isFitToPage() const;
   void setFitToPage(bool fitToPage);
   bool isFitToHeight() const;

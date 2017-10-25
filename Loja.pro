@@ -23,6 +23,7 @@ CONFIG += c++14
 
 gcc {
 QMAKE_CXXFLAGS += -Wall -Wextra
+#QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast
 QMAKE_CXXFLAGS_RELEASE  = -O0
@@ -128,6 +129,7 @@ SOURCES += \
     src/widgetcompragerar.cpp \
     src/widgetcompraoc.cpp \
     src/widgetcomprapendentes.cpp \
+    src/widgetcontas.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
@@ -144,7 +146,7 @@ SOURCES += \
     src/widgetnfeentrada.cpp \
     src/widgetnfesaida.cpp \
     src/widgetorcamento.cpp \
-    src/widgetpagamento.cpp \
+    src/widgetpagamentos.cpp \
     src/widgetrelatorio.cpp \
     src/widgetvenda.cpp \
     src/xml.cpp \
@@ -227,6 +229,7 @@ HEADERS  += \
     src/widgetcompragerar.h \
     src/widgetcompraoc.h \
     src/widgetcomprapendentes.h \
+    src/widgetcontas.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
     src/widgetfinanceirocompra.h\
@@ -243,7 +246,7 @@ HEADERS  += \
     src/widgetnfeentrada.h \
     src/widgetnfesaida.h \
     src/widgetorcamento.h \
-    src/widgetpagamento.h \
+    src/widgetpagamentos.h \
     src/widgetrelatorio.h \
     src/widgetvenda.h \
     src/xml.h \
@@ -292,6 +295,7 @@ FORMS += \
     ui/widgetcompragerar.ui \
     ui/widgetcompraoc.ui \
     ui/widgetcomprapendentes.ui \
+    ui/widgetcontas.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \
@@ -308,7 +312,7 @@ FORMS += \
     ui/widgetnfeentrada.ui \
     ui/widgetnfesaida.ui \
     ui/widgetorcamento.ui \
-    ui/widgetpagamento.ui \
+    ui/widgetpagamentos.ui \
     ui/widgetrelatorio.ui \
     ui/widgetvenda.ui \
     ui/xml_viewer.ui

@@ -16,7 +16,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
 
   ui->lineEditAnexo->setText(arquivo);
 
-  if (tipo == GerarCompra) {
+  if (tipo == Tipo::GerarCompra) {
     const QFileInfo info(arquivo);
 
     ui->lineEditTitulo->setText("PEDIDO " + info.baseName());
@@ -25,9 +25,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando email do fornecedor: " + query.lastError().text());
-    }
+    if (not query.exec()) QMessageBox::critical(this, "Erro!", "Erro buscando email do fornecedor: " + query.lastError().text());
 
     QString representante;
 
@@ -35,9 +33,9 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
       representante = query.value("contatoNome").toString();
       QStringList list = representante.split(" ");
 
-      for (int i = 0; i < list.size(); ++i) {
-        list[i] = list[i].toLower();
-        list[i][0] = list[i][0].toUpper();
+      for (auto &nome : list) {
+        nome = nome.toLower();
+        nome[0] = nome[0].toUpper();
       }
 
       representante = list.join(" ");
@@ -47,8 +45,8 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
       } while (query.next());
     }
 
-    // TODO: 5dont hardcode this
-    // TODO:__project public code
+    // REFAC: 5dont hardcode this
+    // REFAC:__project public code
     ui->textEdit->setHtml(
         R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"><html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;"><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">)" +
         QString(QTime::currentTime().hour() > 12 ? "Boa tarde" : "Bom dia") + " prezado(a) " + (representante.isEmpty() ? "parceiro(a)" : representante) +
@@ -58,17 +56,17 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
   }
 
-  if (tipo == CancelarNFe) {
+  if (tipo == Tipo::CancelarNFe) {
     ui->comboBoxDest->addItem(UserSession::settings("User/emailContabilidade").toString());
 
     ui->lineEditTitulo->setText("CANCELAMENTO DE NFe - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA");
 
     // corpo email ...
 
-    ui->textEdit->setText("Cancelamento da nfe de numero 1234...");
+    ui->textEdit->setText("Cancelamento da NFe de numero 1234...");
   }
 
-  if (tipo != Vazio) {
+  if (tipo != Tipo::Vazio) {
     ui->lineEditEmail->setText(UserSession::settings("User/emailCompra").toString());
     ui->lineEditCopia->setText(UserSession::settings("User/emailCopia").toString());
     ui->lineEditServidor->setText(UserSession::settings("User/servidorSMTP").toString());
@@ -107,7 +105,7 @@ void SendMail::on_pushButtonEnviar_clicked() {
   connect(smtp, &Smtp::status, this, &SendMail::mailSent);
 
   smtp->sendMail(ui->lineEditEmail->text(), ui->comboBoxDest->currentText(), ui->lineEditCopia->text(), ui->lineEditTitulo->text(), ui->textEdit->toHtml(), files,
-                 tipo == GerarCompra ? "://assinatura conrado.png" : "");
+                 tipo == Tipo::GerarCompra ? "://assinatura conrado.png" : "");
 }
 
 void SendMail::mailSent(const QString &status) {

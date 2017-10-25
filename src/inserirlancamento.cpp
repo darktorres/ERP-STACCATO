@@ -25,7 +25,7 @@ InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog
 InserirLancamento::~InserirLancamento() { delete ui; }
 
 void InserirLancamento::setupTables() {
-  model.setTable(tipo == Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento");
+  model.setTable(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento");
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   model.setHeaderData("dataEmissao", "Data Emissão");
@@ -47,13 +47,13 @@ void InserirLancamento::setupTables() {
   ui->table->setModel(&model);
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
-  ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Pagamento, this));
-  ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::StatusReceber, this));
-  ui->table->setItemDelegateForColumn("contaDestino", new ComboBoxDelegate(ComboBoxDelegate::Conta, this));
+  ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
+  ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
+  ui->table->setItemDelegateForColumn("contaDestino", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
   ui->table->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-  ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
-  ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Grupo, this));
-  ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
+  ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
+  ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
+  ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
   ui->table->hideColumn("nfe");
@@ -78,11 +78,11 @@ void InserirLancamento::setupTables() {
 }
 
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
-  const int row = model.rowCount();
-  model.insertRow(row);
+  const int newRow = model.rowCount();
+  model.insertRow(newRow);
 
-  model.setData(row, "status", "PENDENTE");
-  model.setData(row, "dataEmissao", QDate::currentDate());
+  model.setData(newRow, "status", "PENDENTE");
+  model.setData(newRow, "dataEmissao", QDate::currentDate());
 
   for (int row = 0; row < model.rowCount(); ++row) {
     ui->table->openPersistentEditor(row, "idLoja");

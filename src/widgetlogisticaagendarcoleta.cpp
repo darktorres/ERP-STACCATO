@@ -146,7 +146,7 @@ void WidgetLogisticaAgendarColeta::calcularPeso() {
 
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
     const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
     peso += kg * caixa;
@@ -263,7 +263,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
 }
 
 bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga) {
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     int idEstoque;
     QString codComercial;
 
@@ -357,7 +357,7 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
 }
 
 bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list) {
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const int row = modelTransp.rowCount();
     modelTransp.insertRow(row);
 
@@ -418,7 +418,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
     return;
   }
 
-  for (auto const &item : list) modelTransp.removeRow(item.row());
+  for (const auto &item : list) modelTransp.removeRow(item.row());
 
   modelTransp.submitAll();
 }
@@ -484,13 +484,13 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
     return;
   }
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const QString idVenda = modelEstoque.data(item.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
     if (ids.isEmpty()) return;
 
-    for (auto const &id : ids) {
+    for (const auto &id : ids) {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);

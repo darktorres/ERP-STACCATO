@@ -386,7 +386,7 @@ bool ImportarXML::importar() {
 
   query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
 
-  for (auto const &idCompra : idsCompra) {
+  for (const auto &idCompra : idsCompra) {
     query.bindValue(":dataRealFat", dataReal);
     query.bindValue(":idCompra", idCompra);
 
@@ -670,7 +670,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
 bool ImportarXML::inserirItemSql(XML &xml) {
   const auto list = modelEstoque.match(modelEstoque.index(0, modelEstoque.fieldIndex("codComercial")), Qt::DisplayRole, xml.codProd, -1, Qt::MatchFlags(Qt::MatchFixedString | Qt::MatchWrap));
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Produto é do mesmo lote da linha " + QString::number(item.row() + 1) + "?", QMessageBox::Yes | QMessageBox::No, nullptr);
     msgBox.setButtonText(QMessageBox::Yes, "Sim");
     msgBox.setButtonText(QMessageBox::No, "Não");
@@ -783,6 +783,7 @@ bool ImportarXML::inserirNoSqlModel(XML &xml, const QStandardItem *item) {
   return true;
 }
 
+// REFAC: remove the unused criarConsumo
 bool ImportarXML::criarConsumo2(const int rowCompra, const int rowEstoque, const double quantAdicionar) {
   const int idVendaProduto = modelCompra.data(rowCompra, "idVendaProduto").toInt();
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
@@ -1022,7 +1023,7 @@ bool ImportarXML::parear() {
     double estoqueConsumido = 0;
 
     //------------------------ procurar quantidades iguais
-    for (auto const &item : listCompra) { // TODO: 5trocar essa logica por fazer uma busca interna dentro do associarItens()
+    for (const auto &item : listCompra) { // TODO: 5trocar essa logica por fazer uma busca interna dentro do associarItens()
       const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
       //      const double quantCompra = modelCompra.data(item.row(), "quant").toDouble();
       const double quantCompra = modelCompra.data(item, "quant").toDouble();
@@ -1034,7 +1035,7 @@ bool ImportarXML::parear() {
     }
     //------------------------
 
-    for (auto const &item : listCompra) {
+    for (const auto &item : listCompra) {
       //        if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
       if (not associarItens(item, rowEstoque, estoqueConsumido)) return false;
     }

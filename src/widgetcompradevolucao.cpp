@@ -94,7 +94,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
     return;
   }
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     if (not model.setData(item.row(), "status", "PROCESSADO")) {
       QMessageBox::critical(this, "Erro!", "Erro marcando status: " + model.lastError().text());
       return;
@@ -110,7 +110,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 }
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const QString status = model.data(item.row(), "status").toString();
 
     // TODO: 5refazer isso para bloquear o botao

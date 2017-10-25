@@ -9,7 +9,7 @@ void LineEditTel::processTel(const QString &value) {
   QString temp;
   QString tel;
 
-  for (auto const &c : value) {
+  for (const auto &c : value) {
     if (c.isNumber()) temp += c;
   }
 

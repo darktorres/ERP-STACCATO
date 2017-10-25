@@ -71,7 +71,7 @@ bool WidgetCompraFaturar::updateTables() {
 bool WidgetCompraFaturar::faturarCompra(const QDateTime &dataReal, const QStringList &idsCompra) {
   QSqlQuery query;
 
-  for (auto const &idCompra : idsCompra) {
+  for (const auto &idCompra : idsCompra) {
     query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra");
     query.bindValue(":dataRealFat", dataReal);
     query.bindValue(":idCompra", idCompra);
@@ -104,7 +104,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   QStringList idsCompra;
   QStringList fornecedores;
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     idsCompra << model.data(item.row(), "idCompra").toString();
     fornecedores << model.data(item.row(), "fornecedor").toString();
   }
@@ -176,7 +176,7 @@ void WidgetCompraFaturar::montaFiltro() {
 bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
   // TODO: 0nas outras telas com cancelamento verificar se estou filtrando
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     QSqlQuery query;
     query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO'");
     query.bindValue(":ordemCompra", model.data(item.row(), "OC"));
@@ -260,7 +260,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
 
   const QDate dataPrevista = input.getNextDate();
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const int idCompra = model.data(item.row(), "idCompra").toInt();
 
     QSqlQuery query;

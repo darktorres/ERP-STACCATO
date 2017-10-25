@@ -30,7 +30,7 @@ void WidgetCompraGerar::calcularPreco() {
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  for (auto const &item : list) preco += modelProdutos.data(item.row(), "preco").toDouble();
+  for (const auto &item : list) preco += modelProdutos.data(item.row(), "preco").toDouble();
 
   ui->doubleSpinBox->setValue(preco);
 }
@@ -145,12 +145,12 @@ bool WidgetCompraGerar::updateTables() {
 bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &dataCompra, const QDateTime &dataPrevista) {
   QStringList produtos;
 
-  for (auto const &row : lista) {
+  for (const auto &row : lista) {
     produtos.append(modelProdutos.data(row, "descricao").toString() + ", Quant: " + modelProdutos.data(row, "quant").toString() + ", R$ " +
                     modelProdutos.data(row, "preco").toString().replace(".", ","));
   }
 
-  for (auto const &row : lista) {
+  for (const auto &row : lista) {
     if (not modelProdutos.setData(row, "status", "EM COMPRA")) return false;
 
     QSqlQuery queryId;
@@ -211,7 +211,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   QList<int> lista;
   QStringList ids;
 
-  for (auto const &index : list) {
+  for (const auto &index : list) {
     lista.append(index.row());
     ids.append(modelProdutos.data(index.row(), "idPedido").toString());
   }
@@ -449,7 +449,7 @@ void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
 void WidgetCompraGerar::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
-  for (auto const &index : list) {
+  for (const auto &index : list) {
     if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) return false;
 
     QSqlQuery query;

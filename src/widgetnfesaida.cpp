@@ -88,7 +88,7 @@ void WidgetNfeSaida::montaFiltro() {
 
   QString filtroCheck;
 
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) {
       filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
     }
@@ -244,13 +244,13 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   report.dataManager()->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
   report.dataManager()->setReportVariable("TotalIssqn", "R$ XXX");
 
-  if (not report.printToPDF(QDir::currentPath() + "relatorio.pdf")) {
+  if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) {
     QMessageBox::critical(this, "Erro!", "Erro gerando relatório!");
     return;
   }
 
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "relatorio.pdf"))) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo: " + QDir::currentPath() + "relatorio.pdf'!");
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "/relatorio.pdf"))) {
+    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!");
     return;
   }
 }
@@ -326,7 +326,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

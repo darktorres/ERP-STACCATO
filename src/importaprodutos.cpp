@@ -443,7 +443,7 @@ bool ImportaProdutos::cadastraFornecedores() {
 }
 
 void ImportaProdutos::mostraApenasEstesFornecedores() {
-  for (auto const &fornecedor : fornecedores) idsFornecedor.append(QString::number(fornecedor));
+  for (const auto &fornecedor : fornecedores) idsFornecedor.append(QString::number(fornecedor));
 }
 
 bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
@@ -464,7 +464,7 @@ void ImportaProdutos::contaProdutos() {
 }
 
 void ImportaProdutos::consistenciaDados() {
-  for (auto const &key : variantMap.keys()) {
+  for (const auto &key : variantMap.keys()) {
     if (variantMap.value(key).toString().contains("*")) variantMap.insert(key, variantMap.value(key).toString().remove("*"));
   }
 
@@ -492,7 +492,7 @@ void ImportaProdutos::consistenciaDados() {
 }
 
 void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &record) {
-  for (auto const &key : variantMap.keys()) {
+  for (const auto &key : variantMap.keys()) {
     if (key == "ncmEx") continue;
     if (key == "multiplo") continue;
 
@@ -507,7 +507,7 @@ void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &r
 bool ImportaProdutos::atualizaCamposProduto() {
   bool changed = false;
 
-  for (auto const &key : variantMap.keys()) {
+  for (const auto &key : variantMap.keys()) {
     if (not variantMap.value(key).isNull() and model.data(row, key) != variantMap.value(key)) {
       if (not model.setData(row, key, variantMap.value(key))) return false;
       if (not model.setData(row, key + "Upd", static_cast<int>(FieldColors::Yellow))) return false;
@@ -642,7 +642,7 @@ bool ImportaProdutos::insereEmErro() {
   const int row = modelErro.rowCount();
   if (not modelErro.insertRow(row)) return false;
 
-  for (auto const &key : variantMap.keys()) {
+  for (const auto &key : variantMap.keys()) {
     if (not modelErro.setData(row, key, variantMap.value(key))) return false;
     if (not modelErro.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) return false;
   }
@@ -679,7 +679,7 @@ bool ImportaProdutos::insereEmOk() {
 
   if (not model.insertRow(row)) return false;
 
-  for (auto const &key : variantMap.keys()) {
+  for (const auto &key : variantMap.keys()) {
     if (not model.setData(row, key, variantMap.value(key))) return false;
     if (not model.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) return false;
   }
@@ -809,7 +809,7 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
 }
 
 bool ImportaProdutos::verificaTabela(const QSqlRecord &record) {
-  for (auto const &key : variantMap.keys()) {
+  for (const auto &key : variantMap.keys()) {
     if (not record.contains(key)) {
       QMessageBox::critical(this, "Erro!", R"(Tabela não possui coluna ")" + key + R"(")");
       return false;

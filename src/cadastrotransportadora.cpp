@@ -11,7 +11,7 @@
 CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   setupUi();
   setupTables();
@@ -63,7 +63,7 @@ void CadastroTransportadora::clearFields() {
 }
 
 bool CadastroTransportadora::verifyFields() {
-  for (auto const &line : ui->groupBox_7->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBox_7->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -185,7 +185,7 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
 }
 
 bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
-  for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -299,7 +299,7 @@ void CadastroTransportadora::successMessage() { QMessageBox::information(this, "
 void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
-  for (auto const &line : ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

@@ -28,7 +28,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
 
   QString motivo;
 
-  for (auto const &child : ui->groupBox->findChildren<QRadioButton *>()) {
+  for (const auto &child : ui->groupBox->findChildren<QRadioButton *>()) {
     if (child->isChecked()) motivo = child->text();
   }
 

@@ -94,7 +94,7 @@ bool RichString::isNull() const { return d->fragmentTexts.size() == 0; }
     Returns true is this is an empty string.
  */
 bool RichString::isEmtpy() const {
-  for (auto const &str : d->fragmentTexts) {
+  for (const auto &str : d->fragmentTexts) {
     if (not str.isEmpty()) return false;
   }
 

@@ -13,7 +13,7 @@
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   setupUi();
   setupTables();
@@ -66,7 +66,7 @@ void CadastroFornecedor::novoEndereco() {
 }
 
 bool CadastroFornecedor::verifyFields() {
-  for (auto const &line : ui->frameCadastro->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->frameCadastro->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -230,7 +230,7 @@ void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
 }
 
 bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
-  for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

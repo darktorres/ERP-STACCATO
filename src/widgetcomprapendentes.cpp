@@ -165,7 +165,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -174,7 +174,7 @@ void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
 void WidgetCompraPendentes::montaFiltro() {
   QString filtroCheck;
 
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'";
   }
 

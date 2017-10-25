@@ -68,7 +68,7 @@ bool RegisterDialog::viewRegister() {
 }
 
 bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
-  for (auto const &line : list) {
+  for (const auto &line : list) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -191,7 +191,7 @@ bool RegisterDialog::newRegister() {
 }
 
 void RegisterDialog::clearFields() {
-  for (auto const &line : findChildren<QLineEdit *>()) {
+  for (const auto &line : findChildren<QLineEdit *>()) {
     if (not line->isReadOnly()) line->clear();
   }
 }

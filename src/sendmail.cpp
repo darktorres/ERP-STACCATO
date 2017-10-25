@@ -88,7 +88,7 @@ void SendMail::on_pushButtonBuscar_clicked() {
 
   QString fileListString;
 
-  for (auto const &file : files) fileListString.append(R"(")" + QFileInfo(file).fileName() + R"(" )");
+  for (const auto &file : files) fileListString.append(R"(")" + QFileInfo(file).fileName() + R"(" )");
 
   ui->lineEditAnexo->setText(fileListString);
 }

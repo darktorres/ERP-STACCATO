@@ -78,7 +78,7 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   // TODO: 4aqui e na funcao de cancelar verificar se é possivel trocar 'IN ()' por idVendaProduto
   QSqlQuery query;
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     query.prepare("UPDATE estoque SET status = 'ESTOQUE', recebidoPor = :recebidoPor WHERE idEstoque = :idEstoque");
     query.bindValue(":recebidoPor", recebidoPor);
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
@@ -135,7 +135,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   QStringList ids;
 
-  for (auto const &item : list) ids.append(model.data(item.row(), "idEstoque").toString());
+  for (const auto &item : list) ids.append(model.data(item.row(), "idEstoque").toString());
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento);
   inputDlg.setFilter(ids);
@@ -244,13 +244,13 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
     return;
   }
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const QString idVenda = model.data(item.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
     if (ids.isEmpty()) return;
 
-    for (auto const &id : ids) {
+    for (const auto &id : ids) {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);

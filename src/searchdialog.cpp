@@ -125,7 +125,7 @@ void SearchDialog::setFilter(const QString &value) {
 }
 
 void SearchDialog::hideColumns(const QStringList &columns) {
-  for (auto const &column : columns) ui->table->hideColumn(column);
+  for (const auto &column : columns) ui->table->hideColumn(column);
 }
 
 void SearchDialog::on_pushButtonSelecionar_clicked() {
@@ -156,7 +156,7 @@ QString SearchDialog::getText(const QVariant &value) {
 
   QString queryText;
 
-  for (auto const &key : textKeys) queryText += queryText.isEmpty() ? key : ", " + key;
+  for (const auto &key : textKeys) queryText += queryText.isEmpty() ? key : ", " + key;
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + value.toString() + "'";
 
@@ -169,7 +169,7 @@ QString SearchDialog::getText(const QVariant &value) {
 
   QString res;
 
-  for (auto const &key : textKeys) {
+  for (const auto &key : textKeys) {
     if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) {
       res += (res.isEmpty() ? "" : " - ") + query.value(key).toString();
     }

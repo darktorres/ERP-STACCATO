@@ -45,7 +45,7 @@ void AnteciparRecebimento::calcularTotais() {
   double liquido = 0;
   int prazoMedio = 0;
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const QString tipo = model.data(item.row(), "tipo").toString();
     const double valor = model.data(item.row(), "valor").toDouble();
     const QDate dataPagamento = model.data(item.row(), "dataPagamento").toDate();
@@ -200,7 +200,7 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 
   // this is a view, edit the original table
 
-  //  for (auto const &item : list) {
+  //  for (const auto &item : list) {
   //    model.setData(item.row(), "status", "RECEBIDO");
   //    model.setData(item.row(), "dataRealizado", ui->dateEditEvento->date());
   //    model.setData(item.row(), "observacao", "Antecipação");

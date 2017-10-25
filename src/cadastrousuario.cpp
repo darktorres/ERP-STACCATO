@@ -13,7 +13,7 @@
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") ui->table->hide();
 
@@ -66,7 +66,7 @@ void CadastroUsuario::modificarUsuario() {
 }
 
 bool CadastroUsuario::verifyFields() {
-  for (auto const &line : ui->tab->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->tab->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

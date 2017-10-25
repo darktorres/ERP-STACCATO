@@ -36,7 +36,7 @@ void WidgetEstoque::setupTables() {
       "`p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, "
       "0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` "
       "SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS `dataRealColeta`, `vp`.`dataPrevReceb` AS "
-      "`dataPrevReceb`, `vp`.`dataRealReceb` AS `datRealReceb` FROM (SELECT * FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS "
+      "`dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT * FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS "
       "consumo, ec.idEstoque, ec.idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT * FROM produto p) p ON p.idProduto = "
       "e.idProduto LEFT JOIN (SELECT * FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT * FROM estoque_has_nfe ehn) ehn ON e.idEstoque = "
       "ehn.idEstoque LEFT JOIN (SELECT * FROM nfe n) n ON ehn.idNFe = n.idNFe GROUP BY e.idEstoque HAVING restante > 0");

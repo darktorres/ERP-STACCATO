@@ -34,17 +34,16 @@
 QT_BEGIN_NAMESPACE_XLSX
 
 DataValidationPrivate::DataValidationPrivate()
-    : validationType(DataValidation::None), validationOperator(DataValidation::Between), errorStyle(DataValidation::Stop), allowBlank(false),
-      isPromptMessageVisible(true), isErrorMessageVisible(true) {}
+    : validationType(DataValidation::None), validationOperator(DataValidation::Between), errorStyle(DataValidation::Stop), allowBlank(false), isPromptMessageVisible(true),
+      isErrorMessageVisible(true) {}
 
-DataValidationPrivate::DataValidationPrivate(DataValidation::ValidationType type, DataValidation::ValidationOperator op, const QString &formula1, const QString &formula2,
-                                             bool allowBlank)
-    : validationType(type), validationOperator(op), errorStyle(DataValidation::Stop), allowBlank(allowBlank), isPromptMessageVisible(true), isErrorMessageVisible(true),
-      formula1(formula1), formula2(formula2) {}
+DataValidationPrivate::DataValidationPrivate(DataValidation::ValidationType type, DataValidation::ValidationOperator op, const QString &formula1, const QString &formula2, bool allowBlank)
+    : validationType(type), validationOperator(op), errorStyle(DataValidation::Stop), allowBlank(allowBlank), isPromptMessageVisible(true), isErrorMessageVisible(true), formula1(formula1),
+      formula2(formula2) {}
 
 DataValidationPrivate::DataValidationPrivate(const DataValidationPrivate &other)
-    : QSharedData(other), validationType(DataValidation::None), validationOperator(DataValidation::Between), errorStyle(DataValidation::Stop), allowBlank(false),
-      isPromptMessageVisible(true), isErrorMessageVisible(true) {}
+    : QSharedData(other), validationType(DataValidation::None), validationOperator(DataValidation::Between), errorStyle(DataValidation::Stop), allowBlank(false), isPromptMessageVisible(true),
+      isErrorMessageVisible(true) {}
 
 /*!
  * \class DataValidation
@@ -326,7 +325,7 @@ bool DataValidation::saveToXml(QXmlStreamWriter &writer) const {
   if (not promptMessage().isEmpty()) writer.writeAttribute(QStringLiteral("prompt"), promptMessage());
 
   QStringList sqref;
-  for (auto const &range : ranges()) sqref.append(range.toString());
+  for (const auto &range : ranges()) sqref.append(range.toString());
   writer.writeAttribute(QStringLiteral("sqref"), sqref.join(QLatin1Char(' ')));
 
   if (not formula1().isEmpty()) writer.writeTextElement(QStringLiteral("formula1"), formula1());
@@ -374,7 +373,7 @@ DataValidation DataValidation::loadFromXml(QXmlStreamReader &reader) {
   QXmlStreamAttributes attrs = reader.attributes();
 
   QString sqref = attrs.value(QLatin1String("sqref")).toString();
-  for (auto const &range : sqref.split(QLatin1Char(' '))) validation.addRange(range);
+  for (const auto &range : sqref.split(QLatin1Char(' '))) validation.addRange(range);
 
   if (attrs.hasAttribute(QLatin1String("type"))) {
     QString t = attrs.value(QLatin1String("type")).toString();

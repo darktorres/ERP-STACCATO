@@ -13,7 +13,7 @@
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   setupUi();
   setupTables();
@@ -134,7 +134,7 @@ void CadastroLoja::clearFields() {
 }
 
 bool CadastroLoja::verifyFields() {
-  for (auto const &line : ui->groupBoxCadastro->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxCadastro->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -275,7 +275,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
 }
 
 bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
-  for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -527,7 +527,7 @@ bool CadastroLoja::newRegister() {
 }
 
 bool CadastroLoja::cadastrarConta(const bool isUpdate) {
-  for (auto const &line : ui->groupBoxConta->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxConta->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -780,7 +780,7 @@ void CadastroLoja::on_pushButtonAdicionaAssociacao_clicked() {
     return;
   }
 
-  for (auto const &index : list) {
+  for (const auto &index : list) {
     QSqlQuery query;
     query.prepare("INSERT INTO forma_pagamento_has_loja (idPagamento, idLoja) VALUES (:idPagamento, :idLoja)");
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
@@ -804,7 +804,7 @@ void CadastroLoja::on_pushButtonRemoveAssociacao_clicked() {
     return;
   }
 
-  for (auto const &index : list) {
+  for (const auto &index : list) {
     QSqlQuery query;
     query.prepare("DELETE FROM forma_pagamento_has_loja WHERE idPagamento = :idPagamento AND idLoja = :idLoja");
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));

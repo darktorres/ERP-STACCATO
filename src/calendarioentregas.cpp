@@ -159,7 +159,7 @@ void CalendarioEntregas::on_pushButtonReagendar_clicked() {
 bool CalendarioEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
   QSqlQuery query;
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     for (int row = 0; row < modelProdutos.rowCount(); ++row) {
       query.prepare("UPDATE venda_has_produto SET dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
       query.bindValue(":dataPrevEnt", dataPrevEnt);
@@ -611,7 +611,7 @@ void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   xlsx.currentWorksheet()->setFitToPage(true);
   xlsx.currentWorksheet()->setFitToHeight(true);
-  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Horizontal);
+  xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
 
   QSqlQuery query;
   query.prepare("SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda");

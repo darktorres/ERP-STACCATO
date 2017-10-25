@@ -23,7 +23,7 @@
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   setupTables();
 
@@ -414,7 +414,7 @@ bool Venda::verifyFields() {
 
   for (const auto &spinbox : ui->widgetPgts->listDoubleSpinPgt) sum += spinbox->value();
 
-  if (sum != ui->doubleSpinBoxTotalPag->value()) {
+  if (not qFuzzyCompare(sum, ui->doubleSpinBoxTotalPag->value())) {
     QMessageBox::critical(this, "Erro!", "Valor dos pagamentos difere do total!");
     return false;
   }
@@ -1431,6 +1431,8 @@ void Venda::on_pushButtonAdicionarPagamento_clicked() {
 }
 
 void Venda::on_doubleSpinBoxTotalPag_valueChanged(double) {
+  if (ui->widgetPgts->listDoubleSpinPgt.size() <= 1) return;
+
   double sumWithoutLast = 0;
 
   for (const auto &item : ui->widgetPgts->listDoubleSpinPgt) {

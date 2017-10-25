@@ -112,7 +112,7 @@ void WidgetContas::on_table_activated(const QModelIndex &index) {
 void WidgetContas::montaFiltro() {
   QString status;
 
-  for (auto const &child : ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
+  for (const auto &child : ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
     if (child->text() == "Todos") continue;
 
     if (child->isChecked() and child->text() == "Pendente/Conferido") {
@@ -180,7 +180,7 @@ void WidgetContas::setTipo(const Tipo &value) {
 }
 
 void WidgetContas::on_groupBoxData_toggled(const bool enabled) {
-  for (auto const &child : ui->groupBoxData->findChildren<QDateEdit *>()) child->setEnabled(enabled);
+  for (const auto &child : ui->groupBoxData->findChildren<QDateEdit *>()) child->setEnabled(enabled);
 }
 
 void WidgetContas::on_tableVencidos_entered(const QModelIndex &) { ui->tableVencidos->resizeColumnsToContents(); }

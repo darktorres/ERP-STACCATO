@@ -117,7 +117,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
 
     DocPropsCore props(DocPropsCore::F_LoadFromExists);
     props.loadFromXmlData(zipReader.fileData(docPropsCore_Name));
-    for (auto const &name : props.propertyNames()) q->setDocumentProperty(name, props.property(name));
+    for (const auto &name : props.propertyNames()) q->setDocumentProperty(name, props.property(name));
   }
 
   // load app property
@@ -129,7 +129,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
 
     DocPropsApp props(DocPropsApp::F_LoadFromExists);
     props.loadFromXmlData(zipReader.fileData(docPropsApp_Name));
-    for (auto const &name : props.propertyNames()) q->setDocumentProperty(name, props.property(name));
+    for (const auto &name : props.propertyNames()) q->setDocumentProperty(name, props.property(name));
   }
 
   // load workbook now, Get the workbook file path from the root rels file
@@ -294,7 +294,7 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
   }
 
   // save docProps app/core xml file
-  for (auto const &name : q->documentPropertyNames()) {
+  for (const auto &name : q->documentPropertyNames()) {
     docPropsApp.setProperty(name, q->documentProperty(name));
     docPropsCore.setProperty(name, q->documentProperty(name));
   }

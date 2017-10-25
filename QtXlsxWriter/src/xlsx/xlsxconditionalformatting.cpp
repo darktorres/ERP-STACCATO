@@ -305,8 +305,7 @@ bool ConditionalFormatting::addHighlightCellsRule(HighlightRuleType type, const 
  * , \a type2, \a val2, \a showData and \a stopIfTrue.
  * Return false if failed.
  */
-bool ConditionalFormatting::addDataBarRule(const QColor &color, ValueObjectType type1, const QString &val1, ValueObjectType type2, const QString &val2, bool showData,
-                                           bool stopIfTrue) {
+bool ConditionalFormatting::addDataBarRule(const QColor &color, ValueObjectType type1, const QString &val1, ValueObjectType type2, const QString &val2, bool showData, bool stopIfTrue) {
   QSharedPointer<XlsxCfRuleData> cfRule(new XlsxCfRuleData);
 
   cfRule->attrs[XlsxCfRuleData::A_type] = QStringLiteral("dataBar");
@@ -583,7 +582,7 @@ bool ConditionalFormatting::loadFromXml(QXmlStreamReader &reader, Styles *styles
   d->cfRules.clear();
   QXmlStreamAttributes attrs = reader.attributes();
   QString sqref = attrs.value(QLatin1String("sqref")).toString();
-  for (auto const &range : sqref.split(QLatin1Char(' '))) this->addRange(range);
+  for (const auto &range : sqref.split(QLatin1Char(' '))) this->addRange(range);
 
   while (not reader.atEnd()) {
     reader.readNextStartElement();
@@ -605,7 +604,7 @@ bool ConditionalFormatting::loadFromXml(QXmlStreamReader &reader, Styles *styles
 bool ConditionalFormatting::saveToXml(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("conditionalFormatting"));
   QStringList sqref;
-  for (auto const &range : ranges()) sqref.append(range.toString());
+  for (const auto &range : ranges()) sqref.append(range.toString());
   writer.writeAttribute(QStringLiteral("sqref"), sqref.join(QLatin1Char(' ')));
 
   for (int i = 0; i < d->cfRules.size(); ++i) {
@@ -615,8 +614,7 @@ bool ConditionalFormatting::saveToXml(QXmlStreamWriter &writer) const {
     if (rule->dxfFormat.dxfIndexValid()) writer.writeAttribute(QStringLiteral("dxfId"), QString::number(rule->dxfFormat.dxfIndex()));
     writer.writeAttribute(QStringLiteral("priority"), QString::number(rule->priority));
     if (rule->attrs.contains(XlsxCfRuleData::A_stopIfTrue)) writer.writeAttribute(QStringLiteral("stopIfTrue"), rule->attrs[XlsxCfRuleData::A_stopIfTrue].toString());
-    if (rule->attrs.contains(XlsxCfRuleData::A_aboveAverage))
-      writer.writeAttribute(QStringLiteral("aboveAverage"), rule->attrs[XlsxCfRuleData::A_aboveAverage].toString());
+    if (rule->attrs.contains(XlsxCfRuleData::A_aboveAverage)) writer.writeAttribute(QStringLiteral("aboveAverage"), rule->attrs[XlsxCfRuleData::A_aboveAverage].toString());
     if (rule->attrs.contains(XlsxCfRuleData::A_percent)) writer.writeAttribute(QStringLiteral("percent"), rule->attrs[XlsxCfRuleData::A_percent].toString());
     if (rule->attrs.contains(XlsxCfRuleData::A_bottom)) writer.writeAttribute(QStringLiteral("bottom"), rule->attrs[XlsxCfRuleData::A_bottom].toString());
     if (rule->attrs.contains(XlsxCfRuleData::A_operator)) writer.writeAttribute(QStringLiteral("operator"), rule->attrs[XlsxCfRuleData::A_operator].toString());
@@ -624,8 +622,7 @@ bool ConditionalFormatting::saveToXml(QXmlStreamWriter &writer) const {
     if (rule->attrs.contains(XlsxCfRuleData::A_timePeriod)) writer.writeAttribute(QStringLiteral("timePeriod"), rule->attrs[XlsxCfRuleData::A_timePeriod].toString());
     if (rule->attrs.contains(XlsxCfRuleData::A_rank)) writer.writeAttribute(QStringLiteral("rank"), rule->attrs[XlsxCfRuleData::A_rank].toString());
     if (rule->attrs.contains(XlsxCfRuleData::A_stdDev)) writer.writeAttribute(QStringLiteral("stdDev"), rule->attrs[XlsxCfRuleData::A_stdDev].toString());
-    if (rule->attrs.contains(XlsxCfRuleData::A_equalAverage))
-      writer.writeAttribute(QStringLiteral("equalAverage"), rule->attrs[XlsxCfRuleData::A_equalAverage].toString());
+    if (rule->attrs.contains(XlsxCfRuleData::A_equalAverage)) writer.writeAttribute(QStringLiteral("equalAverage"), rule->attrs[XlsxCfRuleData::A_equalAverage].toString());
 
     if (rule->attrs[XlsxCfRuleData::A_type] == QLatin1String("dataBar")) {
       writer.writeStartElement(QStringLiteral("dataBar"));

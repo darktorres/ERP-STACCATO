@@ -131,7 +131,7 @@ void WidgetLogisticaEntrega::setupTables() {
 void WidgetLogisticaEntrega::calcularPeso() {
   double peso = 0;
 
-  for (auto const &item : ui->tableProdutos->selectionModel()->selectedRows()) {
+  for (const auto &item : ui->tableProdutos->selectionModel()->selectedRows()) {
     QSqlQuery query;
     query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
     query.bindValue(":idProduto", modelViewProdutos.data(item.row(), "idProduto"));
@@ -368,7 +368,7 @@ bool WidgetLogisticaEntrega::processRows() {
 }
 
 bool WidgetLogisticaEntrega::adicionarProduto(const QModelIndexList &list) {
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const int row = modelTransp.rowCount();
     modelTransp.insertRow(row);
 
@@ -426,7 +426,7 @@ void WidgetLogisticaEntrega::on_pushButtonAdicionarProduto_clicked() {
     QMessageBox::warning(this, "Aviso!", "Peso maior que capacidade do veículo!");
   }
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const int idVendaProduto = modelViewProdutos.data(item.row(), "idVendaProduto").toInt();
 
     auto listMatch = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
@@ -458,7 +458,7 @@ void WidgetLogisticaEntrega::on_pushButtonRemoverProduto_clicked() {
     return;
   }
 
-  for (auto const &item : list) modelTransp.removeRow(item.row());
+  for (const auto &item : list) modelTransp.removeRow(item.row());
 
   modelTransp.submitAll();
 }
@@ -792,7 +792,7 @@ void WidgetLogisticaEntrega::on_pushButtonReagendarPedido_clicked() {
 bool WidgetLogisticaEntrega::reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) {
   QSqlQuery query;
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     query.prepare("UPDATE venda SET novoPrazoEntrega = :novoPrazoEntrega WHERE idVenda = :idVenda");
     query.bindValue(":novoPrazoEntrega", modelVendas.data(item.row(), "data").toDate().daysTo(dataPrev));
     query.bindValue(":idVenda", modelVendas.data(item.row(), "idVenda"));

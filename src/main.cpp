@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   app.setOrganizationName("Staccato");
   app.setApplicationName("ERP");
   app.setWindowIcon(QIcon("Staccato.ico"));
-  app.setApplicationVersion("0.5.41");
+  app.setApplicationVersion("0.5.42");
   app.setStyle("Fusion");
 
   LoginDialog dialog;

@@ -47,7 +47,7 @@ void Drawing::saveToXmlFile(QIODevice *device) const {
   writer.writeAttribute(QStringLiteral("xmlns:xdr"), QStringLiteral("http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"));
   writer.writeAttribute(QStringLiteral("xmlns:a"), QStringLiteral("http://schemas.openxmlformats.org/drawingml/2006/main"));
 
-  for (auto const &anchor : anchors) anchor->saveToXml(writer);
+  for (const auto &anchor : anchors) anchor->saveToXml(writer);
 
   writer.writeEndElement(); // xdr:wsDr
   writer.writeEndDocument();

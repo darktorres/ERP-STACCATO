@@ -30,7 +30,7 @@ public:
   QList<QLineEdit *> listLinePgt;
 
   void resetarPagamentos();
-  void adicionarPagamentosCompra(const double restante);
+  void adicionarPagamentoCompra(const double restante);
 
 signals:
   void montarFluxoCaixa();

@@ -13,7 +13,7 @@
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) {
+  for (const auto &line : findChildren<QLineEdit *>()) {
     connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
   }
 
@@ -61,7 +61,7 @@ void CadastroCliente::setupTables() {
 bool CadastroCliente::verifyFields() {
   if (modelEnd.rowCount() == 0) incompleto = true;
 
-  for (auto const &line : ui->frame->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->frame->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -128,7 +128,7 @@ void CadastroCliente::clearFields() {
   ui->checkBoxInscEstIsento->setChecked(false);
   novoEndereco();
 
-  for (auto const &box : findChildren<ItemBox *>()) box->clear();
+  for (const auto &box : findChildren<ItemBox *>()) box->clear();
 
   setupUi();
 }
@@ -256,7 +256,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
-  for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

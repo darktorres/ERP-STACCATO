@@ -110,7 +110,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
 
   QSqlQuery query;
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     query.prepare("UPDATE estoque SET status = 'EM RECEBIMENTO' WHERE idEstoque = :idEstoque");
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
@@ -245,13 +245,13 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
     return;
   }
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const QString idVenda = model.data(item.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
     if (ids.isEmpty()) return;
 
-    for (auto const &id : ids) {
+    for (const auto &id : ids) {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);

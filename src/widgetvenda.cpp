@@ -52,13 +52,13 @@ void WidgetVenda::montaFiltro() {
   QString filtroCheck;
 
   if (financeiro) {
-    for (auto const &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
       if (child->isChecked()) {
         filtroCheck += filtroCheck.isEmpty() ? "statusFinanceiro = '" + child->text().toUpper() + "'" : " OR statusFinanceiro = '" + child->text().toUpper() + "'";
       }
     }
   } else {
-    for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+    for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
       if (child->isChecked()) {
         filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
       }
@@ -83,7 +83,7 @@ void WidgetVenda::montaFiltro() {
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -212,7 +212,7 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
-  for (auto const &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

@@ -87,6 +87,7 @@ void Estoque::setupTables() {
   modelViewConsumo.setTable("view_estoque_consumo");
   modelViewConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
+  modelViewConsumo.setHeaderData("statusProduto", "Pedido");
   modelViewConsumo.setHeaderData("status", "Status");
   modelViewConsumo.setHeaderData("ordemCompra", "OC");
   modelViewConsumo.setHeaderData("local", "Local");
@@ -147,12 +148,25 @@ void Estoque::setupTables() {
 void Estoque::on_tableEstoque_activated(const QModelIndex &) { exibirNota(); }
 
 void Estoque::calcularRestante() {
-  double quant = model.data(0, "quant").toDouble();
+  double quantRestante = model.data(0, "quant").toDouble();
+  double quantComprometidoNaoEntregue = 0;
 
-  for (int row = 0; row < modelViewConsumo.rowCount(); ++row) quant += modelViewConsumo.data(row, "quant").toDouble();
+  for (int row = 0; row < modelViewConsumo.rowCount(); ++row) {
+    const double quant = modelViewConsumo.data(row, "quant").toDouble();
+    const QString statusProduto = modelViewConsumo.data(row, "statusProduto").toString();
 
-  ui->doubleSpinBoxRestante->setValue(quant);
-  ui->doubleSpinBoxRestante->setSuffix(" " + model.data(0, "un").toString());
+    quantRestante += quant;
+
+    if (statusProduto == "ESTOQUE") quantComprometidoNaoEntregue += quant * -1;
+  }
+
+  const QString un = model.data(0, "un").toString();
+
+  ui->doubleSpinBoxRestante->setValue(quantRestante);
+  ui->doubleSpinBoxRestante->setSuffix(" " + un);
+
+  ui->doubleSpinBoxComprometidoNaoEntregue->setValue(quantComprometidoNaoEntregue);
+  ui->doubleSpinBoxComprometidoNaoEntregue->setSuffix(" " + un);
 }
 
 bool Estoque::viewRegisterById(const QString &idEstoque, const bool showWindow) {

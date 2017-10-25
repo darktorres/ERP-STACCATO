@@ -22,7 +22,7 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QScrollArea(parent), ui(ne
 
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 
-void WidgetPagamentos::adicionarPagamentosCompra(const double restante) {
+void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   QFrame *frame = new QFrame(this);
   frame->setLayout(new QHBoxLayout(frame));
   // label

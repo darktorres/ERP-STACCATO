@@ -324,7 +324,7 @@ bool Devolucao::inserirItens(const QModelIndexList &list) {
   const double restante = quant - quantDevolvida;
   const double step = ui->doubleSpinBoxQuant->singleStep();
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const int currentRow = item.row();
 
     // copiar linha para devolucao

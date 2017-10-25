@@ -119,7 +119,7 @@ void WidgetOrcamento::montaFiltro() {
 
   QString filtroCheck;
 
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) {
       filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
     }
@@ -158,7 +158,7 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
-  for (auto const &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -177,3 +177,4 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged(const int) {
 
 // TODO: 1por padrao nao ativar filtro mes quando for vendedor (acho que já foi feito)
 // TODO: 5alterar followup para guardar apenas os 12 primeiros caracteres (remover -RevXXX)
+// FIXME: diasrestantes vermelho nao esta aparecendo a fonte

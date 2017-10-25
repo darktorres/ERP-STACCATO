@@ -55,9 +55,9 @@ bool CadastroProduto::viewRegister() {
 }
 
 void CadastroProduto::clearFields() {
-  for (auto const &line : findChildren<QLineEdit *>()) line->clear();
+  for (const auto &line : findChildren<QLineEdit *>()) line->clear();
 
-  for (auto const &spinBox : findChildren<QDoubleSpinBox *>()) spinBox->clear();
+  for (const auto &spinBox : findChildren<QDoubleSpinBox *>()) spinBox->clear();
 
   ui->radioButtonDesc->setChecked(false);
   ui->radioButtonLote->setChecked(false);
@@ -78,7 +78,7 @@ void CadastroProduto::registerMode() {
 }
 
 bool CadastroProduto::verifyFields() {
-  for (auto const &line : findChildren<QLineEdit *>()) {
+  for (const auto &line : findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

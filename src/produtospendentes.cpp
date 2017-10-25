@@ -31,7 +31,7 @@ ProdutosPendentes::~ProdutosPendentes() { delete ui; }
 void ProdutosPendentes::recalcularQuantidade() {
   double quant = 0;
 
-  for (auto const &item : ui->tableProdutos->selectionModel()->selectedRows()) quant += modelViewProdutos.data(item.row(), "quant").toDouble();
+  for (const auto &item : ui->tableProdutos->selectionModel()->selectedRows()) quant += modelViewProdutos.data(item.row(), "quant").toDouble();
 
   ui->doubleSpinBoxComprar->setValue(quant);
 }
@@ -147,7 +147,7 @@ void ProdutosPendentes::setupTables() {
 }
 
 bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const int row = item.row();
 
     if (not atualizarVendaCompra(row, dataPrevista)) return false;

@@ -175,7 +175,7 @@ QString convertSharedFormula(const QString &rootFormula, const CellReference &ro
   enum RefState { INVALID, PRE_AZ, AZ, PRE_09, _09 };
   RefState refState = INVALID;
   int refFlag = 0; // 0x00, 0x01, 0x02, 0x03 ==> A1, $A1, A$1, $A$1
-  for (auto const &ch : rootFormula) {
+  for (const auto &ch : rootFormula) {
     if (inQuote) {
       segment.append(ch);
       if (ch == QLatin1Char('"')) inQuote = false;
@@ -227,7 +227,7 @@ QString convertSharedFormula(const QString &rootFormula, const CellReference &ro
 
   // Replace "A1", "$A1", "A$1" segment with proper one.
   QStringList result;
-  for (auto const &p : segments) {
+  for (const auto &p : segments) {
     // qDebug()<<p.first<<p.second;
     if (p.second != -1 and p.second != 3) {
       CellReference oldRef(p.first);

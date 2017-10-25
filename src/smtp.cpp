@@ -70,7 +70,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   if (not files.isEmpty()) {
     //    qDebug() << "Files to be sent: " << files.size();
 
-    for (auto const &filePath : files) {
+    for (const auto &filePath : files) {
       QFile file(filePath);
 
       if (file.exists()) {

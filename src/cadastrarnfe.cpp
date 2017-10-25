@@ -372,7 +372,7 @@ bool CadastrarNFe::preencherNumeroNFe() {
 void CadastrarNFe::prepararNFe(const QList<int> &items) {
   QString filter;
 
-  for (auto const &item : items) {
+  for (const auto &item : items) {
     filter += QString(filter.isEmpty() ? "" : " OR ") + "idVendaProduto = " + QString::number(item);
 
     QSqlQuery query;
@@ -651,7 +651,7 @@ bool CadastrarNFe::calculaDigitoVerificador(QString &chave) {
   int soma = 0;
   int mult = 4;
 
-  for (auto const &i : chave) {
+  for (const auto &i : chave) {
     soma += i.digitValue() * mult--;
     mult = mult == 1 ? 9 : mult;
   }

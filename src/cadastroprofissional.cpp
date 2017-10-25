@@ -11,7 +11,7 @@
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
 
-  for (auto const *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   setWindowModality(Qt::NonModal);
 
@@ -190,7 +190,7 @@ bool CadastroProfissional::cadastrar() {
 }
 
 bool CadastroProfissional::verifyFields() {
-  for (auto const &line : ui->frame->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->frame->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -253,7 +253,7 @@ void CadastroProfissional::clearFields() {
   ui->radioButtonPF->setChecked(true);
   novoEndereco();
 
-  for (auto const &box : findChildren<ItemBox *>()) box->clear();
+  for (const auto &box : findChildren<ItemBox *>()) box->clear();
 
   setupUi();
 
@@ -288,7 +288,7 @@ void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
-  for (auto const &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

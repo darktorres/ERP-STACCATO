@@ -51,7 +51,7 @@ bool WidgetCalendario::updateCalendar(const QDate &startDate) {
 
   QStringList list;
 
-  for (auto const &item : ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
+  for (const auto &item : ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
     if (not item->isChecked()) continue;
 
     veiculos++;

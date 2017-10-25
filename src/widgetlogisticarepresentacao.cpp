@@ -103,7 +103,7 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE idVendaProduto = :idVendaProduto");
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);
     query1.bindValue(":idVendaProduto", model.data(item.row(), "idVendaProduto"));
 

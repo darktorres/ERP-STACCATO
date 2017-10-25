@@ -253,7 +253,7 @@ void InputDialogFinanceiro::calcularTotal() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (auto const &item : list) {
+  for (const auto &item : list) {
     const double preco = model.data(item.row(), "preco").toDouble();
     const QString tipoSt = model.data(item.row(), "st").toString();
     const double aliquota = model.data(item.row(), "aliquotaSt").toDouble();
@@ -405,7 +405,7 @@ bool InputDialogFinanceiro::verifyFields() {
   }
 
   if (not representacao) {
-    if (ui->doubleSpinBoxTotalPag->value() != ui->doubleSpinBoxTotal->value()) {
+    if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) {
       QMessageBox::critical(this, "Erro!", "Soma dos pagamentos difere do total! Favor verificar!");
       return false;
     }
@@ -418,7 +418,7 @@ bool InputDialogFinanceiro::cadastrar() {
   if (tipo == Tipo::ConfirmarCompra) {
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (auto const &item : list) model.setData(item.row(), "selecionado", true);
+    for (const auto &item : list) model.setData(item.row(), "selecionado", true);
   }
 
   if (tipo == Tipo::Financeiro) {
@@ -525,7 +525,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged(const double
 
   QVector<int> indexs;
 
-  for (auto const index : ui->table->selectionModel()->selectedRows()) {
+  for (const auto index : ui->table->selectionModel()->selectedRows()) {
     indexs << index.row();
   }
 
@@ -538,7 +538,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged(const double
 
   // TODO: 0percorrer apenas as linhas selecionadas?
 
-  for (auto const index : ui->table->selectionModel()->selectedRows()) {
+  for (const auto index : ui->table->selectionModel()->selectedRows()) {
     //  for (int row = 0; row < model.rowCount(); ++row) {
     const double totalProd = QString::number(model.data(index.row(), "preco").toDouble(), 'f', 2).toDouble();
     const double valorProporcional = totalProd - (totalProd / total * value);
@@ -587,7 +587,7 @@ void InputDialogFinanceiro::on_dateEditPgtSt_userDateChanged(const QDate &) {
 void InputDialogFinanceiro::on_pushButtonAdicionarPagamento_clicked() {
   // REFAC: move this inside WidgetPagamentos (use a enum to separate this from the other AdicionarPagamento)
 
-  ui->widgetPgts->adicionarPagamentosCompra(ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value());
+  ui->widgetPgts->adicionarPagamentoCompra(ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value());
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &InputDialogFinanceiro::wrapMontarFluxoCaixa);
   connect(ui->widgetPgts, &WidgetPagamentos::valueChanged, this, &InputDialogFinanceiro::on_doubleSpinBoxPgt_valueChanged);
@@ -596,6 +596,8 @@ void InputDialogFinanceiro::on_pushButtonAdicionarPagamento_clicked() {
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxTotalPag_valueChanged(double) {
+  if (ui->widgetPgts->listDoubleSpinPgt.size() <= 1) return;
+
   double sumWithoutLast = 0;
 
   for (const auto &item : ui->widgetPgts->listDoubleSpinPgt) {

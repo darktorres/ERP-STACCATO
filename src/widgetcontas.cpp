@@ -9,10 +9,10 @@
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
-#include "ui_widgetpagamento.h"
+#include "ui_widgetcontas.h"
 #include "widgetcontas.h"
 
-WidgetContas::WidgetContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamento) {
+WidgetContas::WidgetContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetContas) {
   ui->setupUi(this);
 
   ui->radioButtonPendente->setChecked(true);

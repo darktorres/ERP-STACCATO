@@ -7,7 +7,7 @@
 #include "sqltablemodel.h"
 
 namespace Ui {
-class WidgetPagamento;
+class WidgetContas;
 }
 
 class WidgetContas : public QWidget {
@@ -44,7 +44,7 @@ private:
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
   Tipo tipo = Tipo::Nulo;
-  Ui::WidgetPagamento *ui;
+  Ui::WidgetContas *ui;
   // methods
   void makeConnections();
   void montaFiltro();

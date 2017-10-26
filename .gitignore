@@ -36,3 +36,6 @@ Makefile*
 *.bak
 *.user
 qrs/Thumbs.db
+*.srctrlprj
+*.srctrlbm
+*.srctrldb

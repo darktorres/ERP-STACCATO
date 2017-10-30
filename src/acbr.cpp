@@ -1,11 +1,14 @@
 #include <QCoreApplication>
 #include <QDesktopServices>
+#include <QDir>
+#include <QFile>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTcpSocket>
 #include <QUrl>
+#include <optional>
 
 #include "acbr.h"
 
@@ -71,6 +74,50 @@ bool ACBr::gerarDanfe(const QByteArray &fileContent, QString &resposta, const bo
   // TODO: 1copiar arquivo para pasta predefinida e renomear arquivo para formato 'DANFE_xxx.xxx_idpedido'
 
   return true;
+}
+
+std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) {
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(0, "Erro!", "Erro buscando XML: " + query.lastError().text());
+    return {};
+  }
+
+  QFile file(QDir::currentPath() + "/temp.xml");
+
+  if (not file.open(QFile::WriteOnly)) {
+    QMessageBox::critical(0, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
+    return {};
+  }
+
+  QTextStream stream(&file);
+
+  stream << query.value("xml").toString();
+
+  file.close();
+
+  QString resposta;
+
+  if (not ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")", resposta)) return {};
+
+  if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
+    QMessageBox::critical(0, "Resposta ConsultarNFe", resposta);
+    return {};
+  }
+
+  QFile newFile(QDir::currentPath() + "/temp.xml");
+
+  if (not newFile.open(QFile::ReadOnly)) {
+    QMessageBox::critical(0, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
+    return {};
+  }
+
+  const QString xml = newFile.readAll();
+
+  return std::make_tuple<>(xml, resposta);
 }
 
 bool ACBr::abrirPdf(QString &resposta) {

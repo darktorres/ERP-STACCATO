@@ -266,3 +266,4 @@ void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar tabela de permissoes na vertical?
+// TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)

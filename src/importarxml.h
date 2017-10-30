@@ -52,8 +52,7 @@ private:
   bool associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido);
   bool cadastrarNFe(XML &xml);
   bool cadastrarProdutoEstoque();
-  bool criarConsumo();
-  bool criarConsumo2(const int rowCompra, const int rowEstoque, const double quantAdicionar);
+  bool criarConsumo(const int rowCompra, const int rowEstoque, const double quantAdicionar);
   bool importar();
   bool inserirItemSql(XML &xml);
   bool inserirNoSqlModel(XML &xml, const QStandardItem *item);

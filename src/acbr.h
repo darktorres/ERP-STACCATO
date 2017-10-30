@@ -11,6 +11,7 @@ public:
   static bool enviarComando(const QString &comando, QString &resposta);
   static bool gerarDanfe(const int idNFe);
   static bool gerarDanfe(const QByteArray &fileContent, QString &resposta, const bool openFile = true);
+  static std::optional<std::tuple<QString, QString> > consultarNFe(const int idNFe);
 
 private:
   static bool abrirPdf(QString &resposta);

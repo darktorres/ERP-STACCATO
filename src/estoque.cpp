@@ -102,47 +102,8 @@ void Estoque::setupTables() {
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelViewConsumo, this));
   ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
   ui->tableConsumo->showColumn("created");
-  ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("idEstoque");
-  ui->tableConsumo->hideColumn("idVendaProduto");
-  ui->tableConsumo->hideColumn("idCompra");
-  ui->tableConsumo->hideColumn("idProduto");
   ui->tableConsumo->hideColumn("quantUpd");
-  ui->tableConsumo->hideColumn("codBarras");
-  ui->tableConsumo->hideColumn("ncm");
-  ui->tableConsumo->hideColumn("cfop");
-  ui->tableConsumo->hideColumn("valorUnid");
-  ui->tableConsumo->hideColumn("valor");
-  ui->tableConsumo->hideColumn("codBarrasTrib");
-  ui->tableConsumo->hideColumn("unTrib");
-  ui->tableConsumo->hideColumn("quantTrib");
-  ui->tableConsumo->hideColumn("valorTrib");
-  ui->tableConsumo->hideColumn("desconto");
-  ui->tableConsumo->hideColumn("compoeTotal");
-  ui->tableConsumo->hideColumn("numeroPedido");
-  ui->tableConsumo->hideColumn("itemPedido");
-  ui->tableConsumo->hideColumn("tipoICMS");
-  ui->tableConsumo->hideColumn("orig");
-  ui->tableConsumo->hideColumn("cstICMS");
-  ui->tableConsumo->hideColumn("modBC");
-  ui->tableConsumo->hideColumn("vBC");
-  ui->tableConsumo->hideColumn("pICMS");
-  ui->tableConsumo->hideColumn("vICMS");
-  ui->tableConsumo->hideColumn("modBCST");
-  ui->tableConsumo->hideColumn("pMVAST");
-  ui->tableConsumo->hideColumn("vBCST");
-  ui->tableConsumo->hideColumn("pICMSST");
-  ui->tableConsumo->hideColumn("vICMSST");
-  ui->tableConsumo->hideColumn("cEnq");
-  ui->tableConsumo->hideColumn("cstIPI");
-  ui->tableConsumo->hideColumn("cstPIS");
-  ui->tableConsumo->hideColumn("vBCPIS");
-  ui->tableConsumo->hideColumn("pPIS");
-  ui->tableConsumo->hideColumn("vPIS");
-  ui->tableConsumo->hideColumn("cstCOFINS");
-  ui->tableConsumo->hideColumn("vBCCOFINS");
-  ui->tableConsumo->hideColumn("pCOFINS");
-  ui->tableConsumo->hideColumn("vCOFINS");
 }
 
 void Estoque::on_tableEstoque_activated(const QModelIndex &) { exibirNota(); }

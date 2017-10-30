@@ -13,7 +13,7 @@ public:
   QVariant data(const QModelIndex &proxyIndex, const int role) const override;
 
 private:
-  const int diasIndex;
+  const int diasRestantesIndex;
   const int statusIndex;
   const int followupIndex;
   const int semaforoIndex;

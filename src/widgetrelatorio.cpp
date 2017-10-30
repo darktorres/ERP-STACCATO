@@ -189,9 +189,7 @@ bool WidgetRelatorio::updateTables() {
   modelOrcamento.setTable("view_resumo_relatorio");
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    modelOrcamento.setFilter("Loja = '" + UserSession::fromLoja("descricao") + "' ORDER BY Loja, Vendedor");
-  }
+  if (UserSession::tipoUsuario() == "GERENTE LOJA") modelOrcamento.setFilter("Loja = '" + UserSession::fromLoja("descricao") + "' ORDER BY Loja, Vendedor");
 
   if (not modelOrcamento.select()) {
     emit errorSignal("Erro lendo view_resumo_relatorio: " + modelOrcamento.lastError().text());

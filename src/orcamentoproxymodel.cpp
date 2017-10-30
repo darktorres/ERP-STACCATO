@@ -5,15 +5,15 @@
 #include "orcamentoproxymodel.h"
 
 OrcamentoProxyModel::OrcamentoProxyModel(SqlTableModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), diasIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("status")), followupIndex(model->fieldIndex("Observação")),
+    : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("status")), followupIndex(model->fieldIndex("Observação")),
       semaforoIndex(model->fieldIndex("semaforo")) {
   setSourceModel(model);
 }
 
 QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {
-    if (proxyIndex.column() == diasIndex) {
-      const int dias = QIdentityProxyModel::data(index(proxyIndex.row(), diasIndex), Qt::DisplayRole).toInt();
+    if (proxyIndex.column() == diasRestantesIndex) {
+      const int dias = QIdentityProxyModel::data(index(proxyIndex.row(), diasRestantesIndex), Qt::DisplayRole).toInt();
       const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), statusIndex), Qt::DisplayRole).toString();
 
       if (dias >= 5 or status == "FECHADO") return QBrush(Qt::green);
@@ -36,13 +36,16 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
   }
 
   if (role == Qt::ForegroundRole) {
-    if (proxyIndex.column() == diasIndex) {
-      const int dias = QIdentityProxyModel::data(index(proxyIndex.row(), diasIndex), Qt::DisplayRole).toInt();
+
+    // those paint the text as black if the background is colored
+
+    if (proxyIndex.column() == diasRestantesIndex) {
+      const int dias = QIdentityProxyModel::data(index(proxyIndex.row(), diasRestantesIndex), Qt::DisplayRole).toInt();
       const QString status = QIdentityProxyModel::data(index(proxyIndex.row(), statusIndex), Qt::DisplayRole).toString();
 
       if (dias >= 5 or status == "FECHADO") return QBrush(Qt::black);
       if (dias >= 3 or status == "CANCELADO") return QBrush(Qt::black);
-      if (dias < 3) return QBrush(Qt::red);
+      if (dias < 3) return QBrush(Qt::black);
     }
 
     if (proxyIndex.column() == followupIndex) {
@@ -57,6 +60,8 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
     if (status == "FECHADO") return QBrush(Qt::black);
     if (status == "CANCELADO") return QBrush(Qt::black);
     if (status == "PERDIDO") return QBrush(Qt::black);
+
+    //
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

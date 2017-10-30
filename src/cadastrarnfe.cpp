@@ -56,6 +56,9 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
   connect(&modelProd, &QAbstractItemModel::dataChanged, this, &CadastrarNFe::updateImpostos);
 
   ui->comboBoxFreteConta->setCurrentIndex(1);
+
+  ui->frame_2->hide();
+  ui->frame_4->hide();
 }
 
 CadastrarNFe::~CadastrarNFe() { delete ui; }
@@ -872,8 +875,8 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelProd.data(index.row(), "cfop").toString(), Qt::MatchStartsWith));
   ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelProd.data(index.row(), "orig").toString(), Qt::MatchStartsWith));
   ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelProd.data(index.row(), "cstICMS").toString(), Qt::MatchStartsWith));
-  ui->comboBoxICMSModBc->setCurrentIndex(modelProd.data(index.row(), "modBC").toInt());
-  ui->comboBoxICMSModBcSt->setCurrentIndex(modelProd.data(index.row(), "modBCST").toInt());
+  ui->comboBoxICMSModBc->setCurrentIndex(modelProd.data(index.row(), "modBC").toInt() + 1);
+  ui->comboBoxICMSModBcSt->setCurrentIndex(modelProd.data(index.row(), "modBCST").toInt() + 1);
   ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelProd.data(index.row(), "cstIPI").toString(), Qt::MatchStartsWith));
   ui->comboBoxPIScst->setCurrentIndex(ui->comboBoxPIScst->findText(modelProd.data(index.row(), "cstPIS").toString(), Qt::MatchStartsWith));
   ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelProd.data(index.row(), "cstCOFINS").toString(), Qt::MatchStartsWith));
@@ -902,7 +905,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   }
 
   // ICMS
-  ui->comboBoxCfop_2->setCurrentText(query.value("cfop").toString() + " - " + queryCfop.value("NAT").toString());
+  ui->comboBoxCfop_2->setCurrentText(query.value("cfop").toString() + " - " + queryCfop.value("NAT").toString().left(50));
   ui->comboBoxICMSOrig_2->setCurrentIndex(ui->comboBoxICMSOrig_2->findText(query.value("orig").toString(), Qt::MatchStartsWith));
   ui->comboBoxSituacaoTributaria_2->setCurrentIndex(ui->comboBoxSituacaoTributaria_2->findText(query.value("cstICMS").toString(), Qt::MatchStartsWith));
   ui->comboBoxICMSModBc_2->setCurrentIndex(query.value("modBC").toInt() + 1);
@@ -1573,7 +1576,7 @@ bool CadastrarNFe::validar() {
     }
 
     if (modelProd.data(row, "descUnitario").toDouble() == 0.) {
-      QMessageBox::critical(this, "Erro!", "Preço venda = R$ 0!");
+      QMessageBox::critical(this, "Erro!", "Preço unitário = R$ 0!");
       return false;
     }
 

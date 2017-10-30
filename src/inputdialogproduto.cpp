@@ -102,9 +102,7 @@ void InputDialogProduto::setupTables() {
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
 
-  if (tipo == Tipo::GerarCompra) {
-    ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
-  }
+  if (tipo == Tipo::GerarCompra) ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {

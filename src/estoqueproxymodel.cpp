@@ -4,11 +4,11 @@
 
 #include "estoqueproxymodel.h"
 
-EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpd(model->fieldIndex("quantUpd")) { setSourceModel(model); }
+EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpdIndex(model->fieldIndex("quantUpd")) { setSourceModel(model); }
 
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {
-    const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt());
+    const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), quantUpdIndex), Qt::DisplayRole).toInt());
 
     if (quantUpd == Status::Ok) return QBrush(Qt::green);
     if (quantUpd == Status::QuantDifere) return QBrush(Qt::yellow);
@@ -21,7 +21,7 @@ QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) 
 
     // those paint the text as black if the background is colored
 
-    const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), this->quantUpd), Qt::DisplayRole).toInt());
+    const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), quantUpdIndex), Qt::DisplayRole).toInt());
 
     if (quantUpd == Status::Ok) return QBrush(Qt::black);
     if (quantUpd == Status::QuantDifere) return QBrush(Qt::black);

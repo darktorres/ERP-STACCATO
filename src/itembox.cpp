@@ -63,6 +63,7 @@ void ItemBox::edit() {
   }
 }
 
+// REFAC: replace this with eliding? https://wiki.qt.io/Elided_Label
 void ItemBox::resetCursor() { setCursorPosition(0); }
 
 void ItemBox::setRegisterDialog(RegisterDialog *value) {

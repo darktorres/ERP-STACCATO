@@ -4,14 +4,14 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-#include "ui_widgetcalendario.h"
-#include "widgetcalendario.h"
+#include "ui_widgetlogisticacalendario.h"
+#include "widgetlogisticacalendario.h"
 
-WidgetCalendario::WidgetCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCalendario) { ui->setupUi(this); }
+WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
 
-WidgetCalendario::~WidgetCalendario() { delete ui; }
+WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 
-bool WidgetCalendario::updateTables() {
+bool WidgetLogisticaCalendario::updateTables() {
   if (not setup) {
     QSqlQuery query;
 
@@ -25,7 +25,7 @@ bool WidgetCalendario::updateTables() {
       auto *cb = new QCheckBox(this);
       cb->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
       cb->setChecked(true);
-      connect(cb, &QAbstractButton::toggled, this, &WidgetCalendario::updateFilter);
+      connect(cb, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);
       ui->groupBoxVeiculos->layout()->addWidget(cb);
     }
 
@@ -38,12 +38,12 @@ bool WidgetCalendario::updateTables() {
   return updateCalendar(date.addDays(date.dayOfWeek() * -1));
 }
 
-void WidgetCalendario::updateFilter() {
+void WidgetLogisticaCalendario::updateFilter() {
   const QDate date = ui->calendarWidget->selectedDate();
   updateCalendar(date.addDays(date.dayOfWeek() * -1));
 }
 
-bool WidgetCalendario::updateCalendar(const QDate &startDate) {
+bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   ui->tableWidget->clearContents();
 
   int veiculos = 0;
@@ -139,16 +139,16 @@ bool WidgetCalendario::updateCalendar(const QDate &startDate) {
   return true;
 }
 
-void WidgetCalendario::on_checkBoxMostrarFiltros_toggled(bool checked) {
+void WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled(bool checked) {
   ui->calendarWidget->setVisible(checked);
   ui->groupBoxVeiculos->setVisible(checked);
 }
 
-void WidgetCalendario::on_pushButtonProximo_clicked() { ui->calendarWidget->setSelectedDate(ui->calendarWidget->selectedDate().addDays(7)); }
+void WidgetLogisticaCalendario::on_pushButtonProximo_clicked() { ui->calendarWidget->setSelectedDate(ui->calendarWidget->selectedDate().addDays(7)); }
 
-void WidgetCalendario::on_pushButtonAnterior_clicked() { ui->calendarWidget->setSelectedDate(ui->calendarWidget->selectedDate().addDays(-7)); }
+void WidgetLogisticaCalendario::on_pushButtonAnterior_clicked() { ui->calendarWidget->setSelectedDate(ui->calendarWidget->selectedDate().addDays(-7)); }
 
-void WidgetCalendario::on_calendarWidget_selectionChanged() {
+void WidgetLogisticaCalendario::on_calendarWidget_selectionChanged() {
   const QDate date = ui->calendarWidget->selectedDate();
 
   updateCalendar(date.addDays(date.dayOfWeek() * -1));

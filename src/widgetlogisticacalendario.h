@@ -1,18 +1,18 @@
-#ifndef WIDGETCALENDARIO_H
-#define WIDGETCALENDARIO_H
+#ifndef WIDGETLOGISTICACALENDARIO_H
+#define WIDGETLOGISTICACALENDARIO_H
 
 #include <QWidget>
 
 namespace Ui {
-class WidgetCalendario;
+class WidgetLogisticaCalendario;
 }
 
-class WidgetCalendario : public QWidget {
+class WidgetLogisticaCalendario : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCalendario(QWidget *parent = 0);
-  ~WidgetCalendario();
+  explicit WidgetLogisticaCalendario(QWidget *parent = 0);
+  ~WidgetLogisticaCalendario();
   bool updateTables();
 
 private slots:
@@ -24,10 +24,10 @@ private slots:
 private:
   // attributes
   bool setup = false;
-  Ui::WidgetCalendario *ui;
+  Ui::WidgetLogisticaCalendario *ui;
   // methods
   bool updateCalendar(const QDate &startDate);
   void updateFilter();
 };
 
-#endif // WIDGETCALENDARIO_H
+#endif // WIDGETLOGISTICACALENDARIO_H

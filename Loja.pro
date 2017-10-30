@@ -64,7 +64,6 @@ SOURCES += \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
     src/cadastrousuario.cpp \
-    src/calendarioentregas.cpp \
     src/cepcompleter.cpp \
     src/checkboxdelegate.cpp \
     src/combobox.cpp \
@@ -122,7 +121,6 @@ SOURCES += \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
-    src/widgetcalendario.cpp \
     src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompradevolucao.cpp \
@@ -130,16 +128,18 @@ SOURCES += \
     src/widgetcompragerar.cpp \
     src/widgetcompraoc.cpp \
     src/widgetcomprapendentes.cpp \
-    src/widgetcontas.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
-    src/widgetfluxocaixa.cpp \
+    src/widgetfinanceirocontas.cpp \
+    src/widgetfinanceirofluxocaixa.cpp \
     src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
+    src/widgetlogisticaagendarentrega.cpp \
+    src/widgetlogisticacalendario.cpp \
     src/widgetlogisticacaminhao.cpp \
     src/widgetlogisticacoleta.cpp \
-    src/widgetlogisticaentrega.cpp \
+    src/widgetlogisticaentregas.cpp \
     src/widgetlogisticaentregues.cpp \
     src/widgetlogisticarecebimento.cpp \
     src/widgetlogisticarepresentacao.cpp \
@@ -165,7 +165,6 @@ HEADERS  += \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
     src/cadastrousuario.h \
-    src/calendarioentregas.h \
     src/cepcompleter.h \
     src/checkboxdelegate.h \
     src/combobox.h \
@@ -222,7 +221,6 @@ HEADERS  += \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \
-    src/widgetcalendario.h \
     src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompradevolucao.h \
@@ -230,16 +228,18 @@ HEADERS  += \
     src/widgetcompragerar.h \
     src/widgetcompraoc.h \
     src/widgetcomprapendentes.h \
-    src/widgetcontas.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
     src/widgetfinanceirocompra.h\
-    src/widgetfluxocaixa.h \
+    src/widgetfinanceirocontas.h \
+    src/widgetfinanceirofluxocaixa.h \
     src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
+    src/widgetlogisticaagendarentrega.h \
+    src/widgetlogisticacalendario.h \
     src/widgetlogisticacaminhao.h \
     src/widgetlogisticacoleta.h \
-    src/widgetlogisticaentrega.h \
+    src/widgetlogisticaentregas.h \
     src/widgetlogisticaentregues.h \
     src/widgetlogisticarecebimento.h \
     src/widgetlogisticarepresentacao.h \
@@ -264,7 +264,6 @@ FORMS += \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \
     ui/cadastrousuario.ui \
-    ui/calendarioentregas.ui \
     ui/contas.ui \
     ui/devolucao.ui \
     ui/estoque.ui \
@@ -288,7 +287,6 @@ FORMS += \
     ui/userconfig.ui \
     ui/validadedialog.ui \
     ui/venda.ui \
-    ui/widgetcalendario.ui \
     ui/widgetcompra.ui \
     ui/widgetcompraconfirmar.ui \
     ui/widgetcompradevolucao.ui \
@@ -296,16 +294,18 @@ FORMS += \
     ui/widgetcompragerar.ui \
     ui/widgetcompraoc.ui \
     ui/widgetcomprapendentes.ui \
-    ui/widgetcontas.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \
-    ui/widgetfluxocaixa.ui \
+    ui/widgetfinanceirocontas.ui \
+    ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
+    ui/widgetlogisticaagendarentrega.ui \
+    ui/widgetlogisticacalendario.ui \
     ui/widgetlogisticacaminhao.ui \
     ui/widgetlogisticacoleta.ui \
-    ui/widgetlogisticaentrega.ui \
+    ui/widgetlogisticaentregas.ui \
     ui/widgetlogisticaentregues.ui \
     ui/widgetlogisticarecebimento.ui \
     ui/widgetlogisticarepresentacao.ui \

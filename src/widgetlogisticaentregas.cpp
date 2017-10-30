@@ -13,25 +13,25 @@
 
 #include "acbr.h"
 #include "cadastrarnfe.h"
-#include "calendarioentregas.h"
 #include "doubledelegate.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
 #include "sqlquerymodel.h"
-#include "ui_calendarioentregas.h"
+#include "ui_widgetlogisticaentregas.h"
 #include "usersession.h"
+#include "widgetlogisticaentregas.h"
 #include "xlsxdocument.h"
 
-CalendarioEntregas::CalendarioEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::CalendarioEntregas) {
+WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
 
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
 }
 
-CalendarioEntregas::~CalendarioEntregas() { delete ui; }
+WidgetLogisticaEntregas::~WidgetLogisticaEntregas() { delete ui; }
 
-bool CalendarioEntregas::updateTables() {
+bool WidgetLogisticaEntregas::updateTables() {
   if (modelCarga.tableName().isEmpty()) setupTables();
 
   if (not modelCarga.select()) {
@@ -67,7 +67,7 @@ bool CalendarioEntregas::updateTables() {
   return true;
 }
 
-void CalendarioEntregas::setupTables() {
+void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setTable("view_calendario_entrega");
   modelCalendario.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -129,7 +129,7 @@ void CalendarioEntregas::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this));
 }
 
-void CalendarioEntregas::on_pushButtonReagendar_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -156,7 +156,7 @@ void CalendarioEntregas::on_pushButtonReagendar_clicked() {
   QMessageBox::information(this, "Aviso!", "Reagendado com sucesso!");
 }
 
-bool CalendarioEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
+bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
   QSqlQuery query;
 
   for (const auto &item : list) {
@@ -193,7 +193,7 @@ bool CalendarioEntregas::reagendar(const QModelIndexList &list, const QDate &dat
   return true;
 }
 
-void CalendarioEntregas::on_pushButtonGerarNFeEntregar_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -213,7 +213,7 @@ void CalendarioEntregas::on_pushButtonGerarNFeEntregar_clicked() {
   nfe->show();
 }
 
-void CalendarioEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
+void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
   const QString data = modelCalendario.data(index.row(), "data").toString();
   const QString veiculo = modelCalendario.data(index.row(), "idVeiculo").toString();
 
@@ -234,7 +234,7 @@ void CalendarioEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
   ui->pushButtonCancelarEntrega->setDisabled(true);
 }
 
-void CalendarioEntregas::on_tableCarga_clicked(const QModelIndex &index) {
+void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
 
   if (not modelProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos: " + modelProdutos.lastError().text());
@@ -268,7 +268,7 @@ void CalendarioEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->pushButtonConsultarNFe->setEnabled(nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
 }
 
-bool CalendarioEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
+bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
   QSqlQuery query;
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
@@ -309,7 +309,7 @@ bool CalendarioEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QS
   return true;
 }
 
-void CalendarioEntregas::on_pushButtonConfirmarEntrega_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -348,7 +348,7 @@ void CalendarioEntregas::on_pushButtonConfirmarEntrega_clicked() {
   QMessageBox::information(this, "Aviso!", "Entrega confirmada!");
 }
 
-void CalendarioEntregas::on_pushButtonImprimirDanfe_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -359,7 +359,7 @@ void CalendarioEntregas::on_pushButtonImprimirDanfe_clicked() {
   if (not ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) return;
 }
 
-void CalendarioEntregas::on_lineEditBuscar_textChanged(const QString &text) {
+void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &text) {
   modelCarga.setFilter(text.isEmpty() ? "0" : "idVenda LIKE '%" + text + "%'");
 
   if (not modelCarga.select()) {
@@ -368,7 +368,7 @@ void CalendarioEntregas::on_lineEditBuscar_textChanged(const QString &text) {
   }
 }
 
-void CalendarioEntregas::on_pushButtonCancelarEntrega_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -396,7 +396,7 @@ void CalendarioEntregas::on_pushButtonCancelarEntrega_clicked() {
   QMessageBox::information(this, "Aviso!", "Operação realizada com sucesso!");
 }
 
-bool CalendarioEntregas::cancelarEntrega(const QModelIndexList &list) {
+bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   const int idEvento = modelCarga.data(list.first().row(), "idEvento").toInt();
 
   QSqlQuery query;
@@ -434,9 +434,9 @@ bool CalendarioEntregas::cancelarEntrega(const QModelIndexList &list) {
 // TODO: 1refazer sistema para permitir multiplas notas para uma mesma carga/pedido (notas parciais)
 // TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'
 
-void CalendarioEntregas::on_tableCarga_entered(const QModelIndex &) { ui->tableCarga->resizeColumnsToContents(); }
+void WidgetLogisticaEntregas::on_tableCarga_entered(const QModelIndex &) { ui->tableCarga->resizeColumnsToContents(); }
 
-void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) {
@@ -446,61 +446,25 @@ void CalendarioEntregas::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelCarga.data(selection.first().row(), "idNFe").toInt();
 
-  QSqlQuery query;
-  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", idNFe);
+  if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
+    auto [xml, resposta] = *tuple;
 
-  if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando XML: " + query.lastError().text());
-    return;
+    QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
+    QSqlQuery("START TRANSACTION").exec();
+
+    if (not consultarNFe(idNFe, xml)) {
+      QSqlQuery("ROLLBACK").exec();
+      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+      return;
+    }
+
+    QSqlQuery("COMMIT").exec();
+
+    QMessageBox::information(this, "Aviso!", resposta);
   }
-
-  QFile file(QDir::currentPath() + "/temp.xml");
-
-  if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
-    return;
-  }
-
-  QTextStream stream(&file);
-
-  stream << query.value("xml").toString();
-
-  file.close();
-
-  QString resposta;
-
-  if (not ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")", resposta)) return;
-
-  if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    QMessageBox::critical(this, "Resposta ConsultarNFe", resposta);
-    return;
-  }
-
-  QFile newFile(QDir::currentPath() + "/temp.xml");
-
-  if (not newFile.open(QFile::ReadOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
-    return;
-  }
-
-  const QString xml = newFile.readAll();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not consultarNFe(idNFe, xml)) {
-    QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
-    return;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  QMessageBox::information(this, "Aviso!", resposta);
 }
 
-bool CalendarioEntregas::consultarNFe(const int idNFe, const QString &xml) {
+bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) {
   // alterar status da nota para 'autorizado'
 
   QSqlQuery query;
@@ -546,7 +510,7 @@ bool CalendarioEntregas::consultarNFe(const int idNFe, const QString &xml) {
 
 // TODO: 5mudar nome desta classe
 
-void CalendarioEntregas::on_pushButtonProtocoloEntrega_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {

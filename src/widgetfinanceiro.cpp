@@ -6,13 +6,13 @@
 WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiro) {
   ui->setupUi(this);
 
-  ui->widgetPagar->setTipo(WidgetContas::Tipo::Pagar);
-  ui->widgetReceber->setTipo(WidgetContas::Tipo::Receber);
+  ui->widgetPagar->setTipo(WidgetFinanceiroContas::Tipo::Pagar);
+  ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
   ui->widgetVenda->setFinanceiro();
 
-  connect(ui->widgetFluxoCaixa, &WidgetFluxoCaixa::errorSignal, this, &WidgetFinanceiro::errorSignal);
-  connect(ui->widgetPagar, &WidgetContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
-  connect(ui->widgetReceber, &WidgetContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetPagar, &WidgetFinanceiroContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetReceber, &WidgetFinanceiroContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
   connect(ui->widgetVenda, &WidgetVenda::errorSignal, this, &WidgetFinanceiro::errorSignal);
   connect(ui->widgetCompra, &WidgetFinanceiroCompra::errorSignal, this, &WidgetFinanceiro::errorSignal);
 

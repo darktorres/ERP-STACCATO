@@ -1,5 +1,5 @@
-#ifndef WIDGETFLUXOCAIXA_H
-#define WIDGETFLUXOCAIXA_H
+#ifndef WIDGETFINANCEIROFLUXOCAIXA_H
+#define WIDGETFINANCEIROFLUXOCAIXA_H
 
 #include <QWidget>
 
@@ -7,15 +7,15 @@
 #include "sqltablemodel.h"
 
 namespace Ui {
-class WidgetFluxoCaixa;
+class WidgetFinanceiroFluxoCaixa;
 }
 
-class WidgetFluxoCaixa : public QWidget {
+class WidgetFinanceiroFluxoCaixa : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFluxoCaixa(QWidget *parent = 0);
-  ~WidgetFluxoCaixa();
+  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent = 0);
+  ~WidgetFinanceiroFluxoCaixa();
   bool updateTables();
 
 signals:
@@ -35,9 +35,9 @@ private:
   SqlQueryModel modelCaixa;
   SqlQueryModel modelCaixa2;
   SqlQueryModel modelFuturo;
-  Ui::WidgetFluxoCaixa *ui;
+  Ui::WidgetFinanceiroFluxoCaixa *ui;
   // methods
   void montaFiltro();
 };
 
-#endif // WIDGETFLUXOCAIXA_H
+#endif // WIDGETFINANCEIROFLUXOCAIXA_H

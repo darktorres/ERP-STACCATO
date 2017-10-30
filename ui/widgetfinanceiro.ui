@@ -25,7 +25,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
        <item row="0" column="1">
-        <widget class="WidgetFluxoCaixa" name="widgetFluxoCaixa" native="true"/>
+        <widget class="WidgetFinanceiroFluxoCaixa" name="widgetFluxoCaixa" native="true"/>
        </item>
       </layout>
      </widget>
@@ -35,7 +35,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0">
-        <widget class="WidgetContas" name="widgetPagar" native="true"/>
+        <widget class="WidgetFinanceiroContas" name="widgetPagar" native="true"/>
        </item>
       </layout>
      </widget>
@@ -45,7 +45,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="0">
-        <widget class="WidgetContas" name="widgetReceber" native="true"/>
+        <widget class="WidgetFinanceiroContas" name="widgetReceber" native="true"/>
        </item>
       </layout>
      </widget>
@@ -81,15 +81,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetFluxoCaixa</class>
+   <class>WidgetFinanceiroFluxoCaixa</class>
    <extends>QWidget</extends>
-   <header>src/widgetfluxocaixa.h</header>
+   <header>src/widgetfinanceirofluxocaixa.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetContas</class>
+   <class>WidgetFinanceiroContas</class>
    <extends>QWidget</extends>
-   <header>src/widgetcontas.h</header>
+   <header>src/widgetfinanceirocontas.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

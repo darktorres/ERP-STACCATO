@@ -6,21 +6,21 @@
 
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"
-#include "ui_widgetfluxocaixa.h"
-#include "widgetfluxocaixa.h"
+#include "ui_widgetfinanceirofluxocaixa.h"
+#include "widgetfinanceirofluxocaixa.h"
 
-WidgetFluxoCaixa::WidgetFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFluxoCaixa) { ui->setupUi(this); }
+WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
 
-WidgetFluxoCaixa::~WidgetFluxoCaixa() { delete ui; }
+WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
 
-bool WidgetFluxoCaixa::updateTables() {
+bool WidgetFinanceiroFluxoCaixa::updateTables() {
   if (not ui->tableCaixa->model()) {
     ui->dateEdit->setDate(QDate::currentDate());
 
-    connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFluxoCaixa::montaFiltro);
-    connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFluxoCaixa::montaFiltro);
-    connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFluxoCaixa::montaFiltro);
-    connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFluxoCaixa::montaFiltro);
+    connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
+    connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
+    connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
+    connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
 
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
@@ -40,7 +40,7 @@ bool WidgetFluxoCaixa::updateTables() {
   return true;
 }
 
-void WidgetFluxoCaixa::montaFiltro() {
+void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   if (not isReady) return;
 
   const QString filtroData = ui->groupBoxMes->isChecked() ? "`Data` IS NOT NULL AND DATE_FORMAT(`Data`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`Data` IS NOT NULL";
@@ -131,11 +131,11 @@ void WidgetFluxoCaixa::montaFiltro() {
   ui->tableFuturo->hideColumn("idConta");
 }
 
-void WidgetFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCaixa->resizeColumnsToContents(); }
+void WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCaixa->resizeColumnsToContents(); }
 
-void WidgetFluxoCaixa::on_tableCaixa2_entered(const QModelIndex &) { ui->tableCaixa2->resizeColumnsToContents(); }
+void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_entered(const QModelIndex &) { ui->tableCaixa2->resizeColumnsToContents(); }
 
-void WidgetFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
+void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
   const QDate date = modelCaixa2.data(index.row(), "Data").toDate();
   const QString idConta = modelCaixa2.data(index.row(), "idConta").toString();
 
@@ -144,7 +144,7 @@ void WidgetFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
   dia->show();
 }
 
-void WidgetFluxoCaixa::on_tableCaixa_activated(const QModelIndex &index) {
+void WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated(const QModelIndex &index) {
   const QDate date = modelCaixa.data(index.row(), "Data").toDate();
   const QString idConta = modelCaixa.data(index.row(), "idConta").toString();
 
@@ -153,7 +153,7 @@ void WidgetFluxoCaixa::on_tableCaixa_activated(const QModelIndex &index) {
   dia->show();
 }
 
-void WidgetFluxoCaixa::on_groupBoxCaixa1_toggled(const bool checked) {
+void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled(const bool checked) {
   if (not checked) {
     ui->itemBoxCaixa1->clear();
     return;
@@ -162,7 +162,7 @@ void WidgetFluxoCaixa::on_groupBoxCaixa1_toggled(const bool checked) {
   montaFiltro();
 }
 
-void WidgetFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
+void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
   if (not checked) {
     ui->itemBoxCaixa2->clear();
     return;

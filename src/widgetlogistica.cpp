@@ -12,10 +12,10 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
   ui->splitter_6->setStretchFactor(0, 0);
   ui->splitter_6->setStretchFactor(1, 1);
 
-  connect(ui->widgetCalendarioEntrega, &CalendarioEntregas::errorSignal, this, &WidgetLogistica::errorSignal);
+  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::errorSignal, this, &WidgetLogistica::errorSignal);
   connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::errorSignal, this, &WidgetLogistica::errorSignal);
   connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaEntrega::errorSignal, this, &WidgetLogistica::errorSignal);
+  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::errorSignal, this, &WidgetLogistica::errorSignal);
 
   ui->tableForn->setModel(&model);
 }

@@ -1,5 +1,5 @@
-#ifndef WIDGETLOGISTICAENTREGA_H
-#define WIDGETLOGISTICAENTREGA_H
+#ifndef WIDGETLOGISTICAAGENDARENTREGA_H
+#define WIDGETLOGISTICAAGENDARENTREGA_H
 
 #include <QWidget>
 
@@ -7,15 +7,15 @@
 #include "sqltablemodel.h"
 
 namespace Ui {
-class WidgetLogisticaEntrega;
+class WidgetLogisticaAgendarEntrega;
 }
 
-class WidgetLogisticaEntrega : public QWidget {
+class WidgetLogisticaAgendarEntrega : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaEntrega(QWidget *parent = 0);
-  ~WidgetLogisticaEntrega();
+  explicit WidgetLogisticaAgendarEntrega(QWidget *parent = 0);
+  ~WidgetLogisticaAgendarEntrega();
   bool updateTables();
 
 signals:
@@ -44,7 +44,7 @@ private:
   SqlTableModel modelTransp2;
   SqlTableModel modelVendas;
   SqlQueryModel modelViewProdutos;
-  Ui::WidgetLogisticaEntrega *ui;
+  Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
   bool adicionarProduto(const QModelIndexList &list);
   bool adicionarProdutoParcial(const int row);
@@ -57,4 +57,4 @@ private:
   bool reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao);
 };
 
-#endif // WIDGETLOGISTICAENTREGA_H
+#endif // WIDGETLOGISTICAAGENDARENTREGA_H

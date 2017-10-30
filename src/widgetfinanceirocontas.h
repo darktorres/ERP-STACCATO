@@ -1,5 +1,5 @@
-#ifndef WIDGETCONTAS_H
-#define WIDGETCONTAS_H
+#ifndef WIDGETFINANCEIROCONTAS_H
+#define WIDGETFINANCEIROCONTAS_H
 
 #include <QWidget>
 
@@ -7,16 +7,16 @@
 #include "sqltablemodel.h"
 
 namespace Ui {
-class WidgetContas;
+class WidgetFinanceiroContas;
 }
 
-class WidgetContas : public QWidget {
+class WidgetFinanceiroContas : public QWidget {
   Q_OBJECT
 
 public:
   enum class Tipo { Nulo, Receber, Pagar };
-  explicit WidgetContas(QWidget *parent = 0);
-  ~WidgetContas();
+  explicit WidgetFinanceiroContas(QWidget *parent = 0);
+  ~WidgetFinanceiroContas();
   bool updateTables();
   void setTipo(const Tipo &value);
 
@@ -44,11 +44,11 @@ private:
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
   Tipo tipo = Tipo::Nulo;
-  Ui::WidgetContas *ui;
+  Ui::WidgetFinanceiroContas *ui;
   // methods
   void makeConnections();
   void montaFiltro();
   void setupTables();
 };
 
-#endif // WIDGETCONTAS_H
+#endif // WIDGETFINANCEIROCONTAS_H

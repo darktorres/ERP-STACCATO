@@ -9,10 +9,10 @@
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
-#include "ui_widgetcontas.h"
-#include "widgetcontas.h"
+#include "ui_widgetfinanceirocontas.h"
+#include "widgetfinanceirocontas.h"
 
-WidgetContas::WidgetContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetContas) {
+WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) {
   ui->setupUi(this);
 
   ui->radioButtonPendente->setChecked(true);
@@ -22,9 +22,9 @@ WidgetContas::WidgetContas(QWidget *parent) : QWidget(parent), ui(new Ui::Widget
   ui->itemBoxLojas->setSearchDialog(SearchDialog::loja(this));
 }
 
-WidgetContas::~WidgetContas() { delete ui; }
+WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 
-void WidgetContas::setupTables() {
+void WidgetFinanceiroContas::setupTables() {
   model.setTable(tipo == Tipo::Receber ? "view_conta_receber" : "view_conta_pagar");
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -57,20 +57,20 @@ void WidgetContas::setupTables() {
   ui->tableVencer->setItemDelegate(new ReaisDelegate(this));
 }
 
-void WidgetContas::makeConnections() {
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetContas::montaFiltro);
-  connect(ui->radioButtonCancelado, &QRadioButton::toggled, this, &WidgetContas::montaFiltro);
-  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetContas::montaFiltro);
-  connect(ui->radioButtonRecebido, &QRadioButton::toggled, this, &WidgetContas::montaFiltro);
-  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetContas::montaFiltro);
-  connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetContas::montaFiltro);
-  connect(ui->doubleSpinBoxAte, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetContas::montaFiltro);
-  connect(ui->itemBoxLojas, &ItemBox::textChanged, this, &WidgetContas::montaFiltro);
-  connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetContas::montaFiltro);
-  connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetContas::montaFiltro);
+void WidgetFinanceiroContas::makeConnections() {
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonCancelado, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonRecebido, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->dateEditAte, &QDateEdit::dateChanged, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->doubleSpinBoxAte, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->itemBoxLojas, &ItemBox::textChanged, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->groupBoxLojas, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->groupBoxData, &QGroupBox::toggled, this, &WidgetFinanceiroContas::montaFiltro);
 }
 
-bool WidgetContas::updateTables() {
+bool WidgetFinanceiroContas::updateTables() {
   if (model.tableName().isEmpty()) {
     setupTables();
     montaFiltro();
@@ -97,9 +97,9 @@ bool WidgetContas::updateTables() {
   return true;
 }
 
-void WidgetContas::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+void WidgetFinanceiroContas::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-void WidgetContas::on_table_activated(const QModelIndex &index) {
+void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   auto *contas = new Contas(tipo == Tipo::Receber ? Contas::Tipo::Receber : Contas::Tipo::Pagar, this);
   contas->setAttribute(Qt::WA_DeleteOnClose);
   const QString idPagamento = model.data(index.row(), "idPagamento").toString();
@@ -109,7 +109,7 @@ void WidgetContas::on_table_activated(const QModelIndex &index) {
   // ajustar para selecionar mais de uma linha e ajustar no filtro da Contas
 }
 
-void WidgetContas::montaFiltro() {
+void WidgetFinanceiroContas::montaFiltro() {
   QString status;
 
   for (const auto &child : ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
@@ -150,23 +150,23 @@ void WidgetContas::montaFiltro() {
   ui->table->resizeColumnsToContents();
 }
 
-void WidgetContas::on_pushButtonInserirLancamento_clicked() {
+void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
   auto *lancamento = new InserirLancamento(tipo == Tipo::Receber ? InserirLancamento::Tipo::Receber : InserirLancamento::Tipo::Pagar, this);
   lancamento->setAttribute(Qt::WA_DeleteOnClose);
   lancamento->show();
 }
 
-void WidgetContas::on_pushButtonAdiantarRecebimento_clicked() {
+void WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked() {
   auto *adiantar = new AnteciparRecebimento(this);
   adiantar->setAttribute(Qt::WA_DeleteOnClose);
   adiantar->show();
 }
 
-void WidgetContas::on_doubleSpinBoxDe_valueChanged(const double value) { ui->doubleSpinBoxAte->setValue(value); }
+void WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged(const double value) { ui->doubleSpinBoxAte->setValue(value); }
 
-void WidgetContas::on_dateEditDe_dateChanged(const QDate &date) { ui->dateEditAte->setDate(date); }
+void WidgetFinanceiroContas::on_dateEditDe_dateChanged(const QDate &date) { ui->dateEditAte->setDate(date); }
 
-void WidgetContas::setTipo(const Tipo &value) {
+void WidgetFinanceiroContas::setTipo(const Tipo &value) {
   tipo = value;
 
   if (tipo == Tipo::Pagar) {
@@ -179,15 +179,15 @@ void WidgetContas::setTipo(const Tipo &value) {
   }
 }
 
-void WidgetContas::on_groupBoxData_toggled(const bool enabled) {
+void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
   for (const auto &child : ui->groupBoxData->findChildren<QDateEdit *>()) child->setEnabled(enabled);
 }
 
-void WidgetContas::on_tableVencidos_entered(const QModelIndex &) { ui->tableVencidos->resizeColumnsToContents(); }
+void WidgetFinanceiroContas::on_tableVencidos_entered(const QModelIndex &) { ui->tableVencidos->resizeColumnsToContents(); }
 
-void WidgetContas::on_tableVencer_entered(const QModelIndex &) { ui->tableVencer->resizeColumnsToContents(); }
+void WidgetFinanceiroContas::on_tableVencer_entered(const QModelIndex &) { ui->tableVencer->resizeColumnsToContents(); }
 
-void WidgetContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
+void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
   ui->dateEditDe->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
   ui->dateEditAte->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
 
@@ -196,7 +196,7 @@ void WidgetContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
   ui->tableVencer->clearSelection();
 }
 
-void WidgetContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
+void WidgetFinanceiroContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
   ui->dateEditDe->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
   ui->dateEditAte->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
 
@@ -205,13 +205,13 @@ void WidgetContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
   ui->tableVencidos->clearSelection();
 }
 
-void WidgetContas::on_pushButtonInserirTransferencia_clicked() {
+void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
   auto *transferencia = new InserirTransferencia(this);
   transferencia->setAttribute(Qt::WA_DeleteOnClose);
   transferencia->show();
 }
 
-void WidgetContas::on_pushButtonExcluirLancamento_clicked() {
+void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {

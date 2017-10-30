@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WidgetLogisticaEntrega</class>
- <widget class="QWidget" name="WidgetLogisticaEntrega">
+ <class>WidgetLogisticaAgendarEntrega</class>
+ <widget class="QWidget" name="WidgetLogisticaAgendarEntrega">
   <property name="geometry">
    <rect>
     <x>0</x>

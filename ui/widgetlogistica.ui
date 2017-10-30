@@ -115,7 +115,7 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="0">
-         <widget class="WidgetLogisticaEntrega" name="widgetAgendaEntrega" native="true"/>
+         <widget class="WidgetLogisticaAgendarEntrega" name="widgetAgendaEntrega" native="true"/>
         </item>
        </layout>
       </widget>
@@ -125,7 +125,7 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_27">
         <item row="0" column="0">
-         <widget class="CalendarioEntregas" name="widgetCalendarioEntrega" native="true"/>
+         <widget class="WidgetLogisticaEntregas" name="widgetCalendarioEntrega" native="true"/>
         </item>
        </layout>
       </widget>
@@ -165,7 +165,7 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
-         <widget class="WidgetCalendario" name="widgetCalendario" native="true"/>
+         <widget class="WidgetLogisticaCalendario" name="widgetCalendario" native="true"/>
         </item>
        </layout>
       </widget>
@@ -187,9 +187,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetLogisticaEntrega</class>
+   <class>WidgetLogisticaAgendarEntrega</class>
    <extends>QWidget</extends>
-   <header>src/widgetlogisticaentrega.h</header>
+   <header>src/widgetlogisticaagendarentrega.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -205,9 +205,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>CalendarioEntregas</class>
+   <class>WidgetLogisticaEntregas</class>
    <extends>QWidget</extends>
-   <header>src/calendarioentregas.h</header>
+   <header>src/widgetlogisticaentregas.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -229,9 +229,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetCalendario</class>
+   <class>WidgetLogisticaCalendario</class>
    <extends>QWidget</extends>
-   <header>src/widgetcalendario.h</header>
+   <header>src/widgetlogisticacalendario.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

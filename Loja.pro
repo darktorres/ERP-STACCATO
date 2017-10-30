@@ -49,7 +49,8 @@ CONFIG -= console
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.4.11/limereport/limereport.pri)
+#include(LimeReport-1.4.11/limereport/limereport.pri)
+include(LimeReport-1.4.51/limereport/limereport.pri)
 
 SOURCES += \
     src/acbr.cpp \

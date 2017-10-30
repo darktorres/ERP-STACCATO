@@ -263,7 +263,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     ++row;
   } while (queryProduto.next());
 
-  for (int row = queryProduto.size() + 12; row < 111; ++row) xlsx.setRowHeight(row, 0);
+  for (int row = queryProduto.size() + 12; row < 111; ++row) xlsx.setRowHidden(row, true);
 
   if (not xlsx.saveAs(fileName)) {
     QMessageBox::critical(parent, "Erro!", "Ocorreu algum erro ao salvar o arquivo.");

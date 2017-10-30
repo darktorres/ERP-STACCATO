@@ -416,7 +416,7 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
     xlsx.write("H200", total * modelProdutos.data(lista.first(), "aliquotaSt").toDouble() / 100);
   }
 
-  for (int row = lista.size() + 13; row < 200; ++row) xlsx.setRowHeight(row, 0);
+  for (int row = lista.size() + 13; row < 200; ++row) xlsx.setRowHidden(row, true);
 
   if (not xlsx.saveAs(fileName)) {
     QMessageBox::critical(this, "Erro!", "Ocorreu algum erro ao salvar o arquivo.");

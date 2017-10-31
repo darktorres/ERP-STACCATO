@@ -577,39 +577,37 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   xlsx.currentWorksheet()->setFitToHeight(true);
   xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
 
-  QSqlQuery query;
-  query.prepare("SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda");
-  query.bindValue(":idVenda", idVenda);
+  QSqlQuery queryCliente;
+  queryCliente.prepare("SELECT nome_razao, tel, telCel FROM cliente c WHERE c.idCliente = (SELECT idCliente FROM venda WHERE idVenda = :idVenda)");
+  queryCliente.bindValue(":idVenda", idVenda);
 
-  if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando endereço entrega: " + query.lastError().text());
+  if (not queryCliente.exec() or not queryCliente.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando dados cliente: " + queryCliente.lastError().text());
     return;
   }
 
-  if (query.value("idEnderecoEntrega").toInt() == 1) {
-    QMessageBox::critical(this, "Erro!", R"(Endereço é "NÃO HÁ!")");
-    return;
-  }
-
-  query.prepare("SELECT nome_razao, logradouro, numero, complemento, bairro, cidade, cep, tel, telCel FROM cliente c LEFT JOIN cliente_has_endereco che ON c.idCliente = che.idCliente WHERE "
-                "c.idCliente = (SELECT idCliente FROM venda WHERE idVenda = :idVenda) AND che.idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
-  query.bindValue(":idVenda", idVenda);
-
-  if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando dados cliente: " + query.lastError().text());
-    return;
-  }
-
-  const QString tel = query.value("tel").toString();
-  const QString telCel = query.value("telCel").toString();
+  const QString tel = queryCliente.value("tel").toString();
+  const QString telCel = queryCliente.value("telCel").toString();
   const QString tels = tel.isEmpty() ? "" : tel + (telCel.isEmpty() ? "" : " - " + telCel);
 
   xlsx.write("AA5", idVenda);
-  xlsx.write("G11", query.value("nome_razao"));
+  xlsx.write("G11", queryCliente.value("nome_razao"));
   xlsx.write("Y11", tels);
-  xlsx.write("J19", query.value("logradouro").toString() + " " + query.value("numero").toString() + " " + query.value("complemento").toString() + " - " + query.value("bairro").toString() + ", " +
-                        query.value("cidade").toString());
-  xlsx.write("I17", query.value("cep"));
+
+  QSqlQuery queryEndereco;
+  queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
+  queryEndereco.bindValue(":idVenda", idVenda);
+
+  if (not queryEndereco.exec()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando endereço: " + queryEndereco.lastError().text());
+    return;
+  }
+
+  if (queryEndereco.first()) {
+    xlsx.write("J19", queryEndereco.value("logradouro").toString() + " " + queryEndereco.value("numero").toString() + " " + queryEndereco.value("complemento").toString() + " - " +
+                          queryEndereco.value("bairro").toString() + ", " + queryEndereco.value("cidade").toString());
+    xlsx.write("I17", queryEndereco.value("cep"));
+  }
 
   for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row = row + 2, ++index) {
     xlsx.write("D" + QString::number(row), modelProdutosAgrupado.data(index, "fornecedor"));

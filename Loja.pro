@@ -17,12 +17,12 @@ QMAKE_TARGET_PRODUCT = ERP
 QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
 QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
-CONFIG += c++14
+CONFIG += c++17
 
 #QMAKE_CXXFLAGS += -std=c++14
 
 gcc {
-QMAKE_CXXFLAGS += -Wall -Wextra
+QMAKE_CXXFLAGS += -Wall -Wextra -std=c++17
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast

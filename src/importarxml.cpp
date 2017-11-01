@@ -659,6 +659,16 @@ bool ImportarXML::inserirItemSql(XML &xml) {
 
       if (not modelEstoque.setData(row, "quant", newQuant)) return false;
 
+      //
+
+      const int rowNFe = modelEstoque_nfe.rowCount();
+      modelEstoque_nfe.insertRow(rowNFe);
+
+      if (not modelEstoque_nfe.setData(rowNFe, "idEstoque", modelEstoque.data(row, "idEstoque"))) return false;
+      if (not modelEstoque_nfe.setData(rowNFe, "idNFe", xml.idNFe)) return false;
+
+      //
+
       return true;
     }
   }

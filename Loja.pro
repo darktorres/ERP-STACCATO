@@ -6,8 +6,6 @@
 
 QT       += core gui sql network xml
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.4.51/limereport/limereport.pri)
-
 QT       += core gui sql network xml charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -25,19 +23,19 @@ CONFIG += c++17
 
 QMAKE_CXXFLAGS += -std=c++17
 
-#gcc {
-#QMAKE_CXXFLAGS += -Wall -Wextra
-##QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
-#QMAKE_CXXFLAGS_DEBUG += -O0
-##QMAKE_CXXFLAGS_RELEASE  = -Ofast
-#QMAKE_CXXFLAGS_RELEASE  = -O0
-#QMAKE_LFLAGS_DEBUG += -O0
-##QMAKE_LFLAGS_RELEASE += -O3
-#QMAKE_LFLAGS_RELEASE += -O0
+gcc {
+QMAKE_CXXFLAGS += -Wall -Wextra
+#QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
+QMAKE_CXXFLAGS_DEBUG += -O0
+#QMAKE_CXXFLAGS_RELEASE  = -Ofast
+QMAKE_CXXFLAGS_RELEASE  = -O0
+QMAKE_LFLAGS_DEBUG += -O0
+#QMAKE_LFLAGS_RELEASE += -O3
+QMAKE_LFLAGS_RELEASE += -O0
 
 #QMAKE_CXXFLAGS += -flto
 #QMAKE_LFLAGS += -flto -fuse-linker-plugin
-#}
+}
 
 macx{
 QMAKE_CXXFLAGS += -stdlib=libc++ -std=c++14
@@ -50,6 +48,10 @@ RESOURCES += \
 RC_ICONS = Staccato.ico
 
 CONFIG -= console
+
+include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
+include(QSimpleUpdater/qsimpleupdater.pri)
+include(LimeReport-1.4.51/limereport/limereport.pri)
 
 SOURCES += \
     src/acbr.cpp \

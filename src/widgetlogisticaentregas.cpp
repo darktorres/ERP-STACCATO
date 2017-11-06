@@ -141,16 +141,20 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not reagendar(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Reagendado com sucesso!");
@@ -166,7 +170,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
       query.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
       if (not query.exec()) {
-        error = "Erro atualizando data venda: " + query.lastError().text();
+        emit errorSignal("Erro atualizando data venda: " + query.lastError().text());
         return false;
       }
 
@@ -175,7 +179,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
       query.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
       if (not query.exec()) {
-        error = "Erro atualizando data pedido_fornecedor: " + query.lastError().text();
+        emit errorSignal("Erro atualizando data pedido_fornecedor: " + query.lastError().text());
         return false;
       }
     }
@@ -185,7 +189,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
     query.bindValue(":idEvento", modelCarga.data(item.row(), "idEvento"));
 
     if (not query.exec()) {
-      error = "Erro atualizando data carga: " + query.lastError().text();
+      emit errorSignal("Erro atualizando data carga: " + query.lastError().text());
       return false;
     }
   }
@@ -210,6 +214,11 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
   auto *nfe = new CadastrarNFe(idVenda, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
   nfe->prepararNFe(lista);
+
+  connect(nfe, &CadastrarNFe::errorSignal, this, &WidgetLogisticaEntregas::errorSignal);
+  connect(nfe, &CadastrarNFe::transactionStarted, this, &WidgetLogisticaEntregas::transactionStarted);
+  connect(nfe, &CadastrarNFe::transactionEnded, this, &WidgetLogisticaEntregas::transactionEnded);
+
   nfe->show();
 }
 
@@ -274,34 +283,31 @@ bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, con
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     const int idVendaProduto = modelProdutos.data(row, "idVendaProduto").toInt();
 
-    query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status != 'QUEBRADO' AND idVendaProduto = "
-                  ":idVendaProduto");
+    query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status != 'QUEBRADO' AND idVendaProduto = :idVendaProduto");
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro salvando veiculo_has_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando veiculo_has_produto: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', "
-                  "dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":dataRealEnt", dataRealEnt);
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro salvando pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, "
-                  "dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
+    query.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":entregou", entregou);
     query.bindValue(":recebeu", recebeu);
     query.bindValue(":dataRealEnt", dataRealEnt);
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro salvando venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando venda_produto: " + query.lastError().text());
       return false;
     }
   }
@@ -326,16 +332,20 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const QString entregou = inputDlg.getEntregou();
   const QString recebeu = inputDlg.getRecebeu();
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not confirmarEntrega(dataRealEnt, entregou, recebeu)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -382,16 +392,20 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelarEntrega(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QMessageBox::information(this, "Aviso!", "Operação realizada com sucesso!");
 }
@@ -404,7 +418,7 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   query.bindValue(":idEvento", idEvento);
 
   if (not query.exec()) {
-    error = "Erro buscando produtos: " + query.lastError().text();
+    emit errorSignal("Erro buscando produtos: " + query.lastError().text());
     return false;
   }
 
@@ -414,7 +428,7 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
     if (not query2.exec()) {
-      error = "Erro voltando status produto: " + query2.lastError().text();
+      emit errorSignal("Erro voltando status produto: " + query2.lastError().text());
       return false;
     }
   }
@@ -423,7 +437,7 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   query.bindValue(":idEvento", idEvento);
 
   if (not query.exec()) {
-    error = "Erro deletando evento: " + query.lastError().text();
+    emit errorSignal("Erro deletando evento: " + query.lastError().text());
     return false;
   }
 
@@ -449,66 +463,72 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
     auto [xml, resposta] = *tuple;
 
+    emit transactionStarted();
+
     QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
     QSqlQuery("START TRANSACTION").exec();
 
     if (not consultarNFe(idNFe, xml)) {
       QSqlQuery("ROLLBACK").exec();
-      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+      emit transactionEnded();
       return;
     }
 
     QSqlQuery("COMMIT").exec();
+
+    emit transactionEnded();
 
     QMessageBox::information(this, "Aviso!", resposta);
   }
 }
 
 bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) {
-  // alterar status da nota para 'autorizado'
-
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
-    error = "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text();
+    emit errorSignal("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text());
     return false;
   }
 
-  // alterar status do item/veiculo para 'em entrega'
+  QSqlQuery query1;
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query3;
+  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-    if (not query.exec()) {
-      error = "Erro atualizando status do pedido_fornecedor: " + query.lastError().text();
+    if (not query1.exec()) {
+      emit errorSignal("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query2.bindValue(":idNFeSaida", idNFe);
+    query2.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-    if (not query.exec()) {
-      error = "Erro salvando NFe nos produtos: " + query.lastError().text();
+    if (not query2.exec()) {
+      emit errorSignal("Erro salvando NFe nos produtos: " + query2.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query3.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query3.bindValue(":idNFeSaida", idNFe);
 
-    if (not query.exec()) {
-      error = "Erro atualizando carga veiculo: " + query.lastError().text();
+    if (not query3.exec()) {
+      emit errorSignal("Erro atualizando carga veiculo: " + query3.lastError().text());
       return false;
     }
   }
 
   return true;
 }
-
-// TODO: 5mudar nome desta classe
 
 void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
@@ -534,14 +554,14 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   //-------------------------------------------------------------------------
 
-  if (UserSession::settings("User/EntregasPdfFolder").toString().isEmpty()) {
+  if (UserSession::setSetting("User/EntregasPdfFolder").toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
-    UserSession::setSettings("User/EntregasPdfFolder", QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel"));
+    UserSession::getSetting("User/EntregasPdfFolder", QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel"));
 
-    if (UserSession::settings("User/EntregasPdfFolder").toString().isEmpty()) return;
+    if (UserSession::setSetting("User/EntregasPdfFolder").toString().isEmpty()) return;
   }
 
-  const QString path = UserSession::settings("User/EntregasPdfFolder").toString();
+  const QString path = UserSession::setSetting("User/EntregasPdfFolder").toString();
 
   QDir dir(path);
 

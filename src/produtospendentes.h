@@ -4,7 +4,7 @@
 #include <QDialog>
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class ProdutosPendentes;
@@ -18,6 +18,11 @@ public:
   ~ProdutosPendentes();
   void viewProduto(const QString &codComercial, const QString &idVenda);
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_pushButtonComprar_clicked();
   void on_pushButtonConsumirEstoque_clicked();
@@ -26,23 +31,22 @@ private slots:
 private:
   // attributes
   QString codComercial;
-  QString error;
-  SqlTableModel modelProdutos;
-  SqlTableModel modelViewProdutos;
+  SqlRelationalTableModel modelProdutos;
+  SqlRelationalTableModel modelViewProdutos;
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods
-  bool insere(const QDateTime &dataPrevista);
-  void setupTables();
+  bool atualizarVendaCompra(const int row, const QDate &dataPrevista);
   bool comprar(const QModelIndexList &list, const QDate &dataPrevista);
   bool consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantTotalVenda, const double quantEstoque);
   bool enviarExcedenteParaCompra(const int row, const QDate &dataPrevista);
   bool enviarProdutoParaCompra(const int row, const QDate &dataPrevista);
-  bool atualizarVendaCompra(const int row, const QDate &dataPrevista);
-  bool quebrarVendaConsumo(const double quantConsumir, const double quantTotalVenda, const int rowProduto);
+  bool insere(const QDateTime &dataPrevista);
   bool quebrarVenda(const int row, const QDate &dataPrevista);
-  void recarregarTabelas();
+  bool quebrarVendaConsumo(const double quantConsumir, const double quantTotalVenda, const int rowProduto);
   void recalcularQuantidade();
+  void recarregarTabelas();
+  void setupTables();
 };
 
 #endif // PRODUTOSPENDENTES_H

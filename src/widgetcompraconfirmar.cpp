@@ -76,16 +76,20 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QDateTime dataPrevista = inputDlg.getDate();
   const QDateTime dataConf = inputDlg.getNextDate();
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not confirmarCompra(idCompra, dataPrevista, dataConf)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -104,7 +108,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
   query.bindValue(":idCompra", idCompra);
 
   if (not query.exec()) {
-    error = "Erro buscando produtos: " + query.lastError().text();
+    emit errorSignal("Erro buscando produtos: " + query.lastError().text());
     return false;
   }
 
@@ -117,7 +121,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
     queryUpdate.bindValue(":idPedido", query.value("idPedido"));
 
     if (not queryUpdate.exec()) {
-      error = "Erro atualizando status da compra: " + queryUpdate.lastError().text();
+      emit errorSignal("Erro atualizando status da compra: " + queryUpdate.lastError().text());
       return false;
     }
 
@@ -129,7 +133,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
       queryUpdate.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
       if (not queryUpdate.exec()) {
-        error = "Erro salvando status da venda: " + queryUpdate.lastError().text();
+        emit errorSignal("Erro salvando status da venda: " + queryUpdate.lastError().text());
         return false;
       }
     }
@@ -145,33 +149,30 @@ bool WidgetCompraConfirmar::cancelar(const QModelIndexList &list) {
 
   QSqlQuery query;
 
-  query.prepare("SELECT idVendaProduto FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra "
-                "AND status = 'EM COMPRA'");
+  query.prepare("SELECT idVendaProduto FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra AND status = 'EM COMPRA'");
   query.bindValue(":ordemCompra", model.data(row, "OC"));
 
   if (not query.exec()) {
-    error = "Erro buscando dados: " + query.lastError().text();
+    emit errorSignal("Erro buscando dados: " + query.lastError().text());
     return false;
   }
 
   while (query.next()) {
     QSqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto "
-                   "AND status = 'EM COMPRA'");
+    query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM COMPRA'");
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
     if (not query2.exec()) {
-      error = "Erro voltando status do produto: " + query2.lastError().text();
+      emit errorSignal("Erro voltando status do produto: " + query2.lastError().text());
       return false;
     }
   }
 
-  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra "
-                "AND status = 'EM COMPRA'");
+  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM COMPRA'");
   query.bindValue(":ordemCompra", model.data(row, "OC"));
 
   if (not query.exec()) {
-    error = "Erro salvando dados: " + query.lastError().text();
+    emit errorSignal("Erro salvando dados: " + query.lastError().text());
     return false;
   }
 
@@ -194,18 +195,29 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
 
+  emit transactionEnded();
+
   updateTables();
   QMessageBox::information(this, "Aviso!", "Itens cancelados!");
+}
+
+void WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled(bool checked) {
+  model.setFilter(checked ? "(Venda LIKE '%CAMB%')" : "(Venda NOT LIKE '%CAMB%' OR Venda IS NULL)");
+
+  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)
@@ -213,9 +225,3 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 // TODO: 0colocar data para frete/st e se elas são inclusas nas parcelas ou separadas
 // TODO: 0mesmo bug do gerarcompra/produtospendentes em que o prcUnitario é multiplicado pela quantidade total e nao a da linha
 // TODO: 0cancelar nesta tela nao altera status para pendente
-
-void WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled(bool checked) {
-  model.setFilter(checked ? "(Venda LIKE '%CAMB%')" : "(Venda NOT LIKE '%CAMB%' OR Venda IS NULL)");
-
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
-}

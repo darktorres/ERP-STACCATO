@@ -80,7 +80,7 @@ bool RegisterDialog::setData(const QString &key, const QVariant &value) {
   if (value.type() == QVariant::String and value.toString().remove(".").remove("/").remove("-").isEmpty()) return true;
   if (value.type() == QVariant::Date and value.toString() == "1900-01-01") return true;
 
-  int row = currentRow != -1 ? currentRow : mapper.currentIndex();
+  const int row = currentRow != -1 ? currentRow : mapper.currentIndex();
 
   return model.setData(row, key, value);
 }

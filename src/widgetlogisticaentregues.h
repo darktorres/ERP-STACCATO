@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaEntregues;
@@ -20,21 +20,22 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
-  void on_tableVendas_activated(const QModelIndex &index);
   void on_pushButtonCancelar_clicked();
+  void on_tableVendas_activated(const QModelIndex &index);
 
 private:
   // attributes
   SqlQueryModel modelProdutos;
-  SqlTableModel modelVendas;
-  QString error;
+  SqlRelationalTableModel modelVendas;
   Ui::WidgetLogisticaEntregues *ui;
   // methods
-  void setupTables();
-  void montaFiltro();
   bool cancelar(const QModelIndexList &list);
+  void montaFiltro();
+  void setupTables();
 };
 
 #endif // WIDGETLOGISTICAENTREGUES_H

@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class FinanceiroProxyModel : public QIdentityProxyModel {
 
 public:
-  FinanceiroProxyModel(SqlTableModel *model, QObject *parent = 0);
+  FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);
   ~FinanceiroProxyModel() = default;
   QVariant data(const QModelIndex &proxyIndex, int role) const;
 

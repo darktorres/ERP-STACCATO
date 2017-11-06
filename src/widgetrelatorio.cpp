@@ -15,15 +15,15 @@ WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
 void WidgetRelatorio::setFilterTotaisVendedor() {
-  QString filter;
+  QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
-  if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
-    filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "' AND idUsuario = " + QString::number(UserSession::idUsuario()) + " ORDER BY Loja, Vendedor";
-  } else if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "' AND Loja = '" + UserSession::fromLoja("descricao") + "' ORDER BY Loja, Vendedor";
-  } else {
-    filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "' ORDER BY Loja, Vendedor";
-  }
+  const QString tipoUsuario = UserSession::tipoUsuario();
+
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") filter += " AND idUsuario = " + QString::number(UserSession::idUsuario());
+
+  if (tipoUsuario == "GERENTE LOJA") filter += " AND Loja = '" + UserSession::fromLoja("descricao") + "'";
+
+  filter += " ORDER BY Loja, Vendedor";
 
   modelTotalVendedor.setFilter(filter);
 
@@ -31,13 +31,11 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
-  QString filter;
+  QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM");
 
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "' AND Loja = '" + UserSession::fromLoja("descricao") + "' ORDER BY Loja";
-  } else {
-    filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "' ORDER BY Loja";
-  }
+  if (UserSession::tipoUsuario() == "GERENTE LOJA") filter += "' AND Loja = '" + UserSession::fromLoja("descricao");
+
+  filter += "' ORDER BY Loja";
 
   modelTotalLoja.setFilter(filter);
 
@@ -126,15 +124,14 @@ void WidgetRelatorio::calcularTotalGeral() {
 
 void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
-  QString filter;
+  const QString tipoUsuario = UserSession::tipoUsuario();
+  QString filter = "Mês = '" + date + "'";
 
-  if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
-    filter = "Mês = '" + date + "' AND idUsuario = " + QString::number(UserSession::idUsuario()) + " ORDER BY Loja, Vendedor, idVenda";
-  } else if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    filter = "Mês = '" + date + "' AND Loja = '" + UserSession::fromLoja("descricao") + "' ORDER BY Loja, Vendedor, idVenda";
-  } else {
-    filter = "Mês = '" + date + "' ORDER BY Loja, Vendedor, idVenda";
-  }
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") filter += " AND idUsuario = " + QString::number(UserSession::idUsuario());
+
+  if (tipoUsuario == "GERENTE LOJA") filter += " AND Loja = '" + UserSession::fromLoja("descricao") + "'";
+
+  filter += " ORDER BY Loja, Vendedor, idVenda";
 
   modelRelatorio.setFilter(filter);
 
@@ -173,6 +170,7 @@ bool WidgetRelatorio::updateTables() {
   calcularTotalGeral();
 
   QSqlQuery query;
+  // REFAC: use a join in the view so as to not need setting it manually
   query.prepare("SET @mydate = :mydate");
   query.bindValue(":mydate", ui->dateEditMes->date().toString("yyyy-MM"));
 
@@ -262,7 +260,11 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   for (int row = 0; row < modelRelatorio.rowCount(); ++row) {
     for (int col = 0; col < modelRelatorio.columnCount(); ++col, ++column) {
-      xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col));
+      if (col == 7) {
+        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col).toDouble() / 100);
+      } else {
+        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col));
+      }
     }
 
     column = 'A';
@@ -278,7 +280,11 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   for (int row = 0; row < modelTotalVendedor.rowCount(); ++row) {
     for (int col = 0; col < modelTotalVendedor.columnCount(); ++col, ++column) {
-      xlsx.write(column + QString::number(row + 2), modelTotalVendedor.data(row, col));
+      if (col == 5) {
+        xlsx.write(column + QString::number(row + 2), modelTotalVendedor.data(row, col).toDouble() / 100);
+      } else {
+        xlsx.write(column + QString::number(row + 2), modelTotalVendedor.data(row, col));
+      }
     }
 
     column = 'A';

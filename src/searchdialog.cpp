@@ -37,6 +37,8 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->lineEditEstoque->hide();
   ui->lineEditPromocao->hide();
   ui->lineEditBusca->setFocus();
+
+  model.setLimit(50);
 }
 
 SearchDialog::~SearchDialog() { delete ui; }
@@ -65,13 +67,11 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   QString searchFilter = "MATCH(" + indexes.join(", ") + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 
   if (model.tableName() == "produto") {
-    model.setFilter(searchFilter + " AND descontinuado = " + (ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE") + " AND desativado = FALSE" + representacao + fornecedorRep + " LIMIT 50");
+    model.setFilter(searchFilter + " AND descontinuado = " + (ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE") + " AND desativado = FALSE" + representacao + fornecedorRep);
     return;
   }
 
   if (not filter.isEmpty()) searchFilter.append(" AND (" + filter + ")");
-
-  searchFilter.append(" LIMIT 50");
 
   model.setFilter(searchFilter);
 

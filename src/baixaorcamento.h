@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class BaixaOrcamento;
@@ -21,7 +21,7 @@ private slots:
   void on_pushButtonSalvar_clicked();
 
 private:
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::BaixaOrcamento *ui;
 };
 

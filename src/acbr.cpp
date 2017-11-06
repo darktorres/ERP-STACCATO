@@ -1,14 +1,10 @@
-#include <QCoreApplication>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
-#include <QProgressDialog>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QTcpSocket>
 #include <QUrl>
-#include <optional>
 
 #include "acbr.h"
 
@@ -29,51 +25,38 @@ bool ACBr::gerarDanfe(const int idNFe) {
     return false;
   }
 
-  QString resposta;
-
-  if (not enviarComando(R"(NFE.SaveToFile(xml.xml,")" + query.value("xml").toString() + R"(")", resposta)) return false;
-
-  if (not resposta.contains("OK")) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro salvando XML: " + resposta);
-    return false;
-  }
-
-  if (not enviarComando("NFE.ImprimirDANFEPDF(xml.xml)", resposta)) return false;
-
-  if (not resposta.contains("Arquivo criado em:")) {
-    QMessageBox::critical(nullptr, "Erro!", resposta);
-    QMessageBox::critical(nullptr, "Erro!", "Verifique se o arquivo não está aberto!");
-    return false;
-  }
-
-  resposta = resposta.remove("OK: Arquivo criado em: ");
-
-  return abrirPdf(resposta);
+  return gerarDanfe(query.value("xml").toByteArray(), true).has_value();
 }
 
-bool ACBr::gerarDanfe(const QByteArray &fileContent, QString &resposta, const bool openFile) {
-  if (not enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")", resposta)) return false;
+std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
+  const auto respostaSaveXml = enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")");
 
-  if (not resposta.contains("OK")) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro salvando XML: " + resposta);
-    return false;
+  if (not respostaSaveXml) return {};
+
+  qDebug() << "respostaSaveXml: " << *respostaSaveXml;
+
+  if (not respostaSaveXml->contains("OK")) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro salvando XML: " + *respostaSaveXml);
+    return {};
   }
 
-  if (not enviarComando("NFE.ImprimirDANFEPDF(xml.xml)", resposta)) return false;
+  auto respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(xml.xml)");
 
-  if (not resposta.contains("Arquivo criado em:")) {
-    QMessageBox::critical(nullptr, "Erro!", resposta);
+  if (not respostaSavePdf) return {};
+
+  if (not respostaSavePdf->contains("Arquivo criado em:")) {
+    QMessageBox::critical(nullptr, "Erro!", *respostaSavePdf);
     QMessageBox::critical(nullptr, "Erro!", "Verifique se o arquivo não está aberto!");
-    return false;
+    return {};
   }
 
-  resposta = resposta.remove("OK: Arquivo criado em: ");
+  respostaSavePdf = respostaSavePdf->remove("OK: Arquivo criado em: ");
 
-  if (openFile) abrirPdf(resposta);
+  if (openFile) abrirPdf(*respostaSavePdf);
+
+  return respostaSavePdf;
 
   // TODO: 1copiar arquivo para pasta predefinida e renomear arquivo para formato 'DANFE_xxx.xxx_idpedido'
-
-  return true;
 }
 
 std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) {
@@ -82,14 +65,14 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(0, "Erro!", "Erro buscando XML: " + query.lastError().text());
+    QMessageBox::critical(nullptr, "Erro!", "Erro buscando XML: " + query.lastError().text());
     return {};
   }
 
   QFile file(QDir::currentPath() + "/temp.xml");
 
   if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(0, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
+    QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
     return {};
   }
 
@@ -99,28 +82,28 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   file.close();
 
-  QString resposta;
+  auto resposta = ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")");
 
-  if (not ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")", resposta)) return {};
+  if (not resposta) return {};
 
-  if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    QMessageBox::critical(0, "Resposta ConsultarNFe", resposta);
+  if (not resposta->contains("XMotivo=Autorizado o uso da NF-e")) {
+    QMessageBox::critical(nullptr, "Resposta ConsultarNFe: ", *resposta);
     return {};
   }
 
   QFile newFile(QDir::currentPath() + "/temp.xml");
 
   if (not newFile.open(QFile::ReadOnly)) {
-    QMessageBox::critical(0, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
+    QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
     return {};
   }
 
   const QString xml = newFile.readAll();
 
-  return std::make_tuple<>(xml, resposta);
+  return std::make_tuple<>(xml, *resposta);
 }
 
-bool ACBr::abrirPdf(QString &resposta) {
+bool ACBr::abrirPdf(const QString &resposta) {
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(resposta))) {
     QMessageBox::critical(nullptr, "Erro!", "Erro abrindo PDF!");
     return false;
@@ -129,51 +112,25 @@ bool ACBr::abrirPdf(QString &resposta) {
   return true;
 }
 
-bool ACBr::enviarComando(const QString &comando, QString &resposta) {
-  QTcpSocket socket;
+std::optional<QString> ACBr::enviarComando(const QString &comando) {
+  if (socket->state() != QTcpSocket::ConnectedState) {
+    socket->connectToHost("127.0.0.1", 3434);
 
-  socket.connectToHost("127.0.0.1", 3434);
+    if (not socket->waitForConnected(5000)) {
+      QMessageBox::critical(nullptr, "Erro!", "Não foi possível conectar ao ACBr: " + socket->errorString());
+      return {};
+    }
 
-  if (not socket.waitForConnected(10)) {
-    resposta = "Erro: Não foi possível conectar ao ACBr!";
-    return false;
+    socket->waitForReadyRead(5000);
+
+    socket->readAll(); // lendo mensagem de boas vindas
   }
 
-  QProgressDialog *progressDialog = new QProgressDialog(nullptr);
-  progressDialog->reset();
-  progressDialog->setCancelButton(nullptr);
-  progressDialog->setLabelText("Esperando ACBr...");
-  progressDialog->setWindowTitle("ERP Staccato");
-  progressDialog->setWindowModality(Qt::WindowModal);
-  progressDialog->setMaximum(0);
-  progressDialog->setMinimum(0);
-  progressDialog->show();
+  socket->write(comando.toUtf8());
+  socket->write("\r\n.\r\n");
+  socket->waitForBytesWritten(5000);
 
-  connect(&socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
+  socket->waitForReadyRead(5000);
 
-  while (not progressDialog->wasCanceled()) QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-
-  progressDialog->cancel();
-
-  socket.readAll(); // lendo mensagem de boas vindas
-
-  QTextStream stream(&socket);
-
-  stream << comando << endl;
-
-  stream << "\r\n.\r\n";
-  stream.flush();
-
-  progressDialog->reset();
-  progressDialog->show();
-
-  connect(&socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
-
-  while (not progressDialog->wasCanceled()) QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-
-  progressDialog->cancel();
-
-  resposta = QString(socket.readAll()).remove("\u0003");
-
-  return true;
+  return QString(socket->readAll()).remove("\u0003");
 }

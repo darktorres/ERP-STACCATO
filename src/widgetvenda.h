@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetVenda;
@@ -20,6 +20,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_comboBoxLojas_currentIndexChanged(const int);
@@ -33,7 +35,7 @@ private slots:
 private:
   // attributes
   bool financeiro = false;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetVenda *ui;
   // methods
   void montaFiltro();

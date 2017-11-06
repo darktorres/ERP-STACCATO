@@ -133,9 +133,9 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   // 6. valor
   // 7. aliquota icms (se tiver)
 
-  SqlTableModel modelContabil;
+  SqlRelationalTableModel modelContabil;
   modelContabil.setTable("view_estoque_contabil");
-  modelContabil.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelContabil.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelContabil.setFilter("dataRealReceb <= '" + ui->dateEditMes->date().toString("yyyy-MM-dd") + "'");
 

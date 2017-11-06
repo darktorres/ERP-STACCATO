@@ -17,9 +17,12 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private:
   Ui::WidgetFinanceiro *ui;
+  void setConnections();
 };
 
 #endif // WIDGETFINANCEIRO_H

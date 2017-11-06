@@ -6,7 +6,7 @@
 #include <QSqlQuery>
 #include <QTextStream>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class CadastrarNFe;
@@ -20,9 +20,13 @@ public:
   ~CadastrarNFe();
   void prepararNFe(const QList<int> &items);
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private:
   // attributes
-  // int cnpjCertificado;
   const QString idVenda;
   QDataWidgetMapper mapper;
   QSqlQuery queryCliente;
@@ -33,34 +37,22 @@ private:
   QSqlQuery queryPartilhaIntra;
   QString arquivo;
   QString chaveNum;
-  QString error;
   QString xml;
-  SqlTableModel modelLoja;
-  SqlTableModel modelProd;
-  SqlTableModel modelVenda;
+  SqlRelationalTableModel modelLoja;
+  SqlRelationalTableModel modelProdutos;
+  SqlRelationalTableModel modelVenda;
   Ui::CadastrarNFe *ui;
   // methods
-  bool cadastrar(const QVariant &id);
+  bool cadastrar(const int &idNFe);
   bool calculaDigitoVerificador(QString &chave);
   bool criarChaveAcesso();
   bool preencherNumeroNFe();
+  bool processarResposta(const QString &resposta, const QString &fileName, const int &idNFe);
   bool validar();
   QString clearStr(const QString &str) const;
-  void alterarCertificado(const QString &text);
-  void setConnections();
-  void setupTables();
-  void updateImpostos();
-  void writeDestinatario(QTextStream &stream) const;
-  void writeEmitente(QTextStream &stream) const;
-  void writeIdentificacao(QTextStream &stream) const;
-  void writeProduto(QTextStream &stream) const;
-  void writeTotal(QTextStream &stream) const;
-  void writeTransportadora(QTextStream &stream) const;
-  void writeVolume(QTextStream &stream) const;
-  //
-  bool preCadastrarNota(const QString &fileName, QVariant &id);
-  bool processarResposta(QString &resposta, const QString &fileName, const QVariant &id);
   QString gravarNota();
+  std::optional<int> preCadastrarNota(const QString &fileName);
+  void alterarCertificado(const QString &text);
   void on_comboBoxCfop_currentTextChanged(const QString &text);
   void on_comboBoxCOFINScst_currentTextChanged(const QString &text);
   void on_comboBoxICMSModBc_currentIndexChanged(int index);
@@ -95,6 +87,16 @@ private:
   void on_tableItens_entered(const QModelIndex &);
   void on_tabWidget_currentChanged(int index);
   void sendEmail(const QString &fileName);
+  void setConnections();
+  void setupTables();
+  void updateImpostos();
+  void writeDestinatario(QTextStream &stream) const;
+  void writeEmitente(QTextStream &stream) const;
+  void writeIdentificacao(QTextStream &stream) const;
+  void writeProduto(QTextStream &stream) const;
+  void writeTotal(QTextStream &stream) const;
+  void writeTransportadora(QTextStream &stream) const;
+  void writeVolume(QTextStream &stream) const;
 };
 
 #endif // CADASTRARNFE_H

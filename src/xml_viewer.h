@@ -23,7 +23,6 @@ private:
   // attributes
   QByteArray fileContent;
   QStandardItemModel model;
-  QString fileName;
   Ui::XML_Viewer *ui;
 };
 

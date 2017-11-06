@@ -8,7 +8,6 @@
 
 #include "excel.h"
 #include "usersession.h"
-#include "xlsxdocument.h"
 
 Excel::Excel(const QString &id, QWidget *parent) : id(id), parent(parent) { verificaTipo(); }
 
@@ -25,19 +24,23 @@ void Excel::verificaTipo() {
   tipo = query.first() ? Tipo::Orcamento : Tipo::Venda;
 }
 
+void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
+  for (int row = queryProduto.size() + 12; row < 111; ++row) xlsx.setRowHidden(row, true);
+}
+
 bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &representacao) {
   // REFAC: dear god, divide this into smaller funcs
 
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  if (UserSession::settings(folder).toString().isEmpty()) {
+  if (UserSession::setSetting(folder).toString().isEmpty()) {
     QMessageBox::critical(parent, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
-    UserSession::setSettings(folder, QFileDialog::getExistingDirectory(parent, "Pasta PDF/Excel"));
+    UserSession::getSetting(folder, QFileDialog::getExistingDirectory(parent, "Pasta PDF/Excel"));
 
-    if (UserSession::settings(folder).toString().isEmpty()) return false;
+    if (UserSession::setSetting(folder).toString().isEmpty()) return false;
   }
 
-  const QString path = UserSession::settings(folder).toString();
+  const QString path = UserSession::setSetting(folder).toString();
 
   QDir dir(path);
 
@@ -82,8 +85,8 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Horizontal);
 
   const QString endLoja = queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + " " + queryLojaEnd.value("complemento").toString() + " - " +
-                          queryLojaEnd.value("bairro").toString() + "\n" + queryLojaEnd.value("cidade").toString() + " - " + queryLojaEnd.value("uf").toString() + " - CEP: " +
-                          queryLojaEnd.value("cep").toString() + "\n" + queryLoja.value("tel").toString() + " - " + queryLoja.value("tel2").toString();
+                          queryLojaEnd.value("bairro").toString() + "\n" + queryLojaEnd.value("cidade").toString() + " - " + queryLojaEnd.value("uf").toString() +
+                          " - CEP: " + queryLojaEnd.value("cep").toString() + "\n" + queryLoja.value("tel").toString() + " - " + queryLoja.value("tel2").toString();
 
   const QString endEntrega = queryEndEnt.value("logradouro").toString().isEmpty()
                                  ? "Não há/Retira"
@@ -143,6 +146,8 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   xlsx.write("N116", "R$ " + locale.toString(query.value("frete").toDouble(), 'f', 2));                                                                                      // frete
   xlsx.write("N117", "R$ " + locale.toString(query.value("total").toDouble(), 'f', 2));                                                                                      // total final
   xlsx.write("B113", query.value("prazoEntrega").toString() + " dias");
+
+  // REFAC: generify this code
 
   QSqlQuery queryPgt1("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                       "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO'");
@@ -263,7 +268,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     ++row;
   } while (queryProduto.next());
 
-  for (int row = queryProduto.size() + 12; row < 111; ++row) xlsx.setRowHidden(row, true);
+  hideUnusedRows(xlsx);
 
   if (not xlsx.saveAs(fileName)) {
     QMessageBox::critical(parent, "Erro!", "Ocorreu algum erro ao salvar o arquivo.");

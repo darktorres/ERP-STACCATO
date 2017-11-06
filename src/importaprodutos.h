@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QProgressDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class ImportaProdutos;
@@ -19,6 +19,11 @@ public:
   void importarProduto();
   void importarEstoque();
   void importarPromocao();
+
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_checkBoxRepresentacao_toggled(const bool checked);
@@ -57,8 +62,8 @@ private:
   QString fornecedor;
   QStringList idsFornecedor;
   QVariantMap variantMap;
-  SqlTableModel model;
-  SqlTableModel modelErro;
+  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelErro;
   // REFAC: a tabela no BD nao usa mais uma unica coluna, nao é mais (1,2,3) e sim 3 colunas separadas
   Tipo tipo;
   Ui::ImportaProdutos *ui;

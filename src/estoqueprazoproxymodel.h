@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class EstoquePrazoProxyModel : public QIdentityProxyModel {
 
 public:
-  explicit EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent);
+  explicit EstoquePrazoProxyModel(SqlRelationalTableModel *model, QObject *parent);
   ~EstoquePrazoProxyModel() = default;
   QVariant data(const QModelIndex &proxyIndex, const int role) const override;
 

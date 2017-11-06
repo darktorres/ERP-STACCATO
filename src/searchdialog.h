@@ -4,7 +4,7 @@
 #include <QDataWidgetMapper>
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class SearchDialog;
@@ -59,7 +59,7 @@ private:
   QString primaryKey;
   QString representacao;
   QStringList textKeys;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::SearchDialog *ui;
   // methods
   void hideColumns(const QStringList &columns);

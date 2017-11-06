@@ -147,7 +147,7 @@ void InputDialogFinanceiro::setupTables() {
 }
 
 void InputDialogFinanceiro::wrapMontarFluxoCaixa() {
-  // TODO: replace this wrap by a lambda?
+  // REFAC: replace this wrap by a lambda?
   if (isBlockedFluxoCaixa) return;
 
   isBlockedFluxoCaixa = true;
@@ -173,6 +173,7 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
 
   for (int i = 0; i < ui->widgetPgts->listComboData.size(); ++i) {
     if (ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
+      // REFAC: simplify/redo this block
       const int parcelas = ui->widgetPgts->listComboParc.at(i)->currentIndex() + 1;
       const double valor = ui->widgetPgts->listDoubleSpinPgt.at(i)->value();
       const float temp = ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito" ? static_cast<float>(static_cast<int>(static_cast<float>(valor / parcelas) * 100)) / 100
@@ -352,7 +353,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   setWindowTitle("OC: " + model.data(0, "ordemCompra").toString());
 
   if (tipo == Tipo::ConfirmarCompra) {
-    connect(&model, &SqlTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
+    connect(&model, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
     connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
     //    connect(ui->doubleSpinBoxTotalPag, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::resetarPagamentos);
   }
@@ -367,11 +368,10 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) return;
 
-  // TODO: refactor this function (why ConfirmarCompra doesnt use a transaction?)
+  // REFAC: refactor this function (why ConfirmarCompra doesnt use a transaction?)
 
   if (tipo == Tipo::ConfirmarCompra) {
     if (not cadastrar()) {
-      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
       return;
     }
 
@@ -382,16 +382,21 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   //  if (type == ConfirmarCompra and not verifyFields()) return;
 
   if (tipo == Tipo::Financeiro) {
+    emit transactionStarted();
+
     QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
     QSqlQuery("START TRANSACTION").exec();
 
     if (not cadastrar()) {
       QSqlQuery("ROLLBACK").exec();
-      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+      emit transactionEnded();
       return;
     }
 
     QSqlQuery("COMMIT").exec();
+
+    emit transactionEnded();
+
     QMessageBox::information(this, "Aviso!", "Dados salvos com sucesso!");
     QDialog::accept();
     close();
@@ -423,19 +428,19 @@ bool InputDialogFinanceiro::cadastrar() {
 
   if (tipo == Tipo::Financeiro) {
     if (not model.setData(0, "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) {
-      error = "Erro salvando status na tabela: " + model.lastError().text();
+      emit errorSignal("Erro salvando status na tabela: " + model.lastError().text());
       return false;
     }
   }
 
   if (not model.submitAll()) {
-    error = "Erro salvando dados na tabela: " + model.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela: " + model.lastError().text());
     return false;
   }
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     if (not modelFluxoCaixa.submitAll()) {
-      error = "Erro salvando dados do pagamento: " + modelFluxoCaixa.lastError().text();
+      emit errorSignal("Erro salvando dados do pagamento: " + modelFluxoCaixa.lastError().text());
       return false;
     }
   }
@@ -473,6 +478,7 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
 
   if (modelFluxoCaixa.rowCount() > 0) {
     const QDate date = modelFluxoCaixa.data(0, "dataPagamento").toDate();
+    Q_UNUSED(date);
 
     //    ui->dateEditPgt1->setDate(date);
     //    ui->dateEditPgt2->setDate(date);

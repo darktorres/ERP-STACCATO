@@ -13,15 +13,13 @@ PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoE
   setWindowFlags(Qt::Window);
 
   setupTables();
-
-  show();
 }
 
 PrecoEstoque::~PrecoEstoque() { delete ui; }
 
 void PrecoEstoque::setupTables() {
   model.setTable("produto");
-  model.setEditStrategy(SqlTableModel::OnManualSubmit);
+  model.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   model.setHeaderData("fornecedor", "Fornecedor");
   model.setHeaderData("descricao", "Descrição");

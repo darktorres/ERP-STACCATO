@@ -106,7 +106,8 @@ void WidgetNfeSaida::montaFiltro() {
 void WidgetNfeSaida::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
-  // TODO: colocar returns se as operações falharem
+  // REFAC: colocar transaction
+  // REFAC: code is all over the place, out of order
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
@@ -130,26 +131,30 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const int idNFe = model.data(list.first().row(), "idNFe").toInt();
   const int numeroNFe = model.data(list.first().row(), "NFe").toInt();
+  Q_UNUSED(numeroNFe);
 
   const QString chaveAcesso = model.data(list.first().row(), "chaveAcesso").toString();
 
-  const QString comando = "NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")";
+  auto resposta = ACBr::enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
-  QString resposta;
-  if (not ACBr::enviarComando(comando, resposta)) return;
+  if (not resposta) return;
 
-  // REFAC: if not contains return?
-
-  if (resposta.contains("xEvento=Cancelamento registrado")) {
-    //  if (resposta.contains("XMotivo=Evento registrado e vinculado a NF-e")) {
-    QSqlQuery query;
-    query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
-    query.bindValue(":chaveAcesso", chaveAcesso);
-
-    if (not query.exec()) QMessageBox::critical(this, "Erro!", "Erro marcando nota como cancelada: " + query.lastError().text());
+  // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
+  if (not resposta->contains("xEvento=Cancelamento registrado")) {
+    QMessageBox::critical(this, "Erro!", "Resposta: " + *resposta);
+    return;
   }
 
-  QMessageBox::information(this, "Resposta", resposta);
+  QSqlQuery query;
+  query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", chaveAcesso);
+
+  if (not query.exec()) {
+    QMessageBox::critical(this, "Erro!", "Erro marcando nota como cancelada: " + query.lastError().text());
+    return;
+  }
+
+  QMessageBox::information(this, "Resposta", *resposta);
 
   QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
 
@@ -160,16 +165,16 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   QTextStream stream(&arquivo);
 
-  stream << resposta;
+  stream << *resposta;
 
   arquivo.close();
 
-  QSqlQuery query;
   query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
     QMessageBox::critical(this, "Erro!", "Erro removendo NFe da venda_produto: " + query.lastError().text());
+    return;
   }
 
   query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
@@ -177,11 +182,13 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   if (not query.exec()) {
     QMessageBox::critical(this, "Erro!", "Erro removendo NFe do veiculo_produto: " + query.lastError().text());
+    return;
   }
 
   const QString anexo = QDir::currentPath() + "/cancelamento.xml";
 
   // TODO: 0enviar resposta xml do cancelamento para a contabilidade
+  // TODO: em caso de erro perguntar se deseja tentar novamente
   auto *mail = new SendMail(SendMail::Tipo::CancelarNFe, anexo, QString(), this);
   mail->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -203,7 +210,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   LimeReport::ReportEngine report;
 
-  SqlTableModel view;
+  SqlRelationalTableModel view;
   view.setTable("view_relatorio_nfe");
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
@@ -220,9 +227,8 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   }
 
   QSqlQuery query;
-  query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), "
-                "SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe WHERE DATE_FORMAT(`Criado "
-                "em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
+  query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
+                "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
 
   if (not query.exec() or not query.first()) {
@@ -265,6 +271,15 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     return;
   }
 
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
+
+  // TODO: warn if either is empty
+  const QString xmlFolder = UserSession::setSetting("User/EntregasXmlFolder").toString();
+  const QString pdfFolder = UserSession::setSetting("User/EntregasPdfFolder").toString();
+
+  // TODO: create folders if they dont exist (it wont work it they dont)
+
   for (const auto &item : list) {
     // TODO: 3wrap this in a function so if connection to acbr is dropped the erp retries
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
@@ -277,8 +292,6 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     const QString chaveAcesso = model.data(item.row(), "chaveAcesso").toString();
 
-    QSqlQuery query;
-    query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
     query.bindValue(":chaveAcesso", chaveAcesso);
 
     if (not query.exec() or not query.first()) {
@@ -286,7 +299,9 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
       return;
     }
 
-    QFile fileXml(UserSession::settings("User/EntregasXmlFolder").toString() + "/" + chaveAcesso + ".xml");
+    QFile fileXml(xmlFolder + "/" + chaveAcesso + ".xml");
+
+    qDebug() << "xml: " << xmlFolder + "/" + chaveAcesso + ".xml";
 
     if (not fileXml.open(QFile::WriteOnly)) {
       QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita xml: " + fileXml.errorString());
@@ -300,29 +315,30 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar xml para acbr gerar pdf
 
-    QString pdfOrigem;
-    if (not ACBr::gerarDanfe(query.value("xml").toByteArray(), pdfOrigem, false)) return;
+    auto pdfOrigem = ACBr::gerarDanfe(query.value("xml").toByteArray(), false);
 
-    if (pdfOrigem.isEmpty()) {
-      QMessageBox::critical(this, "Erro!", "pdf is empty!");
+    if (not pdfOrigem) return;
+
+    if (pdfOrigem->isEmpty()) {
+      QMessageBox::critical(this, "Erro!", "Resposta vazia!");
       return;
     }
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = UserSession::settings("User/EntregasPdfFolder").toString() + "/" + chaveAcesso + ".pdf";
+    const QString pdfDestino = pdfFolder + "/" + chaveAcesso + ".pdf";
 
     QFile filePdf(pdfDestino);
 
     if (filePdf.exists()) filePdf.remove();
 
-    if (not QFile::copy(pdfOrigem, pdfDestino)) {
+    if (not QFile::copy(*pdfOrigem, pdfDestino)) {
       QMessageBox::critical(this, "Erro!", "Erro copiando pdf!");
       return;
     }
   }
 
-  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + UserSession::settings("User/EntregasPdfFolder").toString() + "!");
+  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + UserSession::setSetting("User/EntregasPdfFolder").toString() + "!");
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
@@ -350,16 +366,20 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
     auto [xml, resposta] = *tuple;
 
+    emit transactionStarted();
+
     QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
     QSqlQuery("START TRANSACTION").exec();
 
     if (not atualizarNFe(idNFe, xml)) {
       QSqlQuery("ROLLBACK").exec();
-      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+      emit transactionEnded();
       return;
     }
 
     QSqlQuery("COMMIT").exec();
+
+    emit transactionEnded();
 
     QMessageBox::information(this, "Aviso!", resposta);
   }
@@ -372,7 +392,7 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
-    error = "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text();
+    emit errorSignal("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text());
     return false;
   }
 
@@ -384,3 +404,4 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
 // TODO: 0nao estou guardando o valor na nota
 // TODO: 0algumas notas nao estao mostrando valor
 // TODO: nesta tela colocar um campo dizendo qual loja que emitiu a nota (nao precisa mostrar o cnpj, apenas o nome da loja) (e talvez poder filtrar pela loja)
+// TODO: fazer sistema para trocar notas futuras pela nota real

@@ -67,17 +67,17 @@ QString InputDialogConfirmacao::getEntregou() const { return ui->lineEditEntrego
 
 bool InputDialogConfirmacao::cadastrar() {
   if (not model.submitAll()) {
-    error = "Erro salvando dados na tabela: " + model.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela: " + model.lastError().text());
     return false;
   }
 
   if (not modelVenda.submitAll()) {
-    error = "Erro salvando produto venda: " + modelVenda.lastError().text();
+    emit errorSignal("Erro salvando produto venda: " + modelVenda.lastError().text());
     return false;
   }
 
   if (not modelCliente.submitAll()) {
-    error = "Erro salvando crédito: " + modelCliente.lastError().text();
+    emit errorSignal("Erro salvando crédito: " + modelCliente.lastError().text());
     return false;
   }
 
@@ -95,17 +95,21 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
     return;
   }
 
+  emit transactionStarted();
+
   if (tipo != Tipo::Representacao) {
     QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
     QSqlQuery("START TRANSACTION").exec();
 
     if (not cadastrar()) {
       QSqlQuery("ROLLBACK").exec();
-      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+      emit transactionEnded();
       return;
     }
 
     QSqlQuery("COMMIT").exec();
+
+    emit transactionEnded();
   }
 
   QDialog::accept();
@@ -272,16 +276,20 @@ void InputDialogConfirmacao::on_pushButtonQuebradoFaltando_clicked() {
 
   const int row = list.first().row();
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not processarQuebra(row)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QMessageBox::information(this, "Aviso!", "Operação realizada com sucesso!");
 }
@@ -309,7 +317,7 @@ bool InputDialogConfirmacao::quebraRecebimento(const int row) {
   query.bindValue(":idProduto", model.data(row, "idProduto"));
 
   if (not query.exec() or not query.first()) {
-    error = "Erro buscando dados do produto: " + query.lastError().text();
+    emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
     return false;
   }
 
@@ -414,7 +422,7 @@ bool InputDialogConfirmacao::quebraEntrega(const int row) {
   modelVenda.setFilter("idVendaProduto = " + model.data(row, "idVendaProduto").toString());
 
   if (not modelVenda.select()) {
-    error = "Erro lendo tabela produto venda: " + modelVenda.lastError().text();
+    emit errorSignal("Erro lendo tabela produto venda: " + modelVenda.lastError().text());
     return false;
   }
   //
@@ -440,14 +448,14 @@ bool InputDialogConfirmacao::gerarCreditoCliente() {
   query.bindValue(":idVenda", idVenda);
 
   if (not query.exec() or not query.first()) {
-    error = "Erro buscando cliente: " + query.lastError().text();
+    emit errorSignal("Erro buscando cliente: " + query.lastError().text());
     return false;
   }
 
   modelCliente.setFilter("idCliente = " + query.value("idCliente").toString());
 
   if (not modelCliente.select()) {
-    error = "Erro lendo tabela cliente: " + modelCliente.lastError().text();
+    emit errorSignal("Erro lendo tabela cliente: " + modelCliente.lastError().text());
     return false;
   }
 
@@ -531,7 +539,7 @@ bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
   // recalcular proporcional dos valores
 
   if (not model.submitAll()) {
-    error = "Erro dividindo linhas: " + model.lastError().text();
+    emit errorSignal("Erro dividindo linhas: " + model.lastError().text());
     return false;
   }
 
@@ -539,14 +547,14 @@ bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
 }
 
 bool InputDialogConfirmacao::criarConsumo(const int row) {
-  SqlTableModel modelConsumo;
+  SqlRelationalTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelConsumo.setFilter("idEstoque = " + model.data(row, "idEstoque").toString());
 
   if (not modelConsumo.select()) {
-    error = "Erro lendo tabela consumo: " + modelConsumo.lastError().text();
+    emit errorSignal("Erro lendo tabela consumo: " + modelConsumo.lastError().text());
     return false;
   }
 
@@ -570,7 +578,7 @@ bool InputDialogConfirmacao::criarConsumo(const int row) {
   qDebug() << "caixas quebrado: " << caixasDefeito;
 
   if (not modelConsumo.submitAll()) {
-    error = "Erro atualizando consumo: " + modelConsumo.lastError().text();
+    emit errorSignal("Erro atualizando consumo: " + modelConsumo.lastError().text());
     return false;
   }
 
@@ -583,7 +591,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
   query.bindValue(":idEstoque", idEstoque);
 
   if (not query.exec() or not query.first()) {
-    error = "Erro buscando sobra estoque: " + query.lastError().text();
+    emit errorSignal("Erro buscando sobra estoque: " + query.lastError().text());
     return false;
   }
 
@@ -599,7 +607,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
     query.bindValue(":idEstoque", idEstoque);
 
     if (not query.exec()) {
-      error = "Erro buscando consumo estoque: " + query.lastError().text();
+      emit errorSignal("Erro buscando consumo estoque: " + query.lastError().text());
       return false;
     }
 
@@ -612,7 +620,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
       query2.bindValue(":idConsumo", query.value("idConsumo"));
 
       if (not query2.exec()) {
-        error = "Erro removendo consumo: " + query2.lastError().text();
+        emit errorSignal("Erro removendo consumo: " + query2.lastError().text());
         return false;
       }
 
@@ -620,7 +628,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
       query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
       if (not query2.exec()) {
-        error = "Erro voltando produto para pendente: " + query2.lastError().text();
+        emit errorSignal("Erro voltando produto para pendente: " + query2.lastError().text());
         return false;
       }
 

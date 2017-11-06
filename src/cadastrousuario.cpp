@@ -30,7 +30,7 @@ CadastroUsuario::~CadastroUsuario() { delete ui; }
 
 void CadastroUsuario::setupTables() {
   modelPermissoes.setTable("usuario_has_permissao");
-  modelPermissoes.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelPermissoes.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelPermissoes.setHeaderData("view_tab_orcamento", "Ver Orçamentos?");
   modelPermissoes.setHeaderData("view_tab_venda", "Ver Vendas?");
@@ -153,11 +153,14 @@ bool CadastroUsuario::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    error = "Linha -1 usuário: " + QString::number(static_cast<int>(Tipo::Atualizar)) + "\nMapper: " + QString::number(mapper.currentIndex()) + "\nModel: " + QString::number(model.rowCount());
+    emit errorSignal("Erro linha -1");
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
+    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
+    return false;
+  }
 
   if (not savingProcedures()) return false;
 
@@ -169,14 +172,14 @@ bool CadastroUsuario::cadastrar() {
   }
 
   if (not model.submitAll()) {
-    error = "Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
     return false;
   }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
   if (primaryId.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "primaryId está vazio!");
+    emit errorSignal("Id vazio!");
     return false;
   }
 
@@ -186,7 +189,7 @@ bool CadastroUsuario::cadastrar() {
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
     if (not query.exec()) {
-      error = "Erro criando usuário do banco de dados: " + query.lastError().text();
+      emit errorSignal("Erro criando usuário do banco de dados: " + query.lastError().text());
       return false;
     }
 
@@ -194,7 +197,7 @@ bool CadastroUsuario::cadastrar() {
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
     if (not query.exec()) {
-      error = "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text();
+      emit errorSignal("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text());
       return false;
     }
 
@@ -208,14 +211,14 @@ bool CadastroUsuario::cadastrar() {
     modelPermissoes.setData(row2, "idUsuario", primaryId);
 
     if (not modelPermissoes.submitAll()) {
-      error = "Erro salvando permissões: " + modelPermissoes.lastError().text();
+      emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());
       return false;
     }
   }
 
   if (tipo == Tipo::Atualizar) {
     if (not modelPermissoes.submitAll()) {
-      error = "Erro salvando permissões: " + modelPermissoes.lastError().text();
+      emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());
       return false;
     }
   }
@@ -226,16 +229,20 @@ bool CadastroUsuario::cadastrar() {
 bool CadastroUsuario::save() {
   if (not verifyFields()) return false;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return false;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   isDirty = false;
 

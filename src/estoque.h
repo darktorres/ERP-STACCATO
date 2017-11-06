@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Estoque;
@@ -26,9 +26,9 @@ private slots:
 private:
   // attributes
   const QString idEstoque;
-  SqlTableModel model;
-  SqlTableModel modelConsumo;
-  SqlTableModel modelViewConsumo;
+  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelConsumo;
+  SqlRelationalTableModel modelViewConsumo;
   Ui::Estoque *ui;
 
   enum class FieldColors {

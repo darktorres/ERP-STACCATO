@@ -217,16 +217,20 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 
   for (int row = 0; row < modelTransp.rowCount(); ++row) list << modelTransp.index(row, 0);
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not processRows(list, ui->dateTimeEdit->date(), true)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Agendado com sucesso!");
@@ -247,16 +251,20 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
 
   if (input.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not processRows(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Agendado com sucesso!");
@@ -284,7 +292,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
       queryTemp.bindValue(":idEstoque", idEstoque);
 
       if (not queryTemp.exec() or not queryTemp.first()) {
-        error = "Erro buscando codComercial: " + queryTemp.lastError().text();
+        emit errorSignal("Erro buscando codComercial: " + queryTemp.lastError().text());
         return false;
       }
 
@@ -299,7 +307,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     query.bindValue(":idEstoque", idEstoque);
 
     if (not query.exec()) {
-      error = "Erro salvando status no estoque: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no estoque: " + query.lastError().text());
       return false;
     }
 
@@ -310,7 +318,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
@@ -319,13 +327,13 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     query.bindValue(":idEstoque", idEstoque);
 
     if (not query.exec()) {
-      error = "Erro salvando status na venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando status na venda_produto: " + query.lastError().text());
       return false;
     }
   }
 
   if (not modelTransp.submitAll()) {
-    error = "Erro salvando carga veiculo: " + modelTransp.lastError().text();
+    emit errorSignal("Erro salvando carga veiculo: " + modelTransp.lastError().text());
     return false;
   }
 
@@ -494,6 +502,10 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
+
+      connect(venda, &Venda::errorSignal, this, &WidgetLogisticaAgendarColeta::errorSignal);
+      connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaAgendarColeta::transactionStarted);
+      connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaAgendarColeta::transactionEnded);
     }
   }
 }

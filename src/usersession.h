@@ -14,18 +14,17 @@ public:
   static QString nome();
   static QString tipoUsuario();
   static QString fromLoja(const QString &parameter, const QString &user = nome());
-  static QVariant settings(const QString &key);
-  static void setSettings(const QString &key, const QVariant &value);
+  static QVariant setSetting(const QString &key);
+  static void getSetting(const QString &key, const QVariant &value);
   static bool settingsContains(const QString &key);
 
 private:
   // attributes
-  static QSqlQuery *query;
+  inline static QSqlQuery *query = nullptr;
+  inline static QSettings *settings = new QSettings("Staccato", "ERP");
   // methods
-  UserSession();
-  static void free();
   static void initialize();
-  static void logout();
+  static bool dbConnect();
 };
 
 #endif // USERSESSION_H

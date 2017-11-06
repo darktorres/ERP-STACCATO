@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class OrcamentoProxyModel : public QIdentityProxyModel {
 
 public:
-  explicit OrcamentoProxyModel(SqlTableModel *model, QObject *parent);
+  explicit OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent);
   ~OrcamentoProxyModel() = default;
   QVariant data(const QModelIndex &proxyIndex, const int role) const override;
 

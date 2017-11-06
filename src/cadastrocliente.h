@@ -15,6 +15,11 @@ public:
   explicit CadastroCliente(QWidget *parent = 0);
   ~CadastroCliente();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_checkBoxInscEstIsento_toggled(bool checked);
   void on_checkBoxMostrarInativos_clicked(const bool checked);

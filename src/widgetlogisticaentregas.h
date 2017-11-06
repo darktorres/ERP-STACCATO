@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaEntregas;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_lineEditBuscar_textChanged(const QString &text);
@@ -35,17 +37,16 @@ private slots:
 
 private:
   // attributes
-  QString error;
-  SqlTableModel modelCalendario;
-  SqlTableModel modelCarga;
-  SqlTableModel modelProdutos;
+  SqlRelationalTableModel modelCalendario;
+  SqlRelationalTableModel modelCarga;
+  SqlRelationalTableModel modelProdutos;
   Ui::WidgetLogisticaEntregas *ui;
   // methods
   bool cancelarEntrega(const QModelIndexList &list);
   bool confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu);
+  bool consultarNFe(const int idNFe, const QString &xml);
   bool reagendar(const QModelIndexList &list, const QDate &dataPrevEnt);
   void setupTables();
-  bool consultarNFe(const int idNFe, const QString &xml);
 };
 
 #endif // WIDGETLOGISTICAENTREGAS_H

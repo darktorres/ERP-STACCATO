@@ -11,9 +11,7 @@ BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QD
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
   model.setFilter("idOrcamento = '" + idOrcamento + "'");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela orcamento: " + model.lastError().text());
-  }
+  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela orcamento: " + model.lastError().text());
 }
 
 BaixaOrcamento::~BaixaOrcamento() { delete ui; }
@@ -46,6 +44,6 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     return;
   }
 
-  parentWidget()->close();
   close();
+  parentWidget()->close();
 }

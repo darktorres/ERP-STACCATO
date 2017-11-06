@@ -7,7 +7,7 @@
 #include <QDoubleSpinBox>
 #include <QLineEdit>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogFinanceiro;
@@ -24,6 +24,11 @@ public:
   QDateTime getDate() const;
   QDateTime getNextDate() const;
   bool setFilter(const QString &idCompra);
+
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_checkBoxMarcarTodos_toggled(bool checked);
@@ -44,9 +49,8 @@ private:
   bool isBlockedFluxoCaixa = false;
   bool isBlockedStDate = false;
   const Tipo tipo;
-  QString error;
-  SqlTableModel model;
-  SqlTableModel modelFluxoCaixa;
+  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelFluxoCaixa;
   Ui::InputDialogFinanceiro *ui;
   // methods
   bool cadastrar();

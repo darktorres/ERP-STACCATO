@@ -5,7 +5,7 @@
 
 #include "vendaproxymodel.h"
 
-VendaProxyModel::VendaProxyModel(SqlTableModel *model, QObject *parent)
+VendaProxyModel::VendaProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("Status")), followupIndex(model->fieldIndex("Observação")),
       semaforoIndex(model->fieldIndex("semaforo")), financeiroIndex(model->fieldIndex("statusFinanceiro")) {
   setSourceModel(model);

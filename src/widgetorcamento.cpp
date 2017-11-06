@@ -94,7 +94,7 @@ bool WidgetOrcamento::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
-  qDebug() << "filter: " << model.filter();
+  //  qDebug() << "filter: " << model.filter();
 
   return true;
 }
@@ -103,12 +103,22 @@ void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
   orcamento->viewRegisterById(model.data(index.row(), "Código"));
+
+  connect(orcamento, &Orcamento::errorSignal, this, &WidgetOrcamento::errorSignal);
+  connect(orcamento, &Orcamento::transactionStarted, this, &WidgetOrcamento::transactionStarted);
+  connect(orcamento, &Orcamento::transactionEnded, this, &WidgetOrcamento::transactionEnded);
+
   orcamento->show();
 }
 
 void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
+
+  connect(orcamento, &Orcamento::errorSignal, this, &WidgetOrcamento::errorSignal);
+  connect(orcamento, &Orcamento::transactionStarted, this, &WidgetOrcamento::transactionStarted);
+  connect(orcamento, &Orcamento::transactionEnded, this, &WidgetOrcamento::transactionEnded);
+
   orcamento->show();
 }
 
@@ -167,14 +177,13 @@ void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
 void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged(const int) {
   ui->comboBoxVendedores->clear();
 
-  QSqlQuery query2("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" +
-                   (ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString()));
+  QSqlQuery query("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" +
+                  (ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString()));
 
   ui->comboBoxVendedores->addItem("");
 
-  while (query2.next()) ui->comboBoxVendedores->addItem(query2.value("user").toString(), query2.value("idUsuario"));
+  while (query.next()) ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario"));
 }
 
 // TODO: 1por padrao nao ativar filtro mes quando for vendedor (acho que já foi feito)
 // TODO: 5alterar followup para guardar apenas os 12 primeiros caracteres (remover -RevXXX)
-// FIXME: diasrestantes vermelho nao esta aparecendo a fonte

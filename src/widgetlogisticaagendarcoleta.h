@@ -4,7 +4,7 @@
 #include <QStandardItemModel>
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaAgendarColeta;
@@ -21,9 +21,12 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void calcularPeso();
+  void on_checkBoxEstoque_toggled(bool checked);
   void on_dateTimeEdit_dateChanged(const QDate &date);
   void on_itemBoxVeiculo_textChanged(const QString &);
   void on_lineEditBusca_textChanged(const QString &text);
@@ -33,17 +36,15 @@ private slots:
   void on_pushButtonDanfe_clicked();
   void on_pushButtonMontarCarga_clicked();
   void on_pushButtonRemoverProduto_clicked();
-  void on_tableEstoque_entered(const QModelIndex &);
-  void on_checkBoxEstoque_toggled(bool checked);
   void on_pushButtonVenda_clicked();
+  void on_tableEstoque_entered(const QModelIndex &);
 
 private:
   // attributes
-  QString error;
   QString fornecedor;
-  SqlTableModel modelEstoque;
-  SqlTableModel modelTransp;
-  SqlTableModel modelTransp2;
+  SqlRelationalTableModel modelEstoque;
+  SqlRelationalTableModel modelTransp;
+  SqlRelationalTableModel modelTransp2;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
   bool adicionarProduto(const QModelIndexList &list);

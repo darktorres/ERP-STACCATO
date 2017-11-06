@@ -672,6 +672,7 @@ bool ScriptExtractor::parse(int &curPos,const State& state)
             } else {
                 if (m_context[curPos]=='{')
                    extractBracket(curPos);
+                [[fallthrough]];
             }
         case None:
             if (m_context[curPos]=='$'){

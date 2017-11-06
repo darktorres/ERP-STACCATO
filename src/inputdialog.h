@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialog;

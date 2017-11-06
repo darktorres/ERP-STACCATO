@@ -377,7 +377,7 @@ QList<BandDesignIntf *> BandDesignIntf::childrenByType(BandDesignIntf::BandsType
     foreach(BandDesignIntf* item,childBands()){
         if (item->bandType()==type) resList<<item;
     }
-    qSort(resList.begin(),resList.end(),bandIndexLessThen);
+    std::sort(resList.begin(),resList.end(),bandIndexLessThen);
     return resList;
 }
 

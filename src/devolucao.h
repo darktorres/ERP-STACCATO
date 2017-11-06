@@ -4,7 +4,7 @@
 #include <QDataWidgetMapper>
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Devolucao;
@@ -16,6 +16,11 @@ class Devolucao : public QDialog {
 public:
   explicit Devolucao(const QString &idVenda, QWidget *parent = 0);
   ~Devolucao();
+
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_doubleSpinBoxCaixas_valueChanged(const double caixas);
@@ -31,13 +36,12 @@ private:
   bool createNewId = false;
   const QString idVenda;
   QDataWidgetMapper mapperItem;
-  QString error;
   QString idDevolucao;
-  SqlTableModel modelCliente;
-  SqlTableModel modelDevolvidos;
-  SqlTableModel modelPagamentos;
-  SqlTableModel modelProdutos;
-  SqlTableModel modelVenda;
+  SqlRelationalTableModel modelCliente;
+  SqlRelationalTableModel modelDevolvidos;
+  SqlRelationalTableModel modelPagamentos;
+  SqlRelationalTableModel modelProdutos;
+  SqlRelationalTableModel modelVenda;
   Ui::Devolucao *ui;
   // methods
   bool atualizarDevolucao();

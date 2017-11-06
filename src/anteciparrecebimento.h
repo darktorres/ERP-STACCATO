@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class AnteciparRecebimento;
@@ -24,10 +24,10 @@ private slots:
 
 private:
   // attributes
-  // TODO: 0refactor those out
+  // REFAC: 0refactor those out
   bool isBlockedPresente = false;
   bool isBlockedMes = false;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::AnteciparRecebimento *ui;
   // methods
   void calcularTotais();

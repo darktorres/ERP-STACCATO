@@ -6,7 +6,7 @@
 #include <QSqlTableModel>
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 #include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
@@ -36,7 +36,7 @@ void TableView::hideColumn(const QString &column) {
     }
   }
 
-  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlRelationalTableModel *>(QTableView::model())) {
     QTableView::hideColumn(model->fieldIndex(column));
     return;
   }
@@ -67,7 +67,7 @@ void TableView::showColumn(const QString &column) {
     }
   }
 
-  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlRelationalTableModel *>(QTableView::model())) {
     QTableView::showColumn(model->fieldIndex(column));
     return;
   }
@@ -80,7 +80,7 @@ void TableView::showColumn(const QString &column) {
 
 void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) {
   if (auto *model = qobject_cast<QIdentityProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<SqlTableModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlRelationalTableModel *>(model->sourceModel())) {
       QTableView::setItemDelegateForColumn(sourceModel->fieldIndex(column), delegate);
       return;
     }
@@ -98,7 +98,7 @@ void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDel
     }
   }
 
-  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlRelationalTableModel *>(QTableView::model())) {
     QTableView::setItemDelegateForColumn(model->fieldIndex(column), delegate);
     return;
   }
@@ -111,7 +111,7 @@ void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDel
 
 void TableView::openPersistentEditor(const int row, const QString &column) {
   if (auto *model = qobject_cast<QIdentityProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<SqlTableModel *>(model->sourceModel())) {
+    if (auto *sourceModel = qobject_cast<SqlRelationalTableModel *>(model->sourceModel())) {
       QTableView::openPersistentEditor(model->index(row, sourceModel->fieldIndex(column)));
       return;
     }
@@ -129,7 +129,7 @@ void TableView::openPersistentEditor(const int row, const QString &column) {
     }
   }
 
-  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlRelationalTableModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, model->fieldIndex(column)));
     return;
   }
@@ -151,7 +151,7 @@ void TableView::openPersistentEditor(const int row, const int column) {
     return;
   }
 
-  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlRelationalTableModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, column));
     return;
   }
@@ -184,7 +184,7 @@ void TableView::sortByColumn(const QString &column, Qt::SortOrder order) {
     }
   }
 
-  if (auto *model = qobject_cast<SqlTableModel *>(QTableView::model())) {
+  if (auto *model = qobject_cast<SqlRelationalTableModel *>(QTableView::model())) {
     QTableView::sortByColumn(model->fieldIndex(column), order);
     return;
   }

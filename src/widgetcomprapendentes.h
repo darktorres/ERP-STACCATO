@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraPendentes;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void montaFiltro();
@@ -34,8 +36,8 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
-  SqlTableModel modelResumo;
+  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraPendentes *ui;
   // methods
   bool insere(const QDate &dataPrevista);

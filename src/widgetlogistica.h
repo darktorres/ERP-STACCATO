@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogistica;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_tableForn_activated(const QModelIndex &index);
@@ -26,9 +28,10 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetLogistica *ui;
   // methods
+  void setConnections();
 };
 
 #endif // WIDGETLOGISTICA_H

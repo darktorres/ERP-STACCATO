@@ -57,7 +57,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo == Tipo::CancelarNFe) {
-    ui->comboBoxDest->addItem(UserSession::settings("User/emailContabilidade").toString());
+    ui->comboBoxDest->addItem(UserSession::setSetting("User/emailContabilidade").toString());
 
     ui->lineEditTitulo->setText("CANCELAMENTO DE NFe - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA");
 
@@ -67,11 +67,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    ui->lineEditEmail->setText(UserSession::settings("User/emailCompra").toString());
-    ui->lineEditCopia->setText(UserSession::settings("User/emailCopia").toString());
-    ui->lineEditServidor->setText(UserSession::settings("User/servidorSMTP").toString());
-    ui->lineEditPorta->setText(UserSession::settings("User/portaSMTP").toString());
-    ui->lineEditPasswd->setText(UserSession::settings("User/emailSenha").toString());
+    ui->lineEditEmail->setText(UserSession::setSetting("User/emailCompra").toString());
+    ui->lineEditCopia->setText(UserSession::setSetting("User/emailCopia").toString());
+    ui->lineEditServidor->setText(UserSession::setSetting("User/servidorSMTP").toString());
+    ui->lineEditPorta->setText(UserSession::setSetting("User/portaSMTP").toString());
+    ui->lineEditPasswd->setText(UserSession::setSetting("User/emailSenha").toString());
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);
@@ -96,10 +96,10 @@ void SendMail::on_pushButtonBuscar_clicked() {
 void SendMail::on_pushButtonEnviar_clicked() {
   progress->show();
 
-  UserSession::setSettings("User/servidorSMTP", ui->lineEditServidor->text());
-  UserSession::setSettings("User/portaSMTP", ui->lineEditPorta->text());
-  UserSession::setSettings("User/emailCompra", ui->lineEditEmail->text());
-  UserSession::setSettings("User/emailSenha", ui->lineEditPasswd->text());
+  UserSession::getSetting("User/servidorSMTP", ui->lineEditServidor->text());
+  UserSession::getSetting("User/portaSMTP", ui->lineEditPorta->text());
+  UserSession::getSetting("User/emailCompra", ui->lineEditEmail->text());
+  UserSession::getSetting("User/emailSenha", ui->lineEditPasswd->text());
 
   Smtp *smtp = new Smtp(ui->lineEditEmail->text(), ui->lineEditPasswd->text(), ui->lineEditServidor->text(), ui->lineEditPorta->text().toInt());
   connect(smtp, &Smtp::status, this, &SendMail::mailSent);

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaRecebimento;
@@ -20,6 +20,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_checkBoxMarcarTodos_clicked(const bool);
@@ -32,9 +34,8 @@ private slots:
 
 private:
   // attributes
-  QString error;
   QString fornecedor;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   bool cancelar(const QModelIndexList &list);

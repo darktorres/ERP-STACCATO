@@ -15,18 +15,17 @@ bool WidgetLogisticaCalendario::updateTables() {
   if (not setup) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON "
-                       "t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
+    if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
       QMessageBox::critical(this, "Erro!", "Erro buscando veiculos: " + query.lastError().text());
       return false;
     }
 
     while (query.next()) {
-      auto *cb = new QCheckBox(this);
-      cb->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
-      cb->setChecked(true);
-      connect(cb, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);
-      ui->groupBoxVeiculos->layout()->addWidget(cb);
+      auto *checkbox = new QCheckBox(this);
+      checkbox->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
+      checkbox->setChecked(true);
+      connect(checkbox, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);
+      ui->groupBoxVeiculos->layout()->addWidget(checkbox);
     }
 
     ui->groupBoxVeiculos->layout()->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
@@ -150,6 +149,5 @@ void WidgetLogisticaCalendario::on_pushButtonAnterior_clicked() { ui->calendarWi
 
 void WidgetLogisticaCalendario::on_calendarWidget_selectionChanged() {
   const QDate date = ui->calendarWidget->selectedDate();
-
   updateCalendar(date.addDays(date.dayOfWeek() * -1));
 }

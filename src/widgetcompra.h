@@ -17,12 +17,15 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_tabWidget_currentChanged(const int &);
 
 private:
   Ui::WidgetCompra *ui;
+  void setConnections();
 };
 
 #endif // WIDGETCOMPRA_H

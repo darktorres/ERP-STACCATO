@@ -419,7 +419,7 @@ bool Orcamento::generateId() {
     query.bindValue(":id", id + "%");
 
     if (not query.exec()) {
-      error = "Erro buscando próximo id disponível: " + query.lastError().text();
+      emit errorSignal("Erro buscando próximo id disponível: " + query.lastError().text());
       return false;
     }
 
@@ -430,18 +430,17 @@ bool Orcamento::generateId() {
     id += "O";
 
     if (id.size() != 12 and id.size() != 13) {
-      error = "Ocorreu algum erro ao gerar id: " + id;
+      emit errorSignal("Tamanho do Id errado: " + id);
       return false;
     }
   } else {
     QSqlQuery query;
-    query.prepare("SELECT COALESCE(MAX(CAST(REPLACE(idOrcamento, LEFT(idOrcamento, LOCATE('Rev', idOrcamento) + 2), "
-                  "'') AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE LENGTH(idOrcamento) > 16 AND idOrcamento "
-                  "LIKE :idOrcamento");
+    query.prepare("SELECT COALESCE(MAX(CAST(REPLACE(idOrcamento, LEFT(idOrcamento, LOCATE('Rev', idOrcamento) + 2), '') AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE LENGTH(idOrcamento) > 16 "
+                  "AND idOrcamento LIKE :idOrcamento");
     query.bindValue(":idOrcamento", replica.left(16) + "%");
 
     if (not query.exec() or not query.first()) {
-      error = "Erro buscando próxima revisão disponível: " + query.lastError().text();
+      emit errorSignal("Erro buscando próxima revisão disponível: " + query.lastError().text());
       return false;
     }
 
@@ -530,7 +529,7 @@ bool Orcamento::atualizaReplica() {
     query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
 
     if (not query.exec()) {
-      error = "Erro salvando replicadoEm: " + query.lastError().text();
+      emit errorSignal("Erro salvando replicadoEm: " + query.lastError().text());
       return false;
     }
   }
@@ -728,6 +727,10 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
   auto *venda = new Venda(parentWidget());
   venda->prepararVenda(ui->lineEditOrcamento->text());
 
+  connect(venda, &Venda::errorSignal, this, &Orcamento::errorSignal);
+  connect(venda, &Venda::transactionStarted, this, &Orcamento::transactionStarted);
+  connect(venda, &Venda::transactionEnded, this, &Orcamento::transactionEnded);
+
   close();
 }
 
@@ -870,6 +873,10 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
 void Orcamento::on_pushButtonReplicar_clicked() {
   auto *replica = new Orcamento(parentWidget());
 
+  connect(replica, &Orcamento::errorSignal, this, &Orcamento::errorSignal);
+  connect(replica, &Orcamento::transactionStarted, this, &Orcamento::transactionStarted);
+  connect(replica, &Orcamento::transactionEnded, this, &Orcamento::transactionEnded);
+
   replica->ui->pushButtonReplicar->hide();
 
   replica->ui->itemBoxCliente->setValue(data("idCliente"));
@@ -897,13 +904,15 @@ bool Orcamento::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    error = "Erro linha -1 Orçamento: " + QString::number(static_cast<int>(Tipo::Atualizar)) + "\nMapper: " + QString::number(mapper.currentIndex()) + "\nModel: " + QString::number(model.rowCount());
+    emit errorSignal("Erro linha -1");
     return false;
   }
 
   if (tipo == Tipo::Cadastrar) {
-    if (not generateId() or not model.insertRow(currentRow)) {
-      error = "Erro inserindo linha na tabela";
+    if (not generateId()) return false;
+
+    if (not model.insertRow(currentRow)) {
+      emit errorSignal("Erro inserindo linha na tabela");
       return false;
     }
   }
@@ -911,19 +920,19 @@ bool Orcamento::cadastrar() {
   if (not savingProcedures()) return false;
 
   if (not model.submitAll()) {
-    error = "Erro ao cadastrar: " + model.lastError().text();
+    emit errorSignal("Erro ao cadastrar: " + model.lastError().text());
     return false;
   }
 
   primaryId = ui->lineEditOrcamento->text();
 
   if (primaryId.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "primaryId está vazio!");
+    emit errorSignal("Id vazio!");
     return false;
   }
 
   if (not modelItem.submitAll()) {
-    error = "Erro ao adicionar um item ao orçamento: " + modelItem.lastError().text();
+    emit errorSignal("Erro ao adicionar um item ao orçamento: " + modelItem.lastError().text());
     return false;
   }
 
@@ -933,17 +942,22 @@ bool Orcamento::cadastrar() {
 bool Orcamento::save(const bool silent) {
   if (not verifyFields()) return false;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return false;
   }
 
   QSqlQuery("COMMIT").exec();
 
+  emit transactionEnded();
+
+  // REFAC: set this inside RegisterDialog::viewRegister or viewRegisterById
   isDirty = false;
 
   viewRegisterById(primaryId);
@@ -955,6 +969,8 @@ bool Orcamento::save(const bool silent) {
 
 bool Orcamento::verificaCadastroCliente() {
   const int idCliente = ui->itemBoxCliente->getValue().toInt();
+
+  // REFAC: simplify this function
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");
@@ -969,13 +985,17 @@ bool Orcamento::verificaCadastroCliente() {
     QMessageBox::critical(this, "Erro!", "Cliente não possui CPF/CNPJ cadastrado!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
+
+    connect(cadCliente, &CadastroCliente::errorSignal, this, &Orcamento::errorSignal);
+    connect(cadCliente, &CadastroCliente::transactionStarted, this, &Orcamento::transactionStarted);
+    connect(cadCliente, &CadastroCliente::transactionEnded, this, &Orcamento::transactionEnded);
+
     cadCliente->show();
     return false;
   }
 
   QSqlQuery queryCadastro;
-  queryCadastro.prepare("SELECT idCliente FROM cliente_has_endereco WHERE "
-                        "idCliente = :idCliente");
+  queryCadastro.prepare("SELECT idCliente FROM cliente_has_endereco WHERE idCliente = :idCliente");
   queryCadastro.bindValue(":idCliente", idCliente);
 
   if (not queryCadastro.exec()) {
@@ -987,6 +1007,11 @@ bool Orcamento::verificaCadastroCliente() {
     QMessageBox::critical(this, "Erro!", "Cliente não possui endereço cadastrado!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
+
+    connect(cadCliente, &CadastroCliente::errorSignal, this, &Orcamento::errorSignal);
+    connect(cadCliente, &CadastroCliente::transactionStarted, this, &Orcamento::transactionStarted);
+    connect(cadCliente, &CadastroCliente::transactionEnded, this, &Orcamento::transactionEnded);
+
     cadCliente->show();
     return false;
   }
@@ -1003,6 +1028,11 @@ bool Orcamento::verificaCadastroCliente() {
     QMessageBox::critical(this, "Erro!", "Cadastro incompleto, deve terminar!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
+
+    connect(cadCliente, &CadastroCliente::errorSignal, this, &Orcamento::errorSignal);
+    connect(cadCliente, &CadastroCliente::transactionStarted, this, &Orcamento::transactionStarted);
+    connect(cadCliente, &CadastroCliente::transactionEnded, this, &Orcamento::transactionEnded);
+
     cadCliente->show();
     return false;
   }

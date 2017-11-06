@@ -170,7 +170,7 @@ private:
 };
 
 class ScriptEngineManager : public QObject, public Singleton<ScriptEngineManager>, public IScriptEngineManager
-{    
+{
     Q_OBJECT
 public:
     QScriptEngine* scriptEngine(){return m_scriptEngine;}
@@ -253,33 +253,37 @@ public:
         this->setObjectName("QFontPrototype");
     }
     QString family() const {
-        QFont font(qScriptValueToValue<QFont>(this->thisObject()));
+        QFont font(qscriptvalue_cast<QFont>(this->thisObject()));
         return font.family();
     }
     int size(){
-        QFont font = qScriptValueToValue<QFont>(thisObject());
+        QFont font = qscriptvalue_cast<QFont>(thisObject());
         return font.pointSize();
     }
     bool bold(){
-        QFont font = qScriptValueToValue<QFont>(thisObject());
+        QFont font = qscriptvalue_cast<QFont>(thisObject());
         return font.bold();
     }
     bool italic(){
-        QFont font = qScriptValueToValue<QFont>(thisObject());
+        QFont font = qscriptvalue_cast<QFont>(thisObject());
         return font.italic();
     }
     bool underline(){
-        QFont font = qScriptValueToValue<QFont>(thisObject());
+        QFont font = qscriptvalue_cast<QFont>(thisObject());
         return font.underline();
     }
     static QScriptValue constructorQFont(QScriptContext * context, QScriptEngine * engine) {
         QFont font;
         switch (context->argumentCount()) {
-        case 5: font.setUnderline(qScriptValueToValue<bool>(context->argument(4)));
-        case 4: font.setBold(qScriptValueToValue<bool>(context->argument(3)));
-        case 3: font.setItalic(qScriptValueToValue<bool>(context->argument(2)));
-        case 2: font.setPointSize(qScriptValueToValue<int>(context->argument(1)));
-        case 1: font.setFamily(qScriptValueToValue<QString>(context->argument(0)));
+        case 5: font.setUnderline(qscriptvalue_cast<bool>(context->argument(4)));
+                [[fallthrough]];
+        case 4: font.setBold(qscriptvalue_cast<bool>(context->argument(3)));
+                [[fallthrough]];
+        case 3: font.setItalic(qscriptvalue_cast<bool>(context->argument(2)));
+                [[fallthrough]];
+        case 2: font.setPointSize(qscriptvalue_cast<int>(context->argument(1)));
+                [[fallthrough]];
+        case 1: font.setFamily(qscriptvalue_cast<QString>(context->argument(0)));
         case 0: break;
         default:
             break;

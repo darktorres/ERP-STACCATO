@@ -169,6 +169,10 @@ void WidgetVenda::on_table_activated(const QModelIndex &index) {
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) vendas->setFinanceiro();
   vendas->viewRegisterById(model.data(index.row(), "Código"));
+
+  connect(vendas, &Venda::errorSignal, this, &WidgetVenda::errorSignal);
+  connect(vendas, &Venda::transactionStarted, this, &WidgetVenda::transactionStarted);
+  connect(vendas, &Venda::transactionEnded, this, &WidgetVenda::transactionEnded);
 }
 
 void WidgetVenda::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

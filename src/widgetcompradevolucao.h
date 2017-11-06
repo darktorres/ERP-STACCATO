@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraDevolucao;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_pushButtonDevolucaoFornecedor_clicked();
@@ -28,12 +30,11 @@ private slots:
 
 private:
   // attributes
-  QString error;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetCompraDevolucao *ui;
   // methods
-  void setupTables();
   bool retornarEstoque(const QModelIndexList &list);
+  void setupTables();
 };
 
 #endif // WIDGETCOMPRADEVOLUCAO_H

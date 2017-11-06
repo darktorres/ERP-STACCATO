@@ -15,6 +15,11 @@ public:
   explicit CadastroProfissional(QWidget *parent = 0);
   ~CadastroProfissional();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_lineEditCEP_textChanged(const QString &cep);
@@ -42,17 +47,16 @@ private slots:
 
 private:
   // attributes
-  QString error;
   QString tipoPFPJ;
   SearchDialog *sdProfissional;
   Ui::CadastroProfissional *ui;
   // methods
   bool cadastrarEndereco(const bool isUpdate = false);
-  bool viewRegister() override;
   virtual bool cadastrar() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;
+  virtual bool viewRegister() override;
   virtual void clearFields() override;
   virtual void registerMode() override;
   virtual void setupMapper() override;

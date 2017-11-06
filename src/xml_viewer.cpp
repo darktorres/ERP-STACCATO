@@ -1,7 +1,7 @@
+#include "xml_viewer.h"
 #include "acbr.h"
 #include "ui_xml_viewer.h"
 #include "xml.h"
-#include "xml_viewer.h"
 
 XML_Viewer::XML_Viewer(QWidget *parent) : QDialog(parent), ui(new Ui::XML_Viewer) {
   ui->setupUi(this);
@@ -29,7 +29,4 @@ void XML_Viewer::exibirXML(const QByteArray &content) {
   show();
 }
 
-void XML_Viewer::on_pushButtonDanfe_clicked() {
-  QString resposta;
-  if (not ACBr::gerarDanfe(fileContent, resposta)) return;
-}
+void XML_Viewer::on_pushButtonDanfe_clicked() { ACBr::gerarDanfe(fileContent); }

@@ -5,7 +5,7 @@
 
 #include "estoqueprazoproxymodel.h"
 
-EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), dias(model->fieldIndex("prazoEntrega")) { setSourceModel(model); }
+EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), dias(model->fieldIndex("prazoEntrega")) { setSourceModel(model); }
 
 QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {

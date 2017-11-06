@@ -12,15 +12,29 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
   ui->splitter_6->setStretchFactor(0, 0);
   ui->splitter_6->setStretchFactor(1, 1);
 
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::errorSignal, this, &WidgetLogistica::errorSignal);
+  setConnections();
 
   ui->tableForn->setModel(&model);
 }
 
 WidgetLogistica::~WidgetLogistica() { delete ui; }
+
+void WidgetLogistica::setConnections() {
+  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::errorSignal, this, &WidgetLogistica::errorSignal);
+  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::errorSignal, this, &WidgetLogistica::errorSignal);
+  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::errorSignal, this, &WidgetLogistica::errorSignal);
+  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::errorSignal, this, &WidgetLogistica::errorSignal);
+
+  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::transactionStarted, this, &WidgetLogistica::transactionStarted);
+  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::transactionStarted, this, &WidgetLogistica::transactionStarted);
+  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::transactionStarted, this, &WidgetLogistica::transactionStarted);
+  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::transactionStarted, this, &WidgetLogistica::transactionStarted);
+
+  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::transactionEnded, this, &WidgetLogistica::transactionEnded);
+  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::transactionEnded, this, &WidgetLogistica::transactionEnded);
+  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::transactionEnded, this, &WidgetLogistica::transactionEnded);
+  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::transactionEnded, this, &WidgetLogistica::transactionEnded);
+}
 
 bool WidgetLogistica::updateTables() {
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());

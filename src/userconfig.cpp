@@ -10,23 +10,23 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setValue(UserSession::settings("User/lojaACBr"));
+  ui->itemBoxLoja->setValue(UserSession::setSetting("User/lojaACBr"));
   // REFAC: remove these two
-  ui->lineEditEmailContabilidade->setText(UserSession::settings("User/emailContabilidade").toString());
-  ui->lineEditEmailLogistica->setText(UserSession::settings("User/emailLogistica").toString());
+  ui->lineEditEmailContabilidade->setText(UserSession::setSetting("User/emailContabilidade").toString());
+  ui->lineEditEmailLogistica->setText(UserSession::setSetting("User/emailLogistica").toString());
 
-  ui->lineEditServidorSMTP->setText(UserSession::settings("User/servidorSMTP").toString());
-  ui->lineEditPortaSMTP->setText(UserSession::settings("User/portaSMTP").toString());
+  ui->lineEditServidorSMTP->setText(UserSession::setSetting("User/servidorSMTP").toString());
+  ui->lineEditPortaSMTP->setText(UserSession::setSetting("User/portaSMTP").toString());
   // REFAC: rename this to email
-  ui->lineEditEmail->setText(UserSession::settings("User/emailCompra").toString());
-  ui->lineEditEmailSenha->setText(UserSession::settings("User/emailSenha").toString());
-  ui->lineEditEmailCopia->setText(UserSession::settings("User/emailCopia").toString());
+  ui->lineEditEmail->setText(UserSession::setSetting("User/emailCompra").toString());
+  ui->lineEditEmailSenha->setText(UserSession::setSetting("User/emailSenha").toString());
+  ui->lineEditEmailCopia->setText(UserSession::setSetting("User/emailCopia").toString());
 
-  ui->lineEditOrcamentosFolder->setText(UserSession::settings("User/OrcamentosFolder").toString());
-  ui->lineEditVendasFolder->setText(UserSession::settings("User/VendasFolder").toString());
-  ui->lineEditComprasFolder->setText(UserSession::settings("User/ComprasFolder").toString());
-  ui->lineEditEntregasXmlFolder->setText(UserSession::settings("User/EntregasXmlFolder").toString());
-  ui->lineEditEntregasPdfFolder->setText(UserSession::settings("User/EntregasPdfFolder").toString());
+  ui->lineEditOrcamentosFolder->setText(UserSession::setSetting("User/OrcamentosFolder").toString());
+  ui->lineEditVendasFolder->setText(UserSession::setSetting("User/VendasFolder").toString());
+  ui->lineEditComprasFolder->setText(UserSession::setSetting("User/ComprasFolder").toString());
+  ui->lineEditEntregasXmlFolder->setText(UserSession::setSetting("User/EntregasXmlFolder").toString());
+  ui->lineEditEntregasPdfFolder->setText(UserSession::setSetting("User/EntregasPdfFolder").toString());
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();
@@ -56,21 +56,21 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonSalvar_clicked() {
-  UserSession::setSettings("User/lojaACBr", ui->itemBoxLoja->getValue());
-  UserSession::setSettings("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
-  UserSession::setSettings("User/emailLogistica", ui->lineEditEmailLogistica->text());
+  UserSession::getSetting("User/lojaACBr", ui->itemBoxLoja->getValue());
+  UserSession::getSetting("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
+  UserSession::getSetting("User/emailLogistica", ui->lineEditEmailLogistica->text());
 
-  UserSession::setSettings("User/servidorSMTP", ui->lineEditServidorSMTP->text());
-  UserSession::setSettings("User/portaSMTP", ui->lineEditPortaSMTP->text());
-  UserSession::setSettings("User/emailCompra", ui->lineEditEmail->text());
-  UserSession::setSettings("User/emailSenha", ui->lineEditEmailSenha->text());
-  UserSession::setSettings("User/emailCopia", ui->lineEditEmailCopia->text());
+  UserSession::getSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
+  UserSession::getSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());
+  UserSession::getSetting("User/emailCompra", ui->lineEditEmail->text());
+  UserSession::getSetting("User/emailSenha", ui->lineEditEmailSenha->text());
+  UserSession::getSetting("User/emailCopia", ui->lineEditEmailCopia->text());
 
-  UserSession::setSettings("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());
-  UserSession::setSettings("User/VendasFolder", ui->lineEditVendasFolder->text());
-  UserSession::setSettings("User/ComprasFolder", ui->lineEditComprasFolder->text());
-  UserSession::setSettings("User/EntregasXmlFolder", ui->lineEditEntregasXmlFolder->text());
-  UserSession::setSettings("User/EntregasPdfFolder", ui->lineEditEntregasPdfFolder->text());
+  UserSession::getSetting("User/OrcamentosFolder", ui->lineEditOrcamentosFolder->text());
+  UserSession::getSetting("User/VendasFolder", ui->lineEditVendasFolder->text());
+  UserSession::getSetting("User/ComprasFolder", ui->lineEditComprasFolder->text());
+  UserSession::getSetting("User/EntregasXmlFolder", ui->lineEditEntregasXmlFolder->text());
+  UserSession::getSetting("User/EntregasPdfFolder", ui->lineEditEntregasPdfFolder->text());
 
   QDialog::accept();
 
@@ -79,9 +79,14 @@ void UserConfig::on_pushButtonSalvar_clicked() {
 
 void UserConfig::on_pushButtonAlterarDados_clicked() {
   auto *usuario = new CadastroUsuario(this);
-  usuario->show();
   usuario->viewRegisterById(UserSession::idUsuario());
   usuario->modificarUsuario();
+
+  connect(usuario, &CadastroUsuario::errorSignal, this, &UserConfig::errorSignal);
+  connect(usuario, &CadastroUsuario::transactionStarted, this, &UserConfig::transactionStarted);
+  connect(usuario, &CadastroUsuario::transactionEnded, this, &UserConfig::transactionEnded);
+
+  usuario->show();
 }
 
 void UserConfig::on_pushButtonVendasFolder_clicked() {

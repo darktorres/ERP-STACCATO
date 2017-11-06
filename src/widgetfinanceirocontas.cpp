@@ -208,6 +208,11 @@ void WidgetFinanceiroContas::on_tableVencer_doubleClicked(const QModelIndex &ind
 void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
   auto *transferencia = new InserirTransferencia(this);
   transferencia->setAttribute(Qt::WA_DeleteOnClose);
+
+  connect(transferencia, &InserirTransferencia::errorSignal, this, &WidgetFinanceiroContas::errorSignal);
+  connect(transferencia, &InserirTransferencia::transactionStarted, this, &WidgetFinanceiroContas::transactionStarted);
+  connect(transferencia, &InserirTransferencia::transactionEnded, this, &WidgetFinanceiroContas::transactionEnded);
+
   transferencia->show();
 }
 

@@ -8,11 +8,21 @@
 WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
   ui->setupUi(this);
 
-  connect(ui->widgetEntrada, &WidgetNfeEntrada::errorSignal, this, &WidgetNfe::errorSignal);
-  connect(ui->widgetSaida, &WidgetNfeSaida::errorSignal, this, &WidgetNfe::errorSignal);
+  setConnections();
 }
 
 WidgetNfe::~WidgetNfe() { delete ui; }
+
+void WidgetNfe::setConnections() {
+  connect(ui->widgetEntrada, &WidgetNfeEntrada::errorSignal, this, &WidgetNfe::errorSignal);
+  connect(ui->widgetSaida, &WidgetNfeSaida::errorSignal, this, &WidgetNfe::errorSignal);
+
+  connect(ui->widgetEntrada, &WidgetNfeEntrada::transactionStarted, this, &WidgetNfe::transactionStarted);
+  connect(ui->widgetSaida, &WidgetNfeSaida::transactionStarted, this, &WidgetNfe::transactionStarted);
+
+  connect(ui->widgetEntrada, &WidgetNfeEntrada::transactionEnded, this, &WidgetNfe::transactionEnded);
+  connect(ui->widgetSaida, &WidgetNfeSaida::transactionEnded, this, &WidgetNfe::transactionEnded);
+}
 
 bool WidgetNfe::updateTables() {
   const QString currentText = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());

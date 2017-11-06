@@ -27,10 +27,8 @@ private:
   QHash<QString, QString> hash;
   Ui::LoginDialog *ui;
   // methods
-  bool dbConnect();
   void storeSelection();
   void updater();
-  void darkTheme();
   void readSettingsFile();
 };
 

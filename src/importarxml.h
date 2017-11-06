@@ -5,7 +5,7 @@
 #include <QDate>
 #include <QFileDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 #include "xml.h"
 
 namespace Ui {
@@ -19,6 +19,11 @@ public:
   explicit ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent = 0);
   ~ImportarXML();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_pushButtonCancelar_clicked();
   void on_pushButtonImportar_clicked();
@@ -31,13 +36,12 @@ private:
   // attributes
   const QDateTime dataReal;
   const QStringList idsCompra;
-  QString error;
-  SqlTableModel modelCompra;
-  SqlTableModel modelConsumo;
-  SqlTableModel modelEstoque;
-  SqlTableModel modelEstoque_nfe;
-  SqlTableModel modelEstoque_compra;
-  SqlTableModel modelNFe;
+  SqlRelationalTableModel modelCompra;
+  SqlRelationalTableModel modelConsumo;
+  SqlRelationalTableModel modelEstoque;
+  SqlRelationalTableModel modelEstoque_nfe;
+  SqlRelationalTableModel modelEstoque_compra;
+  SqlRelationalTableModel modelNFe;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {
@@ -61,10 +65,10 @@ private:
   bool parear();
   bool perguntarLocal(XML &xml);
   bool verificaCNPJ(const XML &xml);
-  bool verificaExiste(XML &xml);
+  bool verificaExiste(const XML &xml);
   void procurar();
   void setupTables(const QStringList &idsCompra);
-  void WrapParear();
+  void WrapParear(); // REFAC: simplify this
 };
 
 #endif // IMPORTARXML_H

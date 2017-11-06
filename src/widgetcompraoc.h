@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraOC;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_lineEditBusca_textChanged(const QString &text);
@@ -31,14 +33,13 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel modelNFe;
-  SqlTableModel modelPedido;
-  SqlTableModel modelProduto;
-  QString error;
+  SqlRelationalTableModel modelNFe;
+  SqlRelationalTableModel modelPedido;
+  SqlRelationalTableModel modelProduto;
   Ui::WidgetCompraOC *ui;
   // methods
-  void setupTables();
   bool desfazerConsumo(const QModelIndexList &list);
+  void setupTables();
 };
 
 #endif // WIDGETCOMPRAOC_H

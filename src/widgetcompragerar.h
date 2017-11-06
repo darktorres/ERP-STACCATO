@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraGerar;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void calcularPreco();
@@ -32,9 +34,8 @@ private slots:
 private:
   // attributes
   int oc = 0;
-  QString error;
-  SqlTableModel modelResumo;
-  SqlTableModel modelProdutos;
+  SqlRelationalTableModel modelResumo;
+  SqlRelationalTableModel modelProdutos;
   Ui::WidgetCompraGerar *ui;
   // methods
   bool cancelar(const QModelIndexList &list);

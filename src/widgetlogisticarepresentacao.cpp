@@ -81,16 +81,20 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   if (input.exec() != InputDialogConfirmacao::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not processRows(list, input.getDate(), input.getRecebeu())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Atualizado!");
@@ -108,7 +112,7 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     query1.bindValue(":idVendaProduto", model.data(item.row(), "idVendaProduto"));
 
     if (not query1.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query1.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query1.lastError().text());
       return false;
     }
 
@@ -117,7 +121,7 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     query2.bindValue(":recebeu", recebeu);
 
     if (not query2.exec()) {
-      error = "Erro salvando status na venda_produto: " + query2.lastError().text();
+      emit errorSignal("Erro salvando status na venda_produto: " + query2.lastError().text());
       return false;
     }
   }

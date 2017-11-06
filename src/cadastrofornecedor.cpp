@@ -152,15 +152,22 @@ void CadastroFornecedor::updateMode() {
 bool CadastroFornecedor::save() {
   if (not verifyFields()) return false;
 
+  // REFAC: put all this transaction stuff into one base function (since it's all the same)
+
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return false;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   isDirty = false;
 
@@ -175,7 +182,7 @@ bool CadastroFornecedor::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    QMessageBox::critical(this, "Erro!", "Erro: linha -1 RegisterDialog!");
+    emit errorSignal("Erro: linha -1 RegisterDialog!");
     return false;
   }
 
@@ -192,14 +199,14 @@ bool CadastroFornecedor::cadastrar() {
   }
 
   if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
+    emit errorSignal("Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
     return false;
   }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
   if (primaryId.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "primaryId está vazio!");
+    emit errorSignal("Id vazio!");
     return false;
   }
 
@@ -332,27 +339,27 @@ void CadastroFornecedor::successMessage() { QMessageBox::information(this, "Aten
 
 void CadastroFornecedor::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
-bool CadastroFornecedor::ajustarValidade(const int newValidade) {
+bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = model.data(mapper.currentIndex(), "razaoSocial").toString();
 
   QSqlQuery query;
-  query.prepare("UPDATE produto SET validade = :newValidade, descontinuado = 0 WHERE fornecedor = :fornecedor AND "
+  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = 0 WHERE fornecedor = :fornecedor AND "
                 "validade = :oldValidade");
-  query.bindValue(":newValidade", QDate::currentDate().addDays(newValidade));
+  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
   query.bindValue(":oldValidade", model.data(mapper.currentIndex(), "validadeProdutos"));
 
   if (not query.exec()) {
-    error = "Erro atualizando validade nos produtos: " + query.lastError().text();
+    emit errorSignal("Erro atualizando validade nos produtos: " + query.lastError().text());
     return false;
   }
 
-  query.prepare("UPDATE fornecedor SET validadeProdutos = :newValidade WHERE razaoSocial = :fornecedor");
-  query.bindValue(":newValidade", QDate::currentDate().addDays(newValidade));
+  query.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
+  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
 
   if (not query.exec()) {
-    error = "Erro atualizando validade no fornecedor: " + query.lastError().text();
+    emit errorSignal("Erro atualizando validade no fornecedor: " + query.lastError().text());
     return false;
   }
 
@@ -362,20 +369,24 @@ bool CadastroFornecedor::ajustarValidade(const int newValidade) {
 void CadastroFornecedor::on_pushButtonValidade_clicked() {
   bool ok = true;
 
-  const int newValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, 0, 1000, 1, &ok);
+  const int novaValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, 0, 1000, 1, &ok);
 
   if (not ok) return;
+
+  emit transactionStarted();
 
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not ajustarValidade(newValidade)) {
+  if (not ajustarValidade(novaValidade)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QMessageBox::information(this, "Aviso!", "Validade alterada com sucesso!");
 }

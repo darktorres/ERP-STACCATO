@@ -77,7 +77,7 @@ bool WidgetCompraFaturar::faturarCompra(const QDateTime &dataReal, const QString
     query.bindValue(":idCompra", idCompra);
 
     if (not query.exec()) {
-      error = "Erro atualizando status da compra: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status da compra: " + query.lastError().text());
       return false;
     }
 
@@ -85,7 +85,7 @@ bool WidgetCompraFaturar::faturarCompra(const QDateTime &dataReal, const QString
     query.bindValue(":idCompra", idCompra);
 
     if (not query.exec()) {
-      error = "Erro atualizando status do produto da venda: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status do produto da venda: " + query.lastError().text());
       return false;
     }
   }
@@ -127,20 +127,28 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER" ? true : false;
 
   if (pularNota) {
+    emit transactionStarted();
+
     QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
     QSqlQuery("START TRANSACTION").exec();
 
     if (not faturarCompra(dataReal, idsCompra)) {
       QSqlQuery("ROLLBACK").exec();
-      if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+      emit transactionEnded();
       return;
     }
 
     QSqlQuery("COMMIT").exec();
+
+    emit transactionEnded();
   } else {
     auto *import = new ImportarXML(idsCompra, dataReal, this);
     import->setAttribute(Qt::WA_DeleteOnClose);
     import->showMaximized();
+
+    connect(import, &ImportarXML::errorSignal, this, &WidgetCompraFaturar::errorSignal);
+    connect(import, &ImportarXML::transactionStarted, this, &WidgetCompraFaturar::transactionStarted);
+    connect(import, &ImportarXML::transactionEnded, this, &WidgetCompraFaturar::transactionEnded);
 
     if (import->exec() != QDialog::Accepted) return;
   }
@@ -182,7 +190,7 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
     query.bindValue(":ordemCompra", model.data(item.row(), "OC"));
 
     if (not query.exec()) {
-      error = "Erro salvando dados: " + query.lastError().text();
+      emit errorSignal("Erro salvando dados: " + query.lastError().text());
       return false;
     }
 
@@ -190,7 +198,7 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
     query.bindValue(":ordemCompra", model.data(item.row(), "OC"));
 
     if (not query.exec()) {
-      error = "Erro buscando dados: " + query.lastError().text();
+      emit errorSignal("Erro buscando dados: " + query.lastError().text());
       return false;
     }
 
@@ -200,7 +208,7 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
       query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
       if (not query2.exec()) {
-        error = "Erro voltando status do produto: " + query2.lastError().text();
+        emit errorSignal("Erro voltando status do produto: " + query2.lastError().text());
         return false;
       }
     }
@@ -232,16 +240,20 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Itens cancelados!");

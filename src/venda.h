@@ -21,6 +21,11 @@ public:
   void prepararVenda(const QString &idOrcamento);
   void setFinanceiro();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_doubleSpinBoxTotalPag_valueChanged(double);
   void on_pushButtonAdicionarPagamento_clicked();
@@ -30,24 +35,17 @@ private:
   bool financeiro = false;
   double minimoFrete;
   double porcFrete;
-  //  QList<QCheckBox *> listCheckBoxRep;
-  //  QList<QComboBox *> listComboParc;
-  //  QList<QComboBox *> listComboPgt;
-  //  QList<QDateEdit *> listDatePgt;
-  //  QList<QDoubleSpinBox *> listDoubleSpinPgt;
-  //  QList<QLineEdit *> listLinePgt;
-  QString error;
   QString idOrcamento;
-  SqlTableModel modelFluxoCaixa;
-  SqlTableModel modelFluxoCaixa2;
-  SqlTableModel modelItem;
+  SqlRelationalTableModel modelFluxoCaixa;
+  SqlRelationalTableModel modelFluxoCaixa2;
+  SqlRelationalTableModel modelItem;
   Ui::Venda *ui;
   // methods
   bool atualizarCredito();
-  bool cadastrar() override;
   bool cancelamento();
   bool financeiroSalvar();
   bool generateId();
+  virtual bool cadastrar() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;

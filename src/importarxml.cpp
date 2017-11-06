@@ -273,7 +273,7 @@ bool ImportarXML::cadastrarProdutoEstoque() {
     query.bindValue(":estoqueRestante", estoqueRestante);
 
     if (not query.exec()) {
-      error = "Erro criando produto_estoque: " + query.lastError().text();
+      emit errorSignal("Erro criando produto_estoque: " + query.lastError().text());
       return false;
     }
   }
@@ -307,7 +307,7 @@ bool ImportarXML::importar() {
   }
 
   if (not ok) {
-    error = "Nenhuma compra pareada!";
+    emit errorSignal("Nenhuma compra pareada!");
     return false;
   }
 
@@ -315,38 +315,38 @@ bool ImportarXML::importar() {
     const FieldColors color = static_cast<FieldColors>(modelEstoque.data(row, "quantUpd").toInt());
 
     if (color == FieldColors::Red) {
-      error = "Nem todos os estoques estão ok!";
+      emit errorSignal("Nem todos os estoques estão ok!");
       return false;
     }
   }
 
   if (not modelEstoque.submitAll()) {
-    error = "Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text();
+    emit errorSignal("Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text());
     return false;
   }
 
   if (not modelCompra.submitAll()) {
-    error = "Erro salvando dados da tabela compra: " + modelCompra.lastError().text();
+    emit errorSignal("Erro salvando dados da tabela compra: " + modelCompra.lastError().text());
     return false;
   }
 
   if (not modelConsumo.submitAll()) {
-    error = "Erro salvando dados do consumo: " + modelConsumo.lastError().text();
+    emit errorSignal("Erro salvando dados do consumo: " + modelConsumo.lastError().text());
     return false;
   }
 
   if (not modelEstoque_compra.submitAll()) {
-    error = "Erro salvando modelEstoque_compra: " + modelEstoque_compra.lastError().text();
+    emit errorSignal("Erro salvando modelEstoque_compra: " + modelEstoque_compra.lastError().text());
     return false;
   }
 
   if (not modelNFe.submitAll()) {
-    error = "Erro salvando modelNFe: " + modelNFe.lastError().text();
+    emit errorSignal("Erro salvando modelNFe: " + modelNFe.lastError().text());
     return false;
   }
 
   if (not modelEstoque_nfe.submitAll()) {
-    error = "Erro salvando modelEstoque_nfe: " + modelEstoque_nfe.lastError().text();
+    emit errorSignal("Erro salvando modelEstoque_nfe: " + modelEstoque_nfe.lastError().text());
     return false;
   }
 
@@ -367,7 +367,7 @@ bool ImportarXML::importar() {
     query.bindValue(":idVendaProduto", modelCompra.data(row, "idVendaProduto"));
 
     if (not query.exec()) {
-      error = "Erro atualizando status do produto da venda: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status do produto da venda: " + query.lastError().text());
       return false;
     }
   }
@@ -379,7 +379,7 @@ bool ImportarXML::importar() {
     query.bindValue(":idCompra", idCompra);
 
     if (not query.exec()) {
-      error = "Erro atualizando status da compra: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status da compra: " + query.lastError().text());
       return false;
     }
   }
@@ -389,20 +389,24 @@ bool ImportarXML::importar() {
 }
 
 void ImportarXML::on_pushButtonImportar_clicked() {
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 
   if (not importar()) {
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return;
   }
 
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QDialog::accept();
   close();
@@ -542,7 +546,7 @@ bool ImportarXML::verificaCNPJ(const XML &xml) {
   return true;
 }
 
-bool ImportarXML::verificaExiste(XML &xml) {
+bool ImportarXML::verificaExiste(const XML &xml) {
   QSqlQuery query;
   query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
@@ -644,7 +648,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   return true;
 }
 
-bool ImportarXML::inserirItemSql(XML &xml) {
+bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too big/complex
   const auto list = modelEstoque.match(modelEstoque.index(0, modelEstoque.fieldIndex("codComercial")), Qt::DisplayRole, xml.codProd, -1, Qt::MatchFlags(Qt::MatchFixedString | Qt::MatchWrap));
 
   for (const auto &item : list) {

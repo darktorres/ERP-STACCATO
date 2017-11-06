@@ -200,7 +200,7 @@ int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDe
     groupFooterIgnoredBands << BandDesignIntf::DataFooter << BandDesignIntf::GroupHeader;
 
     int bandIndex=-1;
-    qSort(m_bands.begin(),m_bands.end(),bandSortBandLessThenByIndex);
+    std::sort(m_bands.begin(),m_bands.end(),bandSortBandLessThenByIndex);
     foreach(BandDesignIntf* band,m_bands){
         if ((band->bandType() == BandDesignIntf::GroupHeader) && ( band->bandType() > bandType)) break;
         if ((band->bandType() <= bandType)){
@@ -364,7 +364,7 @@ void PageItemDesignIntf::relocateBands()
 
     QVector<qreal> posByColumn;
 
-    qSort(m_bands.begin(),m_bands.end(),bandSortBandLessThenByIndex);
+    std::sort(m_bands.begin(),m_bands.end(),bandSortBandLessThenByIndex);
 
     int bandIndex = 0;
     if (!(itemMode() & DesignMode)){
@@ -429,7 +429,7 @@ int PageItemDesignIntf::dataBandCount()
 BandDesignIntf *PageItemDesignIntf::dataBandAt(int index)
 {
     int count=0;
-    qSort(m_bands.begin(),m_bands.end(),bandSortBandLessThenByIndex);
+    std::sort(m_bands.begin(),m_bands.end(),bandSortBandLessThenByIndex);
     foreach(BandDesignIntf* band,m_bands){
         if (band->bandType()==BandDesignIntf::Data){
             if(count==index) return band;

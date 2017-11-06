@@ -75,16 +75,20 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
 
   const int row = list.first().row();
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelar(row)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Cancelado com sucesso!");
@@ -97,7 +101,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   query.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not query.exec()) {
-    error = "Erro cancelando nota: " + query.lastError().text();
+    emit errorSignal("Erro cancelando nota: " + query.lastError().text());
     return false;
   }
 
@@ -105,19 +109,17 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   query.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not query.exec()) {
-    error = "Erro marcando estoque cancelado: " + query.lastError().text();
+    emit errorSignal("Erro marcando estoque cancelado: " + query.lastError().text());
     return false;
   }
 
   // voltar compra para faturamento
-  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealFat = NULL, "
-                "dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, "
-                "dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra "
-                "WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe))");
+  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, "
+                "dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe))");
   query.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not query.exec()) {
-    error = "Erro voltando compra para faturamento: " + query.lastError().text();
+    emit errorSignal("Erro voltando compra para faturamento: " + query.lastError().text());
     return false;
   }
 
@@ -126,7 +128,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   query.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not query.exec()) {
-    error = "Erro buscando consumos: " + query.lastError().text();
+    emit errorSignal("Erro buscando consumos: " + query.lastError().text());
     return false;
   }
 
@@ -139,19 +141,17 @@ bool WidgetNfeEntrada::cancelar(const int row) {
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
     if (not query2.exec()) {
-      error = "Erro cancelando consumos: " + query.lastError().text();
+      emit errorSignal("Erro cancelando consumos: " + query.lastError().text());
       return false;
     }
 
     // voltar status para pendente
-    query2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, "
-                   "dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, "
-                   "dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, "
-                   "dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = "
+                   "NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
     if (not query2.exec()) {
-      error = "Erro voltando produtos para pendente: " + query2.lastError().text();
+      emit errorSignal("Erro voltando produtos para pendente: " + query2.lastError().text());
       return false;
     }
   }
@@ -160,4 +160,3 @@ bool WidgetNfeEntrada::cancelar(const int row) {
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
-// TODO: fazer sistema para trocar notas futuras pela nota real

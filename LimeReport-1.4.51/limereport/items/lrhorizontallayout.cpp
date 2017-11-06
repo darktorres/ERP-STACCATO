@@ -359,7 +359,7 @@ void HorizontalLayout::relocateChildren()
             m_children.append(item);
         }
     }
-    qSort(m_children.begin(),m_children.end(),lessThen);
+    std::sort(m_children.begin(),m_children.end(),lessThen);
     qreal curX = spaceBorder;
     m_isRelocating = true;
     foreach (BaseDesignIntf* item, m_children) {
@@ -440,7 +440,7 @@ BaseDesignIntf* HorizontalLayout::findNext(BaseDesignIntf* item){
             m_children.append(childItem);
         }
     }
-    qSort(m_children.begin(),m_children.end(),lessThen);
+    std::sort(m_children.begin(),m_children.end(),lessThen);
     for (int i=0; i<m_children.count();++i){
         if (m_children[i]==item && m_children.size()>i+1){ return m_children[i+1];}
     }
@@ -454,7 +454,7 @@ BaseDesignIntf* HorizontalLayout::findPrior(BaseDesignIntf* item){
             m_children.append(childItem);
         }
     }
-    qSort(m_children.begin(),m_children.end(),lessThen);
+    std::sort(m_children.begin(),m_children.end(),lessThen);
     for (int i=0; i<m_children.count();++i){
         if (m_children[i]==item && i!=0){ return m_children[i-1];}
     }

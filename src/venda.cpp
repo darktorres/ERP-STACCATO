@@ -607,83 +607,88 @@ void Venda::updateMode() {
 }
 
 bool Venda::viewRegister() {
-  ui->doubleSpinBoxDescontoGlobalReais->setMinimum(-9999999);
+  unsetConnections();
 
-  modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
+  [=]() {
 
-  if (not modelItem.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelItem.lastError().text());
-    return false;
-  }
+    ui->doubleSpinBoxDescontoGlobalReais->setMinimum(-9999999);
 
-  if (not RegisterDialog::viewRegister()) return false;
+    modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
 
-  calcPrecoGlobalTotal();
-
-  const QString idCliente = ui->itemBoxCliente->getValue().toString();
-
-  ui->itemBoxEndereco->getSearchDialog()->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-  ui->itemBoxEnderecoFat->getSearchDialog()->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-
-  modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND comissao = FALSE AND taxa = FALSE");
-
-  if (not modelFluxoCaixa.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-    return false;
-  }
-
-  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) ui->tableFluxoCaixa->openPersistentEditor(row, "representacao");
-
-  if (financeiro) {
-    // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
-    modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND (comissao = TRUE OR taxa = TRUE)");
-
-    if (not modelFluxoCaixa2.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-      return false;
+    if (not modelItem.select()) {
+      QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelItem.lastError().text());
+      return;
     }
 
-    ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
-  }
+    if (not RegisterDialog::viewRegister()) return;
 
-  ui->tableProdutos->resizeColumnsToContents();
-  ui->tableFluxoCaixa->resizeColumnsToContents();
-  ui->tableFluxoCaixa2->resizeColumnsToContents();
+    calcPrecoGlobalTotal();
 
-  ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    const QString idCliente = ui->itemBoxCliente->getValue().toString();
 
-  ui->spinBoxPrazoEntrega->setReadOnly(true);
+    ui->itemBoxEndereco->getSearchDialog()->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
+    ui->itemBoxEnderecoFat->getSearchDialog()->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
 
-  ui->itemBoxCliente->setReadOnlyItemBox(true);
-  ui->itemBoxEndereco->setReadOnlyItemBox(true);
-  ui->itemBoxEnderecoFat->setReadOnlyItemBox(true);
-  ui->itemBoxProfissional->setReadOnlyItemBox(true);
-  ui->itemBoxVendedor->setReadOnlyItemBox(true);
+    modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND comissao = FALSE AND taxa = FALSE");
 
-  ui->dateTimeEdit->setReadOnly(true);
+    if (not modelFluxoCaixa.select()) {
+      QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
+      return;
+    }
 
-  ui->plainTextEdit->setReadOnly(true);
-  ui->plainTextEdit->setPlainText(data("observacao").toString());
+    for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) ui->tableFluxoCaixa->openPersistentEditor(row, "representacao");
 
-  ui->pushButtonCancelamento->show();
-  ui->pushButtonDevolucao->show();
+    if (financeiro) {
+      // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
+      modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND (comissao = TRUE OR taxa = TRUE)");
 
-  if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
-    ui->pushButtonCancelamento->hide();
-    ui->pushButtonDevolucao->hide();
-  }
+      if (not modelFluxoCaixa2.select()) {
+        QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
+        return;
+      }
 
-  const QString tipoUsuario = UserSession::tipoUsuario();
+      ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
+    }
 
-  if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR") {
-    ui->pushButtonDevolucao->hide();
-    ui->pushButtonCancelamento->hide();
-  }
+    ui->tableProdutos->resizeColumnsToContents();
+    ui->tableFluxoCaixa->resizeColumnsToContents();
+    ui->tableFluxoCaixa2->resizeColumnsToContents();
 
-  ui->framePagamentos->adjustSize();
+    ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-  ui->checkBoxRT->setChecked(false);
-  ui->checkBoxRT->setHidden(true);
+    ui->spinBoxPrazoEntrega->setReadOnly(true);
+
+    ui->itemBoxCliente->setReadOnlyItemBox(true);
+    ui->itemBoxEndereco->setReadOnlyItemBox(true);
+    ui->itemBoxEnderecoFat->setReadOnlyItemBox(true);
+    ui->itemBoxProfissional->setReadOnlyItemBox(true);
+    ui->itemBoxVendedor->setReadOnlyItemBox(true);
+
+    ui->dateTimeEdit->setReadOnly(true);
+
+    ui->plainTextEdit->setReadOnly(true);
+    ui->plainTextEdit->setPlainText(data("observacao").toString());
+
+    ui->pushButtonCancelamento->show();
+    ui->pushButtonDevolucao->show();
+
+    if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
+      ui->pushButtonCancelamento->hide();
+      ui->pushButtonDevolucao->hide();
+    }
+
+    const QString tipoUsuario = UserSession::tipoUsuario();
+
+    if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR") {
+      ui->pushButtonDevolucao->hide();
+      ui->pushButtonCancelamento->hide();
+    }
+
+    ui->framePagamentos->adjustSize();
+
+    ui->checkBoxRT->setChecked(false);
+    ui->checkBoxRT->setHidden(true);
+  }();
 
   setupConnections();
 
@@ -693,6 +698,11 @@ bool Venda::viewRegister() {
 void Venda::on_pushButtonVoltar_clicked() {
   auto *orcamento = new Orcamento(parentWidget());
   orcamento->viewRegisterById(idOrcamento);
+
+  connect(orcamento, &Orcamento::errorSignal, this, &Venda::errorSignal);
+  connect(orcamento, &Orcamento::transactionStarted, this, &Venda::transactionStarted);
+  connect(orcamento, &Orcamento::transactionEnded, this, &Venda::transactionEnded);
+
   orcamento->show();
 
   isDirty = false;
@@ -913,7 +923,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) {
   unsetConnections();
 
-  [=]() { // TODO: put this on totalChanged too
+  [=]() { // REFAC: put this on totalChanged too
     const double liq = ui->doubleSpinBoxSubTotalLiq->value();
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -967,7 +977,7 @@ bool Venda::atualizarCredito() {
     query.bindValue(":idCliente", data("idCliente"));
 
     if (not query.exec()) {
-      error = "Erro atualizando crédito do cliente: " + query.lastError().text();
+      emit errorSignal("Erro atualizando crédito do cliente: " + query.lastError().text());
       return false;
     }
   }
@@ -979,12 +989,14 @@ bool Venda::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    error = "Erro linha -1 Venda: " + QString::number(static_cast<int>(Tipo::Atualizar)) + "\nMapper: " + QString::number(mapper.currentIndex()) + "\nModel: " + QString::number(model.rowCount());
+    emit errorSignal("Erro linha -1");
     return false;
   }
 
   if (not generateId()) return false;
+
   if (not savingProcedures()) return false;
+
   if (not atualizarCredito()) return false;
 
   // inserir rt em contas_pagar
@@ -995,34 +1007,34 @@ bool Venda::cadastrar() {
   QSqlQuery query;
 
   if (ui->checkBoxPontuacaoPadrao->isChecked()) {
-    query.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
-                  "VALUES (:dataEmissao, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+    query.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
+                  ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
     query.bindValue(":dataEmissao", date);
     query.bindValue(":contraParte", ui->itemBoxProfissional->text());
     query.bindValue(":idLoja", data("idLoja"));
     query.bindValue(":centroCusto", data("idLoja"));
     query.bindValue(":valor", valor);
     query.bindValue(":tipo", "1. Dinheiro");
-    query.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
     // 01-15 paga dia 30, 16-30 paga prox dia 15
+    query.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
     query.bindValue(":grupo", "RT's");
 
     if (not query.exec()) {
-      error = "Erro cadastrando pontuação: " + query.lastError().text();
+      emit errorSignal("Erro cadastrando pontuação: " + query.lastError().text());
       return false;
     }
   }
   //
 
   if (not model.submitAll()) {
-    error = "Erro ao cadastrar: " + model.lastError().text();
+    emit errorSignal("Erro ao cadastrar: " + model.lastError().text());
     return false;
   }
 
   primaryId = ui->lineEditVenda->text();
 
   if (primaryId.isEmpty()) {
-    error = "primaryId está vazio!";
+    emit errorSignal("Id vazio!");
     return false;
   }
 
@@ -1031,7 +1043,7 @@ bool Venda::cadastrar() {
   }
 
   if (not modelFluxoCaixa.submitAll()) {
-    error = "Erro salvando dados na tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
     return false;
   }
 
@@ -1040,7 +1052,7 @@ bool Venda::cadastrar() {
   }
 
   if (not modelFluxoCaixa2.submitAll()) {
-    error = "Erro salvando dados na tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa2.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa2.lastError().text());
     return false;
   }
 
@@ -1049,7 +1061,7 @@ bool Venda::cadastrar() {
   }
 
   if (not modelItem.submitAll()) {
-    error = "Erro salvando dados na tabela venda_has_produto: " + modelItem.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela venda_has_produto: " + modelItem.lastError().text());
     return false;
   }
 
@@ -1057,7 +1069,7 @@ bool Venda::cadastrar() {
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) {
-    error = "Erro buscando produtos estoque: " + query.lastError().text();
+    emit errorSignal("Erro buscando produtos estoque: " + query.lastError().text());
     return false;
   }
 
@@ -1065,18 +1077,19 @@ bool Venda::cadastrar() {
     auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
 
     if (not estoque->criarConsumo(query.value("idVendaProduto").toInt(), query.value("quant").toDouble())) {
-      error = "Erro criando consumo!";
+      emit errorSignal("Erro criando consumo!");
       return false;
     }
   }
 
+  // REFAC: refactor those two to deal only with the current idVenda/idVendaProduto
   if (not query.exec("CALL update_produto_estoque_quant()")) {
-    error = "Erro atualizando produto estoque: " + query.lastError().text();
+    emit errorSignal("Erro atualizando produto estoque: " + query.lastError().text());
     return false;
   }
 
   if (not query.exec("CALL update_venda_status()")) {
-    error = "Erro atualizando status das vendas: " + query.lastError().text();
+    emit errorSignal("Erro atualizando status das vendas: " + query.lastError().text());
     return false;
   }
 
@@ -1084,7 +1097,7 @@ bool Venda::cadastrar() {
   query.bindValue(":idOrcamento", idOrcamento);
 
   if (not query.exec()) {
-    error = "Erro marcando orçamento como 'FECHADO': " + query.lastError().text();
+    emit errorSignal("Erro marcando orçamento como 'FECHADO': " + query.lastError().text());
     return false;
   }
 
@@ -1094,16 +1107,20 @@ bool Venda::cadastrar() {
 bool Venda::save() {
   if (not verifyFields()) return false;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return false;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   isDirty = false;
 
@@ -1124,7 +1141,7 @@ bool Venda::cancelamento() {
     query.bindValue(":idOrcamento", idOrcamento);
 
     if (not query.exec()) {
-      error = "Erro reativando orçamento: " + query.lastError().text();
+      emit errorSignal("Erro reativando orçamento: " + query.lastError().text());
       return false;
     }
   }
@@ -1135,7 +1152,7 @@ bool Venda::cancelamento() {
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) {
-    error = "Erro marcando venda como cancelada: " + query.lastError().text();
+    emit errorSignal("Erro marcando venda como cancelada: " + query.lastError().text());
     return false;
   }
 
@@ -1145,7 +1162,7 @@ bool Venda::cancelamento() {
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) {
-    error = "Erro marcando produtos da venda como cancelados: " + query.lastError().text();
+    emit errorSignal("Erro marcando produtos da venda como cancelados: " + query.lastError().text());
     return false;
   }
 
@@ -1160,7 +1177,7 @@ bool Venda::cancelamento() {
       query.bindValue(":idCliente", model.data(0, "idCliente"));
 
       if (not query.exec()) {
-        error = "Erro voltando credito do cliente: " + query.lastError().text();
+        emit errorSignal("Erro voltando credito do cliente: " + query.lastError().text());
         return false;
       }
     }
@@ -1172,7 +1189,7 @@ bool Venda::cancelamento() {
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) {
-    error = "Erro marcando contas como canceladas: " + query.lastError().text();
+    emit errorSignal("Erro marcando contas como canceladas: " + query.lastError().text());
     return false;
   }
 
@@ -1202,16 +1219,20 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   if (msgBox.exec() != QMessageBox::Yes) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelamento()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   const QString idOrcamento = data("idOrcamento").toString();
 
@@ -1222,6 +1243,8 @@ void Venda::on_pushButtonCancelamento_clicked() {
 }
 
 bool Venda::generateId() {
+  // REFAC: refac errors later
+
   QString id = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text()) + "-" + QDate::currentDate().toString("yy") + UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text());
 
   QSqlQuery query;
@@ -1229,7 +1252,7 @@ bool Venda::generateId() {
   query.bindValue(":id", id + "%");
 
   if (not query.exec()) {
-    error = "Erro na query: " + query.lastError().text();
+    //    error = "Erro na query: " + query.lastError().text();
     return false;
   }
 
@@ -1241,12 +1264,12 @@ bool Venda::generateId() {
   query.bindValue(":idOrcamento", idOrcamento);
 
   if (not query.exec() or not query.first()) {
-    error = "Erro na query: " + query.lastError().text();
+    //    error = "Erro na query: " + query.lastError().text();
     return false;
   }
 
   if (id.size() != 11) {
-    error = "Ocorreu algum erro ao gerar id: " + id;
+    //    error = "Ocorreu algum erro ao gerar id: " + id;
     return false;
   }
 
@@ -1304,30 +1327,31 @@ void Venda::setFinanceiro() {
 }
 
 bool Venda::financeiroSalvar() {
+  // REFAC: if false return
   atualizarCredito();
 
   if (not model.setData(mapper.currentIndex(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) {
-    error = "Erro salvando status financeiro: " + model.lastError().text();
+    emit errorSignal("Erro salvando status financeiro: " + model.lastError().text());
     return false;
   }
 
   if (not model.setData(mapper.currentIndex(), "dataFinanceiro", QDateTime::currentDateTime())) {
-    error = "Erro salvando status financeiro: " + model.lastError().text();
+    emit errorSignal("Erro salvando status financeiro: " + model.lastError().text());
     return false;
   }
 
   if (not model.submitAll()) {
-    error = "Erro salvando dados: " + model.lastError().text();
+    emit errorSignal("Erro salvando dados: " + model.lastError().text());
     return false;
   }
 
   if (not modelFluxoCaixa.submitAll()) {
-    error = "Erro salvando pagamentos: " + modelFluxoCaixa.lastError().text();
+    emit errorSignal("Erro salvando pagamentos: " + modelFluxoCaixa.lastError().text());
     return false;
   }
 
   if (not modelFluxoCaixa2.submitAll()) {
-    error = "Erro salvando taxa/comissão: " + modelFluxoCaixa2.lastError().text();
+    emit errorSignal("Erro salvando taxa/comissão: " + modelFluxoCaixa2.lastError().text());
     return false;
   }
 
@@ -1337,16 +1361,20 @@ bool Venda::financeiroSalvar() {
 void Venda::on_pushButtonFinanceiroSalvar_clicked() {
   if (not verifyFields()) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not financeiroSalvar()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QMessageBox::information(this, "Aviso!", "Dados salvos com sucesso!");
   close();

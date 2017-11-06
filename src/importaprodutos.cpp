@@ -136,8 +136,8 @@ bool ImportaProdutos::importar() {
 
   const QString red = QString::number(static_cast<int>(FieldColors::Red));
 
-  modelErro.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)) + " AND (m2cxUpd = " + red + " OR pccxUpd = " +
-                      red + " OR codComercialUpd = " + red + " OR custoUpd = " + red + " OR precoVendaUpd = " + red + ")");
+  modelErro.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)) + " AND (m2cxUpd = " + red +
+                      " OR pccxUpd = " + red + " OR codComercialUpd = " + red + " OR custoUpd = " + red + " OR precoVendaUpd = " + red + ")");
 
   if (not modelErro.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela erro: " + modelErro.lastError().text());
 
@@ -186,19 +186,22 @@ bool ImportaProdutos::importar() {
 
   db.close();
 
-  const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) + "\nNão modificados: " +
-                            QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
+  const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
+                            "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
   QMessageBox::information(this, "Resultado", resultado);
 
   return true;
 }
 
 void ImportaProdutos::importarTabela() {
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not importar()) {
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     close();
   }
 }
@@ -769,6 +772,7 @@ void ImportaProdutos::salvar() {
     QMessageBox::critical(this, "Erro!", "Ocorreu um erro ao salvar os dados: " + model.lastError().text());
     // TODO: 5refactor this because after this runs the transaction is no more
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return;
   }
 
@@ -781,6 +785,7 @@ void ImportaProdutos::salvar() {
   if (not queryPrecos.exec()) {
     QMessageBox::critical(this, "Erro!", "Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text());
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return;
   }
 
@@ -790,6 +795,8 @@ void ImportaProdutos::salvar() {
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QMessageBox::information(this, "Aviso!", "Tabela salva com sucesso!");
 
@@ -830,6 +837,7 @@ void ImportaProdutos::on_tabWidget_currentChanged(const int index) {
 
 void ImportaProdutos::closeEvent(QCloseEvent *event) {
   QSqlQuery("ROLLBACK").exec();
+  emit transactionEnded();
 
   QDialog::closeEvent(event);
 }

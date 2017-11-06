@@ -84,7 +84,7 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando status do estoque: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status do estoque: " + query.lastError().text());
       return false;
     }
 
@@ -92,30 +92,29 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando status da venda: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status da venda: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb "
-                  "WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND "
-                  "codComercial = :codComercial");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = "
+                  ":idEstoque) AND codComercial = :codComercial");
     query.bindValue(":dataRealReceb", dataReceb);
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
     query.bindValue(":codComercial", model.data(item.row(), "codComercial"));
 
     if (not query.exec()) {
-      error = "Erro atualizando status da compra: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status da compra: " + query.lastError().text());
       return false;
     }
 
     // salvar status na venda
-    query.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idVendaProduto IN "
-                  "(SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+    query.prepare(
+        "UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
     query.bindValue(":dataRealReceb", dataReceb);
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando produtos venda: " + query.lastError().text();
+      emit errorSignal("Erro atualizando produtos venda: " + query.lastError().text());
       return false;
     }
   }
@@ -145,16 +144,20 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   const QDateTime dataReceb = inputDlg.getDate();
   const QString recebidoPor = inputDlg.getRecebeu();
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not processRows(list, dataReceb, recebidoPor)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -189,16 +192,20 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not reagendar(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Reagendado com sucesso!");
@@ -210,25 +217,25 @@ bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
     const QString codComercial = model.data(item.row(), "codComercial").toString();
 
     QSqlQuery query;
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT "
-                  "idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = "
+                  ":codComercial");
     query.bindValue(":dataPrevReceb", dataPrevReceb);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM "
-                  "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare(
+        "UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":dataPrevReceb", dataPrevReceb);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status na venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando status na venda_produto: " + query.lastError().text());
       return false;
     }
   }
@@ -254,6 +261,10 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
+
+      connect(venda, &Venda::errorSignal, this, &WidgetLogisticaRecebimento::errorSignal);
+      connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaRecebimento::transactionStarted);
+      connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaRecebimento::transactionEnded);
     }
   }
 }
@@ -272,16 +283,20 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Cancelado com sucesso!");
@@ -293,23 +308,22 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
     const QString codComercial = model.data(item.row(), "codComercial").toString();
 
     QSqlQuery query;
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = NULL WHERE idCompra IN (SELECT "
-                  "idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare(
+        "UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM "
-                  "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE venda_has_produto SET dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status na venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando status na venda_produto: " + query.lastError().text());
       return false;
     }
   }

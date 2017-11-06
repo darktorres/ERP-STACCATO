@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetNfeSaida;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_groupBoxStatus_toggled(const bool enabled);
@@ -31,8 +33,7 @@ private slots:
 
 private:
   // attributes
-  QString error;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetNfeSaida *ui;
   // methods
   bool atualizarNFe(const int idNFe, const QString &xml);

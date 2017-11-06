@@ -138,7 +138,7 @@ public:
   void loadXmlColumnsInfo(QXmlStreamReader &reader);
   void loadXmlMergeCells(QXmlStreamReader &reader);
   void loadXmlDataValidations(QXmlStreamReader &reader);
-  void loadXmlSheetFormatProps(QXmlStreamReader &reader);
+  static void loadXmlSheetFormatProps(QXmlStreamReader &reader);
   void loadXmlSheetViews(QXmlStreamReader &reader);
   void loadXmlHyperlinks(QXmlStreamReader &reader);
 
@@ -195,5 +195,5 @@ public:
 private:
   static double calculateColWidth(int characters);
 };
-}
+} // namespace QXlsx
 #endif // XLSXWORKSHEET_P_H

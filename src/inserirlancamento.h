@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InserirLancamento;
@@ -24,7 +24,7 @@ private slots:
 private:
   // attributes
   const Tipo tipo;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::InserirLancamento *ui;
   // methods
   void setupTables();

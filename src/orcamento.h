@@ -16,6 +16,11 @@ public:
   ~Orcamento();
   void show();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_pushButtonCalculadora_clicked();
 
@@ -27,15 +32,14 @@ private:
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;
-  QString error;
-  SqlTableModel modelItem;
+  SqlRelationalTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  bool atualizaReplica();
   bool buscarParametrosFrete();
+  bool verificaCadastroCliente();
+  bool atualizaReplica();
   bool cadastrar() override;
   bool generateId();
-  bool verificaCadastroCliente();
   virtual bool newRegister() override;
   virtual bool save() override;
   virtual bool save(const bool silent);

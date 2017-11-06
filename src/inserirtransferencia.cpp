@@ -21,16 +21,20 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QMessageBox::information(this, "Aviso!", "Transferência registrada com sucesso!");
   close();
@@ -80,12 +84,12 @@ bool InserirTransferencia::cadastrar() {
   modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
 
   if (not modelDe.submitAll()) {
-    error = "Erro salvando 'De': " + modelDe.lastError().text();
+    emit errorSignal("Erro salvando 'De': " + modelDe.lastError().text());
     return false;
   }
 
   if (not modelPara.submitAll()) {
-    error = "Erro salvando 'Para': " + modelPara.lastError().text();
+    emit errorSignal("Erro salvando 'Para': " + modelPara.lastError().text());
     return false;
   }
 

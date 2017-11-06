@@ -43,7 +43,7 @@ void ItemsContainerDesignInft::snapshotItemsLayout()
     foreach(BaseDesignIntf *childItem,childBaseItems()){
           m_containerItems.append(PItemSortContainer(new ItemSortContainer(childItem)));
     }
-    qSort(m_containerItems.begin(),m_containerItems.end(),itemSortContainerLessThen);
+    std::sort(m_containerItems.begin(),m_containerItems.end(),itemSortContainerLessThen);
 }
 
 void ItemsContainerDesignInft::arrangeSubItems(RenderPass pass, DataSourceManager *dataManager, ArrangeType type)

@@ -13,9 +13,7 @@
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) {
-    connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
-  }
+  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
@@ -298,11 +296,14 @@ bool CadastroCliente::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    QMessageBox::critical(this, "Erro!", "Erro linha -1");
+    emit errorSignal("Erro linha -1");
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
+    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
+    return false;
+  }
 
   if (not savingProcedures()) return false;
 
@@ -314,14 +315,14 @@ bool CadastroCliente::cadastrar() {
   }
 
   if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + model.lastError().text());
+    emit errorSignal("Erro: " + model.lastError().text());
     return false;
   }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
   if (primaryId.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "primaryId está vazio!");
+    emit errorSignal("Id vazio!");
     return false;
   }
 
@@ -337,7 +338,7 @@ bool CadastroCliente::cadastrar() {
   }
 
   if (not modelEnd.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + modelEnd.lastError().text());
+    emit errorSignal("Erro: " + modelEnd.lastError().text());
     return false;
   }
 
@@ -443,9 +444,7 @@ void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) { ui
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço: " + modelEnd.lastError().text());
-  }
+  if (not modelEnd.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço: " + modelEnd.lastError().text());
 }
 
 void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
@@ -471,15 +470,20 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
 bool CadastroCliente::save() {
   if (not verifyFields()) return false;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return false;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   isDirty = false;
 
@@ -508,3 +512,4 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
 
 // TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
 // TODO: 0nao deixar cadastrar endereco sem numero, se necessario colocar 'S/N'
+// TODO: nesta tela e nas outras arrumar a ordem dos tabs

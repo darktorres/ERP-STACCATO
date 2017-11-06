@@ -433,7 +433,7 @@ void DataBrowser::initConnections()
             connections.append(connectionName);
         }
     }
-    qSort(connections);
+    std::sort(connections.begin(), connections.end());
     foreach (QString connectionName, connections) {
         QTreeWidgetItem *item=new QTreeWidgetItem(
             ui->dataTree,
@@ -485,7 +485,6 @@ QDockWidget *DataBrowser::createDataWindow(QString datasourceName)
 {
     QDockWidget *window = new QDockWidget("Table: "+datasourceName);
     QTableView *tableView = new QTableView(window);
-    //TODO: exception or message ?
 
     try {
         IDataSourceHolder* holder = m_report->dataManager()->dataSourceHolder(datasourceName);

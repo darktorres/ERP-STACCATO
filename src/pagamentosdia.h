@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class PagamentosDia;
@@ -18,8 +18,9 @@ public:
   bool setFilter(const QDate &date, const QString &idConta);
 
 private:
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::PagamentosDia *ui;
+  //
   void setupTables();
 };
 

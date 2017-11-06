@@ -16,6 +16,11 @@ public:
   ~CadastroUsuario();
   void modificarUsuario();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void fillCombobox();
   void on_lineEditUser_textEdited(const QString &text);
@@ -27,16 +32,15 @@ private slots:
 
 private:
   // attributes
-  QString error;
   SearchDialog *sdUsuario;
-  SqlTableModel modelPermissoes;
+  SqlRelationalTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
-  bool cadastrar() override;
-  bool viewRegister() override;
+  virtual bool cadastrar() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;
+  virtual bool viewRegister() override;
   virtual void clearFields() override;
   virtual void registerMode() override;
   virtual void setupMapper() override;

@@ -15,6 +15,11 @@ public:
   explicit CadastroLoja(QWidget *parent = 0);
   ~CadastroLoja();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_checkBoxMostrarInativosConta_clicked(bool checked);
@@ -49,22 +54,21 @@ private:
   // attributes
   QDataWidgetMapper mapperConta;
   QDataWidgetMapper mapperPagamento;
-  QString error;
   SearchDialog *sdLoja;
-  SqlTableModel modelAssocia1;
-  SqlTableModel modelAssocia2;
-  SqlTableModel modelConta;
-  SqlTableModel modelPagamentos;
-  SqlTableModel modelPermissoes;
-  SqlTableModel modelTaxas;
+  SqlRelationalTableModel modelAssocia1;
+  SqlRelationalTableModel modelAssocia2;
+  SqlRelationalTableModel modelConta;
+  SqlRelationalTableModel modelPagamentos;
+  SqlRelationalTableModel modelPermissoes;
+  SqlRelationalTableModel modelTaxas;
   Ui::CadastroLoja *ui;
   // methods
   bool adicionarPagamento();
   bool atualizarPagamento();
-  bool cadastrar() override;
   bool cadastrarConta(const bool isUpdate = false);
   bool cadastrarEndereco(const bool isUpdate = false);
   bool viewRegister() override;
+  virtual bool cadastrar() override;
   virtual bool newRegister() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;

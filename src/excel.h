@@ -4,6 +4,8 @@
 #include <QSqlQuery>
 #include <QWidget>
 
+#include <xlsxdocument.h>
+
 class Excel {
 
 public:
@@ -29,6 +31,7 @@ private:
   // methods
   bool setQuerys();
   void verificaTipo();
+  void hideUnusedRows(QXlsx::Document &xlsx);
 };
 
 #endif // EXCEL_H

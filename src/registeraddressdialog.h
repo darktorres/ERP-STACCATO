@@ -14,7 +14,7 @@ public slots:
 protected:
   // attributes
   QDataWidgetMapper mapperEnd;
-  SqlTableModel modelEnd;
+  SqlRelationalTableModel modelEnd;
   // methods
   bool setDataEnd(const QString &key, const QVariant &value);
   int getCodigoUF(QString uf) const;

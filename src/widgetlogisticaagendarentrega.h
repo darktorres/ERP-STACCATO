@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaAgendarEntrega;
@@ -20,6 +20,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_dateTimeEdit_dateChanged(const QDate &date);
@@ -37,12 +39,11 @@ private slots:
 
 private:
   // attributes
-  QString error;
   //  SqlTableModel modelConsumo;
-  SqlTableModel modelProdutos;
-  SqlTableModel modelTransp;
-  SqlTableModel modelTransp2;
-  SqlTableModel modelVendas;
+  SqlRelationalTableModel modelProdutos;
+  SqlRelationalTableModel modelTransp;
+  SqlRelationalTableModel modelTransp2;
+  SqlRelationalTableModel modelVendas;
   SqlQueryModel modelViewProdutos;
   Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
@@ -50,11 +51,11 @@ private:
   bool adicionarProdutoParcial(const int row);
   bool processRows();
   bool quebrarProduto(const int row, const int quantAgendar, const int quantTotal);
+  bool reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao);
   void calcularDisponivel();
   void calcularPeso();
   void montaFiltro();
   void setupTables();
-  bool reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao);
 };
 
 #endif // WIDGETLOGISTICAAGENDARENTREGA_H

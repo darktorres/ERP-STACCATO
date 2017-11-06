@@ -1020,8 +1020,8 @@
                 <widget class="QWidget" name="scrollAreaWidgetContents">
                  <property name="geometry">
                   <rect>
-                   <x>-611</x>
-                   <y>-35</y>
+                   <x>0</x>
+                   <y>0</y>
                    <width>1563</width>
                    <height>333</height>
                   </rect>
@@ -3950,6 +3950,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
            </property>
            <item>
             <property name="text">

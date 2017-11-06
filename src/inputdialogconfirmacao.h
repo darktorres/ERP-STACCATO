@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogConfirmacao;
@@ -24,6 +24,11 @@ public:
   bool setFilter(const QStringList &ids);
   bool setFilter(const QString &id, const QString &idEvento);
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_dateEditEvento_dateChanged(const QDate &date);
   void on_pushButtonQuebradoFaltando_clicked();
@@ -32,10 +37,9 @@ private slots:
 private:
   // attributes
   const Tipo tipo;
-  QString error;
-  SqlTableModel model; // REFAC: separate this into 2 models? one for each table
-  SqlTableModel modelCliente;
-  SqlTableModel modelVenda;
+  SqlRelationalTableModel model; // REFAC: separate this into 2 models? one for each table
+  SqlRelationalTableModel modelCliente;
+  SqlRelationalTableModel modelVenda;
   Ui::InputDialogConfirmacao *ui;
   // temp
   int caixasDefeito;
@@ -44,15 +48,15 @@ private:
 
   // methods
   bool cadastrar();
-  void setupTables();
-  bool gerarCreditoCliente();
+  bool criarConsumo(const int row);
   bool criarReposicaoCliente();
+  bool desfazerConsumo(const int idEstoque);
+  bool gerarCreditoCliente();
+  bool processarQuebra(const int row);
   bool quebraEntrega(const int row);
   bool quebraRecebimento(const int row);
-  bool processarQuebra(const int row);
   bool quebrarLinha(const int row, const int caixas);
-  bool criarConsumo(const int row);
-  bool desfazerConsumo(const int idEstoque);
+  void setupTables();
 };
 
 #endif // INPUTDIALOGCONFIRMACAO_H

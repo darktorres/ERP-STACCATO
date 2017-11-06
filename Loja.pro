@@ -4,14 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network xml
-include(QSimpleUpdater/qsimpleupdater.pri)
 QT       += core gui sql network xml charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Loja
 TEMPLATE = app
+
+DEFINES += QT_DEPRECATED_WARNINGS
 
 VERSION = 0.5
 QMAKE_TARGET_COMPANY = Staccato Revestimentos
@@ -21,10 +21,16 @@ QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
 CONFIG += c++17
 
-QMAKE_CXXFLAGS += -std=c++17
+msvc{
+QMAKE_CXXFLAGS += /std:c++17
+}
+
+clang{
+QMAKE_CXXFLAGS += -Wall -Wextra -std=c++17
+}
 
 gcc {
-QMAKE_CXXFLAGS += -Wall -Wextra
+QMAKE_CXXFLAGS += -Wall -Wextra -std=c++17
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast
@@ -115,7 +121,7 @@ SOURCES += \
     src/singleeditdelegate.cpp \
     src/smtp.cpp \
     src/sqlquerymodel.cpp \
-    src/sqltablemodel.cpp \
+    src/sqlrelationaltablemodel.cpp \
     src/tableview.cpp \
     src/userconfig.cpp \
     src/usersession.cpp \
@@ -215,7 +221,7 @@ HEADERS  += \
     src/singleeditdelegate.h \
     src/smtp.h \
     src/sqlquerymodel.h \
-    src/sqltablemodel.h \
+    src/sqlrelationaltablemodel.h \
     src/tableview.h \
     src/userconfig.h \
     src/usersession.h \

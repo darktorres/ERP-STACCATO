@@ -10,13 +10,7 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
   ui->widgetVenda->setFinanceiro();
 
-  connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::errorSignal, this, &WidgetFinanceiro::errorSignal);
-  connect(ui->widgetPagar, &WidgetFinanceiroContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
-  connect(ui->widgetReceber, &WidgetFinanceiroContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
-  connect(ui->widgetVenda, &WidgetVenda::errorSignal, this, &WidgetFinanceiro::errorSignal);
-  connect(ui->widgetCompra, &WidgetFinanceiroCompra::errorSignal, this, &WidgetFinanceiro::errorSignal);
-
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);
+  setConnections();
 }
 
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
@@ -31,6 +25,28 @@ bool WidgetFinanceiro::updateTables() {
   if (currentText == "Compras") return ui->widgetCompra->updateTables();
 
   return true;
+}
+
+void WidgetFinanceiro::setConnections() {
+  connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetPagar, &WidgetFinanceiroContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetReceber, &WidgetFinanceiroContas::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetVenda, &WidgetVenda::errorSignal, this, &WidgetFinanceiro::errorSignal);
+  connect(ui->widgetCompra, &WidgetFinanceiroCompra::errorSignal, this, &WidgetFinanceiro::errorSignal);
+
+  connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::transactionStarted, this, &WidgetFinanceiro::transactionStarted);
+  connect(ui->widgetPagar, &WidgetFinanceiroContas::transactionStarted, this, &WidgetFinanceiro::transactionStarted);
+  connect(ui->widgetReceber, &WidgetFinanceiroContas::transactionStarted, this, &WidgetFinanceiro::transactionStarted);
+  connect(ui->widgetVenda, &WidgetVenda::transactionStarted, this, &WidgetFinanceiro::transactionStarted);
+  connect(ui->widgetCompra, &WidgetFinanceiroCompra::transactionStarted, this, &WidgetFinanceiro::transactionStarted);
+
+  connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::transactionEnded, this, &WidgetFinanceiro::transactionEnded);
+  connect(ui->widgetPagar, &WidgetFinanceiroContas::transactionEnded, this, &WidgetFinanceiro::transactionEnded);
+  connect(ui->widgetReceber, &WidgetFinanceiroContas::transactionEnded, this, &WidgetFinanceiro::transactionEnded);
+  connect(ui->widgetVenda, &WidgetVenda::transactionEnded, this, &WidgetFinanceiro::transactionEnded);
+  connect(ui->widgetCompra, &WidgetFinanceiroCompra::transactionEnded, this, &WidgetFinanceiro::transactionEnded);
+
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);
 }
 
 // TODO: 0a cada dia colocar em 'maintenance' um job para enviar o relatorio das financas de 3 dias antes

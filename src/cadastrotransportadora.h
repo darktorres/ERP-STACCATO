@@ -15,6 +15,11 @@ public:
   explicit CadastroTransportadora(QWidget *parent = 0);
   ~CadastroTransportadora();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_checkBoxMostrarInativosVeiculo_toggled(bool checked);
@@ -41,14 +46,13 @@ private slots:
 private:
   // attributes
   QDataWidgetMapper mapperVeiculo;
-  QString error;
   SearchDialog *sdTransportadora;
-  SqlTableModel modelVeiculo;
+  SqlRelationalTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
-  bool cadastrar() override;
   bool cadastrarEndereco(const bool isUpdate = false);
   bool cadastrarVeiculo(const bool isUpdate = false);
+  virtual bool cadastrar() override;
   virtual bool save() override;
   virtual bool savingProcedures() override;
   virtual bool verifyFields() override;

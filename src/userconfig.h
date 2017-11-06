@@ -14,6 +14,11 @@ public:
   explicit UserConfig(QWidget *parent = 0);
   ~UserConfig();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_pushButtonAlterarDados_clicked();
   void on_pushButtonComprasFolder_clicked();

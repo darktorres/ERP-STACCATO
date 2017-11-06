@@ -285,17 +285,20 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
     return;
   }
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not processRows()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
-    error.clear();
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -314,7 +317,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
   QSqlQuery query;
 
   if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not query.first()) {
-    error = "Erro comunicando com o banco de dados: " + query.lastError().text();
+    emit errorSignal("Erro comunicando com o banco de dados: " + query.lastError().text());
     return false;
   }
 
@@ -338,7 +341,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
     query1.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query1.exec() or not query1.first()) {
-      error = "Erro buscando dados do produto: " + query1.lastError().text();
+      emit errorSignal("Erro buscando dados do produto: " + query1.lastError().text());
       return false;
     }
 
@@ -346,7 +349,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
     query2.bindValue(":idVenda", idVendaProduto);
 
     if (not query2.exec()) {
-      error = "Erro atualizando status da compra: " + query2.lastError().text();
+      emit errorSignal("Erro atualizando status da compra: " + query2.lastError().text());
       return false;
     }
 
@@ -354,13 +357,13 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
     query3.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query3.exec()) {
-      error = "Erro atualizando produtos venda: " + query3.lastError().text();
+      emit errorSignal("Erro atualizando produtos venda: " + query3.lastError().text());
       return false;
     }
   }
 
   if (not modelTransp.submitAll()) {
-    error = "Erro salvando carga veiculo: " + modelTransp.lastError().text();
+    emit errorSignal("Erro salvando carga veiculo: " + modelTransp.lastError().text());
     return false;
   }
 
@@ -504,6 +507,7 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() {
 
     peso += modelTransp2.data(row, "kg").toDouble();
   }
+
   const double capacidade = ui->doubleSpinBoxCapacidade->value();
 
   ui->doubleSpinBoxDisponivel->setValue(capacidade - peso);
@@ -572,17 +576,20 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
     return;
   }
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not adicionarProdutoParcial(row)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
-    error.clear();
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 }
 
 bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row) {
@@ -608,7 +615,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row) {
   query.bindValue(":idProduto", modelViewProdutos.data(row, "idProduto"));
 
   if (not query.exec() or not query.first()) {
-    error = "Erro buscando peso do produto: " + query.lastError().text();
+    emit errorSignal("Erro buscando peso do produto: " + query.lastError().text());
     return false;
   }
 
@@ -642,7 +649,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   modelProdutos.setFilter("idVendaProduto = " + modelViewProdutos.data(row, "idVendaProduto").toString());
 
   if (not modelProdutos.select()) {
-    error = "Erro lendo tabela venda_produto: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro lendo tabela venda_produto: " + modelProdutos.lastError().text());
     return false;
   }
 
@@ -686,7 +693,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   if (not modelProdutos.setData(newRow, "total", totalNovo)) return false;
 
   if (not modelProdutos.submitAll()) {
-    error = "Erro salvando dados venda_produto: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro salvando dados venda_produto: " + modelProdutos.lastError().text());
     return false;
   }
 
@@ -704,7 +711,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   //  qDebug() << "lastInsert: " << lastId;
   // break consumo into two lines
 
-  SqlTableModel modelConsumo;
+  SqlRelationalTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -750,7 +757,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", lastId)) return false;
 
   if (not modelConsumo.submitAll()) {
-    error = "Erro quebrando consumo em duas linhas: " + modelConsumo.lastError().text();
+    emit errorSignal("Erro quebrando consumo em duas linhas: " + modelConsumo.lastError().text());
     return false;
   }
 
@@ -774,16 +781,20 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 
   if (input.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not reagendar(list, input.getNextDate(), input.getObservacao())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Reagendado com sucesso!");
@@ -798,12 +809,12 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
     query.bindValue(":idVenda", modelVendas.data(item.row(), "idVenda"));
 
     if (not query.exec()) {
-      error = "Erro atualizando novo prazo: " + query.lastError().text();
+      emit errorSignal("Erro atualizando novo prazo: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, tipoOperacao, observacao, dataFollowup) VALUES "
-                  "(:idVenda, :idLoja, :idUsuario, :tipoOperacao, :observacao, :dataFollowup)");
+    query.prepare(
+        "INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, tipoOperacao, observacao, dataFollowup) VALUES (:idVenda, :idLoja, :idUsuario, :tipoOperacao, :observacao, :dataFollowup)");
     query.bindValue(":idVenda", modelVendas.data(item.row(), "idVenda"));
     query.bindValue(":idLoja", UserSession::idLoja());
     query.bindValue(":idUsuario", UserSession::idUsuario());
@@ -812,7 +823,7 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
     query.bindValue(":dataFollowup", QDate::currentDate());
 
     if (not query.exec()) {
-      error = "Erro salvando followup: " + query.lastError().text();
+      emit errorSignal("Erro salvando followup: " + query.lastError().text());
       return false;
     }
   }

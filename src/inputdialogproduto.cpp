@@ -29,7 +29,7 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->labelEvento->setText("Data compra:");
     ui->labelProximoEvento->setText("Data prevista confirmação:");
 
-    connect(&model, &SqlTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+    connect(&model, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
   if (tipo == Tipo::Faturamento) {

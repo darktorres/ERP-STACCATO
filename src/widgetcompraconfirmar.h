@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraConfirmar;
@@ -19,23 +19,24 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
+  void on_checkBoxMostrarSul_toggled(bool checked);
   void on_pushButtonCancelarCompra_clicked();
   void on_pushButtonConfirmarCompra_clicked();
   void on_table_entered(const QModelIndex &);
-  void on_checkBoxMostrarSul_toggled(bool checked);
 
 private:
   // attributes
-  QString error;
-  SqlTableModel model;
-  SqlTableModel modelResumo;
+  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
-  void setupTables();
-  bool confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf);
   bool cancelar(const QModelIndexList &list);
+  bool confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf);
+  void setupTables();
 };
 
 #endif // WIDGETCOMPRACONFIRMAR_H

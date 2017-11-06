@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogProduto;
@@ -33,7 +33,7 @@ private:
   // attributes
   bool isBlockedAliquota = false;
   const Tipo tipo;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::InputDialogProduto *ui;
   // methods
   bool cadastrar();

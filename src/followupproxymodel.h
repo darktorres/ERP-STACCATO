@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class FollowUpProxyModel : public QIdentityProxyModel {
 
 public:
-  FollowUpProxyModel(SqlTableModel *model, QObject *parent = 0);
+  FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);
   ~FollowUpProxyModel() = default;
   QVariant data(const QModelIndex &proxyIndex, int role) const override;
 

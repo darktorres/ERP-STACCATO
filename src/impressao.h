@@ -4,7 +4,7 @@
 #include <QSqlQuery>
 
 #include "lrreportengine.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class Impressao : public QObject {
   Q_OBJECT
@@ -26,7 +26,7 @@ private:
   QSqlQuery query;
   QSqlQuery queryProfissional;
   QSqlQuery queryVendedor;
-  SqlTableModel modelItem;
+  SqlRelationalTableModel modelItem;
   LimeReport::ReportEngine *report;
   // methods
   bool setQuerys();

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetOrcamento;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void montaFiltro();
@@ -31,7 +33,7 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetOrcamento *ui;
   // methods
   void setupTables();

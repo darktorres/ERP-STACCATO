@@ -212,7 +212,7 @@ bool CadastroProduto::savingProcedures() {
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getValue());
 
   if (not query.exec() or not query.first()) {
-    error = "Erro verificando se fornecedor é representacao: " + query.lastError().text();
+    emit errorSignal("Erro verificando se fornecedor é representacao: " + query.lastError().text());
     return false;
   }
 
@@ -245,11 +245,14 @@ bool CadastroProduto::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) {
-    error = "Erro: linha -1 RegisterDialog!";
+    emit errorSignal("Erro linha -1");
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
+    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
+    return false;
+  }
 
   if (not savingProcedures()) return false;
 
@@ -261,14 +264,14 @@ bool CadastroProduto::cadastrar() {
   }
 
   if (not model.submitAll()) {
-    error = "Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text();
+    emit errorSignal("Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
     return false;
   }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
   if (primaryId.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "primaryId está vazio!");
+    emit errorSignal("Id vazio!");
     return false;
   }
 
@@ -278,16 +281,20 @@ bool CadastroProduto::cadastrar() {
 bool CadastroProduto::save() {
   if (not verifyFields()) return false;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return false;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   isDirty = false;
 

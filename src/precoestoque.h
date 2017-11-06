@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class PrecoEstoque;
@@ -24,7 +24,7 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::PrecoEstoque *ui;
   // methods
   void setupTables();

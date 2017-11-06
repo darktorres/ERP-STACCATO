@@ -32,9 +32,7 @@ void WidgetCompraOC::setupTables() {
   modelPedido.setTable("view_ordemcompra");
   modelPedido.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelPedido.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedidos: " + modelPedido.lastError().text());
-  }
+  if (not modelPedido.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedidos: " + modelPedido.lastError().text());
 
   ui->tablePedido->setModel(&modelPedido);
 
@@ -60,9 +58,7 @@ void WidgetCompraOC::setupTables() {
 
   modelProduto.setFilter("0");
 
-  if (not modelProduto.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pedido: " + modelProduto.lastError().text());
-  }
+  if (not modelProduto.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pedido: " + modelProduto.lastError().text());
 
   ui->tableProduto->setModel(&modelProduto);
   ui->tableProduto->setItemDelegateForColumn("quant", new DoubleDelegate(this));
@@ -99,9 +95,7 @@ void WidgetCompraOC::setupTables() {
 
   modelNFe.setFilter("0");
 
-  if (not modelNFe.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela nfe: " + modelNFe.lastError().text());
-  }
+  if (not modelNFe.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela nfe: " + modelNFe.lastError().text());
 
   ui->tableNFe->setModel(&modelNFe);
   ui->tableNFe->hideColumn("ordemCompra");
@@ -147,16 +141,20 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not desfazerConsumo(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
 
@@ -164,6 +162,8 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
 }
 
 bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
+  // REFAC: put prepare outside loop?
+
   for (auto item : list) {
     const int idVendaProduto = modelProduto.data(item.row(), "idVendaProduto").toInt();
 
@@ -173,19 +173,19 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro buscando status do consumo estoque: " + query.lastError().text();
+      emit errorSignal("Erro buscando status do consumo estoque: " + query.lastError().text());
       return false;
     }
 
     if (not query.first()) {
-      error = "Não encontrou consumo!";
+      emit errorSignal("Não encontrou consumo!");
       return false;
     }
 
     const QString status = query.value("status").toString();
 
     if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") {
-      error = "Consumo do estoque está em entrega/entregue!";
+      emit errorSignal("Consumo do estoque está em entrega/entregue!");
       return false;
     }
 
@@ -193,7 +193,7 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro atualizando pedido compra: " + query.lastError().text();
+      emit errorSignal("Erro atualizando pedido compra: " + query.lastError().text());
       return false;
     }
 
@@ -201,7 +201,7 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro atualizando pedido venda: " + query.lastError().text();
+      emit errorSignal("Erro atualizando pedido venda: " + query.lastError().text());
       return false;
     }
 
@@ -209,7 +209,7 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
-      error = "Erro removendo consumo estoque: " + query.lastError().text();
+      emit errorSignal("Erro removendo consumo estoque: " + query.lastError().text());
       return false;
     }
   }

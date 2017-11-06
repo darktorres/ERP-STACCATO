@@ -4,7 +4,7 @@
 
 #include "estoqueproxymodel.h"
 
-EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpdIndex(model->fieldIndex("quantUpd")) { setSourceModel(model); }
+EstoqueProxyModel::EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), quantUpdIndex(model->fieldIndex("quantUpd")) { setSourceModel(model); }
 
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {

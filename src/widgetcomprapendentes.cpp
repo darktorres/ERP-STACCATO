@@ -162,6 +162,10 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   auto *produtos = new ProdutosPendentes(this);
   produtos->setAttribute(Qt::WA_DeleteOnClose);
   produtos->viewProduto(codComercial, idVenda);
+
+  connect(produtos, &ProdutosPendentes::errorSignal, this, &WidgetCompraPendentes::errorSignal);
+  connect(produtos, &ProdutosPendentes::transactionStarted, this, &WidgetCompraPendentes::transactionStarted);
+  connect(produtos, &ProdutosPendentes::transactionEnded, this, &WidgetCompraPendentes::transactionEnded);
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {

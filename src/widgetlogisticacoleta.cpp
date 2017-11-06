@@ -83,16 +83,20 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   if (input.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cadastrar(list, input.getDate(), input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -115,7 +119,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro salvando status do estoque: " + query.lastError().text();
+      emit errorSignal("Erro salvando status do estoque: " + query.lastError().text());
       return false;
     }
 
@@ -127,7 +131,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
     query.bindValue(":codComercial", model.data(item.row(), "codComercial"));
 
     if (not query.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
@@ -139,7 +143,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando status da compra: " + query.lastError().text();
+      emit errorSignal("Erro atualizando status da compra: " + query.lastError().text());
       return false;
     }
 
@@ -149,7 +153,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando veiculo_has_produto: " + query.lastError().text();
+      emit errorSignal("Erro atualizando veiculo_has_produto: " + query.lastError().text());
       return false;
     }
   }
@@ -181,16 +185,20 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not reagendar(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Reagendado com sucesso!");
@@ -202,25 +210,25 @@ bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &
     const QString codComercial = model.data(item.row(), "codComercial").toString();
 
     QSqlQuery query;
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT "
-                  "idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial "
+                  "= :codComercial");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM "
-                  "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare(
+        "UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status na venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando status na venda_produto: " + query.lastError().text());
       return false;
     }
 
@@ -229,7 +237,7 @@ bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando data no veiculo: " + query.lastError().text();
+      emit errorSignal("Erro atualizando data no veiculo: " + query.lastError().text());
       return false;
     }
   }
@@ -255,6 +263,10 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
+
+      connect(venda, &Venda::errorSignal, this, &WidgetLogisticaColeta::errorSignal);
+      connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaColeta::transactionStarted);
+      connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaColeta::transactionEnded);
     }
   }
 }
@@ -265,23 +277,22 @@ bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
     const QString codComercial = model.data(item.row(), "codComercial").toString();
 
     QSqlQuery query;
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT "
-                  "idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare(
+        "UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status no pedido_fornecedor: " + query.lastError().text();
+      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT idCompra FROM "
-                  "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE venda_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
     if (not query.exec()) {
-      error = "Erro salvando status na venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro salvando status na venda_produto: " + query.lastError().text());
       return false;
     }
 
@@ -289,7 +300,7 @@ bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
 
     if (not query.exec()) {
-      error = "Erro atualizando data no veiculo: " + query.lastError().text();
+      emit errorSignal("Erro atualizando data no veiculo: " + query.lastError().text());
       return false;
     }
   }
@@ -311,16 +322,20 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   updateTables();
   QMessageBox::information(this, "Aviso!", "Cancelado com sucesso!");

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraFaturar;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   //  void on_checkBoxRepresentacao_toggled(bool checked);
@@ -29,9 +31,8 @@ private slots:
 
 private:
   // attributes
-  QString error;
-  SqlTableModel model;
-  SqlTableModel modelResumo;
+  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
   bool cancelar(const QModelIndexList &list);

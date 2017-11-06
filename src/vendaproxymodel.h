@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class VendaProxyModel : public QIdentityProxyModel {
 
 public:
-  explicit VendaProxyModel(SqlTableModel *model, QObject *parent);
+  explicit VendaProxyModel(SqlRelationalTableModel *model, QObject *parent);
   ~VendaProxyModel() = default;
   QVariant data(const QModelIndex &proxyIndex, const int role) const override;
 

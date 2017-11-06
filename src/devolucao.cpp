@@ -41,9 +41,7 @@ void Devolucao::determinarIdDevolucao() {
     query.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
     query.bindValue(":idVenda", idVenda + "D%");
 
-    if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro determinando próximo id: " + query.lastError().text());
-    }
+    if (not query.exec() or not query.first()) QMessageBox::critical(this, "Erro!", "Erro determinando próximo id: " + query.lastError().text());
 
     idDevolucao = idVenda + "D" + query.value("number").toString();
     createNewId = true;
@@ -52,7 +50,7 @@ void Devolucao::determinarIdDevolucao() {
 
 void Devolucao::setupTables() {
   modelProdutos.setTable("venda_has_produto");
-  modelProdutos.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelProdutos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelProdutos.setHeaderData("selecionado", "");
   modelProdutos.setHeaderData("status", "Status");
@@ -70,9 +68,7 @@ void Devolucao::setupTables() {
 
   modelProdutos.setFilter("idVenda = '" + idVenda + "' AND status != 'DEVOLVIDO'");
 
-  if (not modelProdutos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelProdutos.lastError().text());
-  }
+  if (not modelProdutos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelProdutos.lastError().text());
 
   ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("recebeu");
@@ -113,7 +109,7 @@ void Devolucao::setupTables() {
   ui->tableProdutos->resizeColumnsToContents();
 
   modelDevolvidos.setTable("venda_has_produto");
-  modelDevolvidos.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelDevolvidos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelDevolvidos.setHeaderData("selecionado", "");
   modelDevolvidos.setHeaderData("status", "Status");
@@ -131,9 +127,7 @@ void Devolucao::setupTables() {
 
   modelDevolvidos.setFilter("idVenda = '" + idDevolucao + "'");
 
-  if (not modelDevolvidos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelDevolvidos.lastError().text());
-  }
+  if (not modelDevolvidos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda_has_produto: " + modelDevolvidos.lastError().text());
 
   ui->tableDevolvidos->setModel(&modelDevolvidos);
   ui->tableDevolvidos->hideColumn("recebeu");
@@ -169,7 +163,7 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
   modelPagamentos.setTable("conta_a_receber_has_pagamento");
-  modelPagamentos.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelPagamentos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelPagamentos.setHeaderData("tipo", "Tipo");
   modelPagamentos.setHeaderData("parcela", "Parcela");
@@ -181,9 +175,7 @@ void Devolucao::setupTables() {
 
   modelPagamentos.setFilter("idVenda = '" + idDevolucao + "'");
 
-  if (not modelPagamentos.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pagamentos: " + modelPagamentos.lastError().text());
-  }
+  if (not modelPagamentos.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela pagamentos: " + modelPagamentos.lastError().text());
 
   ui->tablePagamentos->setModel(&modelPagamentos);
   ui->tablePagamentos->hideColumn("nfe");
@@ -205,29 +197,23 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->hideColumn("comissao");
   ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("representacao"), new CheckBoxDelegate(this, true));
 
-  for (int row = 0; row < modelPagamentos.rowCount(); ++row) {
-    ui->tablePagamentos->openPersistentEditor(row, "representacao");
-  }
+  for (int row = 0; row < modelPagamentos.rowCount(); ++row) ui->tablePagamentos->openPersistentEditor(row, "representacao");
 
   ui->tablePagamentos->resizeColumnsToContents();
 
   modelVenda.setTable("venda");
-  modelVenda.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelVenda.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
-  if (not modelVenda.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda: " + modelVenda.lastError().text());
-  }
+  if (not modelVenda.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela venda: " + modelVenda.lastError().text());
 
   modelCliente.setTable("cliente");
-  modelCliente.setEditStrategy(SqlTableModel::OnManualSubmit);
+  modelCliente.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelCliente.setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString());
 
-  if (not modelCliente.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela cliente: " + modelCliente.lastError().text());
-  }
+  if (not modelCliente.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela cliente: " + modelCliente.lastError().text());
 
   // mapper
   mapperItem.setModel(&modelProdutos);
@@ -296,7 +282,7 @@ bool Devolucao::criarDevolucao() {
   if (not modelVenda.setData(newRow, "devolucao", true)) return false;
 
   if (not modelVenda.submitAll()) {
-    error = "Erro salvando dados do pedido de devolução: " + modelVenda.lastError().text();
+    emit errorSignal("Erro salvando dados do pedido de devolução: " + modelVenda.lastError().text());
     return false;
   }
 
@@ -309,7 +295,7 @@ bool Devolucao::desvincularCompra() {
   query.bindValue(":idVendaProduto", modelProdutos.data(mapperItem.currentIndex(), "idVendaProduto"));
 
   if (not query.exec()) {
-    error = "Erro atualizando pedido compra: " + query.lastError().text();
+    emit errorSignal("Erro atualizando pedido compra: " + query.lastError().text());
     return false;
   }
 
@@ -404,7 +390,7 @@ bool Devolucao::inserirItens(const QModelIndexList &list) {
   }
 
   if (not modelProdutos.submitAll()) {
-    error = "Erro salvando produtos da devolução: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro salvando produtos da devolução: " + modelProdutos.lastError().text());
     return false;
   }
 
@@ -478,7 +464,7 @@ bool Devolucao::criarContas() {
   //
 
   if (not modelPagamentos.submitAll()) {
-    error = "Erro salvando pagamentos: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro salvando pagamentos: " + modelProdutos.lastError().text());
     return false;
   }
 
@@ -493,7 +479,7 @@ bool Devolucao::salvarCredito() {
   if (not modelCliente.setData(0, "credito", credito)) return false;
 
   if (not modelCliente.submitAll()) {
-    error = "Erro salvando crédito do cliente: " + modelCliente.lastError().text();
+    emit errorSignal("Erro salvando crédito do cliente: " + modelCliente.lastError().text());
     return false;
   }
 
@@ -504,7 +490,7 @@ bool Devolucao::devolverItem(const QModelIndexList &list) {
   if (createNewId and not criarDevolucao()) return false;
 
   if (not modelDevolvidos.select()) {
-    error = "Erro lendo tabela devolvidos: " + modelDevolvidos.lastError().text();
+    emit errorSignal("Erro lendo tabela devolvidos: " + modelDevolvidos.lastError().text());
     return false;
   }
 
@@ -514,17 +500,17 @@ bool Devolucao::devolverItem(const QModelIndexList &list) {
   if (not salvarCredito()) return false;
 
   if (not modelProdutos.select()) {
-    error = "Erro lendo tabela produtos: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
     return false;
   }
 
   if (not modelDevolvidos.select()) {
-    error = "Erro lendo tabela devolvidos: " + modelDevolvidos.lastError().text();
+    emit errorSignal("Erro lendo tabela devolvidos: " + modelDevolvidos.lastError().text());
     return false;
   }
 
   if (not modelPagamentos.select()) {
-    error = "Erro lendo tabela pagamentos: " + modelPagamentos.lastError().text();
+    emit errorSignal("Erro lendo tabela pagamentos: " + modelPagamentos.lastError().text());
     return false;
   }
 
@@ -557,16 +543,20 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
     return;
   }
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not devolverItem(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   limparCampos();
 
@@ -579,7 +569,7 @@ bool Devolucao::atualizarDevolucao() {
   query.bindValue(":idVenda", idDevolucao);
 
   if (not query.exec()) {
-    error = "Erro buscando dados da devolução: " + query.lastError().text();
+    emit errorSignal("Erro buscando dados da devolução: " + query.lastError().text());
     return false;
   }
 
@@ -598,7 +588,7 @@ bool Devolucao::atualizarDevolucao() {
   query.bindValue(":idVenda", idDevolucao);
 
   if (not query.exec()) {
-    error = "Erro atualizando devolução: " + query.lastError().text();
+    emit errorSignal("Erro atualizando devolução: " + query.lastError().text());
     return false;
   }
 

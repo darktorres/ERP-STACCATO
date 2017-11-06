@@ -131,16 +131,20 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   // desfazer passos da confirmacao de entrega (volta para tela de confirmar entrega)
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -164,7 +168,7 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
     query.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
     if (not query.exec()) {
-      error = "Erro atualizando veiculo_produto: " + query.lastError().text();
+      emit errorSignal("Erro atualizando veiculo_produto: " + query.lastError().text());
       return false;
     }
 
@@ -172,7 +176,7 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
     query.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
     if (not query.exec()) {
-      error = "Erro atualizando venda_produto: " + query.lastError().text();
+      emit errorSignal("Erro atualizando venda_produto: " + query.lastError().text());
       return false;
     }
   }

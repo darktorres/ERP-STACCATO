@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class FollowUp;
@@ -26,7 +26,7 @@ private:
   // attributes
   const QString id;
   const Tipo tipo;
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::FollowUp *ui;
   // methods
   bool verifyFields();

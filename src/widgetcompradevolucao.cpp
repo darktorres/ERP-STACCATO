@@ -42,9 +42,7 @@ void WidgetCompraDevolucao::setupTables() {
   model.setHeaderData("codComercial", "Cód. Com.");
   model.setHeaderData("formComercial", "Form. Com.");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
-  }
+  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
 
   ui->table->setModel(&model);
 
@@ -135,34 +133,33 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       QSqlQuery query;
       // TODO: 0verificar se estou pegando o idVendaProduto da devolucao e nao o original
-      query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto "
-                    "AND status = 'DEVOLVIDO'");
+      query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto AND status = 'DEVOLVIDO'");
       query.bindValue(":idVenda", idVenda.left(11));
       query.bindValue(":idProduto", model.data(item.row(), "idProduto"));
 
       if (not query.exec()) {
-        error = "Erro buscando idVendaProduto: " + query.lastError().text();
+        emit errorSignal("Erro buscando idVendaProduto: " + query.lastError().text());
         return false;
       }
 
       if (not query.first()) {
-        error = "Estoque não possui consumo!";
+        emit errorSignal("Estoque não possui consumo!");
         return false;
       }
 
       const QString idVendaProduto = query.value("idVendaProduto").toString();
 
-      SqlTableModel modelEstoque;
+      SqlRelationalTableModel modelEstoque;
       modelEstoque.setTable("estoque_has_consumo");
       modelEstoque.setFilter("idVendaProduto = " + idVendaProduto);
 
       if (not modelEstoque.select()) {
-        error = "Erro buscando consumo estoque: " + modelEstoque.lastError().text();
+        emit errorSignal("Erro buscando consumo estoque: " + modelEstoque.lastError().text());
         return false;
       }
 
       if (modelEstoque.rowCount() == 0) {
-        error = "Não encontrou estoque!";
+        emit errorSignal("Não encontrou estoque!");
         return false;
       }
 
@@ -175,7 +172,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
         if (modelEstoque.fieldIndex("lastUpdated") == column) continue;
 
         if (not modelEstoque.setData(newRow, column, modelEstoque.data(0, column))) {
-          error = "Erro copiando dados do consumo: " + modelEstoque.lastError().text();
+          emit errorSignal("Erro copiando dados do consumo: " + modelEstoque.lastError().text());
           return false;
         }
       }
@@ -186,7 +183,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       // TODO: 2substituir idVendaProduto pelo id da devolucao
 
       if (not modelEstoque.submitAll()) {
-        error = "Erro salvando devolução de estoque: " + modelEstoque.lastError().text();
+        emit errorSignal("Erro salvando devolução de estoque: " + modelEstoque.lastError().text());
         return false;
       }
     }
@@ -197,7 +194,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   }
 
   if (not model.submitAll()) {
-    error = "Erro salvando status processado: " + model.lastError().text();
+    emit errorSignal("Erro salvando status processado: " + model.lastError().text());
     return false;
   }
 
@@ -214,16 +211,20 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
     return;
   }
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not retornarEstoque(list)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
 

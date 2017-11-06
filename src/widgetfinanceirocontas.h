@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetFinanceiroContas;
@@ -22,6 +22,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_dateEditDe_dateChanged(const QDate &date);
@@ -40,7 +42,7 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;
   Tipo tipo = Tipo::Nulo;

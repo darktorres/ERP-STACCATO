@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaCaminhao;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_table_clicked(const QModelIndex &index);
@@ -26,8 +28,8 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel modelCaminhao;
-  SqlTableModel modelCarga;
+  SqlRelationalTableModel modelCaminhao;
+  SqlRelationalTableModel modelCarga;
   Ui::WidgetLogisticaCaminhao *ui;
   // methods
   void setupTables();

@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class ImportaProdutosProxy : public QIdentityProxyModel {
 
 public:
-  ImportaProdutosProxy(SqlTableModel *model, QObject *parent = 0);
+  ImportaProdutosProxy(SqlRelationalTableModel *model, QObject *parent = 0);
   ~ImportaProdutosProxy() = default;
   QVariant data(const QModelIndex &proxyIndex, const int role) const override;
 

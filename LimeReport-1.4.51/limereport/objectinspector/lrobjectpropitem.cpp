@@ -91,7 +91,7 @@ void ObjectPropItem::appendItem(ObjectPropItem *item){
 
 void ObjectPropItem::sortItem()
 {
-    qSort(m_childItems.begin(), m_childItems.end(), lesThen);
+    std::sort(m_childItems.begin(), m_childItems.end(), lesThen);
 }
 
 QVariant ObjectPropItem::propertyValue() const {

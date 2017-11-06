@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetRelatorio;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_dateEditMes_dateChanged(const QDate &);
@@ -29,10 +31,10 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel modelOrcamento;
-  SqlTableModel modelRelatorio;
-  SqlTableModel modelTotalLoja;
-  SqlTableModel modelTotalVendedor;
+  SqlRelationalTableModel modelOrcamento;
+  SqlRelationalTableModel modelRelatorio;
+  SqlRelationalTableModel modelTotalLoja;
+  SqlRelationalTableModel modelTotalVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
   bool setupTables();

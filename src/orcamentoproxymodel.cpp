@@ -4,7 +4,7 @@
 
 #include "orcamentoproxymodel.h"
 
-OrcamentoProxyModel::OrcamentoProxyModel(SqlTableModel *model, QObject *parent)
+OrcamentoProxyModel::OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("status")), followupIndex(model->fieldIndex("Observação")),
       semaforoIndex(model->fieldIndex("semaforo")) {
   setSourceModel(model);

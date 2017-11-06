@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "sqlquerymodel.h"
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetFinanceiroFluxoCaixa;
@@ -20,6 +20,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_groupBoxCaixa1_toggled(const bool checked);

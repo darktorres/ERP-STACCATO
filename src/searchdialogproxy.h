@@ -3,12 +3,12 @@
 
 #include <QIdentityProxyModel>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 class SearchDialogProxy : public QIdentityProxyModel {
 
 public:
-  SearchDialogProxy(SqlTableModel *model, QObject *parent = 0);
+  SearchDialogProxy(SqlRelationalTableModel *model, QObject *parent = 0);
   ~SearchDialogProxy() = default;
   QVariant data(const QModelIndex &proxyIndex, int role) const override;
 

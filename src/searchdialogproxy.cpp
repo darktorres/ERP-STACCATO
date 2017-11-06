@@ -5,7 +5,7 @@
 
 #include "searchdialogproxy.h"
 
-SearchDialogProxy::SearchDialogProxy(SqlTableModel *model, QObject *parent)
+SearchDialogProxy::SearchDialogProxy(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), estoque(model->fieldIndex("estoque")), promocao(model->fieldIndex("promocao")), descontinuado(model->fieldIndex("descontinuado")),
       validade(model->fieldIndex("validadeProdutos")) {
   setSourceModel(model);

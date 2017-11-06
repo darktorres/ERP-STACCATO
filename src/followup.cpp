@@ -30,9 +30,8 @@ void FollowUp::on_pushButtonSalvar_clicked() {
 
   QSqlQuery query;
   if (tipo == Tipo::Orcamento) {
-    query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idLoja, idUsuario, semaforo, observacao, "
-                  "dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idLoja, :idUsuario, :semaforo, :observacao, "
-                  ":dataFollowup, :dataProxFollowup)");
+    query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idLoja, idUsuario, semaforo, observacao, dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idLoja, :idUsuario, :semaforo, "
+                  ":observacao, :dataFollowup, :dataProxFollowup)");
     query.bindValue(":idOrcamento", id);
     query.bindValue(":idLoja", UserSession::idLoja());
     query.bindValue(":idUsuario", UserSession::idUsuario());
@@ -43,8 +42,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   }
 
   if (tipo == Tipo::Venda) {
-    query.prepare("INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, observacao, dataFollowup) VALUES "
-                  "(:idVenda, :idLoja, :idUsuario, :observacao, :dataFollowup)");
+    query.prepare("INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idVenda, :idLoja, :idUsuario, :observacao, :dataFollowup)");
     query.bindValue(":idVenda", id);
     query.bindValue(":idLoja", UserSession::idLoja());
     query.bindValue(":idUsuario", UserSession::idUsuario());
@@ -77,7 +75,7 @@ bool FollowUp::verifyFields() {
 
 void FollowUp::setupTables() {
   model.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
-  model.setEditStrategy(SqlTableModel::OnManualSubmit);
+  model.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   model.setHeaderData("idOrcamento", "Orçamento");
   model.setHeaderData("idVenda", "Venda");

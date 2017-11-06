@@ -1,7 +1,7 @@
 #ifndef INSERIRTRANSFERENCIA_H
 #define INSERIRTRANSFERENCIA_H
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 #include <QDialog>
 
@@ -16,14 +16,18 @@ public:
   explicit InserirTransferencia(QWidget *parent = 0);
   ~InserirTransferencia();
 
+signals:
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
+
 private slots:
   void on_pushButtonSalvar_clicked();
   void on_pushButtonCancelar_clicked();
 
 private:
-  QString error;
-  SqlTableModel modelDe;
-  SqlTableModel modelPara;
+  SqlRelationalTableModel modelDe;
+  SqlRelationalTableModel modelPara;
   Ui::InserirTransferencia *ui;
   bool verifyFields();
   void setupTables();

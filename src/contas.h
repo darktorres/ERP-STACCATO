@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Contas;
@@ -26,8 +26,8 @@ private slots:
 private:
   // attributes
   const Tipo tipo;
-  SqlTableModel modelPendentes;
-  SqlTableModel modelProcessados;
+  SqlRelationalTableModel modelPendentes;
+  SqlRelationalTableModel modelProcessados;
   Ui::Contas *ui;
   // methods
   bool verifyFields();

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqltablemodel.h"
+#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetFinanceiroCompra;
@@ -19,6 +19,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_lineEditBusca_textChanged(const QString &text);
@@ -27,7 +29,7 @@ private slots:
 
 private:
   // attributes
-  SqlTableModel model;
+  SqlRelationalTableModel model;
   Ui::WidgetFinanceiroCompra *ui;
   // methods
   void setupTables();

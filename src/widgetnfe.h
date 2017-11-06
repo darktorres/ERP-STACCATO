@@ -17,12 +17,15 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 private slots:
   void on_tabWidgetNfe_currentChanged(const int);
 
 private:
   Ui::WidgetNfe *ui;
+  void setConnections();
 };
 
 #endif // WIDGETNFE_H

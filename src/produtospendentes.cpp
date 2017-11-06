@@ -156,7 +156,7 @@ bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
   }
 
   if (not modelProdutos.submitAll()) {
-    error = "Erro salvando tabela venda_produto: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro salvando tabela venda_produto: " + modelProdutos.lastError().text());
     return false;
   }
 
@@ -184,9 +184,7 @@ void ProdutosPendentes::recarregarTabelas() {
 void ProdutosPendentes::on_pushButtonComprar_clicked() {
   auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty() and modelViewProdutos.rowCount() == 1) {
-    list << modelViewProdutos.index(0, 0);
-  }
+  if (list.isEmpty() and modelViewProdutos.rowCount() == 1) list << modelViewProdutos.index(0, 0);
 
   if (list.isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Nenhum produto selecionado!");
@@ -196,16 +194,20 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
   InputDialog inputDlg(InputDialog::Tipo::Carrinho);
   if (inputDlg.exec() != InputDialog::Accepted) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not comprar(list, inputDlg.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -221,10 +223,9 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
 bool ProdutosPendentes::insere(const QDateTime &dataPrevista) {
   QSqlQuery query;
-  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto, fornecedor, idProduto, descricao, colecao, "
-                "quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, dataPrevCompra) "
-                "VALUES (:idVenda, :idVendaProduto, :fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, "
-                ":prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
+  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto, fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
+                "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto, :fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, "
+                ":formComercial, :codComercial, :codBarras, :dataPrevCompra)");
   query.bindValue(":idVenda", modelViewProdutos.data(0, "idVenda"));
   query.bindValue(":idVendaProduto", modelViewProdutos.data(0, "idVendaProduto"));
   query.bindValue(":fornecedor", modelViewProdutos.data(0, "fornecedor"));
@@ -274,7 +275,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 
   // model submit
   if (not modelProdutos.submitAll()) {
-    error = "Erro salvando tabela venda_produto: " + modelProdutos.lastError().text();
+    emit errorSignal("Erro salvando tabela venda_produto: " + modelProdutos.lastError().text());
     return false;
   }
 
@@ -314,16 +315,20 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   if (not ok) return;
 
+  emit transactionStarted();
+
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
   if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantTotalVenda, quantEstoque)) {
     QSqlQuery("ROLLBACK").exec();
-    if (not error.isEmpty()) QMessageBox::critical(this, "Erro!", error);
+    emit transactionEnded();
     return;
   }
 
   QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
 
   QSqlQuery query;
 
@@ -343,10 +348,9 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
   QSqlQuery query;
 
   if (excedente > 0.) {
-    query.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, "
-                  "colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
-                  "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, "
-                  ":prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
+    query.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
+                  "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, "
+                  ":dataPrevCompra)");
     query.bindValue(":fornecedor", modelViewProdutos.data(row, "fornecedor"));
     query.bindValue(":idProduto", modelViewProdutos.data(row, "idProduto"));
     query.bindValue(":descricao", modelViewProdutos.data(row, "produto"));
@@ -364,7 +368,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":dataPrevCompra", dataPrevista);
 
     if (not query.exec()) {
-      error = "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text();
+      emit errorSignal("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text());
       return false;
     }
   }
@@ -400,7 +404,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   query.bindValue(":dataPrevCompra", dataPrevista);
 
   if (not query.exec()) {
-    error = "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text();
+    emit errorSignal("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text());
     return false;
   }
 

@@ -48,13 +48,11 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   const QString filtroConta = ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getValue().isValid() ? "idConta = " + ui->itemBoxCaixa1->getValue().toString() : "";
 
   if (filtroConta.isEmpty()) {
-    modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS "
-                        "Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS NOT "
-                        "NULL ORDER BY Data, idConta) x WHERE " +
+    modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS "
+                        "NOT NULL ORDER BY Data, idConta) x WHERE " +
                         filtroData);
   } else {
-    modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM "
-                        "view_fluxo_resumo2 v JOIN (SELECT @running_total := 0) r WHERE " +
+    modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo2 v JOIN (SELECT @running_total := 0) r WHERE " +
                         filtroConta + " AND `Data` IS NOT NULL ORDER BY Data) x WHERE " + filtroData);
   }
 
@@ -86,13 +84,11 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getValue().isValid() ? "idConta = " + ui->itemBoxCaixa2->getValue().toString() : "";
 
   if (filtroConta2.isEmpty()) {
-    modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS "
-                         "Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS NOT "
-                         "NULL ORDER BY Data, idConta) x WHERE " +
+    modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS "
+                         "NOT NULL ORDER BY Data, idConta) x WHERE " +
                          filtroData);
   } else {
-    modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM "
-                         "view_fluxo_resumo2 v JOIN (SELECT @running_total := 0) r WHERE " +
+    modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo2 v JOIN (SELECT @running_total := 0) r WHERE " +
                          filtroConta2 + " AND `Data` IS NOT NULL ORDER BY Data) x WHERE " + filtroData);
   }
 
@@ -119,8 +115,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
-  modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v "
-                       "JOIN (SELECT @running_total := 0) r");
+  modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v JOIN (SELECT @running_total := 0) r");
 
   ui->tableFuturo->setModel(&modelFuturo);
   ui->tableFuturo->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));

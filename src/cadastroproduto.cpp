@@ -39,8 +39,6 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->groupBox_4->hide();
   ui->groupBox_5->hide();
 
-  //  model.setEditStrategy(QSqlTableModel::OnRowChange); // for avoiding reloading the entire table
-
   for (const QLineEdit *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
 }
 

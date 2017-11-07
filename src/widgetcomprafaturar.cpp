@@ -22,6 +22,8 @@ WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(
 WidgetCompraFaturar::~WidgetCompraFaturar() { delete ui; }
 
 void WidgetCompraFaturar::setupTables() {
+  // REFAC: refactor this to not select in here
+
   modelResumo.setTable("view_fornecedor_compra_faturar");
 
   modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
@@ -176,6 +178,7 @@ void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();
   const bool sul = ui->checkBoxMostrarSul->isChecked();
 
+  // REFAC: refactor 1/0 to true/false
   model.setFilter("representacao = " + QString(representacao ? "1" : "0") + " AND " + QString(sul ? "(Código LIKE 'CAMB%' OR Código IS NULL)" : "(Código NOT LIKE 'CAMB%' OR Código IS NULL)"));
 
   if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());

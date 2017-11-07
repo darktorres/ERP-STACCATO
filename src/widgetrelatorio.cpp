@@ -43,6 +43,8 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 }
 
 bool WidgetRelatorio::setupTables() {
+  // REFAC: refactor this to not select in here
+
   modelRelatorio.setTable("view_relatorio");
   modelRelatorio.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

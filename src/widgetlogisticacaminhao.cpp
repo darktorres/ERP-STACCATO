@@ -11,6 +11,8 @@ WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(pare
 WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }
 
 void WidgetLogisticaCaminhao::setupTables() {
+  // REFAC: refactor this to not select in here
+
   modelCaminhao.setTable("view_caminhao");
   modelCaminhao.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

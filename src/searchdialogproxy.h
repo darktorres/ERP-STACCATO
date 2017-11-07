@@ -5,6 +5,7 @@
 
 #include "sqlrelationaltablemodel.h"
 
+// REFAC: rename this to SearchDialogProxyModel (and others proxy models)
 class SearchDialogProxy : public QIdentityProxyModel {
 
 public:

@@ -99,7 +99,7 @@ bool WidgetCompraPendentes::updateTables() {
 }
 
 void WidgetCompraPendentes::setupTables() {
-  // REFAC: 5verificar setupTables com select
+  // REFAC: refactor this to not select in here
 
   model.setTable("view_venda_produto");
 

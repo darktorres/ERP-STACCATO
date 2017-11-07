@@ -64,3 +64,4 @@ QString SqlRelationalTableModel::selectStatement() const {
 void SqlRelationalTableModel::setLimit(int value) { limit = value; }
 
 // REFAC: redo this to use MainWindow showErrors
+// REFAC: add nodiscard to setData's

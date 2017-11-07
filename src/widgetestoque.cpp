@@ -29,7 +29,7 @@ WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::Widg
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
 void WidgetEstoque::setupTables() {
-  // TODO: [Conrado] arrumar ordenacao que nao esta funcionando (tem outra tela que usei um proxy para ordenar)
+  // REFAC: merge this setquery with the one in montaFiltro
 
   model.setQuery(
       "SELECT n.cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = `p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', "

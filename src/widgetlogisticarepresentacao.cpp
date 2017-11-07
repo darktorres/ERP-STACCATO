@@ -44,6 +44,8 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
 }
 
 void WidgetLogisticaRepresentacao::setupTables() {
+  // REFAC: refactor this to not select in here
+
   model.setTable("view_logistica_representacao");
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

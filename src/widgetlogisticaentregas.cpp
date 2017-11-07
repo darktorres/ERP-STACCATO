@@ -68,6 +68,8 @@ bool WidgetLogisticaEntregas::updateTables() {
 }
 
 void WidgetLogisticaEntregas::setupTables() {
+  // REFAC: refactor this to not select in here
+
   modelCalendario.setTable("view_calendario_entrega");
   modelCalendario.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

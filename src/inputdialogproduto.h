@@ -31,6 +31,7 @@ private slots:
 
 private:
   // attributes
+  // REFAC: refactor this out
   bool isBlockedAliquota = false;
   const Tipo tipo;
   SqlRelationalTableModel model;

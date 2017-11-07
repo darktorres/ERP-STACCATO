@@ -73,11 +73,6 @@ void InputDialogFinanceiro::setupTables() {
   model.setHeaderData("aliquotaSt", "Alíquota ST");
   model.setHeaderData("st", "ST");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
-    return;
-  }
-
   ui->table->setModel(&model);
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
@@ -119,11 +114,6 @@ void InputDialogFinanceiro::setupTables() {
   modelFluxoCaixa.setHeaderData("dataPagamento", "Data");
   modelFluxoCaixa.setHeaderData("observacao", "Obs.");
   modelFluxoCaixa.setHeaderData("status", "Status");
-
-  if (not modelFluxoCaixa.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-    return;
-  }
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
   ui->tableFluxoCaixa->setItemDelegate(new DoubleDelegate(this));
@@ -334,8 +324,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (tipo == Tipo::Financeiro) ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
 
   QSqlQuery query;
-  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = "
-                "v.idVenda WHERE idCompra = :idCompra");
+  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
   if (not query.exec() or not query.first()) {

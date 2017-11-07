@@ -29,6 +29,8 @@ bool WidgetCompraOC::updateTables() {
 }
 
 void WidgetCompraOC::setupTables() {
+  // REFAC: refactor this to not select in here
+
   modelPedido.setTable("view_ordemcompra");
   modelPedido.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

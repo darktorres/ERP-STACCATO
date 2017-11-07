@@ -50,7 +50,6 @@ protected:
   virtual bool savingProcedures() = 0;
   virtual bool verifyFields() = 0;
   virtual bool verifyRequiredField(QLineEdit *line, const bool silent = false);
-  // REFAC: verificar em todas as subclasses por funcoes utilizando qmessagebox em vez de passar erro para a camada de cima ou substituindo o erro da camada de baixo
   virtual bool cadastrar() = 0;
   virtual void clearFields() = 0;
   virtual void registerMode() = 0;

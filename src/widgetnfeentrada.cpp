@@ -26,6 +26,8 @@ bool WidgetNfeEntrada::updateTables() {
 }
 
 void WidgetNfeEntrada::setupTables() {
+  // REFAC: refactor this to not select in here
+
   model.setTable("view_nfe_entrada");
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

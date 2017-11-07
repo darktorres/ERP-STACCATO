@@ -53,7 +53,7 @@ void WidgetOrcamento::setPermissions() {
 }
 
 void WidgetOrcamento::setupTables() {
-  model.setTable("view_orcamento"); // TODO: 5refactor other querys that use 'find last of'
+  model.setTable("view_orcamento"); // REFAC: 5refactor other querys that use 'find last of'
 
   ui->table->setModel(new OrcamentoProxyModel(&model, this));
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));

@@ -27,6 +27,8 @@ bool WidgetCompraDevolucao::updateTables() {
 }
 
 void WidgetCompraDevolucao::setupTables() {
+  // REFAC: refactor this to not select in here
+
   model.setTable("venda_has_produto");
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

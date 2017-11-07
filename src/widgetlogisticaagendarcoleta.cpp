@@ -31,6 +31,8 @@ WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QW
 WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
 
 void WidgetLogisticaAgendarColeta::setupTables() {
+  // REFAC: refactor this to not select in here
+
   modelEstoque.setTable("view_agendar_coleta");
   modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

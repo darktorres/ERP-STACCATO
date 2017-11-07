@@ -22,6 +22,8 @@ bool WidgetFinanceiroCompra::updateTables() {
 }
 
 void WidgetFinanceiroCompra::setupTables() {
+  // REFAC: refactor this to not select in here
+
   model.setTable("view_compras_financeiro");
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

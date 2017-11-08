@@ -26,7 +26,7 @@ bool UserSession::login(const QString &user, const QString &password, Tipo tipo)
     return queryAutorizar.first();
   }
 
-  initialize();
+  if (not initialize()) return false;
 
   query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
   query->bindValue(":user", user);
@@ -61,12 +61,14 @@ void UserSession::setSetting(const QString &key, const QVariant &value) { settin
 
 bool UserSession::settingsContains(const QString &key) { return settings->contains(key); }
 
-void UserSession::initialize() {
+bool UserSession::initialize() {
   if (not query) {
-    if (not dbConnect()) return;
+    if (not dbConnect()) return false;
 
     query = new QSqlQuery();
   }
+
+  return true;
 }
 
 bool UserSession::dbConnect() {

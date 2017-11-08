@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
   const QPalette defaultPalette = app.palette();
 
-  if (UserSession::setSetting("User/tema").toString() == "escuro") darkTheme();
+  if (UserSession::getSetting("User/tema").toString() == "escuro") darkTheme();
 
   LoginDialog dialog;
 

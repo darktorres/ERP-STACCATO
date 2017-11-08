@@ -196,7 +196,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   // TODO: 1refatorar essa funcao, dividir em funcoes menores etc
 
-  if (UserSession::setSetting("User/ComprasFolder").toString().isEmpty()) {
+  if (UserSession::getSetting("User/ComprasFolder").toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!");
     return;
   }
@@ -357,7 +357,7 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
     return false;
   }
 
-  const QString fileName = UserSession::setSetting("User/ComprasFolder").toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
+  const QString fileName = UserSession::getSetting("User/ComprasFolder").toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   anexo = fileName;
 

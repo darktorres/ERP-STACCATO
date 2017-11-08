@@ -17,11 +17,11 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->lineEditUser->setFocus();
 
   if (UserSession::settingsContains("User/lastuser")) {
-    ui->lineEditUser->setText(UserSession::setSetting("User/lastuser").toString());
+    ui->lineEditUser->setText(UserSession::getSetting("User/lastuser").toString());
     ui->lineEditPass->setFocus();
   }
 
-  ui->lineEditHostname->setText(UserSession::setSetting("Login/hostname").toString());
+  ui->lineEditHostname->setText(UserSession::getSetting("Login/hostname").toString());
 
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();
@@ -70,32 +70,33 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
   accept();
 
-  if (tipo == Tipo::Login) UserSession::getSetting("User/lastuser", ui->lineEditUser->text());
+  if (tipo == Tipo::Login) UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
 }
 
 void LoginDialog::updater() {
   auto *updater = new QSimpleUpdater();
   updater->setApplicationVersion(qApp->applicationVersion());
-  updater->setReferenceUrl("http://" + UserSession::setSetting("Login/hostname").toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + UserSession::setSetting("Login/hostname").toString() + "/Instalador.exe");
+  updater->setReferenceUrl("http://" + UserSession::getSetting("Login/hostname").toString() + "/versao.txt");
+  updater->setDownloadUrl("http://" + UserSession::getSetting("Login/hostname").toString() + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
 }
 
 void LoginDialog::storeSelection() {
-  if (UserSession::setSetting("Login/hostname").toString().isEmpty()) {
+  // TODO: remove InputDialog and asks user to select the current store in the settings
+  if (UserSession::getSetting("Login/hostname").toString().isEmpty()) {
     const QStringList items = {"Alphaville", "Gabriel", "Granja"};
 
     const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
 
-    UserSession::getSetting("Login/hostname", hash.value(loja));
+    UserSession::setSetting("Login/hostname", hash.value(loja));
   }
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(hash.value(loja)); }
 
 void LoginDialog::on_lineEditHostname_textChanged(const QString &) {
-  UserSession::getSetting("Login/hostname", ui->lineEditHostname->text());
+  UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
   updater();
 }

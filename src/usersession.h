@@ -14,8 +14,8 @@ public:
   static QString nome();
   static QString tipoUsuario();
   static QString fromLoja(const QString &parameter, const QString &user = nome());
-  static QVariant setSetting(const QString &key);
-  static void getSetting(const QString &key, const QVariant &value);
+  static QVariant getSetting(const QString &key);
+  static void setSetting(const QString &key, const QVariant &value);
   static bool settingsContains(const QString &key);
 
 private:

@@ -36,8 +36,6 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
   mapper.addMapping(ui->doubleSpinBoxCOFINSpcofins, modelProdutos.fieldIndex("pCOFINS"));
   mapper.addMapping(ui->doubleSpinBoxCOFINSvcofins, modelProdutos.fieldIndex("vCOFINS"));
 
-  // REFAC: dont always do this, only if certificate is wrong
-  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado);
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
   ui->itemBoxLoja->setValue(UserSession::getSetting("User/lojaACBr"));
 
@@ -56,6 +54,7 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
   if (idVenda.isEmpty()) QMessageBox::critical(this, "Erro!", "idVenda vazio!");
 
   connect(&modelProdutos, &QAbstractItemModel::dataChanged, this, &CadastrarNFe::updateImpostos);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado);
 
   ui->frame_2->hide();
   ui->frame_4->hide();

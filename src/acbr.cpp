@@ -1,7 +1,10 @@
+#include <QCoreApplication>
 #include <QDesktopServices>
 #include <QDir>
+#include <QEventLoop>
 #include <QFile>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
@@ -121,16 +124,34 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
       return {};
     }
 
-    socket->waitForReadyRead(5000);
+    socket->waitForReadyRead();
 
     socket->readAll(); // lendo mensagem de boas vindas
   }
 
-  socket->write(comando.toUtf8());
-  socket->write("\r\n.\r\n");
-  socket->waitForBytesWritten(5000);
+  socket->write(comando.toUtf8() + "\r\n.\r\n");
+  socket->waitForBytesWritten();
 
-  socket->waitForReadyRead(5000);
+  QProgressDialog *progressDialog = new QProgressDialog(nullptr);
+  progressDialog->reset();
+  progressDialog->setCancelButton(nullptr);
+  progressDialog->setLabelText("Esperando ACBr...");
+  progressDialog->setWindowTitle("ERP Staccato");
+  progressDialog->setWindowModality(Qt::WindowModal);
+  progressDialog->setMaximum(0);
+  progressDialog->setMinimum(0);
+  progressDialog->show();
 
-  return QString(socket->readAll()).remove("\u0003");
+  connect(socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
+
+  while (not progressDialog->wasCanceled()) QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+  const QString resposta = QString(socket->readAll()).remove("\u0003");
+
+  if (resposta.isEmpty()) {
+    QMessageBox::critical(nullptr, "Erro!", "Não obteve resposta do ACBr!");
+    return {};
+  }
+
+  return resposta;
 }

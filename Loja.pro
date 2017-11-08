@@ -19,18 +19,10 @@ QMAKE_TARGET_PRODUCT = ERP
 QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
 QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
-CONFIG += c++17
+CONFIG += c++1z
 
-msvc{
-QMAKE_CXXFLAGS += /std:c++17
-}
-
-clang{
-QMAKE_CXXFLAGS += -Wall -Wextra -std=c++17
-}
-
-gcc {
-QMAKE_CXXFLAGS += -Wall -Wextra -std=c++17
+gcc{
+QMAKE_CXXFLAGS += -Wall -Wextra
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast
@@ -43,9 +35,30 @@ QMAKE_LFLAGS_RELEASE += -O0
 #QMAKE_LFLAGS += -flto -fuse-linker-plugin
 }
 
-macx{
-QMAKE_CXXFLAGS += -stdlib=libc++ -std=c++14
-QMAKE_LFLAGS += -stdlib=libc++
+win32:gcc{
+message(Windows)
+
+QMAKE_CXXFLAGS += -Wall -Wextra
+#QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
+QMAKE_CXXFLAGS_DEBUG += -O0
+#QMAKE_CXXFLAGS_RELEASE  = -Ofast
+QMAKE_CXXFLAGS_RELEASE  = -O0
+QMAKE_LFLAGS_DEBUG += -O0
+#QMAKE_LFLAGS_RELEASE += -O3
+QMAKE_LFLAGS_RELEASE += -O0
+
+#QMAKE_CXXFLAGS += -flto
+#QMAKE_LFLAGS += -flto -fuse-linker-plugin
+}
+
+linux:gcc{
+message(Linux)
+
+QMAKE_CC = ccache gcc
+QMAKE_CXX = ccache g++
+
+QMAKE_CXXFLAGS += -fuse-ld=gold
+QMAKE_LFLAGS += -fuse-ld=gold
 }
 
 RESOURCES += \

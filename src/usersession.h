@@ -23,7 +23,7 @@ private:
   inline static QSqlQuery *query = nullptr;
   inline static QSettings *settings = new QSettings("Staccato", "ERP");
   // methods
-  static void initialize();
+  static bool initialize();
   static bool dbConnect();
 };
 

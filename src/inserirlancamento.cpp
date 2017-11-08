@@ -81,8 +81,8 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   const int newRow = model.rowCount();
   model.insertRow(newRow);
 
-  model.setData(newRow, "status", "PENDENTE");
-  model.setData(newRow, "dataEmissao", QDate::currentDate());
+  if (not model.setData(newRow, "status", "PENDENTE")) return;
+  if (not model.setData(newRow, "dataEmissao", QDate::currentDate())) return;
 
   for (int row = 0; row < model.rowCount(); ++row) {
     ui->table->openPersistentEditor(row, "idLoja");

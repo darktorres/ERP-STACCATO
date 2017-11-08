@@ -538,25 +538,27 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   //------------------------
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-    for (int col = modelProdutos.fieldIndex("numeroPedido"); col < modelProdutos.columnCount(); ++col) modelProdutos.setData(row, col, 0); // limpar campos dos imposto
+    for (int col = modelProdutos.fieldIndex("numeroPedido"); col < modelProdutos.columnCount(); ++col) {
+      if (not modelProdutos.setData(row, col, 0)) return; // limpar campos dos imposto
+    }
 
-    modelProdutos.setData(row, "cfop", "5403");
+    if (not modelProdutos.setData(row, "cfop", "5403")) return;
 
-    modelProdutos.setData(row, "tipoICMS", "ICMS60");
-    modelProdutos.setData(row, "cstICMS", "60");
+    if (not modelProdutos.setData(row, "tipoICMS", "ICMS60")) return;
+    if (not modelProdutos.setData(row, "cstICMS", "60")) return;
 
     const double total = modelProdutos.data(row, "total").toDouble();
     const double freteProporcional = total == 0 ? 0 : total / ui->doubleSpinBoxValorProduto->value() * ui->doubleSpinBoxValorFrete->value();
 
-    modelProdutos.setData(row, "vBCPIS", total + freteProporcional);
-    modelProdutos.setData(row, "cstPIS", "01");
-    modelProdutos.setData(row, "pPIS", UserSession::fromLoja("porcentagemPIS"));
-    modelProdutos.setData(row, "vPIS", modelProdutos.data(row, "vBCPIS").toDouble() * modelProdutos.data(row, "pPIS").toDouble() / 100);
+    if (not modelProdutos.setData(row, "vBCPIS", total + freteProporcional)) return;
+    if (not modelProdutos.setData(row, "cstPIS", "01")) return;
+    if (not modelProdutos.setData(row, "pPIS", UserSession::fromLoja("porcentagemPIS"))) return;
+    if (not modelProdutos.setData(row, "vPIS", modelProdutos.data(row, "vBCPIS").toDouble() * modelProdutos.data(row, "pPIS").toDouble() / 100)) return;
 
-    modelProdutos.setData(row, "vBCCOFINS", total + freteProporcional);
-    modelProdutos.setData(row, "cstCOFINS", "01");
-    modelProdutos.setData(row, "pCOFINS", UserSession::fromLoja("porcentagemCOFINS"));
-    modelProdutos.setData(row, "vCOFINS", modelProdutos.data(row, "vBCCOFINS").toDouble() * modelProdutos.data(row, "pCOFINS").toDouble() / 100);
+    if (not modelProdutos.setData(row, "vBCCOFINS", total + freteProporcional)) return;
+    if (not modelProdutos.setData(row, "cstCOFINS", "01")) return;
+    if (not modelProdutos.setData(row, "pCOFINS", UserSession::fromLoja("porcentagemCOFINS"))) return;
+    if (not modelProdutos.setData(row, "vCOFINS", modelProdutos.data(row, "vBCCOFINS").toDouble() * modelProdutos.data(row, "pCOFINS").toDouble() / 100)) return;
   }
 
   //
@@ -1096,8 +1098,8 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
 
   const bool tribNormal = ui->comboBoxRegime->currentText() == "Tributação Normal";
 
-  modelProdutos.setData(list.first().row(), "tipoICMS", tribNormal ? "ICMS" + text.left(2) : "ICMSSN" + text.left(3));
-  modelProdutos.setData(list.first().row(), "cstICMS", text.left(tribNormal ? 2 : 3));
+  if (not modelProdutos.setData(list.first().row(), "tipoICMS", tribNormal ? "ICMS" + text.left(2) : "ICMSSN" + text.left(3))) return;
+  if (not modelProdutos.setData(list.first().row(), "cstICMS", text.left(tribNormal ? 2 : 3))) return;
 
   //
 
@@ -1249,7 +1251,7 @@ void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(int index) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "orig", index - 1);
+  if (not modelProdutos.setData(list.first().row(), "orig", index - 1)) return;
 }
 
 void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(int index) {
@@ -1261,7 +1263,7 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(int index) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "modBC", index - 1);
+  if (not modelProdutos.setData(list.first().row(), "modBC", index - 1)) return;
 }
 
 void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(int index) {
@@ -1273,7 +1275,7 @@ void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(int index) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "modBCST", index - 1);
+  if (not modelProdutos.setData(list.first().row(), "modBCST", index - 1)) return;
 }
 
 void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(double value) {
@@ -1281,7 +1283,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(double value) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "vICMS", value);
+  if (not modelProdutos.setData(list.first().row(), "vICMS", value)) return;
 }
 
 void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(double value) {
@@ -1289,7 +1291,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(double value) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "vICMSST", value);
+  if (not modelProdutos.setData(list.first().row(), "vICMSST", value)) return;
 }
 
 void CadastrarNFe::on_comboBoxIPIcst_currentTextChanged(const QString &text) {
@@ -1297,7 +1299,7 @@ void CadastrarNFe::on_comboBoxIPIcst_currentTextChanged(const QString &text) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "cstIPI", text.left(2));
+  if (not modelProdutos.setData(list.first().row(), "cstIPI", text.left(2))) return;
 }
 
 void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
@@ -1305,7 +1307,7 @@ void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "cstPIS", text.left(2));
+  if (not modelProdutos.setData(list.first().row(), "cstPIS", text.left(2))) return;
 }
 
 void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(double value) {
@@ -1313,7 +1315,7 @@ void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(double value) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "vPIS", value);
+  if (not modelProdutos.setData(list.first().row(), "vPIS", value)) return;
 }
 
 void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) {
@@ -1321,7 +1323,7 @@ void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) 
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "cstCOFINS", text.left(2));
+  if (not modelProdutos.setData(list.first().row(), "cstCOFINS", text.left(2))) return;
 }
 
 void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(double value) {
@@ -1329,7 +1331,7 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(double value) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "vCOFINS", value);
+  if (not modelProdutos.setData(list.first().row(), "vCOFINS", value)) return;
 }
 
 void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(double) { ui->doubleSpinBoxICMSvicmsst->setValue(ui->doubleSpinBoxICMSvbcst->value() * ui->doubleSpinBoxICMSpicmsst->value() / 100); }
@@ -1612,7 +1614,7 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 
   if (list.isEmpty()) return;
 
-  modelProdutos.setData(list.first().row(), "cfop", text.left(4));
+  if (not modelProdutos.setData(list.first().row(), "cfop", text.left(4))) return;
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {

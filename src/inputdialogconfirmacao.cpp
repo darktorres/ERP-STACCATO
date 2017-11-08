@@ -461,7 +461,7 @@ bool InputDialogConfirmacao::gerarCreditoCliente() {
 
   const double creditoAntigo = modelCliente.data(0, "credito").toDouble();
 
-  modelCliente.setData(0, "credito", credito + creditoAntigo);
+  if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) return false;
 
   return true;
 }
@@ -526,16 +526,16 @@ bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
     if (model.fieldIndex("created") == col) continue;
     if (model.fieldIndex("lastUpdated") == col) continue;
 
-    model.setData(rowQuebrado, col, model.data(row, col));
+    if (not model.setData(rowQuebrado, col, model.data(row, col))) return false;
   }
 
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
 
-  model.setData(rowQuebrado, "observacao", "(REPO. RECEB.) " + obs);
-  model.setData(rowQuebrado, "caixas", caixasDefeito);
-  model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa);
-  model.setData(rowQuebrado, "status", "QUEBRADO");
-  model.setData(rowQuebrado, "lote", "Estoque: " + model.data(row, "idEstoque").toString());
+  if (not model.setData(rowQuebrado, "observacao", "(REPO. RECEB.) " + obs)) return false;
+  if (not model.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
+  if (not model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
+  if (not model.setData(rowQuebrado, "status", "QUEBRADO")) return false;
+  if (not model.setData(rowQuebrado, "lote", "Estoque: " + model.data(row, "idEstoque").toString())) return false;
   // recalcular proporcional dos valores
 
   if (not model.submitAll()) {

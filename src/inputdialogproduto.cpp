@@ -160,12 +160,12 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
 
   if (header == "Quant." or header == "$ Unit.") {
     const double preco = model.data(row, "quant").toDouble() * model.data(row, "prcUnitario").toDouble();
-    model.setData(row, "preco", preco);
+    if (not model.setData(row, "preco", preco)) return;
   }
 
   if (header == "Total") {
     const double preco = model.data(row, "preco").toDouble() / model.data(row, "quant").toDouble();
-    model.setData(row, "prcUnitario", preco);
+    if (not model.setData(row, "prcUnitario", preco)) return;
   }
 
   processST();
@@ -234,8 +234,8 @@ void InputDialogProduto::processST() {
     ui->doubleSpinBoxST->hide();
 
     for (int row = 0; row < model.rowCount(); ++row) {
-      model.setData(row, "aliquotaSt", aliquota);
-      model.setData(row, "st", text);
+      if (not model.setData(row, "aliquotaSt", aliquota)) return;
+      if (not model.setData(row, "st", text)) return;
     }
   }
 
@@ -250,8 +250,8 @@ void InputDialogProduto::processST() {
     if (not isBlockedAliquota) ui->doubleSpinBoxST->setValue(st);
 
     for (int row = 0; row < model.rowCount(); ++row) {
-      model.setData(row, "aliquotaSt", aliquota);
-      model.setData(row, "st", text);
+      if (not model.setData(row, "aliquotaSt", aliquota)) return;
+      if (not model.setData(row, "st", text)) return;
     }
 
     total += total * aliquota / 100;
@@ -269,8 +269,8 @@ void InputDialogProduto::processST() {
     if (not isBlockedAliquota) ui->doubleSpinBoxST->setValue(st);
 
     for (int row = 0; row < model.rowCount(); ++row) {
-      model.setData(row, "aliquotaSt", aliquota);
-      model.setData(row, "st", text);
+      if (not model.setData(row, "aliquotaSt", aliquota)) return;
+      if (not model.setData(row, "st", text)) return;
     }
 
     total += total * aliquota / 100;

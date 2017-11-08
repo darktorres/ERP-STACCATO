@@ -594,7 +594,9 @@ bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
   }
 
   // Errados
-  if (variantMap.value("colecao").toString() == "REPETIDO") modelErro.setData(row, "colecaoUpd", static_cast<int>(FieldColors::Red));
+  if (variantMap.value("colecao").toString() == "REPETIDO") {
+    if (not modelErro.setData(row, "colecaoUpd", static_cast<int>(FieldColors::Red))) return false;
+  }
 
   if ((variantMap.value("un").toString() == "M2" or variantMap.value("un").toString() == "M²" or variantMap.value("un").toString() == "ML") and variantMap.value("m2cx") <= 0.) {
     if (not modelErro.setData(row, "m2cxUpd", static_cast<int>(FieldColors::Red))) return false;

@@ -208,7 +208,7 @@ bool CadastroUsuario::cadastrar() {
     const int row2 = modelPermissoes.rowCount();
     modelPermissoes.insertRow(row2);
 
-    modelPermissoes.setData(row2, "idUsuario", primaryId);
+    if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) return false;
 
     if (not modelPermissoes.submitAll()) {
       emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());

@@ -51,12 +51,12 @@ void Contas::validarData(const QModelIndex &index) {
 
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
       QMessageBox::critical(this, "Erro!", "Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
-      modelPendentes.setData(index.row(), "dataPagamento", oldDate);
+      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) return;
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
       QMessageBox::critical(this, "Erro!", "Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
-      modelPendentes.setData(index.row(), "dataPagamento", oldDate);
+      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) return;
     }
   }
 }
@@ -77,17 +77,17 @@ void Contas::preencher(const QModelIndex &index) {
 
     if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
       QMessageBox::critical(this, "Erro!", "Limite de alteração de valor excedido! Use a função de corrigir fluxo!");
-      modelPendentes.setData(index.row(), "valor", oldValor);
+      if (not modelPendentes.setData(index.row(), "valor", oldValor)) return;
     }
   }
 
   if (index.column() == modelPendentes.fieldIndex("dataRealizado")) {
-    modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO");
-    modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"));
-    modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"));
-    modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"));
-    modelPendentes.setData(index.row(), "contaDestino", 3);
-    modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"));
+    if (not modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) return;
+    if (not modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"))) return;
+    if (not modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"))) return;
+    if (not modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"))) return;
+    if (not modelPendentes.setData(index.row(), "contaDestino", 3)) return;
+    if (not modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"))) return;
 
     //
 
@@ -97,19 +97,19 @@ void Contas::preencher(const QModelIndex &index) {
     for (const auto &indexMatch : list) {
       if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) continue;
 
-      modelPendentes.setData(indexMatch.row(), "dataRealizado", modelPendentes.data(index.row(), "dataRealizado"));
-      modelPendentes.setData(indexMatch.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO");
-      modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"));
-      modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"));
-      modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"));
-      modelPendentes.setData(indexMatch.row(), "contaDestino", 3);
-      modelPendentes.setData(indexMatch.row(), "centroCusto", modelPendentes.data(indexMatch.row(), "idLoja"));
+      if (not modelPendentes.setData(indexMatch.row(), "dataRealizado", modelPendentes.data(index.row(), "dataRealizado"))) return;
+      if (not modelPendentes.setData(indexMatch.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) return;
+      if (not modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"))) return;
+      if (not modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"))) return;
+      if (not modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"))) return;
+      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", 3)) return;
+      if (not modelPendentes.setData(indexMatch.row(), "centroCusto", modelPendentes.data(indexMatch.row(), "idLoja"))) return;
     }
   }
 
   if (index.column() != modelPendentes.fieldIndex("dataRealizado")) {
     if (modelPendentes.data(index.row(), "status").toString() == "PENDENTE") {
-      modelPendentes.setData(index.row(), "status", "CONFERIDO");
+      if (not modelPendentes.setData(index.row(), "status", "CONFERIDO")) return;
     }
   }
 }

@@ -35,9 +35,9 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     return;
   }
 
-  model.setData(0, "status", "PERDIDO");
-  model.setData(0, "motivoCancelamento", motivo);
-  model.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText());
+  if (not model.setData(0, "status", "PERDIDO")) return;
+  if (not model.setData(0, "motivoCancelamento", motivo)) return;
+  if (not model.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) return;
 
   if (not model.submitAll()) {
     QMessageBox::critical(this, "Erro!", "Erro cancelando orçamento: " + model.lastError().text());

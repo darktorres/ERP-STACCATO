@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QDebug>
 
 #include "logindialog.h"
 #include "mainwindow.h"

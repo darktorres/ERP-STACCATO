@@ -326,8 +326,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     //
 
     modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE"
-                                                 : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != "
-                                                                             "'CONFERIDO' AND representacao = FALSE");
+                                                 : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE");
 
     if (not modelProcessados.select()) {
       QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());

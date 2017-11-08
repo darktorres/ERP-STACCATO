@@ -1,5 +1,4 @@
 language: cpp
-cache: ccache
 sudo: required
 dist: trusty
 
@@ -34,4 +33,4 @@ install:
 script:
   - source /opt/qt59/bin/qt59-env.sh
   - /opt/qt59/bin/qmake Loja.pro
-  - ccache make CXX=$COMPILER -j3
+  - make CXX=$COMPILER -j3

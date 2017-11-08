@@ -123,18 +123,14 @@ void InserirTransferencia::setupTables() {
 
   modelDe.setFilter("0");
 
-  if (not modelDe.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'De': " + modelDe.lastError().text());
-  }
+  if (not modelDe.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'De': " + modelDe.lastError().text());
 
   modelPara.setTable("conta_a_receber_has_pagamento");
   modelPara.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelPara.setFilter("0");
 
-  if (not modelPara.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'Para': " + modelPara.lastError().text());
-  }
+  if (not modelPara.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'Para': " + modelPara.lastError().text());
 }
 
 // TODO: 5colocar campo para observacao (na tabela já tem campo observacao, apenas preencher)

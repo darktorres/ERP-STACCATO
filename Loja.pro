@@ -54,12 +54,12 @@ QMAKE_LFLAGS_RELEASE += -O0
 linux:gcc{
 message(Linux)
 
-#QMAKE_CC = ccache gcc
-#QMAKE_CXX = ccache g++
+QMAKE_CC = ccache gcc
+QMAKE_CXX = ccache g++
 
 QMAKE_CFLAGS += -fuse-ld=gold
 QMAKE_CXXFLAGS += -fuse-ld=gold
-#QMAKE_LFLAGS += -fuse-ld=gold
+QMAKE_LFLAGS += -fuse-ld=gold
 }
 
 RESOURCES += \

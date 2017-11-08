@@ -36,7 +36,7 @@ WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 bool WidgetNfeSaida::updateTables() {
   if (model.tableName().isEmpty()) setupTables();
 
-  // TODO: 1refatorar
+  // REFAC: 1refatorar
   //  if (not model.select()) {
   //    emit errorSignal("Erro lendo tabela NFe: " + model.lastError().text());
   //    return false;

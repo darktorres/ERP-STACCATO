@@ -83,13 +83,14 @@ bool UserSession::dbConnect() {
   db.setUserName(UserSession::getSetting("User/lastuser").toString().toLower());
   db.setPassword("1234");
   db.setDatabaseName("mysql");
+  db.setPort(3306);
 
   db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1");
   //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=60;MYSQL_OPT_READ_TIMEOUT=60;"
   //                       "MYSQL_OPT_WRITE_TIMEOUT=60");
 
   if (not db.open()) {
-    QMessageBox::critical(nullptr, "Erro: Banco de dados inacessível!", db.lastError().nativeErrorCode());
+    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
     return false;
   }
 

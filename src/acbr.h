@@ -15,7 +15,9 @@ public:
   static std::optional<std::tuple<QString, QString>> consultarNFe(const int idNFe);
 
 private:
-  inline static QTcpSocket *socket = new QTcpSocket();
+  // attributes
+  inline static QTcpSocket *socket = new QTcpSocket(nullptr);
+  // methods
   static bool abrirPdf(const QString &resposta);
 };
 

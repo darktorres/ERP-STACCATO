@@ -114,7 +114,7 @@ bool ACBr::abrirPdf(const QString &resposta) {
 
 std::optional<QString> ACBr::enviarComando(const QString &comando) {
   if (socket->state() != QTcpSocket::ConnectedState) {
-    socket->connectToHost("127.0.0.1", 3434);
+    socket->connectToHost("127.0.0.1", 3434); // REFAC: dont hardcode this
 
     if (not socket->waitForConnected(5000)) {
       QMessageBox::critical(nullptr, "Erro!", "Não foi possível conectar ao ACBr: " + socket->errorString());

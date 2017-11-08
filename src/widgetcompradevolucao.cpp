@@ -179,9 +179,9 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
         }
       }
 
-      modelEstoque.setData(newRow, "status", "DEVOLVIDO");
-      modelEstoque.setData(newRow, "quant", model.data(item.row(), "quant").toDouble() * -1);
-      modelEstoque.setData(newRow, "quantUpd", 5);
+      if (not modelEstoque.setData(newRow, "status", "DEVOLVIDO")) return false;
+      if (not modelEstoque.setData(newRow, "quant", model.data(item.row(), "quant").toDouble() * -1)) return false;
+      if (not modelEstoque.setData(newRow, "quantUpd", 5)) return false;
       // TODO: 2substituir idVendaProduto pelo id da devolucao
 
       if (not modelEstoque.submitAll()) {

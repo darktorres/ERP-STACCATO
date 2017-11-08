@@ -46,42 +46,42 @@ bool InserirTransferencia::cadastrar() {
   const int rowDe = modelDe.rowCount();
   modelDe.insertRow(rowDe);
 
-  modelDe.setData(rowDe, "status", "PAGO");
-  modelDe.setData(rowDe, "dataEmissao", ui->dateEdit->date());
-  modelDe.setData(rowDe, "idLoja", "1"); // Geral
-  modelDe.setData(rowDe, "contraParte", "TRANSFERÊNCIA PARA " + ui->itemBoxPara->text());
-  modelDe.setData(rowDe, "valor", ui->doubleSpinBoxValor->value());
-  modelDe.setData(rowDe, "tipo", "1. Transf. Banc.");
-  modelDe.setData(rowDe, "dataPagamento", ui->dateEdit->date());
-  modelDe.setData(rowDe, "dataRealizado", ui->dateEdit->date());
-  modelDe.setData(rowDe, "valorReal", ui->doubleSpinBoxValor->value());
-  modelDe.setData(rowDe, "tipoReal", "1. Transf. Banc.");
-  modelDe.setData(rowDe, "parcelaReal", "1");
-  modelDe.setData(rowDe, "contaDestino", ui->itemBoxDe->getValue());
-  modelDe.setData(rowDe, "centroCusto", 1); // Geral
-  modelDe.setData(rowDe, "grupo", "Transferência");
-  modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text());
+  if (not modelDe.setData(rowDe, "status", "PAGO")) return false;
+  if (not modelDe.setData(rowDe, "dataEmissao", ui->dateEdit->date())) return false;
+  if (not modelDe.setData(rowDe, "idLoja", "1")) return false; // Geral
+  if (not modelDe.setData(rowDe, "contraParte", "TRANSFERÊNCIA PARA " + ui->itemBoxPara->text())) return false;
+  if (not modelDe.setData(rowDe, "valor", ui->doubleSpinBoxValor->value())) return false;
+  if (not modelDe.setData(rowDe, "tipo", "1. Transf. Banc.")) return false;
+  if (not modelDe.setData(rowDe, "dataPagamento", ui->dateEdit->date())) return false;
+  if (not modelDe.setData(rowDe, "dataRealizado", ui->dateEdit->date())) return false;
+  if (not modelDe.setData(rowDe, "valorReal", ui->doubleSpinBoxValor->value())) return false;
+  if (not modelDe.setData(rowDe, "tipoReal", "1. Transf. Banc.")) return false;
+  if (not modelDe.setData(rowDe, "parcelaReal", "1")) return false;
+  if (not modelDe.setData(rowDe, "contaDestino", ui->itemBoxDe->getValue())) return false;
+  if (not modelDe.setData(rowDe, "centroCusto", 1)) return false; // Geral
+  if (not modelDe.setData(rowDe, "grupo", "Transferência")) return false;
+  if (not modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text())) return false;
 
   // lancamento 'para'
 
   const int rowPara = modelPara.rowCount();
   modelPara.insertRow(rowPara);
 
-  modelPara.setData(rowPara, "status", "RECEBIDO");
-  modelPara.setData(rowPara, "dataEmissao", ui->dateEdit->date());
-  modelPara.setData(rowPara, "idLoja", "1"); // Geral
-  modelPara.setData(rowPara, "contraParte", "TRANSFERÊNCIA DE " + ui->itemBoxDe->text());
-  modelPara.setData(rowPara, "valor", ui->doubleSpinBoxValor->value());
-  modelPara.setData(rowPara, "tipo", "1. Transf. Banc.");
-  modelPara.setData(rowPara, "dataPagamento", ui->dateEdit->date());
-  modelPara.setData(rowPara, "dataRealizado", ui->dateEdit->date());
-  modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value());
-  modelPara.setData(rowPara, "tipoReal", "1. Transf. Banc.");
-  modelPara.setData(rowPara, "parcelaReal", "1");
-  modelPara.setData(rowPara, "contaDestino", ui->itemBoxPara->getValue());
-  modelPara.setData(rowPara, "centroCusto", 1); // Geral
-  modelPara.setData(rowPara, "grupo", "Transferência");
-  modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text());
+  if (not modelPara.setData(rowPara, "status", "RECEBIDO")) return false;
+  if (not modelPara.setData(rowPara, "dataEmissao", ui->dateEdit->date())) return false;
+  if (not modelPara.setData(rowPara, "idLoja", "1")) return false; // Geral
+  if (not modelPara.setData(rowPara, "contraParte", "TRANSFERÊNCIA DE " + ui->itemBoxDe->text())) return false;
+  if (not modelPara.setData(rowPara, "valor", ui->doubleSpinBoxValor->value())) return false;
+  if (not modelPara.setData(rowPara, "tipo", "1. Transf. Banc.")) return false;
+  if (not modelPara.setData(rowPara, "dataPagamento", ui->dateEdit->date())) return false;
+  if (not modelPara.setData(rowPara, "dataRealizado", ui->dateEdit->date())) return false;
+  if (not modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value())) return false;
+  if (not modelPara.setData(rowPara, "tipoReal", "1. Transf. Banc.")) return false;
+  if (not modelPara.setData(rowPara, "parcelaReal", "1")) return false;
+  if (not modelPara.setData(rowPara, "contaDestino", ui->itemBoxPara->getValue())) return false;
+  if (not modelPara.setData(rowPara, "centroCusto", 1)) return false; // Geral
+  if (not modelPara.setData(rowPara, "grupo", "Transferência")) return false;
+  if (not modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text())) return false;
 
   if (not modelDe.submitAll()) {
     emit errorSignal("Erro salvando 'De': " + modelDe.lastError().text());

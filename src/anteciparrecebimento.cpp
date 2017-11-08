@@ -206,11 +206,11 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
   //    model.setData(item.row(), "observacao", "Antecipação");
   //  }
 
-  const int newRow = model.rowCount();
-  model.insertRow(newRow);
+  //  const int newRow = model.rowCount();
+  //  model.insertRow(newRow);
 
-  model.setData(newRow, "status", "PAGO");
-  model.setData(newRow, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
-  model.setData(newRow, "observacao", "Juros da antecipação");
-  model.setData(newRow, "tipo", "JUROS ANTECIPAÇÃO");
+  //  model.setData(newRow, "status", "PAGO");
+  //  model.setData(newRow, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
+  //  model.setData(newRow, "observacao", "Juros da antecipação");
+  //  model.setData(newRow, "tipo", "JUROS ANTECIPAÇÃO");
 }

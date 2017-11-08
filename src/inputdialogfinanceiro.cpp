@@ -174,20 +174,20 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
       for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
         const int row = modelFluxoCaixa.rowCount();
         modelFluxoCaixa.insertRow(row);
-        modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"));
-        modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime());
-        modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"));
-        modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
+        if (not modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"))) return;
+        if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
+        if (not modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"))) return;
+        if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return; // Geral
         const QDate dataPgt = (ui->widgetPgts->listComboData.at(i)->currentText() == "Data + 1 Mês"
                                    ? ui->widgetPgts->listDatePgt.at(i)->date().addMonths(x + 1)
                                    : ui->widgetPgts->listComboData.at(i)->currentText() == "Data Mês"
                                          ? ui->widgetPgts->listDatePgt.at(i)->date().addMonths(x)
                                          : ui->widgetPgts->listDatePgt.at(i)->date().addDays(ui->widgetPgts->listComboData.at(i)->currentText().toInt() * (x + 1)));
-        modelFluxoCaixa.setData(row, "dataPagamento", dataPgt);
-        modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0));
-        modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText());
-        modelFluxoCaixa.setData(row, "parcela", parcelas - y);
-        modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text());
+        if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) return;
+        if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) return;
+        if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) return;
+        if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) return;
+        if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text())) return;
       }
     }
   }
@@ -195,15 +195,15 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
   if (ui->doubleSpinBoxFrete->value() > 0) {
     const int row = modelFluxoCaixa.rowCount();
     modelFluxoCaixa.insertRow(row);
-    modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"));
-    modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime());
-    modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"));
-    modelFluxoCaixa.setData(row, "idLoja", 1);                           // Geral
-    modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate()); // TODO: 5redo this with a editable date
-    modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value());
-    modelFluxoCaixa.setData(row, "tipo", "Frete");
-    modelFluxoCaixa.setData(row, "parcela", 1);
-    modelFluxoCaixa.setData(row, "observacao", "");
+    if (not modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"))) return;
+    if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
+    if (not modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"))) return;
+    if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return;                           // Geral
+    if (not modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate())) return; // TODO: 5redo this with a editable date
+    if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value())) return;
+    if (not modelFluxoCaixa.setData(row, "tipo", "Frete")) return;
+    if (not modelFluxoCaixa.setData(row, "parcela", 1)) return;
+    if (not modelFluxoCaixa.setData(row, "observacao", "")) return;
   }
 
   // set st date
@@ -224,15 +224,15 @@ void InputDialogFinanceiro::montarFluxoCaixa() {
     const int row = modelFluxoCaixa.rowCount();
     modelFluxoCaixa.insertRow(row);
 
-    modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"));
-    modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime());
-    modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"));
-    modelFluxoCaixa.setData(row, "idLoja", 1); // Geral
-    modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date());
-    modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxSt->value());
-    modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor");
-    modelFluxoCaixa.setData(row, "parcela", 1);
-    modelFluxoCaixa.setData(row, "observacao", "");
+    if (not modelFluxoCaixa.setData(row, "contraParte", model.data(0, "fornecedor"))) return;
+    if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
+    if (not modelFluxoCaixa.setData(row, "idCompra", model.data(0, "idCompra"))) return;
+    if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return; // Geral
+    if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) return;
+    if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxSt->value())) return;
+    if (not modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor")) return;
+    if (not modelFluxoCaixa.setData(row, "parcela", 1)) return;
+    if (not modelFluxoCaixa.setData(row, "observacao", "")) return;
   }
 
   ui->tableFluxoCaixa->resizeColumnsToContents();
@@ -267,12 +267,12 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
   if (header == "Quant." or header == "$ Unit.") {
     const double preco = model.data(row, "quant").toDouble() * model.data(row, "prcUnitario").toDouble();
-    model.setData(row, "preco", preco);
+    if (not model.setData(row, "preco", preco)) return;
   }
 
   if (header == "Total") {
     const double preco = model.data(row, "preco").toDouble() / model.data(row, "quant").toDouble();
-    model.setData(row, "prcUnitario", preco);
+    if (not model.setData(row, "prcUnitario", preco)) return;
   }
 
   calcularTotal();
@@ -412,7 +412,9 @@ bool InputDialogFinanceiro::cadastrar() {
   if (tipo == Tipo::ConfirmarCompra) {
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &item : list) model.setData(item.row(), "selecionado", true);
+    for (const auto &item : list) {
+      if (not model.setData(item.row(), "selecionado", true)) return false;
+    }
   }
 
   if (tipo == Tipo::Financeiro) {

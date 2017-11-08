@@ -760,19 +760,19 @@ void Venda::montarFluxoCaixa() {
       for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
         const int row = modelFluxoCaixa.rowCount();
         modelFluxoCaixa.insertRow(row);
-        modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text());
-        modelFluxoCaixa.setData(row, "dataEmissao", QDate::currentDate());
-        modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text());
-        modelFluxoCaixa.setData(row, "idLoja", data("idLoja"));
-        modelFluxoCaixa.setData(row, "dataPagamento", ui->widgetPgts->listDatePgt.at(i)->date().addMonths(x + temp2));
-        modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0));
-        modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText());
-        modelFluxoCaixa.setData(row, "parcela", parcelas - y);
-        modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text());
-        modelFluxoCaixa.setData(row, "representacao", ui->widgetPgts->listCheckBoxRep.at(i)->isChecked());
-        modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda");
-        modelFluxoCaixa.setData(row, "subGrupo", "");
-        modelFluxoCaixa.setData(row, "centroCusto", data("idLoja"));
+        if (not modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text())) return;
+        if (not modelFluxoCaixa.setData(row, "dataEmissao", QDate::currentDate())) return;
+        if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) return;
+        if (not modelFluxoCaixa.setData(row, "idLoja", data("idLoja"))) return;
+        if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->widgetPgts->listDatePgt.at(i)->date().addMonths(x + temp2))) return;
+        if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) return;
+        if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) return;
+        if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) return;
+        if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text())) return;
+        if (not modelFluxoCaixa.setData(row, "representacao", ui->widgetPgts->listCheckBoxRep.at(i)->isChecked())) return;
+        if (not modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda")) return;
+        if (not modelFluxoCaixa.setData(row, "subGrupo", "")) return;
+        if (not modelFluxoCaixa.setData(row, "centroCusto", data("idLoja"))) return;
       }
 
       // calculo comissao
@@ -801,17 +801,17 @@ void Venda::montarFluxoCaixa() {
         const int row = modelFluxoCaixa2.rowCount();
         modelFluxoCaixa2.insertRow(row);
 
-        modelFluxoCaixa2.setData(row, "contraParte", modelItem.data(0, "fornecedor"));
-        modelFluxoCaixa2.setData(row, "dataEmissao", QDate::currentDate());
-        modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text());
-        modelFluxoCaixa2.setData(row, "idLoja", data("idLoja"));
-        modelFluxoCaixa2.setData(row, "dataPagamento", modelFluxoCaixa.data(z, "dataPagamento").toDate().addMonths(1));
-        modelFluxoCaixa2.setData(row, "valor", valorAjustado);
-        modelFluxoCaixa2.setData(row, "tipo", QString::number(i + 1) + ". Comissão");
-        modelFluxoCaixa2.setData(row, "parcela", modelFluxoCaixa.data(z, "parcela").toString());
-        modelFluxoCaixa2.setData(row, "comissao", 1);
-        modelFluxoCaixa2.setData(row, "centroCusto", data("idLoja"));
-        modelFluxoCaixa2.setData(row, "grupo", "Comissão Representação");
+        if (not modelFluxoCaixa2.setData(row, "contraParte", modelItem.data(0, "fornecedor"))) return;
+        if (not modelFluxoCaixa2.setData(row, "dataEmissao", QDate::currentDate())) return;
+        if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) return;
+        if (not modelFluxoCaixa2.setData(row, "idLoja", data("idLoja"))) return;
+        if (not modelFluxoCaixa2.setData(row, "dataPagamento", modelFluxoCaixa.data(z, "dataPagamento").toDate().addMonths(1))) return;
+        if (not modelFluxoCaixa2.setData(row, "valor", valorAjustado)) return;
+        if (not modelFluxoCaixa2.setData(row, "tipo", QString::number(i + 1) + ". Comissão")) return;
+        if (not modelFluxoCaixa2.setData(row, "parcela", modelFluxoCaixa.data(z, "parcela").toString())) return;
+        if (not modelFluxoCaixa2.setData(row, "comissao", 1)) return;
+        if (not modelFluxoCaixa2.setData(row, "centroCusto", data("idLoja"))) return;
+        if (not modelFluxoCaixa2.setData(row, "grupo", "Comissão Representação")) return;
       }
       //
 
@@ -839,17 +839,17 @@ void Venda::montarFluxoCaixa() {
 
         const int row = modelFluxoCaixa2.rowCount();
         modelFluxoCaixa2.insertRow(row);
-        modelFluxoCaixa2.setData(row, "contraParte", "Administradora Cartão");
-        modelFluxoCaixa2.setData(row, "dataEmissao", QDate::currentDate());
-        modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text());
-        modelFluxoCaixa2.setData(row, "idLoja", data("idLoja"));
-        modelFluxoCaixa2.setData(row, "dataPagamento", modelFluxoCaixa.data(z, "dataPagamento"));
-        modelFluxoCaixa2.setData(row, "valor", taxa * modelFluxoCaixa.data(z, "valor").toDouble() * -1);
-        modelFluxoCaixa2.setData(row, "tipo", QString::number(i + 1) + ". Taxa Cartão");
-        modelFluxoCaixa2.setData(row, "parcela", modelFluxoCaixa.data(z, "parcela").toString());
-        modelFluxoCaixa2.setData(row, "taxa", 1);
-        modelFluxoCaixa2.setData(row, "centroCusto", data("idLoja"));
-        modelFluxoCaixa2.setData(row, "grupo", "Tarifas Cartão");
+        if (not modelFluxoCaixa2.setData(row, "contraParte", "Administradora Cartão")) return;
+        if (not modelFluxoCaixa2.setData(row, "dataEmissao", QDate::currentDate())) return;
+        if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) return;
+        if (not modelFluxoCaixa2.setData(row, "idLoja", data("idLoja"))) return;
+        if (not modelFluxoCaixa2.setData(row, "dataPagamento", modelFluxoCaixa.data(z, "dataPagamento"))) return;
+        if (not modelFluxoCaixa2.setData(row, "valor", taxa * modelFluxoCaixa.data(z, "valor").toDouble() * -1)) return;
+        if (not modelFluxoCaixa2.setData(row, "tipo", QString::number(i + 1) + ". Taxa Cartão")) return;
+        if (not modelFluxoCaixa2.setData(row, "parcela", modelFluxoCaixa.data(z, "parcela").toString())) return;
+        if (not modelFluxoCaixa2.setData(row, "taxa", 1)) return;
+        if (not modelFluxoCaixa2.setData(row, "centroCusto", data("idLoja"))) return;
+        if (not modelFluxoCaixa2.setData(row, "grupo", "Tarifas Cartão")) return;
       }
     }
   }

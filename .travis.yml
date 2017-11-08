@@ -29,7 +29,7 @@ install:
   qt59location qt59multimedia qt59quickcontrols qt59quickcontrols2 
   qt59remoteobjects qt59script qt59scxml qt59sensors qt59serialbus 
   qt59serialport qt59speech qt59svg qt59tools qt59translations 
-  qt59webchannel qt59websockets qt59x11extras qt59xmlpatterns qt59charts"
+  qt59webchannel qt59websockets qt59x11extras qt59xmlpatterns qt59charts-no-lgpl"
   
 script:
   - source /opt/qt59/bin/qt59-env.sh

@@ -39,7 +39,7 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
   // REFAC: dont always do this, only if certificate is wrong
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado);
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setValue(UserSession::setSetting("User/lojaACBr"));
+  ui->itemBoxLoja->setValue(UserSession::getSetting("User/lojaACBr"));
 
   ui->lineEditModelo->setInputMask("99;_");
   ui->lineEditSerie->setInputMask("999;_");
@@ -72,7 +72,7 @@ void CadastrarNFe::setupTables() {
 
   modelLoja.setTable("loja");
   modelLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  modelLoja.setFilter("idLoja = " + UserSession::setSetting("User/lojaACBr").toString());
+  modelLoja.setFilter("idLoja = " + UserSession::getSetting("User/lojaACBr").toString());
 
   if (not modelLoja.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela de lojas: " + modelLoja.lastError().text());
 
@@ -206,8 +206,8 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::sendEmail(const QString &fileName) {
-  const QString email = UserSession::setSetting("User/emailContabilidade").toString();
-  const QString copia = UserSession::setSetting("User/emailLogistica").toString();
+  const QString email = UserSession::getSetting("User/emailContabilidade").toString();
+  const QString copia = UserSession::getSetting("User/emailLogistica").toString();
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
   const auto resposta = ACBr::enviarComando("NFE.EnviarEmail(" + email + "," + fileName + ",1,'" + assunto + "', " + copia + ")");

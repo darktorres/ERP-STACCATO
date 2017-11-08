@@ -33,7 +33,7 @@ MainWindow::MainWindow(const QPalette &defaultPalette, QWidget *parent) : QMainW
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + UserSession::setSetting("Login/hostname").toString());
+  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + UserSession::getSetting("Login/hostname").toString());
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE LOJA") {
     ui->actionGerenciar_Lojas->setDisabled(true);
@@ -435,12 +435,12 @@ void MainWindow::on_actionClaro_triggered() {
   qApp->setStyle("Fusion");
   qApp->setPalette(defautPalette);
   qApp->setStyleSheet(styleSheet());
-  UserSession::getSetting("User/tema", "claro");
+  UserSession::setSetting("User/tema", "claro");
 }
 
 void MainWindow::on_actionEscuro_triggered() {
   darkTheme();
-  UserSession::getSetting("User/tema", "escuro");
+  UserSession::setSetting("User/tema", "escuro");
 }
 
 void MainWindow::on_actionConfiguracoes_triggered() {

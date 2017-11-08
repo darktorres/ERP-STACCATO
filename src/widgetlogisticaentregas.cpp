@@ -556,14 +556,14 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   //-------------------------------------------------------------------------
 
-  if (UserSession::setSetting("User/EntregasPdfFolder").toString().isEmpty()) {
+  if (UserSession::getSetting("User/EntregasPdfFolder").toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
-    UserSession::getSetting("User/EntregasPdfFolder", QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel"));
+    UserSession::setSetting("User/EntregasPdfFolder", QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel"));
 
-    if (UserSession::setSetting("User/EntregasPdfFolder").toString().isEmpty()) return;
+    if (UserSession::getSetting("User/EntregasPdfFolder").toString().isEmpty()) return;
   }
 
-  const QString path = UserSession::setSetting("User/EntregasPdfFolder").toString();
+  const QString path = UserSession::getSetting("User/EntregasPdfFolder").toString();
 
   QDir dir(path);
 

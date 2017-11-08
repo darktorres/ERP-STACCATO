@@ -39,11 +39,11 @@ void Impressao::verificaTipo() {
 void Impressao::print() {
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  if (UserSession::setSetting(folder).toString().isEmpty()) {
+  if (UserSession::getSetting(folder).toString().isEmpty()) {
     QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
-    UserSession::getSetting(folder, QFileDialog::getExistingDirectory(nullptr, "Pasta PDF/Excel"));
+    UserSession::setSetting(folder, QFileDialog::getExistingDirectory(nullptr, "Pasta PDF/Excel"));
 
-    if (UserSession::setSetting(folder).toString().isEmpty()) return;
+    if (UserSession::getSetting(folder).toString().isEmpty()) return;
   }
 
   if (not setQuerys()) {
@@ -190,7 +190,7 @@ void Impressao::print() {
     report->dataManager()->setReportVariable("FormaPagamento5", pgt5);
   }
 
-  const QString path = UserSession::setSetting(folder).toString();
+  const QString path = UserSession::getSetting(folder).toString();
 
   QDir dir(path);
 

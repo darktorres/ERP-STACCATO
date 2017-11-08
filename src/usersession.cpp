@@ -55,9 +55,9 @@ QString UserSession::fromLoja(const QString &parameter, const QString &user) {
   return queryLoja.value(0).toString();
 }
 
-QVariant UserSession::setSetting(const QString &key) { return settings->value(key); }
+QVariant UserSession::getSetting(const QString &key) { return settings->value(key); }
 
-void UserSession::getSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
+void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
 bool UserSession::settingsContains(const QString &key) { return settings->contains(key); }
 
@@ -77,8 +77,8 @@ bool UserSession::dbConnect() {
 
   QSqlDatabase db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
 
-  db.setHostName(UserSession::setSetting("Login/hostname").toString());
-  db.setUserName(UserSession::setSetting("User/lastuser").toString().toLower());
+  db.setHostName(UserSession::getSetting("Login/hostname").toString());
+  db.setUserName(UserSession::getSetting("User/lastuser").toString().toLower());
   db.setPassword("1234");
   db.setDatabaseName("mysql");
 

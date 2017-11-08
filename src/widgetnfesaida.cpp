@@ -275,8 +275,8 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
   // TODO: warn if either is empty
-  const QString xmlFolder = UserSession::setSetting("User/EntregasXmlFolder").toString();
-  const QString pdfFolder = UserSession::setSetting("User/EntregasPdfFolder").toString();
+  const QString xmlFolder = UserSession::getSetting("User/EntregasXmlFolder").toString();
+  const QString pdfFolder = UserSession::getSetting("User/EntregasPdfFolder").toString();
 
   // TODO: create folders if they dont exist (it wont work it they dont)
 
@@ -338,7 +338,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     }
   }
 
-  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + UserSession::setSetting("User/EntregasPdfFolder").toString() + "!");
+  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + UserSession::getSetting("User/EntregasPdfFolder").toString() + "!");
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {

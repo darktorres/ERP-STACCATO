@@ -13,6 +13,7 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   setWindowModality(Qt::WindowModal);
 
   readSettingsFile();
+  setComboBox();
 
   ui->lineEditUser->setFocus();
 
@@ -47,9 +48,13 @@ void LoginDialog::readSettingsFile() {
     return;
   }
 
-  const QStringList lines = QString(file.readAll()).split("\r\n");
+  const QStringList lines = QString(file.readAll()).split("\r\n", QString::SkipEmptyParts);
 
-  for (int i = 0; i < lines.size(); i += 2) hash.insert(lines.at(i), lines.at(i + 1));
+  for (int i = 0; i < lines.size(); i += 2) mapLojas.insert(lines.at(i), lines.at(i + 1));
+}
+
+void LoginDialog::setComboBox() {
+  for (const auto &loja : mapLojas.keys()) ui->comboBoxLoja->addItem(loja);
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
@@ -62,6 +67,9 @@ void LoginDialog::on_pushButtonConfig_clicked() {
 }
 
 void LoginDialog::on_pushButtonLogin_clicked() {
+  UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
+  UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
     QMessageBox::critical(this, "Erro!", "Login inválido!");
     ui->lineEditPass->setFocus();
@@ -84,17 +92,17 @@ void LoginDialog::updater() {
 }
 
 void LoginDialog::storeSelection() {
-  // TODO: remove InputDialog and asks user to select the current store in the settings
   if (UserSession::getSetting("Login/hostname").toString().isEmpty()) {
-    const QStringList items = {"Alphaville", "Gabriel", "Granja"};
+    const QStringList items = mapLojas.keys();
 
     const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
 
-    UserSession::setSetting("Login/hostname", hash.value(loja));
+    UserSession::setSetting("Login/hostname", mapLojas.value(loja));
+    ui->lineEditHostname->setText(mapLojas.value(loja));
   }
 }
 
-void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(hash.value(loja)); }
+void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(mapLojas.value(loja)); }
 
 void LoginDialog::on_lineEditHostname_textChanged(const QString &) {
   UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());

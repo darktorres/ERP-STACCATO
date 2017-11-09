@@ -2,6 +2,7 @@
 #define LOGINDIALOG_H
 
 #include <QDialog>
+#include <QMap>
 
 namespace Ui {
 class LoginDialog;
@@ -24,12 +25,13 @@ private slots:
 private:
   // attributes
   const Tipo tipo;
-  QHash<QString, QString> hash;
+  QMap<QString, QString> mapLojas;
   Ui::LoginDialog *ui;
   // methods
   void storeSelection();
   void updater();
   void readSettingsFile();
+  void setComboBox();
 };
 
 #endif // LOGINDIALOG_H

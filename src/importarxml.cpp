@@ -266,7 +266,7 @@ bool ImportarXML::cadastrarProdutoEstoque() {
 
     const double estoqueRestante = modelEstoque.data(row, "quant").toDouble() + consumo;
 
-    if (estoqueRestante == 0) continue;
+    if (qFuzzyIsNull(estoqueRestante)) continue;
 
     query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
     query.bindValue(":idEstoque", modelEstoque.data(row, "idEstoque"));
@@ -921,7 +921,7 @@ bool ImportarXML::parear() {
       //      const double quantCompra = modelCompra.data(item.row(), "quant").toDouble();
       const double quantCompra = modelCompra.data(item, "quant").toDouble();
 
-      if (quantEstoque == quantCompra) {
+      if (qFuzzyCompare(quantEstoque, quantCompra)) {
         //          if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
         if (not associarItens(item, rowEstoque, estoqueConsumido)) return false;
       }

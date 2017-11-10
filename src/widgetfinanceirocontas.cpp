@@ -130,7 +130,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   const QString busca = QString(status.isEmpty() ? "" : " AND ") + "(" + QString(tipo == Tipo::Pagar ? "ordemCompra" : "idVenda") + " LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%'" +
                         QString(tipo == Tipo::Pagar ? " OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%'" : "") + ")";
 
-  const QString valor = ui->doubleSpinBoxDe->value() != 0. or ui->doubleSpinBoxAte->value() != 0.
+  const QString valor = not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())
                             ? " AND valor BETWEEN " + QString::number(ui->doubleSpinBoxDe->value() - 1) + " AND " + QString::number(ui->doubleSpinBoxAte->value() + 1)
                             : "";
 

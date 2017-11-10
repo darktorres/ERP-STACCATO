@@ -488,8 +488,8 @@ void ImportaProdutos::consistenciaDados() {
 
   variantMap.insert("minimo", variantMap.value("minimo").toDouble());
 
-  if (variantMap.value("minimo").toDouble() == 0) variantMap.insert("minimo", QVariant());
-  if (variantMap.value("multiplo").toDouble() == 0) variantMap.insert("multiplo", QVariant());
+  if (qFuzzyIsNull(variantMap.value("minimo").toDouble())) variantMap.insert("minimo", QVariant());
+  if (qFuzzyIsNull(variantMap.value("multiplo").toDouble())) variantMap.insert("multiplo", QVariant());
 
   // NOTE: cast other fields to the correct type?
 }

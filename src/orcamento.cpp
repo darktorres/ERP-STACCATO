@@ -550,7 +550,7 @@ void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double) {
   const double caixas = ui->doubleSpinBoxQuant->value() / ui->spinBoxUnCx->value();
 
-  if (ui->doubleSpinBoxCaixas->value() != caixas) ui->doubleSpinBoxCaixas->setValue(caixas);
+  if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) ui->doubleSpinBoxCaixas->setValue(caixas);
 }
 
 void Orcamento::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant->setValue(ui->doubleSpinBoxCaixas->value() * ui->doubleSpinBoxQuant->singleStep()); }
@@ -651,7 +651,7 @@ void Orcamento::adicionarItem(const bool isUpdate) {
       return;
     }
 
-    if (ui->doubleSpinBoxQuant->value() == 0.) {
+    if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) {
       QMessageBox::critical(this, "Erro!", "Quantidade inválida!");
       return;
     }
@@ -735,7 +735,7 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 }
 
 void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
-  const double caixas2 = fmod(caixas, ui->doubleSpinBoxCaixas->singleStep()) != 0. ? ceil(caixas) : caixas;
+  const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
   const double quant = caixas2 * ui->spinBoxUnCx->value();
   const double prcUn = ui->lineEditPrecoUn->getValue();
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
@@ -831,7 +831,7 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
 
   // TODO: 0verificar se preciso tratar os casos sem multiplo
   // if (minimo != 0) ...
-  if (minimo != 0 and multiplo != 0) {
+  if (not qFuzzyIsNull(minimo) and not qFuzzyIsNull(multiplo)) {
     ui->doubleSpinBoxCaixas->setSingleStep(multiplo / minimo);
     ui->doubleSpinBoxQuant->setSingleStep(multiplo);
   }
@@ -1049,7 +1049,7 @@ void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) { ui->itemB
 
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   const double caixas = ui->doubleSpinBoxCaixas->value();
-  const double caixas2 = fmod(caixas, ui->doubleSpinBoxCaixas->singleStep()) != 0. ? ceil(caixas) : caixas;
+  const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
   const double quant = caixas2 * ui->spinBoxUnCx->value();
 
   unsetConnections();
@@ -1172,7 +1172,7 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
   const double subTotalItem = ui->doubleSpinBoxTotalItem->value();
   const double desconto = (itemBruto - subTotalItem) / itemBruto * 100.;
 
-  if (itemBruto == 0.) return;
+  if (qFuzzyIsNull(itemBruto)) return;
 
   unsetConnections();
 

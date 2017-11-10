@@ -207,7 +207,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
     return;
   }
 
-  if (ui->doubleSpinBoxQuantAvulso->value() == 0.) {
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) {
     QMessageBox::critical(this, "Erro!", "Deve escolher uma quantidade!");
     return;
   }

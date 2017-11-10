@@ -109,7 +109,7 @@ bool InserirTransferencia::verifyFields() {
     return false;
   }
 
-  if (ui->doubleSpinBoxValor->value() == 0.) {
+  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) {
     QMessageBox::critical(this, "Erro!", "Valor não preenchido!");
     return false;
   }

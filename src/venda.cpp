@@ -405,7 +405,7 @@ bool Venda::verifyFields() {
 
   if (ui->framePagamentos_2->isHidden()) return true;
 
-  if (ui->doubleSpinBoxTotalPag->value() != ui->doubleSpinBoxTotal->value()) {
+  if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) {
     QMessageBox::critical(this, "Erro!", "Total dos pagamentos difere do total do pedido!");
     return false;
   }
@@ -432,7 +432,7 @@ bool Venda::verifyFields() {
       return false;
     }
 
-    if (ui->widgetPgts->listDoubleSpinPgt.at(i)->value() == 0 and ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
+    if (qFuzzyIsNull(ui->widgetPgts->listDoubleSpinPgt.at(i)->value()) and ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
       QMessageBox::critical(this, "Erro!", "Pagamento " + QString::number(i + 1) + " está com valor 0!");
       ui->widgetPgts->listDoubleSpinPgt.at(i)->setFocus();
       return false;
@@ -833,7 +833,7 @@ void Venda::montarFluxoCaixa() {
           return;
         }
 
-        if (query.value("taxa").toDouble() == 0.) continue;
+        if (qFuzzyIsNull(query.value("taxa").toDouble())) continue;
 
         const double taxa = query.value("taxa").toDouble() / 100;
 
@@ -1292,7 +1292,7 @@ void Venda::on_tableFluxoCaixa2_entered(const QModelIndex &) { ui->tableFluxoCai
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { resetarPagamentos(); }
 
 void Venda::on_pushButtonFreteLoja_clicked() {
-  if (ui->doubleSpinBoxFrete->value() == 0) {
+  if (qFuzzyIsNull(ui->doubleSpinBoxFrete->value())) {
     QMessageBox::critical(this, "Erro!", "Não há frete!");
     return;
   }

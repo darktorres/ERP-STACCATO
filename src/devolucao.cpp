@@ -246,7 +246,7 @@ void Devolucao::calcPrecoItemTotal() { ui->doubleSpinBoxTotalItem->setValue(ui->
 void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
   const double quant = caixas * ui->doubleSpinBoxQuant->singleStep();
 
-  if (ui->doubleSpinBoxQuant->value() != quant) ui->doubleSpinBoxQuant->setValue(quant);
+  if (not qFuzzyCompare(ui->doubleSpinBoxQuant->value(), quant)) ui->doubleSpinBoxQuant->setValue(quant);
 
   calcPrecoItemTotal();
 }
@@ -254,7 +254,7 @@ void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 void Devolucao::on_doubleSpinBoxQuant_valueChanged(double) {
   const double caixas = qRound(ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep() * 100) / 100.;
 
-  if (ui->doubleSpinBoxCaixas->value() != caixas) ui->doubleSpinBoxCaixas->setValue(caixas);
+  if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) ui->doubleSpinBoxCaixas->setValue(caixas);
 }
 
 void Devolucao::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant->setValue(ui->doubleSpinBoxCaixas->value() * ui->doubleSpinBoxQuant->singleStep()); }
@@ -538,7 +538,7 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
     return;
   }
 
-  if (ui->doubleSpinBoxQuant->value() == 0) {
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) {
     QMessageBox::critical(this, "Erro!", "Não selecionou quantidade!");
     return;
   }

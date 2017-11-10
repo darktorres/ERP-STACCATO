@@ -547,7 +547,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     if (not modelProdutos.setData(row, "cstICMS", "60")) return;
 
     const double total = modelProdutos.data(row, "total").toDouble();
-    const double freteProporcional = total == 0 ? 0 : total / ui->doubleSpinBoxValorProduto->value() * ui->doubleSpinBoxValorFrete->value();
+    const double freteProporcional = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProduto->value() * ui->doubleSpinBoxValorFrete->value();
 
     if (not modelProdutos.setData(row, "vBCPIS", total + freteProporcional)) return;
     if (not modelProdutos.setData(row, "cstPIS", "01")) return;
@@ -1594,7 +1594,7 @@ bool CadastrarNFe::validar() {
       return false;
     }
 
-    if (modelProdutos.data(row, "descUnitario").toDouble() == 0.) {
+    if (qFuzzyIsNull(modelProdutos.data(row, "descUnitario").toDouble())) {
       QMessageBox::critical(this, "Erro!", "Preço unitário = R$ 0!");
       return false;
     }

@@ -8,7 +8,7 @@ class ACBr : public QObject {
   Q_OBJECT
 
 public:
-  explicit ACBr(QObject *parent = 0);
+  ACBr() = delete;
   static bool gerarDanfe(const int idNFe);
   static std::optional<QString> enviarComando(const QString &comando);
   static std::optional<QString> gerarDanfe(const QByteArray &fileContent, const bool openFile = true);

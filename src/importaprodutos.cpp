@@ -856,7 +856,6 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
   }
 }
 
-// NOTE: verificar o que esta deixando a importacao lenta ao longo do tempo
 // NOTE: 3colocar tabela relacao para precos diferenciados por loja (associar produto_has_preco <->
 // produto_has_preco_has_loja ou guardar idLoja em produto_has_preco)
 // NOTE: remover idProdutoRelacionado?

@@ -139,9 +139,7 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 
   isBlockedPresente = true;
   const double valor = descTotal / prazoMedio * 30 * 100;
-  ui->doubleSpinBoxDescMes->setValue(valor != valor ? 0 : valor); // if nan set zero
-  // qDebug() << "comparison: " << (valor != valor);
-  // qDebug() << "isnan: " << qIsNaN(valor);
+  ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor);
   isBlockedPresente = false;
 }
 

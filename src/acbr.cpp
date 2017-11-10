@@ -11,8 +11,6 @@
 
 #include "acbr.h"
 
-ACBr::ACBr(QObject *parent) : QObject(parent) {}
-
 bool ACBr::gerarDanfe(const int idNFe) {
   if (idNFe == 0) {
     QMessageBox::critical(nullptr, "Erro!", "Produto não possui nota!");

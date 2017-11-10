@@ -21,8 +21,8 @@ QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
 CONFIG += c++1z
 
-gcc{
-QMAKE_CXXFLAGS += -Wall -Wextra
+gcc|clang{
+QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast
@@ -35,16 +35,23 @@ QMAKE_LFLAGS_RELEASE += -O0
 #QMAKE_LFLAGS += -flto -fuse-linker-plugin
 }
 
-linux:gcc{
-message(Linux)
+message($$QMAKESPEC)
 
-QMAKE_CC = ccache gcc
-QMAKE_CXX = ccache g++
 
-QMAKE_CFLAGS += -fuse-ld=gold
-QMAKE_CXXFLAGS += -fuse-ld=gold
-QMAKE_LFLAGS += -fuse-ld=gold
+linux-g++{
+    QMAKE_CC = ccache gcc
+    QMAKE_CXX = ccache g++
+
+    QMAKE_LFLAGS += -fuse-ld=gold
 }
+
+linux-clang{
+    QMAKE_CC = ccache clang
+    QMAKE_CXX = ccache clang++
+
+    QMAKE_LFLAGS += -fuse-ld=lld-5.0
+}
+
 
 RESOURCES += \
     qrs/resources.qrc

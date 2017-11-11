@@ -6,7 +6,7 @@
 
 #include <xlsxdocument.h>
 
-class Excel {
+class Excel final {
 
 public:
   Excel(const QString &id, QWidget *parent = 0);

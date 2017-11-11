@@ -10,7 +10,7 @@ namespace Ui {
 class ProdutosPendentes;
 }
 
-class ProdutosPendentes : public QDialog {
+class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:

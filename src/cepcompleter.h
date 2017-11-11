@@ -1,7 +1,9 @@
 #ifndef CEPCOMPLETER_H
 #define CEPCOMPLETER_H
 
-class CepCompleter {
+#include <QString>
+
+class CepCompleter final {
 
 public:
   CepCompleter() = default;

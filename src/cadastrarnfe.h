@@ -12,7 +12,7 @@ namespace Ui {
 class CadastrarNFe;
 }
 
-class CadastrarNFe : public QDialog {
+class CadastrarNFe final : public QDialog {
   Q_OBJECT
 
 public:

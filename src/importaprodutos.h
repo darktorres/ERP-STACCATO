@@ -10,7 +10,7 @@ namespace Ui {
 class ImportaProdutos;
 }
 
-class ImportaProdutos : public QDialog {
+class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:
@@ -87,7 +87,7 @@ private:
   bool verificaSeProdutoJaCadastrado();
   bool verificaSeRepresentacao();
   bool verificaTabela(const QSqlRecord &record);
-  virtual void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent *event) final;
   void consistenciaDados();
   void contaProdutos();
   void importarTabela();

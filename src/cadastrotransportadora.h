@@ -8,7 +8,7 @@ namespace Ui {
 class CadastroTransportadora;
 }
 
-class CadastroTransportadora : public RegisterAddressDialog {
+class CadastroTransportadora final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
@@ -50,24 +50,24 @@ private:
   SqlRelationalTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
+  bool cadastrar() final;
   bool cadastrarEndereco(const bool isUpdate = false);
   bool cadastrarVeiculo(const bool isUpdate = false);
-  virtual bool cadastrar() override;
-  virtual bool save() override;
-  virtual bool savingProcedures() override;
-  virtual bool verifyFields() override;
-  virtual bool viewRegister() override;
-  virtual void clearFields() override;
-  virtual void registerMode() override;
-  virtual void setupMapper() override;
-  virtual void successMessage() override;
-  virtual void updateMode() override;
+  bool save() final;
+  bool savingProcedures() final;
+  bool verifyFields() final;
+  bool viewRegister() final;
   void clearEndereco();
+  void clearFields() final;
   void clearVeiculo();
   void novoEndereco();
   void novoVeiculo();
+  void registerMode() final;
+  void setupMapper() final;
   void setupTables();
   void setupUi();
+  void successMessage() final;
+  void updateMode() final;
 };
 
 #endif // CADASTROTRANSPORTADORA_H

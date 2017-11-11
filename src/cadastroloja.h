@@ -8,7 +8,7 @@ namespace Ui {
 class CadastroLoja;
 }
 
-class CadastroLoja : public RegisterAddressDialog {
+class CadastroLoja final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
@@ -65,25 +65,25 @@ private:
   // methods
   bool adicionarPagamento();
   bool atualizarPagamento();
+  bool cadastrar() final;
   bool cadastrarConta(const bool isUpdate = false);
   bool cadastrarEndereco(const bool isUpdate = false);
-  bool viewRegister() override;
-  virtual bool cadastrar() override;
-  virtual bool newRegister() override;
-  virtual bool save() override;
-  virtual bool savingProcedures() override;
-  virtual bool verifyFields() override;
-  virtual void clearFields() override;
-  virtual void registerMode() override;
-  virtual void setupMapper() override;
-  virtual void successMessage() override;
-  virtual void updateMode() override;
+  bool newRegister() final;
+  bool save() final;
+  bool savingProcedures() final;
+  bool verifyFields() final;
+  bool viewRegister() final;
   void clearConta();
   void clearEndereco();
+  void clearFields() final;
   void novaConta();
   void novoEndereco();
+  void registerMode() final;
+  void setupMapper() final;
   void setupTables();
   void setupUi();
+  void successMessage() final;
+  void updateMode() final;
 };
 
 #endif // CADASTROLOJA_H

@@ -3,12 +3,12 @@
 
 #include <QStyledItemDelegate>
 
-class PorcentagemDelegate : public QStyledItemDelegate {
+class PorcentagemDelegate final : public QStyledItemDelegate {
 
 public:
   explicit PorcentagemDelegate(QObject *parent = 0);
   ~PorcentagemDelegate() = default;
-  QString displayText(const QVariant &value, const QLocale &locale) const override;
+  QString displayText(const QVariant &value, const QLocale &locale) const;
 };
 
 #endif // PORCENTAGEMDELEGATE_H

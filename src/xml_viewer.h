@@ -8,7 +8,7 @@ namespace Ui {
 class XML_Viewer;
 }
 
-class XML_Viewer : public QDialog {
+class XML_Viewer final : public QDialog {
   Q_OBJECT
 
 public:

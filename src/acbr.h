@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTcpSocket>
 
-class ACBr : public QObject {
+class ACBr final : public QObject {
   Q_OBJECT
 
 public:

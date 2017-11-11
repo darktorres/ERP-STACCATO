@@ -5,12 +5,12 @@
 
 #include "sqlrelationaltablemodel.h"
 
-class OrcamentoProxyModel : public QIdentityProxyModel {
+class OrcamentoProxyModel final : public QIdentityProxyModel {
 
 public:
   explicit OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent);
   ~OrcamentoProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, const int role) const override;
+  QVariant data(const QModelIndex &proxyIndex, const int role) const final;
 
 private:
   const int diasRestantesIndex;

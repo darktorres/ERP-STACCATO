@@ -9,7 +9,7 @@ namespace Ui {
 class Estoque;
 }
 
-class Estoque : public QDialog {
+class Estoque final : public QDialog {
   Q_OBJECT
 
 public:

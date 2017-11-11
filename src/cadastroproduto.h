@@ -8,7 +8,7 @@ namespace Ui {
 class CadastroProduto;
 }
 
-class CadastroProduto : public RegisterDialog {
+class CadastroProduto final : public RegisterDialog {
   Q_OBJECT
 
 public:
@@ -33,16 +33,16 @@ private:
   SearchDialog *sdProduto;
   Ui::CadastroProduto *ui;
   // methods
-  virtual bool cadastrar() override;
-  virtual bool save() override;
-  virtual bool savingProcedures() override;
-  virtual bool verifyFields() override;
-  virtual bool viewRegister() override;
-  virtual void clearFields() override;
-  virtual void registerMode() override;
-  virtual void setupMapper() override;
-  virtual void successMessage() override;
-  virtual void updateMode() override;
+  bool cadastrar() final;
+  bool save() final;
+  bool savingProcedures() final;
+  bool verifyFields() final;
+  bool viewRegister() final;
+  void clearFields() final;
+  void registerMode() final;
+  void setupMapper() final;
+  void successMessage() final;
+  void updateMode() final;
   void calcularMarkup();
 };
 

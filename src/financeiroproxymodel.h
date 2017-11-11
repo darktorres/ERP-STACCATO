@@ -5,7 +5,7 @@
 
 #include "sqlrelationaltablemodel.h"
 
-class FinanceiroProxyModel : public QIdentityProxyModel {
+class FinanceiroProxyModel final : public QIdentityProxyModel {
 
 public:
   FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);

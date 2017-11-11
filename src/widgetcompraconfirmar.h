@@ -9,7 +9,7 @@ namespace Ui {
 class WidgetCompraConfirmar;
 }
 
-class WidgetCompraConfirmar : public QWidget {
+class WidgetCompraConfirmar final : public QWidget {
   Q_OBJECT
 
 public:

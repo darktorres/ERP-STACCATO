@@ -6,7 +6,7 @@
 #include "lrreportengine.h"
 #include "sqlrelationaltablemodel.h"
 
-class Impressao : public QObject {
+class Impressao final : public QObject {
   Q_OBJECT
 
 public:

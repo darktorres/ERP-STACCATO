@@ -29,7 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <QString>
 #include <QTextStream>
 
-class Smtp : public QObject {
+class Smtp final : public QObject {
   Q_OBJECT
 
 public:

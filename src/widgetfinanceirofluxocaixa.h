@@ -10,7 +10,7 @@ namespace Ui {
 class WidgetFinanceiroFluxoCaixa;
 }
 
-class WidgetFinanceiroFluxoCaixa : public QWidget {
+class WidgetFinanceiroFluxoCaixa final : public QWidget {
   Q_OBJECT
 
 public:

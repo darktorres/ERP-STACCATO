@@ -9,7 +9,7 @@ namespace Ui {
 class WidgetOrcamento;
 }
 
-class WidgetOrcamento : public QWidget {
+class WidgetOrcamento final : public QWidget {
   Q_OBJECT
 
 public:

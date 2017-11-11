@@ -3,7 +3,7 @@
 
 #include <QStyledItemDelegate>
 
-class ItemBoxDelegate : public QStyledItemDelegate {
+class ItemBoxDelegate final : public QStyledItemDelegate {
 
 public:
   enum class Tipo { Loja, Conta };
@@ -15,10 +15,10 @@ private:
   const bool isReadOnly;
   const Tipo tipo;
   // methods
-  virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
-  virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-  virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-  virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const override;
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const final;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const final;
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const final;
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const final;
   void commitAndCloseEditor();
 };
 

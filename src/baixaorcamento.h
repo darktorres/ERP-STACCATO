@@ -9,7 +9,7 @@ namespace Ui {
 class BaixaOrcamento;
 }
 
-class BaixaOrcamento : public QDialog {
+class BaixaOrcamento final : public QDialog {
   Q_OBJECT
 
 public:

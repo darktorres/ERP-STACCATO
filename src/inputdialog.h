@@ -9,7 +9,7 @@ namespace Ui {
 class InputDialog;
 }
 
-class InputDialog : public QDialog {
+class InputDialog final : public QDialog {
   Q_OBJECT
 
 public:

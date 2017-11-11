@@ -3,7 +3,7 @@
 
 #include <QSqlRelationalTableModel>
 
-class SqlRelationalTableModel : public QSqlRelationalTableModel {
+class SqlRelationalTableModel final : public QSqlRelationalTableModel {
   Q_OBJECT
 
 public:
@@ -13,8 +13,8 @@ public:
   bool setHeaderData(const QString &column, const QVariant &value);
   QVariant data(const int row, const int column) const;
   QVariant data(const int row, const QString &column) const;
-  virtual Qt::DropActions supportedDropActions() const override;
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  Qt::DropActions supportedDropActions() const final;
+  Qt::ItemFlags flags(const QModelIndex &index) const final;
   void setLimit(int value);
 
 private:
@@ -23,7 +23,8 @@ private:
   using QSqlRelationalTableModel::setHeaderData;
 
 protected:
-  virtual QString selectStatement() const override;
+  QString selectStatement() const final;
+  // REFAC: put limit in constructor and set const
   int limit = 0;
 };
 

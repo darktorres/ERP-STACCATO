@@ -12,7 +12,7 @@ namespace Ui {
 class ImportarXML;
 }
 
-class ImportarXML : public QDialog {
+class ImportarXML final : public QDialog {
   Q_OBJECT
 
 public:

@@ -6,12 +6,12 @@
 #include "sqlrelationaltablemodel.h"
 
 // REFAC: rename this to SearchDialogProxyModel (and others proxy models)
-class SearchDialogProxy : public QIdentityProxyModel {
+class SearchDialogProxy final : public QIdentityProxyModel {
 
 public:
   SearchDialogProxy(SqlRelationalTableModel *model, QObject *parent = 0);
   ~SearchDialogProxy() = default;
-  QVariant data(const QModelIndex &proxyIndex, int role) const override;
+  QVariant data(const QModelIndex &proxyIndex, int role) const final;
 
 private:
   const int estoque;

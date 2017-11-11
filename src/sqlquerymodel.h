@@ -3,7 +3,7 @@
 
 #include <QSqlQueryModel>
 
-class SqlQueryModel : public QSqlQueryModel {
+class SqlQueryModel final : public QSqlQueryModel {
   Q_OBJECT
 
 public:
@@ -12,8 +12,8 @@ public:
   QVariant data(const int row, const QString &column) const;
 
 private:
-  using QSqlQueryModel::setHeaderData;
   using QSqlQueryModel::data;
+  using QSqlQueryModel::setHeaderData;
 };
 
 #endif // SQLQUERYMODEL_H

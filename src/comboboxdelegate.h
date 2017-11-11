@@ -3,7 +3,7 @@
 
 #include <QStyledItemDelegate>
 
-class ComboBoxDelegate : public QStyledItemDelegate {
+class ComboBoxDelegate final : public QStyledItemDelegate {
 
 public:
   enum class Tipo { Status, StatusReceber, StatusPagar, Conta, Pagamento, Grupo };
@@ -12,10 +12,10 @@ public:
 
 private:
   const Tipo tipo;
-  virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
-  virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-  virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-  virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const override;
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const final;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const final;
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const final;
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const final;
 };
 
 #endif // COMBOBOXDELEGATE_H

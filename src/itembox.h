@@ -7,7 +7,7 @@
 #include "registerdialog.h"
 #include "searchdialog.h"
 
-class ItemBox : public QLineEdit {
+class ItemBox final : public QLineEdit {
   Q_OBJECT
 
 public:
@@ -35,11 +35,11 @@ private:
   RegisterDialog *registerDialog = nullptr;
   SearchDialog *searchDialog = nullptr;
   // methods
-  virtual void edit();
-  virtual void resizeEvent(QResizeEvent *event) override;
-  virtual void search();
-  void mouseDoubleClickEvent(QMouseEvent *event) override;
+  void edit();
+  void mouseDoubleClickEvent(QMouseEvent *event) final;
   void resetCursor();
+  void resizeEvent(QResizeEvent *event) final;
+  void search();
 };
 
 #endif // ITEMBOX_H

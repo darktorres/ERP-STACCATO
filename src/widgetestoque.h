@@ -10,7 +10,7 @@ namespace Ui {
 class WidgetEstoque;
 }
 
-class WidgetEstoque : public QWidget {
+class WidgetEstoque final : public QWidget {
   Q_OBJECT
 
 public:

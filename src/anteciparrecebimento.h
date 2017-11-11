@@ -9,7 +9,7 @@ namespace Ui {
 class AnteciparRecebimento;
 }
 
-class AnteciparRecebimento : public QDialog {
+class AnteciparRecebimento final : public QDialog {
   Q_OBJECT
 
 public:

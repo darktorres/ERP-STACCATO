@@ -149,35 +149,6 @@ void CadastroFornecedor::updateMode() {
   ui->pushButtonRemover->show();
 }
 
-bool CadastroFornecedor::save() {
-  if (not verifyFields()) return false;
-
-  // REFAC: put all this transaction stuff into one base function (since it's all the same)
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  successMessage();
-
-  return true;
-}
-
 bool CadastroFornecedor::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 

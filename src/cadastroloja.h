@@ -15,11 +15,6 @@ public:
   explicit CadastroLoja(QWidget *parent = 0);
   ~CadastroLoja();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_checkBoxMostrarInativosConta_clicked(bool checked);
@@ -69,7 +64,6 @@ private:
   bool cadastrarConta(const bool isUpdate = false);
   bool cadastrarEndereco(const bool isUpdate = false);
   bool newRegister() final;
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;

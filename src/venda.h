@@ -21,11 +21,6 @@ public:
   void prepararVenda(const QString &idOrcamento);
   void setFinanceiro();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_doubleSpinBoxTotalPag_valueChanged(double);
   void on_pushButtonAdicionarPagamento_clicked();
@@ -46,7 +41,6 @@ private:
   bool cancelamento();
   bool financeiroSalvar();
   bool generateId();
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;

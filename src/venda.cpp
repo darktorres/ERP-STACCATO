@@ -1104,33 +1104,6 @@ bool Venda::cadastrar() {
   return true;
 }
 
-bool Venda::save() {
-  if (not verifyFields()) return false;
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  successMessage();
-
-  return true;
-}
-
 bool Venda::cancelamento() {
   const QString idOrcamento = data("idOrcamento").toString();
 

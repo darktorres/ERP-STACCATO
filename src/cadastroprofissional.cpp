@@ -104,33 +104,6 @@ void CadastroProfissional::registerMode() {
   ui->pushButtonRemover->hide();
 }
 
-bool CadastroProfissional::save() {
-  if (not verifyFields()) return false;
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  successMessage();
-
-  return true;
-}
-
 void CadastroProfissional::updateMode() {
   ui->pushButtonCadastrar->hide();
   ui->pushButtonAtualizar->show();

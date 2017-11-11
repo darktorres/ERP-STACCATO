@@ -44,14 +44,7 @@ bool RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value
 }
 
 bool RegisterAddressDialog::newRegister() {
-  if (not confirmationMessage()) return false;
-
-  model.setFilter("0");
-
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
-    return false;
-  }
+  if (not RegisterDialog::newRegister()) return false;
 
   modelEnd.setFilter("0");
 
@@ -59,11 +52,6 @@ bool RegisterAddressDialog::newRegister() {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço: " + modelEnd.lastError().text());
     return false;
   }
-
-  tipo = Tipo::Cadastrar;
-
-  clearFields();
-  registerMode();
 
   return true;
 }

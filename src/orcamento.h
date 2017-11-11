@@ -16,11 +16,6 @@ public:
   ~Orcamento();
   void show();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_pushButtonCalculadora_clicked();
 
@@ -40,8 +35,6 @@ private:
   bool cadastrar() final;
   bool generateId();
   bool newRegister() final;
-  bool save() final;
-  bool save(const bool silent);
   bool savingProcedures() final;
   bool verificaCadastroCliente();
   bool verifyFields() final;

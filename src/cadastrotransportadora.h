@@ -15,11 +15,6 @@ public:
   explicit CadastroTransportadora(QWidget *parent = 0);
   ~CadastroTransportadora();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_checkBoxMostrarInativosVeiculo_toggled(bool checked);
@@ -53,7 +48,6 @@ private:
   bool cadastrar() final;
   bool cadastrarEndereco(const bool isUpdate = false);
   bool cadastrarVeiculo(const bool isUpdate = false);
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;

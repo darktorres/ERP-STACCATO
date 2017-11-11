@@ -475,33 +475,6 @@ bool CadastroLoja::cadastrar() {
   return true;
 }
 
-bool CadastroLoja::save() {
-  if (not verifyFields()) return false;
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  successMessage();
-
-  return true;
-}
-
 void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
   ui->pushButtonAtualizarConta->show();
   ui->pushButtonAdicionarConta->hide();
@@ -509,21 +482,9 @@ void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
 }
 
 bool CadastroLoja::newRegister() {
-  if (not confirmationMessage()) return false;
+  if (not RegisterAddressDialog::newRegister()) return false;
 
-  tipo = Tipo::Cadastrar;
-
-  clearFields();
-  registerMode();
-
-  modelEnd.setFilter("idEndereco = 0");
-
-  if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço: " + modelEnd.lastError().text());
-    return false;
-  }
-
-  modelConta.setFilter("idLoja = 0");
+  modelConta.setFilter("0");
 
   if (not modelConta.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta: " + modelConta.lastError().text());

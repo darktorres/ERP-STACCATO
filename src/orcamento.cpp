@@ -378,9 +378,6 @@ bool Orcamento::newRegister() {
   return true;
 }
 
-// REFAC: replace the false with a enum and default it
-bool Orcamento::save() { return save(false); }
-
 void Orcamento::removeItem() {
   if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) {
     QMessageBox::critical(this, "Erro!", "Erro removendo linha: " + modelItem.lastError().text());
@@ -935,34 +932,6 @@ bool Orcamento::cadastrar() {
     emit errorSignal("Erro ao adicionar um item ao orçamento: " + modelItem.lastError().text());
     return false;
   }
-
-  return true;
-}
-
-bool Orcamento::save(const bool silent) {
-  if (not verifyFields()) return false;
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  // REFAC: set this inside RegisterDialog::viewRegister or viewRegisterById
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  if (not silent) successMessage();
 
   return true;
 }

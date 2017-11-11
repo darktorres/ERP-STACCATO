@@ -57,6 +57,8 @@ void CadastroProduto::clearFields() {
 
   for (const auto &spinBox : findChildren<QDoubleSpinBox *>()) spinBox->clear();
 
+  ui->itemBoxFornecedor->clear();
+
   ui->radioButtonDesc->setChecked(false);
   ui->radioButtonLote->setChecked(false);
 
@@ -272,33 +274,6 @@ bool CadastroProduto::cadastrar() {
     emit errorSignal("Id vazio!");
     return false;
   }
-
-  return true;
-}
-
-bool CadastroProduto::save() {
-  if (not verifyFields()) return false;
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  successMessage();
 
   return true;
 }

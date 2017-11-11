@@ -23,6 +23,9 @@ public slots:
 
 signals:
   void registerUpdated(const QVariant &idCliente, const QString &text);
+  void errorSignal(const QString &error);
+  void transactionEnded();
+  void transactionStarted();
 
 protected:
   // attributes
@@ -46,7 +49,7 @@ protected:
   QVariant data(const int row, const QString &key);
   QVariant data(const QString &key);
   virtual bool newRegister();
-  virtual bool save() = 0;
+  virtual bool save(const bool silent = false) final;
   virtual bool savingProcedures() = 0;
   virtual bool verifyFields() = 0;
   virtual bool verifyRequiredField(QLineEdit *line, const bool silent = false);

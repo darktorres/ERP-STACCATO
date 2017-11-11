@@ -15,11 +15,6 @@ public:
   explicit CadastroProfissional(QWidget *parent = 0);
   ~CadastroProfissional();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_checkBoxMostrarInativos_clicked(const bool checked);
   void on_lineEditCEP_textChanged(const QString &cep);
@@ -53,7 +48,6 @@ private:
   // methods
   bool cadastrar() final;
   bool cadastrarEndereco(const bool isUpdate = false);
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;

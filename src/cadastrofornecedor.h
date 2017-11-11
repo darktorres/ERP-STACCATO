@@ -15,11 +15,6 @@ public:
   explicit CadastroFornecedor(QWidget *parent = 0);
   ~CadastroFornecedor();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_lineEditCEP_textChanged(const QString &cep);
   void on_lineEditCNPJ_textEdited(const QString &text);
@@ -45,7 +40,6 @@ private:
   bool cadastrarEndereco(const bool isUpdate = false);
   bool viewRegister() final;
   bool cadastrar() final;
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   void clearFields() final;

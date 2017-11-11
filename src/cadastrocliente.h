@@ -15,11 +15,6 @@ public:
   explicit CadastroCliente(QWidget *parent = 0);
   ~CadastroCliente();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void on_checkBoxInscEstIsento_toggled(bool checked);
   void on_checkBoxMostrarInativos_clicked(const bool checked);
@@ -49,7 +44,6 @@ private:
   // methods
   bool cadastrar() final;
   bool cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar);
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;

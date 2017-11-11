@@ -16,11 +16,6 @@ public:
   ~CadastroUsuario();
   void modificarUsuario();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
 private slots:
   void fillCombobox();
   void on_lineEditUser_textEdited(const QString &text);
@@ -37,7 +32,6 @@ private:
   Ui::CadastroUsuario *ui;
   // methods
   bool cadastrar() final;
-  bool save() final;
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;

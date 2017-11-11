@@ -226,33 +226,6 @@ bool CadastroUsuario::cadastrar() {
   return true;
 }
 
-bool CadastroUsuario::save() {
-  if (not verifyFields()) return false;
-
-  emit transactionStarted();
-
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
-
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return false;
-  }
-
-  QSqlQuery("COMMIT").exec();
-
-  emit transactionEnded();
-
-  isDirty = false;
-
-  viewRegisterById(primaryId);
-
-  successMessage();
-
-  return true;
-}
-
 void CadastroUsuario::successMessage() { QMessageBox::information(this, "Aviso!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {

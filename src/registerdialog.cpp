@@ -184,8 +184,39 @@ bool RegisterDialog::newRegister() {
     return false;
   }
 
+  tipo = Tipo::Cadastrar;
+
   clearFields();
   registerMode();
+
+  return true;
+}
+
+bool RegisterDialog::save(const bool silent) {
+  if (not verifyFields()) return false;
+
+  emit transactionStarted();
+
+  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
+  QSqlQuery("START TRANSACTION").exec();
+
+  if (not cadastrar()) {
+    QSqlQuery("ROLLBACK").exec();
+    model.select();
+    emit transactionEnded();
+    return false;
+  }
+
+  QSqlQuery("COMMIT").exec();
+
+  emit transactionEnded();
+
+  // REFAC: set this inside RegisterDialog::viewRegister or viewRegisterById
+  isDirty = false;
+
+  viewRegisterById(primaryId);
+
+  if (not silent) successMessage();
 
   return true;
 }

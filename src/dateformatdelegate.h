@@ -4,15 +4,15 @@
 #include <QDate>
 #include <QStyledItemDelegate>
 
-class DateFormatDelegate : public QStyledItemDelegate {
+class DateFormatDelegate final : public QStyledItemDelegate {
 
 public:
   explicit DateFormatDelegate(QObject *parent = 0);
   ~DateFormatDelegate() = default;
-  virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &) const override;
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &) const final;
 
 private:
-  virtual QString displayText(const QVariant &value, const QLocale &) const override;
+  QString displayText(const QVariant &value, const QLocale &) const final;
 };
 
 #endif // DATEFORMATDELEGATE_H

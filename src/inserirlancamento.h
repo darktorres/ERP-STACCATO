@@ -9,7 +9,7 @@ namespace Ui {
 class InserirLancamento;
 }
 
-class InserirLancamento : public QDialog {
+class InserirLancamento final : public QDialog {
   Q_OBJECT
 
 public:

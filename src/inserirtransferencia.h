@@ -9,7 +9,7 @@ namespace Ui {
 class InserirTransferencia;
 }
 
-class InserirTransferencia : public QDialog {
+class InserirTransferencia final : public QDialog {
   Q_OBJECT
 
 public:

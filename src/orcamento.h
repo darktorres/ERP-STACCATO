@@ -8,7 +8,7 @@ namespace Ui {
 class Orcamento;
 }
 
-class Orcamento : public RegisterDialog {
+class Orcamento final : public RegisterDialog {
   Q_OBJECT
 
 public:
@@ -35,25 +35,21 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  bool buscarParametrosFrete();
-  bool verificaCadastroCliente();
   bool atualizaReplica();
-  bool cadastrar() override;
+  bool buscarParametrosFrete();
+  bool cadastrar() final;
   bool generateId();
-  virtual bool newRegister() override;
-  virtual bool save() override;
-  virtual bool save(const bool silent);
-  virtual bool savingProcedures() override;
-  virtual bool verifyFields() override;
-  virtual bool viewRegister() override;
-  virtual void clearFields() override;
-  virtual void registerMode() override;
-  virtual void setupMapper() override;
-  virtual void successMessage() override;
-  virtual void updateMode() override;
+  bool newRegister() final;
+  bool save() final;
+  bool save(const bool silent);
+  bool savingProcedures() final;
+  bool verificaCadastroCliente();
+  bool verifyFields() final;
+  bool viewRegister() final;
   void adicionarItem(const bool isUpdate = false); // REFAC: refac this to enum
   void atualizarItem();
   void calcPrecoGlobalTotal();
+  void clearFields() final;
   void novoItem();
   void on_checkBoxFreteManual_clicked(const bool checked);
   void on_checkBoxRepresentacao_toggled(const bool checked);
@@ -82,10 +78,14 @@ private:
   void on_pushButtonRemoverItem_clicked();
   void on_pushButtonReplicar_clicked();
   void on_tableProdutos_clicked(const QModelIndex &index);
+  void registerMode() final;
   void removeItem();
   void setupConnections();
+  void setupMapper() final;
   void setupTables();
+  void successMessage() final;
   void unsetConnections();
+  void updateMode() final;
 };
 
 #endif // ORCAMENTO_H

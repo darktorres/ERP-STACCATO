@@ -5,12 +5,12 @@
 
 #include "sqlrelationaltablemodel.h"
 
-class FollowUpProxyModel : public QIdentityProxyModel {
+class FollowUpProxyModel final : public QIdentityProxyModel {
 
 public:
   FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);
   ~FollowUpProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, int role) const override;
+  QVariant data(const QModelIndex &proxyIndex, int role) const final;
 
 private:
   const int semaforo;

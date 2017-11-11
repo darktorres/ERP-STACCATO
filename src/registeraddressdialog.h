@@ -9,7 +9,7 @@ public:
   explicit RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent);
 
 public slots:
-  bool viewRegisterById(const QVariant &id) override;
+  bool viewRegisterById(const QVariant &id) final;
 
 protected:
   // attributes

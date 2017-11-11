@@ -13,7 +13,7 @@ namespace Ui {
 class InputDialogFinanceiro;
 }
 
-class InputDialogFinanceiro : public QDialog {
+class InputDialogFinanceiro final : public QDialog {
   Q_OBJECT
 
 public:

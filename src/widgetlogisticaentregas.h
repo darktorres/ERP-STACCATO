@@ -9,7 +9,7 @@ namespace Ui {
 class WidgetLogisticaEntregas;
 }
 
-class WidgetLogisticaEntregas : public QWidget {
+class WidgetLogisticaEntregas final : public QWidget {
   Q_OBJECT
 
 public:

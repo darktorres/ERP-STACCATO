@@ -10,7 +10,7 @@ namespace Ui {
 class SearchDialog;
 }
 
-class SearchDialog : public QDialog {
+class SearchDialog final : public QDialog {
   Q_OBJECT
 
 public:

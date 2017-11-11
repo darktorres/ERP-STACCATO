@@ -4,7 +4,7 @@
 #include <QDomElement>
 #include <QStandardItemModel>
 
-class XML {
+class XML final {
 
 public:
   XML(const QByteArray &fileContent, const QString &fileName = QString());

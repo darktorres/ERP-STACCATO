@@ -9,7 +9,7 @@ namespace Ui {
 class FollowUp;
 }
 
-class FollowUp : public QDialog {
+class FollowUp final : public QDialog {
   Q_OBJECT
 
 public:

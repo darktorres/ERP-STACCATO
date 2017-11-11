@@ -8,7 +8,7 @@ namespace Ui {
 class SendMail;
 }
 
-class SendMail : public QDialog {
+class SendMail final : public QDialog {
   Q_OBJECT
 
 public:

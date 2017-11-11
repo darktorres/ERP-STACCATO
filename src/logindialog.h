@@ -8,7 +8,7 @@ namespace Ui {
 class LoginDialog;
 }
 
-class LoginDialog : public QDialog {
+class LoginDialog final : public QDialog {
   Q_OBJECT
 
 public:

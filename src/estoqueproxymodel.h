@@ -5,12 +5,12 @@
 
 #include "sqlrelationaltablemodel.h"
 
-class EstoqueProxyModel : public QIdentityProxyModel {
+class EstoqueProxyModel final : public QIdentityProxyModel {
 
 public:
   explicit EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);
   ~EstoqueProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, const int role) const override;
+  QVariant data(const QModelIndex &proxyIndex, const int role) const final;
 
 private:
   const int quantUpdIndex;

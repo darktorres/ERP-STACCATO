@@ -12,7 +12,7 @@ namespace Ui {
 class WidgetPagamentos;
 }
 
-class WidgetPagamentos : public QScrollArea {
+class WidgetPagamentos final : public QScrollArea {
   Q_OBJECT
 
 public:

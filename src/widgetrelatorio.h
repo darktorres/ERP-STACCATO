@@ -9,7 +9,7 @@ namespace Ui {
 class WidgetRelatorio;
 }
 
-class WidgetRelatorio : public QWidget {
+class WidgetRelatorio final : public QWidget {
   Q_OBJECT
 
 public:

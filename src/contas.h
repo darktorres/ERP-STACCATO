@@ -9,7 +9,7 @@ namespace Ui {
 class Contas;
 }
 
-class Contas : public QDialog {
+class Contas final : public QDialog {
   Q_OBJECT
 
 public:

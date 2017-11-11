@@ -7,7 +7,7 @@ namespace Ui {
 class WidgetLogisticaCalendario;
 }
 
-class WidgetLogisticaCalendario : public QWidget {
+class WidgetLogisticaCalendario final : public QWidget {
   Q_OBJECT
 
 public:

@@ -3,21 +3,18 @@
 
 #include <QStyledItemDelegate>
 
-class LineEditDelegate : public QStyledItemDelegate {
+class LineEditDelegate final : public QStyledItemDelegate {
 
 public:
   enum class Tipo { ContraPartePagar, ContraParteReceber, Grupo };
+
   explicit LineEditDelegate(const Tipo tipo, QObject *parent);
   ~LineEditDelegate() = default;
-
-  virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const final;
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const final;
 
 private:
   const Tipo tipo;
-
-  // QAbstractItemDelegate interface
-public:
-  virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const override;
 };
 
 #endif // LINEEDITDELEGATE_H

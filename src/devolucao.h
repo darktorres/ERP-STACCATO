@@ -10,7 +10,7 @@ namespace Ui {
 class Devolucao;
 }
 
-class Devolucao : public QDialog {
+class Devolucao final : public QDialog {
   Q_OBJECT
 
 public:

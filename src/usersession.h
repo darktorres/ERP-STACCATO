@@ -4,7 +4,7 @@
 #include <QSettings>
 #include <QSqlQuery>
 
-class UserSession {
+class UserSession final {
 
 public:
   enum class Tipo { Padrao, Autorizacao };

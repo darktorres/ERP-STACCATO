@@ -9,7 +9,7 @@ namespace Ui {
 class PagamentosDia;
 }
 
-class PagamentosDia : public QDialog {
+class PagamentosDia final : public QDialog {
   Q_OBJECT
 
 public:

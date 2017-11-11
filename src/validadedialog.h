@@ -7,7 +7,7 @@ namespace Ui {
 class ValidadeDialog;
 }
 
-class ValidadeDialog : public QDialog {
+class ValidadeDialog final : public QDialog {
   Q_OBJECT
 
 public:

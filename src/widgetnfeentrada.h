@@ -9,7 +9,7 @@ namespace Ui {
 class WidgetNfeEntrada;
 }
 
-class WidgetNfeEntrada : public QWidget {
+class WidgetNfeEntrada final : public QWidget {
   Q_OBJECT
 
 public:

@@ -3,12 +3,12 @@
 
 #include <QStyledItemDelegate>
 
-class ReaisDelegate : public QStyledItemDelegate {
+class ReaisDelegate final : public QStyledItemDelegate {
 
 public:
   explicit ReaisDelegate(QObject *parent = 0, const double decimais = 2.);
   ~ReaisDelegate() = default;
-  QString displayText(const QVariant &value, const QLocale &locale) const override;
+  QString displayText(const QVariant &value, const QLocale &locale) const;
 
 private:
   const double decimais;

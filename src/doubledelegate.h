@@ -3,15 +3,15 @@
 
 #include <QStyledItemDelegate>
 
-class DoubleDelegate : public QStyledItemDelegate {
+class DoubleDelegate final : public QStyledItemDelegate {
 
 public:
   explicit DoubleDelegate(QObject *parent = 0, const int decimais = 2);
   ~DoubleDelegate() = default;
-  QString displayText(const QVariant &value, const QLocale &locale) const override;
+  QString displayText(const QVariant &value, const QLocale &locale) const final;
 
 private:
-  int decimais;
+  const int decimais;
 };
 
 #endif // DOUBLEDELEGATE_H

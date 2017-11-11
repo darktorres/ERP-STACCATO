@@ -3,7 +3,7 @@
 
 #include <QLineEdit>
 
-class LineEditDecimal : public QLineEdit {
+class LineEditDecimal final : public QLineEdit {
   Q_OBJECT
 
 public:

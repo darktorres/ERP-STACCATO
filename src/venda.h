@@ -12,7 +12,7 @@ namespace Ui {
 class Venda;
 }
 
-class Venda : public RegisterDialog {
+class Venda final : public RegisterDialog {
   Q_OBJECT
 
 public:
@@ -42,20 +42,16 @@ private:
   Ui::Venda *ui;
   // methods
   bool atualizarCredito();
+  bool cadastrar() final;
   bool cancelamento();
   bool financeiroSalvar();
   bool generateId();
-  virtual bool cadastrar() override;
-  virtual bool save() override;
-  virtual bool savingProcedures() override;
-  virtual bool verifyFields() override;
-  virtual bool viewRegister() override;
-  virtual void clearFields() override;
-  virtual void registerMode() override;
-  virtual void setupMapper() override;
-  virtual void successMessage() override;
-  virtual void updateMode() override;
+  bool save() final;
+  bool savingProcedures() final;
+  bool verifyFields() final;
+  bool viewRegister() final;
   void calcPrecoGlobalTotal();
+  void clearFields() final;
   void montarFluxoCaixa();
   void on_checkBoxFreteManual_clicked(const bool checked);
   void on_checkBoxPontuacaoIsento_toggled(bool checked);
@@ -82,10 +78,14 @@ private:
   void on_pushButtonVoltar_clicked();
   void on_tableFluxoCaixa_entered(const QModelIndex &);
   void on_tableFluxoCaixa2_entered(const QModelIndex &);
+  void registerMode() final;
   void resetarPagamentos();
   void setupConnections();
+  void setupMapper() final;
   void setupTables();
+  void successMessage() final;
   void unsetConnections();
+  void updateMode() final;
 };
 
 #endif // VENDA_H

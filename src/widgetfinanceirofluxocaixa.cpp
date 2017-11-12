@@ -35,13 +35,13 @@ bool WidgetFinanceiroFluxoCaixa::updateTables() {
     isReady = true;
   }
 
-  montaFiltro();
+  if (not montaFiltro()) return false;
 
   return true;
 }
 
-void WidgetFinanceiroFluxoCaixa::montaFiltro() {
-  if (not isReady) return;
+bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
+  if (not isReady) return false; // REFAC: testar
 
   const QString filtroData = ui->groupBoxMes->isChecked() ? "`Data` IS NOT NULL AND DATE_FORMAT(`Data`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`Data` IS NOT NULL";
 
@@ -74,7 +74,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
     emit errorSignal("Erro buscando saldo: " + query.lastError().text());
-    return;
+    return false;
   }
 
   if (query.first()) ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble());
@@ -108,7 +108,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
     emit errorSignal("Erro buscando saldo: " + query.lastError().text());
-    return;
+    return false;
   }
 
   if (query.first()) ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble());
@@ -124,6 +124,8 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
   ui->tableFuturo->hideColumn("idConta");
+
+  return true;
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCaixa->resizeColumnsToContents(); }

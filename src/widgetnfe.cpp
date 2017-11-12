@@ -25,6 +25,8 @@ void WidgetNfe::setConnections() {
 }
 
 bool WidgetNfe::updateTables() {
+  if (hasError) return false;
+
   const QString currentText = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());
 
   if (currentText == "Entrada" and not ui->widgetEntrada->updateTables()) return false;
@@ -34,3 +36,5 @@ bool WidgetNfe::updateTables() {
 }
 
 void WidgetNfe::on_tabWidgetNfe_currentChanged(const int) { updateTables(); }
+
+void WidgetNfe::setHasError(const bool value) { hasError = value; }

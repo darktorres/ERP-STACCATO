@@ -16,6 +16,7 @@ public:
   explicit WidgetRelatorio(QWidget *parent = 0);
   ~WidgetRelatorio();
   bool updateTables();
+  void setHasError(const bool value);
 
 signals:
   void errorSignal(const QString &error);
@@ -31,6 +32,7 @@ private slots:
 
 private:
   // attributes
+  bool hasError = false;
   SqlRelationalTableModel modelOrcamento;
   SqlRelationalTableModel modelRelatorio;
   SqlRelationalTableModel modelTotalLoja;

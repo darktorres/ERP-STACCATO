@@ -17,6 +17,7 @@ public:
   explicit WidgetEstoque(QWidget *parent = 0);
   ~WidgetEstoque();
   bool updateTables();
+  void setHasError(const bool value);
 
 signals:
   void errorSignal(const QString &error);
@@ -30,10 +31,11 @@ private slots:
 
 private:
   // attributes
+  bool hasError = false;
   SqlQueryModel model;
   Ui::WidgetEstoque *ui;
   // methods
-  void setupTables();
+  bool setupTables();
   void montaFiltro();
 };
 

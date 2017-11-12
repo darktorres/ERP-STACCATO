@@ -37,6 +37,8 @@ void WidgetLogistica::setConnections() {
 }
 
 bool WidgetLogistica::updateTables() {
+  if (hasError) return false;
+
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
   if (currentText == "Agendar Coleta") {
@@ -135,6 +137,8 @@ void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {
 }
 
 void WidgetLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }
+
+void WidgetLogistica::setHasError(const bool value) { hasError = value; }
 
 // NOTE: tela para guardar imagens (fotos/documentos scaneados)
 // TODO: 1followup das entregas (no lugar de followup colocar campo observacao no inputDialog?)

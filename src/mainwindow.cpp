@@ -156,7 +156,7 @@ void MainWindow::endTransaction() {
 }
 
 void MainWindow::showErrors() {
-  if (inTransaction) return;
+  if (inTransaction or updating) return;
 
   for (const auto &error : errorQueue) QMessageBox::critical(this, "Erro!", error);
 
@@ -361,16 +361,18 @@ void MainWindow::updateTables() {
 
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Orçamentos") ui->widgetOrcamento->updateTables();
-  if (currentText == "Vendas") ui->widgetVenda->updateTables();
-  if (currentText == "Compras") ui->widgetCompra->updateTables();
-  if (currentText == "Logística") ui->widgetLogistica->updateTables();
-  if (currentText == "NFe") ui->widgetNfe->updateTables();
-  if (currentText == "Estoque") ui->widgetEstoque->updateTables();
-  if (currentText == "Financeiro") ui->widgetFinanceiro->updateTables();
-  if (currentText == "Relatórios") ui->widgetRelatorio->updateTables();
+  if (currentText == "Orçamentos" and not ui->widgetOrcamento->updateTables()) ui->widgetOrcamento->setHasError(true);
+  if (currentText == "Vendas" and not ui->widgetVenda->updateTables()) ui->widgetVenda->setHasError(true);
+  if (currentText == "Compras" and not ui->widgetCompra->updateTables()) ui->widgetCompra->setHasError(true);
+  if (currentText == "Logística" and not ui->widgetLogistica->updateTables()) ui->widgetLogistica->setHasError(true);
+  if (currentText == "NFe" and not ui->widgetNfe->updateTables()) ui->widgetNfe->setHasError(true);
+  if (currentText == "Estoque" and not ui->widgetEstoque->updateTables()) ui->widgetEstoque->setHasError(true);
+  if (currentText == "Financeiro" and not ui->widgetFinanceiro->updateTables()) ui->widgetFinanceiro->setHasError(true);
+  if (currentText == "Relatórios" and not ui->widgetRelatorio->updateTables()) ui->widgetRelatorio->setHasError(true);
 
   updating = false;
+
+  showErrors();
 }
 
 void MainWindow::on_actionCadastrarFornecedor_triggered() {

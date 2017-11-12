@@ -80,6 +80,8 @@ void WidgetOrcamento::setupConnections() {
 }
 
 bool WidgetOrcamento::updateTables() {
+  if (hasError) return false;
+
   if (model.tableName().isEmpty()) {
     setPermissions();
     setupTables();
@@ -153,6 +155,8 @@ void WidgetOrcamento::montaFiltro() {
 }
 
 void WidgetOrcamento::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+
+void WidgetOrcamento::setHasError(const bool value) { hasError = value; }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

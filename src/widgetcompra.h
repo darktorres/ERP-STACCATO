@@ -14,6 +14,7 @@ public:
   explicit WidgetCompra(QWidget *parent = 0);
   ~WidgetCompra();
   bool updateTables();
+  void setHasError(const bool value);
 
 signals:
   void errorSignal(const QString &error);
@@ -24,7 +25,10 @@ private slots:
   void on_tabWidget_currentChanged(const int &);
 
 private:
+  // attributes
+  bool hasError = false;
   Ui::WidgetCompra *ui;
+  // methods
   void setConnections();
 };
 

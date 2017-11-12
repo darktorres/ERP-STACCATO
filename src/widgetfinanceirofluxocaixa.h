@@ -39,7 +39,7 @@ private:
   SqlQueryModel modelFuturo;
   Ui::WidgetFinanceiroFluxoCaixa *ui;
   // methods
-  void montaFiltro();
+  bool montaFiltro();
 };
 
 #endif // WIDGETFINANCEIROFLUXOCAIXA_H

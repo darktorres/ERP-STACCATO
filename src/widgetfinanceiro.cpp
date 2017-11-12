@@ -16,6 +16,8 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
 
 bool WidgetFinanceiro::updateTables() {
+  if (hasError) return false;
+
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentText == "Fluxo de Caixa") return ui->widgetFluxoCaixa->updateTables();
@@ -26,6 +28,8 @@ bool WidgetFinanceiro::updateTables() {
 
   return true;
 }
+
+void WidgetFinanceiro::setHasError(const bool value) { hasError = value; }
 
 void WidgetFinanceiro::setConnections() {
   connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::errorSignal, this, &WidgetFinanceiro::errorSignal);

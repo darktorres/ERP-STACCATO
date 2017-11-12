@@ -37,7 +37,7 @@ private:
   Ui::WidgetNfeSaida *ui;
   // methods
   bool atualizarNFe(const int idNFe, const QString &xml);
-  void montaFiltro();
+  bool montaFiltro();
   void setupTables();
 };
 

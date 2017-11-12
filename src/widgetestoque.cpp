@@ -28,7 +28,7 @@ WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::Widg
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
-void WidgetEstoque::setupTables() {
+bool WidgetEstoque::setupTables() {
   // REFAC: merge this setquery with the one in montaFiltro
 
   model.setQuery(
@@ -41,7 +41,10 @@ void WidgetEstoque::setupTables() {
       "e.idProduto LEFT JOIN (SELECT * FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT * FROM estoque_has_nfe ehn) ehn ON e.idEstoque = "
       "ehn.idEstoque LEFT JOIN (SELECT * FROM nfe n) n ON ehn.idNFe = n.idNFe GROUP BY e.idEstoque HAVING restante > 0");
 
-  if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
+  if (model.lastError().isValid()) {
+    emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
+    return false;
+  }
 
   model.setHeaderData("cnpjDest", "CNPJ");
   model.setHeaderData("status", "Status");
@@ -73,14 +76,21 @@ void WidgetEstoque::setupTables() {
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("restante est");
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
+  return true;
 }
 
 bool WidgetEstoque::updateTables() {
-  if (model.query().executedQuery().isEmpty()) setupTables();
+  if (hasError) return false;
+
+  if (model.query().executedQuery().isEmpty() and not setupTables()) return false;
 
   model.setQuery(model.query().executedQuery());
 
-  if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
+  if (model.lastError().isValid()) {
+    emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
+    return false;
+  }
 
   ui->table->resizeColumnsToContents();
 
@@ -198,6 +208,8 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
 }
+
+void WidgetEstoque::setHasError(const bool value) { hasError = value; }
 
 // NOTE: gerenciar lugares de estoque (cadastro/permissoes)
 // TODO: 3tem produto com unidade barra que na verdade significa ML

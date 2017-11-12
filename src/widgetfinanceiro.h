@@ -14,6 +14,7 @@ public:
   explicit WidgetFinanceiro(QWidget *parent = 0);
   ~WidgetFinanceiro();
   bool updateTables();
+  void setHasError(const bool value);
 
 signals:
   void errorSignal(const QString &error);
@@ -21,7 +22,10 @@ signals:
   void transactionStarted();
 
 private:
+  // attributes
+  bool hasError = false;
   Ui::WidgetFinanceiro *ui;
+  // methods
   void setConnections();
 };
 

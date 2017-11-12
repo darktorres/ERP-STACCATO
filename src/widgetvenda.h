@@ -17,6 +17,7 @@ public:
   ~WidgetVenda();
   bool updateTables();
   void setFinanceiro();
+  void setHasError(const bool value);
 
 signals:
   void errorSignal(const QString &error);
@@ -34,6 +35,7 @@ private slots:
 
 private:
   // attributes
+  bool hasError = false;
   bool financeiro = false;
   SqlRelationalTableModel model;
   Ui::WidgetVenda *ui;

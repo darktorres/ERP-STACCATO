@@ -41,7 +41,7 @@ bool WidgetNfeSaida::updateTables() {
   //    emit errorSignal("Erro lendo tabela NFe: " + model.lastError().text());
   //    return false;
   //  }
-  montaFiltro();
+  if (not montaFiltro()) return false;
 
   ui->table->resizeColumnsToContents();
 
@@ -77,7 +77,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   viewer->exibirXML(query.value("xml").toByteArray());
 }
 
-void WidgetNfeSaida::montaFiltro() {
+bool WidgetNfeSaida::montaFiltro() {
   // TODO: 5ordenar por 'data criado'
 
   const QString text = ui->lineEditBusca->text();
@@ -98,9 +98,14 @@ void WidgetNfeSaida::montaFiltro() {
 
   model.setFilter(filtroBusca + filtroData + filtroCheck);
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not model.select()) {
+    emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    return false;
+  }
 
   ui->table->resizeColumnsToContents();
+
+  return true;
 }
 
 void WidgetNfeSaida::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

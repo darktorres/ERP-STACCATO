@@ -14,6 +14,7 @@ public:
   explicit WidgetNfe(QWidget *parent = 0);
   ~WidgetNfe();
   bool updateTables();
+  void setHasError(const bool value);
 
 signals:
   void errorSignal(const QString &error);
@@ -24,7 +25,10 @@ private slots:
   void on_tabWidgetNfe_currentChanged(const int);
 
 private:
+  // attributes
+  bool hasError = false;
   Ui::WidgetNfe *ui;
+  // methods
   void setConnections();
 };
 

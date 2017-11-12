@@ -10,6 +10,8 @@ WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::Widget
 WidgetCompra::~WidgetCompra() { delete ui; }
 
 bool WidgetCompra::updateTables() {
+  if (hasError) return false;
+
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentText == "Devoluções" and not ui->widgetDevolucao->updateTables()) return false;
@@ -23,6 +25,8 @@ bool WidgetCompra::updateTables() {
 }
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }
+
+void WidgetCompra::setHasError(const bool value) { hasError = value; }
 
 void WidgetCompra::setConnections() {
   connect(ui->widgetOC, &WidgetCompraOC::errorSignal, this, &WidgetCompra::errorSignal);

@@ -96,8 +96,6 @@ bool WidgetOrcamento::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
-  //  qDebug() << "filter: " << model.filter();
-
   return true;
 }
 

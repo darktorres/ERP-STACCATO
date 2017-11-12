@@ -392,9 +392,6 @@ bool MainWindow::event(QEvent *event) {
     if (not updating) updateTables();
     break;
 
-  case QEvent::WindowDeactivate:
-    break;
-
   default:
     break;
   }

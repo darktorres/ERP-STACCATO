@@ -115,6 +115,7 @@ bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
+  // REFAC: test and return error if false
   modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v JOIN (SELECT @running_total := 0) r");
 
   ui->tableFuturo->setModel(&modelFuturo);

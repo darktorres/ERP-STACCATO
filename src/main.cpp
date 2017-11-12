@@ -58,9 +58,8 @@ int main(int argc, char *argv[]) {
 }
 
 // REFAC: evitar divisoes por zero
-// REFAC: verificar comparacoes double: substituir por qFuzzyCompare ou floats
 // REFAC: verificar todos os QSqlQuery.exec
-// REFAC: pesquisar setData e selects/submits sem verificacao
+// REFAC: pesquisar selects/submits sem verificacao
 // REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?
 // REFAC: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
 // REFAC: use initializer lists?

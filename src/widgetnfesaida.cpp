@@ -89,9 +89,7 @@ bool WidgetNfeSaida::montaFiltro() {
   QString filtroCheck;
 
   for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) {
-      filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
-    }
+    if (child->isChecked()) filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
   }
 
   filtroCheck = filtroCheck.isEmpty() ? "" : " AND (" + filtroCheck + ")";
@@ -369,7 +367,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
 
   if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
-    auto [xml, resposta] = *tuple;
+    auto[xml, resposta] = *tuple;
 
     emit transactionStarted();
 

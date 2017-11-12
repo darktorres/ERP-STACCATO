@@ -114,9 +114,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     if (not query.value("idVenda").toString().isEmpty()) text += "\n           " + query.value("idVenda").toString();
 
-    if (not query.value("bairro").toString().isEmpty()) {
-      text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString();
-    }
+    if (not query.value("bairro").toString().isEmpty()) text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString();
 
     // TODO: 0dont show this to compact screen? or show this only on doubleclick
     text += query.value("text").toString();

@@ -84,6 +84,8 @@ bool WidgetFinanceiroContas::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
+  // REFAC: return false if querys has error
+
   modelVencidos.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString(tipo == Tipo::Receber ? "view_a_receber_vencidos_base" : "view_a_pagar_vencidos_base") +
                          " v JOIN (SELECT @running_total := 0) r");
 

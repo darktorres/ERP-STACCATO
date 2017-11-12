@@ -32,7 +32,6 @@ protected:
   bool isDirty = false; // TODO: o LimeReport tem isso, olhar lá como fizeram
   enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
   int currentRow = -1;
-  int currentRowEnd = -1;
   QDataWidgetMapper mapper;
   QString primaryId;
   QString primaryKey;

@@ -30,76 +30,77 @@
 #ifndef LRVARIABLEHOLDER_H
 #define LRVARIABLEHOLDER_H
 
-#include <QObject>
 #include <QMap>
-#include <QVector>
+#include <QObject>
 #include <QVariant>
+#include <QVector>
+
 #include "lrglobal.h"
 
-namespace LimeReport{
+namespace LimeReport {
 
-class VarDesc : public QObject{
-    Q_OBJECT
-    Q_PROPERTY(QString name READ name WRITE setName)
-    Q_PROPERTY(QVariant value READ value WRITE setValue)
+class VarDesc : public QObject {
+  Q_OBJECT
+  Q_PROPERTY(QString name READ name WRITE setName)
+  Q_PROPERTY(QVariant value READ value WRITE setValue)
 public:
-    enum VarType {System, User, Report};
-    void setVarType(VarType value){m_varType=value;}
-    VarType varType(){return m_varType;}
-    void setRenderPass(RenderPass value){m_varPass=value;}
-    RenderPass renderPass(){return m_varPass;}
-    void setName(QString value){m_name=value;}
-    QString name(){return m_name;}
-    void setValue(QVariant value){m_value=value;}
-    QVariant value(){return m_value;}
+  enum VarType { System, User, Report };
+  void setVarType(VarType value) { m_varType = value; }
+  VarType varType() { return m_varType; }
+  void setRenderPass(RenderPass value) { m_varPass = value; }
+  RenderPass renderPass() { return m_varPass; }
+  void setName(QString value) { m_name = value; }
+  QString name() { return m_name; }
+  void setValue(QVariant value) { m_value = value; }
+  QVariant value() { return m_value; }
+
 private:
-    VarType     m_varType;
-    RenderPass  m_varPass;
-    QString     m_name;
-    QVariant    m_value;
+  VarType m_varType;
+  RenderPass m_varPass;
+  QString m_name;
+  QVariant m_value;
 };
 
-class IVariablesContainer
-{
+class IVariablesContainer {
 public:
-    virtual ~IVariablesContainer(){}
-    virtual void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type=VarDesc::User, RenderPass pass=FirstPass)=0;
-    virtual void deleteVariable(const QString &name)=0;
-    virtual void changeVariable(const QString &name, const QVariant &value)=0;
-    virtual void clearUserVariables()=0;
-    virtual QVariant variable(const QString &name)=0;
-    virtual VarDesc::VarType variableType(const QString &name)=0;
-    virtual RenderPass variablePass(const QString &name)=0;
-    virtual bool containsVariable(const QString &name)=0;
-    virtual QStringList variableNames()=0;
+  virtual ~IVariablesContainer() {}
+  virtual void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type = VarDesc::User, RenderPass pass = FirstPass) = 0;
+  virtual void deleteVariable(const QString &name) = 0;
+  virtual void changeVariable(const QString &name, const QVariant &value) = 0;
+  virtual void clearUserVariables() = 0;
+  virtual QVariant variable(const QString &name) = 0;
+  virtual VarDesc::VarType variableType(const QString &name) = 0;
+  virtual RenderPass variablePass(const QString &name) = 0;
+  virtual bool containsVariable(const QString &name) = 0;
+  virtual QStringList variableNames() = 0;
 };
 
-class VariablesHolder : public QObject, public IVariablesContainer
-{
-    Q_OBJECT
+class VariablesHolder : public QObject, public IVariablesContainer {
+  Q_OBJECT
 public:
-    explicit VariablesHolder(QObject *parent = 0);
-    ~VariablesHolder();
-    void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type=VarDesc::User, RenderPass pass=FirstPass);
-    void deleteVariable(const QString &name);
-    void changeVariable(const QString &name, const QVariant &value);
-    void clearUserVariables();
-    QVariant variable(const QString &name);
-    VarDesc::VarType variableType(const QString &name);
-    RenderPass variablePass(const QString &name);
-    bool containsVariable(const QString &name);
-    QStringList variableNames();
-    int userVariablesCount();
-    VarDesc* userVariableAt(int index);
+  explicit VariablesHolder(QObject *parent = 0);
+  ~VariablesHolder();
+  void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type = VarDesc::User, RenderPass pass = FirstPass);
+  void deleteVariable(const QString &name);
+  void changeVariable(const QString &name, const QVariant &value);
+  void clearUserVariables();
+  QVariant variable(const QString &name);
+  VarDesc::VarType variableType(const QString &name);
+  RenderPass variablePass(const QString &name);
+  bool containsVariable(const QString &name);
+  QStringList variableNames();
+  int userVariablesCount();
+  VarDesc *userVariableAt(int index);
 signals:
-    void variableHasBeenAdded(const QString& variableName);
-    void variableHasBeenChanged(const QString& variableName);
-    void variableHasBennDeleted(const QString& variableName);
+  void variableHasBeenAdded(const QString &variableName);
+  void variableHasBeenChanged(const QString &variableName);
+  void variableHasBennDeleted(const QString &variableName);
+
 private:
-    QMap<QString,VarDesc*> m_varNames;
-    QList<VarDesc*> m_userVariables;
+  QMap<QString, VarDesc *> m_varNames;
+  QList<VarDesc *> m_userVariables;
 };
 
-}// namespace LimeReport
+} // namespace LimeReport
 
 #endif // VARIABLEHOLDER_H

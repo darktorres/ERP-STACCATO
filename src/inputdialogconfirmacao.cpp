@@ -376,7 +376,7 @@ bool InputDialogConfirmacao::quebraEntrega(const int row) {
   QInputDialog input;
   bool ok = false;
   // TODO: 0put this outside transaction
-  caixasDefeito = input.getInt(this, produto, "Caixas quebradas: ", 0, 0, caixas, 1, &ok); // *
+  caixasDefeito = input.getInt(this, produto, "Caixas quebradas: ", 0, 0, caixas, 1, &ok); // REFAC: fix warning
 
   if (not ok or caixasDefeito == 0) return false;
 

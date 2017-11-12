@@ -296,5 +296,5 @@ public:
     return qScriptValueFromValue<QFont>(engine, font);
   }
 };
-}
+} // namespace LimeReport
 #endif // LRSCRIPTENGINEMANAGER_H

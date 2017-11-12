@@ -42,16 +42,13 @@ void CadastroLoja::setupUi() {
 }
 
 void CadastroLoja::setupTables() {
-
   modelAssocia1.setTable("forma_pagamento");
   modelAssocia1.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelAssocia1.setHeaderData("pagamento", "Pagamento");
   modelAssocia1.setHeaderData("parcelas", "Parcelas");
 
-  if (not modelAssocia1.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela forma_pagamento: " + modelAssocia1.lastError().text());
-  }
+  if (not modelAssocia1.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela forma_pagamento: " + modelAssocia1.lastError().text());
 
   ui->tableAssocia1->setModel(&modelAssocia1);
   ui->tableAssocia1->hideColumn("idPagamento");
@@ -63,9 +60,7 @@ void CadastroLoja::setupTables() {
 
   modelAssocia2.setHeaderData("pagamento", "Pagamento");
 
-  if (not modelAssocia2.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela view_pagamento_loja: " + modelAssocia2.lastError().text());
-  }
+  if (not modelAssocia2.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela view_pagamento_loja: " + modelAssocia2.lastError().text());
 
   ui->tableAssocia2->setModel(&modelAssocia2);
   ui->tableAssocia2->hideColumn("idLoja");

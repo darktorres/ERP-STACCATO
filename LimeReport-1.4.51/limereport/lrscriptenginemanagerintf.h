@@ -32,18 +32,16 @@
 
 #include <QtScript/QScriptEngine>
 
-namespace LimeReport{
+namespace LimeReport {
 
-class IScriptEngineManager{
+class IScriptEngineManager {
 public:
-    virtual QScriptEngine* scriptEngine() = 0;
-    virtual bool addFunction(const QString& name, QScriptEngine::FunctionSignature function,
-                             const QString& category="", const QString& description="") = 0;
-    virtual bool addFunction(const QString &name, const QString& script,
-                             const QString &category="", const QString &description="") = 0;
-    virtual const QString& lastError() const = 0;
-    virtual ~IScriptEngineManager(){}
+  virtual QScriptEngine *scriptEngine() = 0;
+  virtual bool addFunction(const QString &name, QScriptEngine::FunctionSignature function, const QString &category = "", const QString &description = "") = 0;
+  virtual bool addFunction(const QString &name, const QString &script, const QString &category = "", const QString &description = "") = 0;
+  virtual const QString &lastError() const = 0;
+  virtual ~IScriptEngineManager() {}
 };
 
-} //namespace LimeReport
+} // namespace LimeReport
 #endif // LRSCRIPTENGINEMANAGERINTF_H

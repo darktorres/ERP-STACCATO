@@ -22,7 +22,7 @@ QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 CONFIG += c++1z
 
 gcc|clang{
-QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal
+QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast

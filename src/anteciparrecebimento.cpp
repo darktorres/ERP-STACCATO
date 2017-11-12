@@ -55,13 +55,13 @@ void AnteciparRecebimento::calcularTotais() {
     liquido += model.data(item.row(), "valor").toDouble();
 
     // valor aqui deve considerar a taxa cartao
-    const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor;
+    const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor; // REFAC: fix warning
 
-    prazoMedio += prazo;
+    prazoMedio += prazo; // REFAC: fix warning
   }
 
   // be careful about division by 0
-  prazoMedio /= liquido;
+  prazoMedio /= liquido; // REFAC: fix warning
 
   ui->doubleSpinBoxDescTotal->setValue(ui->doubleSpinBoxDescMes->value() / 30 * prazoMedio);
   ui->spinBoxPrazoMedio->setValue(prazoMedio);

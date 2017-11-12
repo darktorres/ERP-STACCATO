@@ -31,34 +31,21 @@
 #include "lrdesignelementsfactory.h"
 #include "lrglobal.h"
 
-const QString xmlTag ="ReportHeader";
+const QString xmlTag = "ReportHeader";
 
-namespace{
-LimeReport::BaseDesignIntf * createBand(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::ReportHeader(owner,parent);
-}
-bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instance().registerCreator(
-        xmlTag,
-        LimeReport::ItemAttribs(QObject::tr("Report Header"),LimeReport::Const::bandTAG),
-        createBand
-    );
-}
+namespace {
+LimeReport::BaseDesignIntf *createBand(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::ReportHeader(owner, parent); }
+bool VARIABLE_IS_NOT_USED registred =
+    LimeReport::DesignElementsFactory::instance().registerCreator(xmlTag, LimeReport::ItemAttribs(QObject::tr("Report Header"), LimeReport::Const::bandTAG), createBand);
+} // namespace
 namespace LimeReport {
 
-ReportHeader::ReportHeader(QObject *owner, QGraphicsItem *parent)
-    : BandDesignIntf(LimeReport::BandDesignIntf::ReportHeader,xmlTag,owner,parent) {
-        setBandTypeText(tr("Report Header"));
-        setMarkerColor(bandColor());
+ReportHeader::ReportHeader(QObject *owner, QGraphicsItem *parent) : BandDesignIntf(LimeReport::BandDesignIntf::ReportHeader, xmlTag, owner, parent) {
+  setBandTypeText(tr("Report Header"));
+  setMarkerColor(bandColor());
 }
-BaseDesignIntf *ReportHeader::createSameTypeItem(QObject *owner, QGraphicsItem *parent)
-{
-    return new ReportHeader(owner,parent);
-}
+BaseDesignIntf *ReportHeader::createSameTypeItem(QObject *owner, QGraphicsItem *parent) { return new ReportHeader(owner, parent); }
 
-QColor ReportHeader::bandColor() const
-{
-    return QColor(152,69,167);
-}
+QColor ReportHeader::bandColor() const { return QColor(152, 69, 167); }
 
-}
-
+} // namespace LimeReport

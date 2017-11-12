@@ -1113,10 +1113,10 @@ void Worksheet::saveToXmlFile(QIODevice *device) const {
       writer.writeStartElement(QStringLiteral("col"));
       writer.writeAttribute(QStringLiteral("min"), QString::number(col_info->firstColumn));
       writer.writeAttribute(QStringLiteral("max"), QString::number(col_info->lastColumn));
-      if (col_info->width) writer.writeAttribute(QStringLiteral("width"), QString::number(col_info->width, 'g', 15));
+      if (not qFuzzyIsNull(col_info->width)) writer.writeAttribute(QStringLiteral("width"), QString::number(col_info->width, 'g', 15));
       if (not col_info->format.isEmpty()) writer.writeAttribute(QStringLiteral("style"), QString::number(col_info->format.xfIndex()));
       if (col_info->hidden) writer.writeAttribute(QStringLiteral("hidden"), QStringLiteral("1"));
-      if (col_info->width) writer.writeAttribute(QStringLiteral("customWidth"), QStringLiteral("1"));
+      if (not qFuzzyIsNull(col_info->width)) writer.writeAttribute(QStringLiteral("customWidth"), QStringLiteral("1"));
       if (col_info->outlineLevel) writer.writeAttribute(QStringLiteral("outlineLevel"), QString::number(col_info->outlineLevel));
       if (col_info->collapsed) writer.writeAttribute(QStringLiteral("collapsed"), QStringLiteral("1"));
       writer.writeEndElement(); // col
@@ -1733,7 +1733,7 @@ int WorksheetPrivate::colPixelsSize(int col) const {
     if (width < 1)
       pixels = static_cast<int>(width * (max_digit_width + padding) + 0.5);
     else
-      pixels = static_cast<int>(width * max_digit_width + 0.5) + padding;
+      pixels = static_cast<int>((width * max_digit_width + 0.5) + padding);
   } else {
     pixels = 64;
   }
@@ -1987,7 +1987,7 @@ void WorksheetPrivate::loadXmlSheetFormatProps(QXmlStreamReader &reader) {
     }
   }
 
-  if (formatProps.defaultColWidth == 0.0) { // not set
+  if (qFuzzyIsNull(formatProps.defaultColWidth)) { // not set
     formatProps.defaultColWidth = WorksheetPrivate::calculateColWidth(formatProps.baseColWidth);
   }
 }

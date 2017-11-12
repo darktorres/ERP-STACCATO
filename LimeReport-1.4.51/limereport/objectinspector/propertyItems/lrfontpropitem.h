@@ -32,76 +32,74 @@
 
 #include <QFontComboBox>
 
-#include "lrobjectpropitem.h"
 #include "lrboolpropitem.h"
 #include "lrintpropitem.h"
+#include "lrobjectpropitem.h"
 
-namespace LimeReport{
+namespace LimeReport {
 
-class FontFamilyEditor : public QWidget{
-    Q_OBJECT
+class FontFamilyEditor : public QWidget {
+  Q_OBJECT
 public:
-    FontFamilyEditor(QWidget* parent);
-    QFont currentFont();
-    void setFont(QFont font);
+  FontFamilyEditor(QWidget *parent);
+  QFont currentFont();
+  void setFont(QFont font);
 signals:
-    void editingFinished();
+  void editingFinished();
+
 private:
-    QFontComboBox* m_valueEditor;
+  QFontComboBox *m_valueEditor;
 };
 
-class FontFamilyPropItem : public ObjectPropItem
-{
-    Q_OBJECT
+class FontFamilyPropItem : public ObjectPropItem {
+  Q_OBJECT
 public:
-    FontFamilyPropItem():ObjectPropItem(){}
-    FontFamilyPropItem(QObject* object, ObjectsList* objects, const QString& name, const QString& displayName, const QVariant& value,ObjectPropItem* parent, bool readonly=true)
-    :ObjectPropItem(object, objects, name, displayName, value, parent, readonly){}
-    QString displayValue() const;
-    QWidget* createProperyEditor(QWidget *parent) const;
-    void setPropertyEditorData(QWidget *propertyEditor, const QModelIndex &) const;
-    void setModelData(QWidget *propertyEditor , QAbstractItemModel *model, const QModelIndex &index);
+  FontFamilyPropItem() : ObjectPropItem() {}
+  FontFamilyPropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, const QVariant &value, ObjectPropItem *parent, bool readonly = true)
+      : ObjectPropItem(object, objects, name, displayName, value, parent, readonly) {}
+  QString displayValue() const;
+  QWidget *createProperyEditor(QWidget *parent) const;
+  void setPropertyEditorData(QWidget *propertyEditor, const QModelIndex &) const;
+  void setModelData(QWidget *propertyEditor, QAbstractItemModel *model, const QModelIndex &index);
 };
 
-class FontPointSizePropItem : public IntPropItem
-{
-    Q_OBJECT
+class FontPointSizePropItem : public IntPropItem {
+  Q_OBJECT
 public:
-    FontPointSizePropItem():IntPropItem(){}
-    FontPointSizePropItem(QObject* object, ObjectsList* objects, const QString& name, const QString& displayName, const QVariant& value,ObjectPropItem* parent, bool readonly=true)
-    :IntPropItem(object, objects, name, displayName, value, parent, readonly){}
-    void setModelData(QWidget *propertyEditor , QAbstractItemModel *model, const QModelIndex &index);
+  FontPointSizePropItem() : IntPropItem() {}
+  FontPointSizePropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, const QVariant &value, ObjectPropItem *parent, bool readonly = true)
+      : IntPropItem(object, objects, name, displayName, value, parent, readonly) {}
+  void setModelData(QWidget *propertyEditor, QAbstractItemModel *model, const QModelIndex &index);
 };
 
-class FontAttribPropItem : public BoolPropItem
-{
-    Q_OBJECT
+class FontAttribPropItem : public BoolPropItem {
+  Q_OBJECT
 public:
-    FontAttribPropItem():BoolPropItem(){}
-    FontAttribPropItem(QObject* object, ObjectsList* objects, const QString& name, const QString& displayName, const QVariant& value,ObjectPropItem* parent, bool readonly=true)
-        :BoolPropItem(object, objects, name, displayName, value, parent, readonly){}
-    void setModelData(QWidget *propertyEditor , QAbstractItemModel *model, const QModelIndex &index);
+  FontAttribPropItem() : BoolPropItem() {}
+  FontAttribPropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, const QVariant &value, ObjectPropItem *parent, bool readonly = true)
+      : BoolPropItem(object, objects, name, displayName, value, parent, readonly) {}
+  void setModelData(QWidget *propertyEditor, QAbstractItemModel *model, const QModelIndex &index);
 };
 
-class FontPropItem : public ObjectPropItem
-{
-    Q_OBJECT
+class FontPropItem : public ObjectPropItem {
+  Q_OBJECT
 public:
-    FontPropItem():ObjectPropItem(), m_pointSize(NULL), m_bold(NULL), m_italic(NULL), m_underline(NULL), m_family(NULL) {}
-    FontPropItem(QObject* object, ObjectsList* objects, const QString& name, const QString& displayName, const QVariant& value,ObjectPropItem* parent, bool readonly);
-    QWidget* createProperyEditor(QWidget *parent) const;
-    QString displayValue() const;
-    void setPropertyEditorData(QWidget *propertyEditor, const QModelIndex &) const;
-    void setModelData(QWidget *propertyEditor, QAbstractItemModel *model, const QModelIndex &index);
-    void setPropertyValue(QVariant value);
+  FontPropItem() : ObjectPropItem(), m_pointSize(NULL), m_bold(NULL), m_italic(NULL), m_underline(NULL), m_family(NULL) {}
+  FontPropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, const QVariant &value, ObjectPropItem *parent, bool readonly);
+  QWidget *createProperyEditor(QWidget *parent) const;
+  QString displayValue() const;
+  void setPropertyEditorData(QWidget *propertyEditor, const QModelIndex &) const;
+  void setModelData(QWidget *propertyEditor, QAbstractItemModel *model, const QModelIndex &index);
+  void setPropertyValue(QVariant value);
+
 protected:
-    QString toString(QFont value) const;
-    FontPointSizePropItem* m_pointSize;
-    FontAttribPropItem *m_bold;
-    FontAttribPropItem *m_italic;
-    FontAttribPropItem *m_underline;
-    FontFamilyPropItem *m_family;
+  QString toString(QFont value) const;
+  FontPointSizePropItem *m_pointSize;
+  FontAttribPropItem *m_bold;
+  FontAttribPropItem *m_italic;
+  FontAttribPropItem *m_underline;
+  FontFamilyPropItem *m_family;
 };
 
-}
+} // namespace LimeReport
 #endif // LRFONTPROPITEM_H

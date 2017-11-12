@@ -29,277 +29,283 @@
  ****************************************************************************/
 #ifndef LRBANDDESIGNINTF_H
 #define LRBANDDESIGNINTF_H
+
+#include <QObject>
+
 #include "lrbasedesignintf.h"
 #include "lrdatasourcemanager.h"
 #include "lritemscontainerdesignitf.h"
-#include <QObject>
 
 namespace LimeReport {
 
-class IGroupBand
-{
+class IGroupBand {
 public:
-    virtual void startGroup(DataSourceManager* dataManager) = 0;
-    virtual bool isNeedToClose(DataSourceManager* dataManager) = 0;
-    virtual bool isStarted() = 0;
-    virtual void closeGroup() = 0;
-    virtual int  index() = 0;
-    virtual bool startNewPage() const = 0 ;
-    virtual bool resetPageNumber() const = 0 ;
-    virtual ~IGroupBand(){}
+  virtual void startGroup(DataSourceManager *dataManager) = 0;
+  virtual bool isNeedToClose(DataSourceManager *dataManager) = 0;
+  virtual bool isStarted() = 0;
+  virtual void closeGroup() = 0;
+  virtual int index() = 0;
+  virtual bool startNewPage() const = 0;
+  virtual bool resetPageNumber() const = 0;
+  virtual ~IGroupBand() {}
 };
 
 class BandDesignIntf;
 
-class BandMarker : public QGraphicsItem{
+class BandMarker : public QGraphicsItem {
 public:
-    explicit BandMarker(BandDesignIntf* band, QGraphicsItem *parent=0);
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
-    void setHeight(qreal height);
-    void setWidth(qreal width);
-    void setColor(QColor color);
-    qreal width(){return m_rect.width();}
-    qreal height(){return m_rect.height();}
+  explicit BandMarker(BandDesignIntf *band, QGraphicsItem *parent = 0);
+  QRectF boundingRect() const;
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
+  void setHeight(qreal height);
+  void setWidth(qreal width);
+  void setColor(QColor color);
+  qreal width() { return m_rect.width(); }
+  qreal height() { return m_rect.height(); }
+
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+  void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
 private:
-    QRectF m_rect;
-    QColor m_color;
-    BandDesignIntf* m_band;
+  QRectF m_rect;
+  QColor m_color;
+  BandDesignIntf *m_band;
 };
 
-class BandNameLabel : public QGraphicsItem{
+class BandNameLabel : public QGraphicsItem {
 public:
-    explicit BandNameLabel(BandDesignIntf* band, QGraphicsItem* parent=0);
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    QRectF boundingRect() const;
-    void updateLabel(const QString &bandName);
-    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+  explicit BandNameLabel(BandDesignIntf *band, QGraphicsItem *parent = 0);
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+  QRectF boundingRect() const;
+  void updateLabel(const QString &bandName);
+  void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+
 private:
-    QRectF m_rect;
-    QColor m_color;
-    BandDesignIntf* m_band;
+  QRectF m_rect;
+  QColor m_color;
+  BandDesignIntf *m_band;
 };
 
-class InitializedValue{
+class InitializedValue {
 public:
-    InitializedValue(): m_value(-1), m_isInitialized(false){}
-    InitializedValue(qreal value): m_value(value), m_isInitialized(true){}
-    qreal   value() const { return m_value;}
-    void    setValue( qreal value){ m_value = value; m_isInitialized = true;}
-    bool    isValid() const{ return m_isInitialized;}
+  InitializedValue() : m_value(-1), m_isInitialized(false) {}
+  InitializedValue(qreal value) : m_value(value), m_isInitialized(true) {}
+  qreal value() const { return m_value; }
+  void setValue(qreal value) {
+    m_value = value;
+    m_isInitialized = true;
+  }
+  bool isValid() const { return m_isInitialized; }
+
 private:
-    qreal   m_value;
-    bool    m_isInitialized;
+  qreal m_value;
+  bool m_isInitialized;
 };
 
-class BandDesignIntf : public ItemsContainerDesignInft
-{
-    Q_OBJECT
-    Q_PROPERTY(bool autoHeight READ autoHeight WRITE setAutoHeight )
-    Q_PROPERTY(int bandIndex READ bandIndex WRITE setBandIndex DESIGNABLE false )
-    Q_PROPERTY(bool keepBottomSpace READ keepBottomSpaceOption WRITE setKeepBottomSpaceOption )
-    Q_PROPERTY(QString parentBand READ parentBandName WRITE setParentBandName DESIGNABLE false )
-    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
-    Q_PROPERTY(BrushStyle backgroundBrushStyle READ backgroundBrushStyle WRITE setBackgroundBrushStyle)
-    Q_PROPERTY(bool printIfEmpty READ printIfEmpty WRITE setPrintIfEmpty)
-    Q_ENUMS(BandColumnsLayoutType)
-    friend class BandMarker;
-    friend class BandNameLabel;
+class BandDesignIntf : public ItemsContainerDesignInft {
+  Q_OBJECT
+  Q_PROPERTY(bool autoHeight READ autoHeight WRITE setAutoHeight)
+  Q_PROPERTY(int bandIndex READ bandIndex WRITE setBandIndex DESIGNABLE false)
+  Q_PROPERTY(bool keepBottomSpace READ keepBottomSpaceOption WRITE setKeepBottomSpaceOption)
+  Q_PROPERTY(QString parentBand READ parentBandName WRITE setParentBandName DESIGNABLE false)
+  Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
+  Q_PROPERTY(BrushStyle backgroundBrushStyle READ backgroundBrushStyle WRITE setBackgroundBrushStyle)
+  Q_PROPERTY(bool printIfEmpty READ printIfEmpty WRITE setPrintIfEmpty)
+  Q_ENUMS(BandColumnsLayoutType)
+  friend class BandMarker;
+  friend class BandNameLabel;
+
 public:
+  enum BandsType {
+    PageHeader = 0,
+    ReportHeader = 1,
+    DataHeader = 2,
+    GroupHeader = 3,
+    Data = 4,
+    SubDetailHeader = 5,
+    SubDetailBand = 6,
+    SubDetailFooter = 7,
+    GroupFooter = 8,
+    DataFooter = 9,
+    ReportFooter = 10,
+    TearOffBand = 11,
+    PageFooter = 12
+  };
 
-    enum BandsType {
-        PageHeader=0,
-        ReportHeader=1,
-        DataHeader=2,
-        GroupHeader=3,
-        Data=4,
-        SubDetailHeader=5,
-        SubDetailBand=6,
-        SubDetailFooter=7,
-        GroupFooter=8,
-        DataFooter=9,
-        ReportFooter=10,
-        TearOffBand=11,
-        PageFooter=12
-    };
+  enum BandColumnsLayoutType { Horizontal, Vertical, VerticalUniform };
 
-    enum BandColumnsLayoutType{
-        Horizontal, Vertical, VerticalUniform
-    };
+  BandDesignIntf(BandsType bandType, const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
+  ~BandDesignIntf();
 
-    BandDesignIntf(BandsType bandType, const QString& xmlTypeName, QObject* owner = 0, QGraphicsItem* parent=0);
-    ~BandDesignIntf();
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+  void translateBandsName();
+  virtual BandsType bandType() const;
+  virtual QString bandTitle() const;
+  virtual QIcon bandIcon() const;
+  virtual bool isUnique() const;
+  void updateItemSize(DataSourceManager *dataManager, RenderPass pass = FirstPass, int maxHeight = 0);
+  void updateBandNameLabel();
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void translateBandsName();
-    virtual BandsType bandType() const;
-    virtual QString bandTitle() const;
-    virtual QIcon bandIcon() const;
-    virtual bool isUnique() const;
-    void updateItemSize(DataSourceManager *dataManager, RenderPass pass=FirstPass, int maxHeight=0);
-    void updateBandNameLabel();
+  virtual QColor selectionColor() const;
+  int bandIndex() const;
+  void setBandIndex(int value);
+  void changeBandIndex(int value, bool firstTime = false);
+  void setBandType(BandsType value) { m_bandType = value; }
 
-    virtual QColor selectionColor() const;
-    int bandIndex() const;
-    void setBandIndex(int value);
-    void changeBandIndex(int value, bool firstTime = false);
-    void setBandType(BandsType value){m_bandType=value;}
+  QString datasourceName();
+  void setDataSourceName(const QString &datasourceName);
 
-    QString datasourceName();
-    void setDataSourceName(const QString& datasourceName);
+  void setKeepBottomSpaceOption(bool value);
+  bool keepBottomSpaceOption() const { return m_keepBottomSpace; }
 
-    void setKeepBottomSpaceOption(bool value);
-    bool keepBottomSpaceOption() const {return m_keepBottomSpace;}
+  void addChildBand(BandDesignIntf *band);
+  bool hasChildren() { return !m_childBands.isEmpty(); }
+  void removeChildBand(BandDesignIntf *band);
+  void setParentBand(BandDesignIntf *band);
 
-    void addChildBand(BandDesignIntf* band);
-    bool hasChildren(){return !m_childBands.isEmpty();}
-    void removeChildBand(BandDesignIntf* band);
-    void setParentBand(BandDesignIntf* band);
+  void setParentBandName(const QString &parentBandName);
+  QString parentBandName();
 
-    void setParentBandName(const QString& parentBandName);
-    QString parentBandName();
+  bool isConnectedToBand(BandDesignIntf::BandsType bandType) const;
 
-    bool isConnectedToBand(BandDesignIntf::BandsType bandType) const;
+  int minChildIndex(BandsType bandType);
+  int maxChildIndex(BandDesignIntf::BandsType bandType) const;
+  int maxChildIndex(QSet<BandsType> ignoredBands = QSet<BandDesignIntf::BandsType>()) const;
 
-    int minChildIndex(BandsType bandType);
-    int maxChildIndex(BandDesignIntf::BandsType bandType) const;
-    int maxChildIndex(QSet<BandsType> ignoredBands = QSet<BandDesignIntf::BandsType>()) const;
+  BandDesignIntf *parentBand() const { return m_parentBand; }
 
+  QList<BandDesignIntf *> childBands() const { return m_childBands; }
+  QList<BandDesignIntf *> childrenByType(BandDesignIntf::BandsType type);
 
-    BandDesignIntf* parentBand() const {return m_parentBand;}
+  bool canBeSplitted(int height) const;
+  bool isEmpty() const;
+  virtual bool isNeedRender() const;
+  virtual bool isFooter() const { return false; }
+  virtual bool isHeader() const { return false; }
+  virtual bool isGroupHeader() const { return false; }
+  virtual bool isData() const { return false; }
+  virtual int bandNestingLevel() { return 0; }
+  bool isBand() { return true; }
 
-    QList<BandDesignIntf*> childBands() const{return m_childBands;}
-    QList<BandDesignIntf*> childrenByType(BandDesignIntf::BandsType type);
+  void setTryToKeepTogether(bool value);
+  bool tryToKeepTogether();
 
-    bool canBeSplitted(int height) const;
-    bool isEmpty() const;
-    virtual bool isNeedRender() const;
-    virtual bool isFooter() const {return false;}
-    virtual bool isHeader() const {return false;}
-    virtual bool isGroupHeader() const {return false;}
-    virtual bool isData() const {return false;}
-    virtual int  bandNestingLevel(){return 0;}
-    bool isBand(){return true;}
+  BaseDesignIntf *cloneUpperPart(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
+  BaseDesignIntf *cloneBottomPart(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
+  void parentObjectLoadFinished();
+  void objectLoadFinished();
+  void emitBandRendered(BandDesignIntf *band);
 
-    void setTryToKeepTogether(bool value);
-    bool tryToKeepTogether();
+  bool isSplittable() const { return m_splitable; }
+  void setSplittable(bool value);
 
-    BaseDesignIntf* cloneUpperPart(int height, QObject* owner=0, QGraphicsItem* parent=0);
-    BaseDesignIntf* cloneBottomPart(int height, QObject *owner=0, QGraphicsItem *parent=0);
-    void parentObjectLoadFinished();
-    void objectLoadFinished();
-    void emitBandRendered(BandDesignIntf *band);
+  bool keepFooterTogether() const;
+  void setKeepFooterTogether(bool value);
 
-    bool isSplittable() const {return m_splitable;}
-    void setSplittable(bool value);
+  int maxScalePercent() const;
+  void setMaxScalePercent(int maxScalePercent);
 
-    bool keepFooterTogether() const;
-    void setKeepFooterTogether(bool value);
+  bool sliceLastRow() const;
+  void setSliceLastRow(bool sliceLastRow);
 
-    int maxScalePercent() const;
-    void setMaxScalePercent(int maxScalePercent);
+  bool printIfEmpty() const;
+  void setPrintIfEmpty(bool printIfEmpty);
 
-    bool sliceLastRow() const;
-    void setSliceLastRow(bool sliceLastRow);
+  virtual BandDesignIntf *bandHeader();
+  virtual BandDesignIntf *bandFooter();
 
-    bool printIfEmpty() const;
-    void setPrintIfEmpty(bool printIfEmpty);
+  int columnsCount() const { return m_columnsCount; }
+  BandColumnsLayoutType columnsFillDirection() { return m_columnsFillDirection; }
+  int columnIndex() const;
+  void setColumnIndex(int columnIndex);
 
-    virtual BandDesignIntf* bandHeader();
-    virtual BandDesignIntf* bandFooter();
+  bool reprintOnEachPage() const;
+  void setReprintOnEachPage(bool reprintOnEachPage);
 
-    int columnsCount() const {return m_columnsCount;}
-    BandColumnsLayoutType columnsFillDirection(){ return m_columnsFillDirection;}
-    int columnIndex() const;
-    void setColumnIndex(int columnIndex);
-    
-    bool reprintOnEachPage() const;
-    void setReprintOnEachPage(bool reprintOnEachPage);
+  bool startNewPage() const;
+  void setStartNewPage(bool startNewPage);
 
-    bool startNewPage() const;
-    void setStartNewPage(bool startNewPage);
+  void setAutoHeight(bool value);
+  bool autoHeight() { return m_autoHeight; }
 
-    void setAutoHeight(bool value);
-    bool autoHeight(){return m_autoHeight;}
-
-    bool startFromNewPage() const;
-    void setStartFromNewPage(bool startFromNewPage);
-    bool canContainChildren(){ return true;}
-    bool printAlways() const;
-    void setPrintAlways(bool printAlways);
-    bool repeatOnEachRow() const;
-    void setRepeatOnEachRow(bool repeatOnEachRow);
-    QColor alternateBackgroundColor() const;
-    void setAlternateBackgroundColor(const QColor &alternateBackgroundColor);
-    qreal bottomSpace() const;
+  bool startFromNewPage() const;
+  void setStartFromNewPage(bool startFromNewPage);
+  bool canContainChildren() { return true; }
+  bool printAlways() const;
+  void setPrintAlways(bool printAlways);
+  bool repeatOnEachRow() const;
+  void setRepeatOnEachRow(bool repeatOnEachRow);
+  QColor alternateBackgroundColor() const;
+  void setAlternateBackgroundColor(const QColor &alternateBackgroundColor);
+  qreal bottomSpace() const;
 signals:
-    void bandRendered(BandDesignIntf* band);        
+  void bandRendered(BandDesignIntf *band);
+
 protected:
-    void  trimToMaxHeight(int maxHeight);
-    void  setBandTypeText(const QString& value);
-    QString bandTypeText(){return m_bandTypeText;}
-    void moveDown(){}
-    void moveUp(){}
-    QSet<BandsType> groupBands();
-    QSet<BandsType> subdetailBands();
-    BandDesignIntf *findParentBand();
-    void geometryChangedEvent(QRectF, QRectF);
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-    void initMode(ItemMode mode);
-    virtual QColor bandColor() const;
-    void setMarkerColor(QColor color);
-    void checkEmptyTable();
-    void setColumnsCount(int value);
-    void setColumnsFillDirection(BandColumnsLayoutType value);
-    void moveItemsDown(qreal startPos, qreal offset);
-    void preparePopUpMenu(QMenu &menu);
-    void processPopUpAction(QAction *action);
-    QString translateBandName(const BaseDesignIntf *item) const;
+  void trimToMaxHeight(int maxHeight);
+  void setBandTypeText(const QString &value);
+  QString bandTypeText() { return m_bandTypeText; }
+  void moveDown() {}
+  void moveUp() {}
+  QSet<BandsType> groupBands();
+  QSet<BandsType> subdetailBands();
+  BandDesignIntf *findParentBand();
+  void geometryChangedEvent(QRectF, QRectF);
+  QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+  void initMode(ItemMode mode);
+  virtual QColor bandColor() const;
+  void setMarkerColor(QColor color);
+  void checkEmptyTable();
+  void setColumnsCount(int value);
+  void setColumnsFillDirection(BandColumnsLayoutType value);
+  void moveItemsDown(qreal startPos, qreal offset);
+  void preparePopUpMenu(QMenu &menu);
+  void processPopUpAction(QAction *action);
+  QString translateBandName(const BaseDesignIntf *item) const;
 private slots:
-    void childBandDeleted(QObject* band);
-    void slotPropertyObjectNameChanged(const QString&,const QString&);
+  void childBandDeleted(QObject *band);
+  void slotPropertyObjectNameChanged(const QString &, const QString &);
+
 private:
-    QString                     m_bandTypeText;
-    BandsType                   m_bandType;
-    int                         m_bandIndex;
-    QString                     m_dataSourceName;
-    bool                        m_autoHeight;
-    bool                        m_keepBottomSpace;
-    BandDesignIntf*             m_parentBand;
-    QString                     m_parentBandName;
-    QList<BandDesignIntf*>      m_childBands;
-    QVector<PItemSortContainer> m_bandItems;
-    BandMarker*                 m_bandMarker;
-    bool                        m_tryToKeepTogether;
-    bool                        m_splitable;
-    bool                        m_keepFooterTogether;
-    int                         m_maxScalePercent;
-    bool                        m_sliceLastRow;
-    bool                        m_printIfEmpty;
-    BandNameLabel*              m_bandNameLabel;
-    int                         m_columnsCount;
-    int                         m_columnIndex;
-    BandColumnsLayoutType       m_columnsFillDirection;
-    bool                        m_reprintOnEachPage;
-    bool                        m_startNewPage;
-    bool                        m_startFromNewPage;
-    bool                        m_printAlways;
-    bool                        m_repeatOnEachRow;
-    QMap<QString,BaseDesignIntf*> m_slicedItems;
-    QColor 						m_alternateBackgroundColor;
-    InitializedValue 			m_bottomSpace;
+  QString m_bandTypeText;
+  BandsType m_bandType;
+  int m_bandIndex;
+  QString m_dataSourceName;
+  bool m_autoHeight;
+  bool m_keepBottomSpace;
+  BandDesignIntf *m_parentBand;
+  QString m_parentBandName;
+  QList<BandDesignIntf *> m_childBands;
+  QVector<PItemSortContainer> m_bandItems;
+  BandMarker *m_bandMarker;
+  bool m_tryToKeepTogether;
+  bool m_splitable;
+  bool m_keepFooterTogether;
+  int m_maxScalePercent;
+  bool m_sliceLastRow;
+  bool m_printIfEmpty;
+  BandNameLabel *m_bandNameLabel;
+  int m_columnsCount;
+  int m_columnIndex;
+  BandColumnsLayoutType m_columnsFillDirection;
+  bool m_reprintOnEachPage;
+  bool m_startNewPage;
+  bool m_startFromNewPage;
+  bool m_printAlways;
+  bool m_repeatOnEachRow;
+  QMap<QString, BaseDesignIntf *> m_slicedItems;
+  QColor m_alternateBackgroundColor;
+  InitializedValue m_bottomSpace;
 };
 
-class DataBandDesignIntf : public BandDesignIntf{
-    Q_OBJECT
-    Q_PROPERTY(QString datasource READ datasourceName WRITE setDataSourceName )
+class DataBandDesignIntf : public BandDesignIntf {
+  Q_OBJECT
+  Q_PROPERTY(QString datasource READ datasourceName WRITE setDataSourceName)
 public:
-    DataBandDesignIntf(BandsType bandType, QString xmlTypeName, QObject* owner = 0, QGraphicsItem* parent=0);
+  DataBandDesignIntf(BandsType bandType, QString xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
 };
 
-bool bandIndexLessThen(const BandDesignIntf* b1, const BandDesignIntf* b2);
+bool bandIndexLessThen(const BandDesignIntf *b1, const BandDesignIntf *b2);
 
 } // namespace LimeReport
 #endif // LRBANDDESIGNINTF_H

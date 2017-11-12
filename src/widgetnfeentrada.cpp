@@ -97,6 +97,8 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
 }
 
 bool WidgetNfeEntrada::cancelar(const int row) {
+  // FIXME: ao cancelar nota nao voltar o pedido de compra inteiro, apenas o item da nota cancelada
+
   // marcar nota como cancelada
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE idNFe = :idNFe");

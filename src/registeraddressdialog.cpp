@@ -27,9 +27,7 @@ void RegisterAddressDialog::setupTables(const QString &table) {
 
   modelEnd.setFilter("0");
 
-  if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Ocorreu um erro ao acessar a tabela de endereço: " + modelEnd.lastError().text());
-  }
+  if (not modelEnd.select()) QMessageBox::critical(this, "Erro!", "Ocorreu um erro ao acessar a tabela de endereço: " + modelEnd.lastError().text());
 
   mapperEnd.setModel(&modelEnd);
   mapperEnd.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);

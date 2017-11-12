@@ -30,30 +30,29 @@
 #ifndef LRCOLLECTION_H
 #define LRCOLLECTION_H
 
-#include <QObject>
 #include <QMetaType>
+#include <QObject>
 
 #include "lrglobal.h"
 
-class ACollectionProperty{
+class ACollectionProperty {
 public:
-    ACollectionProperty(){}
-    ACollectionProperty(const ACollectionProperty& ){}
-    virtual ~ACollectionProperty(){}
+  ACollectionProperty() {}
+  ACollectionProperty(const ACollectionProperty &) {}
+  virtual ~ACollectionProperty() {}
 };
 Q_DECLARE_METATYPE(ACollectionProperty)
 
-namespace LimeReport{
+namespace LimeReport {
 
 const int VARIABLE_IS_NOT_USED COLLECTION_TYPE_ID = qMetaTypeId<ACollectionProperty>();
-class ICollectionContainer{
+class ICollectionContainer {
 public:
-    virtual QObject* createElement(const QString& collectionName,const QString& elementType)=0;
-    virtual int elementsCount(const QString& collectionName)=0;
-    virtual QObject* elementAt(const QString& collectionName,int index)=0;
-    virtual void collectionLoadFinished(const QString& collectionName){Q_UNUSED(collectionName)}
-    ACollectionProperty fakeCollectionReader(){return ACollectionProperty();}
+  virtual QObject *createElement(const QString &collectionName, const QString &elementType) = 0;
+  virtual int elementsCount(const QString &collectionName) = 0;
+  virtual QObject *elementAt(const QString &collectionName, int index) = 0;
+  virtual void collectionLoadFinished(const QString &collectionName){Q_UNUSED(collectionName)} ACollectionProperty fakeCollectionReader() { return ACollectionProperty(); }
 };
 
-}
+} // namespace LimeReport
 #endif // LRCOLLECTION_H

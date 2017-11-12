@@ -5,6 +5,7 @@
 #include <QShortcut>
 #include <QSqlError>
 #include <QStyleFactory>
+#include <QUrl>
 
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"

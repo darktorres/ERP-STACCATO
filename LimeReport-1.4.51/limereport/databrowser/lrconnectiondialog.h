@@ -31,41 +31,42 @@
 #define LRCONNECTIONDIALOG_H
 
 #include <QDialog>
+
 #include "lrdatadesignintf.h"
 
-namespace LimeReport{
+namespace LimeReport {
 
 namespace Ui {
-    class ConnectionDialog;
+class ConnectionDialog;
 }
 
-class ConnectionDialog : public QDialog
-{
-    Q_OBJECT
+class ConnectionDialog : public QDialog {
+  Q_OBJECT
 public:
-    explicit ConnectionDialog(LimeReport::IConnectionController* conControl, LimeReport::ConnectionDesc* connectionDesc=0, QWidget *parent = 0);
-    ~ConnectionDialog();
+  explicit ConnectionDialog(LimeReport::IConnectionController *conControl, LimeReport::ConnectionDesc *connectionDesc = 0, QWidget *parent = 0);
+  ~ConnectionDialog();
+
 protected:
-    void showEvent(QShowEvent *);
-    void init();
-    void checkFieldsFill();
-    bool checkConnection();
-    ConnectionDesc* uiToConnection(LimeReport::ConnectionDesc *conDesc = 0);
-    void connectionToUI();
+  void showEvent(QShowEvent *);
+  void init();
+  void checkFieldsFill();
+  bool checkConnection();
+  ConnectionDesc *uiToConnection(LimeReport::ConnectionDesc *conDesc = 0);
+  void connectionToUI();
 signals:
-    void conectionRegistred(LimeReport::ConnectionDesc* connectionDesc);
+  void conectionRegistred(LimeReport::ConnectionDesc *connectionDesc);
 private slots:
-    void slotAccept();
-    void slotCheckConnection();
-    void on_toolButton_clicked();
-    void on_cbbUseDefaultConnection_toggled(bool checked);
+  void slotAccept();
+  void slotCheckConnection();
+  void on_toolButton_clicked();
+  void on_cbbUseDefaultConnection_toggled(bool checked);
 
 private:
-    Ui::ConnectionDialog *ui;
-    ConnectionDesc* m_connection;
-    bool m_changeMode;
-    IConnectionController* m_controller;
-    QString m_savedConnectionName;
+  Ui::ConnectionDialog *ui;
+  ConnectionDesc *m_connection;
+  bool m_changeMode;
+  IConnectionController *m_controller;
+  QString m_savedConnectionName;
 };
 
 } // namespace LimeReport

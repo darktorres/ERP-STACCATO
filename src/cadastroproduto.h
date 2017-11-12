@@ -32,12 +32,12 @@ private:
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;
+  void calcularMarkup();
   void clearFields() final;
   void registerMode() final;
   void setupMapper() final;
   void successMessage() final;
   void updateMode() final;
-  void calcularMarkup();
 };
 
 #endif // CADASTROPRODUTO_H

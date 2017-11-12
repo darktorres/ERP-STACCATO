@@ -35,73 +35,42 @@ const QString xmlTag = "Data";
 const QString xmlTagHeader = "DataHeader";
 const QString xmlTagFooter = "DataFooter";
 
-namespace{
+namespace {
 
-LimeReport::BaseDesignIntf * createBand(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::DataBand(owner,parent);
-}
-LimeReport::BaseDesignIntf * createHeader(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::DataHeaderBand(owner,parent);
-}
-LimeReport::BaseDesignIntf * createFooter(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::DataFooterBand(owner,parent);
-}
+LimeReport::BaseDesignIntf *createBand(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::DataBand(owner, parent); }
+LimeReport::BaseDesignIntf *createHeader(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::DataHeaderBand(owner, parent); }
+LimeReport::BaseDesignIntf *createFooter(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::DataFooterBand(owner, parent); }
 
-bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instance().registerCreator(
-        xmlTag,
-        LimeReport::ItemAttribs(QObject::tr("Data"),LimeReport::Const::bandTAG),
-        createBand
-    );
-bool VARIABLE_IS_NOT_USED registredHeader = LimeReport::DesignElementsFactory::instance().registerCreator(
-            xmlTagHeader,
-            LimeReport::ItemAttribs(QObject::tr("DataHeader"),LimeReport::Const::bandTAG),
-            createHeader
-        );
-bool VARIABLE_IS_NOT_USED registredFooter = LimeReport::DesignElementsFactory::instance().registerCreator(
-            xmlTagFooter,
-            LimeReport::ItemAttribs(QObject::tr("DataFooter"),LimeReport::Const::bandTAG),
-            createFooter
-        );
+bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instance().registerCreator(xmlTag, LimeReport::ItemAttribs(QObject::tr("Data"), LimeReport::Const::bandTAG), createBand);
+bool VARIABLE_IS_NOT_USED registredHeader =
+    LimeReport::DesignElementsFactory::instance().registerCreator(xmlTagHeader, LimeReport::ItemAttribs(QObject::tr("DataHeader"), LimeReport::Const::bandTAG), createHeader);
+bool VARIABLE_IS_NOT_USED registredFooter =
+    LimeReport::DesignElementsFactory::instance().registerCreator(xmlTagFooter, LimeReport::ItemAttribs(QObject::tr("DataFooter"), LimeReport::Const::bandTAG), createFooter);
 
-}
+} // namespace
 
 namespace LimeReport {
 
-DataBand::DataBand(QObject *owner, QGraphicsItem *parent)
-    : DataBandDesignIntf(LimeReport::BandDesignIntf::Data,xmlTag,owner,parent) {
-        setBandTypeText(tr("Data"));
-        setFixedPos(false);
-        setMarkerColor(bandColor());
+DataBand::DataBand(QObject *owner, QGraphicsItem *parent) : DataBandDesignIntf(LimeReport::BandDesignIntf::Data, xmlTag, owner, parent) {
+  setBandTypeText(tr("Data"));
+  setFixedPos(false);
+  setMarkerColor(bandColor());
 }
 
-bool DataBand::isUnique() const
-{
-    return false;
+bool DataBand::isUnique() const { return false; }
+
+QColor DataBand::bandColor() const { return QColor(Qt::darkGreen); }
+
+BaseDesignIntf *DataBand::createSameTypeItem(QObject *owner, QGraphicsItem *parent) { return new DataBand(owner, parent); }
+
+DataHeaderBand::DataHeaderBand(QObject *owner, QGraphicsItem *parent) : BandDesignIntf(BandDesignIntf::DataHeader, xmlTagHeader, owner, parent) {
+  setBandTypeText(tr("DataHeader"));
+  setMarkerColor(bandColor());
 }
 
-QColor DataBand::bandColor() const
-{
-    return QColor(Qt::darkGreen);
+DataFooterBand::DataFooterBand(QObject *owner, QGraphicsItem *parent) : BandDesignIntf(BandDesignIntf::DataFooter, xmlTagFooter, owner, parent) {
+  setBandTypeText(tr("DataFooter"));
+  setMarkerColor(bandColor());
 }
 
-BaseDesignIntf *DataBand::createSameTypeItem(QObject *owner, QGraphicsItem *parent)
-{
-    return new DataBand(owner,parent);
-}
-
-DataHeaderBand::DataHeaderBand(QObject *owner, QGraphicsItem *parent)
-    :BandDesignIntf(BandDesignIntf::DataHeader,xmlTagHeader,owner,parent)
-{
-    setBandTypeText(tr("DataHeader"));
-    setMarkerColor(bandColor());
-}
-
-DataFooterBand::DataFooterBand(QObject *owner, QGraphicsItem *parent)
-    :BandDesignIntf(BandDesignIntf::DataFooter,xmlTagFooter,owner,parent)
-{
-    setBandTypeText(tr("DataFooter"));
-    setMarkerColor(bandColor());
-}
-
-}
-
+} // namespace LimeReport

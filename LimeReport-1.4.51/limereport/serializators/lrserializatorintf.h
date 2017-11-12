@@ -29,22 +29,22 @@
  ****************************************************************************/
 #ifndef LRSERIALIZATORINTF_H
 #define LRSERIALIZATORINTF_H
+
 #include <QObject>
+
 namespace LimeReport {
 
-class SerializatorIntf
-{
+class SerializatorIntf {
 public:
-    virtual QVariant loadValue() = 0;
-    virtual void save(const QVariant& value,QString name) = 0;
-    virtual ~SerializatorIntf(){}
+  virtual QVariant loadValue() = 0;
+  virtual void save(const QVariant &value, QString name) = 0;
+  virtual ~SerializatorIntf() {}
 };
 
-class CryptedSerializator : public virtual SerializatorIntf
-{
+class CryptedSerializator : public virtual SerializatorIntf {
 public:
-    virtual void setPassPhrase(const QString& passPhrase) = 0;
+  virtual void setPassPhrase(const QString &passPhrase) = 0;
 };
 
-}
+} // namespace LimeReport
 #endif // LRSERIALIZATORINTF_H

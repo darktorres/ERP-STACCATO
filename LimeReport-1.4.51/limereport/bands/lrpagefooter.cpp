@@ -31,58 +31,32 @@
 #include "lrdesignelementsfactory.h"
 #include "lrglobal.h"
 
-const QString xmlTag ="PageFooter";
+const QString xmlTag = "PageFooter";
 
-namespace{
-LimeReport::BaseDesignIntf * createBand(QObject* owner, LimeReport::BaseDesignIntf*  parent){
-    return new LimeReport::PageFooter(owner,parent);
+namespace {
+LimeReport::BaseDesignIntf *createBand(QObject *owner, LimeReport::BaseDesignIntf *parent) { return new LimeReport::PageFooter(owner, parent); }
+
+bool VARIABLE_IS_NOT_USED registred =
+    LimeReport::DesignElementsFactory::instance().registerCreator(xmlTag, LimeReport::ItemAttribs(QObject::tr("Page Footer"), LimeReport::Const::bandTAG), createBand);
+} // namespace
+
+namespace LimeReport {
+
+PageFooter::PageFooter(QObject *owner, QGraphicsItem *parent) : BandDesignIntf(LimeReport::BandDesignIntf::PageFooter, xmlTag, owner, parent), m_printOnFirstPage(true), m_printOnLastPage(true) {
+  setBandTypeText(tr("Page Footer"));
+  setMarkerColor(bandColor());
 }
 
-bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instance().registerCreator(
-        xmlTag,
-        LimeReport::ItemAttribs(QObject::tr("Page Footer"),LimeReport::Const::bandTAG),
-        createBand
-    );
-}
+BaseDesignIntf *PageFooter::createSameTypeItem(QObject *owner, QGraphicsItem *parent) { return new PageFooter(owner, parent); }
 
-namespace LimeReport{
+QColor PageFooter::bandColor() const { return QColor(246, 120, 12); }
 
-PageFooter::PageFooter(QObject *owner, QGraphicsItem *parent)
-    : BandDesignIntf(LimeReport::BandDesignIntf::PageFooter,xmlTag,owner,parent),
-      m_printOnFirstPage(true), m_printOnLastPage(true)
-{
-        setBandTypeText( tr("Page Footer") );
-        setMarkerColor(bandColor());
-}
+bool PageFooter::printOnFirstPage() const { return m_printOnFirstPage; }
 
-BaseDesignIntf *PageFooter::createSameTypeItem(QObject *owner, QGraphicsItem *parent)
-{
-    return new PageFooter(owner,parent);
-}
+void PageFooter::setPrintOnFirstPage(bool printOnFirstPage) { m_printOnFirstPage = printOnFirstPage; }
 
-QColor PageFooter::bandColor() const
-{
-   return QColor(246,120,12);
-}
+bool PageFooter::printOnLastPage() const { return m_printOnLastPage; }
 
-bool PageFooter::printOnFirstPage() const
-{
-    return m_printOnFirstPage;
-}
-
-void PageFooter::setPrintOnFirstPage(bool printOnFirstPage)
-{
-    m_printOnFirstPage = printOnFirstPage;
-}
-
-bool PageFooter::printOnLastPage() const
-{
-    return m_printOnLastPage;
-}
-
-void PageFooter::setPrintOnLastPage(bool printOnLastPage)
-{
-    m_printOnLastPage = printOnLastPage;
-}
+void PageFooter::setPrintOnLastPage(bool printOnLastPage) { m_printOnLastPage = printOnLastPage; }
 
 } // namespace LimeReport

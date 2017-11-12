@@ -30,32 +30,33 @@
 #ifndef LRXMLQRECTSERIALIZATOR_H
 #define LRXMLQRECTSERIALIZATOR_H
 
-#include "lrserializatorintf.h"
 #include <QtXml>
 
-namespace LimeReport{
+#include "lrserializatorintf.h"
 
-class XMLQRectSerializator : public SerializatorIntf
-{
+namespace LimeReport {
+
+class XMLQRectSerializator : public SerializatorIntf {
 public:
-    XMLQRectSerializator(QDomDocument *doc, QDomElement *node):m_doc(doc),m_node(node){}
-    virtual void save(const QVariant &value,QString name);
-    virtual QVariant loadValue();
+  XMLQRectSerializator(QDomDocument *doc, QDomElement *node) : m_doc(doc), m_node(node) {}
+  virtual void save(const QVariant &value, QString name);
+  virtual QVariant loadValue();
+
 private:
-    QDomDocument *m_doc;
-    QDomElement *m_node;
+  QDomDocument *m_doc;
+  QDomElement *m_node;
 };
 
-class XMLQRectFSerializator : public SerializatorIntf
-{
+class XMLQRectFSerializator : public SerializatorIntf {
 public:
-    XMLQRectFSerializator(QDomDocument *doc, QDomElement *node):m_doc(doc),m_node(node){}
-    virtual void save(const QVariant &value, QString name);
-    virtual QVariant loadValue();
+  XMLQRectFSerializator(QDomDocument *doc, QDomElement *node) : m_doc(doc), m_node(node) {}
+  virtual void save(const QVariant &value, QString name);
+  virtual QVariant loadValue();
+
 private:
-    QDomDocument *m_doc;
-    QDomElement *m_node;
+  QDomDocument *m_doc;
+  QDomElement *m_node;
 };
 
-}
+} // namespace LimeReport
 #endif // LRXMLQRECTSERIALIZATOR_H

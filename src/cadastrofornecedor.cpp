@@ -314,8 +314,7 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = model.data(mapper.currentIndex(), "razaoSocial").toString();
 
   QSqlQuery query;
-  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = 0 WHERE fornecedor = :fornecedor AND "
-                "validade = :oldValidade");
+  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = 0 WHERE fornecedor = :fornecedor AND validade = :oldValidade");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
   query.bindValue(":oldValidade", model.data(mapper.currentIndex(), "validadeProdutos"));

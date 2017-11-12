@@ -31,63 +31,61 @@
 #define LRITEMDESIGNITTF_H
 
 #include <QObject>
+
 #include "lrbasedesignintf.h"
 
-namespace LimeReport{
+namespace LimeReport {
 class BaseDesignIntf;
-class ItemDesignIntf : public BaseDesignIntf
-{
-    Q_OBJECT
-    Q_PROPERTY(LocationType itemLocation READ itemLocation WRITE setItemLocation)
-    Q_PROPERTY(bool stretchToMaxHeight READ stretchToMaxHeight WRITE setStretchToMaxHeight)
-    Q_PROPERTY(ItemAlign itemAlign READ itemAlign WRITE setItemAlign)
-    Q_ENUMS(LocationType)
+class ItemDesignIntf : public BaseDesignIntf {
+  Q_OBJECT
+  Q_PROPERTY(LocationType itemLocation READ itemLocation WRITE setItemLocation)
+  Q_PROPERTY(bool stretchToMaxHeight READ stretchToMaxHeight WRITE setStretchToMaxHeight)
+  Q_PROPERTY(ItemAlign itemAlign READ itemAlign WRITE setItemAlign)
+  Q_ENUMS(LocationType)
 public:
-    enum LocationType{Band,Page};
-    ItemDesignIntf(const QString& xmlTypeName, QObject* owner = 0,QGraphicsItem* parent = 0);
-    LocationType itemLocation(){return m_itemLocation;}
-    void setItemLocation(LocationType location);
-    void setStretchToMaxHeight(bool value);
-    bool stretchToMaxHeight(){return m_stretchToMaxHeight;}
-    BaseDesignIntf* cloneEmpty(int height, QObject *owner, QGraphicsItem *parent);
+  enum LocationType { Band, Page };
+  ItemDesignIntf(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
+  LocationType itemLocation() { return m_itemLocation; }
+  void setItemLocation(LocationType location);
+  void setStretchToMaxHeight(bool value);
+  bool stretchToMaxHeight() { return m_stretchToMaxHeight; }
+  BaseDesignIntf *cloneEmpty(int height, QObject *owner, QGraphicsItem *parent);
 signals:
-    void itemLocationChanged(BaseDesignIntf* item, BaseDesignIntf* parent);
+  void itemLocationChanged(BaseDesignIntf *item, BaseDesignIntf *parent);
+
 protected:
-    QGraphicsItem* bandByPos();
-    virtual void initFlags();
+  QGraphicsItem *bandByPos();
+  virtual void initFlags();
+
 private:
-    LocationType m_itemLocation;
-    bool m_stretchToMaxHeight;
+  LocationType m_itemLocation;
+  bool m_stretchToMaxHeight;
 };
 
-class Spacer :public ItemDesignIntf{
+class Spacer : public ItemDesignIntf {
 public:
-    Spacer(QObject* owner,QGraphicsItem* parent);
+  Spacer(QObject *owner, QGraphicsItem *parent);
+
 protected:
-    BaseDesignIntf* createSameTypeItem(QObject *owner, QGraphicsItem *parent){
-        return new Spacer(owner, parent);
-    }
+  BaseDesignIntf *createSameTypeItem(QObject *owner, QGraphicsItem *parent) { return new Spacer(owner, parent); }
 };
 
-class ContentItemDesignIntf : public ItemDesignIntf
-{
-    Q_OBJECT
+class ContentItemDesignIntf : public ItemDesignIntf {
+  Q_OBJECT
 public:
-    ContentItemDesignIntf(const QString& xmlTypeName, QObject* owner = 0,QGraphicsItem* parent = 0)
-        :ItemDesignIntf(xmlTypeName,owner,parent){}
-    virtual QString content() const = 0;
-    virtual void setContent(const QString& value) = 0;
+  ContentItemDesignIntf(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0) : ItemDesignIntf(xmlTypeName, owner, parent) {}
+  virtual QString content() const = 0;
+  virtual void setContent(const QString &value) = 0;
 };
 
-class LayoutDesignIntf : public ItemDesignIntf{
+class LayoutDesignIntf : public ItemDesignIntf {
 public:
-    LayoutDesignIntf(const QString& xmlTypeName, QObject* owner = 0,QGraphicsItem* parent = 0):
-        ItemDesignIntf(xmlTypeName,owner,parent){}
-    virtual void addChild(BaseDesignIntf *item,bool updateSize=true) = 0;
-    virtual void restoreChild(BaseDesignIntf *item) = 0;
-    virtual int childrenCount() = 0;
-    friend class BaseDesignIntf;
+  LayoutDesignIntf(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0) : ItemDesignIntf(xmlTypeName, owner, parent) {}
+  virtual void addChild(BaseDesignIntf *item, bool updateSize = true) = 0;
+  virtual void restoreChild(BaseDesignIntf *item) = 0;
+  virtual int childrenCount() = 0;
+  friend class BaseDesignIntf;
 };
 
-}
+} // namespace LimeReport
 #endif // LRITEMDESIGNITTF_H

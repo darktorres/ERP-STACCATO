@@ -13,6 +13,7 @@ public slots:
 
 protected:
   // attributes
+  int currentRowEnd = -1;
   QDataWidgetMapper mapperEnd;
   SqlRelationalTableModel modelEnd;
   // methods

@@ -36,21 +36,21 @@ private:
   SearchDialog *sdFornecedor;
   Ui::CadastroFornecedor *ui;
   // methods
-  bool ajustarValidade(const int newValidade);
-  bool cadastrarEndereco(const bool isUpdate = false);
-  bool viewRegister() final;
+  bool ajustarValidade(const int novaValidade);
   bool cadastrar() final;
+  bool cadastrarEndereco(const bool isUpdate = false);
   bool savingProcedures() final;
   bool verifyFields() final;
+  bool viewRegister() final;
+  void clearEndereco();
   void clearFields() final;
+  void novoEndereco();
   void registerMode() final;
   void setupMapper() final;
-  void successMessage() final;
-  void updateMode() final;
-  void clearEndereco();
-  void novoEndereco();
   void setupTables();
   void setupUi();
+  void successMessage() final;
+  void updateMode() final;
 };
 
 #endif // CADASTROFORNECEDOR_H

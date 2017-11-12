@@ -1,5 +1,5 @@
-#include "ui_validadedialog.h"
 #include "validadedialog.h"
+#include "ui_validadedialog.h"
 
 ValidadeDialog::ValidadeDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ValidadeDialog) {
   ui->setupUi(this);
@@ -16,6 +16,6 @@ void ValidadeDialog::on_pushButtonSalvar_clicked() {
 
 void ValidadeDialog::on_spinBox_valueChanged(const int dias) { ui->dateEdit->setDate(QDate::currentDate().addDays(dias)); }
 
-void ValidadeDialog::on_dateEdit_dateChanged(const QDate &date) { ui->spinBox->setValue(QDate::currentDate().daysTo(date)); }
+void ValidadeDialog::on_dateEdit_dateChanged(const QDate &date) { ui->spinBox->setValue(QDate::currentDate().daysTo(date)); } // REFAC: fix warning
 
 int ValidadeDialog::getValidade() { return ui->spinBox->value(); }

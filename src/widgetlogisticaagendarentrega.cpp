@@ -741,7 +741,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   // alterar quant, caixas, valor
 
   const double quantConsumo = modelConsumo.data(0, "quant").toDouble() * proporcao;
-  const int caixasConsumo = modelConsumo.data(0, "caixas").toInt() * proporcao;
+  const int caixasConsumo = modelConsumo.data(0, "caixas").toInt() * proporcao; // REFAC: redo those to double
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble() * proporcao;
 
   if (not modelConsumo.setData(0, "quant", quantConsumo)) return false;

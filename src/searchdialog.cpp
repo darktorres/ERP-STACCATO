@@ -13,7 +13,7 @@
 #include "usersession.h"
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
-    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), ui(new Ui::SearchDialog) {
+    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   setWindowTitle(title);
@@ -37,8 +37,6 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->lineEditEstoque->hide();
   ui->lineEditPromocao->hide();
   ui->lineEditBusca->setFocus();
-
-  model.setLimit(50);
 }
 
 SearchDialog::~SearchDialog() { delete ui; }

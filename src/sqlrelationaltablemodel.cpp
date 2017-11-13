@@ -3,15 +3,18 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "sqlrelationaltablemodel.h"
 
-SqlRelationalTableModel::SqlRelationalTableModel(QObject *parent) : QSqlRelationalTableModel(parent) {}
+SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *parent) : QSqlRelationalTableModel(parent), limit(limit) {
+  connect(this, &SqlRelationalTableModel::errorSignal, qApp, &Application::enqueueError);
+}
 
 QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlTableModel::data(QSqlTableModel::index(row, column)); }
 
 QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
   if (QSqlTableModel::fieldIndex(column) == -1) {
-    QMessageBox::critical(nullptr, "Erro!", "Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName());
+    emit errorSignal("Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName());
     return QVariant();
   }
 
@@ -20,7 +23,7 @@ QVariant SqlRelationalTableModel::data(const int row, const QString &column) con
 
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), value)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
+    emit errorSignal("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
     return false;
   }
 
@@ -29,18 +32,17 @@ bool SqlRelationalTableModel::setData(const int row, const int column, const QVa
 
 bool SqlRelationalTableModel::setData(const int row, const QString &column, const QVariant &value) {
   if (row == -1) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro: linha -1 SqlTableModel");
+    emit errorSignal("Erro: linha -1 SqlTableModel");
     return false;
   }
 
   if (QSqlTableModel::fieldIndex(column) == -1) {
-    QMessageBox::critical(nullptr, "Erro!", "Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName());
+    emit errorSignal("Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName());
     return false;
   }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)), value)) {
-    QMessageBox::critical(nullptr, "Erro!",
-                          "Erro inserindo " + column + " na tabela " + tableName() + ": " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) + " - valor: " + value.toString());
+    emit errorSignal("Erro inserindo " + column + " na tabela " + tableName() + ": " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) + " - valor: " + value.toString());
     return false;
   }
 
@@ -60,8 +62,3 @@ QString SqlRelationalTableModel::selectStatement() const {
 
   return stmt;
 }
-
-void SqlRelationalTableModel::setLimit(int value) { limit = value; }
-
-// REFAC: redo this to use MainWindow showErrors
-// REFAC: add nodiscard to setData's

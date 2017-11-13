@@ -7,7 +7,7 @@
 
 #include "registerdialog.h"
 
-RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(primaryKey), model(this) {
+RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(primaryKey), model(0, this) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 

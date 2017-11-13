@@ -67,6 +67,7 @@ include(LimeReport-1.4.51/limereport/limereport.pri)
 SOURCES += \
     src/acbr.cpp \
     src/anteciparrecebimento.cpp \
+    src/application.cpp \
     src/baixaorcamento.cpp \
     src/cadastrarnfe.cpp \
     src/cadastrocliente.cpp \
@@ -168,6 +169,7 @@ SOURCES += \
 HEADERS  += \
     src/acbr.h \
     src/anteciparrecebimento.h \
+    src/application.h \
     src/baixaorcamento.h \
     src/cadastrarnfe.h \
     src/cadastrocliente.h \

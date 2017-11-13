@@ -11,15 +11,13 @@ class MainWindow final : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(const QPalette &defaultPalette, QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
 public slots:
   void updateTables();
 
 private slots:
-  void endTransaction();
-  void enqueueError(const QString &error);
   void on_actionCadastrarCliente_triggered();
   void on_actionCadastrarFornecedor_triggered();
   void on_actionCadastrarProdutos_triggered();
@@ -38,20 +36,13 @@ private slots:
   void on_actionPromocao_triggered();
   void on_actionSobre_triggered();
   void on_tabWidget_currentChanged(const int);
-  void startTransaction();
 
 private:
   // attributes
-  bool updating = false;
-  bool inTransaction = false;
-  const QPalette defautPalette;
-  QStringList errorQueue;
   Ui::MainWindow *ui;
   // methods
   bool event(QEvent *event);
-  void darkTheme();
   void gerarEnviarRelatorio();
-  void showErrors();
   void setConnections();
 };
 

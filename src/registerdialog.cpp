@@ -312,11 +312,12 @@ bool RegisterDialog::validaCPF(const QString &text) {
   sub2.push_back(digito1);
 
   const QVector<int> multiplicadores2 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
-  soma = 0;
 
-  for (int i = 0; i < 10; ++i) soma += sub2.at(i) * multiplicadores2.at(i);
+  int soma2 = 0;
 
-  const int resto2 = soma % 11;
+  for (int i = 0; i < 10; ++i) soma2 += sub2.at(i) * multiplicadores2.at(i);
+
+  const int resto2 = soma2 % 11;
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 

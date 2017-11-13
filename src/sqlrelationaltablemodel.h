@@ -7,7 +7,7 @@ class SqlRelationalTableModel final : public QSqlRelationalTableModel {
   Q_OBJECT
 
 public:
-  explicit SqlRelationalTableModel(QObject *parent = 0);
+  explicit SqlRelationalTableModel(const int limit = 0, QObject *parent = 0);
   [[nodiscard]] bool setData(const int row, const int column, const QVariant &value);
   [[nodiscard]] bool setData(const int row, const QString &column, const QVariant &value);
   bool setHeaderData(const QString &column, const QVariant &value);
@@ -15,7 +15,9 @@ public:
   QVariant data(const int row, const QString &column) const;
   Qt::DropActions supportedDropActions() const final;
   Qt::ItemFlags flags(const QModelIndex &index) const final;
-  void setLimit(int value);
+
+signals:
+  void errorSignal(const QString &error) const;
 
 private:
   using QSqlRelationalTableModel::data;
@@ -24,8 +26,7 @@ private:
 
 protected:
   QString selectStatement() const final;
-  // REFAC: put limit in constructor and set const
-  int limit = 0;
+  const int limit;
 };
 
 #endif // SQLTABLEMODEL_H

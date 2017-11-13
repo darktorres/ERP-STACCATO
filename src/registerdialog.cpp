@@ -203,6 +203,7 @@ bool RegisterDialog::save(const bool silent) {
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
     model.select();
+    mapper.toLast();
     emit transactionEnded();
     return false;
   }

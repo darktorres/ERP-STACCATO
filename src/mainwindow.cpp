@@ -7,6 +7,7 @@
 #include <QStyleFactory>
 #include <QUrl>
 
+#include "application.h"
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"
 #include "cadastroloja.h"
@@ -25,7 +26,7 @@
 
 // QT_CHARTS_USE_NAMESPACE
 
-MainWindow::MainWindow(const QPalette &defaultPalette, QWidget *parent) : QMainWindow(parent), defautPalette(defaultPalette), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
   setWindowIcon(QIcon("Staccato.ico"));
@@ -113,54 +114,32 @@ MainWindow::MainWindow(const QPalette &defaultPalette, QWidget *parent) : QMainW
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::setConnections() {
-  connect(ui->widgetOrcamento, &WidgetOrcamento::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetVenda, &WidgetVenda::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetCompra, &WidgetCompra::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetLogistica, &WidgetLogistica::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetNfe, &WidgetNfe::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetEstoque, &WidgetEstoque::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetFinanceiro, &WidgetFinanceiro::errorSignal, this, &MainWindow::enqueueError);
-  connect(ui->widgetRelatorio, &WidgetRelatorio::errorSignal, this, &MainWindow::enqueueError);
+  connect(ui->widgetOrcamento, &WidgetOrcamento::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetVenda, &WidgetVenda::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetCompra, &WidgetCompra::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetLogistica, &WidgetLogistica::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetNfe, &WidgetNfe::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetEstoque, &WidgetEstoque::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetFinanceiro, &WidgetFinanceiro::errorSignal, qApp, &Application::enqueueError);
+  connect(ui->widgetRelatorio, &WidgetRelatorio::errorSignal, qApp, &Application::enqueueError);
 
-  connect(ui->widgetOrcamento, &WidgetOrcamento::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetVenda, &WidgetVenda::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetCompra, &WidgetCompra::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetLogistica, &WidgetLogistica::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetNfe, &WidgetNfe::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetEstoque, &WidgetEstoque::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetFinanceiro, &WidgetFinanceiro::transactionStarted, this, &MainWindow::startTransaction);
-  connect(ui->widgetRelatorio, &WidgetRelatorio::transactionStarted, this, &MainWindow::startTransaction);
+  connect(ui->widgetOrcamento, &WidgetOrcamento::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetVenda, &WidgetVenda::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetCompra, &WidgetCompra::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetLogistica, &WidgetLogistica::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetNfe, &WidgetNfe::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetEstoque, &WidgetEstoque::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetFinanceiro, &WidgetFinanceiro::transactionStarted, qApp, &Application::startTransaction);
+  connect(ui->widgetRelatorio, &WidgetRelatorio::transactionStarted, qApp, &Application::startTransaction);
 
-  connect(ui->widgetOrcamento, &WidgetOrcamento::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetVenda, &WidgetVenda::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetCompra, &WidgetCompra::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetLogistica, &WidgetLogistica::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetNfe, &WidgetNfe::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetEstoque, &WidgetEstoque::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetFinanceiro, &WidgetFinanceiro::transactionEnded, this, &MainWindow::endTransaction);
-  connect(ui->widgetRelatorio, &WidgetRelatorio::transactionEnded, this, &MainWindow::endTransaction);
-}
-
-void MainWindow::enqueueError(const QString &error) {
-  errorQueue << error;
-
-  showErrors();
-}
-
-void MainWindow::startTransaction() { inTransaction = true; }
-
-void MainWindow::endTransaction() {
-  inTransaction = false;
-
-  showErrors();
-}
-
-void MainWindow::showErrors() {
-  if (inTransaction or updating) return;
-
-  for (const auto &error : errorQueue) QMessageBox::critical(this, "Erro!", error);
-
-  errorQueue.clear();
+  connect(ui->widgetOrcamento, &WidgetOrcamento::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetVenda, &WidgetVenda::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetCompra, &WidgetCompra::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetLogistica, &WidgetLogistica::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetNfe, &WidgetNfe::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetEstoque, &WidgetEstoque::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetFinanceiro, &WidgetFinanceiro::transactionEnded, qApp, &Application::endTransaction);
+  connect(ui->widgetRelatorio, &WidgetRelatorio::transactionEnded, qApp, &Application::endTransaction);
 }
 
 // REFAC: put this in main.cpp inside a class
@@ -283,9 +262,9 @@ void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(orcamento, &Orcamento::errorSignal, this, &MainWindow::enqueueError);
-  connect(orcamento, &Orcamento::transactionStarted, this, &MainWindow::startTransaction);
-  connect(orcamento, &Orcamento::transactionEnded, this, &MainWindow::endTransaction);
+  connect(orcamento, &Orcamento::errorSignal, qApp, &Application::enqueueError);
+  connect(orcamento, &Orcamento::transactionStarted, qApp, &Application::startTransaction);
+  connect(orcamento, &Orcamento::transactionEnded, qApp, &Application::endTransaction);
 
   orcamento->show();
 }
@@ -294,9 +273,9 @@ void MainWindow::on_actionCadastrarProdutos_triggered() {
   auto *cad = new CadastroProduto(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroProduto::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroProduto::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroProduto::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroProduto::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroProduto::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroProduto::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
@@ -305,9 +284,9 @@ void MainWindow::on_actionCadastrarCliente_triggered() {
   auto *cad = new CadastroCliente(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroCliente::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroCliente::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroCliente::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroCliente::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroCliente::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroCliente::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
@@ -316,9 +295,9 @@ void MainWindow::on_actionCadastrarUsuario_triggered() {
   auto *cad = new CadastroUsuario(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroUsuario::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroUsuario::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroUsuario::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroUsuario::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroUsuario::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroUsuario::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
@@ -327,9 +306,9 @@ void MainWindow::on_actionCadastrarProfissional_triggered() {
   auto *cad = new CadastroProfissional(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroProfissional::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroProfissional::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroProfissional::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroProfissional::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroProfissional::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroProfissional::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
@@ -338,9 +317,9 @@ void MainWindow::on_actionGerenciar_Transportadoras_triggered() {
   auto *cad = new CadastroTransportadora(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroTransportadora::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroTransportadora::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroTransportadora::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroTransportadora::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroTransportadora::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroTransportadora::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
@@ -349,15 +328,15 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
   auto *cad = new CadastroLoja(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroLoja::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroLoja::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroLoja::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroLoja::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroLoja::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroLoja::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
 
 void MainWindow::updateTables() {
-  updating = true;
+  qApp->setUpdating(true);
 
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
@@ -370,18 +349,18 @@ void MainWindow::updateTables() {
   if (currentText == "Financeiro" and not ui->widgetFinanceiro->updateTables()) ui->widgetFinanceiro->setHasError(true);
   if (currentText == "Relatórios" and not ui->widgetRelatorio->updateTables()) ui->widgetRelatorio->setHasError(true);
 
-  updating = false;
+  qApp->setUpdating(false);
 
-  showErrors();
+  qApp->showErrors();
 }
 
 void MainWindow::on_actionCadastrarFornecedor_triggered() {
   auto *cad = new CadastroFornecedor(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(cad, &CadastroFornecedor::errorSignal, this, &MainWindow::enqueueError);
-  connect(cad, &CadastroFornecedor::transactionStarted, this, &MainWindow::startTransaction);
-  connect(cad, &CadastroFornecedor::transactionEnded, this, &MainWindow::endTransaction);
+  connect(cad, &CadastroFornecedor::errorSignal, qApp, &Application::enqueueError);
+  connect(cad, &CadastroFornecedor::transactionStarted, qApp, &Application::startTransaction);
+  connect(cad, &CadastroFornecedor::transactionEnded, qApp, &Application::endTransaction);
 
   cad->show();
 }
@@ -389,7 +368,7 @@ void MainWindow::on_actionCadastrarFornecedor_triggered() {
 bool MainWindow::event(QEvent *event) {
   switch (event->type()) {
   case QEvent::WindowActivate:
-    if (not updating) updateTables();
+    if (not qApp->getUpdating()) updateTables();
     break;
 
   default:
@@ -399,32 +378,6 @@ bool MainWindow::event(QEvent *event) {
   return QMainWindow::event(event);
 }
 
-// REFAC: refactor this out of mainwindow
-void MainWindow::darkTheme() {
-  qApp->setStyle("Fusion");
-
-  QPalette darkPalette;
-  darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
-  darkPalette.setColor(QPalette::WindowText, Qt::white);
-  darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
-  darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-  darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-  darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-  darkPalette.setColor(QPalette::Text, Qt::white);
-  darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
-  darkPalette.setColor(QPalette::ButtonText, Qt::white);
-  darkPalette.setColor(QPalette::BrightText, Qt::red);
-  darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-  darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(120, 120, 120));
-
-  darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-  darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-
-  qApp->setPalette(darkPalette);
-
-  qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-}
-
 void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionSobre_triggered() {
@@ -432,14 +385,12 @@ void MainWindow::on_actionSobre_triggered() {
 }
 
 void MainWindow::on_actionClaro_triggered() {
-  qApp->setStyle("Fusion");
-  qApp->setPalette(defautPalette);
-  qApp->setStyleSheet(styleSheet());
+  qApp->lightTheme();
   UserSession::setSetting("User/tema", "claro");
 }
 
 void MainWindow::on_actionEscuro_triggered() {
-  darkTheme();
+  qApp->darkTheme();
   UserSession::setSetting("User/tema", "escuro");
 }
 
@@ -447,9 +398,9 @@ void MainWindow::on_actionConfiguracoes_triggered() {
   auto *config = new UserConfig(this);
   config->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(config, &UserConfig::errorSignal, this, &MainWindow::enqueueError);
-  connect(config, &UserConfig::transactionStarted, this, &MainWindow::startTransaction);
-  connect(config, &UserConfig::transactionEnded, this, &MainWindow::endTransaction);
+  connect(config, &UserConfig::errorSignal, qApp, &Application::enqueueError);
+  connect(config, &UserConfig::transactionStarted, qApp, &Application::startTransaction);
+  connect(config, &UserConfig::transactionEnded, qApp, &Application::endTransaction);
 
   config->show();
 }
@@ -460,9 +411,9 @@ void MainWindow::on_actionProdutos_triggered() {
   auto *importa = new ImportaProdutos(this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(importa, &ImportaProdutos::errorSignal, this, &MainWindow::enqueueError);
-  connect(importa, &ImportaProdutos::transactionStarted, this, &MainWindow::startTransaction);
-  connect(importa, &ImportaProdutos::transactionEnded, this, &MainWindow::endTransaction);
+  connect(importa, &ImportaProdutos::errorSignal, qApp, &Application::enqueueError);
+  connect(importa, &ImportaProdutos::transactionStarted, qApp, &Application::startTransaction);
+  connect(importa, &ImportaProdutos::transactionEnded, qApp, &Application::endTransaction);
 
   importa->importarProduto();
 }
@@ -471,9 +422,9 @@ void MainWindow::on_actionEstoque_triggered() {
   auto *importa = new ImportaProdutos(this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(importa, &ImportaProdutos::errorSignal, this, &MainWindow::enqueueError);
-  connect(importa, &ImportaProdutos::transactionStarted, this, &MainWindow::startTransaction);
-  connect(importa, &ImportaProdutos::transactionEnded, this, &MainWindow::endTransaction);
+  connect(importa, &ImportaProdutos::errorSignal, qApp, &Application::enqueueError);
+  connect(importa, &ImportaProdutos::transactionStarted, qApp, &Application::startTransaction);
+  connect(importa, &ImportaProdutos::transactionEnded, qApp, &Application::endTransaction);
 
   importa->importarEstoque();
 }
@@ -482,9 +433,9 @@ void MainWindow::on_actionPromocao_triggered() {
   auto *importa = new ImportaProdutos(this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(importa, &ImportaProdutos::errorSignal, this, &MainWindow::enqueueError);
-  connect(importa, &ImportaProdutos::transactionStarted, this, &MainWindow::startTransaction);
-  connect(importa, &ImportaProdutos::transactionEnded, this, &MainWindow::endTransaction);
+  connect(importa, &ImportaProdutos::errorSignal, qApp, &Application::enqueueError);
+  connect(importa, &ImportaProdutos::transactionStarted, qApp, &Application::startTransaction);
+  connect(importa, &ImportaProdutos::transactionEnded, qApp, &Application::endTransaction);
 
   importa->importarPromocao();
 }

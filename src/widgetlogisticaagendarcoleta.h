@@ -27,6 +27,7 @@ signals:
 private slots:
   void calcularPeso();
   void on_checkBoxEstoque_toggled(bool checked);
+  void on_checkBoxSul_toggled(bool checked);
   void on_dateTimeEdit_dateChanged(const QDate &date);
   void on_itemBoxVeiculo_textChanged(const QString &);
   void on_lineEditBusca_textChanged(const QString &text);
@@ -50,6 +51,7 @@ private:
   bool adicionarProduto(const QModelIndexList &list);
   bool processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga = false);
   void setupTables();
+  void montaFiltro();
 };
 
 #endif // WIDGETLOGISTICAAGENDARCOLETA_H

@@ -168,6 +168,8 @@ bool WidgetLogisticaAgendarColeta::updateTables() {
     connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::calcularPeso);
   }
 
+  montaFiltro();
+
   if (not modelEstoque.select()) {
     emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
     return false;
@@ -190,7 +192,7 @@ void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &f
 
   ui->lineEditBusca->clear();
 
-  modelEstoque.setFilter("fornecedor = '" + fornecedor + "' AND idVenda IS " + QString(ui->checkBoxEstoque->isChecked() ? "NULL" : "NOT NULL"));
+  montaFiltro();
 
   if (not modelEstoque.select()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque: " + modelEstoque.lastError().text());
@@ -477,15 +479,6 @@ void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date
   ui->tableTransp2->resizeColumnsToContents();
 }
 
-void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled(bool checked) {
-  modelEstoque.setFilter("fornecedor = '" + fornecedor + "' AND idVenda IS " + QString(checked ? "NULL" : "NOT NULL"));
-
-  if (not modelEstoque.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + modelEstoque.lastError().text());
-    return;
-  }
-}
-
 void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
@@ -509,6 +502,28 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
       connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaAgendarColeta::transactionStarted);
       connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaAgendarColeta::transactionEnded);
     }
+  }
+}
+
+void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled(bool checked) {
+  if (checked) ui->checkBoxSul->setChecked(false);
+  montaFiltro();
+}
+
+void WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled(bool checked) {
+  if (checked) ui->checkBoxEstoque->setChecked(false);
+  montaFiltro();
+}
+
+void WidgetLogisticaAgendarColeta::montaFiltro() {
+  const QString filterEstoque = " AND idVenda " + QString(ui->checkBoxEstoque->isChecked() ? "IS NULL" : "IS NOT NULL");
+  const QString filterSul = ui->checkBoxEstoque->isChecked() ? "" : " AND idVenda " + QString(ui->checkBoxSul->isChecked() ? "LIKE 'CAMB%'" : "NOT LIKE 'CAMB%'");
+
+  modelEstoque.setFilter("fornecedor = '" + fornecedor + "'" + filterEstoque + filterSul);
+
+  if (not modelEstoque.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro: " + modelEstoque.lastError().text());
+    return;
   }
 }
 

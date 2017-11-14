@@ -84,14 +84,13 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   const QString fornecedor = modelViewProdutos.data(0, "fornecedor").toString();
 
-  modelEstoque.setQuery(
-      "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, (`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) AS `restante`, `e`.`un` AS "
-      "`unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`m2cx`), ((`e`.`quant` + "
-      "COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM "
-      "(((((`estoque` `e` LEFT JOIN `estoque_has_consumo` `ec` ON ((`e`.`idEstoque` = `ec`.`idEstoque`))) LEFT JOIN `produto` `p` ON ((`e`.`idProduto` = `p`.`idProduto`))) LEFT "
-      "JOIN `venda_has_produto` `vp` ON ((`ec`.`idVendaProduto` = `vp`.`idVendaProduto`))) LEFT JOIN `estoque_has_nfe` `ehn` ON ((`e`.`idEstoque` = `ehn`.`idEstoque`))) LEFT JOIN `nfe` `n` ON "
-      "((`ehn`.`idNFe` = `n`.`idNFe`))) WHERE ((`e`.`status` <> 'CANCELADO') AND (`e`.`status` <> 'QUEBRADO')) AND p.fornecedor = '" +
-      fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
+  modelEstoque.setQuery("SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, (`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) AS `restante`, `e`.`un` AS "
+                        "`unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`m2cx`), ((`e`.`quant` + "
+                        "COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM "
+                        "`estoque` `e` LEFT JOIN `estoque_has_consumo` `ec` ON `e`.`idEstoque` = `ec`.`idEstoque` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` LEFT JOIN "
+                        "`venda_has_produto` `vp` ON `ec`.`idVendaProduto` = `vp`.`idVendaProduto` WHERE ((`e`.`status` <> 'CANCELADO') AND (`e`.`status` <> 'QUEBRADO')) AND p.fornecedor = "
+                        "'" +
+                        fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0 ");
 
   if (modelEstoque.lastError().isValid()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque: " + modelEstoque.lastError().text());

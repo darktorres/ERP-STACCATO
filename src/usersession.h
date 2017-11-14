@@ -8,6 +8,8 @@ class UserSession final {
 
 public:
   enum class Tipo { Padrao, Autorizacao };
+
+  UserSession() = delete;
   static bool login(const QString &user, const QString &password, Tipo tipo = Tipo::Padrao);
   static int idUsuario();
   static int idLoja();
@@ -23,8 +25,7 @@ private:
   inline static QSqlQuery *query = nullptr;
   inline static QSettings *settings = new QSettings("Staccato", "ERP");
   // methods
-  static bool initialize();
-  static bool dbConnect();
+  static void initializeQuery();
 };
 
 #endif // USERSESSION_H

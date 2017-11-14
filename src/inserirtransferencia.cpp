@@ -114,6 +114,11 @@ bool InserirTransferencia::verifyFields() {
     return false;
   }
 
+  if (ui->lineEditObservacao->text().isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Preencha a observação!");
+    return false;
+  }
+
   return true;
 }
 

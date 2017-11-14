@@ -33,6 +33,7 @@ private:
   bool inTransaction = false;
   QStringList errorQueue;
   // methods
+  bool dbConnect();
 };
 
 #endif // APPLICATION_H

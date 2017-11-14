@@ -1,4 +1,3 @@
-#include <QDate>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -26,7 +25,7 @@ bool UserSession::login(const QString &user, const QString &password, Tipo tipo)
     return queryAutorizar.first();
   }
 
-  if (not initialize()) return false;
+  initializeQuery();
 
   query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
   query->bindValue(":user", user);
@@ -42,6 +41,7 @@ bool UserSession::login(const QString &user, const QString &password, Tipo tipo)
 
 QString UserSession::tipoUsuario() { return (query->value("tipo").toString()); }
 
+// REFAC: make this return a optional
 QString UserSession::fromLoja(const QString &parameter, const QString &user) {
   QSqlQuery queryLoja;
   queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.nome = :nome");
@@ -55,90 +55,17 @@ QString UserSession::fromLoja(const QString &parameter, const QString &user) {
   return queryLoja.value(0).toString();
 }
 
-QVariant UserSession::getSetting(const QString &key) { return settings->value(key); }
+// REFAC: make this return a optional
+QVariant UserSession::getSetting(const QString &key) {
+  if (settings->value(key).isNull()) QMessageBox::critical(nullptr, "Erro!", "A chave " + key + " não está configurada!");
+
+  return settings->value(key);
+}
 
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
 bool UserSession::settingsContains(const QString &key) { return settings->contains(key); }
 
-bool UserSession::initialize() {
-  if (not query) {
-    if (not dbConnect()) return false;
-
-    query = new QSqlQuery();
-  }
-
-  return true;
-}
-
-bool UserSession::dbConnect() {
-  if (not QSqlDatabase::drivers().contains("QMYSQL")) {
-    QMessageBox::critical(nullptr, "Não foi possível carregar o banco de dados.", "Este aplicativo requer o driver QMYSQL.");
-    exit(1);
-  }
-
-  QSqlDatabase db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
-
-  db.setHostName(UserSession::getSetting("Login/hostname").toString());
-  db.setUserName(UserSession::getSetting("User/lastuser").toString().toLower());
-  db.setPassword("1234");
-  db.setDatabaseName("mysql");
-  db.setPort(3306);
-
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1");
-  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=60;MYSQL_OPT_READ_TIMEOUT=60;"
-  //                       "MYSQL_OPT_WRITE_TIMEOUT=60");
-
-  if (not db.open()) {
-    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
-    return false;
-  }
-
-  QSqlQuery query = db.exec("SHOW SCHEMAS");
-  bool hasMydb = false;
-
-  while (query.next()) {
-    if (query.value(0).toString() == "mydb") hasMydb = true;
-  }
-
-  if (not hasMydb) {
-    QMessageBox::critical(nullptr, "Erro!", "Não encontrou as tabelas do bando de dados, verifique se o servidor está funcionando corretamente.");
-    return false;
-  }
-
-  db.close();
-
-  db.setDatabaseName("mydb");
-
-  if (not db.open()) {
-    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
-    return false;
-  }
-
-  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro", "Erro verificando lastInvalidated: " + query.lastError().text());
-    return false;
-  }
-
-  if (query.value("lastInvalidated").toDate() < QDate::currentDate()) {
-    if (not query.exec("CALL invalidate_expired()")) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro executando InvalidarExpirados: " + query.lastError().text());
-      return false;
-    }
-
-    query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
-    query.bindValue(":lastInvalidated", QDate::currentDate().toString("yyyy-MM-dd"));
-
-    if (not query.exec()) {
-      QMessageBox::critical(nullptr, "Erro", "Erro atualizando lastInvalidated: " + query.lastError().text());
-      return false;
-    }
-  }
-
-  if (not query.exec("CALL update_orcamento_status()")) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro executando update_orcamento_status: " + query.lastError().text());
-    return false;
-  }
-
-  return true;
+void UserSession::initializeQuery() {
+  if (not query) query = new QSqlQuery();
 }

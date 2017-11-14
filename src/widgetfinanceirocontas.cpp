@@ -250,3 +250,50 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo creio eu porem em diversas linhas eles tem valores diferentes
+
+void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    return;
+  }
+
+  QSqlQuery queryPagamento;
+  queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
+  queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
+
+  if (not queryPagamento.exec() or not queryPagamento.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando pagamento: " + queryPagamento.lastError().text());
+    return;
+  }
+
+  if (queryPagamento.value("dataPagamento").toDate().daysTo(QDate::currentDate()) > 5) {
+    QMessageBox::critical(this, "Erro!", "No máximo 5 dias para reverter!");
+    return;
+  }
+
+  if (queryPagamento.value("grupo").toString() == "Transferência") {
+    QMessageBox::critical(this, "Erro!", "Não pode reverter transferência!");
+    return;
+  }
+
+  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Reverter");
+  msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+  if (msgBox.exec() == QMessageBox::Yes) {
+    QSqlQuery query;
+    query.prepare("UPDATE " + QString(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
+    query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
+
+    if (not query.exec()) {
+      QMessageBox::critical(this, "Erro!", "Erro revertendo lançamento: " + query.lastError().text());
+      return;
+    }
+
+    updateTables();
+
+    QMessageBox::information(this, "Aviso!", "Lançamento revertido com sucesso!");
+  }
+}

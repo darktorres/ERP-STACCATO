@@ -192,85 +192,77 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
     return false;
   }
 
-  bool consumed = false;
-
-  // TODO: refactor this to remove the loop, supposedly there is only one line
-  for (int row = 0; row < model.rowCount(); ++row) {
-    if (quant > model.data(row, "quant").toDouble()) continue;
-
-    const int newRow = modelConsumo.rowCount();
-
-    modelConsumo.insertRow(newRow);
-
-    for (int column = 0, columnCount = model.columnCount(); column < columnCount; ++column) {
-      const QString field = model.record().fieldName(column);
-      const int index = modelConsumo.fieldIndex(field);
-      const QVariant value = model.data(row, column);
-
-      if (field == "created") continue;
-      if (field == "lastUpdated") continue;
-
-      if (index != -1 and not modelConsumo.setData(newRow, index, value)) return false;
-    }
-
-    QSqlQuery query;
-    query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
-    query.bindValue(":idProduto", model.data(row, "idProduto"));
-
-    if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando dados do produto: " + query.lastError().text());
-      return false;
-    }
-
-    const QString un = query.value("un").toString();
-    const double m2cx = query.value("m2cx").toDouble();
-    const double pccx = query.value("pccx").toDouble();
-
-    const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
-
-    const double caixas = qRound(quant / unCaixa * 100) / 100.;
-
-    const double proporcao = quant / model.data(row, "quant").toDouble();
-
-    const double valor = model.data(row, "valor").toDouble() * proporcao;
-    const double vBC = model.data(row, "vBC").toDouble() * proporcao;
-    const double vICMS = model.data(row, "vICMS").toDouble() * proporcao;
-    const double vBCST = model.data(row, "vBCST").toDouble() * proporcao;
-    const double vICMSST = model.data(row, "vICMSST").toDouble() * proporcao;
-    const double vBCPIS = model.data(row, "vBCPIS").toDouble() * proporcao;
-    const double vPIS = model.data(row, "vPIS").toDouble() * proporcao;
-    const double vBCCOFINS = model.data(row, "vBCCOFINS").toDouble() * proporcao;
-    const double vCOFINS = model.data(row, "vCOFINS").toDouble() * proporcao;
-
-    // -------------------------------------
-
-    if (not modelConsumo.setData(newRow, "quant", quant * -1)) return false;
-    if (not modelConsumo.setData(newRow, "caixas", caixas)) return false;
-    if (not modelConsumo.setData(newRow, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) return false;
-    if (not modelConsumo.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
-    if (not modelConsumo.setData(newRow, "idEstoque", model.data(row, "idEstoque"))) return false;
-    if (not modelConsumo.setData(newRow, "status", "CONSUMO")) return false;
-
-    if (not modelConsumo.setData(newRow, "valor", valor)) return false;
-    if (not modelConsumo.setData(newRow, "vBC", vBC)) return false;
-    if (not modelConsumo.setData(newRow, "vICMS", vICMS)) return false;
-    if (not modelConsumo.setData(newRow, "vBCST", vBCST)) return false;
-    if (not modelConsumo.setData(newRow, "vICMSST", vICMSST)) return false;
-    if (not modelConsumo.setData(newRow, "vBCPIS", vBCPIS)) return false;
-    if (not modelConsumo.setData(newRow, "vPIS", vPIS)) return false;
-    if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS)) return false;
-    if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS)) return false;
-
-    consumed = true;
-  }
-
-  if (not modelConsumo.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + modelConsumo.lastError().text());
+  if (quant > ui->doubleSpinBoxRestante->value()) {
+    QMessageBox::critical(this, "Erro!", "Quantidade insuficiente!");
     return false;
   }
 
-  if (not consumed) {
-    QMessageBox::critical(this, "Erro!", "Erro criando consumo!");
+  const int row = 0;
+  const int newRow = modelConsumo.rowCount();
+
+  modelConsumo.insertRow(newRow);
+
+  for (int column = 0, columnCount = model.columnCount(); column < columnCount; ++column) {
+    const QString field = model.record().fieldName(column);
+    const int index = modelConsumo.fieldIndex(field);
+    const QVariant value = model.data(row, column);
+
+    if (field == "created") continue;
+    if (field == "lastUpdated") continue;
+
+    if (index != -1 and not modelConsumo.setData(newRow, index, value)) return false;
+  }
+
+  QSqlQuery query;
+  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+  query.bindValue(":idProduto", model.data(row, "idProduto"));
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando dados do produto: " + query.lastError().text());
+    return false;
+  }
+
+  const QString un = query.value("un").toString();
+  const double m2cx = query.value("m2cx").toDouble();
+  const double pccx = query.value("pccx").toDouble();
+
+  const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
+
+  const double caixas = qRound(quant / unCaixa * 100) / 100.;
+
+  const double proporcao = quant / model.data(row, "quant").toDouble();
+
+  const double valor = model.data(row, "valor").toDouble() * proporcao;
+  const double vBC = model.data(row, "vBC").toDouble() * proporcao;
+  const double vICMS = model.data(row, "vICMS").toDouble() * proporcao;
+  const double vBCST = model.data(row, "vBCST").toDouble() * proporcao;
+  const double vICMSST = model.data(row, "vICMSST").toDouble() * proporcao;
+  const double vBCPIS = model.data(row, "vBCPIS").toDouble() * proporcao;
+  const double vPIS = model.data(row, "vPIS").toDouble() * proporcao;
+  const double vBCCOFINS = model.data(row, "vBCCOFINS").toDouble() * proporcao;
+  const double vCOFINS = model.data(row, "vCOFINS").toDouble() * proporcao;
+
+  // -------------------------------------
+
+  if (not modelConsumo.setData(newRow, "quant", quant * -1)) return false;
+  if (not modelConsumo.setData(newRow, "caixas", caixas)) return false;
+  if (not modelConsumo.setData(newRow, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) return false;
+  if (not modelConsumo.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
+  if (not modelConsumo.setData(newRow, "idEstoque", model.data(row, "idEstoque"))) return false;
+  if (not modelConsumo.setData(newRow, "status", "CONSUMO")) return false;
+
+  if (not modelConsumo.setData(newRow, "valor", valor)) return false;
+  if (not modelConsumo.setData(newRow, "vBC", vBC)) return false;
+  if (not modelConsumo.setData(newRow, "vICMS", vICMS)) return false;
+  if (not modelConsumo.setData(newRow, "vBCST", vBCST)) return false;
+  if (not modelConsumo.setData(newRow, "vICMSST", vICMSST)) return false;
+  if (not modelConsumo.setData(newRow, "vBCPIS", vBCPIS)) return false;
+  if (not modelConsumo.setData(newRow, "vPIS", vPIS)) return false;
+  if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS)) return false;
+  if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS)) return false;
+
+  if (not modelConsumo.submitAll()) {
+    QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + modelConsumo.lastError().text());
     return false;
   }
 

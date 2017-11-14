@@ -33,6 +33,7 @@ private slots:
   void on_pushButtonExcluirLancamento_clicked();
   void on_pushButtonInserirLancamento_clicked();
   void on_pushButtonInserirTransferencia_clicked();
+  void on_pushButtonReverterPagamento_clicked();
   void on_table_activated(const QModelIndex &index);
   void on_table_entered(const QModelIndex &);
   void on_tableVencer_doubleClicked(const QModelIndex &index);

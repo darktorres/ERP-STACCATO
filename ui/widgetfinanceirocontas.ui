@@ -281,6 +281,16 @@
             </property>
            </spacer>
           </item>
+          <item row="16" column="0">
+           <widget class="QPushButton" name="pushButtonReverterPagamento">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Reverter pagamento</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -337,14 +347,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableView</class>
-   <extends>QTableView</extends>
-   <header>src/tableview.h</header>
-  </customwidget>
-  <customwidget>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableView</class>
+   <extends>QTableView</extends>
+   <header>src/tableview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

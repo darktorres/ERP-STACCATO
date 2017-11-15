@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -219,6 +220,9 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
+  // TASK: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
+  // usar 'grupo', 'data', 'valor'
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {

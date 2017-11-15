@@ -13,7 +13,7 @@
 #include "ui_importaprodutos.h"
 #include "validadedialog.h"
 
-ImportaProdutos::ImportaProdutos(QWidget *parent) : QDialog(parent), ui(new Ui::ImportaProdutos) {
+ImportaProdutos::ImportaProdutos(QWidget *parent) : Dialog(parent), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);

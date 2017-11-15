@@ -11,7 +11,7 @@
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
 
-WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
+WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -30,7 +30,9 @@ void WidgetVenda::setupTables() {
 }
 
 void WidgetVenda::montaFiltro() {
-  QString sigla = UserSession::fromLoja("sigla");
+  const auto siglaLoja = UserSession::fromLoja("sigla");
+
+  QString sigla = siglaLoja ? siglaLoja.value().toString() : QString();
 
   if (ui->groupBoxLojas->isVisible() and not ui->comboBoxLojas->currentText().isEmpty()) {
     QSqlQuery query;

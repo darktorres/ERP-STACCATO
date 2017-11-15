@@ -53,23 +53,17 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   if (tipo == Tipo::Conta) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) {
-      QMessageBox::critical(parent, "Erro!", "Erro lendo contas da loja: " + query.lastError().text());
-    }
+    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) QMessageBox::critical(parent, "Erro!", "Erro lendo contas da loja: " + query.lastError().text());
 
     list << "";
 
-    while (query.next()) {
-      list << query.value("banco").toString() + " - " + query.value("agencia").toString() + " - " + query.value("conta").toString();
-    }
+    while (query.next()) list << query.value("banco").toString() + " - " + query.value("agencia").toString() + " - " + query.value("conta").toString();
   }
 
   if (tipo == Tipo::Grupo) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT tipo FROM despesa ORDER BY tipo")) {
-      QMessageBox::critical(parent, "Erro!", "Erro lendo grupos de despesa: " + query.lastError().text());
-    }
+    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) QMessageBox::critical(parent, "Erro!", "Erro lendo grupos de despesa: " + query.lastError().text());
 
     list << "";
 

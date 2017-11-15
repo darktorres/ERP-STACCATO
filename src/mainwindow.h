@@ -13,8 +13,6 @@ class MainWindow final : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
-
-public slots:
   void updateTables();
 
 private slots:
@@ -43,7 +41,6 @@ private:
   // methods
   bool event(QEvent *event);
   void gerarEnviarRelatorio();
-  void setConnections();
 };
 
 #endif // MAINWINDOW_H

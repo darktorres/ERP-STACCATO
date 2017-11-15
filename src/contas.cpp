@@ -399,3 +399,5 @@ void Contas::on_tableProcessados_entered(const QModelIndex &) { ui->tableProcess
 // TODO: 5verificar centroCusto que usa dois campos (idLoja/centroCusto)
 // TODO: 5a funcao de marcar 'conferido' nao deixa voltar para pendente
 // TODO: 5funcao de marcar 'conferido' marca na linha de baixo
+
+// FIXME: quando cancelar uma transferencia cancelar a outra ponta tambem

@@ -57,21 +57,25 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo == Tipo::CancelarNFe) {
-    ui->comboBoxDest->addItem(UserSession::getSetting("User/emailContabilidade").toString());
+    const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+
+    if (emailContabilidade) ui->comboBoxDest->addItem(emailContabilidade.value().toString());
 
     ui->lineEditTitulo->setText("CANCELAMENTO DE NFe - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA");
 
     // corpo email ...
 
+    // REFAC: finish this
+
     ui->textEdit->setText("Cancelamento da NFe de numero 1234...");
   }
 
   if (tipo != Tipo::Vazio) {
-    ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
-    ui->lineEditCopia->setText(UserSession::getSetting("User/emailCopia").toString());
-    ui->lineEditServidor->setText(UserSession::getSetting("User/servidorSMTP").toString());
-    ui->lineEditPorta->setText(UserSession::getSetting("User/portaSMTP").toString());
-    ui->lineEditPasswd->setText(UserSession::getSetting("User/emailSenha").toString());
+    if (const auto key = UserSession::getSetting("User/emailCompra"); key) ui->lineEditEmail->setText(key.value().toString());
+    if (const auto key = UserSession::getSetting("User/emailCopia"); key) ui->lineEditCopia->setText(key.value().toString());
+    if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) ui->lineEditServidor->setText(key.value().toString());
+    if (const auto key = UserSession::getSetting("User/portaSMTP"); key) ui->lineEditPorta->setText(key.value().toString());
+    if (const auto key = UserSession::getSetting("User/emailSenha"); key) ui->lineEditPasswd->setText(key.value().toString());
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);

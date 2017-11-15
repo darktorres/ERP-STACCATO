@@ -50,12 +50,10 @@ private slots:
 
 private:
   // attributes
-  const QDataWidgetMapper mapper;
   const QStringList indexes;
-  const QVector<QPair<QString, QString>> headerData;
-  bool permitirDescontinuados;
+  const bool permitirDescontinuados;
   QString filter;
-  QString fornecedorRep;
+  QString fornecedorRep; // REFAC: verificar se isso não é a mesma coisa de 'representacao'
   QString primaryKey;
   QString representacao;
   QStringList textKeys;

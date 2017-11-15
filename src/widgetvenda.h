@@ -1,15 +1,14 @@
 #ifndef WIDGETVENDA_H
 #define WIDGETVENDA_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetVenda;
 }
 
-class WidgetVenda final : public QWidget {
+class WidgetVenda final : public Widget {
   Q_OBJECT
 
 public:
@@ -18,11 +17,6 @@ public:
   bool updateTables();
   void setFinanceiro();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_comboBoxLojas_currentIndexChanged(const int);

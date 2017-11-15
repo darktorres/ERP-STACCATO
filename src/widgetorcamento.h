@@ -1,15 +1,14 @@
 #ifndef WIDGETORCAMENTO_H
 #define WIDGETORCAMENTO_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetOrcamento;
 }
 
-class WidgetOrcamento final : public QWidget {
+class WidgetOrcamento final : public Widget {
   Q_OBJECT
 
 public:
@@ -17,11 +16,6 @@ public:
   ~WidgetOrcamento();
   bool updateTables();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void montaFiltro();

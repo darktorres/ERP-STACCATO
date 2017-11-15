@@ -37,7 +37,15 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
   mapper.addMapping(ui->doubleSpinBoxCOFINSvcofins, modelProdutos.fieldIndex("vCOFINS"));
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setValue(UserSession::getSetting("User/lojaACBr"));
+
+  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
+
+  if (not lojaACBr) {
+    QMessageBox::critical(nullptr, "Erro!", "A chave 'lojaACBr' não está configurada!");
+    return;
+  }
+
+  ui->itemBoxLoja->setValue(lojaACBr.value());
 
   ui->lineEditModelo->setInputMask("99;_");
   ui->lineEditSerie->setInputMask("999;_");
@@ -71,7 +79,15 @@ void CadastrarNFe::setupTables() {
 
   modelLoja.setTable("loja");
   modelLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  modelLoja.setFilter("idLoja = " + UserSession::getSetting("User/lojaACBr").toString());
+
+  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
+
+  if (not lojaACBr) {
+    QMessageBox::critical(nullptr, "Erro!", "A chave 'lojaACBr' não está configurada!");
+    return;
+  }
+
+  modelLoja.setFilter("idLoja = " + lojaACBr.value().toString());
 
   if (not modelLoja.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela de lojas: " + modelLoja.lastError().text());
 
@@ -205,8 +221,23 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::sendEmail(const QString &fileName) {
-  const QString email = UserSession::getSetting("User/emailContabilidade").toString();
-  const QString copia = UserSession::getSetting("User/emailLogistica").toString();
+  // REFAC: actually check these two before and not only before sending the email
+  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+
+  if (not emailContabilidade) {
+    QMessageBox::critical(nullptr, "Erro!", "A chave 'emailContabilidade' não está configurada!");
+    return;
+  }
+
+  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+
+  if (not emailLogistica) {
+    QMessageBox::critical(nullptr, "Erro!", "A chave 'emailLogistica' não está configurada!");
+    return;
+  }
+
+  const QString email = emailContabilidade.value().toString();
+  const QString copia = emailLogistica.value().toString();
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
   const auto resposta = ACBr::enviarComando("NFE.EnviarEmail(" + email + "," + fileName + ",1,'" + assunto + "', " + copia + ")");
@@ -536,6 +567,20 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   //------------------------
 
+  const auto porcentagemPIS = UserSession::fromLoja("porcentagemPIS");
+
+  if (not porcentagemPIS) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando % PIS!");
+    return;
+  }
+
+  const auto porcentagemCOFINS = UserSession::fromLoja("porcentagemCOFINS");
+
+  if (not porcentagemCOFINS) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando % COFINS!");
+    return;
+  }
+
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     for (int col = modelProdutos.fieldIndex("numeroPedido"); col < modelProdutos.columnCount(); ++col) {
       if (not modelProdutos.setData(row, col, 0)) return; // limpar campos dos imposto
@@ -551,12 +596,11 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
     if (not modelProdutos.setData(row, "vBCPIS", total + freteProporcional)) return;
     if (not modelProdutos.setData(row, "cstPIS", "01")) return;
-    if (not modelProdutos.setData(row, "pPIS", UserSession::fromLoja("porcentagemPIS"))) return;
+    if (not modelProdutos.setData(row, "pPIS", porcentagemPIS.value().toDouble())) return;
     if (not modelProdutos.setData(row, "vPIS", modelProdutos.data(row, "vBCPIS").toDouble() * modelProdutos.data(row, "pPIS").toDouble() / 100)) return;
-
     if (not modelProdutos.setData(row, "vBCCOFINS", total + freteProporcional)) return;
     if (not modelProdutos.setData(row, "cstCOFINS", "01")) return;
-    if (not modelProdutos.setData(row, "pCOFINS", UserSession::fromLoja("porcentagemCOFINS"))) return;
+    if (not modelProdutos.setData(row, "pCOFINS", porcentagemCOFINS.value().toDouble())) return;
     if (not modelProdutos.setData(row, "vCOFINS", modelProdutos.data(row, "vBCCOFINS").toDouble() * modelProdutos.data(row, "pCOFINS").toDouble() / 100)) return;
   }
 

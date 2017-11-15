@@ -1,13 +1,13 @@
 #ifndef WIDGETFINANCEIRO_H
 #define WIDGETFINANCEIRO_H
 
-#include <QWidget>
+#include "widget.h"
 
 namespace Ui {
 class WidgetFinanceiro;
 }
 
-class WidgetFinanceiro final : public QWidget {
+class WidgetFinanceiro final : public Widget {
   Q_OBJECT
 
 public:
@@ -15,11 +15,6 @@ public:
   ~WidgetFinanceiro();
   bool updateTables();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private:
   // attributes

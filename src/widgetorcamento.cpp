@@ -10,7 +10,7 @@
 #include "usersession.h"
 #include "widgetorcamento.h"
 
-WidgetOrcamento::WidgetOrcamento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
+WidgetOrcamento::WidgetOrcamento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
 
 WidgetOrcamento::~WidgetOrcamento() { delete ui; }
 
@@ -123,7 +123,10 @@ void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
 }
 
 void WidgetOrcamento::montaFiltro() {
-  QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "(Código LIKE '%" + UserSession::fromLoja("sigla") + "%')" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+  const auto siglaLoja = UserSession::fromLoja("sigla");
+
+  QString filtroLoja =
+      ui->comboBoxLojas->currentText().isEmpty() ? "(Código LIKE '%" + (siglaLoja ? siglaLoja.value().toString() : QString()) + "%')" : "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
   const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : " AND Vendedor = '" + UserSession::nome() + "'";
 

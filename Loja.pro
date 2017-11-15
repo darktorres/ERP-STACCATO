@@ -25,14 +25,14 @@ gcc|clang{
 QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
-#QMAKE_CXXFLAGS_RELEASE  = -Ofast
-QMAKE_CXXFLAGS_RELEASE  = -O0
+QMAKE_CXXFLAGS_RELEASE  = -Ofast
+#QMAKE_CXXFLAGS_RELEASE  = -O0
 QMAKE_LFLAGS_DEBUG += -O0
-#QMAKE_LFLAGS_RELEASE += -O3
-QMAKE_LFLAGS_RELEASE += -O0
+QMAKE_LFLAGS_RELEASE += -O3
+#QMAKE_LFLAGS_RELEASE += -O0
 
-#QMAKE_CXXFLAGS += -flto
-#QMAKE_LFLAGS += -flto -fuse-linker-plugin
+QMAKE_CXXFLAGS += -flto
+QMAKE_LFLAGS += -flto -fuse-linker-plugin
 }
 
 message($$QMAKESPEC)
@@ -84,6 +84,7 @@ SOURCES += \
     src/contas.cpp \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
+    src/dialog.cpp \
     src/doubledelegate.cpp \
     src/estoque.cpp \
     src/estoqueprazoproxymodel.cpp \
@@ -134,6 +135,7 @@ SOURCES += \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
+    src/widget.cpp \
     src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompradevolucao.cpp \
@@ -186,6 +188,7 @@ HEADERS  += \
     src/contas.h \
     src/dateformatdelegate.h \
     src/devolucao.h \
+    src/dialog.h \
     src/doubledelegate.h \
     src/estoque.h \
     src/estoqueprazoproxymodel.h \
@@ -235,6 +238,7 @@ HEADERS  += \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \
+    src/widget.h \
     src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompradevolucao.h \

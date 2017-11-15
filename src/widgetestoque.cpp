@@ -15,7 +15,7 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
+WidgetEstoque::WidgetEstoque(QWidget *parent) : Widget(parent), ui(new Ui::WidgetEstoque) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro);

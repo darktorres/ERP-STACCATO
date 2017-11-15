@@ -277,9 +277,22 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  // TODO: warn if either is empty
-  const QString xmlFolder = UserSession::getSetting("User/EntregasXmlFolder").toString();
-  const QString pdfFolder = UserSession::getSetting("User/EntregasPdfFolder").toString();
+  const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
+
+  if (not folderKeyXml) {
+    QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!");
+    return;
+  }
+
+  const auto folderKeyPdf = UserSession::getSetting("User/EntregasPdfFolder");
+
+  if (not folderKeyPdf) {
+    QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!");
+    return;
+  }
+
+  const QString xmlFolder = folderKeyXml.value().toString();
+  const QString pdfFolder = folderKeyPdf.value().toString();
 
   // TODO: create folders if they dont exist (it wont work it they dont)
 
@@ -341,7 +354,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     }
   }
 
-  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + UserSession::getSetting("User/EntregasPdfFolder").toString() + "!");
+  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + pdfFolder + "!");
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
@@ -367,7 +380,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
 
   if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
-    auto[xml, resposta] = *tuple;
+    auto [xml, resposta] = *tuple;
 
     emit transactionStarted();
 

@@ -14,8 +14,6 @@ public:
   explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
   virtual bool viewRegister();
   static QVariant getLastInsertId();
-
-public slots:
   virtual bool viewRegisterById(const QVariant &id);
   void marcarDirty();
   void saveSlot();

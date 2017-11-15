@@ -39,17 +39,14 @@ void Impressao::verificaTipo() {
 void Impressao::print() {
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  if (UserSession::getSetting(folder).toString().isEmpty()) {
-    QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
-    UserSession::setSetting(folder, QFileDialog::getExistingDirectory(nullptr, "Pasta PDF/Excel"));
+  const auto folderKey = UserSession::getSetting(folder);
 
-    if (UserSession::getSetting(folder).toString().isEmpty()) return;
-  }
-
-  if (not setQuerys()) {
-    QMessageBox::critical(nullptr, "Erro!", "Processo interrompido, ocorreu algum erro!");
+  if (not folderKey) {
+    QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
     return;
   }
+
+  if (not setQuerys()) return;
 
   report->dataManager()->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
@@ -66,7 +63,7 @@ void Impressao::print() {
 
   report->dataManager()->setReportVariable("Data", query.value("data").toDate().toString("dd-MM-yyyy"));
   report->dataManager()->setReportVariable("Cliente", queryCliente.value("nome_razao"));
-  QString cpfcnpj = queryCliente.value("pfpj") == "PF" ? "CPF: " : "CNPJ: ";
+  const QString cpfcnpj = queryCliente.value("pfpj") == "PF" ? "CPF: " : "CNPJ: ";
   report->dataManager()->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value(queryCliente.value("pfpj") == "PF" ? "cpf" : "cnpj").toString());
   report->dataManager()->setReportVariable("EmailCliente", queryCliente.value("email"));
   report->dataManager()->setReportVariable("Tel1", queryCliente.value("tel"));
@@ -190,7 +187,7 @@ void Impressao::print() {
     report->dataManager()->setReportVariable("FormaPagamento5", pgt5);
   }
 
-  const QString path = UserSession::getSetting(folder).toString();
+  const QString path = folderKey.value().toString();
 
   QDir dir(path);
 
@@ -218,16 +215,14 @@ void Impressao::print() {
 
 bool Impressao::setQuerys() {
   if (tipo == Tipo::Orcamento) {
-    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, "
-                  "idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, prazoEntrega "
-                  "FROM orcamento WHERE idOrcamento = :idOrcamento");
+    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, "
+                  "prazoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento");
     query.bindValue(":idOrcamento", id);
   }
 
   if (tipo == Tipo::Venda) {
-    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, idOrcamento, data, idEnderecoFaturamento, "
-                  "idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, prazoEntrega "
-                  "FROM venda WHERE idVenda = :idVenda");
+    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, idOrcamento, data, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, "
+                  "observacao, prazoEntrega FROM venda WHERE idVenda = :idVenda");
     query.bindValue(":idVenda", id);
   }
 
@@ -244,8 +239,7 @@ bool Impressao::setQuerys() {
     return false;
   }
 
-  queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco "
-                      "WHERE idEndereco = :idEndereco");
+  queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
   if (not queryEndEnt.exec() or not queryEndEnt.first()) {
@@ -253,8 +247,7 @@ bool Impressao::setQuerys() {
     return false;
   }
 
-  queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco "
-                      "WHERE idEndereco = :idEndereco");
+  queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
   if (not queryEndFat.exec() or not queryEndFat.first()) {

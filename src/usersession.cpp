@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -41,30 +42,28 @@ bool UserSession::login(const QString &user, const QString &password, Tipo tipo)
 
 QString UserSession::tipoUsuario() { return (query->value("tipo").toString()); }
 
-// REFAC: make this return a optional
-QString UserSession::fromLoja(const QString &parameter, const QString &user) {
+std::optional<QVariant> UserSession::fromLoja(const QString &parameter, const QString &user) {
   QSqlQuery queryLoja;
   queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.nome = :nome");
   queryLoja.bindValue(":nome", user);
 
   if (not queryLoja.exec() or not queryLoja.first()) {
     QMessageBox::critical(nullptr, "Erro!", "Erro na query loja: " + queryLoja.lastError().text());
-    return QString();
+    return {};
   }
 
-  return queryLoja.value(0).toString();
+  if (queryLoja.value(0).isNull()) return {};
+
+  return queryLoja.value(0);
 }
 
-// REFAC: make this return a optional
-QVariant UserSession::getSetting(const QString &key) {
-  if (settings->value(key).isNull()) QMessageBox::critical(nullptr, "Erro!", "A chave " + key + " não está configurada!");
+std::optional<QVariant> UserSession::getSetting(const QString &key) {
+  if (settings->value(key).isNull()) return {};
 
   return settings->value(key);
 }
 
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
-
-bool UserSession::settingsContains(const QString &key) { return settings->contains(key); }
 
 void UserSession::initializeQuery() {
   if (not query) query = new QSqlQuery();

@@ -1,16 +1,16 @@
 #ifndef IMPORTAPRODUTOS_H
 #define IMPORTAPRODUTOS_H
 
-#include <QDialog>
 #include <QProgressDialog>
 
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class ImportaProdutos;
 }
 
-class ImportaProdutos final : public QDialog {
+class ImportaProdutos final : public Dialog {
   Q_OBJECT
 
 public:
@@ -19,11 +19,6 @@ public:
   void importarProduto();
   void importarEstoque();
   void importarPromocao();
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_checkBoxRepresentacao_toggled(const bool checked);

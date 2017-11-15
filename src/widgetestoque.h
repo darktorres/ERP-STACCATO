@@ -1,16 +1,15 @@
 #ifndef WIDGETESTOQUE_H
 #define WIDGETESTOQUE_H
 
-#include <QWidget>
-
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetEstoque;
 }
 
-class WidgetEstoque final : public QWidget {
+class WidgetEstoque final : public Widget {
   Q_OBJECT
 
 public:
@@ -18,11 +17,6 @@ public:
   ~WidgetEstoque();
   bool updateTables();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_table_activated(const QModelIndex &index);

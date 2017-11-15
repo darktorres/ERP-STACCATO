@@ -11,12 +11,12 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.5.46");
+  setApplicationVersion("0.5.48");
   setStyle("Fusion");
 
   dbConnect();
 
-  if (UserSession::getSetting("User/tema").toString() == "escuro") darkTheme();
+  if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") darkTheme();
 }
 
 bool Application::dbConnect() {
@@ -27,8 +27,22 @@ bool Application::dbConnect() {
 
   QSqlDatabase db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
 
-  db.setHostName(UserSession::getSetting("Login/hostname").toString());
-  db.setUserName(UserSession::getSetting("User/lastuser").toString().toLower());
+  const auto hostname = UserSession::getSetting("Login/hostname");
+
+  if (not hostname) {
+    QMessageBox::critical(nullptr, "Erro!", "A chave 'hostname' não está configurada!");
+    return false;
+  }
+
+  const auto lastuser = UserSession::getSetting("User/lastuser");
+
+  if (not lastuser) {
+    QMessageBox::critical(nullptr, "Erro!", "A chave 'lastuser' não está configurada!");
+    return false;
+  }
+
+  db.setHostName(hostname.value().toString());
+  db.setUserName(lastuser.value().toString().toLower());
   db.setPassword("1234");
   db.setDatabaseName("mysql");
   db.setPort(3306);
@@ -83,6 +97,7 @@ bool Application::dbConnect() {
     }
   }
 
+  // REFAC: verify through the code to make sure this is not necessary
   if (not query.exec("CALL update_orcamento_status()")) {
     QMessageBox::critical(nullptr, "Erro!", "Erro executando update_orcamento_status: " + query.lastError().text());
     return false;
@@ -117,12 +132,16 @@ void Application::darkTheme() {
   qApp->setPalette(darkPalette);
 
   qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+
+  UserSession::setSetting("User/tema", "escuro");
 }
 
 void Application::lightTheme() {
   qApp->setStyle("Fusion");
   qApp->setPalette(defaultPalette);
   qApp->setStyleSheet(styleSheet());
+
+  UserSession::setSetting("User/tema", "claro");
 }
 
 void Application::endTransaction() {

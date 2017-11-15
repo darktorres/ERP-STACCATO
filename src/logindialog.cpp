@@ -17,12 +17,12 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   ui->lineEditUser->setFocus();
 
-  if (UserSession::settingsContains("User/lastuser")) {
-    ui->lineEditUser->setText(UserSession::getSetting("User/lastuser").toString());
+  if (const auto key = UserSession::getSetting("User/lastuser"); key) {
+    ui->lineEditUser->setText(key.value().toString());
     ui->lineEditPass->setFocus();
   }
 
-  ui->lineEditHostname->setText(UserSession::getSetting("Login/hostname").toString());
+  if (const auto key = UserSession::getSetting("Login/hostname"); key) ui->lineEditHostname->setText(key.value().toString());
 
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();
@@ -82,17 +82,23 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 }
 
 void LoginDialog::updater() {
+  const auto hostname = UserSession::getSetting("Login/hostname");
+
+  if (not hostname) return;
+
   auto *updater = new QSimpleUpdater();
   updater->setApplicationVersion(qApp->applicationVersion());
-  updater->setReferenceUrl("http://" + UserSession::getSetting("Login/hostname").toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + UserSession::getSetting("Login/hostname").toString() + "/Instalador.exe");
+  updater->setReferenceUrl("http://" + hostname.value().toString() + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname.value().toString() + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
 }
 
 void LoginDialog::storeSelection() {
-  if (UserSession::getSetting("Login/hostname").toString().isEmpty()) {
+  const auto hostname = UserSession::getSetting("Login/hostname");
+
+  if (not hostname) {
     const QStringList items = mapLojas.keys();
 
     const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);

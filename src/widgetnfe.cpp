@@ -5,7 +5,7 @@
 #include "widgetnfe.h"
 #include "xml_viewer.h"
 
-WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
+WidgetNfe::WidgetNfe(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfe) {
   ui->setupUi(this);
 
   setConnections();

@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "registerdialog.h"
 
 RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(primaryKey), model(0, this) {
@@ -18,10 +19,14 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
   if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
 
   mapper.setModel(&model);
-  mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit); // NOTE: shouldnt this be manual?
+  mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
 
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close);
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, &RegisterDialog::saveSlot);
+
+  connect(this, &RegisterDialog::errorSignal, qApp, &Application::enqueueError);
+  connect(this, &RegisterDialog::transactionStarted, qApp, &Application::startTransaction);
+  connect(this, &RegisterDialog::transactionEnded, qApp, &Application::endTransaction);
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {

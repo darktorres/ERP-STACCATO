@@ -404,9 +404,14 @@ void Orcamento::removeItem() {
 }
 
 bool Orcamento::generateId() {
-  QString id = UserSession::fromLoja("sigla", UserSession::tipoUsuario() == "VENDEDOR ESPECIAL" and not ui->itemBoxVendedorIndicou->text().isEmpty() ? ui->itemBoxVendedorIndicou->text()
-                                                                                                                                                     : ui->itemBoxVendedor->text()) +
-               "-" + QDate::currentDate().toString("yy");
+  const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
+
+  if (not siglaLoja) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando sigla da loja!");
+    return false;
+  }
+
+  QString id = siglaLoja.value().toString() + "-" + QDate::currentDate().toString("yy");
 
   const QString replica = ui->lineEditReplicaDe->text();
 
@@ -490,7 +495,15 @@ bool Orcamento::savingProcedures() {
   if (not setData("frete", ui->doubleSpinBoxFrete->value())) return false;
   if (not setData("idCliente", ui->itemBoxCliente->getValue())) return false;
   if (not setData("idEnderecoEntrega", ui->itemBoxEndereco->getValue())) return false;
-  if (not setData("idLoja", UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()))) return false;
+
+  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+
+  if (not idLoja) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    return false;
+  }
+
+  if (not setData("idLoja", idLoja.value().toInt())) return false;
   if (not setData("idOrcamento", ui->lineEditOrcamento->text())) return false;
   if (not setData("idProfissional", ui->itemBoxProfissional->getValue())) return false;
   if (not setData("idUsuario", ui->itemBoxVendedor->getValue())) return false;
@@ -1075,9 +1088,16 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
 }
 
 bool Orcamento::buscarParametrosFrete() {
+  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+
+  if (not idLoja) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    return false;
+  }
+
   QSqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
-  queryFrete.bindValue(":idLoja", UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()));
+  queryFrete.bindValue(":idLoja", idLoja.value().toInt());
 
   if (not queryFrete.exec() or not queryFrete.next()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando parâmetros do frete: " + queryFrete.lastError().text());

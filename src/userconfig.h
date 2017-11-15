@@ -1,23 +1,18 @@
 #ifndef USERCONFIG_H
 #define USERCONFIG_H
 
-#include <QDialog>
+#include "dialog.h"
 
 namespace Ui {
 class UserConfig;
 }
 
-class UserConfig final : public QDialog {
+class UserConfig final : public Dialog {
   Q_OBJECT
 
 public:
   explicit UserConfig(QWidget *parent = 0);
   ~UserConfig();
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_pushButtonAlterarDados_clicked();

@@ -33,14 +33,14 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  if (UserSession::getSetting(folder).toString().isEmpty()) {
-    QMessageBox::critical(parent, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma.");
-    UserSession::setSetting(folder, QFileDialog::getExistingDirectory(parent, "Pasta PDF/Excel"));
+  const auto folderKey = UserSession::getSetting(folder);
 
-    if (UserSession::getSetting(folder).toString().isEmpty()) return false;
+  if (not folderKey) {
+    QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
+    return false;
   }
 
-  const QString path = UserSession::getSetting(folder).toString();
+  const QString path = folderKey.value().toString();
 
   QDir dir(path);
 

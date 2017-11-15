@@ -3,7 +3,7 @@
 #include "ui_widgetfinanceiro.h"
 #include "widgetfinanceiro.h"
 
-WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiro) {
+WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiro) {
   ui->setupUi(this);
 
   ui->widgetPagar->setTipo(WidgetFinanceiroContas::Tipo::Pagar);

@@ -15,10 +15,9 @@ public:
   static int idLoja();
   static QString nome();
   static QString tipoUsuario();
-  static QString fromLoja(const QString &parameter, const QString &user = nome());
-  static QVariant getSetting(const QString &key);
+  static std::optional<QVariant> fromLoja(const QString &parameter, const QString &user = nome());
+  static std::optional<QVariant> getSetting(const QString &key);
   static void setSetting(const QString &key, const QVariant &value);
-  static bool settingsContains(const QString &key);
 
 private:
   // attributes

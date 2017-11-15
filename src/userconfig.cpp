@@ -6,27 +6,27 @@
 #include "userconfig.h"
 #include "usersession.h"
 
-UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
+UserConfig::UserConfig(QWidget *parent) : Dialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setValue(UserSession::getSetting("User/lojaACBr"));
+  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) ui->itemBoxLoja->setValue(key.value());
   // REFAC: remove these two
-  ui->lineEditEmailContabilidade->setText(UserSession::getSetting("User/emailContabilidade").toString());
-  ui->lineEditEmailLogistica->setText(UserSession::getSetting("User/emailLogistica").toString());
+  if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) ui->lineEditEmailContabilidade->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/emailLogistica"); key) ui->lineEditEmailLogistica->setText(key.value().toString());
 
-  ui->lineEditServidorSMTP->setText(UserSession::getSetting("User/servidorSMTP").toString());
-  ui->lineEditPortaSMTP->setText(UserSession::getSetting("User/portaSMTP").toString());
+  if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) ui->lineEditServidorSMTP->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/portaSMTP"); key) ui->lineEditPortaSMTP->setText(key.value().toString());
   // REFAC: rename this to email
-  ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
-  ui->lineEditEmailSenha->setText(UserSession::getSetting("User/emailSenha").toString());
-  ui->lineEditEmailCopia->setText(UserSession::getSetting("User/emailCopia").toString());
+  if (const auto key = UserSession::getSetting("User/emailCompra"); key) ui->lineEditEmail->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/emailSenha"); key) ui->lineEditEmailSenha->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/emailCopia"); key) ui->lineEditEmailCopia->setText(key.value().toString());
 
-  ui->lineEditOrcamentosFolder->setText(UserSession::getSetting("User/OrcamentosFolder").toString());
-  ui->lineEditVendasFolder->setText(UserSession::getSetting("User/VendasFolder").toString());
-  ui->lineEditComprasFolder->setText(UserSession::getSetting("User/ComprasFolder").toString());
-  ui->lineEditEntregasXmlFolder->setText(UserSession::getSetting("User/EntregasXmlFolder").toString());
-  ui->lineEditEntregasPdfFolder->setText(UserSession::getSetting("User/EntregasPdfFolder").toString());
+  if (const auto key = UserSession::getSetting("User/OrcamentosFolder"); key) ui->lineEditOrcamentosFolder->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/VendasFolder"); key) ui->lineEditVendasFolder->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/ComprasFolder"); key) ui->lineEditComprasFolder->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder"); key) ui->lineEditEntregasXmlFolder->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder"); key) ui->lineEditEntregasPdfFolder->setText(key.value().toString());
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();

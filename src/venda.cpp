@@ -359,9 +359,16 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   ui->tableProdutos->resizeColumnsToContents();
 
+  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+
+  if (not idLoja) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    return;
+  }
+
   QSqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
-  queryFrete.bindValue(":idLoja", UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()));
+  queryFrete.bindValue(":idLoja", idLoja.value().toInt());
 
   if (not queryFrete.exec() or not queryFrete.first()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando parâmetros do frete: " + queryFrete.lastError().text());
@@ -555,7 +562,15 @@ bool Venda::savingProcedures() {
   if (not setData("idCliente", ui->itemBoxCliente->getValue())) return false;
   if (not setData("idEnderecoEntrega", ui->itemBoxEndereco->getValue())) return false;
   if (not setData("idEnderecoFaturamento", ui->itemBoxEnderecoFat->getValue())) return false;
-  if (not setData("idLoja", UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()))) return false;
+
+  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+
+  if (not idLoja) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    return false;
+  }
+
+  if (not setData("idLoja", idLoja.value().toInt())) return false;
   if (not setData("idOrcamento", idOrcamento)) return false;
   if (not setData("idProfissional", ui->itemBoxProfissional->getValue())) return false;
   if (not setData("idUsuario", ui->itemBoxVendedor->getValue())) return false;
@@ -1216,16 +1231,29 @@ void Venda::on_pushButtonCancelamento_clicked() {
 }
 
 bool Venda::generateId() {
-  // REFAC: refac errors later
 
-  QString id = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text()) + "-" + QDate::currentDate().toString("yy") + UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text());
+  const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
+
+  if (not siglaLoja) {
+    emit errorSignal("Erro buscando sigla da loja!");
+    return false;
+  }
+
+  const auto idLoja = UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text());
+
+  if (not idLoja) {
+    emit errorSignal("Erro buscando idLoja!");
+    return false;
+  }
+
+  QString id = siglaLoja.value().toString() + "-" + QDate::currentDate().toString("yy") + idLoja.value().toString();
 
   QSqlQuery query;
   query.prepare("SELECT MAX(idVenda) AS idVenda FROM venda WHERE idVenda LIKE :id");
   query.bindValue(":id", id + "%");
 
   if (not query.exec()) {
-    //    error = "Erro na query: " + query.lastError().text();
+    emit errorSignal("Erro na query: " + query.lastError().text());
     return false;
   }
 
@@ -1237,12 +1265,12 @@ bool Venda::generateId() {
   query.bindValue(":idOrcamento", idOrcamento);
 
   if (not query.exec() or not query.first()) {
-    //    error = "Erro na query: " + query.lastError().text();
+    emit errorSignal("Erro na query: " + query.lastError().text());
     return false;
   }
 
   if (id.size() != 11) {
-    //    error = "Ocorreu algum erro ao gerar id: " + id;
+    emit errorSignal("Ocorreu algum erro ao gerar id: " + id);
     return false;
   }
 

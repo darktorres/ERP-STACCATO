@@ -1,15 +1,14 @@
 #ifndef WIDGETRELATORIO_H
 #define WIDGETRELATORIO_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetRelatorio;
 }
 
-class WidgetRelatorio final : public QWidget {
+class WidgetRelatorio final : public Widget {
   Q_OBJECT
 
 public:
@@ -17,11 +16,6 @@ public:
   ~WidgetRelatorio();
   bool updateTables();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_dateEditMes_dateChanged(const QDate &);

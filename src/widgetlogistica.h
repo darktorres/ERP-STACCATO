@@ -1,15 +1,14 @@
 #ifndef WIDGETLOGISTICA_H
 #define WIDGETLOGISTICA_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetLogistica;
 }
 
-class WidgetLogistica final : public QWidget {
+class WidgetLogistica final : public Widget {
   Q_OBJECT
 
 public:
@@ -17,11 +16,6 @@ public:
   ~WidgetLogistica();
   bool updateTables();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_tableForn_activated(const QModelIndex &index);

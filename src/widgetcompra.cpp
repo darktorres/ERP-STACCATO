@@ -1,7 +1,7 @@
 #include "widgetcompra.h"
 #include "ui_widgetcompra.h"
 
-WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompra) {
+WidgetCompra::WidgetCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompra) {
   ui->setupUi(this);
 
   setConnections();

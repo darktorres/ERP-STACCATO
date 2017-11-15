@@ -1,13 +1,13 @@
 #ifndef WIDGETNFE_H
 #define WIDGETNFE_H
 
-#include <QWidget>
+#include "widget.h"
 
 namespace Ui {
 class WidgetNfe;
 }
 
-class WidgetNfe final : public QWidget {
+class WidgetNfe final : public Widget {
   Q_OBJECT
 
 public:
@@ -15,11 +15,6 @@ public:
   ~WidgetNfe();
   bool updateTables();
   void setHasError(const bool value);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private slots:
   void on_tabWidgetNfe_currentChanged(const int);

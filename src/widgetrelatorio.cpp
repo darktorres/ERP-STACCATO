@@ -21,14 +21,11 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") filter += " AND idUsuario = " + QString::number(UserSession::idUsuario());
 
-  const auto descricaoLoja = UserSession::fromLoja("descricao");
+  if (tipoUsuario == "GERENTE LOJA") {
+    const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-  if (not descricaoLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando descrição da loja!");
-    return;
+    if (descricaoLoja) filter = " AND Loja = '" + descricaoLoja.value().toString() + "'";
   }
-
-  if (tipoUsuario == "GERENTE LOJA") filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
 
   filter += " ORDER BY Loja, Vendedor";
 
@@ -40,14 +37,11 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 void WidgetRelatorio::setFilterTotaisLoja() {
   QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM");
 
-  const auto descricaoLoja = UserSession::fromLoja("descricao");
+  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
+    const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-  if (not descricaoLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando descrição da loja!");
-    return;
+    if (descricaoLoja) filter += "' AND Loja = '" + descricaoLoja.value().toString();
   }
-
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") filter += "' AND Loja = '" + descricaoLoja.value().toString();
 
   filter += "' ORDER BY Loja";
 
@@ -145,14 +139,11 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") filter += " AND idUsuario = " + QString::number(UserSession::idUsuario());
 
-  const auto descricaoLoja = UserSession::fromLoja("descricao");
+  if (tipoUsuario == "GERENTE LOJA") {
+    const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-  if (not descricaoLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando descrição da loja!");
-    return;
+    if (descricaoLoja) filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
   }
-
-  if (tipoUsuario == "GERENTE LOJA") filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
 
@@ -212,14 +203,11 @@ bool WidgetRelatorio::updateTables() {
   modelOrcamento.setTable("view_resumo_relatorio");
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  const auto descricaoLoja = UserSession::fromLoja("descricao");
+  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
+    const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-  if (not descricaoLoja) {
-    emit errorSignal("Erro buscando descrição da loja!");
-    return false;
+    if (descricaoLoja) modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor");
   }
-
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor");
 
   if (not modelOrcamento.select()) {
     emit errorSignal("Erro lendo view_resumo_relatorio: " + modelOrcamento.lastError().text());

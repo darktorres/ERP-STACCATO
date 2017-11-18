@@ -927,7 +927,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
     const double frete = ui->doubleSpinBoxFrete->value();
 
     ui->doubleSpinBoxDescontoGlobalReais->setValue(liq * desconto / 100);
-    ui->doubleSpinBoxTotal->setValue((liq * (1 - (desconto / 100)) + frete));
+    ui->doubleSpinBoxTotal->setValue(liq * (1 - (desconto / 100)) + frete);
 
     resetarPagamentos();
   }();
@@ -1016,12 +1016,12 @@ bool Venda::cadastrar() {
 
   // inserir rt em contas_pagar
 
-  const QDate date = ui->dateTimeEdit->date();
-  const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
-
   QSqlQuery query;
 
   if (ui->checkBoxPontuacaoPadrao->isChecked()) {
+    const QDate date = ui->dateTimeEdit->date();
+    const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
+
     query.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
                   ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
     query.bindValue(":dataEmissao", date);

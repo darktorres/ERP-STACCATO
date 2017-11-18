@@ -25,14 +25,14 @@ gcc|clang{
 QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
 QMAKE_CXXFLAGS_DEBUG += -O0
-QMAKE_CXXFLAGS_RELEASE  = -Ofast
-#QMAKE_CXXFLAGS_RELEASE  = -O0
+#QMAKE_CXXFLAGS_RELEASE  = -Ofast
+QMAKE_CXXFLAGS_RELEASE  = -O0
 QMAKE_LFLAGS_DEBUG += -O0
-QMAKE_LFLAGS_RELEASE += -O3
-#QMAKE_LFLAGS_RELEASE += -O0
+#QMAKE_LFLAGS_RELEASE += -O3
+QMAKE_LFLAGS_RELEASE += -O0
 
-QMAKE_CXXFLAGS += -flto
-QMAKE_LFLAGS += -flto -fuse-linker-plugin
+#QMAKE_CXXFLAGS += -flto
+#QMAKE_LFLAGS += -flto -fuse-linker-plugin
 }
 
 message($$QMAKESPEC)

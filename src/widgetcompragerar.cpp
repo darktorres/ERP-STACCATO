@@ -110,10 +110,6 @@ void WidgetCompraGerar::setupTables() {
 bool WidgetCompraGerar::updateTables() {
   if (modelResumo.tableName().isEmpty()) setupTables();
 
-  const auto selection = ui->tableResumo->selectionModel()->selectedRows();
-
-  const auto index = selection.size() > 0 ? selection.first() : QModelIndex();
-
   const QString filter = modelResumo.filter();
 
   if (not modelResumo.select()) {
@@ -134,9 +130,11 @@ bool WidgetCompraGerar::updateTables() {
 
   modelProdutos.setFilter(filter2);
 
+  const auto selection = ui->tableResumo->selectionModel()->selectedRows();
+
   if (selection.size() > 0) {
-    on_tableResumo_activated(index);
-    ui->tableResumo->selectRow(index.row());
+    on_tableResumo_activated(selection.first());
+    ui->tableResumo->selectRow(selection.first().row());
   }
 
   return true;
@@ -198,7 +196,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
-  if (not folderKey) {
+  if (not folderKey or folderKey.value().toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!");
     return;
   }
@@ -361,7 +359,7 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
 
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
-  if (not folderKey) return false;
+  if (not folderKey or folderKey.value().toString().isEmpty()) return false;
 
   const QString fileName = folderKey.value().toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 

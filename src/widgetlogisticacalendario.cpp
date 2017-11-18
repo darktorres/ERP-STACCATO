@@ -145,7 +145,4 @@ void WidgetLogisticaCalendario::on_pushButtonProximo_clicked() { ui->calendarWid
 
 void WidgetLogisticaCalendario::on_pushButtonAnterior_clicked() { ui->calendarWidget->setSelectedDate(ui->calendarWidget->selectedDate().addDays(-7)); }
 
-void WidgetLogisticaCalendario::on_calendarWidget_selectionChanged() {
-  const QDate date = ui->calendarWidget->selectedDate();
-  updateCalendar(date.addDays(date.dayOfWeek() * -1));
-}
+void WidgetLogisticaCalendario::on_calendarWidget_selectionChanged() { updateFilter(); }

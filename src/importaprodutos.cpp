@@ -537,7 +537,7 @@ bool ImportaProdutos::atualizaCamposProduto() {
   const QString markupRound = QString::number(markup, 'f', 4);
   markup = markupRound.toDouble();
 
-  if (model.data(row, "markup") != markup) {
+  if (not qFuzzyCompare(model.data(row, "markup").toDouble(), markup)) {
     if (not model.setData(row, "markup", markup)) return false;
     if (not model.setData(row, "markupUpd", static_cast<int>(FieldColors::Yellow))) return false;
     changed = true;

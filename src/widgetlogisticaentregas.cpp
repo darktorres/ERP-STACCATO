@@ -560,7 +560,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   const auto folderKey = UserSession::getSetting("User/EntregasPdfFolder");
 
-  if (not folderKey) {
+  if (not folderKey or folderKey.value().toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!");
     return;
   }

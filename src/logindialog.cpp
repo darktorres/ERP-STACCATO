@@ -1,8 +1,7 @@
-#include <QInputDialog>
 #include <QMessageBox>
 
+#include "application.h"
 #include "logindialog.h"
-#include "qsimpleupdater.h"
 #include "ui_logindialog.h"
 #include "usersession.h"
 
@@ -12,7 +11,6 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
 
-  readSettingsFile();
   setComboBox();
 
   ui->lineEditUser->setFocus();
@@ -35,26 +33,12 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
     setWindowTitle("Autorização");
   }
 
-  storeSelection();
   adjustSize();
   accept();
 }
 
-void LoginDialog::readSettingsFile() {
-  QFile file("lojas.txt");
-
-  if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo configurações: " + file.errorString());
-    return;
-  }
-
-  const QStringList lines = QString(file.readAll()).split("\r\n", QString::SkipEmptyParts);
-
-  for (int i = 0; i < lines.size(); i += 2) mapLojas.insert(lines.at(i), lines.at(i + 1));
-}
-
 void LoginDialog::setComboBox() {
-  for (const auto &loja : mapLojas.keys()) ui->comboBoxLoja->addItem(loja);
+  for (const auto &loja : qApp->mapLojas.keys()) ui->comboBoxLoja->addItem(loja);
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
@@ -70,6 +54,8 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
   UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
 
+  if (not qApp->dbConnect()) return;
+
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
     QMessageBox::critical(this, "Erro!", "Login inválido!");
     ui->lineEditPass->setFocus();
@@ -81,36 +67,9 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   if (tipo == Tipo::Login) UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
 }
 
-void LoginDialog::updater() {
-  const auto hostname = UserSession::getSetting("Login/hostname");
-
-  if (not hostname) return;
-
-  auto *updater = new QSimpleUpdater();
-  updater->setApplicationVersion(qApp->applicationVersion());
-  updater->setReferenceUrl("http://" + hostname.value().toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + hostname.value().toString() + "/Instalador.exe");
-  updater->setSilent(true);
-  updater->setShowNewestVersionMessage(true);
-  updater->checkForUpdates();
-}
-
-void LoginDialog::storeSelection() {
-  const auto hostname = UserSession::getSetting("Login/hostname");
-
-  if (not hostname) {
-    const QStringList items = mapLojas.keys();
-
-    const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
-
-    UserSession::setSetting("Login/hostname", mapLojas.value(loja));
-    ui->lineEditHostname->setText(mapLojas.value(loja));
-  }
-}
-
-void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(mapLojas.value(loja)); }
+void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(qApp->mapLojas.value(loja)); }
 
 void LoginDialog::on_lineEditHostname_textChanged(const QString &) {
   UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
-  updater();
+  qApp->updater();
 }

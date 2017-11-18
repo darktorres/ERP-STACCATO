@@ -24,11 +24,12 @@ WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 
 void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   QFrame *frame = new QFrame(this);
-  frame->setLayout(new QHBoxLayout(frame));
+  QHBoxLayout *layout = new QHBoxLayout(frame);
+  frame->setLayout(layout);
   // label
   QLabel *labelPagamento = new QLabel(this);
   labelPagamento->setText("Pgt." + QString::number(widget()->children().size()));
-  frame->layout()->addWidget(labelPagamento);
+  layout->addWidget(labelPagamento);
   // combobox pgt
   QComboBox *comboBoxPgt = new QComboBox(this);
   comboBoxPgt->setMinimumWidth(140);
@@ -49,7 +50,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   }());
 
   comboBoxPgt->insertItems(0, list);
-  frame->layout()->addWidget(comboBoxPgt);
+  layout->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listComboPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listComboPgt << comboBoxPgt;
   // combobox data
@@ -60,7 +61,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   comboBoxData->insertItem(3, "20");
   comboBoxData->insertItem(4, "28");
   comboBoxData->insertItem(5, "30");
-  frame->layout()->addWidget(comboBoxData);
+  layout->addWidget(comboBoxData);
   connect(comboBoxData, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
   listComboData << comboBoxData;
   // combobox parc
@@ -68,7 +69,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   comboboxPgtParc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   comboboxPgtParc->setMaximumWidth(45);
   connect(comboboxPgtParc, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(comboboxPgtParc);
+  layout->addWidget(comboboxPgtParc);
   listComboParc << comboboxPgtParc;
   // doublespinbox
   QDoubleSpinBox *doubleSpinBoxPgt = new QDoubleSpinBox(this);
@@ -78,7 +79,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   doubleSpinBoxPgt->setMaximum(restante);
   doubleSpinBoxPgt->setValue(restante);
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
-  frame->layout()->addWidget(doubleSpinBoxPgt);
+  layout->addWidget(doubleSpinBoxPgt);
   connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::valueChanged);
   listDoubleSpinPgt << doubleSpinBoxPgt;
   // dateedit
@@ -88,13 +89,13 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   dateEditPgt->setCalendarPopup(true);
   dateEditPgt->setDate(QDate::currentDate());
   connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(dateEditPgt);
+  layout->addWidget(dateEditPgt);
   listDatePgt << dateEditPgt;
   // lineedit
   QLineEdit *lineEditPgt = new QLineEdit(this);
   lineEditPgt->setPlaceholderText("Observação");
   connect(lineEditPgt, &QLineEdit::textChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(lineEditPgt);
+  layout->addWidget(lineEditPgt);
   listLinePgt << lineEditPgt;
   //
   widget()->layout()->addWidget(frame);

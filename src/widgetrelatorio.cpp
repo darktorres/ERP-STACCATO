@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -10,7 +11,21 @@
 #include "widgetrelatorio.h"
 #include "xlsxdocument.h"
 
-WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
+WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::WidgetRelatorio) {
+  ui->setupUi(this);
+
+  if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
+    ui->labelTotalLoja->hide();
+    ui->tableTotalLoja->hide();
+    ui->labelGeral->hide();
+    ui->doubleSpinBoxGeral->hide();
+    ui->groupBoxResumoOrcamento->hide();
+  }
+
+  ui->dateEditMes->setDate(QDate::currentDate());
+
+  connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetRelatorio::dateEditMes_dateChanged);
+}
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
@@ -24,7 +39,7 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) filter = " AND Loja = '" + descricaoLoja.value().toString() + "'";
+    if (descricaoLoja) filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
   }
 
   filter += " ORDER BY Loja, Vendedor";
@@ -35,15 +50,15 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
-  QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM");
+  QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) filter += "' AND Loja = '" + descricaoLoja.value().toString();
+    if (descricaoLoja) filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
   }
 
-  filter += "' ORDER BY Loja";
+  filter += " ORDER BY Loja";
 
   modelTotalLoja.setFilter(filter);
 
@@ -58,7 +73,7 @@ bool WidgetRelatorio::setupTables() {
 
   modelRelatorio.setHeaderData("idVenda", "Venda");
 
-  setFilterRelatorio();
+  modelRelatorio.setFilter("0");
 
   if (not modelRelatorio.select()) {
     emit errorSignal("Erro lendo tabela relatorio: " + modelRelatorio.lastError().text());
@@ -78,7 +93,7 @@ bool WidgetRelatorio::setupTables() {
   modelTotalVendedor.setTable("view_relatorio_vendedor");
   modelTotalVendedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  setFilterTotaisVendedor();
+  modelTotalVendedor.setFilter("0");
 
   if (not modelTotalVendedor.select()) {
     emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelTotalVendedor.lastError().text());
@@ -98,7 +113,7 @@ bool WidgetRelatorio::setupTables() {
   modelTotalLoja.setTable("view_relatorio_loja");
   modelTotalLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  setFilterTotaisLoja();
+  modelTotalLoja.setFilter("0");
 
   if (not modelTotalLoja.select()) {
     emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelTotalLoja.lastError().text());
@@ -152,7 +167,7 @@ void WidgetRelatorio::setFilterRelatorio() {
   if (not modelRelatorio.select()) emit errorSignal("Erro lendo tabela relatorio: " + modelRelatorio.lastError().text());
 }
 
-void WidgetRelatorio::on_dateEditMes_dateChanged(const QDate &) { updateTables(); }
+void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 
 void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
@@ -160,19 +175,7 @@ bool WidgetRelatorio::updateTables() {
   if (hasError) return false;
 
   if (modelRelatorio.tableName().isEmpty()) {
-    if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
-      ui->labelTotalLoja->hide();
-      ui->tableTotalLoja->hide();
-      ui->labelGeral->hide();
-      ui->doubleSpinBoxGeral->hide();
-      ui->groupBoxResumoOrcamento->hide();
-    }
-
-    ui->dateEditMes->setDate(QDate::currentDate());
-
     if (not setupTables()) return false;
-
-    calcularTotalGeral();
   }
 
   setFilterRelatorio();

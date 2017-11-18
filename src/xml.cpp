@@ -33,15 +33,16 @@ void XML::lerValores(const QStandardItem *item) {
   for (int row = 0; row < item->rowCount(); ++row) {
     for (int col = 0; col < item->columnCount(); ++col) {
       const QStandardItem *child = item->child(row, col);
+      const QString parentText = child->parent()->text();
       QString text = child->text();
 
       if (text.left(6) == "infNFe") chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44);
       if (text.left(3) == "nNF") nNF = text.remove(0, 6);
 
-      if (child->parent()->text() == "emit" and text.left(7) == "xFant -") xFant = text.remove(0, 8);
-      if (child->parent()->text() == "emit" and text.left(7) == "xNome -") xNome = text.remove(0, 8);
-      if (child->parent()->text() == "dest" and text.left(6) == "CNPJ -") cnpj = text.remove(0, 7);
-      if (child->parent()->text() == "transporta" and text.left(7) == "xNome -") xNomeTransp = text.remove(0, 8);
+      if (parentText == "emit" and text.left(7) == "xFant -") xFant = text.remove(0, 8);
+      if (parentText == "emit" and text.left(7) == "xNome -") xNome = text.remove(0, 8);
+      if (parentText == "dest" and text.left(6) == "CNPJ -") cnpj = text.remove(0, 7);
+      if (parentText == "transporta" and text.left(7) == "xNome -") xNomeTransp = text.remove(0, 8);
 
       lerDadosProduto(child);
       lerICMSProduto(child);

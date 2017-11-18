@@ -20,6 +20,10 @@ public:
   bool getInTransaction() const;
   void setInTransaction(const bool value);
   void showErrors();
+  bool dbConnect();
+  void updater();
+  // REFAC: make this private?
+  QMap<QString, QString> mapLojas;
 
 public slots:
   void endTransaction();
@@ -28,12 +32,13 @@ public slots:
 
 private:
   // attributes
-  const QPalette defaultPalette = palette();
-  bool updating = false;
   bool inTransaction = false;
+  bool updating = false;
+  const QPalette defaultPalette = palette();
   QStringList errorQueue;
   // methods
-  bool dbConnect();
+  void storeSelection();
+  void readSettingsFile();
 };
 
 #endif // APPLICATION_H

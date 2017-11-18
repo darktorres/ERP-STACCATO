@@ -114,7 +114,8 @@ void WidgetEstoque::montaFiltro() {
                                        : "WHERE (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  const QString restanteDeposito = ui->radioButtonEstoqueContabil->isChecked() ? "`restante deposito` > 0 AND status = 'ESTOQUE'" : "";
+  // REFAC: why is this not used?
+  //  const QString restanteDeposito = ui->radioButtonEstoqueContabil->isChecked() ? "`restante deposito` > 0 AND status = 'ESTOQUE'" : "";
   const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "restante <= 0" : "restante > 0";
 
   model.setQuery("SELECT GROUP_CONCAT(DISTINCT n.cnpjDest) AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = "

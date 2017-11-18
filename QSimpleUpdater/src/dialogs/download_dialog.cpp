@@ -78,11 +78,7 @@ void DownloadDialog::openDownload() {
   if (not m_path.isEmpty()) {
     QString url = m_path;
 
-    if (url.startsWith("/")) {
-      url = "file://" + url;
-    } else {
-      url = "file:///" + url;
-    }
+    url = url.startsWith("/") ? "file://" + url : "file:///" + url;
 
     QDesktopServices::openUrl(url);
   }

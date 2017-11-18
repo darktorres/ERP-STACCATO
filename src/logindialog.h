@@ -25,12 +25,8 @@ private slots:
 private:
   // attributes
   const Tipo tipo;
-  QMap<QString, QString> mapLojas;
   Ui::LoginDialog *ui;
   // methods
-  void storeSelection();
-  void updater();
-  void readSettingsFile();
   void setComboBox();
 };
 

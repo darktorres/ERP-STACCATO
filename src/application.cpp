@@ -1,22 +1,40 @@
 #include <QDate>
 #include <QDebug>
+#include <QFile>
 #include <QIcon>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
 
 #include "application.h"
+#include "qsimpleupdater.h"
 #include "usersession.h"
 
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.5.48");
+  setApplicationVersion("0.5.53");
   setStyle("Fusion");
 
-  dbConnect();
+  readSettingsFile();
+
+  storeSelection();
 
   if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") darkTheme();
+}
+
+void Application::readSettingsFile() {
+  QFile file("lojas.txt");
+
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro lendo configurações: " + file.errorString());
+    return;
+  }
+
+  const QStringList lines = QString(file.readAll()).split("\r\n", QString::SkipEmptyParts);
+
+  for (int i = 0; i < lines.size(); i += 2) mapLojas.insert(lines.at(i), lines.at(i + 1));
 }
 
 bool Application::dbConnect() {
@@ -36,41 +54,19 @@ bool Application::dbConnect() {
 
   const auto lastuser = UserSession::getSetting("User/lastuser");
 
-  if (not lastuser) {
-    QMessageBox::critical(nullptr, "Erro!", "A chave 'lastuser' não está configurada!");
-    return false;
-  }
+  if (not lastuser) return false;
 
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
   db.setPassword("1234");
-  db.setDatabaseName("mysql");
+  db.setDatabaseName("mydb");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1");
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=1");
   //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=60;MYSQL_OPT_READ_TIMEOUT=60;"
   //                       "MYSQL_OPT_WRITE_TIMEOUT=60");
 
-  if (not db.open()) {
-    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
-    return false;
-  }
-
-  QSqlQuery query = db.exec("SHOW SCHEMAS");
-  bool hasMydb = false;
-
-  while (query.next()) {
-    if (query.value(0).toString() == "mydb") hasMydb = true;
-  }
-
-  if (not hasMydb) {
-    QMessageBox::critical(nullptr, "Erro!", "Não encontrou as tabelas do bando de dados, verifique se o servidor está funcionando corretamente.");
-    return false;
-  }
-
-  db.close();
-
-  db.setDatabaseName("mydb");
+  QSqlQuery query;
 
   if (not db.open()) {
     QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
@@ -158,6 +154,18 @@ void Application::enqueueError(const QString &error) {
 
 void Application::startTransaction() { inTransaction = true; }
 
+void Application::storeSelection() {
+  if (not UserSession::getSetting("Login/hostname")) {
+    const QStringList items = mapLojas.keys();
+
+    const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
+
+    // REFAC: test if empty
+
+    UserSession::setSetting("Login/hostname", mapLojas.value(loja));
+  }
+}
+
 bool Application::getInTransaction() const { return inTransaction; }
 
 void Application::setInTransaction(const bool value) { inTransaction = value; }
@@ -172,4 +180,18 @@ void Application::showErrors() {
   for (const auto &error : errorQueue) QMessageBox::critical(nullptr, "Erro!", error);
 
   errorQueue.clear();
+}
+
+void Application::updater() {
+  const auto hostname = UserSession::getSetting("Login/hostname");
+
+  if (not hostname) return;
+
+  auto *updater = new QSimpleUpdater();
+  updater->setApplicationVersion(qApp->applicationVersion());
+  updater->setReferenceUrl("http://" + hostname.value().toString() + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname.value().toString() + "/Instalador.exe");
+  updater->setSilent(true);
+  updater->setShowNewestVersionMessage(true);
+  updater->checkForUpdates();
 }

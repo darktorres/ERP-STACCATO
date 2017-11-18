@@ -35,7 +35,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   const auto folderKey = UserSession::getSetting(folder);
 
-  if (not folderKey) {
+  if (not folderKey or folderKey.value().toString().isEmpty()) {
     QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
     return false;
   }

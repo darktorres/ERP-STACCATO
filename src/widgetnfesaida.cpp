@@ -212,6 +212,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   }
 
   LimeReport::ReportEngine report;
+  auto dataManager = report.dataManager();
 
   SqlRelationalTableModel view;
   view.setTable("view_relatorio_nfe");
@@ -222,7 +223,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
     return;
   }
 
-  report.dataManager()->addModel("view", &view, true);
+  dataManager->addModel("view", &view, true);
 
   if (not report.loadFromFile("view.lrxml")) {
     QMessageBox::critical(nullptr, "Erro!", "Não encontrou o modelo de impressão!");
@@ -239,19 +240,19 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
     return;
   }
 
-  report.dataManager()->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalFrete", "R$ " + QString::number(query.value("sum(frete)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalNfe", "R$ " + QString::number(query.value("sum(totalnfe)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalDesconto", "R$ " + QString::number(query.value("sum(desconto)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalImpImp", "R$ " + QString::number(query.value("sum(impimp)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalIpi", "R$ " + QString::number(query.value("sum(ipi)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalCofins", "R$ " + QString::number(query.value("sum(cofins)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalPisSt", "R$ XXX");
-  report.dataManager()->setReportVariable("TotalCofinsSt", "R$ XXX");
-  report.dataManager()->setReportVariable("TotalSeguro", "R$ " + QString::number(query.value("sum(seguro)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
-  report.dataManager()->setReportVariable("TotalIssqn", "R$ XXX");
+  dataManager->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalFrete", "R$ " + QString::number(query.value("sum(frete)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalNfe", "R$ " + QString::number(query.value("sum(totalnfe)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalDesconto", "R$ " + QString::number(query.value("sum(desconto)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalImpImp", "R$ " + QString::number(query.value("sum(impimp)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalIpi", "R$ " + QString::number(query.value("sum(ipi)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalCofins", "R$ " + QString::number(query.value("sum(cofins)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalPisSt", "R$ XXX");
+  dataManager->setReportVariable("TotalCofinsSt", "R$ XXX");
+  dataManager->setReportVariable("TotalSeguro", "R$ " + QString::number(query.value("sum(seguro)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalIssqn", "R$ XXX");
 
   if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) {
     QMessageBox::critical(this, "Erro!", "Erro gerando relatório!");
@@ -279,14 +280,14 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
 
-  if (not folderKeyXml) {
+  if (not folderKeyXml or folderKeyXml.value().toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!");
     return;
   }
 
   const auto folderKeyPdf = UserSession::getSetting("User/EntregasPdfFolder");
 
-  if (not folderKeyPdf) {
+  if (not folderKeyPdf or folderKeyPdf.value().toString().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!");
     return;
   }

@@ -10,7 +10,7 @@
 #include "impressao.h"
 #include "usersession.h"
 
-Impressao::Impressao(const QString &id) : id(id) {
+Impressao::Impressao(const QString &id) : id(id), report(new LimeReport::ReportEngine(this)) {
   verificaTipo();
 
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
@@ -19,8 +19,6 @@ Impressao::Impressao(const QString &id) : id(id) {
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
   if (not modelItem.select()) QMessageBox::critical(nullptr, "Erro!", "Erro lendo tabela: " + modelItem.lastError().text());
-
-  report = new LimeReport::ReportEngine(this);
 }
 
 void Impressao::verificaTipo() {
@@ -41,72 +39,70 @@ void Impressao::print() {
 
   const auto folderKey = UserSession::getSetting(folder);
 
-  if (not folderKey) {
+  if (not folderKey or folderKey.value().toString().isEmpty()) {
     QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
     return;
   }
 
   if (not setQuerys()) return;
 
-  report->dataManager()->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
+  auto dataManager = report->dataManager();
+
+  dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
   if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) {
     QMessageBox::critical(nullptr, "Erro!", "Não encontrou o modelo de impressão!");
     return;
   }
 
-  report->dataManager()->setReportVariable("Loja", queryLoja.value("descricao"));
-  report->dataManager()->setReportVariable("EnderecoLoja", queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + "\n" +
-                                                               queryLojaEnd.value("bairro").toString() + "\n" + queryLojaEnd.value("cidade").toString() + " - " + queryLojaEnd.value("uf").toString() +
-                                                               " - CEP: " + queryLojaEnd.value("cep").toString() + "\n" + queryLoja.value("tel").toString() + " - " +
-                                                               queryLoja.value("tel2").toString());
+  dataManager->setReportVariable("Loja", queryLoja.value("descricao"));
+  dataManager->setReportVariable("EnderecoLoja", queryLojaEnd.value("logradouro").toString() + ", " + queryLojaEnd.value("numero").toString() + "\n" + queryLojaEnd.value("bairro").toString() + "\n" +
+                                                     queryLojaEnd.value("cidade").toString() + " - " + queryLojaEnd.value("uf").toString() + " - CEP: " + queryLojaEnd.value("cep").toString() + "\n" +
+                                                     queryLoja.value("tel").toString() + " - " + queryLoja.value("tel2").toString());
 
-  report->dataManager()->setReportVariable("Data", query.value("data").toDate().toString("dd-MM-yyyy"));
-  report->dataManager()->setReportVariable("Cliente", queryCliente.value("nome_razao"));
+  dataManager->setReportVariable("Data", query.value("data").toDate().toString("dd-MM-yyyy"));
+  dataManager->setReportVariable("Cliente", queryCliente.value("nome_razao"));
   const QString cpfcnpj = queryCliente.value("pfpj") == "PF" ? "CPF: " : "CNPJ: ";
-  report->dataManager()->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value(queryCliente.value("pfpj") == "PF" ? "cpf" : "cnpj").toString());
-  report->dataManager()->setReportVariable("EmailCliente", queryCliente.value("email"));
-  report->dataManager()->setReportVariable("Tel1", queryCliente.value("tel"));
-  report->dataManager()->setReportVariable("Tel2", queryCliente.value("telCel"));
-  report->dataManager()->setReportVariable("CEPFiscal", queryEndFat.value("cep"));
-  report->dataManager()->setReportVariable("EndFiscal", query.value("idEnderecoFaturamento").toInt() == 1
-                                                            ? "Não há/Retira"
-                                                            : queryEndFat.value("logradouro").toString() + " - " + queryEndFat.value("numero").toString() + " - " +
-                                                                  queryEndFat.value("complemento").toString() + " - " + queryEndFat.value("bairro").toString() + " - " +
-                                                                  queryEndFat.value("cidade").toString() + " - " + queryEndFat.value("uf").toString());
-  report->dataManager()->setReportVariable("CEPEntrega", queryEndEnt.value("cep"));
+  dataManager->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value(queryCliente.value("pfpj") == "PF" ? "cpf" : "cnpj").toString());
+  dataManager->setReportVariable("EmailCliente", queryCliente.value("email"));
+  dataManager->setReportVariable("Tel1", queryCliente.value("tel"));
+  dataManager->setReportVariable("Tel2", queryCliente.value("telCel"));
+  dataManager->setReportVariable("CEPFiscal", queryEndFat.value("cep"));
+  dataManager->setReportVariable("EndFiscal", query.value("idEnderecoFaturamento").toInt() == 1
+                                                  ? "Não há/Retira"
+                                                  : queryEndFat.value("logradouro").toString() + " - " + queryEndFat.value("numero").toString() + " - " + queryEndFat.value("complemento").toString() +
+                                                        " - " + queryEndFat.value("bairro").toString() + " - " + queryEndFat.value("cidade").toString() + " - " + queryEndFat.value("uf").toString());
+  dataManager->setReportVariable("CEPEntrega", queryEndEnt.value("cep"));
 
   // REFAC: refactor this to avoid the ' - - - - '
-  report->dataManager()->setReportVariable("EndEntrega", query.value("idEnderecoEntrega").toInt() == 1
-                                                             ? "Não há/Retira"
-                                                             : queryEndEnt.value("logradouro").toString() + " - " + queryEndEnt.value("numero").toString() + " - " +
-                                                                   queryEndEnt.value("complemento").toString() + " - " + queryEndEnt.value("bairro").toString() + " - " +
-                                                                   queryEndEnt.value("cidade").toString() + " - " + queryEndEnt.value("uf").toString());
-  report->dataManager()->setReportVariable("Profissional", queryProfissional.value("nome_razao").toString().isEmpty() ? "Não há" : queryProfissional.value("nome_razao"));
-  report->dataManager()->setReportVariable("EmailProfissional", queryProfissional.value("email"));
-  report->dataManager()->setReportVariable("Vendedor", queryVendedor.value("nome"));
-  report->dataManager()->setReportVariable("EmailVendedor", queryVendedor.value("email"));
+  dataManager->setReportVariable("EndEntrega", query.value("idEnderecoEntrega").toInt() == 1
+                                                   ? "Não há/Retira"
+                                                   : queryEndEnt.value("logradouro").toString() + " - " + queryEndEnt.value("numero").toString() + " - " + queryEndEnt.value("complemento").toString() +
+                                                         " - " + queryEndEnt.value("bairro").toString() + " - " + queryEndEnt.value("cidade").toString() + " - " + queryEndEnt.value("uf").toString());
+  dataManager->setReportVariable("Profissional", queryProfissional.value("nome_razao").toString().isEmpty() ? "Não há" : queryProfissional.value("nome_razao"));
+  dataManager->setReportVariable("EmailProfissional", queryProfissional.value("email"));
+  dataManager->setReportVariable("Vendedor", queryVendedor.value("nome"));
+  dataManager->setReportVariable("EmailVendedor", queryVendedor.value("email"));
 
   QLocale locale;
 
-  report->dataManager()->setReportVariable("Soma", locale.toString(query.value("subTotalLiq").toDouble(), 'f', 2));
-  report->dataManager()->setReportVariable("Desconto",
-                                           "R$ " + locale.toString(query.value("descontoReais").toDouble(), 'f', 2) + " (" + locale.toString(query.value("descontoPorc").toDouble(), 'f', 2) + "%)");
+  dataManager->setReportVariable("Soma", locale.toString(query.value("subTotalLiq").toDouble(), 'f', 2));
+  dataManager->setReportVariable("Desconto", "R$ " + locale.toString(query.value("descontoReais").toDouble(), 'f', 2) + " (" + locale.toString(query.value("descontoPorc").toDouble(), 'f', 2) + "%)");
   double value = query.value("total").toDouble() - query.value("frete").toDouble();
-  report->dataManager()->setReportVariable("Total", locale.toString(value, 'f', 2));
-  report->dataManager()->setReportVariable("Frete", locale.toString(query.value("frete").toDouble(), 'f', 2));
-  report->dataManager()->setReportVariable("TotalFinal", locale.toString(query.value("total").toDouble(), 'f', 2));
-  report->dataManager()->setReportVariable("Observacao", query.value("observacao").toString().replace("\n", " "));
+  dataManager->setReportVariable("Total", locale.toString(value, 'f', 2));
+  dataManager->setReportVariable("Frete", locale.toString(query.value("frete").toDouble(), 'f', 2));
+  dataManager->setReportVariable("TotalFinal", locale.toString(query.value("total").toDouble(), 'f', 2));
+  dataManager->setReportVariable("Observacao", query.value("observacao").toString().replace("\n", " "));
 
   if (tipo == Tipo::Orcamento) {
-    report->dataManager()->setReportVariable("Orcamento", id);
-    report->dataManager()->setReportVariable("Validade", query.value("validade").toString() + " dias");
+    dataManager->setReportVariable("Orcamento", id);
+    dataManager->setReportVariable("Validade", query.value("validade").toString() + " dias");
   }
 
   if (tipo == Tipo::Venda) {
-    report->dataManager()->setReportVariable("Pedido", id);
-    report->dataManager()->setReportVariable("Orcamento", query.value("idOrcamento"));
-    report->dataManager()->setReportVariable("PrazoEntrega", query.value("prazoEntrega").toString() + " dias");
+    dataManager->setReportVariable("Pedido", id);
+    dataManager->setReportVariable("Orcamento", query.value("idOrcamento"));
+    dataManager->setReportVariable("PrazoEntrega", query.value("prazoEntrega").toString() + " dias");
 
     QSqlQuery queryPgt1("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                         "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO'");
@@ -120,7 +116,7 @@ void Impressao::print() {
                          (queryPgt1.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt1.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
                          queryPgt1.value("observacao").toString();
 
-    report->dataManager()->setReportVariable("FormaPagamento1", pgt1);
+    dataManager->setReportVariable("FormaPagamento1", pgt1);
 
     QSqlQuery queryPgt2("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                         "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO'");
@@ -136,7 +132,7 @@ void Impressao::print() {
                                    (queryPgt2.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt2.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
                                    queryPgt2.value("observacao").toString();
 
-    report->dataManager()->setReportVariable("FormaPagamento2", pgt2);
+    dataManager->setReportVariable("FormaPagamento2", pgt2);
 
     QSqlQuery queryPgt3("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                         "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO'");
@@ -152,7 +148,7 @@ void Impressao::print() {
                                    (queryPgt3.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt3.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
                                    queryPgt3.value("observacao").toString();
 
-    report->dataManager()->setReportVariable("FormaPagamento3", pgt3);
+    dataManager->setReportVariable("FormaPagamento3", pgt3);
 
     QSqlQuery queryPgt4("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                         "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO'");
@@ -168,7 +164,7 @@ void Impressao::print() {
                                    (queryPgt4.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt4.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
                                    queryPgt4.value("observacao").toString();
 
-    report->dataManager()->setReportVariable("FormaPagamento4", pgt4);
+    dataManager->setReportVariable("FormaPagamento4", pgt4);
 
     QSqlQuery queryPgt5("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                         "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO'");
@@ -184,7 +180,7 @@ void Impressao::print() {
                                    (queryPgt5.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt5.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
                                    queryPgt5.value("observacao").toString();
 
-    report->dataManager()->setReportVariable("FormaPagamento5", pgt5);
+    dataManager->setReportVariable("FormaPagamento5", pgt5);
   }
 
   const QString path = folderKey.value().toString();

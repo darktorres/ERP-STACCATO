@@ -595,7 +595,7 @@ void Orcamento::calcPrecoGlobalTotal() {
   ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalItens * descGlobal / 100);
 
   ui->doubleSpinBoxTotal->setMaximum(subTotalItens + frete);
-  ui->doubleSpinBoxTotal->setValue((subTotalItens * (1 - (descGlobal / 100)) + frete));
+  ui->doubleSpinBoxTotal->setValue(subTotalItens * (1 - (descGlobal / 100)) + frete);
 }
 
 void Orcamento::on_pushButtonImprimir_clicked() {
@@ -1125,7 +1125,7 @@ void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descont
     }
 
     ui->doubleSpinBoxDescontoGlobalReais->setValue(liq * desconto / 100);
-    ui->doubleSpinBoxTotal->setValue((liq * (1 - (desconto / 100)) + frete));
+    ui->doubleSpinBoxTotal->setValue(liq * (1 - (desconto / 100)) + frete);
   }();
 
   setupConnections();
@@ -1186,3 +1186,4 @@ void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(Q
 // TODO: 4quando cadastrar cliente no itemBox mudar para o id dele
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
+// FIXME: ao atualizar um item com outro no lugar apaga a observacao

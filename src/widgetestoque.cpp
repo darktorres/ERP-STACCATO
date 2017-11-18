@@ -31,15 +31,16 @@ WidgetEstoque::~WidgetEstoque() { delete ui; }
 bool WidgetEstoque::setupTables() {
   // REFAC: merge this setquery with the one in montaFiltro
 
-  model.setQuery(
-      "SELECT n.cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = `p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', "
-      "`p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, "
-      "0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` "
-      "SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS `dataRealColeta`, `vp`.`dataPrevReceb` AS "
-      "`dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT * FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS "
-      "consumo, ec.idEstoque, ec.idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT * FROM produto p) p ON p.idProduto = "
-      "e.idProduto LEFT JOIN (SELECT * FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT * FROM estoque_has_nfe ehn) ehn ON e.idEstoque = "
-      "ehn.idEstoque LEFT JOIN (SELECT * FROM nfe n) n ON ehn.idNFe = n.idNFe GROUP BY e.idEstoque HAVING restante > 0");
+  model.setQuery("SELECT GROUP_CONCAT(DISTINCT n.cnpjDest) AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = "
+                 "`p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / "
+                 "`p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS "
+                 "`codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS "
+                 "`dataRealColeta`, `vp`.`dataPrevReceb` AS `dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT e.status, e.idEstoque, e.descricao, e.quant, e.un, e.lote, e.local, "
+                 "e.bloco, e.codComercial, e.idProduto FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS consumo, ec.idEstoque, "
+                 "GROUP_CONCAT(DISTINCT ec.idVendaProduto) AS idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT p.fornecedor, p.un, "
+                 "p.un2, p.m2cx, p.pccx, p.idProduto FROM produto p) p ON p.idProduto = e.idProduto LEFT JOIN (SELECT vp.idCompra, vp.dataPrevColeta, vp.dataRealColeta, vp.dataPrevReceb, "
+                 "vp.dataRealReceb, vp.idVendaProduto FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT ehn.idEstoque, ehn.idNFe FROM estoque_has_nfe ehn) ehn "
+                 "ON e.idEstoque = ehn.idEstoque LEFT JOIN (SELECT n.cnpjDest, n.numeroNFe, n.idNFe FROM nfe n) n ON ehn.idNFe = n.idNFe GROUP BY e.idEstoque HAVING restante > 0;");
 
   if (model.lastError().isValid()) {
     emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
@@ -116,16 +117,17 @@ void WidgetEstoque::montaFiltro() {
   const QString restanteDeposito = ui->radioButtonEstoqueContabil->isChecked() ? "`restante deposito` > 0 AND status = 'ESTOQUE'" : "";
   const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "restante <= 0" : "restante > 0";
 
-  model.setQuery(
-      "SELECT n.cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = `p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', "
-      "`p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, "
-      "0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` "
-      "SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS `dataRealColeta`, `vp`.`dataPrevReceb` AS "
-      "`dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT * FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS "
-      "consumo, ec.idEstoque, ec.idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT * FROM produto p) p ON p.idProduto = "
-      "e.idProduto LEFT JOIN (SELECT * FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT * FROM estoque_has_nfe ehn) ehn ON e.idEstoque = "
-      "ehn.idEstoque LEFT JOIN (SELECT * FROM nfe n) n ON ehn.idNFe = n.idNFe " +
-      match + " GROUP BY e.idEstoque HAVING " + restante);
+  model.setQuery("SELECT GROUP_CONCAT(DISTINCT n.cnpjDest) AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = "
+                 "`p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / "
+                 "`p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS "
+                 "`codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS "
+                 "`dataRealColeta`, `vp`.`dataPrevReceb` AS `dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT e.status, e.idEstoque, e.descricao, e.quant, e.un, e.lote, e.local, "
+                 "e.bloco, e.codComercial, e.idProduto FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS consumo, ec.idEstoque, "
+                 "GROUP_CONCAT(DISTINCT ec.idVendaProduto) AS idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT p.fornecedor, p.un, "
+                 "p.un2, p.m2cx, p.pccx, p.idProduto FROM produto p) p ON p.idProduto = e.idProduto LEFT JOIN (SELECT vp.idCompra, vp.dataPrevColeta, vp.dataRealColeta, vp.dataPrevReceb, "
+                 "vp.dataRealReceb, vp.idVendaProduto FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT ehn.idNFe, ehn.idEstoque FROM estoque_has_nfe ehn) ehn "
+                 "ON e.idEstoque = ehn.idEstoque LEFT JOIN (SELECT n.cnpjDest, n.numeroNFe, n.idNFe FROM nfe n) n ON ehn.idNFe = n.idNFe " +
+                 match + " GROUP BY e.idEstoque HAVING " + restante);
 
   if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
 }

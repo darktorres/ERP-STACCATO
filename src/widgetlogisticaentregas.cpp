@@ -544,8 +544,10 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   const QString idEvento = modelCarga.data(list.first().row(), "idEvento").toString();
 
   SqlQueryModel modelProdutosAgrupado;
-  modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, produto, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, un FROM view_calendario_produto WHERE idVenda = '" +
-                                 idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY produto");
+  modelProdutosAgrupado.setQuery(
+      "SELECT idEvento, idVenda, GROUP_CONCAT(DISTINCT fornecedor) AS fornecedor, produto, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, GROUP_CONCAT(DISTINCT un) AS "
+      "un FROM view_calendario_produto WHERE idVenda = '" +
+      idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY produto");
 
   //-------------------------------------------------------------------------
 

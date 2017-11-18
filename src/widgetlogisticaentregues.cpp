@@ -80,8 +80,8 @@ void WidgetLogisticaEntregues::setupTables() {
 void WidgetLogisticaEntregues::on_tableVendas_activated(const QModelIndex &index) {
   modelProdutos.setQuery("SELECT `vp`.`idVendaProduto` AS `idVendaProduto`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` "
                          "AS `status`, `vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`produto` AS `produto`, `vp`.`caixas` AS `caixas`, `vp`.`quant` AS `quant`, `vp`.`un` AS "
-                         "`un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial` AS `formComercial`, `ehc`.`idConsumo` AS `idConsumo` FROM "
-                         "(`mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON ((`vp`.`idVendaProduto` = `ehc`.`idVendaProduto`))) WHERE idVenda = '" +
+                         "`un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
+                         "FROM (`mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON ((`vp`.`idVendaProduto` = `ehc`.`idVendaProduto`))) WHERE idVenda = '" +
                          modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`");
 
   if (modelProdutos.lastError().isValid()) {

@@ -18,7 +18,6 @@ public:
   void setHasError(const bool value);
 
 private slots:
-  void on_dateEditMes_dateChanged(const QDate &);
   void on_pushButtonExcel_clicked();
   void on_tableRelatorio_entered(const QModelIndex &);
   void on_tableTotalLoja_entered(const QModelIndex &);
@@ -38,6 +37,7 @@ private:
   void setFilterTotaisLoja();
   void calcularTotalGeral();
   void setFilterRelatorio();
+  void dateEditMes_dateChanged(const QDate &);
 };
 
 #endif // WIDGETRELATORIO_H

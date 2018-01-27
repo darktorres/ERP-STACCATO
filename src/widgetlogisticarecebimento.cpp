@@ -96,8 +96,8 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = "
-                  ":idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE "
+                  "idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":dataRealReceb", dataReceb);
     query.bindValue(":idEstoque", model.data(item.row(), "idEstoque"));
     query.bindValue(":codComercial", model.data(item.row(), "codComercial"));
@@ -141,7 +141,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) return;
 
-  const QDateTime dataReceb = inputDlg.getDate();
+  const QDateTime dataReceb = inputDlg.getDateTime();
   const QString recebidoPor = inputDlg.getRecebeu();
 
   emit transactionStarted();
@@ -308,8 +308,17 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
     const QString codComercial = model.data(item.row(), "codComercial").toString();
 
     QSqlQuery query;
-    query.prepare(
-        "UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+
+    query.prepare("UPDATE estoque SET status = 'EM COLETA' WHERE idEstoque = :idEstoque");
+    query.bindValue(":idEstoque", idEstoque);
+
+    if (not query.exec()) {
+      emit errorSignal("Erro salvando status no estoque: " + query.lastError().text());
+      return false;
+    }
+
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE "
+                  "idEstoque = :idEstoque) AND codComercial = :codComercial");
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 
@@ -318,7 +327,8 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+    query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = "
+                  ":idEstoque) AND codComercial = :codComercial");
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
 

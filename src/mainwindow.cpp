@@ -42,7 +42,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     return;
   }
 
-  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + qApp->mapLojas.key(hostname.value().toString()));
+  const QString hostnameText = qApp->mapLojas.key(hostname.value().toString());
+
+  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE LOJA") {
     ui->actionGerenciar_Lojas->setDisabled(true);
@@ -74,6 +76,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   //
 
   ui->tabWidget->setTabEnabled(8, false);
+
+  //
+
+  pushButtonStatus = new QPushButton(this);
+  pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
+  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").value().toString());
+  pushButtonStatus->setStyleSheet("color: rgb(0, 255, 0);");
+
+  ui->statusBar->addWidget(pushButtonStatus);
+
+  connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::verifyDb);
+  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb);
 
   //  QSqlQuery queryChart;
 
@@ -117,12 +131,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::verifyDb() {
+  const bool conectado = qApp->dbConnect();
+
+  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
+  pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 255, 0);" : "color: rgb(255, 0, 0);");
+
+  if (conectado) updateTables();
+}
+
 // REFAC: put this in main.cpp inside a class
 void MainWindow::gerarEnviarRelatorio() {
   // TODO: 0finish
   // verificar em que etapa eu guardo a linha do dia seguinte no BD
 
   QSqlQuery query;
+  // TODO: replace *
   query.prepare("SELECT * FROM jobs WHERE dataReferente = :dataReferente AND status = 'PENDENTE'");
   query.bindValue(":dataAgendado", QDate::currentDate());
 
@@ -276,22 +300,24 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
 }
 
 void MainWindow::updateTables() {
+  if (qApp->getUpdating()) return;
+  if (not qApp->isConnected) return;
+  if (qApp->showingErrors) return;
+
   qApp->setUpdating(true);
 
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Orçamentos" and not ui->widgetOrcamento->updateTables()) ui->widgetOrcamento->setHasError(true);
-  if (currentText == "Vendas" and not ui->widgetVenda->updateTables()) ui->widgetVenda->setHasError(true);
-  if (currentText == "Compras" and not ui->widgetCompra->updateTables()) ui->widgetCompra->setHasError(true);
-  if (currentText == "Logística" and not ui->widgetLogistica->updateTables()) ui->widgetLogistica->setHasError(true);
-  if (currentText == "NFe" and not ui->widgetNfe->updateTables()) ui->widgetNfe->setHasError(true);
-  if (currentText == "Estoque" and not ui->widgetEstoque->updateTables()) ui->widgetEstoque->setHasError(true);
-  if (currentText == "Financeiro" and not ui->widgetFinanceiro->updateTables()) ui->widgetFinanceiro->setHasError(true);
-  if (currentText == "Relatórios" and not ui->widgetRelatorio->updateTables()) ui->widgetRelatorio->setHasError(true);
+  if (currentText == QStringLiteral("Orçamentos")) ui->widgetOrcamento->updateTables();
+  if (currentText == QStringLiteral("Vendas")) ui->widgetVenda->updateTables();
+  if (currentText == QStringLiteral("Compras")) ui->widgetCompra->updateTables();
+  if (currentText == QStringLiteral("Logística")) ui->widgetLogistica->updateTables();
+  if (currentText == QStringLiteral("NFe")) ui->widgetNfe->updateTables();
+  if (currentText == QStringLiteral("Estoque")) ui->widgetEstoque->updateTables();
+  if (currentText == QStringLiteral("Financeiro")) ui->widgetFinanceiro->updateTables();
+  if (currentText == QStringLiteral("Relatórios")) ui->widgetRelatorio->updateTables();
 
   qApp->setUpdating(false);
-
-  qApp->showErrors();
 }
 
 void MainWindow::on_actionCadastrarFornecedor_triggered() {
@@ -303,7 +329,7 @@ void MainWindow::on_actionCadastrarFornecedor_triggered() {
 bool MainWindow::event(QEvent *event) {
   switch (event->type()) {
   case QEvent::WindowActivate:
-    if (not qApp->getUpdating()) updateTables();
+    updateTables();
     break;
 
   default:

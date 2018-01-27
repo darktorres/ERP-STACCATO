@@ -195,6 +195,7 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->hideColumn("taxa");
   ui->tablePagamentos->hideColumn("contraParte");
   ui->tablePagamentos->hideColumn("comissao");
+  ui->tablePagamentos->hideColumn("desativado");
   ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("representacao"), new CheckBoxDelegate(this, true));
 
   for (int row = 0; row < modelPagamentos.rowCount(); ++row) ui->tablePagamentos->openPersistentEditor(row, "representacao");
@@ -326,9 +327,14 @@ bool Devolucao::inserirItens(const QModelIndexList &list) {
     }
 
     if (not modelProdutos.setData(newRow, "idVenda", idDevolucao)) return false;
+    const double quant = quantDevolvida * -1;
+    const double parcial = ui->doubleSpinBoxTotalItem->value() * -1;
+    const double prcUnitario2 = parcial / quant;
+    if (not modelProdutos.setData(newRow, "prcUnitario", prcUnitario2)) return false;
+    if (not modelProdutos.setData(newRow, "descUnitario", prcUnitario2)) return false;
     if (not modelProdutos.setData(newRow, "caixas", quantDevolvida / step * -1)) return false;
-    if (not modelProdutos.setData(newRow, "quant", quantDevolvida * -1)) return false;
-    if (not modelProdutos.setData(newRow, "parcial", ui->doubleSpinBoxTotalItem->value() * -1)) return false;
+    if (not modelProdutos.setData(newRow, "quant", quant)) return false;
+    if (not modelProdutos.setData(newRow, "parcial", parcial)) return false;
     if (not modelProdutos.setData(newRow, "desconto", 0)) return false;
     if (not modelProdutos.setData(newRow, "parcialDesc", ui->doubleSpinBoxTotalItem->value() * -1)) return false;
     if (not modelProdutos.setData(newRow, "descGlobal", 0)) return false;
@@ -617,3 +623,4 @@ void Devolucao::on_groupBoxCredito_toggled(bool) {
 // TODO: 1perguntar e guardar data em que ocorreu a devolucao
 // TODO: 2quando for devolver para o fornecedor perguntar a quantidade
 // TODO: 2quando fizer devolucao no consumo/estoque alterar os dados no pedido_fornecedor? se as quantidades forem iguais trocar idVenda/idVendaProduto
+// TODO: testar devolver mais de uma linha

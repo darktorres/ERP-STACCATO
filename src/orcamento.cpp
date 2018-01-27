@@ -79,7 +79,6 @@ void Orcamento::setupConnections() {
   connect(ui->doubleSpinBoxDescontoGlobal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged);
   connect(ui->doubleSpinBoxDescontoGlobalReais, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged);
   connect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxFrete_valueChanged);
-  connect(ui->doubleSpinBoxQuant, &QDoubleSpinBox::editingFinished, this, &Orcamento::on_doubleSpinBoxQuant_editingFinished);
   connect(ui->doubleSpinBoxQuant, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxQuant_valueChanged);
   connect(ui->doubleSpinBoxTotal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotal_valueChanged);
   connect(ui->doubleSpinBoxTotalItem, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotalItem_valueChanged);
@@ -124,7 +123,6 @@ void Orcamento::unsetConnections() {
   disconnect(ui->doubleSpinBoxDescontoGlobal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged);
   disconnect(ui->doubleSpinBoxDescontoGlobalReais, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxFrete_valueChanged);
-  disconnect(ui->doubleSpinBoxQuant, &QDoubleSpinBox::editingFinished, this, &Orcamento::on_doubleSpinBoxQuant_editingFinished);
   disconnect(ui->doubleSpinBoxQuant, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxQuant_valueChanged);
   disconnect(ui->doubleSpinBoxTotal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotal_valueChanged);
   disconnect(ui->doubleSpinBoxTotalItem, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxTotalItem_valueChanged);
@@ -384,13 +382,13 @@ void Orcamento::removeItem() {
     return;
   }
 
+  calcPrecoGlobalTotal();
+
   if (ui->lineEditOrcamento->text() != "Auto gerado") {
     if (not modelItem.submitAll()) {
       QMessageBox::critical(this, "Erro!", "Erro salvando remoção: " + modelItem.lastError().text());
       return;
     }
-
-    calcPrecoGlobalTotal();
 
     save();
   }
@@ -454,7 +452,41 @@ bool Orcamento::generateId() {
   return true;
 }
 
+bool Orcamento::recalcularTotais() {
+  double subTotalBruto = 0.;
+  double subTotalLiq = 0.;
+  double total = 0.;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    subTotalBruto += modelItem.data(row, "parcial").toDouble();
+    subTotalLiq += modelItem.data(row, "parcialDesc").toDouble();
+    total += modelItem.data(row, "total").toDouble();
+  }
+
+  if (abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 1) {
+    QMessageBox::critical(this, "Erro!", "Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!");
+    calcPrecoGlobalTotal();
+    return false;
+  }
+
+  if (abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 1) {
+    QMessageBox::critical(this, "Erro!", "Total dos itens não confere com SubTotalLíquido! Recalculando valores!");
+    calcPrecoGlobalTotal();
+    return false;
+  }
+
+  if (abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1) {
+    QMessageBox::critical(this, "Erro!", "Total dos itens não confere com Total! Recalculando valores!");
+    calcPrecoGlobalTotal();
+    return false;
+  }
+
+  return true;
+}
+
 bool Orcamento::verifyFields() {
+  if (not recalcularTotais()) return false;
+
   if (ui->itemBoxCliente->text().isEmpty()) {
     ui->itemBoxCliente->setFocus();
     QMessageBox::critical(this, "Erro!", "Cliente inválido!");
@@ -557,13 +589,16 @@ void Orcamento::clearFields() {
 
 void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 
-void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double) {
-  const double caixas = ui->doubleSpinBoxQuant->value() / ui->spinBoxUnCx->value();
+void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
+  const double step = ui->doubleSpinBoxQuant->singleStep();
+  const double quant2 = not qFuzzyIsNull(fmod(quant, step)) ? ceil(quant / step) * step : quant;
+
+  if (not qFuzzyCompare(quant, quant2)) ui->doubleSpinBoxQuant->setValue(quant2);
+
+  const double caixas = quant2 / ui->spinBoxUnCx->value();
 
   if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) ui->doubleSpinBoxCaixas->setValue(caixas);
 }
-
-void Orcamento::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant->setValue(ui->doubleSpinBoxCaixas->value() * ui->doubleSpinBoxQuant->singleStep()); }
 
 void Orcamento::on_pushButtonCadastrarOrcamento_clicked() { save(); }
 
@@ -751,6 +786,8 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
   const double itemBruto = quant * prcUn;
 
+  if (not qFuzzyCompare(caixas, caixas2)) ui->doubleSpinBoxCaixas->setValue(caixas2);
+
   unsetConnections();
 
   ui->doubleSpinBoxQuant->setValue(quant);
@@ -777,7 +814,7 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
   ui->lineEditEstoque->clear();
   ui->lineEditFormComercial->clear();
   ui->lineEditFornecedor->clear();
-  ui->lineEditObs->clear();
+  if (ui->pushButtonAdicionarItem->isVisible()) ui->lineEditObs->clear();
   ui->lineEditPrecoUn->clear();
   ui->lineEditUn->clear();
   ui->spinBoxMinimo->clear();
@@ -815,10 +852,10 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
   ui->doubleSpinBoxQuant->setMinimum(minimo);
   ui->doubleSpinBoxCaixas->setMinimum(minimo / uncx);
 
-  currentItemIsEstoque = query.value("estoque").toBool();
+  currentItemIsEstoque = query.value("estoque").toInt();
   currentItemIsPromocao = query.value("promocao").toBool();
 
-  if (currentItemIsEstoque) {
+  if (currentItemIsEstoque != 0) {
     ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
     ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / uncx);
   } else {
@@ -842,7 +879,7 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
   // TODO: 0verificar se preciso tratar os casos sem multiplo
   // if (minimo != 0) ...
   if (not qFuzzyIsNull(minimo) and not qFuzzyIsNull(multiplo)) {
-    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / minimo);
+    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / uncx);
     ui->doubleSpinBoxQuant->setSingleStep(multiplo);
   }
 
@@ -1186,4 +1223,3 @@ void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(Q
 // TODO: 4quando cadastrar cliente no itemBox mudar para o id dele
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
-// FIXME: ao atualizar um item com outro no lugar apaga a observacao

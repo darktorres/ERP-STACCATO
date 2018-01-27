@@ -89,17 +89,17 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelNatureza">
-            <property name="text">
-             <string>Natureza operação</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
            <widget class="QLabel" name="labelSerie">
             <property name="text">
              <string>Série</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="labelEmissao">
+            <property name="text">
+             <string>Emissão</string>
             </property>
            </widget>
           </item>
@@ -113,17 +113,17 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="2">
-           <widget class="QLabel" name="labelEmissao">
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelNatureza">
             <property name="text">
-             <string>Emissão</string>
+             <string>Natureza operação</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="labelCodigo">
+          <item row="7" column="0">
+           <widget class="QLabel" name="labelSaida">
             <property name="text">
-             <string>Código</string>
+             <string>Saída</string>
             </property>
            </widget>
           </item>
@@ -137,15 +137,15 @@
           <item row="6" column="0">
            <widget class="QLineEdit" name="lineEditCodigo"/>
           </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="labelSaida">
-            <property name="text">
-             <string>Saída</string>
-            </property>
-           </widget>
-          </item>
           <item row="6" column="1">
            <widget class="QLineEdit" name="lineEditNumero"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="labelCodigo">
+            <property name="text">
+             <string>Código</string>
+            </property>
+           </widget>
           </item>
           <item row="7" column="1">
            <widget class="QLabel" name="labelTipo">
@@ -154,12 +154,15 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
-           <widget class="QLineEdit" name="lineEditTipo">
+          <item row="9" column="2">
+           <widget class="QLineEdit" name="lineEditFormatoPagina">
             <property name="text">
              <string/>
             </property>
            </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLineEdit" name="lineEditSaida"/>
           </item>
           <item row="7" column="2">
            <widget class="QLabel" name="labelFormatoPagina">
@@ -168,17 +171,7 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="0">
-           <widget class="QLineEdit" name="lineEditSaida"/>
-          </item>
-          <item row="8" column="2">
-           <widget class="QLineEdit" name="lineEditFormatoPagina">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
+          <item row="11" column="0">
            <widget class="QComboBox" name="comboBoxDestinoOperacao">
             <property name="enabled">
              <bool>true</bool>
@@ -200,7 +193,7 @@
             </item>
            </widget>
           </item>
-          <item row="9" column="0">
+          <item row="10" column="0">
            <widget class="QLabel" name="labelSaida_2">
             <property name="text">
              <string>Destino da operação</string>
@@ -230,6 +223,52 @@
             <item>
              <property name="text">
               <string>DEVOLUÇÃO</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QComboBox" name="comboBoxTipo">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>0 Entrada</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 Saída</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLabel" name="labelTipo_2">
+            <property name="text">
+             <string>Finalidade da operação</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QComboBox" name="comboBoxFinalidade">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>1 Normal</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2 Complementar</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4 Devolução</string>
              </property>
             </item>
            </widget>
@@ -3388,6 +3427,198 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               </item>
              </layout>
             </widget>
+            <widget class="QWidget" name="tab_9">
+             <attribute name="title">
+              <string>ICMS Interestadual</string>
+             </attribute>
+             <layout class="QGridLayout" name="gridLayout_86">
+              <item row="0" column="0">
+               <layout class="QGridLayout" name="gridLayout_43">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="gridLayout_41">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_56">
+                    <property name="text">
+                     <string>Percentual ICMS relativo ao FCP na UF de destino</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_57">
+                    <property name="text">
+                     <string>Valor da base de cálculo na UF do destinatário</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_58">
+                    <property name="text">
+                     <string>Alíquota interna da UF do destinatário</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_59">
+                    <property name="text">
+                     <string>Alíquota interestadual</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_60">
+                    <property name="text">
+                     <string>Percentual provisório de partilha</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_61">
+                    <property name="text">
+                     <string>Valor ICMS de partilha para UF do destinatário</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_62">
+                    <property name="text">
+                     <string>Valor ICMS de partilha para UF do remetente</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="0">
+                   <widget class="QLabel" name="label_63">
+                    <property name="text">
+                     <string>Valor ICMS relativo ao FCP da UF de destino</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="0" column="1">
+                 <layout class="QGridLayout" name="gridLayout_42">
+                  <item row="7" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxFcpDestino">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="prefix">
+                     <string>R$ </string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaRemetente">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="prefix">
+                     <string>R$ </string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInternaDestinatario">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="suffix">
+                     <string>%</string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualPartilha">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="suffix">
+                     <string>%</string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaDestinatario">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="prefix">
+                     <string>R$ </string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInter">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="suffix">
+                     <string>%</string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualFcpDestino">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="suffix">
+                     <string>%</string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0" colspan="2">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseCalculoDestinatario">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="prefix">
+                     <string>R$ </string>
+                    </property>
+                    <property name="maximum">
+                     <double>99999.990000000005239</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <spacer name="horizontalSpacer_4">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
          </layout>
@@ -3801,7 +4032,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorProduto">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorProdutos">
              <property name="wrapping">
               <bool>false</bool>
              </property>
@@ -4389,7 +4620,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
        <item row="3" column="0">
         <widget class="QTextEdit" name="infCompSistema">
          <property name="readOnly">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>

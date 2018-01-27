@@ -97,6 +97,7 @@ private:
   void writeTotal(QTextStream &stream) const;
   void writeTransportadora(QTextStream &stream) const;
   void writeVolume(QTextStream &stream) const;
+  void writePagamento(QTextStream &stream);
 };
 
 #endif // CADASTRARNFE_H

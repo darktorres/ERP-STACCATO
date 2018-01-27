@@ -36,12 +36,14 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Venda *ui;
   // methods
+  bool atualizaQuantEstoque();
   bool atualizarCredito();
   bool cadastrar() final;
   bool cancelamento();
   bool financeiroSalvar();
   bool generateId();
   bool savingProcedures() final;
+  bool todosProdutosSaoEstoque();
   bool verifyFields() final;
   bool viewRegister() final;
   void calcPrecoGlobalTotal();
@@ -53,8 +55,8 @@ private:
   void on_checkBoxRT_toggled(bool checked);
   void on_comboBoxPgt_currentTextChanged(const int index, const QString &text);
   void on_dateTimeEdit_dateTimeChanged(const QDateTime &);
-  void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
   void on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto);
+  void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
   void on_doubleSpinBoxFrete_valueChanged(const double frete);
   void on_doubleSpinBoxPgt_valueChanged();
   void on_doubleSpinBoxTotal_valueChanged(const double total);
@@ -70,8 +72,8 @@ private:
   void on_pushButtonLimparPag_clicked();
   void on_pushButtonPgtLoja_clicked();
   void on_pushButtonVoltar_clicked();
-  void on_tableFluxoCaixa_entered(const QModelIndex &);
   void on_tableFluxoCaixa2_entered(const QModelIndex &);
+  void on_tableFluxoCaixa_entered(const QModelIndex &);
   void registerMode() final;
   void resetarPagamentos();
   void setupConnections();

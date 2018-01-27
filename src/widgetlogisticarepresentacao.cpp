@@ -88,7 +88,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not processRows(list, input.getDate(), input.getRecebeu())) {
+  if (not processRows(list, input.getDateTime(), input.getRecebeu())) {
     QSqlQuery("ROLLBACK").exec();
     emit transactionEnded();
     return;

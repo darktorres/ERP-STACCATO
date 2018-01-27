@@ -22,7 +22,7 @@ private slots:
 private:
   // attributes
   bool isReadOnly = false;
-  bool currentItemIsEstoque = false;
+  int currentItemIsEstoque = 0;
   bool currentItemIsPromocao = false;
   double minimoFrete = 0;
   double porcFrete = 0;
@@ -52,8 +52,7 @@ private:
   void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
   void on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto);
   void on_doubleSpinBoxFrete_valueChanged(const double frete);
-  void on_doubleSpinBoxQuant_editingFinished();
-  void on_doubleSpinBoxQuant_valueChanged(const double);
+  void on_doubleSpinBoxQuant_valueChanged(const double quant);
   void on_doubleSpinBoxTotal_valueChanged(const double total);
   void on_doubleSpinBoxTotalItem_valueChanged(const double);
   void on_itemBoxCliente_textChanged(const QString &);
@@ -79,6 +78,7 @@ private:
   void successMessage() final;
   void unsetConnections();
   void updateMode() final;
+  bool recalcularTotais();
 };
 
 #endif // ORCAMENTO_H

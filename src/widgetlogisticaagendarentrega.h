@@ -48,7 +48,7 @@ private:
   Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
   bool adicionarProduto(const QModelIndexList &list);
-  bool adicionarProdutoParcial(const int row);
+  bool adicionarProdutoParcial(const int row, const int quantAgendar, const int quantTotal);
   bool processRows();
   bool quebrarProduto(const int row, const int quantAgendar, const int quantTotal);
   bool reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao);

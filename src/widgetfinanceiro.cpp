@@ -16,8 +16,6 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : Widget(parent), ui(new Ui:
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
 
 bool WidgetFinanceiro::updateTables() {
-  if (hasError) return false;
-
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentText == "Fluxo de Caixa") return ui->widgetFluxoCaixa->updateTables();
@@ -28,8 +26,6 @@ bool WidgetFinanceiro::updateTables() {
 
   return true;
 }
-
-void WidgetFinanceiro::setHasError(const bool value) { hasError = value; }
 
 void WidgetFinanceiro::setConnections() {
   connect(ui->widgetFluxoCaixa, &WidgetFinanceiroFluxoCaixa::errorSignal, this, &WidgetFinanceiro::errorSignal);
@@ -70,3 +66,5 @@ void WidgetFinanceiro::setConnections() {
 // where cr.valorReal is not null
 // order by cr.dataRealizado;
 // TODO: 0poder deixar 'agencia' e 'conta' como nulo nos casos em que nao existem
+// TODO: poder refazer o fluxo dos pagamentos parcialmente, refazendo pagamentos individualemente com a condicao do total continuar batendo
+// TODO: mostrar na tela de edição de fluxo as notas associadas a compra e poder associar pagamentos com notas

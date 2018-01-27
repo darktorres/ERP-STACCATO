@@ -804,3 +804,5 @@ void CadastroLoja::on_pushButtonLimparSelecao_clicked() {
 
   ui->tablePagamentos->clearSelection();
 }
+
+// FIXME: nao permitir associar um pagamento já associado

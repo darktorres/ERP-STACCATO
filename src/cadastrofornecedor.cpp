@@ -324,6 +324,16 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
     return false;
   }
 
+  query.prepare(
+      "UPDATE produto_has_preco php, produto p SET php.validadeFim = :novaValidade, expirado = FALSE WHERE php.idProduto = p.idProduto AND php.preco = p.precoVenda AND p.fornecedor = :fornecedor");
+  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
+  query.bindValue(":fornecedor", fornecedor);
+
+  if (not query.exec()) {
+    emit errorSignal("Erro atualizando validade no preço/produto: " + query.lastError().text());
+    return false;
+  }
+
   query.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
@@ -333,13 +343,18 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
     return false;
   }
 
+  if (not query.exec("CALL invalidate_expired()")) {
+    emit errorSignal("Erro executando InvalidarExpirados: " + query.lastError().text());
+    return false;
+  }
+
   return true;
 }
 
 void CadastroFornecedor::on_pushButtonValidade_clicked() {
   bool ok = true;
 
-  const int novaValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, 0, 1000, 1, &ok);
+  const int novaValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, -1, 1000, 1, &ok);
 
   if (not ok) return;
 

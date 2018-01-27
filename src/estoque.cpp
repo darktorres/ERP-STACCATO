@@ -17,7 +17,7 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
 
   setupTables();
 
-  viewRegisterById(idEstoque, showWindow);
+  viewRegisterById(showWindow);
 }
 
 Estoque::~Estoque() { delete ui; }
@@ -104,13 +104,18 @@ void Estoque::setupTables() {
   ui->tableConsumo->showColumn("created");
   ui->tableConsumo->hideColumn("idEstoque");
   ui->tableConsumo->hideColumn("quantUpd");
+
+  modelCompra.setTable("pedido_fornecedor_has_produto");
+  modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelCompra.setFilter("0");
 }
 
 void Estoque::on_tableEstoque_activated(const QModelIndex &) { exibirNota(); }
 
 void Estoque::calcularRestante() {
   double quantRestante = model.data(0, "quant").toDouble();
-  double quantComprometidoNaoEntregue = 0;
+  double quantComprometidoNaoEntregue = model.data(0, "quant").toDouble();
 
   for (int row = 0; row < modelViewConsumo.rowCount(); ++row) {
     const double quant = modelViewConsumo.data(row, "quant").toDouble();
@@ -118,7 +123,7 @@ void Estoque::calcularRestante() {
 
     quantRestante += quant;
 
-    if (statusProduto == "ESTOQUE") quantComprometidoNaoEntregue += quant * -1;
+    if (statusProduto == "ENTREGUE") quantComprometidoNaoEntregue -= quant * -1;
   }
 
   const QString un = model.data(0, "un").toString();
@@ -130,7 +135,7 @@ void Estoque::calcularRestante() {
   ui->doubleSpinBoxComprometidoNaoEntregue->setSuffix(" " + un);
 }
 
-bool Estoque::viewRegisterById(const QString &idEstoque, const bool showWindow) {
+bool Estoque::viewRegisterById(const bool showWindow) {
   if (idEstoque.isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Estoque não encontrado!");
     return false;
@@ -159,6 +164,26 @@ bool Estoque::viewRegisterById(const QString &idEstoque, const bool showWindow) 
 
   ui->tableConsumo->resizeColumnsToContents();
 
+  QSqlQuery query;
+  query.prepare("SELECT pf.codComercial, pf.idCompra FROM estoque e, estoque_has_compra ehc, pedido_fornecedor_has_produto pf WHERE e.idEstoque = ehc.idEstoque AND ehc.idEstoque = :idEstoque AND "
+                "pf.idCompra = ehc.idCompra AND pf.codComercial = e.codComercial");
+  query.bindValue(":idEstoque", idEstoque);
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando compra relacionada ao estoque: " + query.lastError().text());
+    return false;
+  }
+
+  const QString idCompra = query.value("idCompra").toString();
+  const QString codComercial = query.value("codComercial").toString();
+
+  modelCompra.setFilter("idCompra = " + idCompra + " AND codComercial = '" + codComercial + "'");
+
+  if (not modelCompra.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor: " + modelCompra.lastError().text());
+    return false;
+  }
+
   calcularRestante();
 
   if (showWindow) show();
@@ -184,6 +209,20 @@ void Estoque::exibirNota() {
   }
 }
 
+bool Estoque::atualizaQuantEstoque(const int idVendaProduto) {
+  QSqlQuery query;
+  query.prepare(
+      "UPDATE venda_has_produto vhp, produto p SET p.estoqueRestante = p.estoqueRestante - vhp.quant WHERE vhp.idProduto = p.idProduto AND vhp.idVendaProduto = :idVendaProduto AND vhp.estoque > 0");
+  query.bindValue(":idVendaProduto", idVendaProduto);
+
+  if (not query.exec()) {
+    QMessageBox::critical(this, "Erro!", "Erro atualizando quant. estoque: " + query.lastError().text());
+    return false;
+  }
+
+  return true;
+}
+
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   // TODO: [*** Conrado/Anderson] relacionar o consumo quebrando a linha em pedido_fornecedor_has_produto e setar o idVenda/idVendaProduto
 
@@ -196,6 +235,14 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
     QMessageBox::critical(this, "Erro!", "Quantidade insuficiente!");
     return false;
   }
+
+  //
+
+  if (not atualizaQuantEstoque(idVendaProduto)) return false;
+
+  if (not quebrarCompra(idVendaProduto, quant)) return false;
+
+  //
 
   const int row = 0;
   const int newRow = modelConsumo.rowCount();
@@ -263,6 +310,70 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
 
   if (not modelConsumo.submitAll()) {
     QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + modelConsumo.lastError().text());
+    return false;
+  }
+
+  return true;
+}
+
+bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
+  // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
+  // senao fazer a quebra
+
+  if (modelCompra.rowCount() == 0) {
+    QMessageBox::critical(this, "Erro!", "Nenhuma linha de compra!");
+    return false;
+  }
+
+  QSqlQuery query;
+  query.prepare("SELECT idVenda FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
+  query.bindValue(":idVendaProduto", idVendaProduto);
+
+  if (not query.exec() or not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando idVenda: " + query.lastError().text());
+    return false;
+  }
+
+  if (quant < modelCompra.data(0, "quant").toDouble()) {
+    const int newRow = modelCompra.rowCount();
+    modelCompra.insertRow(newRow);
+
+    for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
+      if (modelCompra.fieldIndex("idPedido") == column) continue;
+      if (modelCompra.fieldIndex("created") == column) continue;
+      if (modelCompra.fieldIndex("lastUpdated") == column) continue;
+
+      const QVariant value = modelCompra.data(0, column);
+
+      if (not modelCompra.setData(newRow, column, value)) return false;
+    }
+
+    const double caixas = modelCompra.data(0, "caixas").toDouble();
+    const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
+    const double quantConsumida = modelCompra.data(0, "quantConsumida").toDouble();
+    const double quantOriginal = modelCompra.data(0, "quant").toDouble();
+    const double proporcaoNovo = quant / quantOriginal;
+    const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
+
+    if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) return false;
+    if (not modelCompra.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
+    if (not modelCompra.setData(newRow, "quant", quant)) return false;
+    if (not modelCompra.setData(newRow, "quantConsumida", qMin(quant, quantConsumida))) return false;
+    if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) return false;
+    if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) return false;
+
+    if (not modelCompra.setData(0, "quant", quantOriginal - quant)) return false;
+    if (not modelCompra.setData(0, "quantConsumida", qMin(quantOriginal - quant, quantConsumida))) return false;
+    if (not modelCompra.setData(0, "caixas", caixas * proporcaoAntigo)) return false;
+    if (not modelCompra.setData(0, "preco", prcUnitario * (quantOriginal - quant))) return false;
+
+  } else {
+    if (not modelCompra.setData(0, "idVenda", query.value("idVenda"))) return false;
+    if (not modelCompra.setData(0, "idVendaProduto", idVendaProduto)) return false;
+  }
+
+  if (not modelCompra.submitAll()) {
+    QMessageBox::critical(this, "Erro!", "Erro salvando dados da compra: " + modelCompra.lastError().text());
     return false;
   }
 

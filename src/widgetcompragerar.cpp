@@ -296,8 +296,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Pular");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    const int row = ui->tableResumo->selectionModel()->selectedRows().first().row();
-    const QString fornecedor = modelResumo.data(row, "fornecedor").toString();
+    const QString fornecedor = modelProdutos.data(0, "fornecedor").toString();
 
     auto *mail = new SendMail(SendMail::Tipo::GerarCompra, anexo, fornecedor, this);
     mail->setAttribute(Qt::WA_DeleteOnClose);
@@ -457,10 +456,11 @@ void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
 void WidgetCompraGerar::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
+  QSqlQuery query;
+
   for (const auto &index : list) {
     if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) return false;
 
-    QSqlQuery query;
     query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'INICIADO'");
     query.bindValue(":idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"));
 
@@ -468,6 +468,11 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
       emit errorSignal("Erro voltando status do produto: " + query.lastError().text());
       return false;
     }
+  }
+
+  if (not query.exec("CALL update_venda_status()")) {
+    emit errorSignal("Erro atualizando status da venda: " + query.lastError().text());
+    return false;
   }
 
   if (not modelProdutos.submitAll()) {
@@ -521,3 +526,5 @@ void WidgetCompraGerar::on_checkBoxMostrarSul_toggled(bool checked) {
 }
 
 // TODO: avulso
+// TODO: no caso da quartzobras se for mais de um pedido deixar o campo 'PEDIDO DE VENDA NR.' vazio
+// TODO: no caso da quartzobras ordenar por cod. produto em vez de por pedido

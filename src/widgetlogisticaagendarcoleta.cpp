@@ -315,8 +315,8 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
       return false;
     }
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial "
-                  "= :codComercial");
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
+                  "AND codComercial = :codComercial");
     query.bindValue(":dataPrevColeta", dataPrevColeta);
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":codComercial", codComercial);
@@ -460,11 +460,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
   if (not ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) return;
 }
 
-void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &text) {
-  modelEstoque.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
-
-  if (not modelEstoque.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelEstoque.lastError().text());
-}
+void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date) {
   if (ui->itemBoxVeiculo->text().isEmpty()) return;
@@ -516,15 +512,22 @@ void WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled(bool checked) {
 }
 
 void WidgetLogisticaAgendarColeta::montaFiltro() {
-  const QString filterEstoque = " AND idVenda " + QString(ui->checkBoxEstoque->isChecked() ? "IS NULL" : "IS NOT NULL");
-  const QString filterSul = ui->checkBoxEstoque->isChecked() ? "" : " AND idVenda " + QString(ui->checkBoxSul->isChecked() ? "LIKE 'CAMB%'" : "NOT LIKE 'CAMB%'");
+  QString filtro;
+  const QString filterFornecedor = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
+  filtro += filterFornecedor;
+  const QString filterEstoque = "idVenda " + QString(ui->checkBoxEstoque->isChecked() ? "IS NULL" : "IS NOT NULL");
+  filtro += QString(filtro.isEmpty() ? "" : " AND ") + filterEstoque;
+  const QString filterSul = ui->checkBoxEstoque->isChecked() ? "" : "idVenda " + QString(ui->checkBoxSul->isChecked() ? "LIKE 'CAMB%'" : "NOT LIKE 'CAMB%'");
+  filtro += filterSul.isEmpty() ? "" : QString(filtro.isEmpty() ? "" : " AND ") + filterSul;
 
-  modelEstoque.setFilter("fornecedor = '" + fornecedor + "'" + filterEstoque + filterSul);
-
-  if (not modelEstoque.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + modelEstoque.lastError().text());
-    return;
+  if (const QString text = ui->lineEditBusca->text(); not text.isEmpty()) {
+    const QString filterText = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";
+    filtro = filterText;
   }
+
+  modelEstoque.setFilter(filtro);
+
+  if (not modelEstoque.select()) QMessageBox::critical(this, "Erro!", "Erro: " + modelEstoque.lastError().text());
 }
 
 // TODO: 1poder marcar nota de entrada como cancelada (talvez direto na tela de nfe's e retirar dos fluxos os estoques?)

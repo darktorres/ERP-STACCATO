@@ -14,11 +14,9 @@ public:
   explicit WidgetFinanceiro(QWidget *parent = 0);
   ~WidgetFinanceiro();
   bool updateTables();
-  void setHasError(const bool value);
 
 private:
   // attributes
-  bool hasError = false;
   Ui::WidgetFinanceiro *ui;
   // methods
   void setConnections();

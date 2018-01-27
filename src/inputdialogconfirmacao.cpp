@@ -56,10 +56,9 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo &tipo, QWidget *parent
 
 InputDialogConfirmacao::~InputDialogConfirmacao() { delete ui; }
 
-// REFAC: 5should be QDate?
-QDateTime InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->dateTime(); }
+QDateTime InputDialogConfirmacao::getDateTime() const { return ui->dateEditEvento->dateTime(); }
 
-QDateTime InputDialogConfirmacao::getNextDate() const { return ui->dateEditProximo->dateTime(); }
+QDateTime InputDialogConfirmacao::getNextDateTime() const { return ui->dateEditProximo->dateTime(); }
 
 QString InputDialogConfirmacao::getRecebeu() const { return ui->lineEditRecebeu->text(); }
 
@@ -266,7 +265,12 @@ bool InputDialogConfirmacao::setFilter(const QStringList &ids) { // recebimento
   return true;
 }
 
-void InputDialogConfirmacao::on_pushButtonQuebradoFaltando_clicked() {
+void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
+  // 1. quebrar a linha em 2
+  // 2. a parte quebrada fica com status 'quebrado' no limbo
+  // 3. a parte que veio prossegue para estoque
+  // 4. verificar se precisa desfazer algum consumo caso a quant. nao seja suficiente
+
   const auto list = ui->tableLogistica->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -275,6 +279,60 @@ void InputDialogConfirmacao::on_pushButtonQuebradoFaltando_clicked() {
   }
 
   const int row = list.first().row();
+
+  //
+
+  if (tipo == Tipo::Recebimento) {
+    const QString produto = model.data(row, "descricao").toString();
+    const int caixas = model.data(row, "caixas").toInt();
+
+    QSqlQuery query;
+    query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+    query.bindValue(":idProduto", model.data(row, "idProduto"));
+
+    if (not query.exec() or not query.first()) {
+      emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
+      return;
+    }
+
+    const QString un = query.value("un").toString();
+    const double m2cx = query.value("m2cx").toDouble();
+    const double pccx = query.value("pccx").toDouble();
+
+    unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
+
+    qDebug() << "unCaixa: " << unCaixa;
+
+    QInputDialog input;
+    bool ok = false;
+    caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok);
+
+    qDebug() << caixas - caixasDefeito;
+
+    if (not ok or caixasDefeito == 0) return;
+  }
+
+  if (tipo == Tipo::Entrega) {
+    const QString produto = model.data(row, "produto").toString();
+    const double caixas = model.data(row, "caixas").toDouble();
+    unCaixa = model.data(row, "unCaixa").toDouble(); // *
+
+    QInputDialog input;
+    bool ok = false;
+    caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok); // REFAC: fix warning
+
+    if (not ok or caixasDefeito == 0) return;
+
+    // perguntar se gerar credito ou reposicao
+
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
+    msgBox.setButtonText(QMessageBox::No, "Gerar crédito");
+    msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
+
+    choice = msgBox.exec();
+  }
+  //
 
   emit transactionStarted();
 
@@ -308,34 +366,35 @@ bool InputDialogConfirmacao::quebraRecebimento(const int row) {
   // model is estoque
   // perguntar quant. quebrada - QInputDialog
 
-  const QString produto = model.data(row, "descricao").toString();
+  //  const QString produto = model.data(row, "descricao").toString();
   const int idEstoque = model.data(row, "idEstoque").toInt();
   const int caixas = model.data(row, "caixas").toInt();
 
-  QSqlQuery query;
-  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
-  query.bindValue(":idProduto", model.data(row, "idProduto"));
+  //  QSqlQuery query;
+  //  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+  //  query.bindValue(":idProduto", model.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
-    return false;
-  }
+  //  if (not query.exec() or not query.first()) {
+  //    emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
+  //    return false;
+  //  }
 
-  const QString un = query.value("un").toString();
-  const double m2cx = query.value("m2cx").toDouble();
-  const double pccx = query.value("pccx").toDouble();
+  //  const QString un = query.value("un").toString();
+  //  const double m2cx = query.value("m2cx").toDouble();
+  //  const double pccx = query.value("pccx").toDouble();
 
-  unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
+  //  unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
 
-  qDebug() << "unCaixa: " << unCaixa;
+  //  qDebug() << "unCaixa: " << unCaixa;
 
-  QInputDialog input;
-  bool ok = false;
-  // TODO: 0put this outside transaction
-  caixasDefeito = input.getInt(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
+  //  QInputDialog input;
+  //  bool ok = false;
+  //  // TODO: 0put this outside transaction
+  //  caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok);
 
-  if (not ok or caixasDefeito == 0) return false;
+  //  if (not ok or caixasDefeito == 0) return false;
 
+  // TODO: inline this
   if (not quebrarLinha(row, caixas)) return false;
   //  if (not criarConsumo(row)) return false;
   if (not desfazerConsumo(idEstoque)) return false;
@@ -369,16 +428,16 @@ bool InputDialogConfirmacao::quebraRecebimento(const int row) {
 bool InputDialogConfirmacao::quebraEntrega(const int row) {
   // model is veiculo_has_produto
 
-  const QString produto = model.data(row, "produto").toString();
+  //  const QString produto = model.data(row, "produto").toString();
   const double caixas = model.data(row, "caixas").toDouble();
-  unCaixa = model.data(row, "unCaixa").toDouble(); // *
+  //  unCaixa = model.data(row, "unCaixa").toDouble(); // *
 
-  QInputDialog input;
-  bool ok = false;
-  // TODO: 0put this outside transaction
-  caixasDefeito = input.getInt(this, produto, "Caixas quebradas: ", 0, 0, caixas, 1, &ok); // REFAC: fix warning
+  //  QInputDialog input;
+  //  bool ok = false;
+  //  // TODO: 0put this outside transaction
+  //  caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", 0, 0, caixas, 1, &ok); // REFAC: fix warning
 
-  if (not ok or caixasDefeito == 0) return false;
+  //  if (not ok or caixasDefeito == 0) return false;
 
   // diminuir quantidade da linha selecionada
 
@@ -404,14 +463,14 @@ bool InputDialogConfirmacao::quebraEntrega(const int row) {
   if (not model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
   if (not model.setData(rowQuebrado, "status", "QUEBRADO")) return false;
 
-  // perguntar se gerar credito ou reposicao
+  //  // perguntar se gerar credito ou reposicao
 
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
-  msgBox.setButtonText(QMessageBox::No, "Gerar crédito");
-  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
+  //  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+  //  msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
+  //  msgBox.setButtonText(QMessageBox::No, "Gerar crédito");
+  //  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
 
-  const int choice = msgBox.exec();
+  //  const int choice = msgBox.exec();
 
   if (choice == QMessageBox::Cancel) return false;
 
@@ -529,14 +588,14 @@ bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
     if (not model.setData(rowQuebrado, col, model.data(row, col))) return false;
   }
 
-  const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
+  const QString obs = "Estoque: " + model.data(row, "idEstoque").toString() + " - " + QInputDialog::getText(this, "Observacao", "Observacao: ");
+  qDebug() << "obs: " << obs;
 
-  if (not model.setData(rowQuebrado, "observacao", "(REPO. RECEB.) " + obs)) return false;
+  if (not model.setData(rowQuebrado, "observacao", obs)) return false;
   if (not model.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
   if (not model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
   if (not model.setData(rowQuebrado, "status", "QUEBRADO")) return false;
-  if (not model.setData(rowQuebrado, "lote", "Estoque: " + model.data(row, "idEstoque").toString())) return false;
-  // recalcular proporcional dos valores
+  // TODO: recalcular proporcional dos valores
 
   if (not model.submitAll()) {
     emit errorSignal("Erro dividindo linhas: " + model.lastError().text());
@@ -586,6 +645,9 @@ bool InputDialogConfirmacao::criarConsumo(const int row) {
 }
 
 bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
+  // REFAC: pass this responsability to Estoque class
+  // NOTE: verificar WidgetCompraOC::desfazerConsumo
+
   QSqlQuery query;
   query.prepare("SELECT COALESCE(e.caixas - SUM(ehc.caixas), 0) AS sobra FROM estoque_has_consumo ehc LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque WHERE ehc.idEstoque = :idEstoque");
   query.bindValue(":idEstoque", idEstoque);
@@ -638,4 +700,16 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
   }
 
   return true;
+}
+
+void InputDialogConfirmacao::on_pushButtonFaltando_clicked() {
+  // 1. quebrar a linha em 2 (tanto no veiculo_has_produto quanto no venda_has_produto) (talvez no pf tambem)?
+  // 2. a parte que está faltando mantém em recebimento
+  // 3. a parte que veio prossegue para estoque
+  // 4. verificar se precisa desfazer algum consumo caso a quant. nao seja suficiente
+
+  // recebimento
+
+  // entrega
+  // 1. confirmando apenas a linha já selecionada (visivel na tela) a linha duplicada irá se manter na entrega
 }

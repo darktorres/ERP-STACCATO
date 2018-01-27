@@ -71,7 +71,7 @@ void DownloadDialog::beginDownload(const QUrl &url) {
 
 void DownloadDialog::installUpdate() {
   openDownload();
-  qApp->closeAllWindows();
+  qApp->exit(0);
 }
 
 void DownloadDialog::openDownload() {

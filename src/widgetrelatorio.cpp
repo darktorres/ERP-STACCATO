@@ -172,11 +172,7 @@ void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
 bool WidgetRelatorio::updateTables() {
-  if (hasError) return false;
-
-  if (modelRelatorio.tableName().isEmpty()) {
-    if (not setupTables()) return false;
-  }
+  if (modelRelatorio.tableName().isEmpty() and not setupTables()) return false;
 
   setFilterRelatorio();
   setFilterTotaisVendedor();
@@ -238,8 +234,6 @@ bool WidgetRelatorio::updateTables() {
 void WidgetRelatorio::on_tableTotalLoja_entered(const QModelIndex &) { ui->tableTotalLoja->resizeColumnsToContents(); }
 
 void WidgetRelatorio::on_tableTotalVendedor_entered(const QModelIndex &) { ui->tableTotalVendedor->resizeColumnsToContents(); }
-
-void WidgetRelatorio::setHasError(const bool value) { hasError = value; }
 
 void WidgetRelatorio::on_pushButtonExcel_clicked() {
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");

@@ -248,10 +248,10 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   QString filtroCheck;
 
-  if (ui->radioButtonEntregaLimpar->isChecked()) filtroCheck = "";
-  if (ui->radioButtonTotalEstoque->isChecked()) filtroCheck = "Estoque > 0 AND Entregue >= 0 AND Outros = 0";
-  if (ui->radioButtonParcialEstoque->isChecked()) filtroCheck = "Estoque > 0 AND (Entregue > 0 OR Outros > 0)";
-  if (ui->radioButtonSemEstoque->isChecked()) filtroCheck = "Estoque = 0";
+  if (ui->radioButtonEntregaLimpar->isChecked()) filtroCheck = "(Estoque > 0 OR Outros > 0)";
+  if (ui->radioButtonTotalEstoque->isChecked()) filtroCheck = "Estoque > 0 AND Outros = 0";
+  if (ui->radioButtonParcialEstoque->isChecked()) filtroCheck = "Estoque > 0 AND Outros > 0";
+  if (ui->radioButtonSemEstoque->isChecked()) filtroCheck = "Estoque = 0 AND Outros > 0";
 
   filtro += filtroCheck;
 
@@ -578,12 +578,21 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
     return;
   }
 
+  // perguntar quantidade
+  const int quantTotal = modelViewProdutos.data(row, "caixas").toInt();
+
+  bool ok;
+
+  const int quantAgendar = QInputDialog::getInt(this, "Agendar", "Quantidade de caixas: ", quantTotal, 0, quantTotal, 1, &ok);
+
+  if (quantAgendar == 0 or not ok) return;
+
   emit transactionStarted();
 
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  if (not adicionarProdutoParcial(row)) {
+  if (not adicionarProdutoParcial(row, quantAgendar, quantTotal)) {
     QSqlQuery("ROLLBACK").exec();
     emit transactionEnded();
     return;
@@ -594,19 +603,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   emit transactionEnded();
 }
 
-bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row) {
-  // perguntar quantidade
-  const int quantTotal = modelViewProdutos.data(row, "caixas").toInt();
-
-  bool ok;
-
-  // TODO: 0put this outside transaction
-  const int quantAgendar = QInputDialog::getInt(this, "Agendar", "Quantidade de caixas: ", quantTotal, 0, quantTotal, 1, &ok);
-
-  if (quantAgendar == 0 or not ok) return false;
-
+bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int quantAgendar, const int quantTotal) {
   // quebrar se necessario
-
   if (quantAgendar < quantTotal) {
     if (not quebrarProduto(row, quantAgendar, quantTotal)) return false;
   }

@@ -19,6 +19,7 @@ public:
 
 private slots:
   void on_pushButtonCriarLancamento_clicked();
+  void on_pushButtonDuplicarLancamento_clicked();
   void on_pushButtonSalvar_clicked();
 
 private:
@@ -29,6 +30,7 @@ private:
   // methods
   void setupTables();
   bool verifyFields();
+  void openPersistentEditor();
 };
 
 #endif // INSERIRLANCAMENTO_H

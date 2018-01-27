@@ -330,7 +330,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) return;
 
-  const QDateTime dataRealEnt = inputDlg.getDate();
+  const QDateTime dataRealEnt = inputDlg.getDateTime();
   const QString entregou = inputDlg.getEntregou();
   const QString recebeu = inputDlg.getRecebeu();
 
@@ -351,6 +351,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   QSqlQuery query;
 
+  // REFAC: refactor this to update only this idVenda
   if (not query.exec("CALL update_venda_status()")) {
     QMessageBox::critical(this, "Erro!", "Erro atualizando status das vendas: " + query.lastError().text());
     return;

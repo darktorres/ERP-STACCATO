@@ -11,7 +11,10 @@
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
 
-WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
+WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) {
+  ui->setupUi(this);
+  setConnections();
+}
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -149,14 +152,9 @@ void WidgetVenda::setConnections() {
 }
 
 bool WidgetVenda::updateTables() {
-  if (hasError) return false;
-
-  if (model.tableName().isEmpty()) {
-    setPermissions();
-    setupTables();
-    montaFiltro();
-    setConnections();
-  }
+  setPermissions();
+  setupTables();
+  montaFiltro();
 
   if (not model.select()) {
     emit errorSignal("Erro lendo tabela vendas: " + model.lastError().text());
@@ -180,8 +178,6 @@ void WidgetVenda::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetVenda::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
-
-void WidgetVenda::setHasError(const bool value) { hasError = value; }
 
 void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
   if (UserSession::tipoUsuario() == "VENDEDOR") checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide();

@@ -69,6 +69,8 @@ private:
   void procurar();
   void setupTables(const QStringList &idsCompra);
   void WrapParear(); // REFAC: simplify this
+  std::optional<double> buscarCaixas(const int rowEstoque);
+  bool produtoCompativel(const int rowCompra, const QString &codComercialEstoque);
 };
 
 #endif // IMPORTARXML_H

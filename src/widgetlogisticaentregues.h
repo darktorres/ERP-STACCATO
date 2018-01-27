@@ -25,7 +25,7 @@ signals:
 
 private slots:
   void on_pushButtonCancelar_clicked();
-  void on_tableVendas_activated(const QModelIndex &index);
+  void on_tableVendas_clicked(const QModelIndex &index);
 
 private:
   // attributes

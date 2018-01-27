@@ -44,6 +44,8 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     return;
   }
 
+  // TODO: exibir mensagem de confirmacao
+
   close();
   parentWidget()->close();
 }

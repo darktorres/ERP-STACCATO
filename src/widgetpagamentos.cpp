@@ -23,6 +23,8 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QScrollArea(parent), ui(ne
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 
 void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
+  // REFAC: refactor this with the other adicionarPagamento
+
   QFrame *frame = new QFrame(this);
   QHBoxLayout *layout = new QHBoxLayout(frame);
   frame->setLayout(layout);
@@ -239,6 +241,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
   listComboParc.at(index)->clear();
 
+  // TODO: this emits montarFluxoCaixa
   for (int i = 0; i < parcelas; ++i) listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
 
   listComboParc.at(index)->setEnabled(true);

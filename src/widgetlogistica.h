@@ -15,7 +15,6 @@ public:
   explicit WidgetLogistica(QWidget *parent = 0);
   ~WidgetLogistica();
   bool updateTables();
-  void setHasError(const bool value);
 
 private slots:
   void on_tableForn_activated(const QModelIndex &index);
@@ -23,7 +22,6 @@ private slots:
 
 private:
   // attributes
-  bool hasError = false;
   SqlRelationalTableModel model;
   Ui::WidgetLogistica *ui;
   // methods

@@ -16,6 +16,6 @@ void ValidadeDialog::on_pushButtonSalvar_clicked() {
 
 void ValidadeDialog::on_spinBox_valueChanged(const int dias) { ui->dateEdit->setDate(QDate::currentDate().addDays(dias)); }
 
-void ValidadeDialog::on_dateEdit_dateChanged(const QDate &date) { ui->spinBox->setValue(QDate::currentDate().daysTo(date)); } // REFAC: fix warning
+void ValidadeDialog::on_dateEdit_dateChanged(const QDate &date) { ui->spinBox->setValue(static_cast<int>(QDate::currentDate().daysTo(date))); }
 
 int ValidadeDialog::getValidade() { return ui->spinBox->value(); }

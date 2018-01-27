@@ -30,24 +30,9 @@ signals:
   void transactionEnded();
   void transactionStarted();
 
-private slots:
-  void on_checkBoxMarcarTodos_toggled(bool checked);
-  void on_dateEditEvento_dateChanged(const QDate &date);
-  void on_dateEditPgtSt_userDateChanged(const QDate &);
-  void on_doubleSpinBoxAdicionais_valueChanged(const double value);
-  void on_doubleSpinBoxFrete_valueChanged(double);
-  void on_doubleSpinBoxTotalPag_valueChanged(double);
-  void on_pushButtonAdicionarPagamento_clicked();
-  void on_pushButtonCorrigirFluxo_clicked();
-  void on_pushButtonLimparPag_clicked();
-  void on_pushButtonSalvar_clicked();
-
 private:
   // attributes
   bool representacao;
-  // REFAC: refactor those out
-  bool isBlockedFluxoCaixa = false;
-  bool isBlockedStDate = false;
   const Tipo tipo;
   SqlRelationalTableModel model;
   SqlRelationalTableModel modelFluxoCaixa;
@@ -56,13 +41,25 @@ private:
   bool cadastrar();
   bool verifyFields();
   void calcularTotal();
-  void montarFluxoCaixa();
+  void montarFluxoCaixa(const bool updateDate = true);
+  void on_checkBoxMarcarTodos_toggled(bool checked);
   void on_comboBoxPgt_currentTextChanged(const int index, const QString &text);
+  void on_dateEditEvento_dateChanged(const QDate &date);
+  void on_dateEditPgtSt_dateChanged(const QDate &);
+  void on_doubleSpinBoxAdicionais_valueChanged(const double value);
+  void on_doubleSpinBoxFrete_valueChanged(double);
   void on_doubleSpinBoxPgt_valueChanged();
+  void on_doubleSpinBoxSt_valueChanged(double);
+  void on_doubleSpinBoxTotalPag_valueChanged(double);
+  void on_pushButtonAdicionarPagamento_clicked();
+  void on_pushButtonCorrigirFluxo_clicked();
+  void on_pushButtonLimparPag_clicked();
+  void on_pushButtonSalvar_clicked();
   void resetarPagamentos();
+  void setConnections();
   void setupTables();
   void updateTableData(const QModelIndex &topLeft);
-  void wrapMontarFluxoCaixa();
+  void unsetConnections();
 };
 
 #endif // INPUTDIALOGFINANCEIRO_H

@@ -105,7 +105,7 @@ void Impressao::print() {
     dataManager->setReportVariable("PrazoEntrega", query.value("prazoEntrega").toString() + " dias");
 
     QSqlQuery queryPgt1("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO'");
+                        "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt1.exec() or not queryPgt1.first()) {
       QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 1: " + queryPgt1.lastError().text());
@@ -119,7 +119,7 @@ void Impressao::print() {
     dataManager->setReportVariable("FormaPagamento1", pgt1);
 
     QSqlQuery queryPgt2("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO'");
+                        "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt2.exec() or not queryPgt2.first()) {
       QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 2: " + queryPgt2.lastError().text());
@@ -135,7 +135,7 @@ void Impressao::print() {
     dataManager->setReportVariable("FormaPagamento2", pgt2);
 
     QSqlQuery queryPgt3("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO'");
+                        "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt3.exec() or not queryPgt3.first()) {
       QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 3: " + queryPgt3.lastError().text());
@@ -151,7 +151,7 @@ void Impressao::print() {
     dataManager->setReportVariable("FormaPagamento3", pgt3);
 
     QSqlQuery queryPgt4("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO'");
+                        "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt4.exec() or not queryPgt4.first()) {
       QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 4: " + queryPgt4.lastError().text());
@@ -167,7 +167,7 @@ void Impressao::print() {
     dataManager->setReportVariable("FormaPagamento4", pgt4);
 
     QSqlQuery queryPgt5("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO'");
+                        "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt5.exec() or not queryPgt5.first()) {
       QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 5: " + queryPgt5.lastError().text());

@@ -88,13 +88,6 @@ bool WidgetCompraPendentes::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
-  if (not modelResumo.select()) {
-    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
-    return false;
-  }
-
-  ui->tableResumo->resizeColumnsToContents();
-
   return true;
 }
 
@@ -126,17 +119,6 @@ void WidgetCompraPendentes::setupTables() {
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->table->resizeColumnsToContents();
-
-  modelResumo.setTable("view_fornecedor_compra");
-
-  modelResumo.setHeaderData("fornecedor", "Forn.");
-
-  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
-
-  //  if (not modelResumo.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela resumo: " + modelResumo.lastError().text());
-
-  ui->tableResumo->setModel(&modelResumo);
-  ui->tableResumo->hideColumn("idVenda");
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
@@ -294,3 +276,4 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 }
 
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para o Conrado confirmar, apenas com um botão de ok ou cancelar.
+// TODO: pegar a tableResumo e colocar em uma aba separada no widgetCompra

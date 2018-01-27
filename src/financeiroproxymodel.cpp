@@ -23,7 +23,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     if (proxyIndex.column() == prazoEntrega) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), prazoEntrega), Qt::DisplayRole).toDate();
-      const int dias = QDate::currentDate().daysTo(prazo); // REFAC: fix warning
+      const int dias = static_cast<int>(QDate::currentDate().daysTo(prazo));
 
       if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::yellow);
       if (not prazo.isNull() and dias < 3) return QBrush(Qt::red);
@@ -31,7 +31,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     if (proxyIndex.column() == novoPrazoEntrega) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), novoPrazoEntrega), Qt::DisplayRole).toDate();
-      const int dias = QDate::currentDate().daysTo(prazo); // REFAC: fix warning
+      const int dias = static_cast<int>(QDate::currentDate().daysTo(prazo));
 
       if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::yellow);
       if (not prazo.isNull() and dias < 3) return QBrush(Qt::red);
@@ -52,7 +52,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     if (proxyIndex.column() == prazoEntrega) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), prazoEntrega), Qt::DisplayRole).toDate();
-      const int dias = QDate::currentDate().daysTo(prazo); // REFAC: fix warning
+      const int dias = static_cast<int>(QDate::currentDate().daysTo(prazo));
 
       if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::black);
       if (not prazo.isNull() and dias < 3) return QBrush(Qt::black);
@@ -60,7 +60,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     if (proxyIndex.column() == novoPrazoEntrega) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), novoPrazoEntrega), Qt::DisplayRole).toDate();
-      const int dias = QDate::currentDate().daysTo(prazo); // REFAC: fix warning
+      const int dias = static_cast<int>(QDate::currentDate().daysTo(prazo));
 
       if (not prazo.isNull() and dias >= 3 and dias < 5) return QBrush(Qt::black);
       if (not prazo.isNull() and dias < 3) return QBrush(Qt::black);

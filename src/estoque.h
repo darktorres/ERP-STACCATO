@@ -13,6 +13,7 @@ class Estoque final : public QDialog {
   Q_OBJECT
 
 public:
+  // REFAC: turn showWindow into a enum
   Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = 0);
   ~Estoque();
   bool criarConsumo(const int idVendaProduto, const double quant = 0);
@@ -29,6 +30,7 @@ private:
   SqlRelationalTableModel model;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelViewConsumo;
+  SqlRelationalTableModel modelCompra;
   Ui::Estoque *ui;
 
   enum class FieldColors {
@@ -41,10 +43,13 @@ private:
   };
 
   // methods
-  bool viewRegisterById(const QString &idEstoque, const bool showWindow = true);
+  // REFAC: remove idEstoque and just use the class one?
+  bool quebrarCompra(const int idVendaProduto, const double quant);
+  bool viewRegisterById(const bool showWindow);
   void calcularRestante();
   void exibirNota();
   void setupTables();
+  bool atualizaQuantEstoque(const int idVendaProduto);
 };
 
 #endif // ESTOQUE_H

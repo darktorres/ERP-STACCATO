@@ -34,6 +34,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
 
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
+  ui->lineEditEstoque_2->hide();
   ui->lineEditEstoque->hide();
   ui->lineEditPromocao->hide();
   ui->lineEditBusca->setFocus();
@@ -97,6 +98,7 @@ void SearchDialog::show() {
 
   QDialog::show();
 
+  ui->lineEditEstoque_2->setText("Staccato OFF");
   ui->lineEditEstoque->setText("Estoque");
   ui->lineEditPromocao->setText("Promoção");
 
@@ -270,6 +272,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, QWidget *
   sdProd->ui->radioButtonProdAtivos->show();
   sdProd->ui->radioButtonProdDesc->show();
   sdProd->ui->lineEditEstoque->show();
+  sdProd->ui->lineEditEstoque_2->show();
   sdProd->ui->lineEditPromocao->show();
   sdProd->ui->radioButtonProdAtivos->setChecked(true);
 

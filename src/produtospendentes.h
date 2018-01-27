@@ -36,14 +36,13 @@ private:
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods
-  bool atualizarVendaCompra(const int row, const QDate &dataPrevista);
+  bool atualizarVenda(const int row, const QDate &dataPrevista);
   bool comprar(const QModelIndexList &list, const QDate &dataPrevista);
-  bool consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantTotalVenda, const double quantEstoque);
+  bool consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda);
   bool enviarExcedenteParaCompra(const int row, const QDate &dataPrevista);
   bool enviarProdutoParaCompra(const int row, const QDate &dataPrevista);
   bool insere(const QDateTime &dataPrevista);
-  bool quebrarVenda(const int row, const QDate &dataPrevista);
-  bool quebrarVendaConsumo(const double quantConsumir, const double quantTotalVenda, const int rowProduto);
+  bool quebrarVenda(const double quantConsumir, const double quantVenda, const int rowProduto);
   void recalcularQuantidade();
   void recarregarTabelas();
   void setupTables();

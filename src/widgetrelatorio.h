@@ -15,7 +15,6 @@ public:
   explicit WidgetRelatorio(QWidget *parent = 0);
   ~WidgetRelatorio();
   bool updateTables();
-  void setHasError(const bool value);
 
 private slots:
   void on_pushButtonExcel_clicked();
@@ -25,7 +24,6 @@ private slots:
 
 private:
   // attributes
-  bool hasError = false;
   SqlRelationalTableModel modelOrcamento;
   SqlRelationalTableModel modelRelatorio;
   SqlRelationalTableModel modelTotalLoja;

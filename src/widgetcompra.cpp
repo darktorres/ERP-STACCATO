@@ -10,11 +10,10 @@ WidgetCompra::WidgetCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetC
 WidgetCompra::~WidgetCompra() { delete ui; }
 
 bool WidgetCompra::updateTables() {
-  if (hasError) return false;
-
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentText == "Devoluções" and not ui->widgetDevolucao->updateTables()) return false;
+  if (currentText == "Resumo" and not ui->widgetResumo->updateTables()) return false;
   if (currentText == "Pendentes" and not ui->widgetPendentes->updateTables()) return false;
   if (currentText == "Gerar Compra" and not ui->widgetGerar->updateTables()) return false;
   if (currentText == "Confirmar Compra" and not ui->widgetConfirmar->updateTables()) return false;
@@ -26,9 +25,9 @@ bool WidgetCompra::updateTables() {
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }
 
-void WidgetCompra::setHasError(const bool value) { hasError = value; }
-
 void WidgetCompra::setConnections() {
+  // REFAC: couldnt I connect directly to Application?
+
   connect(ui->widgetOC, &WidgetCompraOC::errorSignal, this, &WidgetCompra::errorSignal);
   connect(ui->widgetDevolucao, &WidgetCompraDevolucao::errorSignal, this, &WidgetCompra::errorSignal);
   connect(ui->widgetPendentes, &WidgetCompraPendentes::errorSignal, this, &WidgetCompra::errorSignal);

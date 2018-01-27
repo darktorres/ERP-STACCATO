@@ -47,7 +47,7 @@ void ImportaProdutos::importarProduto() {
 }
 
 void ImportaProdutos::importarEstoque() {
-  QMessageBox::critical(this, "Erro!", "Temporariamente desativado!");
+  QMessageBox::critical(this, "Aviso!", "Temporariamente desativado!");
   return;
 
   // NOTE: ao inves de cadastrar uma tabela de estoque, quando o estoque for gerado (importacao de xml) criar uma linha

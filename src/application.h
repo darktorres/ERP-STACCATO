@@ -7,9 +7,10 @@
 #if defined(qApp)
 #undef qApp
 #endif
-#define qApp (static_cast<Application *>(QCoreApplication::instance()))
+#define qApp (dynamic_cast<Application *>(QCoreApplication::instance()))
 
 class Application : public QApplication {
+  Q_OBJECT
 
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
@@ -22,8 +23,13 @@ public:
   void showErrors();
   bool dbConnect();
   void updater();
-  // REFAC: make this private?
+  // REFAC: make those private?
+  bool showingErrors = false;
+  bool isConnected = false;
   QMap<QString, QString> mapLojas;
+
+signals:
+  void verifyDb();
 
 public slots:
   void endTransaction();
@@ -39,6 +45,7 @@ private:
   // methods
   void storeSelection();
   void readSettingsFile();
+  void startSqlPing();
 };
 
 #endif // APPLICATION_H

@@ -100,6 +100,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   QSqlQuery query;
 
+  // REFAC: replace this with a simpler query
   if (not query.exec("CALL update_venda_status()")) {
     QMessageBox::critical(this, "Erro!", "Erro atualizando status das vendas: " + query.lastError().text());
     return;

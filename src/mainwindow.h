@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 
 namespace Ui {
 class MainWindow;
@@ -34,10 +35,12 @@ private slots:
   void on_actionPromocao_triggered();
   void on_actionSobre_triggered();
   void on_tabWidget_currentChanged(const int);
+  void verifyDb();
 
 private:
   // attributes
   Ui::MainWindow *ui;
+  QPushButton *pushButtonStatus;
   // methods
   bool event(QEvent *event);
   void gerarEnviarRelatorio();

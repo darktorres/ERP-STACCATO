@@ -186,16 +186,9 @@ void WidgetCompraFaturar::montaFiltro() {
 
 bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
   // TODO: 0nas outras telas com cancelamento verificar se estou filtrando
+  QSqlQuery query;
 
   for (const auto &item : list) {
-    QSqlQuery query;
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO'");
-    query.bindValue(":ordemCompra", model.data(item.row(), "OC"));
-
-    if (not query.exec()) {
-      emit errorSignal("Erro salvando dados: " + query.lastError().text());
-      return false;
-    }
 
     query.prepare("SELECT idVendaProduto FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO'");
     query.bindValue(":ordemCompra", model.data(item.row(), "OC"));
@@ -207,13 +200,21 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
 
     while (query.next()) {
       QSqlQuery query2;
-      query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO'");
+      query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO'");
       query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
       if (not query2.exec()) {
         emit errorSignal("Erro voltando status do produto: " + query2.lastError().text());
         return false;
       }
+    }
+
+    query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO'");
+    query.bindValue(":ordemCompra", model.data(item.row(), "OC"));
+
+    if (not query.exec()) {
+      emit errorSignal("Erro salvando dados: " + query.lastError().text());
+      return false;
     }
 
     // TODO: 5verificar como tratar isso
@@ -226,6 +227,14 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
     //    }
   }
 
+  if (not query.exec("CALL update_venda_status()")) {
+    emit errorSignal("Erro atualizando status da venda: " + query.lastError().text());
+    return false;
+  }
+
+  // TODO: alterar a funcao de cancelar por uma tela de SAC onde o usuario indica as operacoes necessarias (troca de nfe, produto nao disponivel etc) e realiza as mudanças necessarias, bem como
+  // alteracoes no fluxo de pagamento se necessario
+
   return true;
 }
 
@@ -237,7 +246,8 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
     return;
   }
 
-  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
+  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Essa operação ira cancelar todos os itens desta OC, mesmo os já confirmados/faturados! Deseja continuar?", QMessageBox::Yes | QMessageBox::No,
+                     this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 

@@ -553,6 +553,16 @@ void Venda::on_comboBoxPgt_currentTextChanged(const int index, const QString &te
 }
 
 bool Venda::savingProcedures() {
+  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+
+  if (not idLoja) {
+    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    return false;
+  }
+
+  if (not setData("idLoja", idLoja.value().toInt())) return false;
+
+  if (not setData("status", todosProdutosSaoEstoque() ? "ESTOQUE" : "PENDENTE")) return false;
   if (not setData("idVenda", ui->lineEditVenda->text())) return false;
   if (not setData("data", ui->dateTimeEdit->dateTime())) return false;
   if (not setData("dataOrc", ui->dateTimeEditOrc->dateTime())) return false;
@@ -562,21 +572,11 @@ bool Venda::savingProcedures() {
   if (not setData("idCliente", ui->itemBoxCliente->getValue())) return false;
   if (not setData("idEnderecoEntrega", ui->itemBoxEndereco->getValue())) return false;
   if (not setData("idEnderecoFaturamento", ui->itemBoxEnderecoFat->getValue())) return false;
-
-  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
-
-  if (not idLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
-    return false;
-  }
-
-  if (not setData("idLoja", idLoja.value().toInt())) return false;
   if (not setData("idOrcamento", idOrcamento)) return false;
   if (not setData("idProfissional", ui->itemBoxProfissional->getValue())) return false;
   if (not setData("idUsuario", ui->itemBoxVendedor->getValue())) return false;
   if (not setData("observacao", ui->plainTextEdit->toPlainText())) return false;
   if (not setData("prazoEntrega", ui->spinBoxPrazoEntrega->value())) return false;
-  if (not setData("status", "PENDENTE")) return false;
   if (not setData("subTotalBru", ui->doubleSpinBoxSubTotalBruto->value())) return false;
   if (not setData("subTotalLiq", ui->doubleSpinBoxSubTotalLiq->value())) return false;
   if (not setData("total", ui->doubleSpinBoxTotal->value())) return false;
@@ -584,6 +584,19 @@ bool Venda::savingProcedures() {
   if (not setData("rt", ui->doubleSpinBoxPontuacao->value())) return false;
 
   return true;
+}
+
+bool Venda::todosProdutosSaoEstoque() {
+  bool temEstoque = true;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (not modelItem.data(row, "estoque").toBool()) {
+      temEstoque = false;
+      break;
+    }
+  }
+
+  return temEstoque;
 }
 
 void Venda::registerMode() {
@@ -625,7 +638,6 @@ bool Venda::viewRegister() {
   unsetConnections();
 
   [=]() {
-
     ui->doubleSpinBoxDescontoGlobalReais->setMinimum(-9999999);
 
     modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
@@ -1080,7 +1092,7 @@ bool Venda::cadastrar() {
     return false;
   }
 
-  query.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p on p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque = TRUE");
+  query.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p on p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) {
@@ -1097,23 +1109,32 @@ bool Venda::cadastrar() {
     }
   }
 
-  // REFAC: refactor those two to deal only with the current idVenda/idVendaProduto
-  if (not query.exec("CALL update_produto_estoque_quant()")) {
-    emit errorSignal("Erro atualizando produto estoque: " + query.lastError().text());
-    return false;
-  }
-
-  if (not query.exec("CALL update_venda_status()")) {
-    emit errorSignal("Erro atualizando status das vendas: " + query.lastError().text());
-    return false;
-  }
-
   query.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
   query.bindValue(":idOrcamento", idOrcamento);
 
   if (not query.exec()) {
     emit errorSignal("Erro marcando orçamento como 'FECHADO': " + query.lastError().text());
     return false;
+  }
+
+  return true;
+}
+
+bool Venda::atualizaQuantEstoque() {
+  // TODO: verify at this point if modelItem hasnt been reset
+
+  QSqlQuery query;
+  query.prepare("UPDATE produto p, view_estoque2 v SET p.estoqueRestante = v.restante WHERE p.idEstoque = v.idEstoque AND p.idProduto = :idProduto");
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.data(row, "estoque").toBool()) {
+      query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
+
+      if (not query.exec()) {
+        emit errorSignal("Erro atualizando quant. estoque: " + query.lastError().text());
+        return false;
+      }
+    }
   }
 
   return true;
@@ -1187,6 +1208,8 @@ bool Venda::cancelamento() {
 }
 
 void Venda::on_pushButtonCancelamento_clicked() {
+  // TODO: perguntar e salvar motivo do cancelamento
+
   bool ok = true;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1231,7 +1254,6 @@ void Venda::on_pushButtonCancelamento_clicked() {
 }
 
 bool Venda::generateId() {
-
   const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
 
   if (not siglaLoja) {
@@ -1246,7 +1268,7 @@ bool Venda::generateId() {
     return false;
   }
 
-  QString id = siglaLoja.value().toString() + "-" + QDate::currentDate().toString("yy") + idLoja.value().toString();
+  QString id = siglaLoja.value().toString() + "-" + ui->dateTimeEdit->date().toString("yy");
 
   QSqlQuery query;
   query.prepare("SELECT MAX(idVenda) AS idVenda FROM venda WHERE idVenda LIKE :id");
@@ -1257,9 +1279,9 @@ bool Venda::generateId() {
     return false;
   }
 
-  const int last = query.first() ? query.value("idVenda").toString().remove(id).left(3).toInt() : 0;
+  const int last = query.first() ? query.value("idVenda").toString().remove(id).left(4).toInt() : 0;
 
-  id += QString("%1").arg(last + 1, 3, 10, QChar('0'));
+  id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
 
   query.prepare("SELECT representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   query.bindValue(":idOrcamento", idOrcamento);
@@ -1282,6 +1304,7 @@ bool Venda::generateId() {
 }
 
 void Venda::on_pushButtonDevolucao_clicked() {
+  // TODO: bloquear/esconder o botao caso o pedido aberto já seja de devolucao
   auto *devolucao = new Devolucao(data("idVenda").toString(), this);
   devolucao->show();
 }
@@ -1488,3 +1511,4 @@ void Venda::on_doubleSpinBoxTotalPag_valueChanged(double) {
 // NOTE: prazoEntrega por produto
 // NOTE: bloquear desconto maximo por classe de funcionario
 // TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
+// REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'

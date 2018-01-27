@@ -17,11 +17,13 @@ public:
 
   explicit InputDialogConfirmacao(const Tipo &tipo, QWidget *parent = 0);
   ~InputDialogConfirmacao();
-  QDateTime getDate() const;
-  QDateTime getNextDate() const;
+  QDateTime getDateTime() const;
+  QDateTime getNextDateTime() const;
   QString getRecebeu() const;
   QString getEntregou() const;
   bool setFilter(const QStringList &ids);
+  // TODO: convert functions to trailing return syntax?
+  //  auto setFilter(const QStringList &ids) -> bool;
   bool setFilter(const QString &id, const QString &idEvento);
 
 signals:
@@ -31,7 +33,8 @@ signals:
 
 private slots:
   void on_dateEditEvento_dateChanged(const QDate &date);
-  void on_pushButtonQuebradoFaltando_clicked();
+  void on_pushButtonFaltando_clicked();
+  void on_pushButtonQuebrado_clicked();
   void on_pushButtonSalvar_clicked();
 
 private:
@@ -42,6 +45,7 @@ private:
   SqlRelationalTableModel modelVenda;
   Ui::InputDialogConfirmacao *ui;
   // temp
+  int choice;
   int caixasDefeito;
   double unCaixa;
   //

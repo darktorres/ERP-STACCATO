@@ -37,7 +37,6 @@ private slots:
 private:
   // attributes
   SqlRelationalTableModel model;
-  SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraPendentes *ui;
   // methods
   bool insere(const QDate &dataPrevista);

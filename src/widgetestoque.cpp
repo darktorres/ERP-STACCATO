@@ -31,17 +31,7 @@ WidgetEstoque::~WidgetEstoque() { delete ui; }
 bool WidgetEstoque::setupTables() {
   // REFAC: merge this setquery with the one in montaFiltro
 
-  model.setQuery("SELECT GROUP_CONCAT(DISTINCT n.cnpjDest) AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = "
-                 "`p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / "
-                 "`p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS "
-                 "`codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS "
-                 "`dataRealColeta`, `vp`.`dataPrevReceb` AS `dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT e.status, e.idEstoque, e.descricao, e.quant, e.un, e.lote, e.local, "
-                 "e.bloco, e.codComercial, e.idProduto FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS consumo, ec.idEstoque, "
-                 "GROUP_CONCAT(DISTINCT ec.idVendaProduto) AS idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT p.fornecedor, p.un, "
-                 "p.un2, p.m2cx, p.pccx, p.idProduto FROM produto p) p ON p.idProduto = e.idProduto LEFT JOIN (SELECT vp.idCompra, vp.dataPrevColeta, vp.dataRealColeta, vp.dataPrevReceb, "
-                 "vp.dataRealReceb, vp.idVendaProduto FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT ehn.idEstoque, ehn.idNFe FROM estoque_has_nfe ehn) ehn "
-                 "ON e.idEstoque = ehn.idEstoque LEFT JOIN (SELECT n.cnpjDest, n.numeroNFe, n.idNFe FROM nfe n) n ON ehn.idNFe = n.idNFe GROUP BY e.idEstoque HAVING restante > 0;");
-
+  model.setQuery(view_estoque2 + " GROUP BY e.idEstoque HAVING restante > 0");
   if (model.lastError().isValid()) {
     emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
     return false;
@@ -82,8 +72,6 @@ bool WidgetEstoque::setupTables() {
 }
 
 bool WidgetEstoque::updateTables() {
-  if (hasError) return false;
-
   if (model.query().executedQuery().isEmpty() and not setupTables()) return false;
 
   model.setQuery(model.query().executedQuery());
@@ -106,6 +94,8 @@ void WidgetEstoque::on_table_activated(const QModelIndex &index) {
 void WidgetEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetEstoque::montaFiltro() {
+  // FIXME: digitar hifen causa erro na pesquisa
+
   ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("restante est") : ui->table->hideColumn("restante est");
 
   const QString text = ui->lineEditBusca->text();
@@ -114,21 +104,11 @@ void WidgetEstoque::montaFiltro() {
                                        : "WHERE (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  // REFAC: why is this not used?
-  //  const QString restanteDeposito = ui->radioButtonEstoqueContabil->isChecked() ? "`restante deposito` > 0 AND status = 'ESTOQUE'" : "";
   const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "restante <= 0" : "restante > 0";
 
-  model.setQuery("SELECT GROUP_CONCAT(DISTINCT n.cnpjDest) AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(consumo, 0) AS restante, e.un AS unEst, IF((`p`.`un` = "
-                 "`p`.`un2`), `p`.`un`, CONCAT(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(consumo, 0)) / "
-                 "`p`.`m2cx`), ((`e`.`quant` + COALESCE(consumo, 0)) / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS "
-                 "`codComercial`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, `vp`.`idCompra` AS `idCompra`, `vp`.`dataPrevColeta` AS `dataPrevColeta`, `vp`.`dataRealColeta` AS "
-                 "`dataRealColeta`, `vp`.`dataPrevReceb` AS `dataPrevReceb`, `vp`.`dataRealReceb` AS `dataRealReceb` FROM (SELECT e.status, e.idEstoque, e.descricao, e.quant, e.un, e.lote, e.local, "
-                 "e.bloco, e.codComercial, e.idProduto FROM estoque e WHERE status != 'QUEBRADO' AND status != 'CANCELADO') e LEFT JOIN (SELECT SUM(quant) AS consumo, ec.idEstoque, "
-                 "GROUP_CONCAT(DISTINCT ec.idVendaProduto) AS idVendaProduto FROM estoque_has_consumo ec GROUP BY idEstoque) ec ON e.idEstoque = ec.idEstoque LEFT JOIN (SELECT p.fornecedor, p.un, "
-                 "p.un2, p.m2cx, p.pccx, p.idProduto FROM produto p) p ON p.idProduto = e.idProduto LEFT JOIN (SELECT vp.idCompra, vp.dataPrevColeta, vp.dataRealColeta, vp.dataPrevReceb, "
-                 "vp.dataRealReceb, vp.idVendaProduto FROM venda_has_produto vp) vp ON vp.idVendaProduto = ec.idVendaProduto LEFT JOIN (SELECT ehn.idNFe, ehn.idEstoque FROM estoque_has_nfe ehn) ehn "
-                 "ON e.idEstoque = ehn.idEstoque LEFT JOIN (SELECT n.cnpjDest, n.numeroNFe, n.idNFe FROM nfe n) n ON ehn.idNFe = n.idNFe " +
-                 match + " GROUP BY e.idEstoque HAVING " + restante);
+  model.setQuery(view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante);
+
+  qDebug() << "query: " << view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante;
 
   if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
 }
@@ -146,13 +126,29 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   // 6. valor
   // 7. aliquota icms (se tiver)
 
-  SqlRelationalTableModel modelContabil;
-  modelContabil.setTable("view_estoque_contabil");
-  modelContabil.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
+  const QString data = ui->dateEditMes->date().toString("yyyy-MM-dd");
 
-  modelContabil.setFilter("dataRealReceb <= '" + ui->dateEditMes->date().toString("yyyy-MM-dd") + "'");
+  SqlQueryModel modelContabil;
+  modelContabil.setQuery(
+      "SELECT e.idEstoque, group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, pf.fornecedor, e.descricao, e.quant - "
+      "coalesce(e2.consumoVenda, 0) + ajuste AS contabil, e.un AS `unEst`, if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = "
+      "'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), (e.quant - coalesce(e2.consumoVenda, 0) + ajuste / `p`.`m2cx`), (e.quant - coalesce(e2.consumoVenda, 0) + ajuste / "
+      "`p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo AS custo, p.precoVenda AS precoVenda, "
+      "pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, "
+      "e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS restante, sum(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e "
+      "LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' AND e.created < '" +
+      data +
+      "' GROUP BY e.idEstoque) e "
+      "LEFT JOIN (SELECT consumo.idEstoque, sum(consumo.quant), sum(vp.quant) AS consumoVenda, vp.dataRealEnt FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON "
+      "consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
+      data +
+      "') AND (consumo.status = 'CONSUMO' OR consumo.status = 'PRÉ-CONSUMO' OR consumo.status = "
+      "'AJUSTE') GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
+      "pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN "
+      "nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto LEFT JOIN estoque_has_consumo ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN venda_has_produto "
+      "vp ON ehc2.idVendaProduto = vp.idVendaProduto GROUP BY e.idEstoque HAVING contabil > 0");
 
-  if (not modelContabil.select()) {
+  if (modelContabil.lastError().isValid()) {
     QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelContabil.lastError().text());
     return;
   }
@@ -161,7 +157,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   if (dir.isEmpty()) return;
 
-  const QString arquivoModelo = "relatorio.xlsx";
+  const QString arquivoModelo = "modelo relatorio contabil.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
@@ -198,7 +194,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   column = 'A';
 
   for (int row = 0; row < modelContabil.rowCount(); ++row) {
-    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) xlsx.write(column + QString::number(row + 2), modelContabil.data(row, col));
+    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) xlsx.write(column + QString::number(row + 2), modelContabil.data(modelContabil.index(row, col)));
 
     column = 'A';
   }
@@ -212,8 +208,6 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
 }
 
-void WidgetEstoque::setHasError(const bool value) { hasError = value; }
-
 // NOTE: gerenciar lugares de estoque (cadastro/permissoes)
 // TODO: 3tem produto com unidade barra que na verdade significa ML
 
@@ -223,3 +217,5 @@ void WidgetEstoque::setHasError(const bool value) { hasError = value; }
 // TODO: reimplementar estoque_contabil
 // TODO: terminar de arrumar relatorio estoque
 // TODO: [Conrado] colocar filtro/tela para buscar por pedido e mostrar os estoques em que foi consumido
+// TODO: arrumar 'estoque contabil'
+// TODO: fix fulltext indexes (put match against inside subquery)

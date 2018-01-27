@@ -30,7 +30,7 @@ private slots:
   void on_checkBoxSul_toggled(bool checked);
   void on_dateTimeEdit_dateChanged(const QDate &date);
   void on_itemBoxVeiculo_textChanged(const QString &);
-  void on_lineEditBusca_textChanged(const QString &text);
+  void on_lineEditBusca_textChanged(const QString &);
   void on_pushButtonAdicionarProduto_clicked();
   void on_pushButtonAgendarColeta_clicked();
   void on_pushButtonCancelarCarga_clicked();
@@ -42,7 +42,7 @@ private slots:
 
 private:
   // attributes
-  QString fornecedor;
+  QString fornecedor; // REFAC: make this not class member
   SqlRelationalTableModel modelEstoque;
   SqlRelationalTableModel modelTransp;
   SqlRelationalTableModel modelTransp2;

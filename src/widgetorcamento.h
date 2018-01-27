@@ -15,7 +15,6 @@ public:
   explicit WidgetOrcamento(QWidget *parent = 0);
   ~WidgetOrcamento();
   bool updateTables();
-  void setHasError(const bool value);
 
 private slots:
   void montaFiltro();
@@ -28,7 +27,6 @@ private slots:
 
 private:
   // attributes
-  bool hasError = false;
   SqlRelationalTableModel model;
   Ui::WidgetOrcamento *ui;
   // methods

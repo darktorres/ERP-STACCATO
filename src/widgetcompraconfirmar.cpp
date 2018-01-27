@@ -168,6 +168,11 @@ bool WidgetCompraConfirmar::cancelar(const QModelIndexList &list) {
     }
   }
 
+  if (not query.exec("CALL update_venda_status()")) {
+    emit errorSignal("Erro atualizando status da venda: " + query.lastError().text());
+    return false;
+  }
+
   query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM COMPRA'");
   query.bindValue(":ordemCompra", model.data(row, "OC"));
 
@@ -189,7 +194,8 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
     return;
   }
 
-  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
+  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Essa operação ira cancelar todos os itens desta OC, mesmo os já confirmados/faturados! Deseja continuar?", QMessageBox::Yes | QMessageBox::No,
+                     this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 

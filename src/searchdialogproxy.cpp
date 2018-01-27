@@ -17,10 +17,13 @@ QVariant SearchDialogProxy::data(const QModelIndex &proxyIndex, int role) const 
 
     if (descontinuado == true) return QBrush(Qt::red); // descontinuado
 
-    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
+    //    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
+    const int estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toInt();
     const bool promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toBool();
 
-    if (estoque == true) return QBrush(Qt::yellow); // estoque
+    //    if (estoque == true) return QBrush(Qt::blue);   // estoque
+    if (estoque == 1) return QBrush(Qt::yellow);
+    if (estoque == 2) return QBrush(Qt::blue);
     if (promocao == true) return QBrush(Qt::green); // promocao
 
     if (proxyIndex.column() == this->validade) {
@@ -38,10 +41,13 @@ QVariant SearchDialogProxy::data(const QModelIndex &proxyIndex, int role) const 
 
     if (descontinuado == true) return QBrush(Qt::black);
 
-    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
+    //    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
+    const int estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toInt();
     const bool promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toBool();
 
-    if (estoque == true) return QBrush(Qt::black);
+    //    if (estoque == true) return QBrush(Qt::white);
+    if (estoque == 1) return QBrush(Qt::black);
+    if (estoque == 2) return QBrush(Qt::white);
     if (promocao == true) return QBrush(Qt::black);
 
     if (proxyIndex.column() == this->validade) {
@@ -57,3 +63,5 @@ QVariant SearchDialogProxy::data(const QModelIndex &proxyIndex, int role) const 
 
   return QIdentityProxyModel::data(proxyIndex, role);
 }
+
+// TODO: posteriormente remover o azul da promocao 'staccato off'

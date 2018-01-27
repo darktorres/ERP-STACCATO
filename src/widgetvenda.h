@@ -16,7 +16,6 @@ public:
   ~WidgetVenda();
   bool updateTables();
   void setFinanceiro();
-  void setHasError(const bool value);
 
 private slots:
   void on_comboBoxLojas_currentIndexChanged(const int);
@@ -29,7 +28,6 @@ private slots:
 
 private:
   // attributes
-  bool hasError = false;
   bool financeiro = false;
   SqlRelationalTableModel model;
   Ui::WidgetVenda *ui;

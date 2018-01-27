@@ -5,6 +5,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
+#include <QTimer>
 
 #include "application.h"
 #include "qsimpleupdater.h"
@@ -14,7 +15,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.5.53");
+  setApplicationVersion("0.5.64");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -62,16 +63,40 @@ bool Application::dbConnect() {
   db.setDatabaseName("mydb");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=1");
-  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=60;MYSQL_OPT_READ_TIMEOUT=60;"
-  //                       "MYSQL_OPT_WRITE_TIMEOUT=60");
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=10;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=20");
 
   QSqlQuery query;
 
   if (not db.open()) {
+    // TODO: caso o servidor selecionado nao esteja disponivel tente os outros
+    // TODO: try local ip's first
+
+    //    db.setHostName("201.6.117.16");
+    //    UserSession::setSetting("Login/hostname", "201.6.117.16");
+
+    //    if (not db.open()) {
+    //      db.setHostName("187.122.102.193");
+    //      UserSession::setSetting("Login/hostname", "187.122.102.193");
+
+    //      if (not db.open()) {
+    //        QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
+    //        isConnected = false;
+    //        return false;
+    //      }
+    //    }
+
+    //      //    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
+    //      //    return false;
+    //    }
+
     QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
+
+    isConnected = false;
+
     return false;
   }
+
+  isConnected = true;
 
   if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
     QMessageBox::critical(nullptr, "Erro", "Erro verificando lastInvalidated: " + query.lastError().text());
@@ -99,7 +124,20 @@ bool Application::dbConnect() {
     return false;
   }
 
+  startSqlPing();
+
   return true;
+}
+
+void Application::startSqlPing() {
+  QTimer *timer = new QTimer(this);
+  connect(timer, &QTimer::timeout, this, [] {
+    QSqlQuery query;
+    query.exec("DO 0");
+  });
+  timer->start(60000);
+
+  // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
 }
 
 void Application::darkTheme() {
@@ -149,7 +187,7 @@ void Application::endTransaction() {
 void Application::enqueueError(const QString &error) {
   errorQueue << error;
 
-  showErrors();
+  if (not updating) showErrors();
 }
 
 void Application::startTransaction() { inTransaction = true; }
@@ -170,16 +208,29 @@ bool Application::getInTransaction() const { return inTransaction; }
 
 void Application::setInTransaction(const bool value) { inTransaction = value; }
 
-void Application::setUpdating(const bool value) { updating = value; }
+void Application::setUpdating(const bool value) {
+  updating = value;
+
+  if (value == false) showErrors();
+}
 
 bool Application::getUpdating() const { return updating; }
 
 void Application::showErrors() {
   if (inTransaction or updating) return;
+  if (errorQueue.size() == 0) return;
+
+  showingErrors = true;
+
+  // TODO: deal with 'Lost connection to MySQL server'
 
   for (const auto &error : errorQueue) QMessageBox::critical(nullptr, "Erro!", error);
 
   errorQueue.clear();
+
+  emit verifyDb();
+
+  showingErrors = false;
 }
 
 void Application::updater() {

@@ -40,9 +40,7 @@ void InserirLancamento::setupTables() {
 
   model.setFilter("0");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + model.lastError().text());
-  }
+  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + model.lastError().text());
 
   ui->table->setModel(&model);
   ui->table->setItemDelegate(new DoubleDelegate(this));
@@ -77,6 +75,14 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("desativado");
 }
 
+void InserirLancamento::openPersistentEditor() {
+  for (int row = 0; row < model.rowCount(); ++row) {
+    ui->table->openPersistentEditor(row, "idLoja");
+    ui->table->openPersistentEditor(row, "tipo");
+    ui->table->openPersistentEditor(row, "grupo");
+  }
+}
+
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   const int newRow = model.rowCount();
   model.insertRow(newRow);
@@ -84,11 +90,7 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   if (not model.setData(newRow, "status", "PENDENTE")) return;
   if (not model.setData(newRow, "dataEmissao", QDate::currentDate())) return;
 
-  for (int row = 0; row < model.rowCount(); ++row) {
-    ui->table->openPersistentEditor(row, "idLoja");
-    ui->table->openPersistentEditor(row, "tipo");
-    ui->table->openPersistentEditor(row, "grupo");
-  }
+  openPersistentEditor();
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
@@ -142,4 +144,29 @@ bool InserirLancamento::verifyFields() {
   }
 
   return true;
+}
+
+void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    QMessageBox::critical(this, "Erro!", "Deve selecionar uma linha primeiro!");
+    return;
+  }
+
+  const int row = list.first().row();
+  const int newRow = model.rowCount();
+
+  model.insertRow(newRow);
+
+  for (int col = 0; col < model.columnCount(); ++col) {
+    if (model.fieldIndex("valor") == col) continue;
+    if (model.fieldIndex("desativado") == col) continue;
+    if (model.fieldIndex("created") == col) continue;
+    if (model.fieldIndex("lastUpdated") == col) continue;
+
+    if (not model.setData(newRow, col, model.data(row, col))) return;
+  }
+
+  openPersistentEditor();
 }

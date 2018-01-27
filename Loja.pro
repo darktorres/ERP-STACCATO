@@ -24,32 +24,36 @@ CONFIG += c++1z
 gcc|clang{
 QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
 #QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
+
 QMAKE_CXXFLAGS_DEBUG += -O0
-#QMAKE_CXXFLAGS_RELEASE  = -Ofast
 QMAKE_CXXFLAGS_RELEASE  = -O0
 QMAKE_LFLAGS_DEBUG += -O0
-#QMAKE_LFLAGS_RELEASE += -O3
 QMAKE_LFLAGS_RELEASE += -O0
 
-#QMAKE_CXXFLAGS += -flto
-#QMAKE_LFLAGS += -flto -fuse-linker-plugin
+#QMAKE_CXXFLAGS_RELEASE  = -Ofast
+#QMAKE_LFLAGS_RELEASE += -O3
 }
 
 message($$QMAKESPEC)
-
 
 linux-g++{
     QMAKE_CC = ccache gcc
     QMAKE_CXX = ccache g++
 
     QMAKE_LFLAGS += -fuse-ld=gold
+
+    #QMAKE_CXXFLAGS += -flto
+    #QMAKE_LFLAGS += -flto -fuse-linker-plugin
 }
 
 linux-clang{
-    QMAKE_CC = ccache clang
-    QMAKE_CXX = ccache clang++
+    QMAKE_CC = ccache clang-5.0
+    QMAKE_CXX = ccache clang++-5.0
 
     QMAKE_LFLAGS += -fuse-ld=lld-5.0
+
+    #QMAKE_CXXFLAGS += -flto=thin
+    #QMAKE_LFLAGS += -flto=thin
 }
 
 
@@ -109,6 +113,7 @@ SOURCES += \
     src/lineeditdecimal.cpp \
     src/lineeditdelegate.cpp \
     src/lineedittel.cpp \
+    src/log.cpp \
     src/logindialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -143,6 +148,7 @@ SOURCES += \
     src/widgetcompragerar.cpp \
     src/widgetcompraoc.cpp \
     src/widgetcomprapendentes.cpp \
+    src/widgetcompraresumo.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
@@ -213,6 +219,7 @@ HEADERS  += \
     src/lineeditdecimal.h \
     src/lineeditdelegate.h \
     src/lineedittel.h \
+    src/log.h \
     src/logindialog.h \
     src/mainwindow.h \
     src/noeditdelegate.h \
@@ -246,6 +253,7 @@ HEADERS  += \
     src/widgetcompragerar.h \
     src/widgetcompraoc.h \
     src/widgetcomprapendentes.h \
+    src/widgetcompraresumo.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
     src/widgetfinanceirocompra.h\
@@ -312,6 +320,7 @@ FORMS += \
     ui/widgetcompragerar.ui \
     ui/widgetcompraoc.ui \
     ui/widgetcomprapendentes.ui \
+    ui/widgetcompraresumo.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \

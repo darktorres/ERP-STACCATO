@@ -51,7 +51,6 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(pa
   ui->lineEditSerie->setInputMask("999;_");
   ui->lineEditCodigo->setInputMask("99999999;_");
   ui->lineEditNumero->setInputMask("999999999;_");
-  ui->lineEditTipo->setInputMask("9;_");
   ui->lineEditFormatoPagina->setInputMask("9;_");
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
@@ -136,6 +135,8 @@ QString CadastrarNFe::gravarNota() {
   writeProduto(stream);
   writeTotal(stream);
   writeTransportadora(stream);
+  // TODO: adicionar pagamentos para NFe 4.0
+  //  writePagamento(stream);
   writeVolume(stream);
 
   const QString infUsuario = ui->infCompUsuario->toPlainText().isEmpty() ? "" : ui->infCompUsuario->toPlainText();
@@ -185,6 +186,20 @@ std::optional<int> CadastrarNFe::preCadastrarNota(const QString &fileName) {
 bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fileName, const int &idNFe) {
   // erro de comunicacao/rejeicao
   if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
+    if (resposta.contains("Rejeição:")) {
+      QSqlQuery queryNota;
+      queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+      queryNota.bindValue(":idNFe", idNFe);
+
+      if (not queryNota.exec()) {
+        QMessageBox::critical(this, "Erro!", "Erro removendo nota: " + queryNota.lastError().text());
+        return false;
+      }
+
+      QMessageBox::critical(this, "Erro!", "Resposta EnviarNFe: " + resposta);
+      return false;
+    }
+
     const auto respostaConsultar = ACBr::enviarComando("NFE.ConsultarNFe(" + fileName + ")");
 
     if (not respostaConsultar) return false;
@@ -256,6 +271,7 @@ void CadastrarNFe::sendEmail(const QString &fileName) {
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
   // TODO: colocar um qprogressdialog
+  // TODO: quando um campo é maior que o permitido o ACBr retorna 'OK' e na linha seguinte 'Alertas:'
 
   if (not validar()) return;
 
@@ -428,7 +444,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT COUNT(*) AS count FROM estoque_has_consumo WHERE " + filter) or not query.first()) {
+  if (not query.exec("SELECT COUNT(DISTINCT idVendaProduto) AS count FROM estoque_has_consumo WHERE " + filter) or not query.first()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando idVendaProduto!");
     return;
   }
@@ -453,7 +469,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   ui->lineEditSerie->setText("001");
   ui->lineEditEmissao->setText(QDate::currentDate().toString("dd/MM/yy"));
   ui->lineEditSaida->setText(QDate::currentDate().toString("dd/MM/yy"));
-  ui->lineEditTipo->setText("1");
+  ui->comboBoxTipo->setCurrentIndex(1);
   ui->lineEditFormatoPagina->setText("0");
 
   //-----------------------
@@ -559,11 +575,13 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) valorProdutos += modelProdutos.data(row, "total").toDouble();
 
-  const double frete = valorProdutos / (modelVenda.data(0, "subTotalLiq").toDouble() - modelVenda.data(0, "descontoReais").toDouble()) * modelVenda.data(0, "frete").toDouble();
+  const double frete = modelVenda.data(0, "frete").toDouble();
+  const double totalVenda = modelVenda.data(0, "total").toDouble() - frete;
+  const double freteProporcional = valorProdutos / totalVenda * frete;
 
-  ui->doubleSpinBoxValorProduto->setValue(valorProdutos);
-  ui->doubleSpinBoxValorFrete->setValue(frete);
-  ui->doubleSpinBoxValorNota->setValue(valorProdutos + frete);
+  ui->doubleSpinBoxValorProdutos->setValue(valorProdutos);
+  ui->doubleSpinBoxValorFrete->setValue(freteProporcional);
+  ui->doubleSpinBoxValorNota->setValue(valorProdutos + freteProporcional);
 
   //------------------------
 
@@ -592,13 +610,13 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     if (not modelProdutos.setData(row, "cstICMS", "60")) return;
 
     const double total = modelProdutos.data(row, "total").toDouble();
-    const double freteProporcional = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProduto->value() * ui->doubleSpinBoxValorFrete->value();
+    const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
 
-    if (not modelProdutos.setData(row, "vBCPIS", total + freteProporcional)) return;
+    if (not modelProdutos.setData(row, "vBCPIS", total + freteProduto)) return;
     if (not modelProdutos.setData(row, "cstPIS", "01")) return;
     if (not modelProdutos.setData(row, "pPIS", porcentagemPIS.value().toDouble())) return;
     if (not modelProdutos.setData(row, "vPIS", modelProdutos.data(row, "vBCPIS").toDouble() * modelProdutos.data(row, "pPIS").toDouble() / 100)) return;
-    if (not modelProdutos.setData(row, "vBCCOFINS", total + freteProporcional)) return;
+    if (not modelProdutos.setData(row, "vBCCOFINS", total + freteProduto)) return;
     if (not modelProdutos.setData(row, "cstCOFINS", "01")) return;
     if (not modelProdutos.setData(row, "pCOFINS", porcentagemCOFINS.value().toDouble())) return;
     if (not modelProdutos.setData(row, "vCOFINS", modelProdutos.data(row, "vBCCOFINS").toDouble() * modelProdutos.data(row, "pCOFINS").toDouble() / 100)) return;
@@ -686,9 +704,21 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   //
 
+  // TODO: place in the right place
+
+  if (not ui->lineEditDestinatarioUF_2->text().isEmpty()) {
+    if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) ui->comboBoxDestinoOperacao->setCurrentIndex(1);
+  }
+
+  validar();
+
+  //
+
   updateImpostos();
 
   setConnections();
+
+  ui->comboBoxRegime->setCurrentText("Tributação Normal");
 }
 
 bool CadastrarNFe::criarChaveAcesso() {
@@ -698,7 +728,7 @@ bool CadastrarNFe::criarChaveAcesso() {
                                  ui->lineEditModelo->text(),
                                  ui->lineEditSerie->text(),
                                  ui->lineEditNumero->text(),
-                                 ui->lineEditTipo->text(),
+                                 ui->comboBoxTipo->currentText().left(1),
                                  ui->lineEditCodigo->text()};
 
   chaveNum = listChave.join("");
@@ -738,18 +768,22 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
   stream << "Numero = " << ui->lineEditNumero->text() << endl; // 1
   stream << "Emissao = " + QDate::currentDate().toString("dd/MM/yyyy") << endl;
   stream << "Saida = " + QDate::currentDate().toString("dd/MM/yyyy") << endl;
-  stream << "Tipo = " + ui->lineEditTipo->text() << endl;
+  stream << "Tipo = " + ui->comboBoxTipo->currentText().left(1) << endl;
+  stream << "finNFe = " + ui->comboBoxFinalidade->currentText().left(1) << endl;
   stream << "FormaPag = " + ui->lineEditFormatoPagina->text() << endl;
   stream << "idDest = " + ui->comboBoxDestinoOperacao->currentText().left(1) << endl;
   stream << "indPres = 1" << endl;
   stream << "indFinal = 1" << endl;
+  // TODO: fix
+  //  stream << "cMunFG = 3505708" << endl;
 }
 
 void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "[Emitente]" << endl;
   stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) << endl;
+  //  stream << "CNPJ = 99999090910270" << endl;
   stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() << endl;
-  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString() << endl;
+  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(60) << endl;
   stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() << endl;
   stream << "Fone = " + modelLoja.data(0, "tel").toString() << endl;
   stream << "CEP = " + clearStr(queryLojaEnd.value("CEP").toString()) << endl;
@@ -757,6 +791,8 @@ void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "Numero = " + queryLojaEnd.value("numero").toString() << endl;
   stream << "Complemento = " + queryLojaEnd.value("complemento").toString() << endl;
   stream << "Bairro = " + queryLojaEnd.value("bairro").toString() << endl;
+  // TODO: fix
+  //  stream << "cMun = 3505708" << endl;
   stream << "Cidade = " + queryLojaEnd.value("cidade").toString() << endl;
   stream << "UF = " + queryLojaEnd.value("uf").toString() << endl;
 }
@@ -810,7 +846,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const double quant = modelProdutos.data(row, "quant").toDouble();
     stream << "ValorUnitario = " + QString::number(total / quant, 'f', 10) << endl;
     stream << "ValorTotal = " + modelProdutos.data(row, "total").toString() << endl;
-    const double frete = total / ui->doubleSpinBoxValorProduto->value() * ui->doubleSpinBoxValorFrete->value();
+    const double frete = total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
     stream << "vFrete = " + QString::number(frete) << endl;
 
     stream << "[ICMS" + numProd + "]" << endl;
@@ -841,18 +877,18 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
-      stream << "vBCUFDest = " + modelProdutos.data(row, "total").toString() << endl;
+      stream << "vBCUFDest = " + modelProdutos.data(row, "vBCPIS").toString() << endl;
       stream << "pFCPUFDest = 2" << endl; // REFAC: dont hardcode (2% FCP)
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
       stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() << endl;
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-      const double difal = modelProdutos.data(row, "total").toDouble() * diferencaICMS;
+      const double difal = modelProdutos.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
-      stream << "pICMSInterPart = 60" << endl;                                                                 // REFAC: o valor depende do ano atual
-      stream << "vFCPUFDest = " + QString::number(modelProdutos.data(row, "total").toDouble() * 0.02) << endl; // 2% FCP
-      stream << "vICMSUFDest = " + QString::number(difal * 0.6) << endl;
-      stream << "vICMSUFRemet = " + QString::number(difal * 0.4) << endl;
+      stream << "pICMSInterPart = 80" << endl;                                                                  // REFAC: o valor depende do ano atual
+      stream << "vFCPUFDest = " + QString::number(modelProdutos.data(row, "vBCPIS").toDouble() * 0.02) << endl; // 2% FCP
+      stream << "vICMSUFDest = " + QString::number(difal * 0.8) << endl;
+      stream << "vICMSUFRemet = " + QString::number(difal * 0.2) << endl;
     }
 
     //    http://www.asseinfo.com.br/blog/difal-diferencial-de-aliquota-icms/
@@ -861,14 +897,14 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
 void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "[Total]" << endl;
-  stream << "BaseICMS = " + QString::number(ui->doubleSpinBoxBaseICMS->value(), 'f', 2) << endl;
-  stream << "ValorICMS = " + QString::number(ui->doubleSpinBoxValorICMS->value(), 'f', 2) << endl;
-  stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value(), 'f', 2) << endl;
-  stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value(), 'f', 2) << endl;
-  stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value(), 'f', 2) << endl;
-  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProduto->value(), 'f', 2) << endl;
-  stream << "ValorFrete = " + QString::number(ui->doubleSpinBoxValorFrete->value(), 'f', 2) << endl;
-  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
+  stream << "BaseICMS = " + QString::number(ui->doubleSpinBoxBaseICMS->value()) << endl;
+  stream << "ValorICMS = " + QString::number(ui->doubleSpinBoxValorICMS->value()) << endl;
+  stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value()) << endl;
+  stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value()) << endl;
+  stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value()) << endl;
+  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value()) << endl;
+  stream << "ValorFrete = " + QString::number(ui->doubleSpinBoxValorFrete->value()) << endl;
+  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value()) << endl;
 
   // PARTILHA ICMS
 
@@ -880,9 +916,9 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
     const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
 
     for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-      totalFcp += modelProdutos.data(row, "total").toDouble() * 0.02;
+      totalFcp += modelProdutos.data(row, "vBCPIS").toDouble() * 0.02;
 
-      const double difal = modelProdutos.data(row, "total").toDouble() * diferencaICMS;
+      const double difal = modelProdutos.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
       totalIcmsDest += difal * 0.6;
       totalIcmsOrig += difal * 0.4;
@@ -915,6 +951,13 @@ void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
     stream << "UFPlaca = " << ui->lineEditTransportadorUfPlaca->text() << endl;
     stream << "RNTC = " << endl;
   }
+}
+
+void CadastrarNFe::writePagamento(QTextStream &stream) {
+  stream << "[Pag001]" << endl;
+
+  stream << "tPag = 01" << endl;
+  stream << "vPag = " + QString::number(ui->doubleSpinBoxValorNota->value()) << endl;
 }
 
 void CadastrarNFe::writeVolume(QTextStream &stream) const {
@@ -997,13 +1040,26 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   ui->doubleSpinBoxCOFINSpcofins_4->setValue(query.value("pCOFINS").toDouble());
   ui->doubleSpinBoxCOFINSvcofins_4->setValue(query.value("vCOFINS").toDouble());
 
+  // ICMS Inter
+
+  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+    ui->doubleSpinBoxPercentualFcpDestino->setValue(2);
+    ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelProdutos.data(index.row(), "vBCPIS").toDouble());
+    ui->doubleSpinBoxAliquotaInternaDestinatario->setValue(queryPartilhaIntra.value("valor").toDouble());
+    ui->doubleSpinBoxAliquotaInter->setValue(queryPartilhaInter.value("valor").toDouble());
+    ui->doubleSpinBoxPercentualPartilha->setValue(80);
+
+    const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
+    const double difal = modelProdutos.data(index.row(), "vBCPIS").toDouble() * diferencaICMS;
+
+    ui->doubleSpinBoxPartilhaDestinatario->setValue(difal * 0.8);
+    ui->doubleSpinBoxPartilhaRemetente->setValue(difal * 0.2);
+    ui->doubleSpinBoxFcpDestino->setValue(modelProdutos.data(index.row(), "vBCPIS").toDouble() * 0.02);
+  }
+
   //
 
   mapper.setCurrentModelIndex(index);
-
-  //
-
-  ui->comboBoxRegime->setCurrentText("Tributação Normal");
 }
 
 void CadastrarNFe::on_tabWidget_currentChanged(int index) {
@@ -1307,6 +1363,15 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(int index) {
   if (list.isEmpty()) return;
 
   if (not modelProdutos.setData(list.first().row(), "modBC", index - 1)) return;
+
+  if (ui->comboBoxICMSModBc->currentText() == "Valor da Operação") {
+    ui->doubleSpinBoxICMSvbc->setValue(modelProdutos.data(list.first().row(), "vBCPIS").toDouble());
+    if (not modelProdutos.setData(list.first().row(), "vBC", modelProdutos.data(list.first().row(), "vBCPIS").toDouble())) return;
+    if (not modelProdutos.setData(list.first().row(), "pICMS", 7)) return;
+    // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
+  }
+
+  updateImpostos();
 }
 
 void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(int index) {
@@ -1795,3 +1860,4 @@ void CadastrarNFe::setConnections() {
 // TODO: 5verificar com Anderson rateamento de frete
 // TODO: 5bloquear edicao direto na tabela
 // TODO: os produtos de reposicao devem sair na nota com o valor que foram vendidos originalmente
+// TODO: quando mudar a finalidade operacao para devolucao mudar as tabelas de cfop

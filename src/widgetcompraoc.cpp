@@ -130,6 +130,8 @@ void WidgetCompraOC::on_tableProduto_entered(const QModelIndex &) { ui->tablePro
 void WidgetCompraOC::on_tableNFe_entered(const QModelIndex &) { ui->tableNFe->resizeColumnsToContents(); }
 
 void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
+  // TODO: mostrar erro/aviso se a linha selecionada noa possuir consumo (linhas de estoque)
+
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -164,9 +166,10 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
 }
 
 bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
+  // REFAC: pass this responsability to Estoque class
   // REFAC: put prepare outside loop?
 
-  for (auto item : list) {
+  for (const auto &item : list) {
     const int idVendaProduto = modelProduto.data(item.row(), "idVendaProduto").toInt();
 
     QSqlQuery query;
@@ -191,6 +194,8 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
       return false;
     }
 
+    // TODO: juntar linhas sem consumo do mesmo tipo?
+
     query.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":idVendaProduto", idVendaProduto);
 
@@ -199,11 +204,16 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto");
+    query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto");
     query.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query.exec()) {
       emit errorSignal("Erro atualizando pedido venda: " + query.lastError().text());
+      return false;
+    }
+
+    if (not query.exec("CALL update_venda_status()")) {
+      emit errorSignal("Erro atualizando status da venda: " + query.lastError().text());
       return false;
     }
 

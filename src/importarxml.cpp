@@ -481,6 +481,32 @@ void ImportarXML::procurar() {
   ui->tableCompra->resizeColumnsToContents();
 }
 
+std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
+  QSqlQuery query;
+  query.prepare("SELECT idProduto, m2cx, pccx, UPPER(un) AS un FROM produto WHERE codComercial = :codComercial");
+  query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
+
+  if (not query.exec()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produto: " + query.lastError().text());
+    return false;
+  }
+
+  if (not query.first()) {
+    QMessageBox::critical(this, "Erro!", "Produto não cadastrado: " + modelEstoque.data(rowEstoque, "codComercial").toString());
+    return false;
+  }
+
+  const QString un = modelEstoque.data(rowEstoque, "un").toString();
+
+  const double quantCaixa = un == "M2" or un == "M²" or un == "ML" ? query.value("m2cx").toDouble() : query.value("pccx").toDouble();
+
+  const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
+
+  const double caixas = qRound(quant / quantCaixa * 100) / 100.;
+
+  return caixas;
+}
+
 bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) {
   if (static_cast<FieldColors>(modelEstoque.data(rowEstoque, "quantUpd").toInt()) == FieldColors::Green) return true;
   if (static_cast<FieldColors>(modelCompra.data(rowCompra, "quantUpd").toInt()) == FieldColors::Green) return true;
@@ -500,6 +526,13 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
   if (not modelCompra.setData(rowCompra, "quantConsumida", quantConsumida + quantAdicionar)) return false;
   if (not modelCompra.setData(rowCompra, "quantUpd", static_cast<int>(qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? FieldColors::Green : FieldColors::Yellow))) return false;
   if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoqueConsumido, quantEstoque) ? FieldColors::Green : FieldColors::Yellow))) return false;
+
+  auto caixas = buscarCaixas(rowEstoque);
+
+  if (not caixas) return false;
+
+  if (not modelEstoque.setData(rowEstoque, "caixas", *caixas)) return false;
+  if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(rowCompra, "idProduto"))) return false;
 
   const int idCompra = modelCompra.data(rowCompra, "idCompra").toInt();
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
@@ -866,75 +899,47 @@ void ImportarXML::WrapParear() { // TODO: 0terminar de refatorar e homologar
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
 }
 
+bool ImportarXML::produtoCompativel(const int rowCompra, const QString &codComercialEstoque) {
+  if (modelCompra.data(rowCompra, "status").toString() != "EM FATURAMENTO") return false;
+  const QString codComercialCompra = modelCompra.data(rowCompra, "codComercial").toString();
+  if (codComercialCompra != codComercialEstoque) return false;
+  if (modelCompra.data(rowCompra, "quantUpd").toInt() == static_cast<int>(FieldColors::Green)) return false;
+
+  return true;
+}
+
 bool ImportarXML::parear() {
   if (not limparAssociacoes()) return false;
 
-  for (int rowEstoque = 0, total = modelEstoque.rowCount(); rowEstoque < total; ++rowEstoque) {
-    QVector<int> listCompra;
+  for (int rowEstoque = 0, totalEstoque = modelEstoque.rowCount(); rowEstoque < totalEstoque; ++rowEstoque) {
+    // pintar inicialmente de vermelho, pintar diferente na associacao
+    if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(FieldColors::Red))) return false;
 
-    for (int row = 0; row < modelCompra.rowCount(); ++row) {
-      if (modelCompra.data(row, "status").toString() == "EM FATURAMENTO" and modelCompra.data(row, "codComercial").toString() == modelEstoque.data(rowEstoque, "codComercial").toString()) {
-        listCompra << row;
-      }
-    }
+    const QString codComercialEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
+    const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
+    double quantConsumida = 0;
 
-    if (listCompra.isEmpty()) {
-      if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(FieldColors::Red))) return false;
-      continue;
-    }
+    // fazer busca por quantidades iguais
+    for (int rowCompra = 0, totalCompra = modelCompra.rowCount(); rowCompra < totalCompra; ++rowCompra) {
+      if (not produtoCompativel(rowCompra, codComercialEstoque)) continue;
 
-    QSqlQuery query;
-    query.prepare("SELECT idProduto, m2cx, pccx, UPPER(un) AS un FROM produto WHERE codComercial = :codComercial");
-    query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
-
-    if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela produto: " + query.lastError().text());
-      return false;
-    }
-
-    if (not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Produto não cadastrado: " + modelEstoque.data(rowEstoque, "codComercial").toString());
-      return false;
-    }
-
-    const QString un = modelEstoque.data(rowEstoque, "un").toString();
-
-    const double quantCaixa = un == "M2" or un == "M²" or un == "ML" ? query.value("m2cx").toDouble() : query.value("pccx").toDouble();
-
-    const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
-
-    const double caixas = qRound(quant / quantCaixa * 100) / 100.;
-
-    //    if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(listCompra.first().row(),
-    //    "idProduto"))) {
-    if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(listCompra.first(), "idProduto"))) {
-      return false;
-    }
-
-    if (not modelEstoque.setData(rowEstoque, "caixas", caixas)) return false;
-
-    double estoqueConsumido = 0;
-
-    //------------------------ procurar quantidades iguais
-    for (const auto &item : listCompra) { // TODO: 5trocar essa logica por fazer uma busca interna dentro do associarItens()
-      const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
-      //      const double quantCompra = modelCompra.data(item.row(), "quant").toDouble();
-      const double quantCompra = modelCompra.data(item, "quant").toDouble();
+      const double quantCompra = modelCompra.data(rowCompra, "quant").toDouble();
 
       if (qFuzzyCompare(quantEstoque, quantCompra)) {
-        //          if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
-        if (not associarItens(item, rowEstoque, estoqueConsumido)) return false;
+        associarItens(rowCompra, rowEstoque, quantConsumida);
+        break;
       }
     }
-    //------------------------
 
-    for (const auto &item : listCompra) {
-      //        if (not associarItens(item.row(), rowEstoque, estoqueConsumido)) return false;
-      if (not associarItens(item, rowEstoque, estoqueConsumido)) return false;
+    // se o estoque foi associado passar para o proximo produto
+    if (qFuzzyCompare(quantConsumida, quantEstoque)) continue;
+
+    for (int rowCompra = 0, totalCompra = modelCompra.rowCount(); rowCompra < totalCompra; ++rowCompra) {
+      if (not produtoCompativel(rowCompra, codComercialEstoque)) continue;
+
+      associarItens(rowCompra, rowEstoque, quantConsumida);
     }
   }
-
-  //  if (not criarConsumo()) return false;
 
   ui->tableEstoque->clearSelection();
   ui->tableCompra->clearSelection();

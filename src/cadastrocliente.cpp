@@ -40,7 +40,6 @@ CadastroCliente::~CadastroCliente() { delete ui; }
 void CadastroCliente::setupUi() {
   ui->lineEditCPF->setInputMask("999.999.999-99;_");
   ui->lineEditContatoCPF->setInputMask("999.999.999-99;_");
-  ui->lineEditContatoRG->setInputMask("99.999.999-9;_");
   ui->lineEditIdNextel->setInputMask("99*9999999*99999;_");
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
   ui->lineEditInscEstadual->setValidator(new QRegExpValidator(QRegExp(R"([0-9]\d{0,15})"), this));
@@ -140,11 +139,8 @@ void CadastroCliente::setupMapper() {
   addMapping(ui->lineEditCliente, "nome_razao");
   addMapping(ui->lineEditCNPJ, "cnpj");
   addMapping(ui->lineEditContatoApelido, "contatoApelido");
-  addMapping(ui->lineEditContatoApelido, "contatoApelido");
   addMapping(ui->lineEditContatoCPF, "contatoCPF");
   addMapping(ui->lineEditContatoNome, "contatoNome");
-  addMapping(ui->lineEditContatoNome, "contatoNome");
-  addMapping(ui->lineEditContatoRG, "contatoRG");
   addMapping(ui->lineEditContatoRG, "contatoRG");
   addMapping(ui->lineEditCPF, "cpf");
   addMapping(ui->lineEditEmail, "email");
@@ -486,3 +482,4 @@ void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
 // TODO: 0ao trocar de cadastro nao esta limpando observacao (esta fazendo append)
 // TODO: 0nao deixar cadastrar endereco sem numero, se necessario colocar 'S/N'
 // TODO: nesta tela e nas outras arrumar a ordem dos tabs
+// TODO: limitar complemento de endereco a 60 caracteres

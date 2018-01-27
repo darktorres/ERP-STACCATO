@@ -118,8 +118,9 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   }
 
   // voltar compra para faturamento
-  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, "
-                "dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe))");
+  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
+                "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
+                "FROM estoque_has_nfe WHERE idNFe = :idNFe))");
   query.bindValue(":idNFe", model.data(row, "idNFe"));
 
   if (not query.exec()) {
@@ -139,6 +140,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   while (query.next()) {
     // TODO: 1quando cancelar nota pegar os estoques e cancelar/remover da logistica (exceto quando estiverem entregues?)
     // se existir linhas de consumo pode ser que existam linhas de entrega, tratar
+    // se houver consumos na nota mostrar para o usuario e pedir que ele faça os 'desconsumir'
 
     QSqlQuery query2;
     query2.prepare("UPDATE estoque_has_consumo SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");

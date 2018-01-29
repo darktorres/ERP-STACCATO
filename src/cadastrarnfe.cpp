@@ -897,14 +897,14 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
 void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "[Total]" << endl;
-  stream << "BaseICMS = " + QString::number(ui->doubleSpinBoxBaseICMS->value()) << endl;
-  stream << "ValorICMS = " + QString::number(ui->doubleSpinBoxValorICMS->value()) << endl;
-  stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value()) << endl;
-  stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value()) << endl;
-  stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value()) << endl;
-  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value()) << endl;
-  stream << "ValorFrete = " + QString::number(ui->doubleSpinBoxValorFrete->value()) << endl;
-  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value()) << endl;
+  stream << "BaseICMS = " + QString::number(ui->doubleSpinBoxBaseICMS->value(), 'f', 2) << endl;
+  stream << "ValorICMS = " + QString::number(ui->doubleSpinBoxValorICMS->value(), 'f', 2) << endl;
+  stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value(), 'f', 2) << endl;
+  stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value(), 'f', 2) << endl;
+  stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value(), 'f', 2) << endl;
+  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value(), 'f', 2) << endl;
+  stream << "ValorFrete = " + QString::number(ui->doubleSpinBoxValorFrete->value(), 'f', 2) << endl;
+  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
 
   // PARTILHA ICMS
 
@@ -920,8 +920,8 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
 
       const double difal = modelProdutos.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
-      totalIcmsDest += difal * 0.6;
-      totalIcmsOrig += difal * 0.4;
+      totalIcmsDest += difal * 0.8;
+      totalIcmsOrig += difal * 0.2;
     }
 
     stream << "vFCPUFDest = " + QString::number(totalFcp) << endl;

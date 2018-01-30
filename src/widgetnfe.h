@@ -11,18 +11,16 @@ class WidgetNfe final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfe(QWidget *parent = 0);
+  explicit WidgetNfe(QWidget *parent = nullptr);
   ~WidgetNfe();
-  bool updateTables();
-
-private slots:
-  void on_tabWidgetNfe_currentChanged(const int);
+  auto updateTables() -> bool;
 
 private:
   // attributes
   Ui::WidgetNfe *ui;
   // methods
-  void setConnections();
+  auto setConnections() -> void;
+  auto on_tabWidgetNfe_currentChanged(const int) -> void;
 };
 
 #endif // WIDGETNFE_H

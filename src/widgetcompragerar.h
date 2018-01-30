@@ -13,7 +13,7 @@ class WidgetCompraGerar final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraGerar(QWidget *parent = 0);
+  explicit WidgetCompraGerar(QWidget *parent = nullptr);
   ~WidgetCompraGerar();
   bool updateTables();
 

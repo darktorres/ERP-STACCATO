@@ -8,8 +8,8 @@ class XML final {
 
 public:
   XML(const QByteArray &fileContent, const QString &fileName = QString());
-  void montarArvore(QStandardItemModel &model);
-  void lerValores(const QStandardItem *item);
+  auto montarArvore(QStandardItemModel &model) -> void;
+  auto lerValores(const QStandardItem *item) -> void;
 
   const QByteArray fileContent;
   const QString fileName;
@@ -92,13 +92,13 @@ public:
 
   // methods
 private:
-  void lerCOFINSProduto(const QStandardItem *child);
-  void lerDadosProduto(const QStandardItem *child);
-  void lerICMSProduto(const QStandardItem *child);
-  void lerIPIProduto(const QStandardItem *child);
-  void lerPISProduto(const QStandardItem *child);
-  void lerTotais(const QStandardItem *child);
-  void readChild(QDomElement &element, QStandardItem *elementItem);
+  auto lerCOFINSProduto(const QStandardItem *child) -> void;
+  auto lerDadosProduto(const QStandardItem *child) -> void;
+  auto lerICMSProduto(const QStandardItem *child) -> void;
+  auto lerIPIProduto(const QStandardItem *child) -> void;
+  auto lerPISProduto(const QStandardItem *child) -> void;
+  auto lerTotais(const QStandardItem *child) -> void;
+  auto readChild(QDomElement &element, QStandardItem *elementItem) -> void;
 };
 
 #endif // XML_H

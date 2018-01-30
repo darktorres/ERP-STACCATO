@@ -7,7 +7,7 @@
 class DateFormatDelegate final : public QStyledItemDelegate {
 
 public:
-  explicit DateFormatDelegate(QObject *parent = 0);
+  explicit DateFormatDelegate(QObject *parent = nullptr);
   ~DateFormatDelegate() = default;
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &) const final;
 

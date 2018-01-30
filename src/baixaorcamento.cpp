@@ -12,6 +12,9 @@ BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QD
   model.setFilter("idOrcamento = '" + idOrcamento + "'");
 
   if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela orcamento: " + model.lastError().text());
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonSalvar_clicked);
 }
 
 BaixaOrcamento::~BaixaOrcamento() { delete ui; }
@@ -26,7 +29,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
 
   QString motivo;
 
-  for (const auto &child : ui->groupBox->findChildren<QRadioButton *>()) {
+  Q_FOREACH (const auto &child, ui->groupBox->findChildren<QRadioButton *>()) {
     if (child->isChecked()) motivo = child->text();
   }
 

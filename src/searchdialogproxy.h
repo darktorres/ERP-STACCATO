@@ -9,9 +9,9 @@
 class SearchDialogProxy final : public QIdentityProxyModel {
 
 public:
-  SearchDialogProxy(SqlRelationalTableModel *model, QObject *parent = 0);
+  SearchDialogProxy(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~SearchDialogProxy() = default;
-  QVariant data(const QModelIndex &proxyIndex, int role) const final;
+  auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
 private:
   const int estoque;

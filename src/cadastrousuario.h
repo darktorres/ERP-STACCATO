@@ -12,9 +12,9 @@ class CadastroUsuario final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroUsuario(QWidget *parent = 0);
+  explicit CadastroUsuario(QWidget *parent = nullptr);
   ~CadastroUsuario();
-  void modificarUsuario();
+  auto modificarUsuario() -> void;
 
 private slots:
   void fillCombobox();
@@ -31,16 +31,16 @@ private:
   SqlRelationalTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
-  bool cadastrar() final;
-  bool savingProcedures() final;
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void clearFields() final;
-  void registerMode() final;
-  void setupMapper() final;
-  void setupTables();
-  void successMessage() final;
-  void updateMode() final;
+  auto cadastrar() -> bool final;
+  auto savingProcedures() -> bool final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
+  auto clearFields() -> void final;
+  auto registerMode() -> void final;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
 };
 
 #endif // CADASTRARUSUARIO_H

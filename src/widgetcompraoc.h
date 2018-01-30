@@ -13,7 +13,7 @@ class WidgetCompraOC final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraOC(QWidget *parent = 0);
+  explicit WidgetCompraOC(QWidget *parent = nullptr);
   ~WidgetCompraOC();
   bool updateTables();
 

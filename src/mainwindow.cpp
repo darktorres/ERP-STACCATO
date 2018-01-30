@@ -308,14 +308,14 @@ void MainWindow::updateTables() {
 
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == QStringLiteral("Orçamentos")) ui->widgetOrcamento->updateTables();
-  if (currentText == QStringLiteral("Vendas")) ui->widgetVenda->updateTables();
-  if (currentText == QStringLiteral("Compras")) ui->widgetCompra->updateTables();
-  if (currentText == QStringLiteral("Logística")) ui->widgetLogistica->updateTables();
-  if (currentText == QStringLiteral("NFe")) ui->widgetNfe->updateTables();
-  if (currentText == QStringLiteral("Estoque")) ui->widgetEstoque->updateTables();
-  if (currentText == QStringLiteral("Financeiro")) ui->widgetFinanceiro->updateTables();
-  if (currentText == QStringLiteral("Relatórios")) ui->widgetRelatorio->updateTables();
+  if (currentText == "Orçamentos") ui->widgetOrcamento->updateTables();
+  if (currentText == "Vendas") ui->widgetVenda->updateTables();
+  if (currentText == "Compras") ui->widgetCompra->updateTables();
+  if (currentText == "Logística") ui->widgetLogistica->updateTables();
+  if (currentText == "NFe") ui->widgetNfe->updateTables();
+  if (currentText == "Estoque") ui->widgetEstoque->updateTables();
+  if (currentText == "Financeiro") ui->widgetFinanceiro->updateTables();
+  if (currentText == "Relatórios") ui->widgetRelatorio->updateTables();
 
   qApp->setUpdating(false);
 }

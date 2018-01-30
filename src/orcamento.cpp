@@ -22,7 +22,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   setupTables();
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
@@ -100,7 +100,7 @@ void Orcamento::setupConnections() {
 }
 
 void Orcamento::show() {
-  QDialog::show();
+  RegisterDialog::show();
   ui->tableProdutos->resizeColumnsToContents();
 }
 
@@ -423,7 +423,7 @@ bool Orcamento::generateId() {
       return false;
     }
 
-    const int last = query.first() ? query.value("idOrcamento").toString().remove(id).left(4).toInt() : 0;
+    const int last = query.first() ? query.value("idOrcamento").toString().remove(id).leftRef(4).toInt() : 0;
 
     id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
     id += ui->checkBoxRepresentacao->isChecked() ? "R" : "";

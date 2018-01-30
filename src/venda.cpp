@@ -23,7 +23,7 @@
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setupTables();
 
@@ -419,7 +419,7 @@ bool Venda::verifyFields() {
 
   double sum = 0;
 
-  for (const auto &spinbox : ui->widgetPgts->listDoubleSpinPgt) sum += spinbox->value();
+  Q_FOREACH (const auto &spinbox, ui->widgetPgts->listDoubleSpinPgt) { sum += spinbox->value(); }
 
   if (not qFuzzyCompare(sum, ui->doubleSpinBoxTotalPag->value())) {
     QMessageBox::critical(this, "Erro!", "Valor dos pagamentos difere do total!");
@@ -512,7 +512,7 @@ void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 void Venda::on_doubleSpinBoxPgt_valueChanged() {
   double sum = 0;
 
-  for (const auto &spinbox : ui->widgetPgts->listDoubleSpinPgt) sum += spinbox->value();
+  Q_FOREACH (const auto &spinbox, ui->widgetPgts->listDoubleSpinPgt) { sum += spinbox->value(); }
 
   ui->doubleSpinBoxTotalPag->setValue(sum);
 
@@ -1279,7 +1279,7 @@ bool Venda::generateId() {
     return false;
   }
 
-  const int last = query.first() ? query.value("idVenda").toString().remove(id).left(4).toInt() : 0;
+  const int last = query.first() ? query.value("idVenda").toString().remove(id).leftRef(4).toInt() : 0;
 
   id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
 
@@ -1337,7 +1337,7 @@ void Venda::on_pushButtonPgtLoja_clicked() {
 
   if (dialog.exec() == QDialog::Rejected) return;
 
-  for (auto item : ui->widgetPgts->listCheckBoxRep) item->setChecked(false);
+  Q_FOREACH (auto item, ui->widgetPgts->listCheckBoxRep) { item->setChecked(false); }
 }
 
 void Venda::setFinanceiro() {
@@ -1487,7 +1487,7 @@ void Venda::on_doubleSpinBoxTotalPag_valueChanged(double) {
 
   double sumWithoutLast = 0;
 
-  for (const auto &item : ui->widgetPgts->listDoubleSpinPgt) {
+  Q_FOREACH (const auto &item, ui->widgetPgts->listDoubleSpinPgt) {
     item->setMaximum(ui->doubleSpinBoxTotal->value());
     sumWithoutLast += item->value();
   }

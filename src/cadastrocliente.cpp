@@ -13,7 +13,7 @@
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
@@ -33,6 +33,25 @@ CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("clien
   }
 
   ui->lineEditCliente->setFocus();
+
+  connect(ui->checkBoxInscEstIsento, &QCheckBox::toggled, this, &CadastroCliente::on_checkBoxInscEstIsento_toggled);
+  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroCliente::on_checkBoxMostrarInativos_clicked);
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroCliente::on_lineEditCEP_textChanged);
+  connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditCNPJ_textEdited);
+  connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditContatoCPF_textEdited);
+  connect(ui->lineEditCPF, &QLineEdit::textEdited, this, &CadastroCliente::on_lineEditCPF_textEdited);
+  connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAdicionarEnd_clicked);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAtualizar_clicked);
+  connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAtualizarEnd_clicked);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonBuscar_clicked);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonEndLimpar_clicked);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonNovoCad_clicked);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemover_clicked);
+  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemoverEnd_clicked);
+  connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroCliente::on_radioButtonPF_toggled);
+  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroCliente::on_tableEndereco_clicked);
+  connect(ui->tableEndereco, &TableView::entered, this, &CadastroCliente::on_tableEndereco_entered);
 }
 
 CadastroCliente::~CadastroCliente() { delete ui; }
@@ -58,7 +77,7 @@ void CadastroCliente::setupTables() {
 bool CadastroCliente::verifyFields() {
   if (modelEnd.rowCount() == 0) incompleto = true;
 
-  for (const auto &line : ui->frame->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->frame->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -125,7 +144,7 @@ void CadastroCliente::clearFields() {
   ui->checkBoxInscEstIsento->setChecked(false);
   novoEndereco();
 
-  for (const auto &box : findChildren<ItemBox *>()) box->clear();
+  Q_FOREACH (const auto &box, findChildren<ItemBox *>()) { box->clear(); }
 
   setupUi();
 }
@@ -250,7 +269,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
-  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -404,9 +423,11 @@ void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
 }
 
 void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
-  tipoPFPJ = checked ? "PF" : "PJ";
+  tipoPFPJ = checked ? QString("PF") : QString("PJ");
 
   if (checked) {
+    ui->lineEditCNPJ->clear();
+
     ui->lineEditCNPJ->setHidden(checked);
     ui->labelCNPJ->setHidden(checked);
     ui->lineEditInscEstadual->setHidden(checked);
@@ -418,6 +439,8 @@ void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
     ui->dateEdit->setVisible(checked);
     ui->labelDataNasc->setVisible(checked);
   } else {
+    ui->lineEditCPF->clear();
+
     ui->lineEditCPF->setVisible(checked);
     ui->labelCPF->setVisible(checked);
     ui->dateEdit->setVisible(checked);
@@ -429,8 +452,6 @@ void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
     ui->labelInscricaoEstadual->setHidden(checked);
     ui->checkBoxInscEstIsento->setHidden(checked);
   }
-
-  checked ? ui->lineEditCNPJ->clear() : ui->lineEditCPF->clear();
 
   adjustSize();
 }

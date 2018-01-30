@@ -11,7 +11,7 @@ class ValidadeDialog final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ValidadeDialog(QWidget *parent = 0);
+  explicit ValidadeDialog(QWidget *parent = nullptr);
   ~ValidadeDialog();
   int getValidade();
 

@@ -22,6 +22,8 @@ void WidgetNfe::setConnections() {
 
   connect(ui->widgetEntrada, &WidgetNfeEntrada::transactionEnded, this, &WidgetNfe::transactionEnded);
   connect(ui->widgetSaida, &WidgetNfeSaida::transactionEnded, this, &WidgetNfe::transactionEnded);
+
+  connect(ui->tabWidgetNfe, &QTabWidget::currentChanged, this, &WidgetNfe::on_tabWidgetNfe_currentChanged);
 }
 
 bool WidgetNfe::updateTables() {

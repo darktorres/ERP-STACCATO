@@ -12,15 +12,9 @@ class WidgetRelatorio final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetRelatorio(QWidget *parent = 0);
+  explicit WidgetRelatorio(QWidget *parent = nullptr);
   ~WidgetRelatorio();
-  bool updateTables();
-
-private slots:
-  void on_pushButtonExcel_clicked();
-  void on_tableRelatorio_entered(const QModelIndex &);
-  void on_tableTotalLoja_entered(const QModelIndex &);
-  void on_tableTotalVendedor_entered(const QModelIndex &);
+  auto updateTables() -> bool;
 
 private:
   // attributes
@@ -30,12 +24,16 @@ private:
   SqlRelationalTableModel modelTotalVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
-  bool setupTables();
-  void setFilterTotaisVendedor();
-  void setFilterTotaisLoja();
-  void calcularTotalGeral();
-  void setFilterRelatorio();
-  void dateEditMes_dateChanged(const QDate &);
+  auto calcularTotalGeral() -> void;
+  auto dateEditMes_dateChanged(const QDate &) -> void;
+  auto on_pushButtonExcel_clicked() -> void;
+  auto on_tableRelatorio_entered(const QModelIndex &) -> void;
+  auto on_tableTotalLoja_entered(const QModelIndex &) -> void;
+  auto on_tableTotalVendedor_entered(const QModelIndex &) -> void;
+  auto setFilterRelatorio() -> void;
+  auto setFilterTotaisLoja() -> void;
+  auto setFilterTotaisVendedor() -> void;
+  auto setupTables() -> bool;
 };
 
 #endif // WIDGETRELATORIO_H

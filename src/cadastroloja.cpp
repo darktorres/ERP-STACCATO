@@ -13,7 +13,7 @@
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setupUi();
   setupTables();
@@ -30,6 +30,35 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
+
+  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroLoja::on_checkBoxMostrarInativos_clicked);
+  connect(ui->checkBoxMostrarInativosConta, &QCheckBox::clicked, this, &CadastroLoja::on_checkBoxMostrarInativosConta_clicked);
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroLoja::on_lineEditCEP_textChanged);
+  connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroLoja::on_lineEditCNPJ_textEdited);
+  connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionaAssociacao_clicked);
+  connect(ui->pushButtonAdicionarConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionarConta_clicked);
+  connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionarEnd_clicked);
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionarPagamento_clicked);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizar_clicked);
+  connect(ui->pushButtonAtualizarConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarConta_clicked);
+  connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarEnd_clicked);
+  connect(ui->pushButtonAtualizarPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarPagamento_clicked);
+  connect(ui->pushButtonAtualizarTaxas, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarTaxas_clicked);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonBuscar_clicked);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonContaLimpar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonContaLimpar_clicked);
+  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonEndLimpar_clicked);
+  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonLimparSelecao_clicked);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonNovoCad_clicked);
+  connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoveAssociacao_clicked);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemover_clicked);
+  connect(ui->pushButtonRemoverConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverConta_clicked);
+  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverEnd_clicked);
+  connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverPagamento_clicked);
+  connect(ui->tableConta, &TableView::clicked, this, &CadastroLoja::on_tableConta_clicked);
+  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroLoja::on_tableEndereco_clicked);
+  connect(ui->tableEndereco, &TableView::entered, this, &CadastroLoja::on_tableEndereco_entered);
+  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroLoja::on_tablePagamentos_clicked);
 }
 
 CadastroLoja::~CadastroLoja() { delete ui; }
@@ -129,7 +158,7 @@ void CadastroLoja::clearFields() {
 }
 
 bool CadastroLoja::verifyFields() {
-  for (const auto &line : ui->groupBoxCadastro->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxCadastro->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -270,7 +299,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
 }
 
 bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
-  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -490,7 +519,7 @@ bool CadastroLoja::newRegister() {
 }
 
 bool CadastroLoja::cadastrarConta(const bool isUpdate) {
-  for (const auto &line : ui->groupBoxConta->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxConta->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

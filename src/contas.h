@@ -14,7 +14,7 @@ class Contas final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
-  explicit Contas(const Tipo tipo, QWidget *parent = 0);
+  explicit Contas(const Tipo tipo, QWidget *parent = nullptr);
   ~Contas();
   void viewConta(const QString &idPagamento, const QString &contraparte);
 

@@ -962,3 +962,4 @@ void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsum
 // TODO: 5avisar se R$ da nota for diferente do R$ da compra
 // TODO: 5bloquear a importacao de documentos que nao sejam NFe
 // TODO: verificar se o valor total da nota bate com o valor total da compra (bater impostos/st)
+// TODO: bloquear edicao dos campos na tabela de estoque

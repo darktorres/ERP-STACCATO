@@ -61,12 +61,12 @@ void ImportaProdutos::importarEstoque() {
   // obs3: quando fechar pedido mudar status de 'pendente' para 'estoque' para nao aparecer na tela de compras
   // obs4: colocar na tabela produto um campo para indicar qual o estoque relacionado
 
-  if (not readFile()) return;
+  //  if (not readFile()) return;
 
-  validade = 730;
-  tipo = Tipo::Estoque;
+  //  validade = 730;
+  //  tipo = Tipo::Estoque;
 
-  importarTabela();
+  //  importarTabela();
 }
 
 void ImportaProdutos::importarPromocao() {
@@ -446,7 +446,7 @@ bool ImportaProdutos::cadastraFornecedores() {
 }
 
 void ImportaProdutos::mostraApenasEstesFornecedores() {
-  for (const auto &fornecedor : fornecedores) idsFornecedor.append(QString::number(fornecedor));
+  Q_FOREACH (const auto &fornecedor, fornecedores) { idsFornecedor.append(QString::number(fornecedor)); }
 }
 
 bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
@@ -467,7 +467,7 @@ void ImportaProdutos::contaProdutos() {
 }
 
 void ImportaProdutos::consistenciaDados() {
-  for (const auto &key : variantMap.keys()) {
+  Q_FOREACH (const auto &key, variantMap.keys()) {
     if (variantMap.value(key).toString().contains("*")) variantMap.insert(key, variantMap.value(key).toString().remove("*"));
   }
 
@@ -495,7 +495,7 @@ void ImportaProdutos::consistenciaDados() {
 }
 
 void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &record) {
-  for (const auto &key : variantMap.keys()) {
+  Q_FOREACH (const auto &key, variantMap.keys()) {
     if (key == "ncmEx") continue;
     if (key == "multiplo") continue;
 
@@ -510,7 +510,7 @@ void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &r
 bool ImportaProdutos::atualizaCamposProduto() {
   bool changed = false;
 
-  for (const auto &key : variantMap.keys()) {
+  Q_FOREACH (const auto &key, variantMap.keys()) {
     if (not variantMap.value(key).isNull() and model.data(row, key) != variantMap.value(key)) {
       if (not model.setData(row, key, variantMap.value(key))) return false;
       if (not model.setData(row, key + "Upd", static_cast<int>(FieldColors::Yellow))) return false;
@@ -647,7 +647,7 @@ bool ImportaProdutos::insereEmErro() {
   const int row = modelErro.rowCount();
   if (not modelErro.insertRow(row)) return false;
 
-  for (const auto &key : variantMap.keys()) {
+  Q_FOREACH (const auto &key, variantMap.keys()) {
     if (not modelErro.setData(row, key, variantMap.value(key))) return false;
     if (not modelErro.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) return false;
   }
@@ -684,7 +684,7 @@ bool ImportaProdutos::insereEmOk() {
 
   if (not model.insertRow(row)) return false;
 
-  for (const auto &key : variantMap.keys()) {
+  Q_FOREACH (const auto &key, variantMap.keys()) {
     if (not model.setData(row, key, variantMap.value(key))) return false;
     if (not model.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) return false;
   }
@@ -818,7 +818,7 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
 }
 
 bool ImportaProdutos::verificaTabela(const QSqlRecord &record) {
-  for (const auto &key : variantMap.keys()) {
+  Q_FOREACH (const auto &key, variantMap.keys()) {
     if (not record.contains(key)) {
       QMessageBox::critical(this, "Erro!", R"(Tabela não possui coluna ")" + key + R"(")");
       return false;

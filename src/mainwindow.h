@@ -12,7 +12,7 @@ class MainWindow final : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
   void updateTables();
 
@@ -42,8 +42,8 @@ private:
   Ui::MainWindow *ui;
   QPushButton *pushButtonStatus;
   // methods
-  bool event(QEvent *event);
-  void gerarEnviarRelatorio();
+  auto event(QEvent *event) -> bool;
+  auto gerarEnviarRelatorio() -> void;
 };
 
 #endif // MAINWINDOW_H

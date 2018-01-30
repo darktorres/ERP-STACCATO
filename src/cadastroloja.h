@@ -12,38 +12,8 @@ class CadastroLoja final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroLoja(QWidget *parent = 0);
+  explicit CadastroLoja(QWidget *parent = nullptr);
   ~CadastroLoja();
-
-private slots:
-  void on_checkBoxMostrarInativos_clicked(const bool checked);
-  void on_checkBoxMostrarInativosConta_clicked(bool checked);
-  void on_lineEditCEP_textChanged(const QString &cep);
-  void on_lineEditCNPJ_textEdited(const QString &text);
-  void on_pushButtonAdicionaAssociacao_clicked();
-  void on_pushButtonAdicionarConta_clicked();
-  void on_pushButtonAdicionarEnd_clicked();
-  void on_pushButtonAdicionarPagamento_clicked();
-  void on_pushButtonAtualizar_clicked();
-  void on_pushButtonAtualizarConta_clicked();
-  void on_pushButtonAtualizarEnd_clicked();
-  void on_pushButtonAtualizarPagamento_clicked();
-  void on_pushButtonAtualizarTaxas_clicked();
-  void on_pushButtonBuscar_clicked();
-  void on_pushButtonCadastrar_clicked();
-  void on_pushButtonContaLimpar_clicked();
-  void on_pushButtonEndLimpar_clicked();
-  void on_pushButtonLimparSelecao_clicked();
-  void on_pushButtonNovoCad_clicked();
-  void on_pushButtonRemoveAssociacao_clicked();
-  void on_pushButtonRemover_clicked();
-  void on_pushButtonRemoverConta_clicked();
-  void on_pushButtonRemoverEnd_clicked();
-  void on_pushButtonRemoverPagamento_clicked();
-  void on_tableConta_clicked(const QModelIndex &index);
-  void on_tableEndereco_clicked(const QModelIndex &index);
-  void on_tableEndereco_entered(const QModelIndex &);
-  void on_tablePagamentos_clicked(const QModelIndex &index);
 
 private:
   // attributes
@@ -67,17 +37,45 @@ private:
   bool savingProcedures() final;
   bool verifyFields() final;
   bool viewRegister() final;
-  void clearConta();
-  void clearEndereco();
-  void clearFields() final;
-  void novaConta();
-  void novoEndereco();
-  void registerMode() final;
-  void setupMapper() final;
-  void setupTables();
-  void setupUi();
-  void successMessage() final;
-  void updateMode() final;
+  auto clearConta() -> void;
+  auto clearEndereco() -> void;
+  auto clearFields() -> void final;
+  auto novaConta() -> void;
+  auto novoEndereco() -> void;
+  auto registerMode() -> void final;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto setupUi() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
+  auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
+  auto on_checkBoxMostrarInativosConta_clicked(bool checked) -> void;
+  auto on_lineEditCEP_textChanged(const QString &cep) -> void;
+  auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
+  auto on_pushButtonAdicionaAssociacao_clicked() -> void;
+  auto on_pushButtonAdicionarConta_clicked() -> void;
+  auto on_pushButtonAdicionarEnd_clicked() -> void;
+  auto on_pushButtonAdicionarPagamento_clicked() -> void;
+  auto on_pushButtonAtualizar_clicked() -> void;
+  auto on_pushButtonAtualizarConta_clicked() -> void;
+  auto on_pushButtonAtualizarEnd_clicked() -> void;
+  auto on_pushButtonAtualizarPagamento_clicked() -> void;
+  auto on_pushButtonAtualizarTaxas_clicked() -> void;
+  auto on_pushButtonBuscar_clicked() -> void;
+  auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonContaLimpar_clicked() -> void;
+  auto on_pushButtonEndLimpar_clicked() -> void;
+  auto on_pushButtonLimparSelecao_clicked() -> void;
+  auto on_pushButtonNovoCad_clicked() -> void;
+  auto on_pushButtonRemoveAssociacao_clicked() -> void;
+  auto on_pushButtonRemover_clicked() -> void;
+  auto on_pushButtonRemoverConta_clicked() -> void;
+  auto on_pushButtonRemoverEnd_clicked() -> void;
+  auto on_pushButtonRemoverPagamento_clicked() -> void;
+  auto on_tableConta_clicked(const QModelIndex &index) -> void;
+  auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
+  auto on_tableEndereco_entered(const QModelIndex &) -> void;
+  auto on_tablePagamentos_clicked(const QModelIndex &index) -> void;
 };
 
 #endif // CADASTROLOJA_H

@@ -33,12 +33,17 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
     setWindowTitle("Autorização");
   }
 
+  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged);
+  connect(ui->lineEditHostname, &QLineEdit::textChanged, this, &LoginDialog::on_lineEditHostname_textChanged);
+  connect(ui->pushButtonConfig, &QPushButton::clicked, this, &LoginDialog::on_pushButtonConfig_clicked);
+  connect(ui->pushButtonLogin, &QPushButton::clicked, this, &LoginDialog::on_pushButtonLogin_clicked);
+
   adjustSize();
   accept();
 }
 
 void LoginDialog::setComboBox() {
-  for (const auto &loja : qApp->mapLojas.keys()) ui->comboBoxLoja->addItem(loja);
+  Q_FOREACH (const auto &loja, qApp->mapLojas.keys()) { ui->comboBoxLoja->addItem(loja); }
 }
 
 LoginDialog::~LoginDialog() { delete ui; }

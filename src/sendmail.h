@@ -13,8 +13,8 @@ class SendMail final : public QDialog {
 
 public:
   enum class Tipo { GerarCompra, CancelarNFe, Vazio };
-  explicit SendMail(const Tipo tipo, const QString &arquivo = QString(), const QString &fornecedor = QString(), QWidget *parent = 0);
-  ~SendMail();
+  explicit SendMail(const Tipo tipo, const QString &arquivo = QString(), const QString &fornecedor = QString(), QWidget *parent = nullptr);
+  ~SendMail() final;
 
 private slots:
   void on_pushButtonBuscar_clicked();
@@ -29,8 +29,8 @@ private:
   Tipo tipo;
   Ui::SendMail *ui;
   // methods
-  void failureStatus(const QString &status);
-  void successStatus();
+  auto failureStatus(const QString &status) -> void;
+  auto successStatus() -> void;
 };
 
 #endif // SENDMAIL_H

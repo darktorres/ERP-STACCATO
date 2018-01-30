@@ -13,7 +13,7 @@ class WidgetLogisticaCaminhao final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaCaminhao(QWidget *parent = 0);
+  explicit WidgetLogisticaCaminhao(QWidget *parent = nullptr);
   ~WidgetLogisticaCaminhao();
   bool updateTables();
 

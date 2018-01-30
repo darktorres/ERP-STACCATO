@@ -13,14 +13,8 @@ class AnteciparRecebimento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit AnteciparRecebimento(QWidget *parent = 0);
+  explicit AnteciparRecebimento(QWidget *parent = nullptr);
   ~AnteciparRecebimento();
-
-private slots:
-  void on_comboBox_currentTextChanged(const QString &text);
-  void on_doubleSpinBoxValorPresente_valueChanged(double);
-  void on_pushButtonGerar_clicked();
-  void on_table_entered(const QModelIndex &);
 
 private:
   // attributes
@@ -30,8 +24,12 @@ private:
   SqlRelationalTableModel model;
   Ui::AnteciparRecebimento *ui;
   // methods
-  void calcularTotais();
-  void setupTables();
+  auto calcularTotais() -> void;
+  auto setupTables() -> void;
+  auto on_comboBox_currentTextChanged(const QString &text) -> void;
+  auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
+  auto on_pushButtonGerar_clicked() -> void;
+  auto on_table_entered(const QModelIndex) -> void;
 };
 
 #endif // ANTECIPARRECEBIMENTO_H

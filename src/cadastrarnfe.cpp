@@ -669,7 +669,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     peso += queryProduto.value("kgcx").toDouble() * modelProdutos.data(row, "caixas").toInt();
   }
 
-  ui->spinBoxVolumesQuant->setValue(caixas);
+  ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));
   ui->lineEditVolumesEspecie->setText("Caixas");
   ui->doubleSpinBoxVolumesPesoBruto->setValue(peso);
   ui->doubleSpinBoxVolumesPesoLiq->setValue(peso);
@@ -747,7 +747,7 @@ bool CadastrarNFe::calculaDigitoVerificador(QString &chave) {
   int soma = 0;
   int mult = 4;
 
-  for (const auto &i : chave) {
+  for (const auto &i : std::as_const(chave)) {
     soma += i.digitValue() * mult--;
     mult = mult == 1 ? 9 : mult;
   }

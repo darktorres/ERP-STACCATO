@@ -13,10 +13,10 @@ class WidgetLogisticaRepresentacao final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaRepresentacao(QWidget *parent = 0);
+  explicit WidgetLogisticaRepresentacao(QWidget *parent = nullptr);
   ~WidgetLogisticaRepresentacao();
-  bool updateTables();
-  void tableFornLogistica_activated(const QString &fornecedor);
+  auto updateTables() -> bool;
+  auto tableFornLogistica_activated(const QString &fornecedor) -> void;
 
 signals:
   void errorSignal(const QString &error);
@@ -34,8 +34,8 @@ private:
   QString fornecedor;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
-  bool processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu);
-  void setupTables();
+  auto processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) -> bool;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETLOGISTICAREPRESENTACAO_H

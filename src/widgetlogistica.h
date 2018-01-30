@@ -12,7 +12,7 @@ class WidgetLogistica final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogistica(QWidget *parent = 0);
+  explicit WidgetLogistica(QWidget *parent = nullptr);
   ~WidgetLogistica();
   bool updateTables();
 

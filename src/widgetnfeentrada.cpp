@@ -8,7 +8,14 @@
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
 
-WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
+WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) {
+  ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetNfeEntrada::on_table_entered);
+}
 
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 

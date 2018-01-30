@@ -14,7 +14,7 @@ class WidgetFinanceiroFluxoCaixa final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent = 0);
+  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent = nullptr);
   ~WidgetFinanceiroFluxoCaixa();
   bool updateTables();
 

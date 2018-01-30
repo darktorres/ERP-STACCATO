@@ -12,7 +12,7 @@ class CadastroProfissional final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroProfissional(QWidget *parent = 0);
+  explicit CadastroProfissional(QWidget *parent = nullptr);
   ~CadastroProfissional();
 
 private slots:
@@ -46,20 +46,20 @@ private:
   SearchDialog *sdProfissional;
   Ui::CadastroProfissional *ui;
   // methods
-  bool cadastrar() final;
-  bool cadastrarEndereco(const bool isUpdate = false);
-  bool savingProcedures() final;
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void clearEndereco();
-  void clearFields() final;
-  void novoEndereco();
-  void registerMode() final;
-  void setupMapper() final;
-  void setupTables();
-  void setupUi();
-  void successMessage() final;
-  void updateMode() final;
+  auto cadastrar() -> bool final;
+  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto savingProcedures() -> bool final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
+  auto clearEndereco() -> void;
+  auto clearFields() -> void final;
+  auto novoEndereco() -> void;
+  auto registerMode() -> void final;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto setupUi() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
 };
 
 #endif // CADASTROPROFISSIONAL_H

@@ -48,4 +48,6 @@ void WidgetCompra::setConnections() {
   connect(ui->widgetGerar, &WidgetCompraGerar::transactionEnded, this, &WidgetCompra::transactionEnded);
   connect(ui->widgetConfirmar, &WidgetCompraConfirmar::transactionEnded, this, &WidgetCompra::transactionEnded);
   connect(ui->widgetFaturar, &WidgetCompraFaturar::transactionEnded, this, &WidgetCompra::transactionEnded);
+
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetCompra::on_tabWidget_currentChanged);
 }

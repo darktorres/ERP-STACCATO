@@ -14,7 +14,7 @@ class WidgetLogisticaAgendarColeta final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaAgendarColeta(QWidget *parent = 0);
+  explicit WidgetLogisticaAgendarColeta(QWidget *parent = nullptr);
   ~WidgetLogisticaAgendarColeta();
   bool updateTables();
   void tableFornLogistica_activated(const QString &fornecedor);

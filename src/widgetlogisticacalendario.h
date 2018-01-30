@@ -11,7 +11,7 @@ class WidgetLogisticaCalendario final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaCalendario(QWidget *parent = 0);
+  explicit WidgetLogisticaCalendario(QWidget *parent = nullptr);
   ~WidgetLogisticaCalendario();
   bool updateTables();
 

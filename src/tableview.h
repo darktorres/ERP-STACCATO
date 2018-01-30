@@ -4,9 +4,11 @@
 #include <QTableView>
 
 class TableView final : public QTableView {
+  Q_OBJECT
 
 public:
-  explicit TableView(QWidget *parent = 0);
+  explicit TableView(QWidget *parent = nullptr);
+  ~TableView() final = default;
   void hideColumn(const QString &column);
   void openPersistentEditor(const int row, const int column);
   void openPersistentEditor(const int row, const QString &column);

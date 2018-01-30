@@ -15,7 +15,7 @@ class InputDialogProduto final : public QDialog {
 public:
   enum class Tipo { GerarCompra, Faturamento };
 
-  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = 0);
+  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogProduto();
   QDateTime getDate() const;
   QDateTime getNextDate() const;

@@ -8,7 +8,7 @@
 #include "orcamento.h"
 #include "ui_inputdialogconfirmacao.h"
 
-InputDialogConfirmacao::InputDialogConfirmacao(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
+InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -314,6 +314,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 
   if (tipo == Tipo::Entrega) {
     const QString produto = model.data(row, "produto").toString();
+    // TODO: verificar porque essa caixa é double
     const double caixas = model.data(row, "caixas").toDouble();
     unCaixa = model.data(row, "unCaixa").toDouble(); // *
 

@@ -12,18 +12,17 @@ class XML_Viewer final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit XML_Viewer(QWidget *parent = 0);
+  explicit XML_Viewer(QWidget *parent = nullptr);
   ~XML_Viewer();
-  void exibirXML(const QByteArray &content);
-
-private slots:
-  void on_pushButtonDanfe_clicked();
+  auto exibirXML(const QByteArray &content) -> void;
 
 private:
   // attributes
   QByteArray fileContent;
   QStandardItemModel model;
   Ui::XML_Viewer *ui;
+  // methods
+  auto on_pushButtonDanfe_clicked() -> void;
 };
 
 #endif // XML_VIEWER_H

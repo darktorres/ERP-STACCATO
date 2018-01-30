@@ -4,6 +4,7 @@
 #include <QStyledItemDelegate>
 
 class LineEditDelegate final : public QStyledItemDelegate {
+  Q_OBJECT
 
 public:
   enum class Tipo { ContraPartePagar, ContraParteReceber, Grupo };

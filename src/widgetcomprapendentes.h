@@ -13,7 +13,7 @@ class WidgetCompraPendentes final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraPendentes(QWidget *parent = 0);
+  explicit WidgetCompraPendentes(QWidget *parent = nullptr);
   ~WidgetCompraPendentes();
   bool updateTables();
 

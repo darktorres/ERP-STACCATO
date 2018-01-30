@@ -57,13 +57,13 @@ void WidgetVenda::montaFiltro() {
   QString filtroCheck;
 
   if (financeiro) {
-    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+    Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
       if (child->isChecked()) {
         filtroCheck += filtroCheck.isEmpty() ? "statusFinanceiro = '" + child->text().toUpper() + "'" : " OR statusFinanceiro = '" + child->text().toUpper() + "'";
       }
     }
   } else {
-    for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+    Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
       if (child->isChecked()) {
         filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
       }
@@ -88,7 +88,7 @@ void WidgetVenda::montaFiltro() {
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -143,12 +143,19 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  connect(ui->comboBoxLojas, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
   connect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
+  connect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
   connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
 }
 
 bool WidgetVenda::updateTables() {
@@ -166,7 +173,7 @@ bool WidgetVenda::updateTables() {
   return true;
 }
 
-void WidgetVenda::on_table_activated(const QModelIndex &index) {
+void WidgetVenda::on_table_activated(const QModelIndex index) {
   auto *vendas = new Venda(this);
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) vendas->setFinanceiro();
@@ -177,7 +184,7 @@ void WidgetVenda::on_table_activated(const QModelIndex &index) {
   connect(vendas, &Venda::transactionEnded, this, &WidgetVenda::transactionEnded);
 }
 
-void WidgetVenda::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+void WidgetVenda::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
   if (UserSession::tipoUsuario() == "VENDEDOR") checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide();
@@ -218,7 +225,7 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

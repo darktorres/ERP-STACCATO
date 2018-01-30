@@ -9,16 +9,16 @@ class ACBr final : public QObject {
 
 public:
   ACBr() = delete;
-  static bool gerarDanfe(const int idNFe);
-  static std::optional<QString> enviarComando(const QString &comando);
-  static std::optional<QString> gerarDanfe(const QByteArray &fileContent, const bool openFile = true);
-  static std::optional<std::tuple<QString, QString>> consultarNFe(const int idNFe);
+  static auto gerarDanfe(const int idNFe) -> bool;
+  static auto enviarComando(const QString &comando) -> std::optional<QString>;
+  static auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> std::optional<QString>;
+  static auto consultarNFe(const int idNFe) -> std::optional<std::tuple<QString, QString>>;
 
 private:
   // attributes
   inline static QTcpSocket *socket = new QTcpSocket(nullptr);
   // methods
-  static bool abrirPdf(const QString &resposta);
+  static auto abrirPdf(const QString &resposta) -> bool;
 };
 
 #endif // ACBR_H

@@ -4,6 +4,7 @@
 #include <QTableView>
 
 class TableView final : public QTableView {
+  Q_OBJECT
 
 public:
   explicit TableView(QWidget *parent = 0);

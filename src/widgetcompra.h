@@ -11,18 +11,16 @@ class WidgetCompra final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompra(QWidget *parent = 0);
+  explicit WidgetCompra(QWidget *parent = nullptr);
   ~WidgetCompra();
-  bool updateTables();
-
-private slots:
-  void on_tabWidget_currentChanged(const int &);
+  auto updateTables() -> bool;
 
 private:
   // attributes
   Ui::WidgetCompra *ui;
   // methods
-  void setConnections();
+  auto on_tabWidget_currentChanged(const int &) -> void;
+  auto setConnections() -> void;
 };
 
 #endif // WIDGETCOMPRA_H

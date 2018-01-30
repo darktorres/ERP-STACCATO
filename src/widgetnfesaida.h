@@ -13,32 +13,30 @@ class WidgetNfeSaida final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfeSaida(QWidget *parent = 0);
+  explicit WidgetNfeSaida(QWidget *parent = nullptr);
   ~WidgetNfeSaida();
-  bool updateTables();
+  auto updateTables() -> bool;
 
 signals:
   void errorSignal(const QString &error);
   void transactionEnded();
   void transactionStarted();
 
-private slots:
-  void on_groupBoxStatus_toggled(const bool enabled);
-  void on_pushButtonCancelarNFe_clicked();
-  void on_pushButtonConsultarNFe_clicked();
-  void on_pushButtonExportar_clicked();
-  void on_pushButtonRelatorio_clicked();
-  void on_table_activated(const QModelIndex &index);
-  void on_table_entered(const QModelIndex &);
-
 private:
   // attributes
   SqlRelationalTableModel model;
   Ui::WidgetNfeSaida *ui;
   // methods
-  bool atualizarNFe(const int idNFe, const QString &xml);
-  bool montaFiltro();
-  void setupTables();
+  auto atualizarNFe(const int idNFe, const QString &xml) -> bool;
+  auto montaFiltro() -> bool;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
+  auto on_pushButtonCancelarNFe_clicked() -> void;
+  auto on_pushButtonConsultarNFe_clicked() -> void;
+  auto on_pushButtonExportar_clicked() -> void;
+  auto on_pushButtonRelatorio_clicked() -> void;
+  auto on_table_activated(const QModelIndex &index) -> void;
+  auto on_table_entered(const QModelIndex) -> void;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETNFESAIDA_H

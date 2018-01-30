@@ -115,7 +115,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
 void WidgetFinanceiroContas::montaFiltro() {
   QString status;
 
-  for (const auto &child : ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
     if (child->text() == "Todos") continue;
 
     if (child->isChecked() and child->text() == "Pendente/Conferido") {
@@ -183,7 +183,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &value) {
 }
 
 void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxData->findChildren<QDateEdit *>()) child->setEnabled(enabled);
+  Q_FOREACH (const auto &child, ui->groupBoxData->findChildren<QDateEdit *>()) { child->setEnabled(enabled); }
 }
 
 void WidgetFinanceiroContas::on_tableVencidos_entered(const QModelIndex &) { ui->tableVencidos->resizeColumnsToContents(); }

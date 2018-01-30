@@ -50,7 +50,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
   QStringList list;
 
-  for (const auto &item : ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &item, ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
     if (not item->isChecked()) continue;
 
     veiculos++;

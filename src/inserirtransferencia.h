@@ -13,7 +13,7 @@ class InserirTransferencia final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit InserirTransferencia(QWidget *parent = 0);
+  explicit InserirTransferencia(QWidget *parent = nullptr);
   ~InserirTransferencia();
 
 signals:

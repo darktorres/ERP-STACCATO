@@ -7,7 +7,7 @@ class Log final {
 
 public:
   Log() = delete;
-  static bool createLog(const QString &message);
+  static auto createLog(const QString &message) -> bool;
 };
 
 #endif // LOG_H

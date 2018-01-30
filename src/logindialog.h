@@ -13,21 +13,19 @@ class LoginDialog final : public QDialog {
 
 public:
   enum class Tipo { Login, Autorizacao };
-  explicit LoginDialog(const Tipo tipo = Tipo::Login, QWidget *parent = 0);
+  explicit LoginDialog(const Tipo tipo = Tipo::Login, QWidget *parent = nullptr);
   ~LoginDialog();
-
-private slots:
-  void on_comboBoxLoja_currentTextChanged(const QString &loja);
-  void on_lineEditHostname_textChanged(const QString &);
-  void on_pushButtonConfig_clicked();
-  void on_pushButtonLogin_clicked();
 
 private:
   // attributes
   const Tipo tipo;
   Ui::LoginDialog *ui;
   // methods
-  void setComboBox();
+  auto on_comboBoxLoja_currentTextChanged(const QString &loja) -> void;
+  auto on_lineEditHostname_textChanged(const QString &) -> void;
+  auto on_pushButtonConfig_clicked() -> void;
+  auto on_pushButtonLogin_clicked() -> void;
+  auto setComboBox() -> void;
 };
 
 #endif // LOGINDIALOG_H

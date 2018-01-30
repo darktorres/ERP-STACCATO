@@ -13,7 +13,7 @@ class WidgetCompraFaturar final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraFaturar(QWidget *parent = 0);
+  explicit WidgetCompraFaturar(QWidget *parent = nullptr);
   ~WidgetCompraFaturar();
   bool updateTables();
 

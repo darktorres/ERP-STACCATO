@@ -133,7 +133,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 void WidgetLogisticaAgendarEntrega::calcularPeso() {
   double peso = 0;
 
-  for (const auto &item : ui->tableProdutos->selectionModel()->selectedRows()) {
+  Q_FOREACH (const auto &item, ui->tableProdutos->selectionModel()->selectedRows()) {
     QSqlQuery query;
     query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
     query.bindValue(":idProduto", modelViewProdutos.data(item.row(), "idProduto"));

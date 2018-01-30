@@ -92,7 +92,7 @@ void SendMail::on_pushButtonBuscar_clicked() {
 
   QString fileListString;
 
-  for (const auto &file : files) fileListString.append(R"(")" + QFileInfo(file).fileName() + R"(" )");
+  Q_FOREACH (const auto &file, files) { fileListString.append(R"(")" + QFileInfo(file).fileName() + R"(" )"); }
 
   ui->lineEditAnexo->setText(fileListString);
 }
@@ -105,7 +105,7 @@ void SendMail::on_pushButtonEnviar_clicked() {
   UserSession::setSetting("User/emailCompra", ui->lineEditEmail->text());
   UserSession::setSetting("User/emailSenha", ui->lineEditPasswd->text());
 
-  Smtp *smtp = new Smtp(ui->lineEditEmail->text(), ui->lineEditPasswd->text(), ui->lineEditServidor->text(), ui->lineEditPorta->text().toInt());
+  Smtp *smtp = new Smtp(ui->lineEditEmail->text(), ui->lineEditPasswd->text(), ui->lineEditServidor->text(), ui->lineEditPorta->text().toUShort());
   connect(smtp, &Smtp::status, this, &SendMail::mailSent);
 
   smtp->sendMail(ui->lineEditEmail->text(), ui->comboBoxDest->currentText(), ui->lineEditCopia->text(), ui->lineEditTitulo->text(), ui->textEdit->toHtml(), files,

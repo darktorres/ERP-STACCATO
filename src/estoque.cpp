@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <utility>
 
 #include "doubledelegate.h"
 #include "estoque.h"
@@ -10,12 +11,17 @@
 #include "ui_estoque.h"
 #include "xml_viewer.h"
 
-Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(idEstoque), ui(new Ui::Estoque) {
+Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
 
   setupTables();
+
+  connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked);
+  connect(ui->tableConsumo, &TableView::entered, this, &Estoque::on_tableConsumo_entered);
+  connect(ui->tableEstoque, &TableView::activated, this, &Estoque::on_tableEstoque_activated);
+  connect(ui->tableEstoque, &TableView::entered, this, &Estoque::on_tableEstoque_entered);
 
   viewRegisterById(showWindow);
 }
@@ -380,8 +386,8 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
   return true;
 }
 
-void Estoque::on_tableEstoque_entered(const QModelIndex &) { ui->tableEstoque->resizeColumnsToContents(); }
+void Estoque::on_tableEstoque_entered(const QModelIndex) { ui->tableEstoque->resizeColumnsToContents(); }
 
-void Estoque::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsumo->resizeColumnsToContents(); }
+void Estoque::on_tableConsumo_entered(const QModelIndex) { ui->tableConsumo->resizeColumnsToContents(); }
 
 // TODO: 1colocar o botao de desvincular consumo nesta tela

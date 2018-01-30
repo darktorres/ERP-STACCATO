@@ -13,7 +13,7 @@ class WidgetCompraConfirmar final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraConfirmar(QWidget *parent = 0);
+  explicit WidgetCompraConfirmar(QWidget *parent = nullptr);
   ~WidgetCompraConfirmar();
   bool updateTables();
 

@@ -11,20 +11,20 @@ class UserConfig final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit UserConfig(QWidget *parent = 0);
+  explicit UserConfig(QWidget *parent = nullptr);
   ~UserConfig();
 
-private slots:
-  void on_pushButtonAlterarDados_clicked();
-  void on_pushButtonComprasFolder_clicked();
-  void on_pushButtonEntregasPdfFolder_clicked();
-  void on_pushButtonEntregasXmlFolder_clicked();
-  void on_pushButtonOrcamentosFolder_clicked();
-  void on_pushButtonSalvar_clicked();
-  void on_pushButtonVendasFolder_clicked();
-
 private:
+  // attributes
   Ui::UserConfig *ui;
+  // methods
+  auto on_pushButtonAlterarDados_clicked() -> void;
+  auto on_pushButtonComprasFolder_clicked() -> void;
+  auto on_pushButtonEntregasPdfFolder_clicked() -> void;
+  auto on_pushButtonEntregasXmlFolder_clicked() -> void;
+  auto on_pushButtonOrcamentosFolder_clicked() -> void;
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto on_pushButtonVendasFolder_clicked() -> void;
 };
 
 #endif // USERCONFIG_H

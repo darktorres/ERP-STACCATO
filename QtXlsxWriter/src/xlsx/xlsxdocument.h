@@ -52,9 +52,9 @@ class Q_XLSX_EXPORT Document : public QObject {
   Q_DECLARE_PRIVATE(Document)
 
 public:
-  explicit Document(QObject *parent = 0);
-  Document(const QString &xlsxName, QObject *parent = 0);
-  Document(QIODevice *device, QObject *parent = 0);
+  explicit Document(QObject *parent = nullptr);
+  Document(const QString &xlsxName, QObject *parent = nullptr);
+  Document(QIODevice *device, QObject *parent = nullptr);
   ~Document();
 
   bool write(const CellReference &cell, const QVariant &value, const Format &format = Format());
@@ -98,8 +98,7 @@ public:
   Cell *cellAt(const CellReference &cell) const;
   Cell *cellAt(int row, int col) const;
 
-  bool defineName(const QString &name, const QString &formula, const QString &comment = QString(),
-                  const QString &scope = QString());
+  bool defineName(const QString &name, const QString &formula, const QString &comment = QString(), const QString &scope = QString());
 
   CellRange dimension() const;
 
@@ -109,8 +108,7 @@ public:
 
   QStringList sheetNames() const;
   bool addSheet(const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
-  bool insertSheet(int index, const QString &name = QString(),
-                   AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
+  bool insertSheet(int index, const QString &name = QString(), AbstractSheet::SheetType type = AbstractSheet::ST_WorkSheet);
   bool selectSheet(const QString &name);
   bool renameSheet(const QString &oldName, const QString &newName);
   bool copySheet(const QString &srcName, const QString &distName = QString());

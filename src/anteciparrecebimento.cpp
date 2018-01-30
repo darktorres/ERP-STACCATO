@@ -31,6 +31,10 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   connect(ui->doubleSpinBoxDescMes, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
+  connect(ui->comboBox, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
+  connect(ui->doubleSpinBoxValorPresente, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged);
+  connect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked);
+  connect(ui->table, &TableView::entered, this, &AnteciparRecebimento::on_table_entered);
 }
 
 AnteciparRecebimento::~AnteciparRecebimento() { delete ui; }
@@ -111,7 +115,7 @@ void AnteciparRecebimento::setupTables() {
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 }
 
-void AnteciparRecebimento::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+void AnteciparRecebimento::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &text) {
   model.setFilter("tipo LIKE '%" + text + "%' AND status = 'PENDENTE' AND dataPagamento > NOW()");

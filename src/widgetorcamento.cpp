@@ -10,7 +10,16 @@
 #include "usersession.h"
 #include "widgetorcamento.h"
 
-WidgetOrcamento::WidgetOrcamento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
+WidgetOrcamento::WidgetOrcamento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetOrcamento) {
+  ui->setupUi(this);
+
+  connect(ui->comboBoxLojas, QOverload<int>::of(&ComboBox::currentIndexChanged), this, &WidgetOrcamento::on_comboBoxLojas_currentIndexChanged);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetOrcamento::on_groupBoxStatus_toggled);
+  connect(ui->pushButtonCriarOrc, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonCriarOrc_clicked);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonFollowup_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetOrcamento::on_table_entered);
+}
 
 WidgetOrcamento::~WidgetOrcamento() { delete ui; }
 
@@ -130,7 +139,7 @@ void WidgetOrcamento::montaFiltro() {
 
   QString filtroCheck;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) {
       filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
     }
@@ -169,7 +178,7 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

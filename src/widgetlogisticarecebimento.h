@@ -13,7 +13,7 @@ class WidgetLogisticaRecebimento final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaRecebimento(QWidget *parent = 0);
+  explicit WidgetLogisticaRecebimento(QWidget *parent = nullptr);
   ~WidgetLogisticaRecebimento();
   bool updateTables();
   void tableFornLogistica_activated(const QString &fornecedor);

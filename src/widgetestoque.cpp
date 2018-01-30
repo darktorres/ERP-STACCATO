@@ -95,20 +95,33 @@ void WidgetEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeCol
 
 void WidgetEstoque::montaFiltro() {
   // FIXME: digitar hifen causa erro na pesquisa
+  // TODO: arrumar query (está nas gambiarras temporariamente)
 
   ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("restante est") : ui->table->hideColumn("restante est");
 
   const QString text = ui->lineEditBusca->text();
 
-  const QString match = text.isEmpty() ? ""
-                                       : "WHERE (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
-                                             "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  const QString match1 = text.isEmpty() ? "" : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "restante <= 0" : "restante > 0";
+  const QString match2 = text.isEmpty() ? ""
+                                        : "(MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
+                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  model.setQuery(view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante);
+  const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "consumo <= 0" : "consumo > 0";
 
-  qDebug() << "query: " << view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante;
+  model.setQuery("SELECT group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, e.idEstoque, pf.fornecedor, e.descricao, e.consumo AS restante, e.un AS `unEst`, "
+                 "if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
+                 "(consumo / `p`.`m2cx`), (consumo / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, group_concat(DISTINCT `n`.`numeroNFe` "
+                 "SEPARATOR ', ') AS `nfe`, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, "
+                 "e.descricao, e.codComercial, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS consumo FROM estoque e LEFT JOIN "
+                 "estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status != 'CANCELADO' AND e.status != 'QUEBRADO' " +
+                 match1 + " GROUP BY e.idEstoque HAVING " + restante +
+                 ") e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial "
+                 "LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque");
+
+  //  model.setQuery(view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante);
+
+  //  qDebug() << "query: " << view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante;
 
   if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
 }

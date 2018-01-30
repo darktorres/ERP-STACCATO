@@ -14,7 +14,7 @@ class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(QWidget *parent = 0);
+  explicit ProdutosPendentes(QWidget *parent = nullptr);
   ~ProdutosPendentes();
   void viewProduto(const QString &codComercial, const QString &idVenda);
 

@@ -130,7 +130,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
   socket->write(comando.toUtf8() + "\r\n.\r\n");
   socket->waitForBytesWritten();
 
-  QProgressDialog *progressDialog = new QProgressDialog(nullptr);
+  auto *progressDialog = new QProgressDialog(nullptr);
   progressDialog->reset();
   progressDialog->setCancelButton(nullptr);
   progressDialog->setLabelText("Esperando ACBr...");

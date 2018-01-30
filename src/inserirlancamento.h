@@ -14,7 +14,7 @@ class InserirLancamento final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
-  explicit InserirLancamento(const Tipo tipo, QWidget *parent = 0);
+  explicit InserirLancamento(const Tipo tipo, QWidget *parent = nullptr);
   ~InserirLancamento();
 
 private slots:
@@ -28,9 +28,9 @@ private:
   SqlRelationalTableModel model;
   Ui::InserirLancamento *ui;
   // methods
-  void setupTables();
-  bool verifyFields();
-  void openPersistentEditor();
+  auto setupTables() -> void;
+  auto verifyFields() -> bool;
+  auto openPersistentEditor() -> void;
 };
 
 #endif // INSERIRLANCAMENTO_H

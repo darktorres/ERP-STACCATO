@@ -13,7 +13,7 @@ class PagamentosDia final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PagamentosDia(QWidget *parent = 0);
+  explicit PagamentosDia(QWidget *parent = nullptr);
   ~PagamentosDia();
   bool setFilter(const QDate &date, const QString &idConta);
 

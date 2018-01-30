@@ -12,7 +12,7 @@ class CadastroProduto final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroProduto(QWidget *parent = 0);
+  explicit CadastroProduto(QWidget *parent = nullptr);
   ~CadastroProduto();
 
 private slots:
@@ -28,16 +28,16 @@ private:
   SearchDialog *sdProduto;
   Ui::CadastroProduto *ui;
   // methods
-  bool cadastrar() final;
-  bool savingProcedures() final;
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void calcularMarkup();
-  void clearFields() final;
-  void registerMode() final;
-  void setupMapper() final;
-  void successMessage() final;
-  void updateMode() final;
+  auto cadastrar() -> bool final;
+  auto savingProcedures() -> bool final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
+  auto calcularMarkup() -> void;
+  auto clearFields() -> void final;
+  auto registerMode() -> void final;
+  auto setupMapper() -> void final;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
 };
 
 #endif // CADASTROPRODUTO_H

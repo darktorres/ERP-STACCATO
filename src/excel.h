@@ -9,7 +9,7 @@
 class Excel final {
 
 public:
-  Excel(const QString &id, QWidget *parent = 0);
+  Excel(const QString &id, QWidget *parent = nullptr);
   bool gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString());
   QString getFileName() const;
 

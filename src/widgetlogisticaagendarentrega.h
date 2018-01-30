@@ -14,7 +14,7 @@ class WidgetLogisticaAgendarEntrega final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaAgendarEntrega(QWidget *parent = 0);
+  explicit WidgetLogisticaAgendarEntrega(QWidget *parent = nullptr);
   ~WidgetLogisticaAgendarEntrega();
   bool updateTables();
 

@@ -9,11 +9,11 @@ class LineEditCEP final : public QLineEdit {
 public:
   explicit LineEditCEP(QWidget *parent);
   ~LineEditCEP() = default;
-  bool isValid() const;
+  auto isValid() const -> bool;
 
 private:
-  QString getValue() const;
-  void setValue(const QString &value);
+  auto getValue() const -> QString;
+  auto setValue(const QString &value) -> void;
 };
 
 #endif // LINEEDITCEP_H

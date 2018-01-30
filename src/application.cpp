@@ -130,7 +130,7 @@ bool Application::dbConnect() {
 }
 
 void Application::startSqlPing() {
-  QTimer *timer = new QTimer(this);
+  auto *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] {
     QSqlQuery query;
     query.exec("DO 0");
@@ -224,7 +224,7 @@ void Application::showErrors() {
 
   // TODO: deal with 'Lost connection to MySQL server'
 
-  for (const auto &error : errorQueue) QMessageBox::critical(nullptr, "Erro!", error);
+  for (const auto &error : std::as_const(errorQueue)) QMessageBox::critical(nullptr, "Erro!", error);
 
   errorQueue.clear();
 

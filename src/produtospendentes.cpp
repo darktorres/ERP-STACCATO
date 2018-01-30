@@ -31,7 +31,7 @@ ProdutosPendentes::~ProdutosPendentes() { delete ui; }
 void ProdutosPendentes::recalcularQuantidade() {
   double quant = 0;
 
-  for (const auto &item : ui->tableProdutos->selectionModel()->selectedRows()) quant += modelViewProdutos.data(item.row(), "quant").toDouble();
+  Q_FOREACH (const auto &item, ui->tableProdutos->selectionModel()->selectedRows()) { quant += modelViewProdutos.data(item.row(), "quant").toDouble(); }
 
   ui->doubleSpinBoxComprar->setMinimum(quant);
   ui->doubleSpinBoxComprar->setValue(quant);

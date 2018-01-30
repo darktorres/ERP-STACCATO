@@ -39,7 +39,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->groupBox_4->hide();
   ui->groupBox_5->hide();
 
-  for (const QLineEdit *line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  Q_FOREACH (const QLineEdit *line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 }
 
 CadastroProduto::~CadastroProduto() { delete ui; }
@@ -53,9 +53,9 @@ bool CadastroProduto::viewRegister() {
 }
 
 void CadastroProduto::clearFields() {
-  for (const auto &line : findChildren<QLineEdit *>()) line->clear();
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { line->clear(); }
 
-  for (const auto &spinBox : findChildren<QDoubleSpinBox *>()) spinBox->clear();
+  Q_FOREACH (const auto &spinBox, findChildren<QDoubleSpinBox *>()) { spinBox->clear(); }
 
   ui->itemBoxFornecedor->clear();
 
@@ -78,7 +78,7 @@ void CadastroProduto::registerMode() {
 }
 
 bool CadastroProduto::verifyFields() {
-  for (const auto &line : findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 

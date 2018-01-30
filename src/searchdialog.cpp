@@ -156,7 +156,7 @@ QString SearchDialog::getText(const QVariant &value) {
 
   QString queryText;
 
-  for (const auto &key : textKeys) queryText += queryText.isEmpty() ? key : ", " + key;
+  Q_FOREACH (const auto &key, textKeys) { queryText += queryText.isEmpty() ? key : ", " + key; }
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + value.toString() + "'";
 
@@ -169,7 +169,7 @@ QString SearchDialog::getText(const QVariant &value) {
 
   QString res;
 
-  for (const auto &key : textKeys) {
+  Q_FOREACH (const auto &key, textKeys) {
     if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) {
       res += (res.isEmpty() ? "" : " - ") + query.value(key).toString();
     }

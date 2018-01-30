@@ -13,28 +13,26 @@ class WidgetNfeEntrada final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfeEntrada(QWidget *parent = 0);
+  explicit WidgetNfeEntrada(QWidget *parent = nullptr);
   ~WidgetNfeEntrada();
-  bool updateTables();
+  auto updateTables() -> bool;
 
 signals:
   void errorSignal(const QString &error);
   void transactionEnded();
   void transactionStarted();
 
-private slots:
-  void on_lineEditBusca_textChanged(const QString &text);
-  void on_pushButtonCancelarNFe_clicked();
-  void on_table_activated(const QModelIndex &index);
-  void on_table_entered(const QModelIndex &);
-
 private:
   // attributes
   SqlRelationalTableModel model;
   Ui::WidgetNfeEntrada *ui;
   // methods
-  bool cancelar(const int row);
-  void setupTables();
+  auto cancelar(const int row) -> bool;
+  auto setupTables() -> void;
+  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto on_pushButtonCancelarNFe_clicked() -> void;
+  auto on_table_activated(const QModelIndex &index) -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
 };
 
 #endif // WIDGETNFEENTRADA_H

@@ -16,7 +16,7 @@ class Venda final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Venda(QWidget *parent = 0);
+  explicit Venda(QWidget *parent = nullptr);
   ~Venda();
   void prepararVenda(const QString &idOrcamento);
   void setFinanceiro();

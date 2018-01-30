@@ -12,7 +12,7 @@ class CadastroTransportadora final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroTransportadora(QWidget *parent = 0);
+  explicit CadastroTransportadora(QWidget *parent = nullptr);
   ~CadastroTransportadora();
 
 private slots:
@@ -45,23 +45,23 @@ private:
   SqlRelationalTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
-  bool cadastrar() final;
-  bool cadastrarEndereco(const bool isUpdate = false);
-  bool cadastrarVeiculo(const bool isUpdate = false);
-  bool savingProcedures() final;
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void clearEndereco();
-  void clearFields() final;
-  void clearVeiculo();
-  void novoEndereco();
-  void novoVeiculo();
-  void registerMode() final;
-  void setupMapper() final;
-  void setupTables();
-  void setupUi();
-  void successMessage() final;
-  void updateMode() final;
+  auto cadastrar() -> bool final;
+  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto cadastrarVeiculo(const bool isUpdate = false) -> bool;
+  auto savingProcedures() -> bool final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
+  auto clearEndereco() -> void;
+  auto clearFields() -> void final;
+  auto clearVeiculo() -> void;
+  auto novoEndereco() -> void;
+  auto novoVeiculo() -> void;
+  auto registerMode() -> void final;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto setupUi() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
 };
 
 #endif // CADASTROTRANSPORTADORA_H

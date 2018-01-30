@@ -14,7 +14,7 @@ class ImportaProdutos final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit ImportaProdutos(QWidget *parent = 0);
+  explicit ImportaProdutos(QWidget *parent = nullptr);
   ~ImportaProdutos();
   void importarProduto();
   void importarEstoque();

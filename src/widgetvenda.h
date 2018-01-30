@@ -12,30 +12,29 @@ class WidgetVenda final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetVenda(QWidget *parent = 0);
-  ~WidgetVenda();
-  bool updateTables();
-  void setFinanceiro();
-
-private slots:
-  void on_comboBoxLojas_currentIndexChanged(const int);
-  void on_groupBoxStatus_toggled(const bool enabled);
-  void on_groupBoxStatusFinanceiro_toggled(const bool enabled);
-  void on_pushButtonFollowup_clicked();
-  void on_radioButtonProprios_toggled(const bool checked);
-  void on_table_activated(const QModelIndex &index);
-  void on_table_entered(const QModelIndex &);
+  explicit WidgetVenda(QWidget *parent = nullptr);
+  ~WidgetVenda() final;
+  auto updateTables() -> bool;
+  auto setFinanceiro() -> void;
 
 private:
   // attributes
+  // REFAC: convert this to constructor enum/bool?
   bool financeiro = false;
   SqlRelationalTableModel model;
   Ui::WidgetVenda *ui;
   // methods
-  void montaFiltro();
-  void setConnections();
-  void setPermissions();
-  void setupTables();
+  auto montaFiltro() -> void;
+  auto on_comboBoxLojas_currentIndexChanged(const int) -> void;
+  auto on_groupBoxStatusFinanceiro_toggled(const bool enabled) -> void;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
+  auto on_radioButtonProprios_toggled(const bool checked) -> void;
+  auto on_table_activated(const QModelIndex index) -> void;
+  auto on_table_entered(const QModelIndex) -> void;
+  auto setConnections() -> void;
+  auto setPermissions() -> void;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETVENDA_H

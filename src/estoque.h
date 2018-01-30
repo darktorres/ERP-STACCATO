@@ -14,15 +14,9 @@ class Estoque final : public QDialog {
 
 public:
   // REFAC: turn showWindow into a enum
-  Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = 0);
+  Estoque(QString idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
-  bool criarConsumo(const int idVendaProduto, const double quant = 0);
-
-private slots:
-  void on_pushButtonExibirNfe_clicked();
-  void on_tableConsumo_entered(const QModelIndex &);
-  void on_tableEstoque_activated(const QModelIndex &);
-  void on_tableEstoque_entered(const QModelIndex &);
+  auto criarConsumo(const int idVendaProduto, const double quant = 0) -> bool;
 
 private:
   // attributes
@@ -43,13 +37,16 @@ private:
   };
 
   // methods
-  // REFAC: remove idEstoque and just use the class one?
-  bool quebrarCompra(const int idVendaProduto, const double quant);
-  bool viewRegisterById(const bool showWindow);
-  void calcularRestante();
-  void exibirNota();
-  void setupTables();
-  bool atualizaQuantEstoque(const int idVendaProduto);
+  auto atualizaQuantEstoque(const int idVendaProduto) -> bool;
+  auto calcularRestante() -> void;
+  auto exibirNota() -> void;
+  auto on_pushButtonExibirNfe_clicked() -> void;
+  auto on_tableConsumo_entered(const QModelIndex) -> void;
+  auto on_tableEstoque_activated(const QModelIndex &) -> void;
+  auto on_tableEstoque_entered(const QModelIndex) -> void;
+  auto quebrarCompra(const int idVendaProduto, const double quant) -> bool;
+  auto setupTables() -> void;
+  auto viewRegisterById(const bool showWindow) -> bool;
 };
 
 #endif // ESTOQUE_H

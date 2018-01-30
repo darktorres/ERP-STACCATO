@@ -25,6 +25,10 @@ WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::W
   ui->dateEditMes->setDate(QDate::currentDate());
 
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetRelatorio::dateEditMes_dateChanged);
+  connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetRelatorio::on_pushButtonExcel_clicked);
+  connect(ui->tableRelatorio, &TableView::entered, this, &WidgetRelatorio::on_tableRelatorio_entered);
+  connect(ui->tableTotalLoja, &TableView::entered, this, &WidgetRelatorio::on_tableTotalLoja_entered);
+  connect(ui->tableTotalVendedor, &TableView::entered, this, &WidgetRelatorio::on_tableTotalVendedor_entered);
 }
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }

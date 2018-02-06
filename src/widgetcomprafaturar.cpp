@@ -12,8 +12,13 @@
 #include "ui_widgetcomprafaturar.h"
 #include "widgetcomprafaturar.h"
 
-WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {
+WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraFaturar) {
   ui->setupUi(this);
+
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
+  connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraFaturar::on_table_entered);
 
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
@@ -148,10 +153,6 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     import->setAttribute(Qt::WA_DeleteOnClose);
     import->showMaximized();
 
-    connect(import, &ImportarXML::errorSignal, this, &WidgetCompraFaturar::errorSignal);
-    connect(import, &ImportarXML::transactionStarted, this, &WidgetCompraFaturar::transactionStarted);
-    connect(import, &ImportarXML::transactionEnded, this, &WidgetCompraFaturar::transactionEnded);
-
     if (import->exec() != QDialog::Accepted) return;
   }
 
@@ -167,12 +168,6 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 }
 
 void WidgetCompraFaturar::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
-
-// void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
-//  model.setFilter("representacao = " + QString(checked ? "1" : "0"));
-
-//  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
-//}
 
 void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();

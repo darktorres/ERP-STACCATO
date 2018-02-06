@@ -14,8 +14,17 @@
 #include "ui_widgetcomprapendentes.h"
 #include "widgetcomprapendentes.h"
 
-WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
+WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraPendentes) {
   ui->setupUi(this);
+
+  connect(ui->doubleSpinBoxQuantAvulso, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged);
+  connect(ui->doubleSpinBoxQuantAvulsoCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
+  connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
+  connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
+  connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraPendentes::on_table_entered);
 
   ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
   ui->itemBoxProduto->getSearchDialog()->setRepresentacao(" AND representacao = FALSE");
@@ -92,11 +101,7 @@ bool WidgetCompraPendentes::updateTables() {
 }
 
 void WidgetCompraPendentes::setupTables() {
-  // REFAC: refactor this to not select in here
-
   model.setTable("view_venda_produto");
-
-  //  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
 
   model.setHeaderData("data", "Data");
   model.setHeaderData("fornecedor", "Fornecedor");
@@ -144,10 +149,6 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   auto *produtos = new ProdutosPendentes(this);
   produtos->setAttribute(Qt::WA_DeleteOnClose);
   produtos->viewProduto(codComercial, idVenda);
-
-  connect(produtos, &ProdutosPendentes::errorSignal, this, &WidgetCompraPendentes::errorSignal);
-  connect(produtos, &ProdutosPendentes::transactionStarted, this, &WidgetCompraPendentes::transactionStarted);
-  connect(produtos, &ProdutosPendentes::transactionEnded, this, &WidgetCompraPendentes::transactionEnded);
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {

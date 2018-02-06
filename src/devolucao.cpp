@@ -12,8 +12,16 @@
 #include "ui_devolucao.h"
 #include "usersession.h"
 
-Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : Dialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
+
+  connect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
+  connect(ui->doubleSpinBoxQuant, &QDoubleSpinBox::editingFinished, this, &Devolucao::on_doubleSpinBoxQuant_editingFinished);
+  connect(ui->doubleSpinBoxQuant, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
+  connect(ui->doubleSpinBoxTotalItem, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxTotalItem_valueChanged);
+  connect(ui->groupBoxCredito, &QGroupBox::toggled, this, &Devolucao::on_groupBoxCredito_toggled);
+  connect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked);
+  connect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked);
 
   setWindowFlags(Qt::Window);
 
@@ -281,6 +289,7 @@ bool Devolucao::criarDevolucao() {
   if (not modelVenda.setData(newRow, "total", 0)) return false;
   if (not modelVenda.setData(newRow, "prazoEntrega", 0)) return false;
   if (not modelVenda.setData(newRow, "devolucao", true)) return false;
+  if (not modelVenda.setData(newRow, "status", "DEVOLVIDO")) return false;
 
   if (not modelVenda.submitAll()) {
     emit errorSignal("Erro salvando dados do pedido de devolução: " + modelVenda.lastError().text());
@@ -624,3 +633,5 @@ void Devolucao::on_groupBoxCredito_toggled(bool) {
 // TODO: 2quando for devolver para o fornecedor perguntar a quantidade
 // TODO: 2quando fizer devolucao no consumo/estoque alterar os dados no pedido_fornecedor? se as quantidades forem iguais trocar idVenda/idVendaProduto
 // TODO: testar devolver mais de uma linha
+// TODO: ao quebrar linha venda_has_produto em 2 ajustar os consumos de estoque para que fique devolvido<->devolvido e consumo<->consumo
+// em vez de ficar os 2 consumos apontando para a mesma linha (select * from view_estoque_consumo where status = 'CONSUMO' and statusProduto = 'DEVOLVIDO';)

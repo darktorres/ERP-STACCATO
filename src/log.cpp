@@ -5,8 +5,6 @@
 #include "log.h"
 #include "usersession.h"
 
-// Log::Log() {}
-
 bool Log::createLog(const QString &message) {
   QSqlQuery query;
   query.prepare("INSERT INTO log (idUsuario, message) VALUES (:idUsuario, :message)");

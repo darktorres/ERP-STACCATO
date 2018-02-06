@@ -90,10 +90,6 @@ void UserConfig::on_pushButtonAlterarDados_clicked() {
   usuario->viewRegisterById(UserSession::idUsuario());
   usuario->modificarUsuario();
 
-  connect(usuario, &CadastroUsuario::errorSignal, this, &UserConfig::errorSignal);
-  connect(usuario, &CadastroUsuario::transactionStarted, this, &UserConfig::transactionStarted);
-  connect(usuario, &CadastroUsuario::transactionEnded, this, &UserConfig::transactionEnded);
-
   usuario->show();
 }
 

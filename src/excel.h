@@ -10,8 +10,8 @@ class Excel final {
 
 public:
   Excel(const QString &id, QWidget *parent = nullptr);
-  bool gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString());
-  QString getFileName() const;
+  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> bool;
+  auto getFileName() const -> QString;
 
 private:
   // attributes
@@ -29,9 +29,9 @@ private:
   QString fileName;
   QWidget *parent;
   // methods
-  bool setQuerys();
-  void verificaTipo();
-  void hideUnusedRows(QXlsx::Document &xlsx);
+  auto hideUnusedRows(QXlsx::Document &xlsx) -> void;
+  auto setQuerys() -> bool;
+  auto verificaTipo() -> void;
 };
 
 #endif // EXCEL_H

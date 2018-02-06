@@ -10,7 +10,7 @@
 #include "singleeditdelegate.h"
 #include "ui_inputdialogproduto.h"
 
-InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
+InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -44,12 +44,32 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->labelEvento->setText("Data faturamento:");
   }
 
+  setConnections();
+
   adjustSize();
 
   showMaximized();
 }
 
 InputDialogProduto::~InputDialogProduto() { delete ui; }
+
+void InputDialogProduto::setConnections() {
+  connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
+  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
+  connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
+  connect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
+  connect(ui->table, &TableView::entered, this, &InputDialogProduto::on_table_entered);
+}
+
+void InputDialogProduto::unsetConnections() {
+  disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
+  disconnect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
+  disconnect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
+  disconnect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
+  disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
+  disconnect(ui->table, &TableView::entered, this, &InputDialogProduto::on_table_entered);
+}
 
 void InputDialogProduto::setupTables() {
   model.setTable("pedido_fornecedor_has_produto");
@@ -168,8 +188,7 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
     if (not model.setData(row, "prcUnitario", preco)) return;
   }
 
-  processST();
-  //  calcularTotal();
+  calcularTotal();
 }
 
 void InputDialogProduto::calcularTotal() {
@@ -177,7 +196,9 @@ void InputDialogProduto::calcularTotal() {
 
   for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
 
-  ui->doubleSpinBoxTotal->setValue(total);
+  ui->doubleSpinBoxTotal->setValue(total + ui->doubleSpinBoxST->value());
+
+  ui->doubleSpinBoxST->setMaximum(total * 0.2);
 }
 
 void InputDialogProduto::on_pushButtonSalvar_clicked() {
@@ -200,31 +221,47 @@ void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
   if (ui->dateEditProximo->date() < date) ui->dateEditProximo->setDate(date);
 }
 
-void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double) { processST(); }
-
-void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double value) {
-  // calcular a aliquota e jogar no spinbox para recalcular os totais
-  isBlockedAliquota = true;
+void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
+  unsetConnections();
 
   double total = 0;
 
   for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
 
-  const double aliquota = value / total * 100;
+  const double valueSt = total * aliquota / 100;
+
+  ui->doubleSpinBoxST->setValue(valueSt);
+
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, "aliquotaSt", aliquota)) return;
+  }
+
+  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+
+  setConnections();
+}
+
+void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
+  unsetConnections();
+
+  double total = 0;
+
+  for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
+
+  const double aliquota = valueSt * 100 / total;
 
   ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-  isBlockedAliquota = false;
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, "aliquotaSt", aliquota)) return;
+  }
+
+  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+
+  setConnections();
 }
 
-void InputDialogProduto::processST() {
-  calcularTotal();
-
-  const QString text = ui->comboBoxST->currentText();
-
-  const double aliquota = ui->doubleSpinBoxAliquota->value();
-  double total = ui->doubleSpinBoxTotal->value();
-
+void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
   if (text == "Sem ST") {
     ui->doubleSpinBoxST->setValue(0);
 
@@ -232,54 +269,20 @@ void InputDialogProduto::processST() {
     ui->doubleSpinBoxAliquota->hide();
     ui->labelST->hide();
     ui->doubleSpinBoxST->hide();
-
-    for (int row = 0; row < model.rowCount(); ++row) {
-      if (not model.setData(row, "aliquotaSt", aliquota)) return;
-      if (not model.setData(row, "st", text)) return;
-    }
   }
 
-  if (text == "ST Fornecedor") {
+  if (text == "ST Fornecedor" or text == "ST Loja") {
     ui->labelAliquota->show();
     ui->doubleSpinBoxAliquota->show();
     ui->labelST->show();
     ui->doubleSpinBoxST->show();
 
-    const double st = total * aliquota / 100;
-
-    if (not isBlockedAliquota) ui->doubleSpinBoxST->setValue(st);
-
-    for (int row = 0; row < model.rowCount(); ++row) {
-      if (not model.setData(row, "aliquotaSt", aliquota)) return;
-      if (not model.setData(row, "st", text)) return;
-    }
-
-    total += total * aliquota / 100;
-    ui->doubleSpinBoxTotal->setValue(total);
+    ui->doubleSpinBoxAliquota->setValue(4.65);
   }
 
-  if (text == "ST Loja") {
-    ui->labelAliquota->show();
-    ui->doubleSpinBoxAliquota->show();
-    ui->labelST->show();
-    ui->doubleSpinBoxST->show();
-
-    const double st = total * aliquota / 100;
-
-    if (not isBlockedAliquota) ui->doubleSpinBoxST->setValue(st);
-
-    for (int row = 0; row < model.rowCount(); ++row) {
-      if (not model.setData(row, "aliquotaSt", aliquota)) return;
-      if (not model.setData(row, "st", text)) return;
-    }
-
-    total += total * aliquota / 100;
-    ui->doubleSpinBoxTotal->setValue(total);
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, "st", text)) return;
   }
-
-  ui->table->resizeColumnsToContents();
 }
-
-void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &) { processST(); }
 
 void InputDialogProduto::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

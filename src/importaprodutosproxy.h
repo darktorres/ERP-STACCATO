@@ -10,11 +10,11 @@ class ImportaProdutosProxy final : public QIdentityProxyModel {
 public:
   ImportaProdutosProxy(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~ImportaProdutosProxy() = default;
-  QVariant data(const QModelIndex &proxyIndex, const int role) const final;
+  auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
   const int descontinuado;
-  enum class Status { Novo = 1, Atualizado, ForaPadrao, Errado };
+  enum class Status { Novo = 1, Atualizado = 2, ForaPadrao = 3, Errado = 4 };
 };
 
 #endif // IMPORTAPRODUTOSPROXY_H

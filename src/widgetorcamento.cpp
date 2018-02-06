@@ -111,20 +111,12 @@ void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
   orcamento->viewRegisterById(model.data(index.row(), "Código"));
 
-  connect(orcamento, &Orcamento::errorSignal, this, &WidgetOrcamento::errorSignal);
-  connect(orcamento, &Orcamento::transactionStarted, this, &WidgetOrcamento::transactionStarted);
-  connect(orcamento, &Orcamento::transactionEnded, this, &WidgetOrcamento::transactionEnded);
-
   orcamento->show();
 }
 
 void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
-
-  connect(orcamento, &Orcamento::errorSignal, this, &WidgetOrcamento::errorSignal);
-  connect(orcamento, &Orcamento::transactionStarted, this, &WidgetOrcamento::transactionStarted);
-  connect(orcamento, &Orcamento::transactionEnded, this, &WidgetOrcamento::transactionEnded);
 
   orcamento->show();
 }

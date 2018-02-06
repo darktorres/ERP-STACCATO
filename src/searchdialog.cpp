@@ -13,8 +13,15 @@
 #include "usersession.h"
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
-    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
+    : Dialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
+  connect(ui->radioButtonProdAtivos, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
+  connect(ui->radioButtonProdDesc, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdDesc_toggled);
+  connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
+  connect(ui->table, &TableView::entered, this, &SearchDialog::on_table_entered);
 
   setWindowTitle(title);
   setWindowModality(Qt::NonModal);

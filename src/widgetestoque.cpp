@@ -18,10 +18,14 @@
 WidgetEstoque::WidgetEstoque(QWidget *parent) : Widget(parent), ui(new Ui::WidgetEstoque) {
   ui->setupUi(this);
 
+  connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetEstoque::on_table_entered);
+
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro);
+  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
   connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
   connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
 
   ui->dateEditMes->setDate(QDate::currentDate());
 }
@@ -143,20 +147,19 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   SqlQueryModel modelContabil;
   modelContabil.setQuery(
-      "SELECT e.idEstoque, group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, pf.fornecedor, e.descricao, e.quant - "
-      "coalesce(e2.consumoVenda, 0) + ajuste AS contabil, e.un AS `unEst`, if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = "
-      "'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), (e.quant - coalesce(e2.consumoVenda, 0) + ajuste / `p`.`m2cx`), (e.quant - coalesce(e2.consumoVenda, 0) + ajuste / "
-      "`p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo AS custo, p.precoVenda AS precoVenda, "
-      "pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, "
-      "e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS restante, sum(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e "
-      "LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' AND e.created < '" +
+      "SELECT e.idEstoque, group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, pf.fornecedor, e.descricao, e.quant - coalesce(e2.consumoVenda, 0) + ajuste AS contabil, "
+      " e2.consumoEst, e.un AS `unEst`, if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
+      "(e.quant - coalesce(e2.consumoVenda, 0) + ajuste / `p`.`m2cx`), (e.quant - coalesce(e2.consumoVenda, 0) + ajuste / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, "
+      "group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant - coalesce(e2.consumoVenda, 0) + ajuste) AS custo, "
+      "p.precoVenda * (e.quant - coalesce(e2.consumoVenda, 0) + ajuste) AS precoVenda, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, "
+      "e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS restante, sum(CASE WHEN consumo.status = "
+      "'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' AND e.created < "
+      "'" +
       data +
-      "' GROUP BY e.idEstoque) e "
-      "LEFT JOIN (SELECT consumo.idEstoque, sum(consumo.quant), sum(vp.quant) AS consumoVenda, vp.dataRealEnt FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON "
-      "consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
+      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, sum(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO', vp.quant, 0)) AS consumoVenda, vp.dataRealEnt FROM "
+      "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
       data +
-      "') AND (consumo.status = 'CONSUMO' OR consumo.status = 'PRÉ-CONSUMO' OR consumo.status = "
-      "'AJUSTE') GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
+      "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
       "pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN "
       "nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto LEFT JOIN estoque_has_consumo ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN venda_has_produto "
       "vp ON ehc2.idVendaProduto = vp.idVendaProduto GROUP BY e.idEstoque HAVING contabil > 0");

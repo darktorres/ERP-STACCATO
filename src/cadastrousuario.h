@@ -16,15 +16,6 @@ public:
   ~CadastroUsuario();
   auto modificarUsuario() -> void;
 
-private slots:
-  void fillCombobox();
-  void on_lineEditUser_textEdited(const QString &text);
-  void on_pushButtonAtualizar_clicked();
-  void on_pushButtonBuscar_clicked();
-  void on_pushButtonCadastrar_clicked();
-  void on_pushButtonNovoCad_clicked();
-  void on_pushButtonRemover_clicked();
-
 private:
   // attributes
   SearchDialog *sdUsuario;
@@ -32,15 +23,22 @@ private:
   Ui::CadastroUsuario *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto savingProcedures() -> bool final;
-  auto verifyFields() -> bool final;
-  auto viewRegister() -> bool final;
   auto clearFields() -> void final;
+  auto fillCombobox() -> void;
+  auto on_lineEditUser_textEdited(const QString &text) -> void;
+  auto on_pushButtonAtualizar_clicked() -> void;
+  auto on_pushButtonBuscar_clicked() -> void;
+  auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonNovoCad_clicked() -> void;
+  auto on_pushButtonRemover_clicked() -> void;
   auto registerMode() -> void final;
+  auto savingProcedures() -> bool final;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
 };
 
 #endif // CADASTRARUSUARIO_H

@@ -34,6 +34,14 @@ CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("clien
 
   ui->lineEditCliente->setFocus();
 
+  setConnections();
+
+  on_radioButtonPF_toggled(true);
+}
+
+CadastroCliente::~CadastroCliente() { delete ui; }
+
+void CadastroCliente::setConnections() {
   connect(ui->checkBoxInscEstIsento, &QCheckBox::toggled, this, &CadastroCliente::on_checkBoxInscEstIsento_toggled);
   connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroCliente::on_checkBoxMostrarInativos_clicked);
   connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroCliente::on_lineEditCEP_textChanged);
@@ -53,8 +61,6 @@ CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("clien
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroCliente::on_tableEndereco_clicked);
   connect(ui->tableEndereco, &TableView::entered, this, &CadastroCliente::on_tableEndereco_entered);
 }
-
-CadastroCliente::~CadastroCliente() { delete ui; }
 
 void CadastroCliente::setupUi() {
   ui->lineEditCPF->setInputMask("999.999.999-99;_");

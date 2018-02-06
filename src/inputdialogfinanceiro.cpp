@@ -11,19 +11,27 @@
 #include "ui_inputdialogfinanceiro.h"
 #include "usersession.h"
 
-InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
+InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
 
   setupTables();
 
+  ui->pushButtonAdicionarPagamento->hide();
+  ui->widgetPgts->hide();
+
   ui->frameData->hide();
   ui->frameDataPreco->hide();
-  ui->frameFrete->hide();
   ui->checkBoxMarcarTodos->hide();
   ui->groupBoxFinanceiro->hide();
   ui->framePgtTotal->hide();
+
+  ui->labelAliquota->hide();
+  ui->doubleSpinBoxAliquota->hide();
+  ui->labelSt->hide();
+  ui->doubleSpinBoxSt->hide();
+  ui->dateEditPgtSt->hide();
 
   ui->dateEditEvento->setDate(QDate::currentDate());
   ui->dateEditProximo->setDate(QDate::currentDate());
@@ -32,12 +40,15 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
     ui->frameDataPreco->show();
-    ui->frameFrete->show();
+    ui->frameAdicionais->show();
     ui->checkBoxMarcarTodos->show();
     ui->framePgtTotal->show();
 
     ui->labelEvento->setText("Data confirmação:");
     ui->labelProximoEvento->setText("Data prevista faturamento:");
+
+    ui->pushButtonAdicionarPagamento->show();
+    ui->widgetPgts->show();
   }
 
   if (tipo == Tipo::Financeiro) {
@@ -55,9 +66,11 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
 void InputDialogFinanceiro::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled);
+  connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged);
   connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged);
   connect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged);
   connect(ui->doubleSpinBoxAdicionais, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged);
+  connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
   connect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
   connect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
   connect(ui->doubleSpinBoxTotalPag, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxTotalPag_valueChanged);
@@ -69,9 +82,11 @@ void InputDialogFinanceiro::setConnections() {
 
 void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled);
+  disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged);
   disconnect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged);
   disconnect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged);
   disconnect(ui->doubleSpinBoxAdicionais, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAdicionais_valueChanged);
+  disconnect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
   disconnect(ui->doubleSpinBoxTotalPag, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxTotalPag_valueChanged);
@@ -79,6 +94,27 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonLimparPag_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
+}
+
+void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
+  unsetConnections();
+
+  double total = 0;
+
+  for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
+
+  const double valueSt = total * aliquota / 100;
+
+  ui->doubleSpinBoxSt->setValue(valueSt);
+
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, "aliquotaSt", aliquota)) return;
+  }
+
+  // TODO: adicionar frete/adicionais
+  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+
+  setConnections();
 }
 
 InputDialogFinanceiro::~InputDialogFinanceiro() { delete ui; }
@@ -270,25 +306,17 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
 void InputDialogFinanceiro::calcularTotal() {
   double total = 0;
-  double st = 0;
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &item : list) {
-    const double preco = model.data(item.row(), "preco").toDouble();
-    const QString tipoSt = model.data(item.row(), "st").toString();
-    const double aliquota = model.data(item.row(), "aliquotaSt").toDouble();
-
-    const bool isSt = (tipoSt == "ST Fornecedor" or tipoSt == "ST Loja");
-
-    st += isSt ? preco * aliquota / 100 : 0;
-    total += preco;
-  }
+  for (const auto &item : list) total += model.data(item.row(), "preco").toDouble();
 
   total -= ui->doubleSpinBoxAdicionais->value();
+  // TODO: somar frete?
 
-  ui->doubleSpinBoxSt->setValue(st);
-  ui->doubleSpinBoxTotal->setValue(total);
+  ui->doubleSpinBoxTotal->setValue(total + ui->doubleSpinBoxSt->value());
+
+  ui->doubleSpinBoxSt->setMaximum(total * 0.2);
 }
 
 void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
@@ -336,6 +364,34 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   ui->table->resizeColumnsToContents();
 
+  // TODO: verificar se aqui é o lugar correto
+
+  unsetConnections();
+
+  const QString tipoSt = model.data(0, "st").toString();
+  const double aliquotaSt = model.data(0, "aliquotaSt").toDouble();
+
+  ui->comboBoxST->setCurrentText(tipoSt);
+
+  if (tipoSt == "ST Fornecedor" or tipoSt == "ST Loja") {
+    ui->labelAliquota->show();
+    ui->doubleSpinBoxAliquota->show();
+    ui->labelSt->show();
+    ui->doubleSpinBoxSt->show();
+    ui->dateEditPgtSt->show();
+  }
+
+  ui->doubleSpinBoxAliquota->setValue(aliquotaSt);
+
+  double total = 0;
+
+  for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
+
+  ui->doubleSpinBoxSt->setValue(total * aliquotaSt / 100);
+
+  setConnections();
+  //
+
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
 
@@ -344,7 +400,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
       return false;
     }
 
-    calcularTotal();
+    //    calcularTotal();
 
     ui->checkBoxMarcarTodos->setChecked(true);
 
@@ -366,7 +422,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   if (representacao) {
     ui->framePagamentos->hide();
-    ui->frameFrete->hide();
+    //    ui->frameFrete->hide();
   }
 
   setWindowTitle("OC: " + model.data(0, "ordemCompra").toString());
@@ -494,6 +550,8 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
   //  ui->framePgt4->show();
   //  ui->framePgt5->show();
   ui->framePgtTotal->show();
+  ui->pushButtonAdicionarPagamento->show();
+  ui->widgetPgts->show();
 
   //
 
@@ -643,4 +701,53 @@ void InputDialogFinanceiro::on_doubleSpinBoxTotalPag_valueChanged(double) {
 // TODO: ?colocar formas de pagamento 4 e 5
 // TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
 
-void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(double) { montarFluxoCaixa(); }
+void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(double valueSt) {
+  unsetConnections();
+
+  double total = 0;
+
+  for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
+
+  const double aliquota = valueSt * 100 / total;
+
+  ui->doubleSpinBoxAliquota->setValue(aliquota);
+
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, "aliquotaSt", aliquota)) return;
+  }
+
+  // TODO: adicionar frete/adicionais
+  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+
+  setConnections();
+
+  montarFluxoCaixa();
+}
+
+void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text) {
+  if (text == "Sem ST") {
+    ui->doubleSpinBoxSt->setValue(0);
+
+    ui->labelAliquota->hide();
+    ui->doubleSpinBoxAliquota->hide();
+    ui->labelSt->hide();
+    ui->doubleSpinBoxSt->hide();
+    ui->dateEditPgtSt->hide();
+  }
+
+  if (text == "ST Fornecedor" or text == "ST Loja") {
+    ui->doubleSpinBoxAliquota->setValue(4.65);
+
+    ui->labelAliquota->show();
+    ui->doubleSpinBoxAliquota->show();
+    ui->labelSt->show();
+    ui->doubleSpinBoxSt->show();
+    ui->dateEditPgtSt->show();
+  }
+
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, "st", text)) return;
+  }
+
+  montarFluxoCaixa();
+}

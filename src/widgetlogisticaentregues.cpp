@@ -9,7 +9,12 @@
 #include "vendaproxymodel.h"
 #include "widgetlogisticaentregues.h"
 
-WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
+WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregues) {
+  ui->setupUi(this);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaEntregues::on_pushButtonCancelar_clicked);
+  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaEntregues::on_tableVendas_clicked);
+}
 
 WidgetLogisticaEntregues::~WidgetLogisticaEntregues() { delete ui; }
 

@@ -8,13 +8,13 @@ class SqlRelationalTableModel final : public QSqlRelationalTableModel {
 
 public:
   explicit SqlRelationalTableModel(const int limit = 0, QObject *parent = nullptr);
-  [[nodiscard]] bool setData(const int row, const int column, const QVariant &value);
-  [[nodiscard]] bool setData(const int row, const QString &column, const QVariant &value);
-  bool setHeaderData(const QString &column, const QVariant &value);
-  QVariant data(const int row, const int column) const;
-  QVariant data(const int row, const QString &column) const;
-  Qt::DropActions supportedDropActions() const final;
-  Qt::ItemFlags flags(const QModelIndex &index) const final;
+  [[nodiscard]] auto setData(const int row, const int column, const QVariant &value) -> bool;
+  [[nodiscard]] auto setData(const int row, const QString &column, const QVariant &value) -> bool;
+  auto setHeaderData(const QString &column, const QVariant &value) -> bool;
+  auto data(const int row, const int column) const -> QVariant;
+  auto data(const int row, const QString &column) const -> QVariant;
+  auto supportedDropActions() const -> Qt::DropActions final;
+  auto flags(const QModelIndex &index) const -> Qt::ItemFlags final;
 
 signals:
   void errorSignal(const QString &error) const;
@@ -25,8 +25,10 @@ private:
   using QSqlRelationalTableModel::setHeaderData;
 
 protected:
-  QString selectStatement() const final;
+  // attributes
   const int limit;
+  // methods
+  auto selectStatement() const -> QString final;
 };
 
 #endif // SQLTABLEMODEL_H

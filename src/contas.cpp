@@ -16,7 +16,7 @@
 #include "reaisdelegate.h"
 #include "ui_contas.h"
 
-Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
+Contas::Contas(const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -25,6 +25,9 @@ Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), 
 
   showMaximized();
 
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
+  connect(ui->tablePendentes, &TableView::entered, this, &Contas::on_tablePendentes_entered);
+  connect(ui->tableProcessados, &TableView::entered, this, &Contas::on_tableProcessados_entered);
   connect(&modelPendentes, &QSqlTableModel::dataChanged, this, &Contas::preencher);
   connect(&modelPendentes, &QSqlTableModel::dataChanged, this, &Contas::validarData);
 }

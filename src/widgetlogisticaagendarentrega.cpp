@@ -15,7 +15,7 @@
 #include "usersession.h"
 #include "widgetlogisticaagendarentrega.h"
 
-WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarEntrega) {
+WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaAgendarEntrega) {
   ui->setupUi(this);
 
   if (UserSession::tipoUsuario() == "VENDEDOR") {
@@ -27,8 +27,19 @@ WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : 
 
   ui->dateTimeEdit->setDate(QDate::currentDate());
 
-  connect(ui->dateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, &WidgetLogisticaAgendarEntrega::calcularDisponivel);
   connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged);
+  connect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked);
+  connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked);
+  connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked);
+  connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
+  connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked);
+  connect(ui->tableProdutos, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_entered);
+  connect(ui->tableTransp2, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableTransp2_entered);
+  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked);
+  connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked);
+  connect(ui->tableVendas, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_entered);
 }
 
 WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
@@ -434,10 +445,16 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   for (const auto &item : list) {
     const int idVendaProduto = modelViewProdutos.data(item.row(), "idVendaProduto").toInt();
 
-    auto listMatch = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
+    // TODO: verificar se nao precisa usar 'matchExact'
+    const auto listMatch = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
 
     if (listMatch.size() > 0) {
       QMessageBox::critical(this, "Erro!", "Item já inserido!");
+      return;
+    }
+
+    if (modelViewProdutos.data(item.row(), "status").toString() != "ESTOQUE") {
+      QMessageBox::critical(this, "Erro!", "Produto não está em estoque!");
       return;
     }
 
@@ -552,10 +569,15 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   const int idVendaProduto = modelViewProdutos.data(row, "idVendaProduto").toInt();
 
-  auto list2 = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
+  const auto list2 = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
 
   if (list2.size() > 0) {
     QMessageBox::critical(this, "Erro!", "Item já inserido!");
+    return;
+  }
+
+  if (modelViewProdutos.data(row, "status").toString() != "ESTOQUE") {
+    QMessageBox::critical(this, "Erro!", "Produto não está em estoque!");
     return;
   }
 
@@ -739,7 +761,8 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   // alterar quant, caixas, valor
 
   const double quantConsumo = modelConsumo.data(0, "quant").toDouble() * proporcao;
-  const int caixasConsumo = modelConsumo.data(0, "caixas").toInt() * proporcao; // REFAC: redo those to double
+  // REFAC: redo those to double
+  const int caixasConsumo = modelConsumo.data(0, "caixas").toInt() * proporcao;
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble() * proporcao;
 
   if (not modelConsumo.setData(0, "quant", quantConsumo)) return false;
@@ -748,6 +771,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
   // alterar linha nova
   const double quantConsumo2 = modelConsumo.data(rowConsumo, "quant").toDouble() * proporcaoNovo;
+  // REFAC: redo those to double
   const int caixasConsumo2 = modelConsumo.data(rowConsumo, "caixas").toInt() * proporcaoNovo;
   const double valorConsumo2 = modelConsumo.data(rowConsumo, "valor").toDouble() * proporcaoNovo;
 

@@ -83,7 +83,7 @@
            <bool>true</bool>
           </property>
           <property name="text">
-           <string>Processado</string>
+           <string>Devolvido</string>
           </property>
          </widget>
         </item>

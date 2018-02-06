@@ -1,15 +1,14 @@
 #ifndef BAIXAORCAMENTO_H
 #define BAIXAORCAMENTO_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class BaixaOrcamento;
 }
 
-class BaixaOrcamento final : public QDialog {
+class BaixaOrcamento final : public Dialog {
   Q_OBJECT
 
 public:

@@ -2,28 +2,23 @@
 #define CADASTRARNFE_H
 
 #include <QDataWidgetMapper>
-#include <QDialog>
 #include <QSqlQuery>
 #include <QTextStream>
 
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class CadastrarNFe;
 }
 
-class CadastrarNFe final : public QDialog {
+class CadastrarNFe final : public Dialog {
   Q_OBJECT
 
 public:
   explicit CadastrarNFe(const QString &idVenda, QWidget *parent = nullptr);
   ~CadastrarNFe();
   auto prepararNFe(const QList<int> &items) -> void;
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private:
   // attributes

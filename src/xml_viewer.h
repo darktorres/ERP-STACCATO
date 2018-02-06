@@ -1,14 +1,15 @@
 #ifndef XML_VIEWER_H
 #define XML_VIEWER_H
 
-#include <QDialog>
+#include "dialog.h"
+
 #include <QStandardItemModel>
 
 namespace Ui {
 class XML_Viewer;
 }
 
-class XML_Viewer final : public QDialog {
+class XML_Viewer final : public Dialog {
   Q_OBJECT
 
 public:

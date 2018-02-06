@@ -1,15 +1,14 @@
 #ifndef ANTECIPARRECEBIMENTO_H
 #define ANTECIPARRECEBIMENTO_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class AnteciparRecebimento;
 }
 
-class AnteciparRecebimento final : public QDialog {
+class AnteciparRecebimento final : public Dialog {
   Q_OBJECT
 
 public:

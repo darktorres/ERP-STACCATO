@@ -10,7 +10,7 @@
 #include "venda.h"
 #include "widgetlogisticacoleta.h"
 
-WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) {
+WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaColeta) {
   ui->setupUi(this);
 
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked);
@@ -274,10 +274,6 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
-
-      connect(venda, &Venda::errorSignal, this, &WidgetLogisticaColeta::errorSignal);
-      connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaColeta::transactionStarted);
-      connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaColeta::transactionEnded);
     }
   }
 }

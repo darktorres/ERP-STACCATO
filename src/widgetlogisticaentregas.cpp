@@ -22,8 +22,20 @@
 #include "widgetlogisticaentregas.h"
 #include "xlsxdocument.h"
 
-WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
+WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
+
+  connect(ui->lineEditBuscar, &QLineEdit::textChanged, this, &WidgetLogisticaEntregas::on_lineEditBuscar_textChanged);
+  connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked);
+  connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked);
+  connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked);
+  connect(ui->pushButtonGerarNFeEntregar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked);
+  connect(ui->pushButtonImprimirDanfe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked);
+  connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked);
+  connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked);
+  connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked);
+  connect(ui->tableCarga, &TableView::entered, this, &WidgetLogisticaEntregas::on_tableCarga_entered);
 
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
@@ -216,10 +228,6 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
   auto *nfe = new CadastrarNFe(idVenda, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
   nfe->prepararNFe(lista);
-
-  connect(nfe, &CadastrarNFe::errorSignal, this, &WidgetLogisticaEntregas::errorSignal);
-  connect(nfe, &CadastrarNFe::transactionStarted, this, &WidgetLogisticaEntregas::transactionStarted);
-  connect(nfe, &CadastrarNFe::transactionEnded, this, &WidgetLogisticaEntregas::transactionEnded);
 
   nfe->show();
 }

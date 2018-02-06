@@ -29,9 +29,9 @@
  ****************************************************************************/
 #include <QLocale>
 #include <QMessageBox>
+#include <QScriptEngine>
 #include <QTextLayout>
 #include <QtGui>
-#include <QtScript/QScriptEngine>
 #include <math.h>
 
 #include "lrdatasourcemanager.h"

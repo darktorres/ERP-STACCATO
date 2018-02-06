@@ -22,6 +22,8 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   setupTables();
 
+  connect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked);
+
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
@@ -772,10 +774,6 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
   auto *venda = new Venda(parentWidget());
   venda->prepararVenda(ui->lineEditOrcamento->text());
 
-  connect(venda, &Venda::errorSignal, this, &Orcamento::errorSignal);
-  connect(venda, &Venda::transactionStarted, this, &Orcamento::transactionStarted);
-  connect(venda, &Venda::transactionEnded, this, &Orcamento::transactionEnded);
-
   close();
 }
 
@@ -920,10 +918,6 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
 void Orcamento::on_pushButtonReplicar_clicked() {
   auto *replica = new Orcamento(parentWidget());
 
-  connect(replica, &Orcamento::errorSignal, this, &Orcamento::errorSignal);
-  connect(replica, &Orcamento::transactionStarted, this, &Orcamento::transactionStarted);
-  connect(replica, &Orcamento::transactionEnded, this, &Orcamento::transactionEnded);
-
   replica->ui->pushButtonReplicar->hide();
 
   replica->ui->itemBoxCliente->setValue(data("idCliente"));
@@ -1005,10 +999,6 @@ bool Orcamento::verificaCadastroCliente() {
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
 
-    connect(cadCliente, &CadastroCliente::errorSignal, this, &Orcamento::errorSignal);
-    connect(cadCliente, &CadastroCliente::transactionStarted, this, &Orcamento::transactionStarted);
-    connect(cadCliente, &CadastroCliente::transactionEnded, this, &Orcamento::transactionEnded);
-
     cadCliente->show();
     return false;
   }
@@ -1027,10 +1017,6 @@ bool Orcamento::verificaCadastroCliente() {
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
 
-    connect(cadCliente, &CadastroCliente::errorSignal, this, &Orcamento::errorSignal);
-    connect(cadCliente, &CadastroCliente::transactionStarted, this, &Orcamento::transactionStarted);
-    connect(cadCliente, &CadastroCliente::transactionEnded, this, &Orcamento::transactionEnded);
-
     cadCliente->show();
     return false;
   }
@@ -1047,10 +1033,6 @@ bool Orcamento::verificaCadastroCliente() {
     QMessageBox::critical(this, "Erro!", "Cadastro incompleto, deve terminar!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
-
-    connect(cadCliente, &CadastroCliente::errorSignal, this, &Orcamento::errorSignal);
-    connect(cadCliente, &CadastroCliente::transactionStarted, this, &Orcamento::transactionStarted);
-    connect(cadCliente, &CadastroCliente::transactionEnded, this, &Orcamento::transactionEnded);
 
     cadCliente->show();
     return false;

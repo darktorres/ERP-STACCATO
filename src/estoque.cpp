@@ -11,7 +11,7 @@
 #include "ui_estoque.h"
 #include "xml_viewer.h"
 
-Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
+Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : Dialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -93,8 +93,8 @@ void Estoque::setupTables() {
   modelViewConsumo.setTable("view_estoque_consumo");
   modelViewConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelViewConsumo.setHeaderData("statusProduto", "Pedido");
-  modelViewConsumo.setHeaderData("status", "Status");
+  modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
+  modelViewConsumo.setHeaderData("status", "Status Consumo");
   modelViewConsumo.setHeaderData("ordemCompra", "OC");
   modelViewConsumo.setHeaderData("local", "Local");
   modelViewConsumo.setHeaderData("fornecedor", "Fornecedor");
@@ -103,6 +103,7 @@ void Estoque::setupTables() {
   modelViewConsumo.setHeaderData("un", "Un.");
   modelViewConsumo.setHeaderData("caixas", "Caixas");
   modelViewConsumo.setHeaderData("codComercial", "Cód. Com.");
+  modelViewConsumo.setHeaderData("dataRealEnt", "Entrega");
   modelViewConsumo.setHeaderData("created", "Criado");
 
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelViewConsumo, this));

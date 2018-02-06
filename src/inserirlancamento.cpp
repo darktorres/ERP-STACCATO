@@ -14,8 +14,12 @@
 #include "reaisdelegate.h"
 #include "ui_inserirlancamento.h"
 
-InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
+InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InserirLancamento) {
   ui->setupUi(this);
+
+  connect(ui->pushButtonCriarLancamento, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonCriarLancamento_clicked);
+  connect(ui->pushButtonDuplicarLancamento, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonDuplicarLancamento_clicked);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirLancamento::on_pushButtonSalvar_clicked);
 
   setWindowFlags(Qt::Window);
 

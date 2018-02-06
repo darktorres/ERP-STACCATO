@@ -20,20 +20,8 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : Widget(parent), ui(new Ui::W
 WidgetLogistica::~WidgetLogistica() { delete ui; }
 
 void WidgetLogistica::setConnections() {
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::errorSignal, this, &WidgetLogistica::errorSignal);
-
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::transactionStarted, this, &WidgetLogistica::transactionStarted);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::transactionStarted, this, &WidgetLogistica::transactionStarted);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::transactionStarted, this, &WidgetLogistica::transactionStarted);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::transactionStarted, this, &WidgetLogistica::transactionStarted);
-
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::transactionEnded, this, &WidgetLogistica::transactionEnded);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::transactionEnded, this, &WidgetLogistica::transactionEnded);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::transactionEnded, this, &WidgetLogistica::transactionEnded);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::transactionEnded, this, &WidgetLogistica::transactionEnded);
+  connect(ui->tableForn, &TableView::activated, this, &WidgetLogistica::on_tableForn_activated);
+  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged);
 }
 
 bool WidgetLogistica::updateTables() {

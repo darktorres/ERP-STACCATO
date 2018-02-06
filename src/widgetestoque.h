@@ -15,12 +15,7 @@ class WidgetEstoque final : public Widget {
 public:
   explicit WidgetEstoque(QWidget *parent = nullptr);
   ~WidgetEstoque();
-  bool updateTables();
-
-private slots:
-  void on_table_activated(const QModelIndex &index);
-  void on_table_entered(const QModelIndex &);
-  void on_pushButtonRelatorio_clicked();
+  auto updateTables() -> bool;
 
 private:
   // attributes
@@ -35,8 +30,11 @@ private:
   SqlQueryModel model;
   Ui::WidgetEstoque *ui;
   // methods
-  bool setupTables();
-  void montaFiltro();
+  auto montaFiltro() -> void;
+  auto on_pushButtonRelatorio_clicked() -> void;
+  auto on_table_activated(const QModelIndex &index) -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
+  auto setupTables() -> bool;
 };
 
 #endif // WIDGETESTOQUE_H

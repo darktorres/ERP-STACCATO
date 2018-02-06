@@ -11,7 +11,17 @@
 #include "venda.h"
 #include "widgetlogisticarecebimento.h"
 
-WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
+WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRecebimento) {
+  ui->setupUi(this);
+
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked);
+  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonVenda_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetLogisticaRecebimento::on_table_entered);
+}
 
 WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
 
@@ -261,10 +271,6 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
-
-      connect(venda, &Venda::errorSignal, this, &WidgetLogisticaRecebimento::errorSignal);
-      connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaRecebimento::transactionStarted);
-      connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaRecebimento::transactionEnded);
     }
   }
 }

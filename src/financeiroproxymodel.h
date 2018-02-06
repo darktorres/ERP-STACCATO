@@ -10,7 +10,7 @@ class FinanceiroProxyModel final : public QIdentityProxyModel {
 public:
   FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~FinanceiroProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, int role) const;
+  auto data(const QModelIndex &proxyIndex, int role) const -> QVariant;
 
 private:
   const int statusFinanceiro;

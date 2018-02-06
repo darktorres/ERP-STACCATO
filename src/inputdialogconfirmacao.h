@@ -1,15 +1,14 @@
 #ifndef INPUTDIALOGCONFIRMACAO_H
 #define INPUTDIALOGCONFIRMACAO_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogConfirmacao;
 }
 
-class InputDialogConfirmacao final : public QDialog {
+class InputDialogConfirmacao final : public Dialog {
   Q_OBJECT
 
 public:
@@ -17,25 +16,12 @@ public:
 
   explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent = nullptr);
   ~InputDialogConfirmacao() final;
-  QDateTime getDateTime() const;
-  QDateTime getNextDateTime() const;
-  QString getRecebeu() const;
-  QString getEntregou() const;
-  bool setFilter(const QStringList &ids);
-  // TODO: convert functions to trailing return syntax?
-  //  auto setFilter(const QStringList &ids) -> bool;
-  bool setFilter(const QString &id, const QString &idEvento);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_dateEditEvento_dateChanged(const QDate &date);
-  void on_pushButtonFaltando_clicked();
-  void on_pushButtonQuebrado_clicked();
-  void on_pushButtonSalvar_clicked();
+  auto getDateTime() const -> QDateTime;
+  auto getEntregou() const -> QString;
+  auto getNextDateTime() const -> QDateTime;
+  auto getRecebeu() const -> QString;
+  auto setFilter(const QString &id, const QString &idEvento) -> bool;
+  auto setFilter(const QStringList &ids) -> bool;
 
 private:
   // attributes
@@ -51,16 +37,20 @@ private:
   //
 
   // methods
-  bool cadastrar();
-  bool criarConsumo(const int row);
-  bool criarReposicaoCliente();
-  bool desfazerConsumo(const int idEstoque);
-  bool gerarCreditoCliente();
-  bool processarQuebra(const int row);
-  bool quebraEntrega(const int row);
-  bool quebraRecebimento(const int row);
-  bool quebrarLinha(const int row, const int caixas);
-  void setupTables();
+  auto cadastrar() -> bool;
+  auto criarConsumo(const int row) -> bool;
+  auto criarReposicaoCliente() -> bool;
+  auto desfazerConsumo(const int idEstoque) -> bool;
+  auto gerarCreditoCliente() -> bool;
+  auto processarQuebra(const int row) -> bool;
+  auto quebraEntrega(const int row) -> bool;
+  auto quebraRecebimento(const int row) -> bool;
+  auto quebrarLinha(const int row, const int caixas) -> bool;
+  auto setupTables() -> void;
+  void on_dateEditEvento_dateChanged(const QDate &date);
+  void on_pushButtonFaltando_clicked();
+  void on_pushButtonQuebrado_clicked();
+  void on_pushButtonSalvar_clicked();
 };
 
 #endif // INPUTDIALOGCONFIRMACAO_H

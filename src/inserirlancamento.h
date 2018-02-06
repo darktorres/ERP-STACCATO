@@ -1,15 +1,14 @@
 #ifndef INSERIRLANCAMENTO_H
 #define INSERIRLANCAMENTO_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InserirLancamento;
 }
 
-class InserirLancamento final : public QDialog {
+class InserirLancamento final : public Dialog {
   Q_OBJECT
 
 public:
@@ -17,20 +16,18 @@ public:
   explicit InserirLancamento(const Tipo tipo, QWidget *parent = nullptr);
   ~InserirLancamento();
 
-private slots:
-  void on_pushButtonCriarLancamento_clicked();
-  void on_pushButtonDuplicarLancamento_clicked();
-  void on_pushButtonSalvar_clicked();
-
 private:
   // attributes
   const Tipo tipo;
   SqlRelationalTableModel model;
   Ui::InserirLancamento *ui;
   // methods
+  auto on_pushButtonCriarLancamento_clicked() -> void;
+  auto on_pushButtonDuplicarLancamento_clicked() -> void;
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto openPersistentEditor() -> void;
   auto setupTables() -> void;
   auto verifyFields() -> bool;
-  auto openPersistentEditor() -> void;
 };
 
 #endif // INSERIRLANCAMENTO_H

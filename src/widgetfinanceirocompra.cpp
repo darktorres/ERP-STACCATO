@@ -6,7 +6,13 @@
 #include "ui_widgetfinanceirocompra.h"
 #include "widgetfinanceirocompra.h"
 
-WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
+WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroCompra) {
+  ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged);
+  connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetFinanceiroCompra::on_table_entered);
+}
 
 WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 

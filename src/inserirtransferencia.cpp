@@ -5,8 +5,11 @@
 #include "inserirtransferencia.h"
 #include "ui_inserirtransferencia.h"
 
-InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
+InserirTransferencia::InserirTransferencia(QWidget *parent) : Dialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked);
 
   setupTables();
 

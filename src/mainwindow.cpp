@@ -29,6 +29,25 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+  connect(ui->actionCadastrarCliente, &QAction::triggered, this, &MainWindow::on_actionCadastrarCliente_triggered);
+  connect(ui->actionCadastrarFornecedor, &QAction::triggered, this, &MainWindow::on_actionCadastrarFornecedor_triggered);
+  connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered);
+  connect(ui->actionCadastrarProfissional, &QAction::triggered, this, &MainWindow::on_actionCadastrarProfissional_triggered);
+  connect(ui->actionCadastrarUsuario, &QAction::triggered, this, &MainWindow::on_actionCadastrarUsuario_triggered);
+  connect(ui->actionCalculadora, &QAction::triggered, this, &MainWindow::on_actionCalculadora_triggered);
+  connect(ui->actionClaro, &QAction::triggered, this, &MainWindow::on_actionClaro_triggered);
+  connect(ui->actionConfiguracoes, &QAction::triggered, this, &MainWindow::on_actionConfiguracoes_triggered);
+  connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
+  connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
+  connect(ui->actionEstoque, &QAction::triggered, this, &MainWindow::on_actionEstoque_triggered);
+  connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
+  connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
+  connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
+  connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
+  connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered);
+  connect(ui->actionSobre, &QAction::triggered, this, &MainWindow::on_actionSobre_triggered);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::on_tabWidget_currentChanged);
+
   setWindowIcon(QIcon("Staccato.ico"));
   setWindowTitle("ERP Staccato");
 
@@ -416,3 +435,4 @@ void MainWindow::on_actionGerenciar_preco_estoque_triggered() {
 // TODO: na reposicao concatenar '(REPOSICAO)' no comeco da descricao do produto
 // REFAC: make a code that checks if the program is inside a transaction and if it is it postpones showing error messages
 // TODO: diff defaultPalette and darkPalette to find the stuff that is missing implementing
+// TODO: verificar no banco de dados as tabelas que usam coluna 'caixas', tem varias linhas com casas decimais (4.999999999), verificar os calculos

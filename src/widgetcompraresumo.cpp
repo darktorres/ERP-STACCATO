@@ -3,7 +3,7 @@
 #include "ui_widgetcompraresumo.h"
 #include "widgetcompraresumo.h"
 
-WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraResumo) {
+WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraResumo) {
   ui->setupUi(this);
 
   setupTables();

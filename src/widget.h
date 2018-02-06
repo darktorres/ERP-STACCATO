@@ -9,6 +9,11 @@ class Widget : public QWidget {
 public:
   explicit Widget(QWidget *parent = nullptr);
 
+  Widget(Widget const &) = delete;
+  Widget(Widget &&) = delete;
+  Widget &operator=(Widget const &) = delete;
+  Widget &operator=(Widget &&) = delete;
+
 signals:
   void errorSignal(const QString &error);
   void transactionEnded();

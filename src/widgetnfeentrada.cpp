@@ -8,7 +8,7 @@
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
 
-WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) {
+WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeEntrada) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);

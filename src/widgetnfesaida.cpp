@@ -18,7 +18,7 @@
 #include "widgetnfesaida.h"
 #include "xml_viewer.h"
 
-WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) {
+WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeSaida) {
   ui->setupUi(this);
 
   ui->dateEdit->setDate(QDate::currentDate());

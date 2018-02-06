@@ -34,12 +34,12 @@
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlQueryModel>
 
 #include "lrconnectiondialog.h"
 #include "lrdatabrowser.h"

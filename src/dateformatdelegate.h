@@ -9,10 +9,10 @@ class DateFormatDelegate final : public QStyledItemDelegate {
 public:
   explicit DateFormatDelegate(QObject *parent = nullptr);
   ~DateFormatDelegate() = default;
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &) const final;
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &) const -> QWidget * final;
 
 private:
-  QString displayText(const QVariant &value, const QLocale &) const final;
+  auto displayText(const QVariant &value, const QLocale &) const -> QString final;
 };
 
 #endif // DATEFORMATDELEGATE_H

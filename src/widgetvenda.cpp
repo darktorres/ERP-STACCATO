@@ -178,10 +178,6 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) vendas->setFinanceiro();
   vendas->viewRegisterById(model.data(index.row(), "Código"));
-
-  connect(vendas, &Venda::errorSignal, this, &WidgetVenda::errorSignal);
-  connect(vendas, &Venda::transactionStarted, this, &WidgetVenda::transactionStarted);
-  connect(vendas, &Venda::transactionEnded, this, &WidgetVenda::transactionEnded);
 }
 
 void WidgetVenda::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
@@ -230,3 +226,5 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
     child->setChecked(enabled);
   }
 }
+
+// TODO: verificar os pedidos de devolucao que estao com o status errado (update_venda_status)

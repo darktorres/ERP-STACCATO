@@ -7,7 +7,14 @@
 #include "ui_widgetlogisticacalendario.h"
 #include "widgetlogisticacalendario.h"
 
-WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
+WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCalendario) {
+  ui->setupUi(this);
+
+  connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
+  connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
+  connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked);
+  connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked);
+}
 
 WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 

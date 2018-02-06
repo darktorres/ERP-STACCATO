@@ -5,8 +5,13 @@
 #include "ui_logindialog.h"
 #include "usersession.h"
 
-LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
+LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
+
+  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged);
+  connect(ui->lineEditHostname, &QLineEdit::textChanged, this, &LoginDialog::on_lineEditHostname_textChanged);
+  connect(ui->pushButtonConfig, &QPushButton::clicked, this, &LoginDialog::on_pushButtonConfig_clicked);
+  connect(ui->pushButtonLogin, &QPushButton::clicked, this, &LoginDialog::on_pushButtonLogin_clicked);
 
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
@@ -32,11 +37,6 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
     ui->lineEditUser->setFocus();
     setWindowTitle("Autorização");
   }
-
-  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged);
-  connect(ui->lineEditHostname, &QLineEdit::textChanged, this, &LoginDialog::on_lineEditHostname_textChanged);
-  connect(ui->pushButtonConfig, &QPushButton::clicked, this, &LoginDialog::on_pushButtonConfig_clicked);
-  connect(ui->pushButtonLogin, &QPushButton::clicked, this, &LoginDialog::on_pushButtonLogin_clicked);
 
   adjustSize();
   accept();

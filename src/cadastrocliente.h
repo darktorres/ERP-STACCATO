@@ -13,7 +13,7 @@ class CadastroCliente final : public RegisterAddressDialog {
 
 public:
   explicit CadastroCliente(QWidget *parent = nullptr);
-  ~CadastroCliente();
+  ~CadastroCliente() final;
 
 private:
   // attributes
@@ -54,6 +54,7 @@ private:
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
+  auto setConnections() -> void;
 };
 
 #endif // CADASTROCLIENTE_H

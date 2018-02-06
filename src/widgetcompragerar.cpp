@@ -16,8 +16,15 @@
 #include "widgetcompragerar.h"
 #include "xlsxdocument.h"
 
-WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraGerar) {
+WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);
+
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
+  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraGerar::on_checkBoxMostrarSul_toggled);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
+  connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
+  connect(ui->tableProdutos, &TableView::entered, this, &WidgetCompraGerar::on_tableProdutos_entered);
+  connect(ui->tableResumo, &TableView::activated, this, &WidgetCompraGerar::on_tableResumo_activated);
 
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);

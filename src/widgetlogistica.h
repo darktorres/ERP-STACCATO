@@ -14,18 +14,16 @@ class WidgetLogistica final : public Widget {
 public:
   explicit WidgetLogistica(QWidget *parent = nullptr);
   ~WidgetLogistica();
-  bool updateTables();
-
-private slots:
-  void on_tableForn_activated(const QModelIndex &index);
-  void on_tabWidgetLogistica_currentChanged(const int);
+  auto updateTables() -> bool;
 
 private:
   // attributes
   SqlRelationalTableModel model;
   Ui::WidgetLogistica *ui;
   // methods
-  void setConnections();
+  auto setConnections() -> void;
+  auto on_tableForn_activated(const QModelIndex &index) -> void;
+  auto on_tabWidgetLogistica_currentChanged(const int) -> void;
 };
 
 #endif // WIDGETLOGISTICA_H

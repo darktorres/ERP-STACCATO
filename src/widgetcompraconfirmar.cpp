@@ -9,8 +9,13 @@
 #include "ui_widgetcompraconfirmar.h"
 #include "widgetcompraconfirmar.h"
 
-WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {
+WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraConfirmar) {
   ui->setupUi(this);
+
+  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked);
+  connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraConfirmar::on_table_entered);
 
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
@@ -60,6 +65,8 @@ bool WidgetCompraConfirmar::updateTables() {
 }
 
 void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
+  // TODO: ao preencher na tabela de compras colocar o grupo como 'produto/venda'
+
   if (ui->table->selectionModel()->selectedRows().isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
     return;

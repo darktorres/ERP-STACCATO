@@ -6,7 +6,12 @@
 #include "ui_widgetlogisticacaminhao.h"
 #include "widgetlogisticacaminhao.h"
 
-WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
+WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCaminhao) {
+  ui->setupUi(this);
+
+  connect(ui->table, &TableView::clicked, this, &WidgetLogisticaCaminhao::on_table_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetLogisticaCaminhao::on_table_entered);
+}
 
 WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }
 

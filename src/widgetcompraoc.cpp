@@ -8,7 +8,17 @@
 #include "ui_widgetcompraoc.h"
 #include "widgetcompraoc.h"
 
-WidgetCompraOC::WidgetCompraOC(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
+WidgetCompraOC::WidgetCompraOC(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraOC) {
+  ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraOC::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDanfe_clicked);
+  connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked);
+  connect(ui->tableNFe, &TableView::entered, this, &WidgetCompraOC::on_tableNFe_entered);
+  connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraOC::on_tablePedido_clicked);
+  connect(ui->tablePedido, &TableView::entered, this, &WidgetCompraOC::on_tablePedido_entered);
+  connect(ui->tableProduto, &TableView::entered, this, &WidgetCompraOC::on_tableProduto_entered);
+}
 
 WidgetCompraOC::~WidgetCompraOC() { delete ui; }
 

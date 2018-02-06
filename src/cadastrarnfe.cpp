@@ -11,7 +11,7 @@
 #include "ui_cadastrarnfe.h"
 #include "usersession.h"
 
-CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
+CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : Dialog(parent), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);

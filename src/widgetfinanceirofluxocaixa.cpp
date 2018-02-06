@@ -9,7 +9,16 @@
 #include "ui_widgetfinanceirofluxocaixa.h"
 #include "widgetfinanceirofluxocaixa.h"
 
-WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
+WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) {
+  ui->setupUi(this);
+
+  connect(ui->groupBoxCaixa1, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled);
+  connect(ui->groupBoxCaixa2, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled);
+  connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated);
+  connect(ui->tableCaixa, &TableView::entered, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered);
+  connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated);
+  connect(ui->tableCaixa2, &TableView::entered, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_entered);
+}
 
 WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
 

@@ -9,6 +9,11 @@ class Dialog : public QDialog {
 public:
   explicit Dialog(QWidget *parent);
 
+  Dialog(Dialog const &) = delete;
+  Dialog(Dialog &&) = delete;
+  Dialog &operator=(Dialog const &) = delete;
+  Dialog &operator=(Dialog &&) = delete;
+
 signals:
   void errorSignal(const QString &error);
   void transactionEnded();

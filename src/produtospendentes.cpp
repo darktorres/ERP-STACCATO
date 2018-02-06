@@ -13,13 +13,16 @@
 #include "reaisdelegate.h"
 #include "ui_produtospendentes.h"
 
-ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
+ProdutosPendentes::ProdutosPendentes(QWidget *parent) : Dialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
 
   setupTables();
 
+  connect(ui->pushButtonComprar, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonComprar_clicked);
+  connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked);
+  connect(ui->tableProdutos, &TableView::entered, this, &ProdutosPendentes::on_tableProdutos_entered);
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
 
   show();

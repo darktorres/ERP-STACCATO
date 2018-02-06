@@ -1,31 +1,27 @@
 #ifndef WIDGETCOMPRARESUMO_H
 #define WIDGETCOMPRARESUMO_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetCompraResumo;
 }
 
-class WidgetCompraResumo : public QWidget {
+class WidgetCompraResumo : public Widget {
   Q_OBJECT
 
 public:
   explicit WidgetCompraResumo(QWidget *parent = nullptr);
   ~WidgetCompraResumo();
-  bool updateTables();
-
-signals:
-  void errorSignal(const QString &error);
+  auto updateTables() -> bool;
 
 private:
   // attributes
   Ui::WidgetCompraResumo *ui;
   SqlRelationalTableModel modelResumo;
   // methods
-  void setupTables();
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETCOMPRARESUMO_H

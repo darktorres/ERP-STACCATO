@@ -9,7 +9,13 @@
 #include "ui_widgetlogisticarepresentacao.h"
 #include "widgetlogisticarepresentacao.h"
 
-WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
+WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRepresentacao) {
+  ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetLogisticaRepresentacao::on_table_entered);
+}
 
 WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 

@@ -1,26 +1,20 @@
 #ifndef WIDGETNFEENTRADA_H
 #define WIDGETNFEENTRADA_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetNfeEntrada;
 }
 
-class WidgetNfeEntrada final : public QWidget {
+class WidgetNfeEntrada final : public Widget {
   Q_OBJECT
 
 public:
   explicit WidgetNfeEntrada(QWidget *parent = nullptr);
   ~WidgetNfeEntrada();
   auto updateTables() -> bool;
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private:
   // attributes

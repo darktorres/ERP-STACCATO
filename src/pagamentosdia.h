@@ -1,27 +1,26 @@
 #ifndef PAGAMENTOSDIA_H
 #define PAGAMENTOSDIA_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class PagamentosDia;
 }
 
-class PagamentosDia final : public QDialog {
+class PagamentosDia final : public Dialog {
   Q_OBJECT
 
 public:
   explicit PagamentosDia(QWidget *parent = nullptr);
   ~PagamentosDia();
-  bool setFilter(const QDate &date, const QString &idConta);
+  auto setFilter(const QDate &date, const QString &idConta) -> bool;
 
 private:
   SqlRelationalTableModel model;
   Ui::PagamentosDia *ui;
   //
-  void setupTables();
+  auto setupTables() -> void;
 };
 
 #endif // PAGAMENTOSDIA_H

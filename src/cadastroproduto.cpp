@@ -10,6 +10,15 @@
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
 
+  connect(ui->doubleSpinBoxCusto, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
+  connect(ui->doubleSpinBoxVenda, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
+
+  Q_FOREACH (const QLineEdit *line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+
   ui->lineEditCodBarras->setInputMask("9999999999999;_");
   ui->lineEditNCM->setInputMask("99999999;_");
 
@@ -38,8 +47,6 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   ui->groupBox->hide();
   ui->groupBox_4->hide();
   ui->groupBox_5->hide();
-
-  Q_FOREACH (const QLineEdit *line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 }
 
 CadastroProduto::~CadastroProduto() { delete ui; }

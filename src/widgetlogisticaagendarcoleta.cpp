@@ -19,8 +19,22 @@
 #include "venda.h"
 #include "widgetlogisticaagendarcoleta.h"
 
-WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
+WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
   ui->setupUi(this);
+
+  connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled);
+  connect(ui->checkBoxSul, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled);
+  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked);
+  connect(ui->pushButtonAgendarColeta, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked);
+  connect(ui->pushButtonCancelarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked);
+  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked);
+  connect(ui->pushButtonMontarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked);
+  connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked);
+  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked);
+  connect(ui->tableEstoque, &TableView::entered, this, &WidgetLogisticaAgendarColeta::on_tableEstoque_entered);
 
   ui->frameCaminhao->hide();
   ui->pushButtonCancelarCarga->hide();
@@ -493,10 +507,6 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
-
-      connect(venda, &Venda::errorSignal, this, &WidgetLogisticaAgendarColeta::errorSignal);
-      connect(venda, &Venda::transactionStarted, this, &WidgetLogisticaAgendarColeta::transactionStarted);
-      connect(venda, &Venda::transactionEnded, this, &WidgetLogisticaAgendarColeta::transactionEnded);
     }
   }
 }

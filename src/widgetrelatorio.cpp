@@ -189,7 +189,7 @@ bool WidgetRelatorio::updateTables() {
   calcularTotalGeral();
 
   QSqlQuery query;
-  // REFAC: use a join in the view so as to not need setting it manually
+  // REFAC: use a join in the view so as to not need setting it manually (look into widgetfinanceirocontas)
   query.prepare("SET @mydate = :mydate");
   query.bindValue(":mydate", ui->dateEditMes->date().toString("yyyy-MM"));
 

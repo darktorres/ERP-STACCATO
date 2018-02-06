@@ -4,7 +4,7 @@
 #include "baixaorcamento.h"
 #include "ui_baixaorcamento.h"
 
-BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QDialog(parent), ui(new Ui::BaixaOrcamento) {
+BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : Dialog(parent), ui(new Ui::BaixaOrcamento) {
   ui->setupUi(this);
 
   model.setTable("orcamento");

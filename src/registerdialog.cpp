@@ -8,7 +8,7 @@
 #include "application.h"
 #include "registerdialog.h"
 
-RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(primaryKey), model(0, this) {
+RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : Dialog(parent), primaryKey(primaryKey), model(0, this) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
@@ -23,10 +23,6 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
 
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close);
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, &RegisterDialog::saveSlot);
-
-  connect(this, &RegisterDialog::errorSignal, qApp, &Application::enqueueError);
-  connect(this, &RegisterDialog::transactionStarted, qApp, &Application::startTransaction);
-  connect(this, &RegisterDialog::transactionEnded, qApp, &Application::endTransaction);
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {

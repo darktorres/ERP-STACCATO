@@ -9,7 +9,7 @@
 #include "reaisdelegate.h"
 #include "ui_anteciparrecebimento.h"
 
-AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), ui(new Ui::AnteciparRecebimento) {
+AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : Dialog(parent), ui(new Ui::AnteciparRecebimento) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);

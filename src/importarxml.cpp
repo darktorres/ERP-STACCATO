@@ -12,8 +12,15 @@
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : Dialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
+  connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
+  connect(ui->tableCompra, &TableView::entered, this, &ImportarXML::on_tableCompra_entered);
+  connect(ui->tableConsumo, &TableView::entered, this, &ImportarXML::on_tableConsumo_entered);
+  connect(ui->tableEstoque, &TableView::entered, this, &ImportarXML::on_tableEstoque_entered);
 
   setWindowFlags(Qt::Window);
 
@@ -394,7 +401,7 @@ void ImportarXML::on_pushButtonImportar_clicked() {
   QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
   QSqlQuery("START TRANSACTION").exec();
 
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   if (not importar()) {
     QSqlQuery("ROLLBACK").exec();
@@ -402,7 +409,7 @@ void ImportarXML::on_pushButtonImportar_clicked() {
     return;
   }
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   QSqlQuery("COMMIT").exec();
 
@@ -437,11 +444,11 @@ bool ImportarXML::limparAssociacoes() {
 }
 
 void ImportarXML::on_pushButtonProcurar_clicked() {
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   procurar();
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 }
 
 void ImportarXML::procurar() {
@@ -891,12 +898,12 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque, const 
 
 void ImportarXML::on_pushButtonCancelar_clicked() { close(); }
 
-void ImportarXML::WrapParear() { // TODO: 0terminar de refatorar e homologar
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+void ImportarXML::wrapParear() { // TODO: 0terminar de refatorar e homologar
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   parear();
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 }
 
 bool ImportarXML::produtoCompativel(const int rowCompra, const QString &codComercialEstoque) {
@@ -962,4 +969,4 @@ void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsum
 // TODO: 5avisar se R$ da nota for diferente do R$ da compra
 // TODO: 5bloquear a importacao de documentos que nao sejam NFe
 // TODO: verificar se o valor total da nota bate com o valor total da compra (bater impostos/st)
-// TODO: bloquear edicao dos campos na tabela de estoque
+// TODO: quando o usuario editar valorUnid recalcular o total

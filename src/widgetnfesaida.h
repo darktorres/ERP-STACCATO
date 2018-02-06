@@ -1,26 +1,20 @@
 #ifndef WIDGETNFESAIDA_H
 #define WIDGETNFESAIDA_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetNfeSaida;
 }
 
-class WidgetNfeSaida final : public QWidget {
+class WidgetNfeSaida final : public Widget {
   Q_OBJECT
 
 public:
   explicit WidgetNfeSaida(QWidget *parent = nullptr);
   ~WidgetNfeSaida();
   auto updateTables() -> bool;
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private:
   // attributes

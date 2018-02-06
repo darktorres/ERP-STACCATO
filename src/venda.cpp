@@ -60,7 +60,9 @@ void Venda::setupConnections() {
   connect(ui->doubleSpinBoxDescontoGlobalReais, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged);
   connect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxFrete_valueChanged);
   connect(ui->doubleSpinBoxTotal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotal_valueChanged);
+  connect(ui->doubleSpinBoxTotalPag, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotalPag_valueChanged);
   connect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged);
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarPagamento_clicked);
   connect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked);
   connect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &Venda::on_pushButtonCorrigirFluxo_clicked);
@@ -86,7 +88,9 @@ void Venda::unsetConnections() {
   disconnect(ui->doubleSpinBoxDescontoGlobalReais, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxTotal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotal_valueChanged);
+  disconnect(ui->doubleSpinBoxTotalPag, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Venda::on_doubleSpinBoxTotalPag_valueChanged);
   disconnect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged);
+  disconnect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarPagamento_clicked);
   disconnect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked);
   disconnect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &Venda::on_pushButtonCorrigirFluxo_clicked);
@@ -726,10 +730,6 @@ void Venda::on_pushButtonVoltar_clicked() {
   auto *orcamento = new Orcamento(parentWidget());
   orcamento->viewRegisterById(idOrcamento);
 
-  connect(orcamento, &Orcamento::errorSignal, this, &Venda::errorSignal);
-  connect(orcamento, &Orcamento::transactionStarted, this, &Venda::transactionStarted);
-  connect(orcamento, &Orcamento::transactionEnded, this, &Venda::transactionEnded);
-
   orcamento->show();
 
   isDirty = false;
@@ -781,6 +781,7 @@ void Venda::montarFluxoCaixa() {
       const double valor = ui->widgetPgts->listDoubleSpinPgt.at(i)->value();
       const int temp2 = ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito" ? 1 : 0;
       const float temp = static_cast<float>(static_cast<int>(static_cast<float>(valor / parcelas) * 100)) / 100;
+      // REFAC: fix warning
       const double resto = static_cast<double>(valor - (temp * parcelas));
       const double parcela = static_cast<double>(temp);
 

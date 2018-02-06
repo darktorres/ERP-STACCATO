@@ -7,8 +7,13 @@
 #include "reaisdelegate.h"
 #include "ui_precoestoque.h"
 
-PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
+PrecoEstoque::PrecoEstoque(QWidget *parent) : Dialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonSalvar_clicked);
+  connect(ui->table, &TableView::entered, this, &PrecoEstoque::on_table_entered);
 
   setWindowFlags(Qt::Window);
 

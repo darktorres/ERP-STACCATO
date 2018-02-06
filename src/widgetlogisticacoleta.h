@@ -1,15 +1,14 @@
 #ifndef WIDGETLOGISTICACOLETA_H
 #define WIDGETLOGISTICACOLETA_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetLogisticaColeta;
 }
 
-class WidgetLogisticaColeta final : public QWidget {
+class WidgetLogisticaColeta final : public Widget {
   Q_OBJECT
 
 public:
@@ -17,11 +16,6 @@ public:
   ~WidgetLogisticaColeta();
   auto updateTables() -> bool;
   auto tableFornLogistica_activated(const QString &fornecedor) -> void;
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 private:
   // attributes

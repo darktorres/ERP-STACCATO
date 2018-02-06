@@ -1,14 +1,15 @@
 #ifndef LOGINDIALOG_H
 #define LOGINDIALOG_H
 
-#include <QDialog>
+#include "dialog.h"
+
 #include <QMap>
 
 namespace Ui {
 class LoginDialog;
 }
 
-class LoginDialog final : public QDialog {
+class LoginDialog final : public Dialog {
   Q_OBJECT
 
 public:

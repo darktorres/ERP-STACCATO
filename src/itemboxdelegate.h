@@ -15,11 +15,11 @@ private:
   const bool isReadOnly;
   const Tipo tipo;
   // methods
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const final;
-  void setEditorData(QWidget *editor, const QModelIndex &index) const final;
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const final;
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const final;
-  void commitAndCloseEditor();
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const -> QWidget * final;
+  auto setEditorData(QWidget *editor, const QModelIndex &index) const -> void final;
+  auto setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const -> void final;
+  auto updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const -> void final;
+  auto commitAndCloseEditor() -> void;
 };
 
 #endif // ITEMBOXDELEGATE_H

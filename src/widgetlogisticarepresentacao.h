@@ -1,15 +1,14 @@
 #ifndef WIDGETLOGISTICAREPRESENTACAO_H
 #define WIDGETLOGISTICAREPRESENTACAO_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetLogisticaRepresentacao;
 }
 
-class WidgetLogisticaRepresentacao final : public QWidget {
+class WidgetLogisticaRepresentacao final : public Widget {
   Q_OBJECT
 
 public:
@@ -18,22 +17,15 @@ public:
   auto updateTables() -> bool;
   auto tableFornLogistica_activated(const QString &fornecedor) -> void;
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_lineEditBusca_textChanged(const QString &text);
-  void on_pushButtonMarcarEntregue_clicked();
-  void on_table_entered(const QModelIndex &);
-
 private:
   // attributes
   SqlRelationalTableModel model;
   QString fornecedor;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
+  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto on_pushButtonMarcarEntregue_clicked() -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
   auto processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) -> bool;
   auto setupTables() -> void;
 };

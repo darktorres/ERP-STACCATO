@@ -16,6 +16,12 @@
 ImportaProdutos::ImportaProdutos(QWidget *parent) : Dialog(parent), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);
 
+  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &ImportaProdutos::on_checkBoxRepresentacao_toggled);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ImportaProdutos::on_pushButtonSalvar_clicked);
+  connect(ui->tableErro, &TableView::entered, this, &ImportaProdutos::on_tableErro_entered);
+  connect(ui->tableProdutos, &TableView::entered, this, &ImportaProdutos::on_tableProdutos_entered);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &ImportaProdutos::on_tabWidget_currentChanged);
+
   setWindowFlags(Qt::Window);
 
   setVariantMap();

@@ -1,33 +1,32 @@
 #ifndef LOGINDIALOG_H
 #define LOGINDIALOG_H
 
-#include <QDialog>
+#include "dialog.h"
+
 #include <QMap>
 
 namespace Ui {
 class LoginDialog;
 }
 
-class LoginDialog final : public QDialog {
+class LoginDialog final : public Dialog {
   Q_OBJECT
 
 public:
   enum class Tipo { Login, Autorizacao };
-  explicit LoginDialog(const Tipo tipo = Tipo::Login, QWidget *parent = 0);
+  explicit LoginDialog(const Tipo tipo = Tipo::Login, QWidget *parent = nullptr);
   ~LoginDialog();
-
-private slots:
-  void on_comboBoxLoja_currentTextChanged(const QString &loja);
-  void on_lineEditHostname_textChanged(const QString &);
-  void on_pushButtonConfig_clicked();
-  void on_pushButtonLogin_clicked();
 
 private:
   // attributes
   const Tipo tipo;
   Ui::LoginDialog *ui;
   // methods
-  void setComboBox();
+  auto on_comboBoxLoja_currentTextChanged(const QString &loja) -> void;
+  auto on_lineEditHostname_textChanged(const QString &) -> void;
+  auto on_pushButtonConfig_clicked() -> void;
+  auto on_pushButtonLogin_clicked() -> void;
+  auto setComboBox() -> void;
 };
 
 #endif // LOGINDIALOG_H

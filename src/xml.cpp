@@ -1,8 +1,15 @@
 #include <QMessageBox>
 
+#include "application.h"
 #include "xml.h"
 
-XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(model); }
+XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) {
+  connect(this, &XML::informationSignal, qApp, &Application::enqueueInformation);
+  connect(this, &XML::warningSignal, qApp, &Application::enqueueWarning);
+  connect(this, &XML::errorSignal, qApp, &Application::enqueueError);
+
+  montarArvore(model);
+}
 
 void XML::readChild(QDomElement &element, QStandardItem *elementItem) {
   QDomElement child = element.firstChildElement();
@@ -162,7 +169,7 @@ void XML::montarArvore(QStandardItemModel &model) {
   QString error;
 
   if (not document.setContent(fileContent, &error)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro lendo arquivo: " + error);
+    emit errorSignal("Erro lendo arquivo: " + error);
     return;
   }
 

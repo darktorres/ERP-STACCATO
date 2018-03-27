@@ -16,18 +16,15 @@ class Venda final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Venda(QWidget *parent = 0);
+  explicit Venda(QWidget *parent = nullptr);
   ~Venda();
-  void prepararVenda(const QString &idOrcamento);
-  void setFinanceiro();
-
-private slots:
-  void on_doubleSpinBoxTotalPag_valueChanged(double);
-  void on_pushButtonAdicionarPagamento_clicked();
+  auto prepararVenda(const QString &idOrcamento) -> void;
+  auto setFinanceiro() -> void;
 
 private:
   // attributes
   bool financeiro = false;
+  bool correcao = false;
   double minimoFrete;
   double porcFrete;
   QString idOrcamento;
@@ -36,52 +33,54 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Venda *ui;
   // methods
-  bool atualizaQuantEstoque();
-  bool atualizarCredito();
-  bool cadastrar() final;
-  bool cancelamento();
-  bool financeiroSalvar();
-  bool generateId();
-  bool savingProcedures() final;
-  bool todosProdutosSaoEstoque();
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void calcPrecoGlobalTotal();
-  void clearFields() final;
-  void montarFluxoCaixa();
-  void on_checkBoxFreteManual_clicked(const bool checked);
-  void on_checkBoxPontuacaoIsento_toggled(bool checked);
-  void on_checkBoxPontuacaoPadrao_toggled(bool checked);
-  void on_checkBoxRT_toggled(bool checked);
-  void on_comboBoxPgt_currentTextChanged(const int index, const QString &text);
-  void on_dateTimeEdit_dateTimeChanged(const QDateTime &);
-  void on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto);
-  void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
-  void on_doubleSpinBoxFrete_valueChanged(const double frete);
-  void on_doubleSpinBoxPgt_valueChanged();
-  void on_doubleSpinBoxTotal_valueChanged(const double total);
-  void on_itemBoxProfissional_textChanged(const QString &);
-  void on_pushButtonCadastrarPedido_clicked();
-  void on_pushButtonCancelamento_clicked();
-  void on_pushButtonCorrigirFluxo_clicked();
-  void on_pushButtonDevolucao_clicked();
-  void on_pushButtonFinanceiroSalvar_clicked();
-  void on_pushButtonFreteLoja_clicked();
-  void on_pushButtonGerarExcel_clicked();
-  void on_pushButtonImprimir_clicked();
-  void on_pushButtonLimparPag_clicked();
-  void on_pushButtonPgtLoja_clicked();
-  void on_pushButtonVoltar_clicked();
-  void on_tableFluxoCaixa2_entered(const QModelIndex &);
-  void on_tableFluxoCaixa_entered(const QModelIndex &);
-  void registerMode() final;
-  void resetarPagamentos();
-  void setupConnections();
-  void setupMapper() final;
-  void setupTables();
-  void successMessage() final;
-  void unsetConnections();
-  void updateMode() final;
+  auto atualizaQuantEstoque() -> bool;
+  auto atualizarCredito() -> bool;
+  auto cadastrar() -> bool final;
+  auto calcPrecoGlobalTotal() -> void;
+  auto cancelamento() -> bool;
+  auto clearFields() -> void final;
+  auto financeiroSalvar() -> bool;
+  auto generateId() -> bool;
+  auto montarFluxoCaixa() -> void;
+  auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
+  auto on_checkBoxPontuacaoIsento_toggled(bool checked) -> void;
+  auto on_checkBoxPontuacaoPadrao_toggled(bool checked) -> void;
+  auto on_checkBoxRT_toggled(bool checked) -> void;
+  auto on_comboBoxPgt_currentTextChanged(const int index, const QString &text) -> void;
+  auto on_dateTimeEdit_dateTimeChanged(const QDateTime &) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
+  auto on_doubleSpinBoxPgt_valueChanged() -> void;
+  auto on_doubleSpinBoxTotalPag_valueChanged(double) -> void;
+  auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
+  auto on_itemBoxProfissional_textChanged(const QString &) -> void;
+  auto on_pushButtonAdicionarPagamento_clicked() -> void;
+  auto on_pushButtonCadastrarPedido_clicked() -> void;
+  auto on_pushButtonCancelamento_clicked() -> void;
+  auto on_pushButtonCorrigirFluxo_clicked() -> void;
+  auto on_pushButtonDevolucao_clicked() -> void;
+  auto on_pushButtonFinanceiroSalvar_clicked() -> void;
+  auto on_pushButtonFreteLoja_clicked() -> void;
+  auto on_pushButtonGerarExcel_clicked() -> void;
+  auto on_pushButtonImprimir_clicked() -> void;
+  auto on_pushButtonLimparPag_clicked() -> void;
+  auto on_pushButtonPgtLoja_clicked() -> void;
+  auto on_pushButtonVoltar_clicked() -> void;
+  auto on_tableFluxoCaixa2_entered(const QModelIndex &) -> void;
+  auto on_tableFluxoCaixa_entered(const QModelIndex &) -> void;
+  auto registerMode() -> void final;
+  auto resetarPagamentos() -> void;
+  auto savingProcedures() -> bool final;
+  auto setupConnections() -> void;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto successMessage() -> void final;
+  auto todosProdutosSaoEstoque() -> bool;
+  auto unsetConnections() -> void;
+  auto updateMode() -> void final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
 };
 
 #endif // VENDA_H

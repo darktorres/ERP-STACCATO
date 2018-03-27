@@ -4,12 +4,13 @@
 #include <QDomElement>
 #include <QStandardItemModel>
 
-class XML final {
+class XML final : public QObject {
+  Q_OBJECT
 
 public:
   XML(const QByteArray &fileContent, const QString &fileName = QString());
-  void montarArvore(QStandardItemModel &model);
-  void lerValores(const QStandardItem *item);
+  auto montarArvore(QStandardItemModel &model) -> void;
+  auto lerValores(const QStandardItem *item) -> void;
 
   const QByteArray fileContent;
   const QString fileName;
@@ -90,15 +91,20 @@ public:
   // xml
   int idNFe = 0;
 
+signals:
+  void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
+
   // methods
 private:
-  void lerCOFINSProduto(const QStandardItem *child);
-  void lerDadosProduto(const QStandardItem *child);
-  void lerICMSProduto(const QStandardItem *child);
-  void lerIPIProduto(const QStandardItem *child);
-  void lerPISProduto(const QStandardItem *child);
-  void lerTotais(const QStandardItem *child);
-  void readChild(QDomElement &element, QStandardItem *elementItem);
+  auto lerCOFINSProduto(const QStandardItem *child) -> void;
+  auto lerDadosProduto(const QStandardItem *child) -> void;
+  auto lerICMSProduto(const QStandardItem *child) -> void;
+  auto lerIPIProduto(const QStandardItem *child) -> void;
+  auto lerPISProduto(const QStandardItem *child) -> void;
+  auto lerTotais(const QStandardItem *child) -> void;
+  auto readChild(QDomElement &element, QStandardItem *elementItem) -> void;
 };
 
 #endif // XML_H

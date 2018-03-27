@@ -12,7 +12,12 @@ class Impressao final : public QObject {
 public:
   explicit Impressao(const QString &id);
   Impressao(const Impressao &) = delete;
-  void print();
+  auto print() -> void;
+
+signals:
+  void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
 
 private:
   // attributes
@@ -29,8 +34,8 @@ private:
   SqlRelationalTableModel modelItem;
   LimeReport::ReportEngine *report;
   // methods
-  bool setQuerys();
-  void verificaTipo();
+  auto setQuerys() -> bool;
+  auto verificaTipo() -> void;
 };
 
 #endif // IMPRESSAO_H

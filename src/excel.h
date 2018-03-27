@@ -6,12 +6,18 @@
 
 #include <xlsxdocument.h>
 
-class Excel final {
+class Excel final : public QObject {
+  Q_OBJECT
 
 public:
-  Excel(const QString &id, QWidget *parent = 0);
-  bool gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString());
-  QString getFileName() const;
+  Excel(const QString &id, QWidget *parent = nullptr);
+  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> bool;
+  auto getFileName() const -> QString;
+
+signals:
+  void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
 
 private:
   // attributes
@@ -29,9 +35,9 @@ private:
   QString fileName;
   QWidget *parent;
   // methods
-  bool setQuerys();
-  void verificaTipo();
-  void hideUnusedRows(QXlsx::Document &xlsx);
+  auto hideUnusedRows(QXlsx::Document &xlsx) -> void;
+  auto setQuerys() -> bool;
+  auto verificaTipo() -> void;
 };
 
 #endif // EXCEL_H

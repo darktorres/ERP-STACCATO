@@ -12,45 +12,43 @@ class CadastroFornecedor final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroFornecedor(QWidget *parent = 0);
-  ~CadastroFornecedor();
-
-private slots:
-  void on_lineEditCEP_textChanged(const QString &cep);
-  void on_lineEditCNPJ_textEdited(const QString &text);
-  void on_lineEditContatoCPF_textEdited(const QString &text);
-  void on_pushButtonAdicionarEnd_clicked();
-  void on_pushButtonAtualizar_clicked();
-  void on_pushButtonAtualizarEnd_clicked();
-  void on_pushButtonBuscar_clicked();
-  void on_pushButtonCadastrar_clicked();
-  void on_pushButtonNovoCad_clicked();
-  void on_pushButtonRemover_clicked();
-  void on_pushButtonRemoverEnd_clicked();
-  void on_pushButtonValidade_clicked();
-  void on_tableEndereco_clicked(const QModelIndex &index);
-  void on_tableEndereco_entered(const QModelIndex &);
+  explicit CadastroFornecedor(QWidget *parent = nullptr);
+  ~CadastroFornecedor() final;
 
 private:
   // attributes
   SearchDialog *sdFornecedor;
   Ui::CadastroFornecedor *ui;
   // methods
-  bool ajustarValidade(const int novaValidade);
-  bool cadastrar() final;
-  bool cadastrarEndereco(const bool isUpdate = false);
-  bool savingProcedures() final;
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void clearEndereco();
-  void clearFields() final;
-  void novoEndereco();
-  void registerMode() final;
-  void setupMapper() final;
-  void setupTables();
-  void setupUi();
-  void successMessage() final;
-  void updateMode() final;
+  auto ajustarValidade(const int novaValidade) -> bool;
+  auto cadastrar() -> bool final;
+  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto clearEndereco() -> void;
+  auto clearFields() -> void final;
+  auto novoEndereco() -> void;
+  auto on_lineEditCEP_textChanged(const QString &cep) -> void;
+  auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
+  auto on_lineEditContatoCPF_textEdited(const QString &text) -> void;
+  auto on_pushButtonAdicionarEnd_clicked() -> void;
+  auto on_pushButtonAtualizarEnd_clicked() -> void;
+  auto on_pushButtonAtualizar_clicked() -> void;
+  auto on_pushButtonBuscar_clicked() -> void;
+  auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonNovoCad_clicked() -> void;
+  auto on_pushButtonRemoverEnd_clicked() -> void;
+  auto on_pushButtonRemover_clicked() -> void;
+  auto on_pushButtonValidade_clicked() -> void;
+  auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
+  auto on_tableEndereco_entered(const QModelIndex &) -> void;
+  auto registerMode() -> void final;
+  auto savingProcedures() -> bool final;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto setupUi() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
 };
 
 #endif // CADASTROFORNECEDOR_H

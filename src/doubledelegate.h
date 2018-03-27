@@ -6,9 +6,9 @@
 class DoubleDelegate final : public QStyledItemDelegate {
 
 public:
-  explicit DoubleDelegate(QObject *parent = 0, const int decimais = 2);
+  explicit DoubleDelegate(QObject *parent = nullptr, const int decimais = 2);
   ~DoubleDelegate() = default;
-  QString displayText(const QVariant &value, const QLocale &locale) const final;
+  auto displayText(const QVariant &value, const QLocale &locale) const -> QString final;
 
 private:
   const int decimais;

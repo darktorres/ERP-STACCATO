@@ -1,35 +1,21 @@
 #ifndef WIDGETFINANCEIROFLUXOCAIXA_H
 #define WIDGETFINANCEIROFLUXOCAIXA_H
 
-#include <QWidget>
-
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetFinanceiroFluxoCaixa;
 }
 
-class WidgetFinanceiroFluxoCaixa final : public QWidget {
+class WidgetFinanceiroFluxoCaixa final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent = 0);
+  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent = nullptr);
   ~WidgetFinanceiroFluxoCaixa();
-  bool updateTables();
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_groupBoxCaixa1_toggled(const bool checked);
-  void on_groupBoxCaixa2_toggled(const bool checked);
-  void on_tableCaixa_activated(const QModelIndex &index);
-  void on_tableCaixa_entered(const QModelIndex &);
-  void on_tableCaixa2_activated(const QModelIndex &index);
-  void on_tableCaixa2_entered(const QModelIndex &);
+  auto updateTables() -> bool;
 
 private:
   // attributes
@@ -39,7 +25,13 @@ private:
   SqlQueryModel modelFuturo;
   Ui::WidgetFinanceiroFluxoCaixa *ui;
   // methods
-  bool montaFiltro();
+  auto montaFiltro() -> bool;
+  auto on_groupBoxCaixa1_toggled(const bool checked) -> void;
+  auto on_groupBoxCaixa2_toggled(const bool checked) -> void;
+  auto on_tableCaixa2_activated(const QModelIndex &index) -> void;
+  auto on_tableCaixa2_entered(const QModelIndex &) -> void;
+  auto on_tableCaixa_activated(const QModelIndex &index) -> void;
+  auto on_tableCaixa_entered(const QModelIndex &) -> void;
 };
 
 #endif // WIDGETFINANCEIROFLUXOCAIXA_H

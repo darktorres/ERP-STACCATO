@@ -47,7 +47,7 @@ public:
 class QObjectPropertyModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  QObjectPropertyModel(QObject *parent = 0);
+  QObjectPropertyModel(QObject *parent = nullptr);
   ~QObjectPropertyModel();
   virtual void setObject(QObject *object);
   virtual void setMultiObjects(QList<QObject *> *list);

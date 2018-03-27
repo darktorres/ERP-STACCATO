@@ -114,7 +114,7 @@ Q_FLAGS(PreviewHints)
 
 class ReportError : public std::runtime_error {
 public:
-  ReportError(const QString &message) : std::runtime_error(message.toStdString()) {}
+  explicit ReportError(const QString &message) : std::runtime_error(message.toStdString()) {}
 };
 
 class ReportSettings {

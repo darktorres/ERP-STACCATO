@@ -39,7 +39,7 @@
 
 namespace LimeReport {
 
-ComboBoxEditor::ComboBoxEditor(QWidget *parent, bool clearable) : QWidget(parent), m_comboBox(new InternalComboBox(this)), m_buttonClear(0), m_settingValues(false) {
+ComboBoxEditor::ComboBoxEditor(QWidget *parent, bool clearable) : QWidget(parent), m_comboBox(new InternalComboBox(this)), m_buttonClear(nullptr), m_settingValues(false) {
   setFocusProxy(m_comboBox);
 
   if (clearable) {

@@ -64,8 +64,7 @@ PageItemDesignIntf::PageItemDesignIntf(const PageSize pageSize, const QRectF &re
 }
 
 PageItemDesignIntf::~PageItemDesignIntf() {
-  foreach (BandDesignIntf *band, m_bands)
-    band->disconnect(this);
+  for (BandDesignIntf *band : m_bands) band->disconnect(this);
   m_bands.clear();
 }
 
@@ -124,7 +123,7 @@ QColor PageItemDesignIntf::gridColor() const {
 }
 
 void PageItemDesignIntf::clear() {
-  foreach (QGraphicsItem *item, childItems()) { delete item; }
+  for (QGraphicsItem *item : childItems()) delete item;
   childItems().clear();
   m_bands.clear();
 }
@@ -134,37 +133,37 @@ BandDesignIntf *PageItemDesignIntf::bandByType(BandDesignIntf::BandsType bandTyp
   for (; it != childBands().constEnd(); ++it) {
     if ((*it)->bandType() == bandType) return (*it);
   }
-  return 0;
+  return nullptr;
 }
 
 bool PageItemDesignIntf::isBandExists(BandDesignIntf::BandsType bandType) {
-  foreach (BandDesignIntf *band, childBands()) {
+  for (BandDesignIntf *band : childBands()) {
     if (band->bandType() == bandType) return true;
   }
   return false;
 }
 
 bool PageItemDesignIntf::isBandExists(const QString &bandType) {
-  foreach (BandDesignIntf *band, m_bands) {
+  for (BandDesignIntf *band : m_bands) {
     if (band->bandTitle() == bandType) return true;
   }
   return false;
 }
 
 BandDesignIntf *PageItemDesignIntf::bandByIndex(int index) {
-  foreach (BandDesignIntf *band, m_bands) {
+  for (BandDesignIntf *band : m_bands) {
     if (band->bandIndex() == index) return band;
   }
-  return 0;
+  return nullptr;
 }
 
 BandDesignIntf *PageItemDesignIntf::bandByName(QString bandObjectName) {
-  foreach (BandDesignIntf *band, childBands()) {
+  for (BandDesignIntf *band : childBands()) {
     if (band->objectName().compare(bandObjectName, Qt::CaseInsensitive) == 0) {
       return band;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDesignIntf *parentBand, bool &increaseBandIndex) {
@@ -176,7 +175,7 @@ int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDe
 
   int bandIndex = -1;
   std::sort(m_bands.begin(), m_bands.end(), bandSortBandLessThenByIndex);
-  foreach (BandDesignIntf *band, m_bands) {
+  for (BandDesignIntf *band : m_bands) {
     if ((band->bandType() == BandDesignIntf::GroupHeader) && (band->bandType() > bandType)) break;
     if ((band->bandType() <= bandType)) {
       if (bandIndex <= band->bandIndex()) {
@@ -193,7 +192,7 @@ int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDe
   }
 
   if (bandIndex == -1) {
-    bandIndex = (int)(bandType);
+    bandIndex = static_cast<int>(bandType);
     increaseBandIndex = true;
   }
 
@@ -244,7 +243,7 @@ int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDe
 
 void PageItemDesignIntf::increaseBandIndex(int startIndex) {
   if (bandByIndex(startIndex)) {
-    foreach (BandDesignIntf *band, m_bands) {
+    for (BandDesignIntf *band : m_bands) {
       if (band->bandIndex() >= startIndex) {
         band->setBandIndex(band->bandIndex() + 1);
       }
@@ -253,7 +252,7 @@ void PageItemDesignIntf::increaseBandIndex(int startIndex) {
 }
 
 bool PageItemDesignIntf::isBandRegistred(BandDesignIntf *band) {
-  foreach (BandDesignIntf *cBand, childBands()) {
+  for (BandDesignIntf *cBand : childBands()) {
     if (band == cBand) return true;
   }
   return false;
@@ -352,7 +351,7 @@ void PageItemDesignIntf::relocateBands() {
         }
       }
     }
-    foreach (BandDesignIntf *band, m_bands) {
+    for (BandDesignIntf *band : m_bands) {
       if (band->isSelected()) band->updateBandNameLabel();
     }
   }
@@ -366,7 +365,7 @@ void PageItemDesignIntf::removeBand(BandDesignIntf *band) {
 
 int PageItemDesignIntf::dataBandCount() {
   int count = 0;
-  foreach (BandDesignIntf *band, m_bands) {
+  for (BandDesignIntf *band : m_bands) {
     if (band->bandType() == BandDesignIntf::Data) count++;
   }
   return count;
@@ -375,13 +374,13 @@ int PageItemDesignIntf::dataBandCount() {
 BandDesignIntf *PageItemDesignIntf::dataBandAt(int index) {
   int count = 0;
   std::sort(m_bands.begin(), m_bands.end(), bandSortBandLessThenByIndex);
-  foreach (BandDesignIntf *band, m_bands) {
+  for (BandDesignIntf *band : m_bands) {
     if (band->bandType() == BandDesignIntf::Data) {
       if (count == index) return band;
       count++;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 void PageItemDesignIntf::setTopMargin(int value) {
@@ -457,8 +456,8 @@ QSizeF PageItemDesignIntf::getRectByPageSize(const PageSize &size) {
   if (size != Custom) {
     QPrinter printer;
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOrientation((QPrinter::Orientation)pageOrientation());
-    printer.setPaperSize((QPrinter::PageSize)size);
+    printer.setOrientation(static_cast<QPrinter::Orientation>(pageOrientation()));
+    printer.setPaperSize(static_cast<QPrinter::PageSize>(size));
     return QSizeF(printer.paperSize(QPrinter::Millimeter).width() * 10, printer.paperSize(QPrinter::Millimeter).height() * 10);
   }
 
@@ -475,7 +474,7 @@ void PageItemDesignIntf::initPageSize(const QSizeF &size) {
 }
 
 void PageItemDesignIntf::preparePopUpMenu(QMenu &menu) {
-  foreach (QAction *action, menu.actions()) {
+  for (QAction *action : menu.actions()) {
     if (action->text().compare(tr("Paste")) != 0) action->setVisible(false);
   }
 }
@@ -504,8 +503,8 @@ void PageItemDesignIntf::bandDeleted(QObject *band) {
 void PageItemDesignIntf::bandGeometryChanged(QObject *object, QRectF newGeometry, QRectF oldGeometry) {
   BandDesignIntf *band = dynamic_cast<BandDesignIntf *>(object);
   int curIndex = band->bandIndex();
-  BandDesignIntf *bandToSwap = 0;
-  foreach (BandDesignIntf *curBand, bands()) {
+  BandDesignIntf *bandToSwap = nullptr;
+  for (BandDesignIntf *curBand : bands()) {
     if (newGeometry.y() > oldGeometry.y()) {
       if (curBand->bandType() == band->bandType() && curIndex < curBand->bandIndex() && (curBand->pos().y() + (curBand->height() / 2)) < newGeometry.y() &&
           curBand->parentBand() == band->parentBand()) {
@@ -533,9 +532,9 @@ void PageItemDesignIntf::collectionLoadFinished(const QString &collectionName) {
   if (collectionName.compare("children", Qt::CaseInsensitive) == 0) {
     m_bands.clear();
 #ifdef HAVE_QT5
-    foreach (QObject *obj, children()) {
+    for (QObject *obj : children()) {
 #else
-    foreach (QObject *obj, QObject::children()) {
+    for (QObject *obj : QObject::children()) {
 #endif
       BandDesignIntf *item = dynamic_cast<BandDesignIntf *>(obj);
       if (item) {
@@ -549,11 +548,11 @@ void PageItemDesignIntf::collectionLoadFinished(const QString &collectionName) {
 void PageItemDesignIntf::updateMarginRect() {
   m_pageRect = rect();
   m_pageRect.adjust(m_leftMargin * mmFactor(), m_topMargin * mmFactor(), -m_rightMargin * mmFactor(), -m_bottomMargin * mmFactor());
-  foreach (BandDesignIntf *band, m_bands) {
+  for (BandDesignIntf *band : m_bands) {
     band->setWidth(pageRect().width() / band->columnsCount());
     relocateBands();
   }
-  foreach (BaseDesignIntf *item, childBaseItems()) {
+  for (BaseDesignIntf *item : childBaseItems()) {
     if (item->itemAlign() != DesignedItemAlign) {
       item->updateItemAlign();
     }

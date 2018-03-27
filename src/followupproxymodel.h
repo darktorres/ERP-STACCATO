@@ -8,13 +8,12 @@
 class FollowUpProxyModel final : public QIdentityProxyModel {
 
 public:
-  FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);
-  ~FollowUpProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, int role) const final;
+  FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  ~FollowUpProxyModel() final = default;
+  auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
 private:
   const int semaforo;
-
   enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
 };
 

@@ -12,38 +12,37 @@ class MainWindow final : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
-  void updateTables();
-
-private slots:
-  void on_actionCadastrarCliente_triggered();
-  void on_actionCadastrarFornecedor_triggered();
-  void on_actionCadastrarProdutos_triggered();
-  void on_actionCadastrarProfissional_triggered();
-  void on_actionCadastrarUsuario_triggered();
-  void on_actionCalculadora_triggered();
-  void on_actionClaro_triggered();
-  void on_actionConfiguracoes_triggered();
-  void on_actionCriarOrcamento_triggered();
-  void on_actionEscuro_triggered();
-  void on_actionEstoque_triggered();
-  void on_actionGerenciar_Lojas_triggered();
-  void on_actionGerenciar_preco_estoque_triggered();
-  void on_actionGerenciar_Transportadoras_triggered();
-  void on_actionProdutos_triggered();
-  void on_actionPromocao_triggered();
-  void on_actionSobre_triggered();
-  void on_tabWidget_currentChanged(const int);
-  void verifyDb();
+  auto updateTables() -> void;
 
 private:
   // attributes
   Ui::MainWindow *ui;
   QPushButton *pushButtonStatus;
   // methods
-  bool event(QEvent *event);
-  void gerarEnviarRelatorio();
+  auto event(QEvent *event) -> bool;
+  auto gerarEnviarRelatorio() -> void;
+  auto on_actionCadastrarCliente_triggered() -> void;
+  auto on_actionCadastrarFornecedor_triggered() -> void;
+  auto on_actionCadastrarProdutos_triggered() -> void;
+  auto on_actionCadastrarProfissional_triggered() -> void;
+  auto on_actionCadastrarUsuario_triggered() -> void;
+  auto on_actionCalculadora_triggered() -> void;
+  auto on_actionCalcular_frete_triggered() -> void;
+  auto on_actionClaro_triggered() -> void;
+  auto on_actionConfiguracoes_triggered() -> void;
+  auto on_actionCriarOrcamento_triggered() -> void;
+  auto on_actionEscuro_triggered() -> void;
+  auto on_actionEstoque_triggered() -> void;
+  auto on_actionGerenciar_Lojas_triggered() -> void;
+  auto on_actionGerenciar_Transportadoras_triggered() -> void;
+  auto on_actionGerenciar_preco_estoque_triggered() -> void;
+  auto on_actionProdutos_triggered() -> void;
+  auto on_actionPromocao_triggered() -> void;
+  auto on_actionSobre_triggered() -> void;
+  auto on_tabWidget_currentChanged(const int) -> void;
+  auto verifyDb() -> void;
 };
 
 #endif // MAINWINDOW_H

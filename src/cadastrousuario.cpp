@@ -6,6 +6,7 @@
 
 #include "cadastrousuario.h"
 #include "checkboxdelegate.h"
+#include "horizontalproxymodel.h"
 #include "searchdialog.h"
 #include "ui_cadastrousuario.h"
 #include "usersession.h"
@@ -13,7 +14,14 @@
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked);
+
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") ui->table->hide();
 
@@ -43,14 +51,13 @@ void CadastroUsuario::setupTables() {
 
   modelPermissoes.setFilter("0");
 
-  if (not modelPermissoes.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela permissões: " + modelPermissoes.lastError().text());
-  }
+  if (not modelPermissoes.select()) emit errorSignal("Erro lendo tabela permissões: " + modelPermissoes.lastError().text());
 
-  ui->table->setModel(&modelPermissoes);
-  ui->table->hideColumn("idUsuario");
-  ui->table->hideColumn("created");
-  ui->table->hideColumn("lastUpdated");
+  auto *proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
+  ui->table->setModel(proxyModel);
+  ui->table->hideRow(0);                          // idUsuario
+  ui->table->hideRow(proxyModel->rowCount() - 1); // created
+  ui->table->hideRow(proxyModel->rowCount() - 2); // lastUpdated
   ui->table->setItemDelegate(new CheckBoxDelegate(this));
 }
 
@@ -66,13 +73,13 @@ void CadastroUsuario::modificarUsuario() {
 }
 
 bool CadastroUsuario::verifyFields() {
-  for (const auto &line : ui->tab->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->tab->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
     ui->lineEditPasswd->setFocus();
-    QMessageBox::critical(this, "Erro!", "As senhas não batem!");
+    emit errorSignal("As senhas não batem!");
     return false;
   }
 
@@ -126,7 +133,9 @@ bool CadastroUsuario::viewRegister() {
 
   modelPermissoes.setFilter("idUsuario = " + data("idUsuario").toString());
 
-  for (int col = 0; col < ui->table->model()->columnCount(); ++col) ui->table->openPersistentEditor(0, col);
+  modelPermissoes.select();
+
+  for (int row = 0; row < ui->table->model()->rowCount(); ++row) ui->table->openPersistentEditor(row, 0);
 
   return true;
 }
@@ -185,7 +194,7 @@ bool CadastroUsuario::cadastrar() {
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
-    query.prepare("CREATE USER :user@'%' IDENTIFIED BY '1234'");
+    query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
     if (not query.exec()) {
@@ -209,6 +218,9 @@ bool CadastroUsuario::cadastrar() {
     modelPermissoes.insertRow(row2);
 
     if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) return false;
+    if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) return false;
+    if (not modelPermissoes.setData(row2, "view_tab_venda", true)) return false;
+    if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) return false;
 
     if (not modelPermissoes.submitAll()) {
       emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());
@@ -226,7 +238,7 @@ bool CadastroUsuario::cadastrar() {
   return true;
 }
 
-void CadastroUsuario::successMessage() { QMessageBox::information(this, "Aviso!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
+void CadastroUsuario::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   QSqlQuery query;
@@ -234,16 +246,15 @@ void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   query.bindValue(":user", text);
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando usuário: " + query.lastError().text());
+    emit errorSignal("Erro buscando usuário: " + query.lastError().text());
     return;
   }
 
   if (query.first()) {
-    QMessageBox::critical(this, "Erro!", "Nome de usuário já existe!");
+    emit errorSignal("Nome de usuário já existe!");
     return;
   }
 }
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
-// TODO: colocar tabela de permissoes na vertical?
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)

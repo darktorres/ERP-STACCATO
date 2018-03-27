@@ -52,33 +52,13 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroRecebimento">
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroEstoque">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Em recebimento</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroColeta">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em coleta</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroEmEntrega">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Em entrega</string>
+            <string>Estoque</string>
            </property>
           </widget>
          </item>
@@ -92,23 +72,43 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroEstoque">
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroColeta">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Estoque</string>
+            <string>Em coleta</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroIniciados">
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroRecebimento">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Iniciado</string>
+            <string>Em recebimento</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroEmEntrega">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Em entrega</string>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroSul">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>SUL</string>
            </property>
           </widget>
          </item>
@@ -122,13 +122,23 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
+         <item row="11" column="0">
           <widget class="QCheckBox" name="checkBoxFiltroRepoEntrega">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
             <string>Repo. Entrega</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroIniciados">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Iniciado</string>
            </property>
           </widget>
          </item>
@@ -142,13 +152,13 @@
            </property>
           </widget>
          </item>
-         <item row="12" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroSul">
+         <item row="10" column="0">
+          <widget class="QCheckBox" name="checkBoxFiltroRepoReceb">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>SUL</string>
+            <string>Repo. Receb.</string>
            </property>
           </widget>
          </item>
@@ -159,16 +169,6 @@
            </property>
            <property name="text">
             <string>Entregue</string>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QCheckBox" name="checkBoxFiltroRepoReceb">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Repo. Receb.</string>
            </property>
           </widget>
          </item>

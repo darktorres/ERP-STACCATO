@@ -9,7 +9,7 @@ QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   auto *editor = new QCheckBox(parent);
   if (readOnly) editor->setDisabled(true);
 
-  connect(editor, &QCheckBox::toggled, this, &CheckBoxDelegate::commitAndCloseEditor);
+  connect(editor, &QCheckBox::toggled, this, &CheckBoxDelegate::commitEditor);
 
   return editor;
 }
@@ -26,8 +26,7 @@ void CheckBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
 
 QString CheckBoxDelegate::displayText(const QVariant &, const QLocale &) const { return QString(); }
 
-void CheckBoxDelegate::commitAndCloseEditor() {
+void CheckBoxDelegate::commitEditor() {
   QWidget *editor = qobject_cast<QWidget *>(sender());
   emit commitData(editor);
-  emit closeEditor(editor);
 }

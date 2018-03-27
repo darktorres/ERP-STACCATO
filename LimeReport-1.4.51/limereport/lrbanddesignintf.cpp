@@ -91,7 +91,7 @@ void BandMarker::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
 BandDesignIntf::BandDesignIntf(BandsType bandType, const QString &xmlTypeName, QObject *owner, QGraphicsItem *parent)
     : ItemsContainerDesignInft(xmlTypeName, owner, parent), m_bandType(bandType), m_bandIndex(static_cast<int>(bandType)), m_dataSourceName(""), m_autoHeight(true), m_keepBottomSpace(false),
-      m_parentBand(0), m_parentBandName(""), m_bandMarker(0), m_tryToKeepTogether(false), m_splitable(false), m_keepFooterTogether(false), m_maxScalePercent(0), m_sliceLastRow(false),
+      m_parentBand(nullptr), m_parentBandName(""), m_bandMarker(nullptr), m_tryToKeepTogether(false), m_splitable(false), m_keepFooterTogether(false), m_maxScalePercent(0), m_sliceLastRow(false),
       m_printIfEmpty(false), m_columnsCount(1), m_columnIndex(0), m_columnsFillDirection(Horizontal), m_reprintOnEachPage(false), m_startNewPage(false), m_startFromNewPage(false),
       m_printAlways(false), m_repeatOnEachRow(false), m_bottomSpace() {
   setPossibleResizeDirectionFlags(ResizeBottom);
@@ -120,7 +120,7 @@ BandDesignIntf::BandDesignIntf(BandsType bandType, const QString &xmlTypeName, Q
 
 BandDesignIntf::~BandDesignIntf() {
   //    if (itemMode()&DesignMode){
-  //        foreach(BandDesignIntf* band,childBands()) {
+  //        for(BandDesignIntf* band : childBands()) {
   //            removeChildBand(band);
   //            delete band;
   //        }
@@ -222,7 +222,7 @@ void BandDesignIntf::changeBandIndex(int value, bool firstTime) {
 
   indexOffset = value - m_bandIndex;
 
-  foreach (BandDesignIntf *band, childBands()) {
+  for (BandDesignIntf *band : childBands()) {
     int newIndex = band->bandIndex() + indexOffset;
     band->changeBandIndex(newIndex);
   }
@@ -260,7 +260,7 @@ void BandDesignIntf::setParentBand(BandDesignIntf *band) {
 void BandDesignIntf::setParentBandName(const QString &parentBandName) {
   m_parentBandName = parentBandName;
   if (itemMode() & DesignMode && !m_parentBandName.isEmpty()) {
-    if ((parentBand() == 0) || (parentBand()->objectName() != parentBandName)) setParentBand(findParentBand());
+    if ((parentBand() == nullptr) || (parentBand()->objectName() != parentBandName)) setParentBand(findParentBand());
   }
 }
 
@@ -272,14 +272,14 @@ QString BandDesignIntf::parentBandName() {
 }
 
 bool BandDesignIntf::isConnectedToBand(BandDesignIntf::BandsType bandType) const {
-  foreach (BandDesignIntf *band, childBands())
+  for (BandDesignIntf *band : childBands())
     if (band->bandType() == bandType) return true;
   return false;
 }
 
 int BandDesignIntf::maxChildIndex(BandDesignIntf::BandsType bandType) const {
   int curIndex = bandIndex();
-  foreach (BandDesignIntf *childBand, childBands()) {
+  for (BandDesignIntf *childBand : childBands()) {
     if ((childBand->bandIndex() > bandIndex()) && (childBand->bandType() < bandType)) {
       curIndex = std::max(curIndex, childBand->maxChildIndex());
     }
@@ -289,7 +289,7 @@ int BandDesignIntf::maxChildIndex(BandDesignIntf::BandsType bandType) const {
 
 int BandDesignIntf::maxChildIndex(QSet<BandDesignIntf::BandsType> ignoredBands) const {
   int curIndex = bandIndex();
-  foreach (BandDesignIntf *childBand, childBands()) {
+  for (BandDesignIntf *childBand : childBands()) {
     if (!ignoredBands.contains(childBand->bandType()) && childBand->bandIndex() > bandIndex()) {
       curIndex = std::max(curIndex, childBand->maxChildIndex(ignoredBands));
     }
@@ -299,7 +299,7 @@ int BandDesignIntf::maxChildIndex(QSet<BandDesignIntf::BandsType> ignoredBands) 
 
 int BandDesignIntf::minChildIndex(BandDesignIntf::BandsType bandType) {
   int curIndex = bandIndex();
-  foreach (BandDesignIntf *childBand, childBands()) {
+  for (BandDesignIntf *childBand : childBands()) {
     if (curIndex > childBand->bandIndex() && (childBand->bandType() > bandType)) {
       curIndex = childBand->bandIndex();
     }
@@ -309,7 +309,7 @@ int BandDesignIntf::minChildIndex(BandDesignIntf::BandsType bandType) {
 
 QList<BandDesignIntf *> BandDesignIntf::childrenByType(BandDesignIntf::BandsType type) {
   QList<BandDesignIntf *> resList;
-  foreach (BandDesignIntf *item, childBands()) {
+  for (BandDesignIntf *item : childBands()) {
     if (item->bandType() == type) resList << item;
   }
   std::sort(resList.begin(), resList.end(), bandIndexLessThen);
@@ -318,7 +318,7 @@ QList<BandDesignIntf *> BandDesignIntf::childrenByType(BandDesignIntf::BandsType
 
 bool BandDesignIntf::canBeSplitted(int height) const {
   if (isSplittable()) {
-    foreach (QGraphicsItem *qgItem, childItems()) {
+    for (QGraphicsItem *qgItem : childItems()) {
       BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
       if (item)
         if ((item->minHeight() > height) && (item->minHeight() > (this->height() - height))) return false;
@@ -329,7 +329,7 @@ bool BandDesignIntf::canBeSplitted(int height) const {
 
 bool BandDesignIntf::isEmpty() const {
   if (!isVisible()) return true;
-  foreach (QGraphicsItem *qgItem, childItems()) {
+  for (QGraphicsItem *qgItem : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
     if ((item) && (!item->isEmpty())) return false;
   }
@@ -345,13 +345,13 @@ bool BandDesignIntf::tryToKeepTogether() { return m_tryToKeepTogether; }
 void BandDesignIntf::checkEmptyTable() {
   bool isEmpty = true;
   bool allItemsIsText = true;
-  foreach (QGraphicsItem *qgItem, childItems()) {
+  for (QGraphicsItem *qgItem : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
     if (item && !item->isEmpty()) isEmpty = false;
     if (!item) allItemsIsText = false;
   }
   if (isEmpty && allItemsIsText) {
-    foreach (QGraphicsItem *qgItem, childItems()) {
+    for (QGraphicsItem *qgItem : childItems()) {
       ContentItemDesignIntf *item = dynamic_cast<ContentItemDesignIntf *>(qgItem);
       item->setHeight(0);
     }
@@ -379,13 +379,13 @@ void BandDesignIntf::setColumnsFillDirection(BandDesignIntf::BandColumnsLayoutTy
 }
 
 void BandDesignIntf::moveItemsDown(qreal startPos, qreal offset) {
-  foreach (QGraphicsItem *item, childItems()) {
+  for (QGraphicsItem *item : childItems()) {
     if (item->pos().y() >= startPos) item->setPos(item->x(), item->y() + offset);
   }
 }
 
 void BandDesignIntf::preparePopUpMenu(QMenu &menu) {
-  foreach (QAction *action, menu.actions()) {
+  for (QAction *action : menu.actions()) {
     if (action->text().compare(tr("Bring to top")) == 0 || action->text().compare(tr("Send to back")) == 0) action->setEnabled(false);
   }
 
@@ -412,32 +412,22 @@ void BandDesignIntf::preparePopUpMenu(QMenu &menu) {
 }
 
 void BandDesignIntf::processPopUpAction(QAction *action) {
-  if (action->text().compare(tr("Auto height")) == 0) {
-    setProperty("autoHeight", action->isChecked());
-  }
-  if (action->text().compare(tr("Splittable")) == 0) {
-    setProperty("splittable", action->isChecked());
-  }
-  if (action->text().compare(tr("Keep bottom space")) == 0) {
-    setProperty("keepBottomSpace", action->isChecked());
-  }
-  if (action->text().compare(tr("Start new page")) == 0) {
-    setProperty("startNewPage", action->isChecked());
-  }
-  if (action->text().compare(tr("Start from new page")) == 0) {
-    setProperty("startFromNewPage", action->isChecked());
-  }
+  if (action->text().compare(tr("Auto height")) == 0) setProperty("autoHeight", action->isChecked());
+  if (action->text().compare(tr("Splittable")) == 0) setProperty("splittable", action->isChecked());
+  if (action->text().compare(tr("Keep bottom space")) == 0) setProperty("keepBottomSpace", action->isChecked());
+  if (action->text().compare(tr("Start new page")) == 0) setProperty("startNewPage", action->isChecked());
+  if (action->text().compare(tr("Start from new page")) == 0) setProperty("startFromNewPage", action->isChecked());
 }
 
 BaseDesignIntf *BandDesignIntf::cloneUpperPart(int height, QObject *owner, QGraphicsItem *parent) {
   int maxBottom = 0;
   BandDesignIntf *upperPart = dynamic_cast<BandDesignIntf *>(createSameTypeItem(owner, parent));
   upperPart->m_bottomSpace = this->bottomSpace();
-  BaseDesignIntf *upperItem = 0;
+  BaseDesignIntf *upperItem = nullptr;
 
   upperPart->initFromItem(this);
 
-  foreach (QGraphicsItem *qgItem, childItems()) {
+  for (QGraphicsItem *qgItem : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
     if (item) {
       if (item->geometry().bottom() <= height) {
@@ -482,7 +472,7 @@ BaseDesignIntf *BandDesignIntf::cloneBottomPart(int height, QObject *owner, QGra
   bandItems = childItems();
   std::sort(bandItems.begin(), bandItems.end(), itemLessThen);
 
-  foreach (QGraphicsItem *qgItem, bandItems) {
+  for (QGraphicsItem *qgItem : bandItems) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
 
     if (item) {
@@ -540,7 +530,7 @@ void BandDesignIntf::setSplittable(bool value) {
 bool bandIndexLessThen(const BandDesignIntf *b1, const BandDesignIntf *b2) { return b1->bandIndex() < b2->bandIndex(); }
 
 void BandDesignIntf::trimToMaxHeight(int maxHeight) {
-  foreach (BaseDesignIntf *item, childBaseItems()) {
+  for (BaseDesignIntf *item : childBaseItems()) {
     if (item->height() > maxHeight) item->setHeight(maxHeight);
   }
 }
@@ -564,12 +554,12 @@ QSet<BandDesignIntf::BandsType> BandDesignIntf::subdetailBands() {
 
 BandDesignIntf *BandDesignIntf::findParentBand() {
   if (parent() && (!dynamic_cast<BaseDesignIntf *>(parent())->isLoading())) {
-    foreach (QObject *item, parent()->children()) {
+    for (QObject *item : parent()->children()) {
       BandDesignIntf *band = dynamic_cast<BandDesignIntf *>(item);
       if (band && (band->objectName().compare(parentBandName(), Qt::CaseInsensitive) == 0)) return band;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 void BandDesignIntf::geometryChangedEvent(QRectF, QRectF) {
@@ -580,7 +570,7 @@ void BandDesignIntf::geometryChangedEvent(QRectF, QRectF) {
       m_bandMarker->setHeight(rect().height());
     }
   }
-  foreach (BaseDesignIntf *item, childBaseItems()) {
+  for (BaseDesignIntf *item : childBaseItems()) {
     if (item->itemAlign() != DesignedItemAlign) {
       item->updateItemAlign();
     }
@@ -690,17 +680,17 @@ bool BandDesignIntf::printIfEmpty() const { return m_printIfEmpty; }
 void BandDesignIntf::setPrintIfEmpty(bool printIfEmpty) { m_printIfEmpty = printIfEmpty; }
 
 BandDesignIntf *BandDesignIntf::bandHeader() {
-  foreach (BandDesignIntf *band, childBands()) {
+  for (BandDesignIntf *band : childBands()) {
     if (band->isHeader() && !band->isGroupHeader()) return band;
   }
-  return 0;
+  return nullptr;
 }
 
 BandDesignIntf *BandDesignIntf::bandFooter() {
-  foreach (BandDesignIntf *band, childBands()) {
+  for (BandDesignIntf *band : childBands()) {
     if (band->isFooter()) return band;
   }
-  return 0;
+  return nullptr;
 }
 
 bool BandDesignIntf::sliceLastRow() const { return m_sliceLastRow; }

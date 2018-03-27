@@ -12,33 +12,8 @@ class CadastroProfissional final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroProfissional(QWidget *parent = 0);
+  explicit CadastroProfissional(QWidget *parent = nullptr);
   ~CadastroProfissional();
-
-private slots:
-  void on_checkBoxMostrarInativos_clicked(const bool checked);
-  void on_lineEditCEP_textChanged(const QString &cep);
-  void on_lineEditCNPJ_editingFinished();
-  void on_lineEditCNPJ_textEdited(const QString &text);
-  void on_lineEditCNPJBancario_textEdited(const QString &text);
-  void on_lineEditContatoCPF_textEdited(const QString &text);
-  void on_lineEditCPF_editingFinished();
-  void on_lineEditCPF_textEdited(const QString &text);
-  void on_lineEditCPFBancario_textEdited(const QString &text);
-  void on_lineEditProfissional_editingFinished();
-  void on_pushButtonAdicionarEnd_clicked();
-  void on_pushButtonAtualizar_clicked();
-  void on_pushButtonAtualizarEnd_clicked();
-  void on_pushButtonBuscar_clicked();
-  void on_pushButtonCadastrar_clicked();
-  void on_pushButtonCancelar_clicked();
-  void on_pushButtonEndLimpar_clicked();
-  void on_pushButtonNovoCad_clicked();
-  void on_pushButtonRemover_clicked();
-  void on_pushButtonRemoverEnd_clicked();
-  void on_radioButtonPF_toggled(const bool checked);
-  void on_tableEndereco_clicked(const QModelIndex &index);
-  void on_tableEndereco_entered(const QModelIndex &);
 
 private:
   // attributes
@@ -46,20 +21,43 @@ private:
   SearchDialog *sdProfissional;
   Ui::CadastroProfissional *ui;
   // methods
-  bool cadastrar() final;
-  bool cadastrarEndereco(const bool isUpdate = false);
-  bool savingProcedures() final;
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void clearEndereco();
-  void clearFields() final;
-  void novoEndereco();
-  void registerMode() final;
-  void setupMapper() final;
-  void setupTables();
-  void setupUi();
-  void successMessage() final;
-  void updateMode() final;
+  auto cadastrar() -> bool final;
+  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto clearEndereco() -> void;
+  auto clearFields() -> void final;
+  auto novoEndereco() -> void;
+  auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
+  auto on_lineEditCEP_textChanged(const QString &cep) -> void;
+  auto on_lineEditCNPJBancario_textEdited(const QString &text) -> void;
+  auto on_lineEditCNPJ_editingFinished() -> void;
+  auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
+  auto on_lineEditCPFBancario_textEdited(const QString &text) -> void;
+  auto on_lineEditCPF_editingFinished() -> void;
+  auto on_lineEditCPF_textEdited(const QString &text) -> void;
+  auto on_lineEditContatoCPF_textEdited(const QString &text) -> void;
+  auto on_lineEditProfissional_editingFinished() -> void;
+  auto on_pushButtonAdicionarEnd_clicked() -> void;
+  auto on_pushButtonAtualizarEnd_clicked() -> void;
+  auto on_pushButtonAtualizar_clicked() -> void;
+  auto on_pushButtonBuscar_clicked() -> void;
+  auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonCancelar_clicked() -> void;
+  auto on_pushButtonEndLimpar_clicked() -> void;
+  auto on_pushButtonNovoCad_clicked() -> void;
+  auto on_pushButtonRemoverEnd_clicked() -> void;
+  auto on_pushButtonRemover_clicked() -> void;
+  auto on_radioButtonPF_toggled(const bool checked) -> void;
+  auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
+  auto on_tableEndereco_entered(const QModelIndex &) -> void;
+  auto registerMode() -> void final;
+  auto savingProcedures() -> bool final;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto setupUi() -> void;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
 };
 
 #endif // CADASTROPROFISSIONAL_H

@@ -46,7 +46,7 @@ class ScriptBrowser : public QWidget {
   Q_OBJECT
 
 public:
-  explicit ScriptBrowser(QWidget *parent = 0);
+  explicit ScriptBrowser(QWidget *parent = nullptr);
   ~ScriptBrowser();
   void setReportEditor(LimeReport::ReportDesignWidget *report);
   inline ReportDesignWidget *reportEditor() { return m_report; }

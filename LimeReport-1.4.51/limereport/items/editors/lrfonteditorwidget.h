@@ -43,10 +43,10 @@ namespace LimeReport {
 class FontEditorWidget : public ItemEditorWidget {
   Q_OBJECT
 public:
-  explicit FontEditorWidget(ReportDesignWidget *reportEditor, const QString &title, QWidget *parent = 0);
-  explicit FontEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent = 0);
-  explicit FontEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent = 0);
-  explicit FontEditorWidget(PageDesignIntf *page, QWidget *parent = 0);
+  explicit FontEditorWidget(ReportDesignWidget *reportEditor, const QString &title, QWidget *parent = nullptr);
+  explicit FontEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent = nullptr);
+  explicit FontEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent = nullptr);
+  explicit FontEditorWidget(PageDesignIntf *page, QWidget *parent = nullptr);
 
 protected:
   void setItemEvent(BaseDesignIntf *item);

@@ -9,7 +9,7 @@ namespace LimeReport {
 class ContentEditor : public ButtonLineEditor {
   Q_OBJECT
 public:
-  explicit ContentEditor(QObject *object, const QString &propertyName, QWidget *parent = 0) : ButtonLineEditor(propertyName, parent), m_object(object) {}
+  explicit ContentEditor(QObject *object, const QString &propertyName, QWidget *parent = nullptr) : ButtonLineEditor(propertyName, parent), m_object(object) {}
 public slots:
   void editButtonClicked();
 

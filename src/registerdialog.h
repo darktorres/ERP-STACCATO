@@ -2,28 +2,27 @@
 #define REGISTERDIALOG_H
 
 #include <QDataWidgetMapper>
-#include <QDialog>
 #include <QLineEdit>
 
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
-class RegisterDialog : public QDialog {
+class RegisterDialog : public Dialog {
   Q_OBJECT
 
 public:
   explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
-  virtual bool viewRegister();
-  static QVariant getLastInsertId();
-  virtual bool viewRegisterById(const QVariant &id);
-  void marcarDirty();
-  void saveSlot();
-  void show();
+  ~RegisterDialog() = default;
+
+  auto marcarDirty() -> void;
+  auto saveSlot() -> void;
+  auto show() -> void;
+  static auto getLastInsertId() -> QVariant;
+  virtual auto viewRegister() -> bool;
+  virtual auto viewRegisterById(const QVariant &id) -> bool;
 
 signals:
   void registerUpdated(const QVariant &idCliente, const QString &text);
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
 
 protected:
   // attributes
@@ -36,32 +35,31 @@ protected:
   QStringList textKeys;
   SqlRelationalTableModel model;
   // methods
-  bool confirmationMessage();
-  bool setData(const QString &key, const QVariant &value);
-  bool validaCNPJ(const QString &text);
-  bool validaCPF(const QString &text);
-  bool verifyFields(const QList<QLineEdit *> &list);
-  QString requiredStyle();
-  QStringList getTextKeys() const;
-  QVariant data(const int row, const QString &key);
-  QVariant data(const QString &key);
-  virtual bool newRegister();
-  virtual bool save(const bool silent = false) final;
-  virtual bool savingProcedures() = 0;
-  virtual bool verifyFields() = 0;
-  virtual bool verifyRequiredField(QLineEdit *line, const bool silent = false);
-  virtual bool cadastrar() = 0;
-  virtual void clearFields() = 0;
-  virtual void registerMode() = 0;
-  virtual void setupMapper() = 0;
-  virtual void successMessage() = 0;
-  virtual void updateMode() = 0;
-  void addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray());
-  void closeEvent(QCloseEvent *event) override;
-  void errorMessage();
-  void keyPressEvent(QKeyEvent *event) override;
-  void remove();
-  void setTextKeys(const QStringList &value);
+  auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
+  auto closeEvent(QCloseEvent *event) -> void override;
+  auto confirmationMessage() -> bool;
+  auto data(const QString &key) -> QVariant;
+  auto data(const int row, const QString &key) -> QVariant;
+  auto getTextKeys() const -> QStringList;
+  auto keyPressEvent(QKeyEvent *event) -> void override;
+  auto remove() -> void;
+  auto requiredStyle() -> QString;
+  auto setData(const QString &key, const QVariant &value) -> bool;
+  auto setTextKeys(const QStringList &value) -> void;
+  auto validaCNPJ(const QString &text) -> bool;
+  auto validaCPF(const QString &text) -> bool;
+  auto verifyFields(const QList<QLineEdit *> &list) -> bool;
+  virtual auto cadastrar() -> bool = 0;
+  virtual auto clearFields() -> void = 0;
+  virtual auto newRegister() -> bool;
+  virtual auto registerMode() -> void = 0;
+  virtual auto save(const bool silent = false) -> bool final;
+  virtual auto savingProcedures() -> bool = 0;
+  virtual auto setupMapper() -> void = 0;
+  virtual auto successMessage() -> void = 0;
+  virtual auto updateMode() -> void = 0;
+  virtual auto verifyFields() -> bool = 0;
+  virtual auto verifyRequiredField(QLineEdit *line, const bool silent = false) -> bool;
 };
 
 #endif // REGISTERDIALOG_H

@@ -10,7 +10,7 @@ SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *paren
   connect(this, &SqlRelationalTableModel::errorSignal, qApp, &Application::enqueueError);
 }
 
-QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlTableModel::data(QSqlTableModel::index(row, column)); }
+QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column)); }
 
 QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
   if (QSqlTableModel::fieldIndex(column) == -1) {
@@ -18,11 +18,11 @@ QVariant SqlRelationalTableModel::data(const int row, const QString &column) con
     return QVariant();
   }
 
-  return QSqlTableModel::data(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)));
+  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)));
 }
 
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
-  if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), value)) {
+  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), value)) {
     emit errorSignal("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
     return false;
   }
@@ -41,7 +41,7 @@ bool SqlRelationalTableModel::setData(const int row, const QString &column, cons
     return false;
   }
 
-  if (not QSqlTableModel::setData(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)), value)) {
+  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)), value)) {
     emit errorSignal("Erro inserindo " + column + " na tabela " + tableName() + ": " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) + " - valor: " + value.toString());
     return false;
   }

@@ -53,7 +53,7 @@ void ShapeItem::setPenStyle(const Qt::PenStyle &value) {
     Qt::PenStyle oldValue = m_penStyle;
     m_penStyle = value;
     update();
-    notify("penStyle", (int)oldValue, (int)value);
+    notify("penStyle", static_cast<int>(oldValue), static_cast<int>(value));
   }
 }
 

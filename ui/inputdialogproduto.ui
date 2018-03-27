@@ -67,19 +67,6 @@
        <widget class="QFrame" name="frameTotal">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QComboBox" name="comboBoxST">
            <item>
             <property name="text">
@@ -109,6 +96,9 @@
           <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquota">
            <property name="suffix">
             <string> %</string>
+           </property>
+           <property name="maximum">
+            <double>20.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -172,6 +162,19 @@
             <double>999999.989999999990687</double>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>

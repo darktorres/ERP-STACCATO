@@ -41,7 +41,7 @@ namespace LimeReport {
 class ObjectInspectorWidget : public QTreeView {
   Q_OBJECT
 public:
-  ObjectInspectorWidget(QWidget *parent = 0);
+  ObjectInspectorWidget(QWidget *parent = nullptr);
   ~ObjectInspectorWidget();
   QColor getColor(const int index) const;
   virtual void reset();

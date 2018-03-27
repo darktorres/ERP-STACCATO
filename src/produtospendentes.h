@@ -1,8 +1,7 @@
 #ifndef PRODUTOSPENDENTES_H
 #define PRODUTOSPENDENTES_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
 
@@ -10,23 +9,13 @@ namespace Ui {
 class ProdutosPendentes;
 }
 
-class ProdutosPendentes final : public QDialog {
+class ProdutosPendentes final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(QWidget *parent = 0);
+  explicit ProdutosPendentes(QWidget *parent = nullptr);
   ~ProdutosPendentes();
-  void viewProduto(const QString &codComercial, const QString &idVenda);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_pushButtonComprar_clicked();
-  void on_pushButtonConsumirEstoque_clicked();
-  void on_tableProdutos_entered(const QModelIndex &);
+  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 
 private:
   // attributes
@@ -36,16 +25,19 @@ private:
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods
-  bool atualizarVenda(const int row, const QDate &dataPrevista);
-  bool comprar(const QModelIndexList &list, const QDate &dataPrevista);
-  bool consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda);
-  bool enviarExcedenteParaCompra(const int row, const QDate &dataPrevista);
-  bool enviarProdutoParaCompra(const int row, const QDate &dataPrevista);
-  bool insere(const QDateTime &dataPrevista);
-  bool quebrarVenda(const double quantConsumir, const double quantVenda, const int rowProduto);
-  void recalcularQuantidade();
-  void recarregarTabelas();
-  void setupTables();
+  auto atualizarVenda(const int row) -> bool;
+  auto comprar(const QModelIndexList &list, const QDate &dataPrevista) -> bool;
+  auto consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) -> bool;
+  auto enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) -> bool;
+  auto enviarProdutoParaCompra(const int row, const QDate &dataPrevista) -> bool;
+  auto insere(const QDateTime &dataPrevista) -> bool;
+  auto on_pushButtonComprar_clicked() -> void;
+  auto on_pushButtonConsumirEstoque_clicked() -> void;
+  auto on_tableProdutos_entered(const QModelIndex &) -> void;
+  auto quebrarVenda(const double quantConsumir, const double quantVenda, const int rowProduto) -> bool;
+  auto recalcularQuantidade() -> void;
+  auto recarregarTabelas() -> void;
+  auto setupTables() -> void;
 };
 
 #endif // PRODUTOSPENDENTES_H

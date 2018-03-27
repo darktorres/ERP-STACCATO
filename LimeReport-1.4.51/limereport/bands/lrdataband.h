@@ -49,7 +49,7 @@ class DataBand : public DataBandDesignIntf {
   Q_PROPERTY(bool startFromNewPage READ startFromNewPage WRITE setStartFromNewPage)
   Q_PROPERTY(QColor alternateBackgroundColor READ alternateBackgroundColor WRITE setAlternateBackgroundColor)
 public:
-  DataBand(QObject *owner = 0, QGraphicsItem *parent = 0);
+  DataBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   bool isUnique() const;
   bool isData() const { return true; }
 
@@ -57,7 +57,7 @@ protected:
   QColor bandColor() const;
 
 private:
-  BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 };
 
 class DataHeaderBand : public BandDesignIntf {
@@ -68,13 +68,13 @@ class DataHeaderBand : public BandDesignIntf {
   Q_PROPERTY(bool printAlways READ printAlways() WRITE setPrintAlways())
   Q_PROPERTY(bool repeatOnEachRow READ repeatOnEachRow WRITE setRepeatOnEachRow)
 public:
-  DataHeaderBand(QObject *owner = 0, QGraphicsItem *parent = 0);
+  DataHeaderBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   bool isUnique() const { return false; }
   bool isHeader() const { return true; }
   QColor bandColor() const { return QColor(Qt::darkGreen); }
 
 private:
-  BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0) { return new DataHeaderBand(owner, parent); }
+  BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr) { return new DataHeaderBand(owner, parent); }
 };
 
 class DataFooterBand : public BandDesignIntf {
@@ -83,13 +83,13 @@ class DataFooterBand : public BandDesignIntf {
   Q_PROPERTY(BandColumnsLayoutType columnsFillDirection READ columnsFillDirection WRITE setColumnsFillDirection)
   Q_PROPERTY(bool printAlways READ printAlways() WRITE setPrintAlways())
 public:
-  DataFooterBand(QObject *owner = 0, QGraphicsItem *parent = 0);
+  DataFooterBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   bool isUnique() const { return false; }
   bool isFooter() const { return true; }
   QColor bandColor() const { return QColor(Qt::darkGreen); }
 
 private:
-  BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0) { return new DataFooterBand(owner, parent); }
+  BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr) { return new DataFooterBand(owner, parent); }
 };
 
 } // namespace LimeReport

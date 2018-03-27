@@ -65,13 +65,13 @@ public:
   static void printReport(ReportPages pages, QPrinter &printer);
 
 public:
-  explicit ReportEnginePrivate(QObject *parent = 0);
+  explicit ReportEnginePrivate(QObject *parent = nullptr);
   virtual ~ReportEnginePrivate();
 
   PageDesignIntf *appendPage(const QString &pageName = "");
   bool deletePage(PageDesignIntf *page);
   PageDesignIntf *createPreviewPage();
-  PageDesignIntf *pageAt(int index) { return (index <= (m_pages.count() - 1)) ? m_pages.at(index) : 0; }
+  PageDesignIntf *pageAt(int index) { return (index <= (m_pages.count() - 1)) ? m_pages.at(index) : nullptr; }
   int pageCount() { return m_pages.count(); }
   DataSourceManager *dataManager() { return m_datasources; }
   ScriptEngineContext *scriptContext() { return m_scriptEngineContext; }
@@ -84,7 +84,7 @@ public:
   }
 
   void clearReport();
-  bool printReport(QPrinter *printer = 0);
+  bool printReport(QPrinter *printer = nullptr);
   bool printPages(ReportPages pages, QPrinter *printer);
   void printToFile(const QString &fileName);
   bool printToPDF(const QString &fileName);

@@ -37,7 +37,7 @@
 namespace LimeReport {
 class BaseDesignPropertyModel : public QObjectPropertyModel {
 public:
-  explicit BaseDesignPropertyModel(QObject *parent = 0);
+  explicit BaseDesignPropertyModel(QObject *parent = nullptr);
   virtual void setObject(QObject *object);
 };
 } // namespace LimeReport

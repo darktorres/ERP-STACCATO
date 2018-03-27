@@ -96,16 +96,12 @@ public:
   ~ConditionalFormatting();
 
   bool addHighlightCellsRule(HighlightRuleType type, const Format &format, bool stopIfTrue = false);
-  bool addHighlightCellsRule(HighlightRuleType type, const QString &formula1, const Format &format,
-                             bool stopIfTrue = false);
-  bool addHighlightCellsRule(HighlightRuleType type, const QString &formula1, const QString &formula2,
-                             const Format &format, bool stopIfTrue = false);
+  bool addHighlightCellsRule(HighlightRuleType type, const QString &formula1, const Format &format, bool stopIfTrue = false);
+  bool addHighlightCellsRule(HighlightRuleType type, const QString &formula1, const QString &formula2, const Format &format, bool stopIfTrue = false);
   bool addDataBarRule(const QColor &color, bool showData = true, bool stopIfTrue = false);
-  bool addDataBarRule(const QColor &color, ValueObjectType type1, const QString &val1, ValueObjectType type2,
-                      const QString &val2, bool showData = true, bool stopIfTrue = false);
+  bool addDataBarRule(const QColor &color, ValueObjectType type1, const QString &val1, ValueObjectType type2, const QString &val2, bool showData = true, bool stopIfTrue = false);
   bool add2ColorScaleRule(const QColor &minColor, const QColor &maxColor, bool stopIfTrue = false);
-  bool add3ColorScaleRule(const QColor &minColor, const QColor &midColor, const QColor &maxColor,
-                          bool stopIfTrue = false);
+  bool add3ColorScaleRule(const QColor &minColor, const QColor &midColor, const QColor &maxColor, bool stopIfTrue = false);
 
   QList<CellRange> ranges() const;
 
@@ -121,7 +117,7 @@ private:
   friend class Worksheet;
   friend class ::ConditionalFormattingTest;
   bool saveToXml(QXmlStreamWriter &writer) const;
-  bool loadFromXml(QXmlStreamReader &reader, Styles *styles = 0);
+  bool loadFromXml(QXmlStreamReader &reader, Styles *styles = nullptr);
   QSharedDataPointer<ConditionalFormattingPrivate> d;
 };
 

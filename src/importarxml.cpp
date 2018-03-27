@@ -12,8 +12,15 @@
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : Dialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
+  connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
+  connect(ui->tableCompra, &TableView::entered, this, &ImportarXML::on_tableCompra_entered);
+  connect(ui->tableConsumo, &TableView::entered, this, &ImportarXML::on_tableConsumo_entered);
+  connect(ui->tableEstoque, &TableView::entered, this, &ImportarXML::on_tableEstoque_entered);
 
   setWindowFlags(Qt::Window);
 
@@ -44,7 +51,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelEstoque.setFilter("status = 'TEMP'");
 
-  if (not modelEstoque.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque: " + modelEstoque.lastError().text());
+  if (not modelEstoque.select()) emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
 
   ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
@@ -115,7 +122,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelConsumo.setFilter("status = 'TEMP'");
 
-  if (not modelConsumo.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque_has_consumo: " + modelConsumo.lastError().text());
+  if (not modelConsumo.select()) emit errorSignal("Erro lendo tabela estoque_has_consumo: " + modelConsumo.lastError().text());
 
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelConsumo, this));
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
@@ -187,7 +194,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelCompra.setFilter("idCompra = " + idsCompra.join(" OR idCompra = "));
 
-  if (not modelCompra.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelCompra.lastError().text());
+  if (not modelCompra.select()) emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelCompra.lastError().text());
 
   ui->tableCompra->setModel(new EstoqueProxyModel(&modelCompra, this));
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
@@ -228,21 +235,21 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelNFe.setFilter("0");
 
-  if (not modelNFe.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela nfe: " + modelNFe.lastError().text());
+  if (not modelNFe.select()) emit errorSignal("Erro lendo tabela nfe: " + modelNFe.lastError().text());
 
   modelEstoque_nfe.setTable("estoque_has_nfe");
   modelEstoque_nfe.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque_nfe.setFilter("0");
 
-  if (not modelEstoque_nfe.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque_has_nfe: " + modelEstoque_nfe.lastError().text());
+  if (not modelEstoque_nfe.select()) emit errorSignal("Erro lendo tabela estoque_has_nfe: " + modelEstoque_nfe.lastError().text());
 
   modelEstoque_compra.setTable("estoque_has_compra");
   modelEstoque_compra.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque_compra.setFilter("0");
 
-  if (not modelEstoque_compra.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela estoque_has_compra: " + modelEstoque_compra.lastError().text());
+  if (not modelEstoque_compra.select()) emit errorSignal("Erro lendo tabela estoque_has_compra: " + modelEstoque_compra.lastError().text());
 }
 
 bool ImportarXML::cadastrarProdutoEstoque() {
@@ -296,29 +303,6 @@ bool ImportarXML::importar() {
     if (not modelCompra.setData(row, "selecionado", false)) return false;
 
   //--------------
-
-  bool ok = false;
-
-  for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    if (modelCompra.data(row, "quantUpd") == static_cast<int>(FieldColors::Green)) {
-      ok = true;
-      break;
-    }
-  }
-
-  if (not ok) {
-    emit errorSignal("Nenhuma compra pareada!");
-    return false;
-  }
-
-  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    const FieldColors color = static_cast<FieldColors>(modelEstoque.data(row, "quantUpd").toInt());
-
-    if (color == FieldColors::Red) {
-      emit errorSignal("Nem todos os estoques estão ok!");
-      return false;
-    }
-  }
 
   if (not modelEstoque.submitAll()) {
     emit errorSignal("Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text());
@@ -388,13 +372,49 @@ bool ImportarXML::importar() {
   return true;
 }
 
+bool ImportarXML::verifyFields() {
+  bool ok = false;
+
+  for (int row = 0; row < modelCompra.rowCount(); ++row) {
+    if (modelCompra.data(row, "quantUpd") == static_cast<int>(FieldColors::Green)) {
+      ok = true;
+      break;
+    }
+  }
+
+  if (not ok) {
+    emit errorSignal("Nenhuma compra pareada!");
+    return false;
+  }
+
+  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+    const FieldColors color = static_cast<FieldColors>(modelEstoque.data(row, "quantUpd").toInt());
+
+    if (color == FieldColors::Red) {
+      emit errorSignal("Nem todos os estoques estão ok!");
+      return false;
+    }
+  }
+
+  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+    if (modelEstoque.data(row, "lote").toString().isEmpty()) {
+      emit errorSignal("Lote vazio! Se não há coloque 'N/D'");
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void ImportarXML::on_pushButtonImportar_clicked() {
+  if (not verifyFields()) return;
+
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
   if (not importar()) {
     QSqlQuery("ROLLBACK").exec();
@@ -402,9 +422,9 @@ void ImportarXML::on_pushButtonImportar_clicked() {
     return;
   }
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  if (not QSqlQuery("COMMIT").exec()) return;
 
-  QSqlQuery("COMMIT").exec();
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   emit transactionEnded();
 
@@ -437,11 +457,11 @@ bool ImportarXML::limparAssociacoes() {
 }
 
 void ImportarXML::on_pushButtonProcurar_clicked() {
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   procurar();
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 }
 
 void ImportarXML::procurar() {
@@ -455,7 +475,7 @@ void ImportarXML::procurar() {
   QFile file(filePath);
 
   if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo arquivo: " + file.errorString());
+    emit errorSignal("Erro lendo arquivo: " + file.errorString());
     return;
   }
 
@@ -487,12 +507,12 @@ std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
   query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela produto: " + query.lastError().text());
+    emit errorSignal("Erro lendo tabela produto: " + query.lastError().text());
     return false;
   }
 
   if (not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Produto não cadastrado: " + modelEstoque.data(rowEstoque, "codComercial").toString());
+    emit errorSignal("Produto não cadastrado: " + modelEstoque.data(rowEstoque, "codComercial").toString());
     return false;
   }
 
@@ -554,7 +574,7 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
     if (not modelEstoque_compra.setData(rowEstoque_compra, "idCompra", idCompra)) return false;
   }
 
-  if (not criarConsumo(rowCompra, rowEstoque, quantAdicionar)) return false;
+  if (not criarConsumo(rowCompra, rowEstoque)) return false;
 
   return true;
 }
@@ -564,7 +584,7 @@ bool ImportarXML::verificaCNPJ(const XML &xml) {
 
   // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
   if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro na query CNPJ: " + queryLoja.lastError().text());
+    emit errorSignal("Erro na query CNPJ: " + queryLoja.lastError().text());
     return false;
   }
 
@@ -585,19 +605,19 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
   if (not query.exec()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro verificando se nota já cadastrada: " + query.lastError().text());
+    emit errorSignal("Erro verificando se nota já cadastrada: " + query.lastError().text());
     return false;
   }
 
   if (query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Nota já cadastrada!");
+    emit errorSignal("Nota já cadastrada!");
     return true;
   }
 
   const auto list = modelNFe.match(modelNFe.index(0, modelNFe.fieldIndex("chaveAcesso")), Qt::DisplayRole, xml.chaveAcesso);
 
   if (list.size() > 0) {
-    QMessageBox::critical(nullptr, "Erro!", "Nota já cadastrada!");
+    emit errorSignal("Nota já cadastrada!");
     return true;
   }
 
@@ -610,14 +630,14 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   QFile file(xml.fileName);
 
   if (not file.open(QFile::ReadOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro lendo arquivo: " + file.errorString());
+    emit errorSignal("Erro lendo arquivo: " + file.errorString());
     return false;
   }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT COALESCE(MAX(idNFe), 1) AS idNFe FROM nfe") or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando próximo id: " + query.lastError().text());
+    emit errorSignal("Erro buscando próximo id: " + query.lastError().text());
     return false;
   }
 
@@ -658,7 +678,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
   if (not query.exec("SELECT descricao FROM loja WHERE descricao != '' and descricao != 'CD'")) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando lojas: " + query.lastError().text());
+    emit errorSignal("Erro buscando lojas: " + query.lastError().text());
     return false;
   }
 
@@ -713,7 +733,7 @@ bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too bi
   const int newRow = modelEstoque.rowCount();
 
   if (not modelEstoque.insertRow(newRow)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro inserindo linha na tabela: " + modelEstoque.lastError().text());
+    emit errorSignal("Erro inserindo linha na tabela: " + modelEstoque.lastError().text());
     return false;
   }
 
@@ -723,7 +743,7 @@ bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too bi
   QSqlQuery query;
 
   if (not query.exec("SELECT COALESCE(MAX(idEstoque), 1) AS idEstoque FROM estoque") or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando próximo id: " + query.lastError().text());
+    emit errorSignal("Erro buscando próximo id: " + query.lastError().text());
     return false;
   }
 
@@ -807,8 +827,7 @@ bool ImportarXML::inserirNoSqlModel(XML &xml, const QStandardItem *item) {
   return true;
 }
 
-// REFAC: remove the unused criarConsumo
-bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque, const double quantAdicionar) {
+bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   const int idVendaProduto = modelCompra.data(rowCompra, "idVendaProduto").toInt();
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
   const QString codCompra = modelCompra.data(rowCompra, "codComercial").toString();
@@ -834,16 +853,24 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque, const 
     if (not modelConsumo.setData(rowConsumo, index, value)) return false;
   }
 
-  const double quant = quantAdicionar;
+  QSqlQuery query;
+  query.prepare("SELECT quant FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
+  query.bindValue(":idVendaProduto", idVendaProduto);
+
+  if (not query.exec() or not query.first()) {
+    emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
+    return false;
+  }
+
+  const double quant = query.value("quant").toDouble();
 
   // -------------------------------------
 
-  QSqlQuery query;
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando dados do produto: " + query.lastError().text());
+    emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
     return false;
   }
 
@@ -891,12 +918,14 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque, const 
 
 void ImportarXML::on_pushButtonCancelar_clicked() { close(); }
 
-void ImportarXML::WrapParear() { // TODO: 0terminar de refatorar e homologar
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+void ImportarXML::wrapParear() {
+  // TODO: colocar um parametro para refazer o parear apenas quando a coluna alterada for a 'codComercial'
+  // TODO: 0terminar de refatorar e homologar
+  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 
   parear();
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::WrapParear);
+  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::wrapParear);
 }
 
 bool ImportarXML::produtoCompativel(const int rowCompra, const QString &codComercialEstoque) {
@@ -962,3 +991,8 @@ void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsum
 // TODO: 5avisar se R$ da nota for diferente do R$ da compra
 // TODO: 5bloquear a importacao de documentos que nao sejam NFe
 // TODO: verificar se o valor total da nota bate com o valor total da compra (bater impostos/st)
+// TODO: quando o usuario editar valorUnid recalcular o total
+// TODO: poder fazer importacao parcial de nota (quando a linha fica amarela)
+// TODO: antes de salvar verificar se o lote foi preenchido (se nao houver lote pedir para preencher com N/D)
+
+// TODO: erro na criacao dos consumos: item que foi consumido em 2 estoques fez o consumo total nos dois (vide ALPH-180154)

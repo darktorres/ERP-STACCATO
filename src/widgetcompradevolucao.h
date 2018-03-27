@@ -1,40 +1,32 @@
 #ifndef WIDGETCOMPRADEVOLUCAO_H
 #define WIDGETCOMPRADEVOLUCAO_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetCompraDevolucao;
 }
 
-class WidgetCompraDevolucao final : public QWidget {
+class WidgetCompraDevolucao final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraDevolucao(QWidget *parent = 0);
+  explicit WidgetCompraDevolucao(QWidget *parent = nullptr);
   ~WidgetCompraDevolucao();
-  bool updateTables();
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_pushButtonDevolucaoFornecedor_clicked();
-  void on_pushButtonRetornarEstoque_clicked();
-  void on_radioButtonFiltroPendente_toggled(bool checked);
-  void on_table_entered(const QModelIndex &);
+  auto updateTables() -> bool;
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelVendaProduto;
   Ui::WidgetCompraDevolucao *ui;
   // methods
-  bool retornarEstoque(const QModelIndexList &list);
-  void setupTables();
+  auto on_pushButtonDevolucaoFornecedor_clicked() -> void;
+  auto on_pushButtonRetornarEstoque_clicked() -> void;
+  auto on_radioButtonFiltroPendente_toggled(bool checked) -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
+  auto retornarEstoque(const QModelIndexList &list) -> bool;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETCOMPRADEVOLUCAO_H

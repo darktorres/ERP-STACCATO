@@ -6,7 +6,12 @@
 #include "ui_widgetlogisticacaminhao.h"
 #include "widgetlogisticacaminhao.h"
 
-WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
+WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCaminhao) {
+  ui->setupUi(this);
+
+  connect(ui->table, &TableView::clicked, this, &WidgetLogisticaCaminhao::on_table_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetLogisticaCaminhao::on_table_entered);
+}
 
 WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }
 
@@ -16,7 +21,7 @@ void WidgetLogisticaCaminhao::setupTables() {
   modelCaminhao.setTable("view_caminhao");
   modelCaminhao.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelCaminhao.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela caminhâo: " + modelCaminhao.lastError().text());
+  if (not modelCaminhao.select()) emit errorSignal("Erro lendo tabela caminhâo: " + modelCaminhao.lastError().text());
 
   ui->table->setModel(&modelCaminhao);
   ui->table->hideColumn("idVeiculo");
@@ -28,7 +33,7 @@ void WidgetLogisticaCaminhao::setupTables() {
 
   modelCarga.setFilter("0");
 
-  if (not modelCarga.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela carga: " + modelCarga.lastError().text());
+  if (not modelCarga.select()) emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text());
 
   ui->tableCarga->setModel(&modelCarga);
   ui->tableCarga->hideColumn("idVeiculo");
@@ -53,5 +58,5 @@ void WidgetLogisticaCaminhao::on_table_entered(const QModelIndex &) { ui->table-
 void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
   modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
 
-  if (not modelCarga.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela carga: " + modelCarga.lastError().text());
+  if (not modelCarga.select()) emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text());
 }

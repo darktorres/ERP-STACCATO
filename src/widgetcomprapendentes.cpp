@@ -14,8 +14,17 @@
 #include "ui_widgetcomprapendentes.h"
 #include "widgetcomprapendentes.h"
 
-WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) {
+WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraPendentes) {
   ui->setupUi(this);
+
+  connect(ui->doubleSpinBoxQuantAvulso, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged);
+  connect(ui->doubleSpinBoxQuantAvulsoCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
+  connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
+  connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
+  connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraPendentes::on_table_entered);
 
   ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
   ui->itemBoxProduto->getSearchDialog()->setRepresentacao(" AND representacao = FALSE");
@@ -43,7 +52,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   query.bindValue(":idProduto", ui->itemBoxProduto->getValue());
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando produto: " + query.lastError().text());
+    emit errorSignal("Erro buscando produto: " + query.lastError().text());
     return;
   }
 
@@ -75,14 +84,14 @@ void WidgetCompraPendentes::makeConnections() {
 }
 
 bool WidgetCompraPendentes::updateTables() {
-  if (model.tableName().isEmpty()) {
+  if (modelViewVendaProduto.tableName().isEmpty()) {
     setupTables();
     montaFiltro();
     makeConnections();
   }
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela produtos pendentes: " + model.lastError().text());
+  if (not modelViewVendaProduto.select()) {
+    emit errorSignal("Erro lendo tabela produtos pendentes: " + modelViewVendaProduto.lastError().text());
     return false;
   }
 
@@ -92,28 +101,24 @@ bool WidgetCompraPendentes::updateTables() {
 }
 
 void WidgetCompraPendentes::setupTables() {
-  // REFAC: refactor this to not select in here
+  modelViewVendaProduto.setTable("view_venda_produto");
 
-  model.setTable("view_venda_produto");
+  modelViewVendaProduto.setHeaderData("data", "Data");
+  modelViewVendaProduto.setHeaderData("fornecedor", "Fornecedor");
+  modelViewVendaProduto.setHeaderData("idVenda", "Venda");
+  modelViewVendaProduto.setHeaderData("produto", "Produto");
+  modelViewVendaProduto.setHeaderData("caixas", "Caixas");
+  modelViewVendaProduto.setHeaderData("quant", "Quant.");
+  modelViewVendaProduto.setHeaderData("un", "Un.");
+  modelViewVendaProduto.setHeaderData("total", "Total");
+  modelViewVendaProduto.setHeaderData("codComercial", "Cód. Com.");
+  modelViewVendaProduto.setHeaderData("formComercial", "Form. Com.");
+  modelViewVendaProduto.setHeaderData("status", "Status");
+  modelViewVendaProduto.setHeaderData("statusFinanceiro", "Financeiro");
+  modelViewVendaProduto.setHeaderData("dataFinanceiro", "Data Fin.");
+  modelViewVendaProduto.setHeaderData("obs", "Obs.");
 
-  //  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
-
-  model.setHeaderData("data", "Data");
-  model.setHeaderData("fornecedor", "Fornecedor");
-  model.setHeaderData("idVenda", "Venda");
-  model.setHeaderData("produto", "Produto");
-  model.setHeaderData("caixas", "Caixas");
-  model.setHeaderData("quant", "Quant.");
-  model.setHeaderData("un", "Un.");
-  model.setHeaderData("total", "Total");
-  model.setHeaderData("codComercial", "Cód. Com.");
-  model.setHeaderData("formComercial", "Form. Com.");
-  model.setHeaderData("status", "Status");
-  model.setHeaderData("statusFinanceiro", "Financeiro");
-  model.setHeaderData("dataFinanceiro", "Data Fin.");
-  model.setHeaderData("obs", "Obs.");
-
-  ui->table->setModel(new FinanceiroProxyModel(&model, this));
+  ui->table->setModel(new FinanceiroProxyModel(&modelViewVendaProduto, this));
 
   ui->table->sortByColumn("idVenda");
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
@@ -122,16 +127,16 @@ void WidgetCompraPendentes::setupTables() {
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
-  const QString status = model.data(index.row(), "status").toString();
+  const QString status = modelViewVendaProduto.data(index.row(), "status").toString();
 
   if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") {
-    QMessageBox::critical(this, "Erro!", "Produto não está PENDENTE!");
+    emit errorSignal("Produto não está PENDENTE!");
     return;
   }
 
-  const QString financeiro = model.data(index.row(), "statusFinanceiro").toString();
-  const QString codComercial = model.data(index.row(), "codComercial").toString();
-  const QString idVenda = model.data(index.row(), "idVenda").toString();
+  const QString financeiro = modelViewVendaProduto.data(index.row(), "statusFinanceiro").toString();
+  const QString codComercial = modelViewVendaProduto.data(index.row(), "codComercial").toString();
+  const QString idVenda = modelViewVendaProduto.data(index.row(), "idVenda").toString();
 
   if (financeiro == "PENDENTE") {
     QMessageBox msgBox(QMessageBox::Question, "Pendente!", "Financeiro não liberou! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
@@ -144,14 +149,10 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   auto *produtos = new ProdutosPendentes(this);
   produtos->setAttribute(Qt::WA_DeleteOnClose);
   produtos->viewProduto(codComercial, idVenda);
-
-  connect(produtos, &ProdutosPendentes::errorSignal, this, &WidgetCompraPendentes::errorSignal);
-  connect(produtos, &ProdutosPendentes::transactionStarted, this, &WidgetCompraPendentes::transactionStarted);
-  connect(produtos, &ProdutosPendentes::transactionEnded, this, &WidgetCompraPendentes::transactionEnded);
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -160,7 +161,7 @@ void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
 void WidgetCompraPendentes::montaFiltro() {
   QString filtroCheck;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'";
   }
 
@@ -176,21 +177,21 @@ void WidgetCompraPendentes::montaFiltro() {
 
   const QString filtroStatus = QString((filtroCheck + filtroBusca).isEmpty() ? "" : " AND ") + "status != 'CANCELADO'";
 
-  model.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0" + textoSul);
+  modelViewVendaProduto.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0" + textoSul);
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro na busca: " + model.lastError().text());
+  if (not modelViewVendaProduto.select()) emit errorSignal("Erro na busca: " + modelViewVendaProduto.lastError().text());
 
   ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
   if (ui->itemBoxProduto->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum produto selecionado!");
+    emit errorSignal("Nenhum produto selecionado!");
     return;
   }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) {
-    QMessageBox::critical(this, "Erro!", "Deve escolher uma quantidade!");
+    emit errorSignal("Deve escolher uma quantidade!");
     return;
   }
 
@@ -200,27 +201,25 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   const QDate dataPrevista = inputDlg.getNextDate();
 
-  insere(dataPrevista) ? QMessageBox::information(this, "Aviso!", "Produto enviado para compras com sucesso!") : QMessageBox::critical(this, "Erro!", "Erro ao enviar produto para compras!");
+  insere(dataPrevista) ? emit informationSignal("Produto enviado para compras com sucesso!") : emit errorSignal("Erro ao enviar produto para compras!");
 
   ui->itemBoxProduto->clear();
 }
 
 bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   QSqlQuery query;
-  query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, "
-                "codBarras FROM produto WHERE idProduto = :idProduto");
+  query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getValue());
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando produto: " + query.lastError().text());
+    emit errorSignal("Erro buscando produto: " + query.lastError().text());
     return false;
   }
 
   QSqlQuery query2;
-  query2.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, "
-                 "prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, dataPrevCompra) VALUES (:fornecedor, "
-                 ":idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, "
-                 ":codComercial, :codBarras, :dataPrevCompra)");
+  query2.prepare(
+      "INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
+      "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
   query2.bindValue(":fornecedor", query.value("fornecedor"));
   query2.bindValue(":idProduto", query.value("idProduto"));
   query2.bindValue(":descricao", query.value("descricao"));
@@ -238,7 +237,7 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   query2.bindValue(":dataPrevCompra", dataPrevista);
 
   if (not query2.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro inserindo dados em pedido_fornecedor_has_produto: " + query2.lastError().text());
+    emit errorSignal("Erro inserindo dados em pedido_fornecedor_has_produto: " + query2.lastError().text());
     return false;
   }
 
@@ -255,11 +254,11 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
 
-  Excel excel(model.data(list.first().row(), "idVenda").toString());
+  Excel excel(modelViewVendaProduto.data(list.first().row(), "idVenda").toString());
   excel.gerarExcel();
 }
 
@@ -267,11 +266,11 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
 
-  Impressao impressao(model.data(list.first().row(), "idVenda").toString());
+  Impressao impressao(modelViewVendaProduto.data(list.first().row(), "idVenda").toString());
   impressao.print();
 }
 

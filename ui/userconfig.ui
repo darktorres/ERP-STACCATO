@@ -40,6 +40,13 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QPushButton" name="pushButtonAlterarDados">
+     <property name="text">
+      <string>Alterar dados do usuário</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBoxEmail">
      <property name="title">
@@ -99,45 +106,6 @@
       </item>
       <item row="8" column="1">
        <widget class="QLineEdit" name="lineEditEmailCopia"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="3">
-    <widget class="QGroupBox" name="groupBoxAcbr">
-     <property name="title">
-      <string>ACBr</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>E-mail Contabilidade:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="ItemBox" name="itemBoxLoja"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Loja:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>E-mail Logística:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEditEmailContabilidade"/>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="lineEditEmailLogistica"/>
       </item>
      </layout>
     </widget>
@@ -236,11 +204,63 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="0" colspan="3">
-    <widget class="QPushButton" name="pushButtonAlterarDados">
-     <property name="text">
-      <string>Alterar dados do usuário</string>
+   <item row="0" column="0" colspan="3">
+    <widget class="QGroupBox" name="groupBoxAcbr">
+     <property name="title">
+      <string>ACBr</string>
      </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>E-mail Contabilidade:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>E-mail Logística:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Loja:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Servidor:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditACBrServidor"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Porta:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="lineEditACBrPorta"/>
+      </item>
+      <item row="3" column="1" colspan="3">
+       <widget class="ItemBox" name="itemBoxLoja"/>
+      </item>
+      <item row="4" column="1" colspan="3">
+       <widget class="QLineEdit" name="lineEditEmailContabilidade"/>
+      </item>
+      <item row="5" column="1" colspan="3">
+       <widget class="QLineEdit" name="lineEditEmailLogistica"/>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

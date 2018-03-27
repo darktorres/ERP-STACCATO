@@ -42,7 +42,7 @@ ModelHolder::ModelHolder(QAbstractItemModel *model, bool owned /*false*/) {
   ModelToDataSource *mh = new ModelToDataSource(model, owned);
   m_dataSource = mh;
   m_owned = owned;
-  connect(mh, SIGNAL(modelStateChanged()), this, SIGNAL(modelStateChanged()));
+  connect(mh, &ModelToDataSource::modelStateChanged, this, &ModelHolder::modelStateChanged);
 }
 
 ModelHolder::~ModelHolder() { delete m_dataSource; }
@@ -120,7 +120,7 @@ void QueryHolder::setDatasource(IDataSource::Ptr value) {
 }
 
 void QueryHolder::fillParams(QSqlQuery *query) {
-  foreach (QString param, m_aliasesToParam.keys()) {
+  for (QString param : m_aliasesToParam.keys()) {
     QVariant value;
     if (param.contains(".")) {
       value = dataManager()->fieldData(m_aliasesToParam.value(param));
@@ -170,14 +170,14 @@ void QueryHolder::setQueryText(QString queryText) {
 }
 
 IDataSource *QueryHolder::dataSource(IDataSource::DatasourceMode mode) {
-  if ((m_mode != mode && m_mode == IDataSource::DESIGN_MODE) || m_dataSource == 0) {
+  if ((m_mode != mode && m_mode == IDataSource::DESIGN_MODE) || m_dataSource == nullptr) {
     m_mode = mode;
     runQuery(mode);
   }
   if (m_dataSource)
     return m_dataSource.data();
   else
-    return 0;
+    return nullptr;
 }
 
 // QueryHolder
@@ -188,13 +188,13 @@ ModelToDataSource::ModelToDataSource(QAbstractItemModel *model, bool owned) : QO
   Q_ASSERT(model);
   if (model) {
     while (model->canFetchMore(QModelIndex())) model->fetchMore(QModelIndex());
-    connect(model, SIGNAL(destroyed()), this, SLOT(slotModelDestroed()));
-    connect(model, SIGNAL(modelReset()), this, SIGNAL(modelStateChanged()));
+    connect(model, &QObject::destroyed, this, &ModelToDataSource::slotModelDestroed);
+    connect(model, &QAbstractItemModel::modelReset, this, &ModelToDataSource::modelStateChanged);
   }
 }
 
 ModelToDataSource::~ModelToDataSource() {
-  if ((m_owned) && m_model != 0) delete m_model;
+  if ((m_owned) && m_model != nullptr) delete m_model;
 }
 
 bool ModelToDataSource::next() {
@@ -278,10 +278,10 @@ int ModelToDataSource::currentRow() {
   return m_curRow;
 }
 
-bool ModelToDataSource::isInvalid() const { return m_model == 0; }
+bool ModelToDataSource::isInvalid() const { return m_model == nullptr; }
 
 void ModelToDataSource::slotModelDestroed() {
-  m_model = 0;
+  m_model = nullptr;
   m_lastError = tr("model is destroyed");
   emit modelStateChanged();
 }
@@ -383,7 +383,7 @@ QObject *ProxyDesc::createElement(const QString &collectionName, const QString &
     m_maps.append(fieldMapDesc);
     return fieldMapDesc;
   }
-  return 0;
+  return nullptr;
 }
 
 int ProxyDesc::elementsCount(const QString &collectionName) {
@@ -396,7 +396,8 @@ QObject *ProxyDesc::elementAt(const QString &collectionName, int index) {
   return m_maps.at(index);
 }
 
-ProxyHolder::ProxyHolder(ProxyDesc *desc, DataSourceManager *dataManager) : m_model(0), m_desc(desc), m_lastError(""), m_mode(IDataSource::RENDER_MODE), m_invalid(false), m_dataManger(dataManager) {}
+ProxyHolder::ProxyHolder(ProxyDesc *desc, DataSourceManager *dataManager)
+    : m_model(nullptr), m_desc(desc), m_lastError(""), m_mode(IDataSource::RENDER_MODE), m_invalid(false), m_dataManger(dataManager) {}
 
 QString ProxyHolder::masterDatasource() {
   if (m_desc) return m_desc->master();
@@ -411,7 +412,7 @@ void ProxyHolder::filterModel() {
       IDataSource *child = dataManager()->dataSource(m_desc->child());
       if (master && child) {
         m_model = new MasterDetailProxyModel(dataManager());
-        connect(child->model(), SIGNAL(destroyed()), this, SLOT(slotChildModelDestoroyed()));
+        connect(child->model(), &QObject::destroyed, this, &ProxyHolder::slotChildModelDestoroyed);
         m_model->setSourceModel(child->model());
         m_model->setMaster(m_desc->master());
         m_model->setChildName(m_desc->child());
@@ -439,7 +440,7 @@ void ProxyHolder::filterModel() {
 }
 
 IDataSource *ProxyHolder::dataSource(IDataSource::DatasourceMode mode) {
-  if ((m_mode != mode && m_mode == IDataSource::DESIGN_MODE) || m_datasource == 0) {
+  if ((m_mode != mode && m_mode == IDataSource::DESIGN_MODE) || m_datasource == nullptr) {
     m_mode = mode;
     m_datasource.clear();
     filterModel();
@@ -460,7 +461,7 @@ void ProxyHolder::invalidate(IDataSource::DatasourceMode mode, bool dbWillBeClos
 
 void ProxyHolder::slotChildModelDestoroyed() {
   m_datasource.clear();
-  m_model = 0;
+  m_model = nullptr;
 }
 
 void ProxyDesc::addFieldsCorrelation(const FieldsCorrelation &fieldsCorrelation) { m_maps.append(new FieldMapDesc(fieldsCorrelation)); }
@@ -477,7 +478,7 @@ bool MasterDetailProxyModel::isInvalid() const {
 
 bool MasterDetailProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const {
   Q_UNUSED(source_parent)
-  foreach (FieldMapDesc *fieldCorrelation, *m_maps) {
+  for (FieldMapDesc *fieldCorrelation : *m_maps) {
     QVariant master = masterData(fieldCorrelation->master());
     QVariant detail = sourceData(fieldCorrelation->detail(), source_row);
     if (master == detail) return true;

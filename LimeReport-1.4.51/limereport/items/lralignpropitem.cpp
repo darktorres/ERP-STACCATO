@@ -98,7 +98,8 @@ void AlignmentItemEditor::setModelData(QWidget *propertyEditor, QAbstractItemMod
   int align = m_acceptableValues.value(qobject_cast<ComboBoxEditor *>(propertyEditor)->text());
   flags = clearAcceptableValues(flags) | align;
   object()->setProperty(propertyName().toLatin1(), flags);
-  if (objects()) foreach (QObject *item, *objects()) {
+  if (objects())
+    for (QObject *item : *objects()) {
       item->setProperty(propertyName().toLatin1(), flags);
     }
   parent()->setPropertyValue(flags);

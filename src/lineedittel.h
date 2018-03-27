@@ -11,7 +11,7 @@ public:
   ~LineEditTel() = default;
 
 private:
-  void processTel(const QString &value);
+  auto processTel(const QString &value) -> void;
 };
 
 #endif // LINEEDITTEL_H

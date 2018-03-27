@@ -18,7 +18,7 @@
 #include "widgetnfesaida.h"
 #include "xml_viewer.h"
 
-WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) {
+WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeSaida) {
   ui->setupUi(this);
 
   ui->dateEdit->setDate(QDate::currentDate());
@@ -29,12 +29,20 @@ WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::Wi
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled);
+  connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
+  connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked);
+  connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
+  connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetNfeSaida::on_table_entered);
 }
 
 WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 
 bool WidgetNfeSaida::updateTables() {
-  if (model.tableName().isEmpty()) setupTables();
+  if (modelViewNFeSaida.tableName().isEmpty()) setupTables();
 
   // REFAC: 1refatorar
   //  if (not model.select()) {
@@ -49,13 +57,13 @@ bool WidgetNfeSaida::updateTables() {
 }
 
 void WidgetNfeSaida::setupTables() {
-  model.setTable("view_nfe_saida");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelViewNFeSaida.setTable("view_nfe_saida");
+  modelViewNFeSaida.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  model.setHeaderData("created", "Criado em");
-  model.setHeaderData("valor", "R$");
+  modelViewNFeSaida.setHeaderData("created", "Criado em");
+  modelViewNFeSaida.setHeaderData("valor", "R$");
 
-  ui->table->setModel(&model);
+  ui->table->setModel(&modelViewNFeSaida);
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
   ui->table->setItemDelegate(new DoubleDelegate(this));
@@ -65,10 +73,10 @@ void WidgetNfeSaida::setupTables() {
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
+  query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando xml da nota: " + query.lastError().text());
+    emit errorSignal("Erro buscando xml da nota: " + query.lastError().text());
     return;
   }
 
@@ -88,16 +96,16 @@ bool WidgetNfeSaida::montaFiltro() {
 
   QString filtroCheck;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
   }
 
   filtroCheck = filtroCheck.isEmpty() ? "" : " AND (" + filtroCheck + ")";
 
-  model.setFilter(filtroBusca + filtroData + filtroCheck);
+  modelViewNFeSaida.setFilter(filtroBusca + filtroData + filtroCheck);
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+  if (not modelViewNFeSaida.select()) {
+    emit errorSignal("Erro lendo tabela: " + modelViewNFeSaida.lastError().text());
     return false;
   }
 
@@ -106,7 +114,7 @@ bool WidgetNfeSaida::montaFiltro() {
   return true;
 }
 
-void WidgetNfeSaida::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+void WidgetNfeSaida::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   // REFAC: colocar transaction
@@ -115,7 +123,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
@@ -128,15 +136,15 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const QString justificativa = QInputDialog::getText(this, "Justificativa", "Entre 15 e 200 caracteres: ");
 
   if (justificativa.size() < 15 or justificativa.size() > 200) {
-    QMessageBox::critical(this, "Erro!", "Justificativa fora do tamanho!");
+    emit errorSignal("Justificativa fora do tamanho!");
     return;
   }
 
-  const int idNFe = model.data(list.first().row(), "idNFe").toInt();
-  const int numeroNFe = model.data(list.first().row(), "NFe").toInt();
+  const int idNFe = modelViewNFeSaida.data(list.first().row(), "idNFe").toInt();
+  const int numeroNFe = modelViewNFeSaida.data(list.first().row(), "NFe").toInt();
   Q_UNUSED(numeroNFe);
 
-  const QString chaveAcesso = model.data(list.first().row(), "chaveAcesso").toString();
+  const QString chaveAcesso = modelViewNFeSaida.data(list.first().row(), "chaveAcesso").toString();
 
   auto resposta = ACBr::enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
@@ -144,7 +152,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
   if (not resposta->contains("xEvento=Cancelamento registrado")) {
-    QMessageBox::critical(this, "Erro!", "Resposta: " + *resposta);
+    emit errorSignal("Resposta: " + *resposta);
     return;
   }
 
@@ -153,16 +161,16 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   query.bindValue(":chaveAcesso", chaveAcesso);
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro marcando nota como cancelada: " + query.lastError().text());
+    emit errorSignal("Erro marcando nota como cancelada: " + query.lastError().text());
     return;
   }
 
-  QMessageBox::information(this, "Resposta", *resposta);
+  emit informationSignal(*resposta);
 
   QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
 
   if (not arquivo.open(QFile::WriteOnly)) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita: " + arquivo.errorString());
+    emit errorSignal("Erro abrindo arquivo para escrita: " + arquivo.errorString());
     return;
   }
 
@@ -176,7 +184,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro removendo NFe da venda_produto: " + query.lastError().text());
+    emit errorSignal("Erro removendo NFe da venda_produto: " + query.lastError().text());
     return;
   }
 
@@ -184,7 +192,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro removendo NFe do veiculo_produto: " + query.lastError().text());
+    emit errorSignal("Erro removendo NFe do veiculo_produto: " + query.lastError().text());
     return;
   }
 
@@ -207,7 +215,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   // TODO: 3verificar quais as tags na nota dos campos que faltam preencher
 
   if (not ui->groupBoxMes->isChecked()) {
-    QMessageBox::critical(this, "Erro!", "Selecione um mês para gerar o relatório!");
+    emit errorSignal("Selecione um mês para gerar o relatório!");
     return;
   }
 
@@ -219,14 +227,14 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
   if (not view.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + view.lastError().text());
+    emit errorSignal("Erro comunicando com banco de dados: " + view.lastError().text());
     return;
   }
 
   dataManager->addModel("view", &view, true);
 
   if (not report.loadFromFile("view.lrxml")) {
-    QMessageBox::critical(nullptr, "Erro!", "Não encontrou o modelo de impressão!");
+    emit errorSignal("Não encontrou o modelo de impressão!");
     return;
   }
 
@@ -236,7 +244,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando dados: " + query.lastError().text());
+    emit errorSignal("Erro buscando dados: " + query.lastError().text());
     return;
   }
 
@@ -255,12 +263,12 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   dataManager->setReportVariable("TotalIssqn", "R$ XXX");
 
   if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) {
-    QMessageBox::critical(this, "Erro!", "Erro gerando relatório!");
+    emit errorSignal("Erro gerando relatório!");
     return;
   }
 
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "/relatorio.pdf"))) {
-    QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!");
+    emit errorSignal("Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!");
     return;
   }
 }
@@ -271,7 +279,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
 
@@ -281,14 +289,14 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
 
   if (not folderKeyXml or folderKeyXml.value().toString().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!");
+    emit errorSignal("Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!");
     return;
   }
 
   const auto folderKeyPdf = UserSession::getSetting("User/EntregasPdfFolder");
 
   if (not folderKeyPdf or folderKeyPdf.value().toString().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!");
+    emit errorSignal("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!");
     return;
   }
 
@@ -303,16 +311,16 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (model.data(item.row(), "status").toString() != "AUTORIZADO") continue;
+    if (modelViewNFeSaida.data(item.row(), "status").toString() != "AUTORIZADO") continue;
 
     // pegar xml do bd e salvar em arquivo
 
-    const QString chaveAcesso = model.data(item.row(), "chaveAcesso").toString();
+    const QString chaveAcesso = modelViewNFeSaida.data(item.row(), "chaveAcesso").toString();
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando xml: " + query.lastError().text());
+      emit errorSignal("Erro buscando xml: " + query.lastError().text());
       return;
     }
 
@@ -321,7 +329,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     qDebug() << "xml: " << xmlFolder + "/" + chaveAcesso + ".xml";
 
     if (not fileXml.open(QFile::WriteOnly)) {
-      QMessageBox::critical(this, "Erro!", "Erro abrindo arquivo para escrita xml: " + fileXml.errorString());
+      emit errorSignal("Erro abrindo arquivo para escrita xml: " + fileXml.errorString());
       return;
     }
 
@@ -337,7 +345,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     if (not pdfOrigem) return;
 
     if (pdfOrigem->isEmpty()) {
-      QMessageBox::critical(this, "Erro!", "Resposta vazia!");
+      emit errorSignal("Resposta vazia!");
       return;
     }
 
@@ -350,16 +358,16 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     if (filePdf.exists()) filePdf.remove();
 
     if (not QFile::copy(*pdfOrigem, pdfDestino)) {
-      QMessageBox::critical(this, "Erro!", "Erro copiando pdf!");
+      emit errorSignal("Erro copiando pdf!");
       return;
     }
   }
 
-  QMessageBox::information(this, "Aviso!", "Arquivos exportados com sucesso para " + pdfFolder + "!");
+  emit informationSignal("Arquivos exportados com sucesso para " + pdfFolder + "!");
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -369,24 +377,24 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
   //  if (model.data(selection.first().row(), "status").toString() != "NOTA PENDENTE") {
-  //    QMessageBox::critical(this, "Erro!", "Nota não está pendente!");
+  //    emit errorSignal("Nota não está pendente!");
   //    return;
   //  }
 
-  const int idNFe = model.data(selection.first().row(), "idNFe").toInt();
+  const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
 
   if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
     auto [xml, resposta] = *tuple;
 
     emit transactionStarted();
 
-    QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-    QSqlQuery("START TRANSACTION").exec();
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+    if (not QSqlQuery("START TRANSACTION").exec()) return;
 
     if (not atualizarNFe(idNFe, xml)) {
       QSqlQuery("ROLLBACK").exec();
@@ -394,11 +402,11 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
       return;
     }
 
-    QSqlQuery("COMMIT").exec();
+    if (not QSqlQuery("COMMIT").exec()) return;
 
     emit transactionEnded();
 
-    QMessageBox::information(this, "Aviso!", resposta);
+    emit informationSignal(resposta);
   }
 }
 

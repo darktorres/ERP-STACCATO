@@ -44,7 +44,7 @@ class ItemDesignIntf : public BaseDesignIntf {
   Q_ENUMS(LocationType)
 public:
   enum LocationType { Band, Page };
-  ItemDesignIntf(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
+  ItemDesignIntf(const QString &xmlTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   LocationType itemLocation() { return m_itemLocation; }
   void setItemLocation(LocationType location);
   void setStretchToMaxHeight(bool value);
@@ -73,14 +73,14 @@ protected:
 class ContentItemDesignIntf : public ItemDesignIntf {
   Q_OBJECT
 public:
-  ContentItemDesignIntf(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0) : ItemDesignIntf(xmlTypeName, owner, parent) {}
+  ContentItemDesignIntf(const QString &xmlTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr) : ItemDesignIntf(xmlTypeName, owner, parent) {}
   virtual QString content() const = 0;
   virtual void setContent(const QString &value) = 0;
 };
 
 class LayoutDesignIntf : public ItemDesignIntf {
 public:
-  LayoutDesignIntf(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0) : ItemDesignIntf(xmlTypeName, owner, parent) {}
+  LayoutDesignIntf(const QString &xmlTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr) : ItemDesignIntf(xmlTypeName, owner, parent) {}
   virtual void addChild(BaseDesignIntf *item, bool updateSize = true) = 0;
   virtual void restoreChild(BaseDesignIntf *item) = 0;
   virtual int childrenCount() = 0;

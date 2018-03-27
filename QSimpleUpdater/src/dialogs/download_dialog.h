@@ -34,7 +34,7 @@ class DownloadDialog : public QWidget {
   Q_OBJECT
 
 public:
-  explicit DownloadDialog(QWidget *parent = 0);
+  explicit DownloadDialog(QWidget *parent = nullptr);
   ~DownloadDialog();
 
   void beginDownload(const QUrl &url);
@@ -58,7 +58,7 @@ private:
 
   uint m_start_time;
 
-  float roundNumber(const float &input);
+  double roundNumber(const double &input);
 };
 
 #endif

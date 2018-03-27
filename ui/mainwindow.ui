@@ -196,6 +196,7 @@
       <normaloff>:/calculator-icon.png</normaloff>:/calculator-icon.png</iconset>
     </property>
     <addaction name="actionCalculadora"/>
+    <addaction name="actionCalcular_frete"/>
    </widget>
    <addaction name="menuVenda"/>
    <addaction name="menuAdministracao"/>
@@ -305,6 +306,11 @@
   <action name="actionGerenciar_preco_estoque">
    <property name="text">
     <string>Gerenciar preço estoque</string>
+   </property>
+  </action>
+  <action name="actionCalcular_frete">
+   <property name="text">
+    <string>Calcular frete</string>
    </property>
   </action>
  </widget>

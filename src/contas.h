@@ -1,27 +1,21 @@
 #ifndef CONTAS_H
 #define CONTAS_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Contas;
 }
 
-class Contas final : public QDialog {
+class Contas final : public Dialog {
   Q_OBJECT
 
 public:
   enum class Tipo { Pagar, Receber };
-  explicit Contas(const Tipo tipo, QWidget *parent = 0);
+  explicit Contas(const Tipo tipo, QWidget *parent = nullptr);
   ~Contas();
-  void viewConta(const QString &idPagamento, const QString &contraparte);
-
-private slots:
-  void on_pushButtonSalvar_clicked();
-  void on_tablePendentes_entered(const QModelIndex &);
-  void on_tableProcessados_entered(const QModelIndex &);
+  auto viewConta(const QString &idPagamento, const QString &contraparte) -> void;
 
 private:
   // attributes
@@ -30,10 +24,13 @@ private:
   SqlRelationalTableModel modelProcessados;
   Ui::Contas *ui;
   // methods
-  bool verifyFields();
-  void preencher(const QModelIndex &index);
-  void setupTables();
-  void validarData(const QModelIndex &index);
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto on_tablePendentes_entered(const QModelIndex &) -> void;
+  auto on_tableProcessados_entered(const QModelIndex &) -> void;
+  auto preencher(const QModelIndex &index) -> void;
+  auto setupTables() -> void;
+  auto validarData(const QModelIndex &index) -> void;
+  auto verifyFields() -> bool;
 };
 
 #endif // CONTAS_H

@@ -6,8 +6,12 @@
 #include "ui_followup.h"
 #include "usersession.h"
 
-FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
+FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : Dialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
   ui->setupUi(this);
+
+  connect(ui->dateFollowup, &QDateTimeEdit::dateChanged, this, &FollowUp::on_dateFollowup_dateChanged);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &FollowUp::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &FollowUp::on_pushButtonSalvar_clicked);
 
   setWindowFlags(Qt::Window);
 
@@ -51,22 +55,22 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   }
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando followup: " + query.lastError().text());
+    emit errorSignal("Erro salvando followup: " + query.lastError().text());
     return;
   }
 
-  QMessageBox::information(this, "Aviso!", "Followup salvo com sucesso!");
+  emit informationSignal("Followup salvo com sucesso!");
   close();
 }
 
 bool FollowUp::verifyFields() {
   if (tipo == Tipo::Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
-    QMessageBox::critical(this, "Erro!", "Deve selecionar uma temperatura!");
+    emit errorSignal("Deve selecionar uma temperatura!");
     return false;
   }
 
   if (ui->plainTextEdit->toPlainText().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Deve escrever uma observação!");
+    emit errorSignal("Deve escrever uma observação!");
     return false;
   }
 
@@ -74,24 +78,24 @@ bool FollowUp::verifyFields() {
 }
 
 void FollowUp::setupTables() {
-  model.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
-  model.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
+  modelViewFollowup.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
+  modelViewFollowup.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
-  model.setHeaderData("idOrcamento", "Orçamento");
-  model.setHeaderData("idVenda", "Venda");
-  model.setHeaderData("nome", "Usuário");
-  model.setHeaderData("observacao", "Observação");
-  model.setHeaderData("dataFollowup", "Data");
-  model.setHeaderData("dataProxFollowup", "Próx. Data");
+  modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
+  modelViewFollowup.setHeaderData("idVenda", "Venda");
+  modelViewFollowup.setHeaderData("nome", "Usuário");
+  modelViewFollowup.setHeaderData("observacao", "Observação");
+  modelViewFollowup.setHeaderData("dataFollowup", "Data");
+  modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
 
-  model.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
+  modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela followup: " + model.lastError().text());
+  if (not modelViewFollowup.select()) {
+    emit errorSignal("Erro lendo tabela followup: " + modelViewFollowup.lastError().text());
     return;
   }
 
-  ui->table->setModel(new FollowUpProxyModel(&model, this));
+  ui->table->setModel(new FollowUpProxyModel(&modelViewFollowup, this));
   ui->table->hideColumn("semaforo");
 
   ui->table->resizeColumnsToContents();

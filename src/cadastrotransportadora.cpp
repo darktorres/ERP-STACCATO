@@ -11,7 +11,29 @@
 CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroTransportadora::on_checkBoxMostrarInativos_clicked);
+  connect(ui->checkBoxMostrarInativosVeiculo, &QCheckBox::toggled, this, &CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled);
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroTransportadora::on_lineEditCEP_textChanged);
+  connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroTransportadora::on_lineEditCNPJ_textEdited);
+  connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonAdicionarEnd_clicked);
+  connect(ui->pushButtonAdicionarVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonAtualizar_clicked);
+  connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonAtualizarEnd_clicked);
+  connect(ui->pushButtonAtualizarVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonBuscar_clicked);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonEndLimpar_clicked);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonNovoCad_clicked);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemover_clicked);
+  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemoverEnd_clicked);
+  connect(ui->pushButtonRemoverVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked);
+  connect(ui->pushButtonVeiculoLimpar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonVeiculoLimpar_clicked);
+  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroTransportadora::on_tableEndereco_clicked);
+  connect(ui->tableEndereco, &TableView::entered, this, &CadastroTransportadora::on_tableEndereco_entered);
+  connect(ui->tableVeiculo, &TableView::clicked, this, &CadastroTransportadora::on_tableVeiculo_clicked);
+  connect(ui->tableVeiculo, &TableView::entered, this, &CadastroTransportadora::on_tableVeiculo_entered);
+
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setupUi();
   setupTables();
@@ -39,7 +61,7 @@ void CadastroTransportadora::setupTables() {
 
   modelVeiculo.setFilter("idVeiculo = 0");
 
-  if (not modelVeiculo.select()) QMessageBox::critical(this, "Erro!", "Ocorreu um erro ao acessar a tabela de veículo: " + modelVeiculo.lastError().text());
+  if (not modelVeiculo.select()) emit errorSignal("Ocorreu um erro ao acessar a tabela de veículo: " + modelVeiculo.lastError().text());
 
   ui->tableVeiculo->setModel(&modelVeiculo);
   ui->tableVeiculo->hideColumn("idVeiculo");
@@ -61,7 +83,7 @@ void CadastroTransportadora::clearFields() {
 }
 
 bool CadastroTransportadora::verifyFields() {
-  for (const auto &line : ui->groupBox_7->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBox_7->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -124,7 +146,7 @@ void CadastroTransportadora::on_pushButtonNovoCad_clicked() {
   modelVeiculo.setFilter("0");
 
   if (not modelVeiculo.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela veiculo: " + modelVeiculo.lastError().text());
+    emit errorSignal("Erro lendo tabela veiculo: " + modelVeiculo.lastError().text());
     return;
   }
 }
@@ -140,7 +162,7 @@ void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
 
 void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
   if (not cadastrarEndereco()) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este endereço!");
+    emit errorSignal("Não foi possível cadastrar este endereço!");
     return;
   }
 
@@ -149,7 +171,7 @@ void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
 
 void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
   if (not cadastrarEndereco(true)) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível atualizar este endereço!");
+    emit errorSignal("Não foi possível atualizar este endereço!");
     return;
   }
 
@@ -165,12 +187,12 @@ void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
 
   if (msgBox.exec() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando desativado!");
+      emit errorSignal("Erro marcando desativado!");
       return;
     }
 
     if (not modelEnd.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + modelEnd.lastError().text());
+      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
       return;
     }
 
@@ -183,13 +205,13 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
 }
 
 bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
-  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    QMessageBox::critical(this, "Erro!", "CEP inválido!");
+    emit errorSignal("CEP inválido!");
     return false;
   }
 
@@ -241,7 +263,7 @@ void CadastroTransportadora::on_lineEditCEP_textChanged(const QString &cep) {
   CepCompleter cc;
 
   if (not cc.buscaCEP(cep)) {
-    QMessageBox::warning(this, "Aviso!", "CEP não encontrado!");
+    emit warningSignal("CEP não encontrado!");
     return;
   }
 
@@ -274,7 +296,7 @@ bool CadastroTransportadora::viewRegister() {
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + " AND desativado = FALSE");
 
   if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço transportadora: " + modelEnd.lastError().text());
+    emit errorSignal("Erro lendo tabela endereço transportadora: " + modelEnd.lastError().text());
     return false;
   }
 
@@ -283,7 +305,7 @@ bool CadastroTransportadora::viewRegister() {
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + " AND desativado = FALSE");
 
   if (not modelVeiculo.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela veículo: " + modelVeiculo.lastError().text());
+    emit errorSignal("Erro lendo tabela veículo: " + modelVeiculo.lastError().text());
     return false;
   }
 
@@ -292,12 +314,12 @@ bool CadastroTransportadora::viewRegister() {
   return true;
 }
 
-void CadastroTransportadora::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
+void CadastroTransportadora::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
 
 void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
-  for (const auto &line : ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
@@ -323,7 +345,7 @@ bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
   if (not cadastrarVeiculo()) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este veículo!");
+    emit errorSignal("Não foi possível cadastrar este veículo!");
     return;
   }
 
@@ -332,7 +354,7 @@ void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
 
 void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
   if (not cadastrarVeiculo(true)) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível atualizar este veículo!");
+    emit errorSignal("Não foi possível atualizar este veículo!");
     return;
   }
 
@@ -362,12 +384,12 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 
   if (msgBox.exec() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando desativado!");
+      emit errorSignal("Erro marcando desativado!");
       return;
     }
 
     if (not modelVeiculo.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + modelVeiculo.lastError().text());
+      emit errorSignal("Não foi possível remover este item: " + modelVeiculo.lastError().text());
       return;
     }
 

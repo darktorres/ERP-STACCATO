@@ -41,8 +41,8 @@ class ReportFooter : public BandDesignIntf {
   Q_PROPERTY(int maxScalePercent READ maxScalePercent WRITE setMaxScalePercent)
   Q_PROPERTY(bool splittable READ isSplittable WRITE setSplittable)
 public:
-  ReportFooter(QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  ReportFooter(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 
 protected:
   QColor bandColor() const;

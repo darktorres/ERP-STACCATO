@@ -52,9 +52,9 @@ namespace LimeReport {
 BaseDesignIntf::BaseDesignIntf(const QString &storageTypeName, QObject *owner, QGraphicsItem *parent)
     : QObject(owner), QGraphicsItem(parent), m_resizeHandleSize(Const::RESIZE_HANDLE_SIZE), m_selectionPenSize(Const::SELECTION_PEN_SIZE),
       m_possibleResizeDirectionFlags(ResizeTop | ResizeBottom | ResizeLeft | ResizeRight), m_possibleMoveDirectionFlags(All), m_resizeDirectionFlags(0), m_width(200), m_height(50),
-      m_fontColor(Qt::black), m_mmFactor(Const::mmFACTOR), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags(0), m_storageTypeName(storageTypeName),
-      m_itemMode(DesignMode), m_objectState(ObjectCreated), m_selectionMarker(0), m_joinMarker(0), m_backgroundBrushStyle(SolidPattern), m_backgroundColor(Qt::white), m_margin(4),
-      m_itemAlign(DesignedItemAlign), m_changingItemAlign(false), m_borderColor(Qt::black), m_reportSettings(0), m_patternName("") {
+      m_fontColor(Qt::black), m_mmFactor(Const::mmFACTOR), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags(nullptr),
+      m_storageTypeName(storageTypeName), m_itemMode(DesignMode), m_objectState(ObjectCreated), m_selectionMarker(nullptr), m_joinMarker(nullptr), m_backgroundBrushStyle(SolidPattern),
+      m_backgroundColor(Qt::white), m_margin(4), m_itemAlign(DesignedItemAlign), m_changingItemAlign(false), m_borderColor(Qt::black), m_reportSettings(nullptr), m_patternName("") {
   setGeometry(QRectF(0, 0, m_width, m_height));
   if (BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(parent)) {
     m_font = item->font();
@@ -340,8 +340,7 @@ void BaseDesignIntf::hoverMoveEvent(QGraphicsSceneHoverEvent *event) {
 }
 
 void BaseDesignIntf::invalidateRects(QVector<QRectF *> rects) {
-  foreach (QRectF *rect, rects)
-    scene()->update(mapToScene(*rect).boundingRect());
+  for (QRectF *rect : rects) scene()->update(mapToScene(*rect).boundingRect());
 }
 
 void BaseDesignIntf::hoverLeaveEvent(QGraphicsSceneHoverEvent *) {
@@ -496,6 +495,7 @@ QPointF BaseDesignIntf::modifyPosForAlignedItem(const QPointF &pos) {
       break;
     case ParentWidthItemAlign:
       result.setX(leftBorder);
+      [[fallthrough]];
     case DesignedItemAlign:
       break;
     }
@@ -511,7 +511,7 @@ void BaseDesignIntf::turnOnJoinMarker(bool value) {
     m_joinMarker->setVisible(true);
   } else {
     delete m_joinMarker;
-    m_joinMarker = 0;
+    m_joinMarker = nullptr;
   }
 }
 
@@ -541,6 +541,7 @@ void BaseDesignIntf::updatePossibleDirectionFlags() {
     break;
   case ParentWidthItemAlign:
     setPossibleResizeDirectionFlags(ResizeBottom | ResizeTop);
+    [[fallthrough]];
   case CenterItemAlign:
   case DesignedItemAlign:
     break;
@@ -555,7 +556,7 @@ void BaseDesignIntf::turnOnSelectionMarker(bool value) {
     m_selectionMarker->setVisible(true);
   } else {
     delete m_selectionMarker;
-    m_selectionMarker = 0;
+    m_selectionMarker = nullptr;
   }
 }
 
@@ -567,7 +568,9 @@ ReportSettings *BaseDesignIntf::reportSettings() const { return m_reportSettings
 
 void BaseDesignIntf::setReportSettings(ReportSettings *reportSettings) {
   m_reportSettings = reportSettings;
-  foreach (BaseDesignIntf *child, childBaseItems()) { child->setReportSettings(reportSettings); }
+  for (BaseDesignIntf *child : childBaseItems()) {
+    child->setReportSettings(reportSettings);
+  }
 }
 
 QColor BaseDesignIntf::borderColor() const { return m_borderColor; }
@@ -799,9 +802,9 @@ void BaseDesignIntf::parentChangedEvent(BaseDesignIntf *) {}
 
 void BaseDesignIntf::restoreLinks() {
 #ifdef HAVE_QT5
-  foreach (QObject *child, children()) {
+  for (QObject *child : children()) {
 #else
-  foreach (QObject *child, QObject::children()) {
+  for (QObject *child : QObject::children()) {
 #endif
     BaseDesignIntf *childItem = dynamic_cast<BaseDesignIntf *>(child);
     if (childItem) {
@@ -837,7 +840,7 @@ void BaseDesignIntf::moveSelectedItems(QPointF delta) {
   QList<QGraphicsItem *> selectedItems;
   selectedItems = scene()->selectedItems();
   BaseDesignIntf *selectedItem;
-  foreach (QGraphicsItem *item, selectedItems) {
+  for (QGraphicsItem *item : selectedItems) {
     if (item != this) {
       selectedItem = dynamic_cast<BaseDesignIntf *>(item);
       if (selectedItem && !selectedItem->isBand()) {
@@ -851,7 +854,7 @@ void BaseDesignIntf::setItemPos(qreal x, qreal y) { setItemPos(QPointF(x, y)); }
 
 void BaseDesignIntf::setItemMode(ItemMode mode) {
   m_itemMode = mode;
-  foreach (QGraphicsItem *item, childItems()) {
+  for (QGraphicsItem *item : childItems()) {
     BaseDesignIntf *ri = dynamic_cast<BaseDesignIntf *>(item);
     if (ri) ri->setItemMode(mode);
   }
@@ -983,7 +986,7 @@ void BaseDesignIntf::drawResizeZone(QPainter * /*painter*/) {
   //        painter->setPen(QPen(Const::RESIZE_ZONE_COLOR));
   //        (isSelected()) ? painter->setOpacity(Const::SELECTED_RESIZE_ZONE_OPACITY) : painter->setOpacity(Const::RESIZE_ZONE_OPACITY);
   //        painter->setBrush(QBrush(Qt::green, Qt::SolidPattern));
-  //        foreach(QRectF * resizeArea, m_resizeAreas) painter->drawRect(*resizeArea);
+  //        for(QRectF * resizeArea : m_resizeAreas) painter->drawRect(*resizeArea);
   //        painter->restore();
   //    }
 }
@@ -1005,7 +1008,7 @@ ReportEnginePrivate *BaseDesignIntf::reportEditor() {
   if (page)
     return page->reportEditor();
   else
-    return 0;
+    return nullptr;
 }
 
 void BaseDesignIntf::updateItemSize(DataSourceManager *dataManager, RenderPass pass, int maxHeight) {
@@ -1020,7 +1023,7 @@ bool BaseDesignIntf::isNeedUpdateSize(RenderPass /*pass*/) const { return false;
 void BaseDesignIntf::drawPinArea(QPainter *painter) const { painter->drawRect(QRect(0, 0, 16, 16)); }
 
 QObject *BaseDesignIntf::createElement(const QString & /*collectionName*/, const QString &elementType) {
-  BaseDesignIntf *obj = 0;
+  BaseDesignIntf *obj = nullptr;
   try {
     if (LimeReport::DesignElementsFactory::instance().objectCreator(elementType)) {
       obj = LimeReport::DesignElementsFactory::instance().objectCreator(elementType)(this, this);
@@ -1040,9 +1043,9 @@ void BaseDesignIntf::collectionLoadFinished(const QString &collectionName) {
   if (collectionName.compare("children", Qt::CaseInsensitive) == 0) {
     if (page()) {
 #ifdef HAVE_QT5
-      foreach (QObject *obj, children()) {
+      for (QObject *obj : children()) {
 #else
-      foreach (QObject *obj, QObject::children()) {
+      for (QObject *obj : QObject::children()) {
 #endif
         BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(obj);
         if (item) {
@@ -1058,9 +1061,9 @@ BaseDesignIntf *BaseDesignIntf::cloneItem(ItemMode mode, QObject *owner, QGraphi
   BaseDesignIntf *clone = cloneItemWOChild(mode, owner, parent);
   clone->setPatternName(this->objectName());
 #ifdef HAVE_QT5
-  foreach (QObject *child, children()) {
+  for (QObject *child : children()) {
 #else
-  foreach (QObject *child, QObject::children()) {
+  for (QObject *child : QObject::children()) {
 #endif
     BaseDesignIntf *childItem = dynamic_cast<BaseDesignIntf *>(child);
     if (childItem) {
@@ -1105,21 +1108,21 @@ BaseDesignIntf *BaseDesignIntf::cloneUpperPart(int height, QObject *owner, QGrap
   Q_UNUSED(height);
   Q_UNUSED(owner);
   Q_UNUSED(parent);
-  return 0;
+  return nullptr;
 }
 
 BaseDesignIntf *BaseDesignIntf::cloneBottomPart(int height, QObject *owner, QGraphicsItem *parent) {
   Q_UNUSED(height);
   Q_UNUSED(owner);
   Q_UNUSED(parent);
-  return 0;
+  return nullptr;
 }
 
 BaseDesignIntf *BaseDesignIntf::cloneEmpty(int height, QObject *owner, QGraphicsItem *parent) {
   Q_UNUSED(height);
   Q_UNUSED(owner);
   Q_UNUSED(parent);
-  return 0;
+  return nullptr;
 }
 
 void BaseDesignIntf::objectLoadStarted() { m_objectState = ObjectLoading; }
@@ -1133,7 +1136,7 @@ void BaseDesignIntf::parentObjectLoadFinished() {}
 
 QList<BaseDesignIntf *> BaseDesignIntf::childBaseItems() {
   QList<BaseDesignIntf *> resList;
-  foreach (QGraphicsItem *item, childItems()) {
+  for (QGraphicsItem *item : childItems()) {
     BaseDesignIntf *baseItem = dynamic_cast<BaseDesignIntf *>(item);
     if (baseItem) resList << baseItem;
   }
@@ -1141,7 +1144,7 @@ QList<BaseDesignIntf *> BaseDesignIntf::childBaseItems() {
 }
 
 BaseDesignIntf *BaseDesignIntf::childByName(const QString &name) {
-  foreach (BaseDesignIntf *item, childBaseItems()) {
+  for (BaseDesignIntf *item : childBaseItems()) {
     if (item->objectName().compare(name, Qt::CaseInsensitive) == 0) {
       return item;
     } else {
@@ -1149,10 +1152,10 @@ BaseDesignIntf *BaseDesignIntf::childByName(const QString &name) {
       if (child) return child;
     }
   }
-  return 0;
+  return nullptr;
 }
 
-QWidget *BaseDesignIntf::defaultEditor() { return 0; }
+QWidget *BaseDesignIntf::defaultEditor() { return nullptr; }
 
 void BaseDesignIntf::notify(const QString &propertyName, const QVariant &oldValue, const QVariant &newValue) {
   if (!isLoading()) emit propertyChanged(propertyName, oldValue, newValue);

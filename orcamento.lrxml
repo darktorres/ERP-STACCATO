@@ -5,23 +5,23 @@
     <pages Type="Collection">
       <item ClassName="LimeReport::PageDesignIntf" Type="Object">
         <objectName Type="QString">page1</objectName>
-        <sceneRect height="2200" Type="QRect" x="-50" y="-50" width="3070"/>
+        <sceneRect width="3070" height="2200" y="-50" Type="QRect" x="-50"/>
         <bspTreeDepth Type="int" Value="5"/>
-        <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+        <font pointSize="8" weight="50" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
         <sortCacheEnabled Type="bool" Value="0"/>
         <stickyFocus Type="bool" Value="0"/>
         <minimumRenderSize Type="qreal" Value="0"/>
         <pageItem ClassName="PageItem" Type="Object">
           <objectName Type="QString">ReportPage1</objectName>
-          <geometry height="2100" Type="QRect" x="0" y="0" width="2970"/>
+          <geometry width="2970" height="2100" y="0" Type="QRect" x="0"/>
           <children Type="Collection">
             <item ClassName="ReportHeader" Type="Object">
               <objectName Type="QString">ReportHeader1</objectName>
-              <geometry height="450" Type="QRect" x="50" y="50" width="2870"/>
+              <geometry width="2870" height="450" y="50" Type="QRect" x="50"/>
               <children Type="Collection">
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem30</objectName>
-                  <geometry height="50" Type="QRect" x="2350" y="16" width="500"/>
+                  <geometry width="500" height="50" y="16" Type="QRect" x="2350"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -37,7 +37,7 @@
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -60,7 +60,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem31</objectName>
-                  <geometry height="52" Type="QRect" x="670" y="76" width="1560"/>
+                  <geometry width="1560" height="52" y="76" Type="QRect" x="670"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -76,7 +76,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -99,7 +99,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem32</objectName>
-                  <geometry height="50" Type="QRect" x="670" y="138" width="1400"/>
+                  <geometry width="1400" height="50" y="138" Type="QRect" x="670"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -115,7 +115,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -138,7 +138,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem33</objectName>
-                  <geometry height="50" Type="QRect" x="670" y="198" width="1850"/>
+                  <geometry width="1850" height="50" y="198" Type="QRect" x="670"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -154,7 +154,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                  <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -177,7 +177,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem34</objectName>
-                  <geometry height="50" Type="QRect" x="670" y="258" width="1850"/>
+                  <geometry width="1850" height="50" y="258" Type="QRect" x="670"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -193,7 +193,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                  <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -216,7 +216,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem35</objectName>
-                  <geometry height="50" Type="QRect" x="670" y="318" width="1010"/>
+                  <geometry width="1010" height="50" y="318" Type="QRect" x="670"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -232,7 +232,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                  <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -255,7 +255,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem36</objectName>
-                  <geometry height="58" Type="QRect" x="670" y="380" width="880"/>
+                  <geometry width="880" height="58" y="380" Type="QRect" x="670"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -271,7 +271,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -294,7 +294,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem37</objectName>
-                  <geometry height="50" Type="QRect" x="672" y="16" width="1140"/>
+                  <geometry width="1140" height="50" y="16" Type="QRect" x="672"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -310,7 +310,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -333,7 +333,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem38</objectName>
-                  <geometry height="50" Type="QRect" x="1826" y="16" width="520"/>
+                  <geometry width="520" height="50" y="16" Type="QRect" x="1826"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -349,7 +349,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -372,7 +372,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem39</objectName>
-                  <geometry height="58" Type="QRect" x="1560" y="380" width="1300"/>
+                  <geometry width="1300" height="58" y="380" Type="QRect" x="1560"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -388,7 +388,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -411,7 +411,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem40</objectName>
-                  <geometry height="50" Type="QRect" x="1690" y="318" width="380"/>
+                  <geometry width="380" height="50" y="318" Type="QRect" x="1690"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -427,7 +427,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -450,7 +450,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem41</objectName>
-                  <geometry height="50" Type="QRect" x="2080" y="318" width="776"/>
+                  <geometry width="776" height="50" y="318" Type="QRect" x="2080"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -466,7 +466,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -489,7 +489,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem42</objectName>
-                  <geometry height="50" Type="QRect" x="2526" y="198" width="330"/>
+                  <geometry width="330" height="50" y="198" Type="QRect" x="2526"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -505,7 +505,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -528,7 +528,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem43</objectName>
-                  <geometry height="50" Type="QRect" x="2526" y="258" width="330"/>
+                  <geometry width="330" height="50" y="258" Type="QRect" x="2526"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -544,7 +544,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -567,7 +567,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem44</objectName>
-                  <geometry height="50" Type="QRect" x="2456" y="138" width="400"/>
+                  <geometry width="400" height="50" y="138" Type="QRect" x="2456"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -583,7 +583,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -606,7 +606,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem45</objectName>
-                  <geometry height="50" Type="QRect" x="2080" y="138" width="366"/>
+                  <geometry width="366" height="50" y="138" Type="QRect" x="2080"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -622,7 +622,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -645,7 +645,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem46</objectName>
-                  <geometry height="52" Type="QRect" x="2236" y="76" width="620"/>
+                  <geometry width="620" height="52" y="76" Type="QRect" x="2236"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -661,7 +661,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -684,7 +684,7 @@
                 </item>
                 <item ClassName="ImageItem" Type="Object">
                   <objectName Type="QString">ImageItem46</objectName>
-                  <geometry height="240" Type="QRect" x="4" y="10" width="650"/>
+                  <geometry width="650" height="240" y="10" Type="QRect" x="4"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -707,7 +707,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem47</objectName>
-                  <geometry height="140" Type="QRect" x="4" y="300" width="650"/>
+                  <geometry width="650" height="140" y="300" Type="QRect" x="4"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -723,7 +723,7 @@
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="1"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="50" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -746,7 +746,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem48</objectName>
-                  <geometry height="40" Type="QRect" x="4" y="260" width="650"/>
+                  <geometry width="650" height="40" y="260" Type="QRect" x="4"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -762,7 +762,7 @@
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="10" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -801,11 +801,11 @@
             </item>
             <item ClassName="ReportFooter" Type="Object">
               <objectName Type="QString">ReportFooter1</objectName>
-              <geometry height="700" Type="QRect" x="50" y="702" width="2870"/>
+              <geometry width="2870" height="768" y="702" Type="QRect" x="50"/>
               <children Type="Collection">
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem11</objectName>
-                  <geometry height="50" Type="QRect" x="2490" y="270" width="362"/>
+                  <geometry width="362" height="50" y="270" Type="QRect" x="2490"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -821,7 +821,7 @@
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -844,7 +844,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem12</objectName>
-                  <geometry height="50" Type="QRect" x="2490" y="210" width="362"/>
+                  <geometry width="362" height="50" y="210" Type="QRect" x="2490"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -860,7 +860,7 @@
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -883,7 +883,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem13</objectName>
-                  <geometry height="50" Type="QRect" x="2490" y="150" width="362"/>
+                  <geometry width="362" height="50" y="150" Type="QRect" x="2490"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -899,7 +899,7 @@
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -922,7 +922,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem14</objectName>
-                  <geometry height="50" Type="QRect" x="2490" y="90" width="362"/>
+                  <geometry width="362" height="50" y="90" Type="QRect" x="2490"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -938,7 +938,7 @@
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -961,7 +961,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem15</objectName>
-                  <geometry height="50" Type="QRect" x="2490" y="30" width="362"/>
+                  <geometry width="362" height="50" y="30" Type="QRect" x="2490"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -977,7 +977,7 @@
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1000,7 +1000,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem16</objectName>
-                  <geometry height="50" Type="QRect" x="10" y="20" width="2260"/>
+                  <geometry width="2260" height="50" y="20" Type="QRect" x="10"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1016,7 +1016,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1039,7 +1039,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem17</objectName>
-                  <geometry height="50" Type="QRect" x="220" y="80" width="2050"/>
+                  <geometry width="2050" height="50" y="80" Type="QRect" x="220"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1055,7 +1055,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1078,7 +1078,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem26</objectName>
-                  <geometry height="50" Type="QRect" x="220" y="140" width="2050"/>
+                  <geometry width="2050" height="50" y="140" Type="QRect" x="220"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1094,7 +1094,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1117,7 +1117,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem27</objectName>
-                  <geometry height="50" Type="QRect" x="220" y="200" width="2050"/>
+                  <geometry width="2050" height="50" y="200" Type="QRect" x="220"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1133,7 +1133,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1156,7 +1156,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem28</objectName>
-                  <geometry height="120" Type="QRect" x="10" y="260" width="2260"/>
+                  <geometry width="2260" height="120" y="260" Type="QRect" x="10"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1172,7 +1172,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1195,7 +1195,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem29</objectName>
-                  <geometry height="220" Type="QRect" x="10" y="390" width="2840"/>
+                  <geometry width="2840" height="300" y="390" Type="QRect" x="10"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -1206,12 +1206,12 @@
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">Os produtos só serão comprados a partir do pagamento parcial/total. Por trabalharmos com produtos sob encomenda, não aceitaremos devolução de mercadorias. Pedidos de complemento, caso não haja mesmo lote em estoque, estão sujeitos à variação de tonalidade e tamanho das peças. As mercadorias poderão apresentar pequena diferença de tonalidade em relação ao mostruário da loja. Nosso serviço de especificação e paginação é mera cortesia, cabendo ao cliente ou ao profissional que o acompanha a conferência de quantidades e produtos escolhidos. Após fechamento do pedido, caso houver necessidade, entre em contatos com os fones: ENTREGAS (11) 98817 5628 e ASSISTÊNCIA TÉCNICA (11) 98817 2540</content>
+                  <content Type="QString">Os produtos só serão comprados a partir do pagamento parcial/total. Por trabalharmos com produtos sob encomenda, não aceitaremos devolução de mercadorias. Pedidos de complemento, caso não haja mesmo lote em estoque, estão sujeitos à variação de tonalidade e tamanho das peças. As mercadorias poderão apresentar pequena diferença de tonalidade em relação ao mostruário da loja. Nosso serviço de especificação e paginação é mera cortesia, cabendo ao cliente ou ao profissional que o acompanha a conferência de quantidades e produtos escolhidos. O frete contratado nesta compra limita-se à entrega no endereço destacado em local limpo e de fácil acesso, eventuais içamentos e entregas especiais com dificuldades de acesso deverão ser contratadas a parte. Frustração de entrega por responsabilidade do comprador acarretarão nova cobrança do valor de frete. Após fechamento do pedido, caso houver necessidade, entre em contatos com os fones: ENTREGAS (11) 98817 5628 e ASSISTÊNCIA TÉCNICA (11) 98817 2540</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1234,7 +1234,7 @@
                 </item>
                 <item ClassName="ShapeItem" Type="Object">
                   <objectName Type="QString">ShapeItem2</objectName>
-                  <geometry height="690" Type="QRect" x="0" y="0" width="2870"/>
+                  <geometry width="2870" height="758" y="0" Type="QRect" x="0"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="-0.1"/>
                   <borders Type="enumAndFlags" Value="15"/>
@@ -1256,7 +1256,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem10</objectName>
-                  <geometry height="50" Type="QRect" x="2290" y="30" width="190"/>
+                  <geometry width="190" height="50" y="30" Type="QRect" x="2290"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1272,7 +1272,7 @@
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1295,7 +1295,7 @@
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem49</objectName>
-                  <geometry height="50" Type="QRect" x="2290" y="90" width="190"/>
+                  <geometry width="190" height="50" y="90" Type="QRect" x="2290"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1312,7 +1312,7 @@ Adicional:</content>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="6" italic="0" family="Arial"/>
+                  <font pointSize="6" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1335,7 +1335,7 @@ Adicional:</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem50</objectName>
-                  <geometry height="50" Type="QRect" x="2290" y="270" width="190"/>
+                  <geometry width="190" height="50" y="270" Type="QRect" x="2290"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1351,7 +1351,7 @@ Adicional:</content>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1374,7 +1374,7 @@ Adicional:</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem51</objectName>
-                  <geometry height="50" Type="QRect" x="2290" y="150" width="190"/>
+                  <geometry width="190" height="50" y="150" Type="QRect" x="2290"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1390,7 +1390,7 @@ Adicional:</content>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1413,7 +1413,7 @@ Adicional:</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem52</objectName>
-                  <geometry height="50" Type="QRect" x="2290" y="210" width="190"/>
+                  <geometry width="190" height="50" y="210" Type="QRect" x="2290"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1429,7 +1429,7 @@ Adicional:</content>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1452,7 +1452,7 @@ Adicional:</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem53</objectName>
-                  <geometry height="170" Type="QRect" x="10" y="80" width="200"/>
+                  <geometry width="200" height="170" y="80" Type="QRect" x="10"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1469,7 +1469,7 @@ Pagamento:</content>
                   <alignment Type="enumAndFlags" Value="129"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1492,7 +1492,7 @@ Pagamento:</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem54</objectName>
-                  <geometry height="50" Type="QRect" x="10" y="630" width="1340"/>
+                  <geometry width="1340" height="50" y="702" Type="QRect" x="12"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1508,7 +1508,7 @@ Pagamento:</content>
                   <alignment Type="enumAndFlags" Value="65"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1531,7 +1531,7 @@ Pagamento:</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem55</objectName>
-                  <geometry height="50" Type="QRect" x="1360" y="630" width="870"/>
+                  <geometry width="870" height="50" y="702" Type="QRect" x="1362"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="2"/>
@@ -1547,7 +1547,7 @@ Pagamento:</content>
                   <alignment Type="enumAndFlags" Value="65"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="75" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1587,15 +1587,15 @@ Pagamento:</content>
             </item>
             <item ClassName="Data" Type="Object">
               <objectName Type="QString">DataBand1</objectName>
-              <geometry height="90" Type="QRect" x="50" y="608" width="2870"/>
+              <geometry width="2870" height="90" y="608" Type="QRect" x="50"/>
               <children Type="Collection">
                 <item ClassName="HLayout" Type="Object">
                   <objectName Type="QString">HorizontalLayout52</objectName>
-                  <geometry height="70" Type="QRect" x="0" y="4" width="2872"/>
+                  <geometry width="2872" height="70" y="4" Type="QRect" x="0"/>
                   <children Type="Collection">
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem19</objectName>
-                      <geometry height="70" Type="QRect" x="0" y="0" width="280"/>
+                      <geometry width="280" height="70" y="0" Type="QRect" x="0"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="11"/>
@@ -1611,7 +1611,7 @@ Pagamento:</content>
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="1"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1634,7 +1634,7 @@ Pagamento:</content>
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem20</objectName>
-                      <geometry height="70" Type="QRect" x="280" y="0" width="340"/>
+                      <geometry width="340" height="70" y="0" Type="QRect" x="280"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="15"/>
@@ -1650,7 +1650,7 @@ Pagamento:</content>
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="1"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1673,7 +1673,7 @@ Pagamento:</content>
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem18</objectName>
-                      <geometry height="70" Type="QRect" x="620" y="0" width="850"/>
+                      <geometry width="850" height="70" y="0" Type="QRect" x="620"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="15"/>
@@ -1690,7 +1690,7 @@ $S{ $D{orcamento.formComercial} != "" ? " (" + $D{orcamento.formComercial} + ")"
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="1"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1713,7 +1713,7 @@ $S{ $D{orcamento.formComercial} != "" ? " (" + $D{orcamento.formComercial} + ")"
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem21</objectName>
-                      <geometry height="70" Type="QRect" x="1470" y="0" width="620"/>
+                      <geometry width="620" height="70" y="0" Type="QRect" x="1470"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="15"/>
@@ -1729,7 +1729,7 @@ $S{ $D{orcamento.formComercial} != "" ? " (" + $D{orcamento.formComercial} + ")"
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="1"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1752,7 +1752,7 @@ $S{ $D{orcamento.formComercial} != "" ? " (" + $D{orcamento.formComercial} + ")"
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem22</objectName>
-                      <geometry height="70" Type="QRect" x="2090" y="0" width="270"/>
+                      <geometry width="270" height="70" y="0" Type="QRect" x="2090"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="15"/>
@@ -1768,7 +1768,7 @@ $S{ $D{orcamento.formComercial} != "" ? " (" + $D{orcamento.formComercial} + ")"
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="0"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1791,7 +1791,7 @@ $S{ $D{orcamento.formComercial} != "" ? " (" + $D{orcamento.formComercial} + ")"
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem23</objectName>
-                      <geometry height="70" Type="QRect" x="2360" y="0" width="150"/>
+                      <geometry width="150" height="70" y="0" Type="QRect" x="2360"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="15"/>
@@ -1808,7 +1808,7 @@ $D{orcamento.caixas} cx.</content>
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="1"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1831,7 +1831,7 @@ $D{orcamento.caixas} cx.</content>
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem24</objectName>
-                      <geometry height="70" Type="QRect" x="2510" y="0" width="92"/>
+                      <geometry width="92" height="70" y="0" Type="QRect" x="2510"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="15"/>
@@ -1847,7 +1847,7 @@ $D{orcamento.caixas} cx.</content>
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="1"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1870,7 +1870,7 @@ $D{orcamento.caixas} cx.</content>
                     </item>
                     <item ClassName="TextItem" Type="Object">
                       <objectName Type="QString">TextItem25</objectName>
-                      <geometry height="70" Type="QRect" x="2602" y="0" width="270"/>
+                      <geometry width="270" height="70" y="0" Type="QRect" x="2602"/>
                       <children Type="Collection"/>
                       <zOrder Type="qreal" Value="0"/>
                       <borders Type="enumAndFlags" Value="7"/>
@@ -1886,7 +1886,7 @@ $D{orcamento.caixas} cx.</content>
                       <alignment Type="enumAndFlags" Value="132"/>
                       <autoWidth Type="enumAndFlags" Value="0"/>
                       <autoHeight Type="bool" Value="0"/>
-                      <font underline="0" Type="QFont" stylename="" weight="50" pointSize="8" italic="0" family="Arial"/>
+                      <font pointSize="8" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                       <backgroundOpacity Type="int" Value="100"/>
                       <backgroundMode Type="enumAndFlags" Value="1"/>
                       <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -1946,11 +1946,11 @@ $D{orcamento.caixas} cx.</content>
             </item>
             <item ClassName="PageFooter" Type="Object">
               <objectName Type="QString">PageFooter1</objectName>
-              <geometry height="100" Type="QRect" x="50" y="1406" width="2870"/>
+              <geometry width="2870" height="100" y="1474" Type="QRect" x="50"/>
               <children Type="Collection">
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem1</objectName>
-                  <geometry height="82" Type="QRect" x="741" y="12" width="1388"/>
+                  <geometry width="1388" height="82" y="12" Type="QRect" x="741"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -1966,7 +1966,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="50" pointSize="10" italic="0" family="Arial"/>
+                  <font pointSize="10" weight="50" family="Arial" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -2006,11 +2006,11 @@ $D{orcamento.caixas} cx.</content>
             </item>
             <item ClassName="DataHeader" Type="Object">
               <objectName Type="QString">DataHeaderBand2</objectName>
-              <geometry height="100" Type="QRect" x="50" y="504" width="2870"/>
+              <geometry width="2870" height="100" y="504" Type="QRect" x="50"/>
               <children Type="Collection">
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem2</objectName>
-                  <geometry height="50" Type="QRect" x="0" y="12" width="280"/>
+                  <geometry width="280" height="50" y="12" Type="QRect" x="0"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2026,7 +2026,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2049,7 +2049,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem3</objectName>
-                  <geometry height="50" Type="QRect" x="279" y="12" width="340"/>
+                  <geometry width="340" height="50" y="12" Type="QRect" x="279"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2065,7 +2065,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2088,7 +2088,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem4</objectName>
-                  <geometry height="50" Type="QRect" x="618" y="12" width="860"/>
+                  <geometry width="860" height="50" y="12" Type="QRect" x="618"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2104,7 +2104,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2127,7 +2127,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem5</objectName>
-                  <geometry height="50" Type="QRect" x="1470" y="12" width="620"/>
+                  <geometry width="620" height="50" y="12" Type="QRect" x="1470"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2143,7 +2143,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2166,7 +2166,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem6</objectName>
-                  <geometry height="50" Type="QRect" x="2090" y="12" width="274"/>
+                  <geometry width="274" height="50" y="12" Type="QRect" x="2090"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2182,7 +2182,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2205,7 +2205,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem7</objectName>
-                  <geometry height="50" Type="QRect" x="2360" y="12" width="150"/>
+                  <geometry width="150" height="50" y="12" Type="QRect" x="2360"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2221,7 +2221,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2244,7 +2244,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem8</objectName>
-                  <geometry height="50" Type="QRect" x="2510" y="12" width="100"/>
+                  <geometry width="100" height="50" y="12" Type="QRect" x="2510"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2260,7 +2260,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2283,7 +2283,7 @@ $D{orcamento.caixas} cx.</content>
                 </item>
                 <item ClassName="TextItem" Type="Object">
                   <objectName Type="QString">TextItem9</objectName>
-                  <geometry height="50" Type="QRect" x="2600" y="12" width="270"/>
+                  <geometry width="270" height="50" y="12" Type="QRect" x="2600"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -2299,7 +2299,7 @@ $D{orcamento.caixas} cx.</content>
                   <alignment Type="enumAndFlags" Value="132"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" stylename="" weight="75" pointSize="8" italic="0" family="MS Shell Dlg 2"/>
+                  <font pointSize="8" weight="75" family="MS Shell Dlg 2" italic="0" stylename="" Type="QFont" underline="0"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -2353,7 +2353,7 @@ $D{orcamento.caixas} cx.</content>
           <leftMargin Type="int" Value="5"/>
           <pageOrientation Type="enumAndFlags" Value="1"/>
           <pageSize Type="enumAndFlags" Value="0"/>
-          <gridStep Type="int" Value="10"/>
+          <gridStep Type="int" Value="2"/>
           <fullPage Type="bool" Value="0"/>
           <oldPrintMode Type="bool" Value="0"/>
           <resetPageNumber Type="bool" Value="0"/>

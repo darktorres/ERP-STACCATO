@@ -35,14 +35,16 @@ bool itemSortContainerLessThen(const PItemSortContainer c1, const PItemSortConta
 
 void ItemsContainerDesignInft::snapshotItemsLayout() {
   m_containerItems.clear();
-  foreach (BaseDesignIntf *childItem, childBaseItems()) { m_containerItems.append(PItemSortContainer(new ItemSortContainer(childItem))); }
+  for (BaseDesignIntf *childItem : childBaseItems()) {
+    m_containerItems.append(PItemSortContainer(new ItemSortContainer(childItem)));
+  }
   std::sort(m_containerItems.begin(), m_containerItems.end(), itemSortContainerLessThen);
 }
 
 void ItemsContainerDesignInft::arrangeSubItems(RenderPass pass, DataSourceManager *dataManager, ArrangeType type) {
   bool needArrage = (type == Force);
 
-  foreach (PItemSortContainer item, m_containerItems) {
+  for (PItemSortContainer item : m_containerItems) {
     if (item->m_item->isNeedUpdateSize(pass)) {
       item->m_item->updateItemSize(dataManager, pass);
       needArrage = true;
@@ -70,7 +72,7 @@ void ItemsContainerDesignInft::arrangeSubItems(RenderPass pass, DataSourceManage
 
   if (needArrage || pass == FirstPass) {
     int maxBottom = findMaxBottom();
-    foreach (BaseDesignIntf *item, childBaseItems()) {
+    for (BaseDesignIntf *item : childBaseItems()) {
       ItemDesignIntf *childItem = dynamic_cast<ItemDesignIntf *>(item);
       if (childItem) {
         if (childItem->stretchToMaxHeight()) childItem->setHeight(maxBottom - childItem->geometry().top());
@@ -81,7 +83,7 @@ void ItemsContainerDesignInft::arrangeSubItems(RenderPass pass, DataSourceManage
 
 qreal ItemsContainerDesignInft::findMaxBottom() const {
   qreal maxBottom = 0;
-  foreach (QGraphicsItem *item, childItems()) {
+  for (QGraphicsItem *item : childItems()) {
     BaseDesignIntf *subItem = dynamic_cast<BaseDesignIntf *>(item);
     if (subItem)
       if (subItem->isVisible() && (subItem->geometry().bottom() > maxBottom)) maxBottom = subItem->geometry().bottom();
@@ -91,7 +93,7 @@ qreal ItemsContainerDesignInft::findMaxBottom() const {
 
 qreal ItemsContainerDesignInft::findMaxHeight() const {
   qreal maxHeight = 0;
-  foreach (QGraphicsItem *item, childItems()) {
+  for (QGraphicsItem *item : childItems()) {
     BaseDesignIntf *subItem = dynamic_cast<BaseDesignIntf *>(item);
     if (subItem)
       if (subItem->geometry().height() > maxHeight) maxHeight = subItem->geometry().height();

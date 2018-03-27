@@ -41,10 +41,10 @@ class TextAlignmentEditorWidget:public ItemEditorWidget
 {
     Q_OBJECT
 public:
-    explicit TextAlignmentEditorWidget(ReportDesignWidget* reportEditor, const QString &title, QWidget *parent = 0);
-    explicit TextAlignmentEditorWidget(ReportDesignWidget* reportEditor, QWidget *parent = 0);
-    explicit TextAlignmentEditorWidget(PageDesignIntf* page, const QString &title, QWidget *parent = 0);
-    explicit TextAlignmentEditorWidget(PageDesignIntf* page, QWidget *parent = 0);
+    explicit TextAlignmentEditorWidget(ReportDesignWidget* reportEditor, const QString &title, QWidget *parent = nullptr);
+    explicit TextAlignmentEditorWidget(ReportDesignWidget* reportEditor, QWidget *parent = nullptr);
+    explicit TextAlignmentEditorWidget(PageDesignIntf* page, const QString &title, QWidget *parent = nullptr);
+    explicit TextAlignmentEditorWidget(PageDesignIntf* page, QWidget *parent = nullptr);
 protected:
     void setItemEvent(BaseDesignIntf *item);
 private:

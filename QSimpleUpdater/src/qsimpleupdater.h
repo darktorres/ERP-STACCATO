@@ -43,7 +43,7 @@ class QSimpleUpdater : public QObject {
   Q_OBJECT
 
 public:
-  explicit QSimpleUpdater(QObject *parent = 0);
+  explicit QSimpleUpdater(QObject *parent = nullptr);
 
   QString changeLog() const;
   QString latestVersion() const;

@@ -54,7 +54,7 @@ class BandDesignIntf;
 
 class BandMarker : public QGraphicsItem {
 public:
-  explicit BandMarker(BandDesignIntf *band, QGraphicsItem *parent = 0);
+  explicit BandMarker(BandDesignIntf *band, QGraphicsItem *parent = nullptr);
   QRectF boundingRect() const;
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
   void setHeight(qreal height);
@@ -74,7 +74,7 @@ private:
 
 class BandNameLabel : public QGraphicsItem {
 public:
-  explicit BandNameLabel(BandDesignIntf *band, QGraphicsItem *parent = 0);
+  explicit BandNameLabel(BandDesignIntf *band, QGraphicsItem *parent = nullptr);
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
   QRectF boundingRect() const;
   void updateLabel(const QString &bandName);
@@ -134,7 +134,7 @@ public:
 
   enum BandColumnsLayoutType { Horizontal, Vertical, VerticalUniform };
 
-  BandDesignIntf(BandsType bandType, const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
+  BandDesignIntf(BandsType bandType, const QString &xmlTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   ~BandDesignIntf();
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -190,8 +190,8 @@ public:
   void setTryToKeepTogether(bool value);
   bool tryToKeepTogether();
 
-  BaseDesignIntf *cloneUpperPart(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
-  BaseDesignIntf *cloneBottomPart(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
+  BaseDesignIntf *cloneUpperPart(int height, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  BaseDesignIntf *cloneBottomPart(int height, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   void parentObjectLoadFinished();
   void objectLoadFinished();
   void emitBandRendered(BandDesignIntf *band);
@@ -302,7 +302,7 @@ class DataBandDesignIntf : public BandDesignIntf {
   Q_OBJECT
   Q_PROPERTY(QString datasource READ datasourceName WRITE setDataSourceName)
 public:
-  DataBandDesignIntf(BandsType bandType, QString xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
+  DataBandDesignIntf(BandsType bandType, QString xmlTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 };
 
 bool bandIndexLessThen(const BandDesignIntf *b1, const BandDesignIntf *b2);

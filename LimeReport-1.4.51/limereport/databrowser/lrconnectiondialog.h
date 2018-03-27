@@ -43,7 +43,7 @@ class ConnectionDialog;
 class ConnectionDialog : public QDialog {
   Q_OBJECT
 public:
-  explicit ConnectionDialog(LimeReport::IConnectionController *conControl, LimeReport::ConnectionDesc *connectionDesc = 0, QWidget *parent = 0);
+  explicit ConnectionDialog(LimeReport::IConnectionController *conControl, LimeReport::ConnectionDesc *connectionDesc = nullptr, QWidget *parent = nullptr);
   ~ConnectionDialog();
 
 protected:
@@ -51,7 +51,7 @@ protected:
   void init();
   void checkFieldsFill();
   bool checkConnection();
-  ConnectionDesc *uiToConnection(LimeReport::ConnectionDesc *conDesc = 0);
+  ConnectionDesc *uiToConnection(LimeReport::ConnectionDesc *conDesc = nullptr);
   void connectionToUI();
 signals:
   void conectionRegistred(LimeReport::ConnectionDesc *connectionDesc);

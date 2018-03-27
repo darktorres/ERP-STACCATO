@@ -1,27 +1,27 @@
 #ifndef VALIDADEDIALOG_H
 #define VALIDADEDIALOG_H
 
-#include <QDialog>
+#include "dialog.h"
 
 namespace Ui {
 class ValidadeDialog;
 }
 
-class ValidadeDialog final : public QDialog {
+class ValidadeDialog final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit ValidadeDialog(QWidget *parent = 0);
+  explicit ValidadeDialog(QWidget *parent = nullptr);
   ~ValidadeDialog();
-  int getValidade();
-
-private slots:
-  void on_pushButtonSalvar_clicked();
-  void on_spinBox_valueChanged(const int dias);
-  void on_dateEdit_dateChanged(const QDate &date);
+  auto getValidade() -> int;
 
 private:
+  // attributes
   Ui::ValidadeDialog *ui;
+  // methods
+  auto on_dateEdit_dateChanged(const QDate &date) -> void;
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto on_spinBox_valueChanged(const int dias) -> void;
 };
 
 #endif // VALIDADEDIALOG_H

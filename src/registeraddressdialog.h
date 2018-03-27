@@ -7,7 +7,7 @@ class RegisterAddressDialog : public RegisterDialog {
 
 public:
   explicit RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent);
-  bool viewRegisterById(const QVariant &id) final;
+  auto viewRegisterById(const QVariant &id) -> bool final;
 
 protected:
   // attributes
@@ -15,12 +15,12 @@ protected:
   QDataWidgetMapper mapperEnd;
   SqlRelationalTableModel modelEnd;
   // methods
-  bool setDataEnd(const QString &key, const QVariant &value);
-  int getCodigoUF(QString uf) const;
-  virtual bool newRegister() override;
+  auto setDataEnd(const QString &key, const QVariant &value) -> bool;
+  auto getCodigoUF(QString uf) const -> int;
+  virtual auto newRegister() -> bool override;
 
 private:
-  void setupTables(const QString &table);
+  auto setupTables(const QString &table) -> void;
 };
 
 #endif // REGISTERADDRESSDIALOG_H

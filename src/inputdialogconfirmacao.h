@@ -1,66 +1,48 @@
 #ifndef INPUTDIALOGCONFIRMACAO_H
 #define INPUTDIALOGCONFIRMACAO_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogConfirmacao;
 }
 
-class InputDialogConfirmacao final : public QDialog {
+class InputDialogConfirmacao final : public Dialog {
   Q_OBJECT
 
 public:
   enum class Tipo { Recebimento, Entrega, Representacao };
 
-  explicit InputDialogConfirmacao(const Tipo &tipo, QWidget *parent = 0);
-  ~InputDialogConfirmacao();
-  QDateTime getDateTime() const;
-  QDateTime getNextDateTime() const;
-  QString getRecebeu() const;
-  QString getEntregou() const;
-  bool setFilter(const QStringList &ids);
-  // TODO: convert functions to trailing return syntax?
-  //  auto setFilter(const QStringList &ids) -> bool;
-  bool setFilter(const QString &id, const QString &idEvento);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_dateEditEvento_dateChanged(const QDate &date);
-  void on_pushButtonFaltando_clicked();
-  void on_pushButtonQuebrado_clicked();
-  void on_pushButtonSalvar_clicked();
+  explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent = nullptr);
+  ~InputDialogConfirmacao() final;
+  auto getDateTime() const -> QDateTime;
+  auto getEntregou() const -> QString;
+  auto getNextDateTime() const -> QDateTime;
+  auto getRecebeu() const -> QString;
+  auto setFilterEntrega(const QString &id, const QString &idEvento) -> bool;
+  auto setFilterRecebe(const QStringList &ids) -> bool;
 
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel model; // REFAC: separate this into 2 models? one for each table
-  SqlRelationalTableModel modelCliente;
-  SqlRelationalTableModel modelVenda;
+  SqlRelationalTableModel modelEstoque;
+  SqlRelationalTableModel modelVeiculo;
   Ui::InputDialogConfirmacao *ui;
-  // temp
-  int choice;
-  int caixasDefeito;
-  double unCaixa;
-  //
-
   // methods
-  bool cadastrar();
-  bool criarConsumo(const int row);
-  bool criarReposicaoCliente();
-  bool desfazerConsumo(const int idEstoque);
-  bool gerarCreditoCliente();
-  bool processarQuebra(const int row);
-  bool quebraEntrega(const int row);
-  bool quebraRecebimento(const int row);
-  bool quebrarLinha(const int row, const int caixas);
-  void setupTables();
+  auto cadastrar() -> bool;
+  auto criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) -> bool;
+  auto desfazerConsumo(const int idEstoque, const double caixasDefeito) -> bool;
+  auto gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) -> bool;
+  auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
+  auto on_pushButtonFaltando_clicked() -> void;
+  auto on_pushButtonQuebrado_clicked() -> void;
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;
+  auto quebrarEntrega(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;
+  auto quebrarLinhaRecebimento(const int row, const int caixas, const double caixasDefeito, const double unCaixa) -> bool;
+  auto quebrarRecebimento(const int row, const double caixasDefeito, const double unCaixa) -> bool;
+  auto setupTables() -> void;
 };
 
 #endif // INPUTDIALOGCONFIRMACAO_H

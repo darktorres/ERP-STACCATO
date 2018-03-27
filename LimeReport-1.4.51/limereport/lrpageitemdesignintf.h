@@ -96,11 +96,11 @@ public:
   typedef QList<BandDesignIntf *>::const_iterator BandsIterator;
   typedef QSharedPointer<PageItemDesignIntf> Ptr;
   static PageItemDesignIntf::Ptr create(QObject *owner);
-  explicit PageItemDesignIntf(QObject *owner = 0, QGraphicsItem *parent = 0);
-  explicit PageItemDesignIntf(const PageSize pageSize, const QRectF &rect, QObject *owner = 0, QGraphicsItem *parent = 0);
+  explicit PageItemDesignIntf(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  explicit PageItemDesignIntf(const PageSize pageSize, const QRectF &rect, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   ~PageItemDesignIntf();
   virtual void paint(QPainter *ppainter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   virtual void geometryChangedEvent(QRectF newRect, QRectF);
   virtual QColor selectionColor() const;
   virtual QColor pageBorderColor() const;

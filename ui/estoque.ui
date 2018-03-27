@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>902</width>
+    <width>1205</width>
     <height>404</height>
    </rect>
   </property>
@@ -135,6 +135,9 @@ color: rgb(0, 0, 0);</string>
        <property name="readOnly">
         <bool>true</bool>
        </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
        <property name="maximum">
         <double>99999.990000000005239</double>
        </property>
@@ -151,6 +154,9 @@ color: rgb(0, 0, 0);</string>
       <widget class="QDoubleSpinBox" name="doubleSpinBoxComprometidoNaoEntregue">
        <property name="readOnly">
         <bool>true</bool>
+       </property>
+       <property name="decimals">
+        <number>3</number>
        </property>
        <property name="maximum">
         <double>99999.990000000005239</double>

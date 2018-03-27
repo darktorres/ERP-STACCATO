@@ -42,7 +42,7 @@ class LRVariableDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit LRVariableDialog(QWidget *parent = 0);
+  explicit LRVariableDialog(QWidget *parent = nullptr);
   ~LRVariableDialog();
   void setVariableContainer(LimeReport::IVariablesContainer *value);
   void setVariableName(const QString &value);

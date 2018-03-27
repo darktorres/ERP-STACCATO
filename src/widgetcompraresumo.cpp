@@ -3,7 +3,7 @@
 #include "ui_widgetcompraresumo.h"
 #include "widgetcompraresumo.h"
 
-WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraResumo) {
+WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraResumo) {
   ui->setupUi(this);
 
   setupTables();
@@ -18,7 +18,7 @@ void WidgetCompraResumo::setupTables() {
 
   modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
 
-  //  if (not modelResumo.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela resumo: " + modelResumo.lastError().text());
+  //  if (not modelResumo.select()) emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
 
   ui->tableResumo->setModel(&modelResumo);
   ui->tableResumo->hideColumn("idVenda");

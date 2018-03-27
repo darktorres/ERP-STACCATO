@@ -44,7 +44,7 @@ namespace LimeReport {
 class ButtonLineEditor : public QWidget {
   Q_OBJECT
 public:
-  explicit ButtonLineEditor(const QString &propertyName, QWidget *parent = 0);
+  explicit ButtonLineEditor(const QString &propertyName, QWidget *parent = nullptr);
   ~ButtonLineEditor();
   void setText(const QString &value);
   QString text();

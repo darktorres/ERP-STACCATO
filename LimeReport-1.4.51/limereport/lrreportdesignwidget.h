@@ -164,7 +164,7 @@ protected:
 
 private:
   bool eventFilter(QObject *target, QEvent *event);
-  ReportDesignWidget(ReportEnginePrivate *report, QMainWindow *mainWindow, QWidget *parent = 0);
+  ReportDesignWidget(ReportEnginePrivate *report, QMainWindow *mainWindow, QWidget *parent = nullptr);
 
 private:
   ReportEnginePrivate *m_report;

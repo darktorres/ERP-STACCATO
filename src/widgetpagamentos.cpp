@@ -6,6 +6,7 @@
 #include <QSqlQuery>
 #include <QVBoxLayout>
 
+#include "application.h"
 #include "ui_widgetpagamentos.h"
 #include "usersession.h"
 #include "widgetpagamentos.h"
@@ -18,6 +19,10 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QScrollArea(parent), ui(ne
   auto *scrollLayout = new QVBoxLayout(frame);
   scrollLayout->setSizeConstraint(QLayout::SetMinimumSize);
   setWidget(frame);
+
+  connect(this, &WidgetPagamentos::informationSignal, qApp, &Application::enqueueInformation);
+  connect(this, &WidgetPagamentos::warningSignal, qApp, &Application::enqueueWarning);
+  connect(this, &WidgetPagamentos::errorSignal, qApp, &Application::enqueueError);
 }
 
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
@@ -41,7 +46,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   queryPag.bindValue(":idLoja", UserSession::idLoja());
 
   if (not queryPag.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo formas de pagamentos: " + queryPag.lastError().text());
+    emit errorSignal("Erro lendo formas de pagamentos: " + queryPag.lastError().text());
     return;
   }
 
@@ -130,7 +135,7 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
   if (not queryOrc.exec() or not queryOrc.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando orçamento: " + queryOrc.lastError().text());
+    emit errorSignal("Erro buscando orçamento: " + queryOrc.lastError().text());
     return;
   }
 
@@ -139,7 +144,7 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
 
   if (not queryPag.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo formas de pagamentos: " + queryPag.lastError().text());
+    emit errorSignal("Erro lendo formas de pagamentos: " + queryPag.lastError().text());
     return;
   }
 
@@ -208,7 +213,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.bindValue(":pagamento", listComboPgt.at(index)->currentText());
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text());
+    emit errorSignal("Erro lendo formas de pagamentos: " + query.lastError().text());
     return;
   }
 
@@ -233,7 +238,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.bindValue(":pagamento", listComboPgt.at(index)->currentText());
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text());
+    emit errorSignal("Erro lendo formas de pagamentos: " + query.lastError().text());
     return;
   }
 
@@ -241,7 +246,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
   listComboParc.at(index)->clear();
 
-  // TODO: this emits montarFluxoCaixa
+  // NOTE: this emits montarFluxoCaixa
   for (int i = 0; i < parcelas; ++i) listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
 
   listComboParc.at(index)->setEnabled(true);

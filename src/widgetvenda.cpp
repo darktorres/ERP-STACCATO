@@ -13,18 +13,20 @@
 
 WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) {
   ui->setupUi(this);
+
+  setPermissions();
   setConnections();
 }
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
 void WidgetVenda::setupTables() {
-  model.setTable("view_venda");
+  modelViewVenda.setTable("view_venda");
 
-  model.setHeaderData("statusFinanceiro", "Financeiro");
-  model.setHeaderData("dataFinanceiro", "Data Fin.");
+  modelViewVenda.setHeaderData("statusFinanceiro", "Financeiro");
+  modelViewVenda.setHeaderData("dataFinanceiro", "Data Fin.");
 
-  ui->table->setModel(new VendaProxyModel(&model, this));
+  ui->table->setModel(new VendaProxyModel(&modelViewVenda, this));
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
@@ -43,7 +45,7 @@ void WidgetVenda::montaFiltro() {
     query.bindValue(":descricao", ui->comboBoxLojas->currentText());
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando sigla da loja: " + query.lastError().text());
+      emit errorSignal("Erro buscando sigla da loja: " + query.lastError().text());
       return;
     }
 
@@ -82,7 +84,7 @@ void WidgetVenda::montaFiltro() {
       textoBusca.isEmpty() ? ""
                            : " AND (Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  model.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
+  modelViewVenda.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
 
   ui->table->resizeColumnsToContents();
 }
@@ -139,7 +141,8 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxEntregaAgend, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEntregue, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->checkBoxFinalizado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
@@ -159,12 +162,11 @@ void WidgetVenda::setConnections() {
 }
 
 bool WidgetVenda::updateTables() {
-  setPermissions();
   setupTables();
   montaFiltro();
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela vendas: " + model.lastError().text());
+  if (not modelViewVenda.select()) {
+    emit errorSignal("Erro lendo tabela vendas: " + modelViewVenda.lastError().text());
     return false;
   }
 
@@ -177,7 +179,7 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   auto *vendas = new Venda(this);
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) vendas->setFinanceiro();
-  vendas->viewRegisterById(model.data(index.row(), "Código"));
+  vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
 }
 
 void WidgetVenda::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
@@ -211,11 +213,11 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
-  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Venda, this);
+  FollowUp *followup = new FollowUp(modelViewVenda.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

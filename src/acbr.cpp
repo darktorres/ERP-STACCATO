@@ -10,6 +10,7 @@
 #include <QUrl>
 
 #include "acbr.h"
+#include "usersession.h"
 
 bool ACBr::gerarDanfe(const int idNFe) {
   if (idNFe == 0) {
@@ -33,8 +34,6 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   const auto respostaSaveXml = enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")");
 
   if (not respostaSaveXml) return {};
-
-  qDebug() << "respostaSaveXml: " << *respostaSaveXml;
 
   if (not respostaSaveXml->contains("OK")) {
     QMessageBox::critical(nullptr, "Erro!", "Erro salvando XML: " + *respostaSaveXml);
@@ -115,7 +114,15 @@ bool ACBr::abrirPdf(const QString &resposta) {
 
 std::optional<QString> ACBr::enviarComando(const QString &comando) {
   if (socket->state() != QTcpSocket::ConnectedState) {
-    socket->connectToHost("127.0.0.1", 3434); // REFAC: dont hardcode this
+    const auto servidor = UserSession::getSetting("User/servidorACBr");
+    const auto ip = UserSession::getSetting("User/portaACBr");
+
+    if (not servidor or not ip) {
+      QMessageBox::critical(nullptr, "Erro!", "Preencher IP e porta do ACBr nas configurações!");
+      return {};
+    }
+
+    socket->connectToHost(servidor.value().toString(), ip.value().toByteArray().toUShort());
 
     if (not socket->waitForConnected(5000)) {
       QMessageBox::critical(nullptr, "Erro!", "Não foi possível conectar ao ACBr: " + socket->errorString());

@@ -21,7 +21,7 @@ class LIMEREPORT_EXPORT PreviewReportWidget : public QWidget {
   friend class PreviewReportWidgetPrivate;
 
 public:
-  explicit PreviewReportWidget(ReportEnginePrivate *report, QWidget *parent = 0);
+  explicit PreviewReportWidget(ReportEnginePrivate *report, QWidget *parent = nullptr);
   ~PreviewReportWidget();
 public slots:
   void refreshPages();

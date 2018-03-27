@@ -8,8 +8,8 @@ namespace LimeReport {
 class TearOffBand : public BandDesignIntf {
   Q_OBJECT
 public:
-  TearOffBand(QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  TearOffBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 
 protected:
   QColor bandColor() const;

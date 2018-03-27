@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewLogistica;
   Ui::WidgetLogistica *ui;
   // methods
   auto setConnections() -> void;

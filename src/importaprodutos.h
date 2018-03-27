@@ -50,7 +50,7 @@ private:
   QString fornecedor;
   QStringList idsFornecedor;
   QVariantMap variantMap;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelProduto;
   SqlRelationalTableModel modelErro;
   // REFAC: a tabela no BD nao usa mais uma unica coluna, nao é mais (1,2,3) e sim 3 colunas separadas
   Tipo tipo;

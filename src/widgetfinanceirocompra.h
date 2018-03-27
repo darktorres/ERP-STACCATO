@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewComprasFinanceiro;
   Ui::WidgetFinanceiroCompra *ui;
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;

@@ -4,6 +4,7 @@
 #include <QDataWidgetMapper>
 #include <QDate>
 #include <QFileDialog>
+#include <optional>
 
 #include "dialog.h"
 #include "sqlrelationaltablemodel.h"
@@ -45,7 +46,7 @@ private:
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto cadastrarNFe(XML &xml) -> bool;
   auto cadastrarProdutoEstoque() -> bool;
-  auto criarConsumo(const int rowCompra, const int rowEstoque, const double quantAdicionar) -> bool;
+  auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
   auto importar() -> bool;
   auto inserirItemSql(XML &xml) -> bool;
   auto inserirNoSqlModel(XML &xml, const QStandardItem *item) -> bool;
@@ -64,6 +65,7 @@ private:
   auto setupTables(const QStringList &idsCompra) -> void;
   auto verificaCNPJ(const XML &xml) -> bool;
   auto verificaExiste(const XML &xml) -> bool;
+  auto verifyFields() -> bool;
   auto wrapParear() -> void; // REFAC: simplify this
 };
 

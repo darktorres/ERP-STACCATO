@@ -6,13 +6,15 @@
 
 #include "baixaorcamento.h"
 #include "cadastrocliente.h"
+#include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
 #include "impressao.h"
+#include "logindialog.h"
 #include "orcamento.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "searchdialogproxy.h"
+#include "searchdialogproxymodel.h"
 #include "ui_orcamento.h"
 #include "usersession.h"
 #include "venda.h"
@@ -68,9 +70,26 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->lineEditReplicadoEm->hide();
 
   setupConnections();
+
+  ui->pushButtonCalcularFrete->hide();
 }
 
 Orcamento::~Orcamento() { delete ui; }
+
+void Orcamento::show() {
+  RegisterDialog::show();
+  ui->tableProdutos->resizeColumnsToContents();
+}
+
+void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
+  if (isReadOnly) return;
+
+  ui->pushButtonAtualizarItem->show();
+  ui->pushButtonAdicionarItem->hide();
+  ui->pushButtonRemoverItem->show();
+  mapperItem.setCurrentModelIndex(index);
+  ui->tableProdutos->selectRow(index.row());
+}
 
 void Orcamento::setupConnections() {
   connect(ui->checkBoxFreteManual, &QCheckBox::clicked, this, &Orcamento::on_checkBoxFreteManual_clicked);
@@ -92,6 +111,7 @@ void Orcamento::setupConnections() {
   connect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked);
   connect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked);
   connect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
+  connect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
   connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked);
@@ -99,21 +119,6 @@ void Orcamento::setupConnections() {
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
-}
-
-void Orcamento::show() {
-  RegisterDialog::show();
-  ui->tableProdutos->resizeColumnsToContents();
-}
-
-void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
-  if (isReadOnly) return;
-
-  ui->pushButtonAtualizarItem->show();
-  ui->pushButtonAdicionarItem->hide();
-  ui->pushButtonRemoverItem->show();
-  mapperItem.setCurrentModelIndex(index);
-  ui->tableProdutos->selectRow(index.row());
 }
 
 void Orcamento::unsetConnections() {
@@ -136,6 +141,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonAtualizarItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarItem_clicked);
   disconnect(ui->pushButtonAtualizarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonAtualizarOrcamento_clicked);
   disconnect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
+  disconnect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
   disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked);
@@ -152,7 +158,7 @@ bool Orcamento::viewRegister() {
     modelItem.setFilter("idOrcamento = '" + data(0, "idOrcamento").toString() + "'");
 
     if (not modelItem.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela orcamento_has_produto: " + modelItem.lastError().text());
+      emit errorSignal("Erro lendo tabela orcamento_has_produto: " + modelItem.lastError().text());
       return false;
     }
 
@@ -380,7 +386,7 @@ bool Orcamento::newRegister() {
 
 void Orcamento::removeItem() {
   if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) {
-    QMessageBox::critical(this, "Erro!", "Erro removendo linha: " + modelItem.lastError().text());
+    emit errorSignal("Erro removendo linha: " + modelItem.lastError().text());
     return;
   }
 
@@ -388,7 +394,7 @@ void Orcamento::removeItem() {
 
   if (ui->lineEditOrcamento->text() != "Auto gerado") {
     if (not modelItem.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Erro salvando remoção: " + modelItem.lastError().text());
+      emit errorSignal("Erro salvando remoção: " + modelItem.lastError().text());
       return;
     }
 
@@ -407,7 +413,7 @@ bool Orcamento::generateId() {
   const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
 
   if (not siglaLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando sigla da loja!");
+    emit errorSignal("Erro buscando sigla da loja!");
     return false;
   }
 
@@ -466,19 +472,19 @@ bool Orcamento::recalcularTotais() {
   }
 
   if (abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 1) {
-    QMessageBox::critical(this, "Erro!", "Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!");
+    emit errorSignal("Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!");
     calcPrecoGlobalTotal();
     return false;
   }
 
   if (abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 1) {
-    QMessageBox::critical(this, "Erro!", "Total dos itens não confere com SubTotalLíquido! Recalculando valores!");
+    emit errorSignal("Total dos itens não confere com SubTotalLíquido! Recalculando valores!");
     calcPrecoGlobalTotal();
     return false;
   }
 
   if (abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1) {
-    QMessageBox::critical(this, "Erro!", "Total dos itens não confere com Total! Recalculando valores!");
+    emit errorSignal("Total dos itens não confere com Total! Recalculando valores!");
     calcPrecoGlobalTotal();
     return false;
   }
@@ -491,31 +497,31 @@ bool Orcamento::verifyFields() {
 
   if (ui->itemBoxCliente->text().isEmpty()) {
     ui->itemBoxCliente->setFocus();
-    QMessageBox::critical(this, "Erro!", "Cliente inválido!");
+    emit errorSignal("Cliente inválido!");
     return false;
   }
 
   if (ui->itemBoxVendedor->text().isEmpty()) {
     ui->itemBoxVendedor->setFocus();
-    QMessageBox::critical(this, "Erro!", "Vendedor inválido!");
+    emit errorSignal("Vendedor inválido!");
     return false;
   }
 
   if (ui->itemBoxProfissional->text().isEmpty()) {
     ui->itemBoxProfissional->setFocus();
-    QMessageBox::critical(this, "Erro!", "Profissional inválido!");
+    emit errorSignal("Profissional inválido!");
     return false;
   }
 
   if (ui->itemBoxEndereco->text().isEmpty()) {
     ui->itemBoxEndereco->setFocus();
-    QMessageBox::critical(this, "Erro!", R"(Endereço inválido! Se não possui endereço, escolha "Não há".)");
+    emit errorSignal(R"(Endereço inválido! Se não possui endereço, escolha "Não há".)");
     return false;
   }
 
   if (modelItem.rowCount() == 0) {
     ui->itemBoxProduto->setFocus();
-    QMessageBox::critical(this, "Erro!", "Não pode cadastrar um orçamento sem itens!");
+    emit errorSignal("Não pode cadastrar um orçamento sem itens!");
     return false;
   }
 
@@ -533,7 +539,7 @@ bool Orcamento::savingProcedures() {
   const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
 
   if (not idLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    emit errorSignal("Erro buscando idLoja!");
     return false;
   }
 
@@ -602,7 +608,15 @@ void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
   if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) ui->doubleSpinBoxCaixas->setValue(caixas);
 }
 
-void Orcamento::on_pushButtonCadastrarOrcamento_clicked() { save(); }
+void Orcamento::on_pushButtonCadastrarOrcamento_clicked() {
+  // TODO: ao fechar pedido calcular o frete com o endereco selecinado em 'end. entrega'
+  // se o valor calculado for maior que o do campo frete pedir autorizacao do gerente para manter o valor atual
+  // senao usa o valor calculado
+
+  // pedir login caso o frete (manual ou automatico) seja menor que ou o valorPeso ou a porcentagem parametrizada
+
+  save();
+}
 
 void Orcamento::on_pushButtonAtualizarOrcamento_clicked() { save(); }
 
@@ -660,11 +674,11 @@ void Orcamento::setupTables() {
   modelItem.setFilter("0");
 
   if (not modelItem.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela orcamento_has_produto: " + modelItem.lastError().text());
+    emit errorSignal("Erro lendo tabela orcamento_has_produto: " + modelItem.lastError().text());
     return;
   }
 
-  ui->tableProdutos->setModel(new SearchDialogProxy(&modelItem, this));
+  ui->tableProdutos->setModel(new SearchDialogProxyModel(&modelItem, this));
   ui->tableProdutos->hideColumn("idOrcamentoProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idOrcamento");
@@ -694,19 +708,19 @@ void Orcamento::adicionarItem(const bool isUpdate) {
     ui->checkBoxRepresentacao->setDisabled(true);
 
     if (ui->itemBoxProduto->text().isEmpty()) {
-      QMessageBox::critical(this, "Erro!", "Item inválido!");
+      emit errorSignal("Item inválido!");
       return;
     }
 
     if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) {
-      QMessageBox::critical(this, "Erro!", "Quantidade inválida!");
+      emit errorSignal("Quantidade inválida!");
       return;
     }
 
     const int row = isUpdate ? mapperItem.currentIndex() : modelItem.rowCount();
 
     if (row == -1) {
-      QMessageBox::critical(this, "Erro!", "Erro linha - 1 adicionarItem");
+      emit errorSignal("Erro linha - 1 adicionarItem");
       return;
     }
 
@@ -759,12 +773,12 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
   if (not time.isValid()) return;
 
   if (time.addDays(data("validade").toInt()).date() < QDateTime::currentDateTime().date()) {
-    QMessageBox::critical(this, "Erro!", "Orçamento vencido!");
+    emit errorSignal("Orçamento vencido!");
     return;
   }
 
   if (ui->itemBoxEndereco->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Deve selecionar endereço!");
+    emit errorSignal("Deve selecionar endereço!");
     ui->itemBoxEndereco->setFocus();
     return;
   }
@@ -825,7 +839,7 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
   query.bindValue(":idProduto", ui->itemBoxProduto->getValue());
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro na busca do produto: " + query.lastError().text());
+    emit errorSignal("Erro na busca do produto: " + query.lastError().text());
     return;
   }
 
@@ -896,7 +910,7 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
   queryCliente.bindValue(":idCliente", ui->itemBoxCliente->getValue());
 
   if (not queryCliente.exec() or not queryCliente.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro ao buscar cliente: " + queryCliente.lastError().text());
+    emit errorSignal("Erro ao buscar cliente: " + queryCliente.lastError().text());
     return;
   }
 
@@ -990,12 +1004,12 @@ bool Orcamento::verificaCadastroCliente() {
   queryCliente.bindValue(":idCliente", idCliente);
 
   if (not queryCliente.exec() or not queryCliente.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text());
+    emit errorSignal("Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text());
     return false;
   }
 
   if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Cliente não possui CPF/CNPJ cadastrado!");
+    emit errorSignal("Cliente não possui CPF/CNPJ cadastrado!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
 
@@ -1008,12 +1022,12 @@ bool Orcamento::verificaCadastroCliente() {
   queryCadastro.bindValue(":idCliente", idCliente);
 
   if (not queryCadastro.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text());
+    emit errorSignal("Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text());
     return false;
   }
 
   if (not queryCadastro.first()) {
-    QMessageBox::critical(this, "Erro!", "Cliente não possui endereço cadastrado!");
+    emit errorSignal("Cliente não possui endereço cadastrado!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
 
@@ -1025,12 +1039,12 @@ bool Orcamento::verificaCadastroCliente() {
   queryCadastro.bindValue(":idCliente", idCliente);
 
   if (not queryCadastro.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text());
+    emit errorSignal("Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text());
     return false;
   }
 
   if (queryCadastro.first()) {
-    QMessageBox::critical(this, "Erro!", "Cadastro incompleto, deve terminar!");
+    emit errorSignal("Cadastro incompleto, deve terminar!");
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
 
@@ -1110,7 +1124,7 @@ bool Orcamento::buscarParametrosFrete() {
   const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
 
   if (not idLoja) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando idLoja!");
+    emit errorSignal("Erro buscando idLoja!");
     return false;
   }
 
@@ -1119,7 +1133,7 @@ bool Orcamento::buscarParametrosFrete() {
   queryFrete.bindValue(":idLoja", idLoja.value().toInt());
 
   if (not queryFrete.exec() or not queryFrete.next()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando parâmetros do frete: " + queryFrete.lastError().text());
+    emit errorSignal("Erro buscando parâmetros do frete: " + queryFrete.lastError().text());
     return false;
   }
 
@@ -1189,7 +1203,7 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
   setupConnections();
 }
 
-void Orcamento::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Orçamento cadastrado com sucesso!"); }
+void Orcamento::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Orçamento cadastrado com sucesso!"); }
 
 void Orcamento::on_comboBoxLoja_currentTextChanged(const QString &) {
   ui->itemBoxVendedorIndicou->clear();
@@ -1198,6 +1212,72 @@ void Orcamento::on_comboBoxLoja_currentTextChanged(const QString &) {
 
 void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
 
+void Orcamento::on_pushButtonCalcularFrete_clicked() {
+  LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+  if (dialog.exec() == QDialog::Rejected) return;
+
+  auto *frete = new CalculoFrete(this);
+  frete->setCliente(ui->itemBoxCliente->getValue());
+  frete->exec();
+
+  const double dist = frete->getDistancia();
+
+  if (qFuzzyIsNull(dist)) {
+    emit errorSignal("Não foi possível determinar a distância!");
+    return;
+  }
+
+  int peso = 0;
+
+  QSqlQuery query;
+  query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
+
+    if (not query.exec() or not query.first()) {
+      emit errorSignal("Erro buscando peso do produto: " + query.lastError().text());
+      return;
+    }
+
+    peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
+  }
+
+  if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'") or not query.first()) {
+    emit errorSignal("Erro buscando parâmetros: " + query.lastError().text());
+    return;
+  }
+
+  const double custoTon = query.value("custoTransporteTon").toDouble();
+  const double custo1 = query.value("custoTransporte1").toDouble();
+  const double custo2 = query.value("custoTransporte2").toDouble();
+  const double custoFuncionario = query.value("custoFuncionario").toDouble();
+
+  qDebug() << "peso: " << peso;
+
+  int cargas = peso / 4500;
+  int restante = peso % 4500;
+
+  qDebug() << "inteiro: " << cargas;
+  qDebug() << "resto: " << restante;
+
+  // TODO: se endereco for 'nao há/retira' calcular apenas o valorPeso
+  const double valorPeso = (peso / 1000.0 * custoTon);
+
+  const double valorDistCargaCheia = (cargas * custo2 * dist) + (cargas * 3 * custoFuncionario);
+  const double valorDistMeiaCarga =
+      cargas > 0 and restante < 200 ? 0 : (restante < 2000 ? dist * custo1 + (2 * custoFuncionario / 2000.0 * restante) : dist * custo2 + (3 * custoFuncionario / 4500.0 * restante));
+  const double valorFrete = valorPeso + valorDistCargaCheia + valorDistMeiaCarga;
+
+  qDebug() << "valorPeso: " << valorPeso;
+  qDebug() << "valorDistCargaCheia: " << valorDistCargaCheia;
+  qDebug() << "valorDistMeiaCarga: " << valorDistMeiaCarga;
+  qDebug() << "frete: " << valorFrete;
+
+  // frete = (pesoProduto(ton.) * 180) + (pesoProduto < 2ton. ? dist. * 1.5 : pesoProduto < 4.5 ? dist. * 2 : fracionar cargas)
+}
+
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque
 // submitAll chama select)
 // TODO: 0se produto for estoque permitir vender por peça (setar minimo/multiplo)
@@ -1205,3 +1285,4 @@ void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(Q
 // TODO: 4quando cadastrar cliente no itemBox mudar para o id dele
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
+// TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/

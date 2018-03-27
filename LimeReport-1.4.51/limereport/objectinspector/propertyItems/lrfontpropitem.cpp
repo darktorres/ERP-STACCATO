@@ -51,8 +51,8 @@ FontPropItem::FontPropItem(QObject *object, ObjectPropItem::ObjectsList *objects
   m_bold = new FontAttribPropItem(object, objects, "bold", tr("bold"), propertyValue().value<QFont>().bold(), this, false);
   m_italic = new FontAttribPropItem(object, objects, "italic", tr("italic"), propertyValue().value<QFont>().italic(), this, false);
   m_underline = new FontAttribPropItem(object, objects, "underline", tr("underline"), propertyValue().value<QFont>().underline(), this, false);
-  m_pointSize = new FontPointSizePropItem(object, 0, "pointSize", tr("size"), propertyValue().value<QFont>().pointSize(), this, false);
-  m_family = new FontFamilyPropItem(object, 0, "family", tr("family"), propertyValue().value<QFont>(), this, false);
+  m_pointSize = new FontPointSizePropItem(object, nullptr, "pointSize", tr("size"), propertyValue().value<QFont>().pointSize(), this, false);
+  m_family = new FontFamilyPropItem(object, nullptr, "family", tr("family"), propertyValue().value<QFont>(), this, false);
 
   this->appendItem(m_family);
   this->appendItem(m_pointSize);

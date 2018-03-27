@@ -89,7 +89,7 @@ bool CadastroFornecedor::verifyFields() {
   }
 
   if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    QMessageBox::critical(this, "Erro!", "CNPJ inválido!");
+    emit errorSignal("CNPJ inválido!");
     return false;
   }
 
@@ -112,6 +112,7 @@ bool CadastroFornecedor::savingProcedures() {
   if (not setData("email", ui->lineEditEmail->text())) return false;
   if (not setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value())) return false;
   if (not setData("st", ui->comboBoxSt->currentText())) return false;
+  if (not setData("comissao1", ui->doubleSpinBoxComissao->value())) return false;
 
   return true;
 }
@@ -143,6 +144,7 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->checkBoxRepresentacao, "representacao", "checked");
   addMapping(ui->comboBoxSt, "st");
   addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");
+  addMapping(ui->doubleSpinBoxComissao, "comissao1");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
@@ -221,9 +223,7 @@ void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
   ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
-  cadastrarEndereco() ? novoEndereco() : static_cast<void>(QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este endereço."));
-}
+void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : emit errorSignal("Não foi possível cadastrar este endereço."); }
 
 bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
@@ -232,7 +232,7 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    QMessageBox::critical(this, "Erro!", "CEP inválido!");
+    emit errorSignal("CEP inválido!");
     return false;
   }
 
@@ -267,7 +267,7 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   CepCompleter cc;
 
   if (not cc.buscaCEP(cep)) {
-    QMessageBox::warning(this, "Aviso!", "CEP não encontrado!");
+    emit warningSignal("CEP não encontrado!");
     return;
   }
 
@@ -277,9 +277,7 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditBairro->setText(cc.getBairro());
 }
 
-void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {
-  cadastrarEndereco(true) ? novoEndereco() : static_cast<void>(QMessageBox::critical(this, "Erro!", "Não foi possível atualizar este endereço!"));
-}
+void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : emit errorSignal("Não foi possível atualizar este endereço!"); }
 
 void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
   ui->pushButtonAtualizarEnd->show();
@@ -293,7 +291,7 @@ bool CadastroFornecedor::viewRegister() {
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + " AND desativado = FALSE");
 
   if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço do fornecedor: " + modelEnd.lastError().text());
+    emit errorSignal("Erro lendo tabela endereço do fornecedor: " + modelEnd.lastError().text());
     return false;
   }
 
@@ -311,12 +309,12 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
 
   if (msgBox.exec() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando desativado!");
+      emit errorSignal("Erro marcando desativado!");
       return;
     }
 
     if (not modelEnd.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + modelEnd.lastError().text());
+      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
       return;
     }
 
@@ -324,7 +322,7 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroFornecedor::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!"); }
+void CadastroFornecedor::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!"); }
 
 void CadastroFornecedor::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
@@ -370,7 +368,7 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
 }
 
 void CadastroFornecedor::on_pushButtonValidade_clicked() {
-  bool ok = true;
+  bool ok;
 
   const int novaValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, -1, 1000, 1, &ok);
 
@@ -378,8 +376,8 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
   if (not ajustarValidade(novaValidade)) {
     QSqlQuery("ROLLBACK").exec();
@@ -387,11 +385,11 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
-  QMessageBox::information(this, "Aviso!", "Validade alterada com sucesso!");
+  emit informationSignal("Validade alterada com sucesso!");
 }
 
 // TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)

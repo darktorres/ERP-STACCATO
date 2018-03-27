@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 
@@ -113,7 +112,7 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
 void InputDialog::on_pushButtonSalvar_clicked() {
   if (tipo == Tipo::ReagendarPedido) {
     if (ui->lineEditObservacao->text().isEmpty()) {
-      QMessageBox::critical(this, "Erro!", "Observação não pode estar vazio!");
+      emit errorSignal("Observação não pode estar vazio!");
       return;
     }
   }

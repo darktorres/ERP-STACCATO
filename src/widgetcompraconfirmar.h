@@ -18,11 +18,11 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewCompras;
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
-  auto cancelar(const QModelIndexList &list) -> bool;
+  auto cancelar(const int row) -> bool;
   auto confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) -> bool;
   auto on_checkBoxMostrarSul_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;

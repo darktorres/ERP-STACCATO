@@ -19,7 +19,7 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelContaPagamento;
   Ui::InserirLancamento *ui;
   // methods
   auto on_pushButtonCriarLancamento_clicked() -> void;

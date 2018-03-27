@@ -40,8 +40,8 @@ class ItemsBordersEditorWidget : public ItemEditorWidget
 {
     Q_OBJECT
 public:
-    explicit ItemsBordersEditorWidget(ReportDesignWidget* reportEditor, const QString &title, QWidget *parent = 0);
-    explicit ItemsBordersEditorWidget(ReportDesignWidget* reportEditor, QWidget *parent = 0);
+    explicit ItemsBordersEditorWidget(ReportDesignWidget* reportEditor, const QString &title, QWidget *parent = nullptr);
+    explicit ItemsBordersEditorWidget(ReportDesignWidget* reportEditor, QWidget *parent = nullptr);
 private slots:
     void noBordesClicked();
     void allBordesClicked();

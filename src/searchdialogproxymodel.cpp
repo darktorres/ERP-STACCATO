@@ -3,15 +3,15 @@
 #include <QDate>
 #include <QStyle>
 
-#include "searchdialogproxy.h"
+#include "searchdialogproxymodel.h"
 
-SearchDialogProxy::SearchDialogProxy(SqlRelationalTableModel *model, QObject *parent)
+SearchDialogProxyModel::SearchDialogProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), estoque(model->fieldIndex("estoque")), promocao(model->fieldIndex("promocao")), descontinuado(model->fieldIndex("descontinuado")),
       validade(model->fieldIndex("validadeProdutos")) {
   setSourceModel(model);
 }
 
-QVariant SearchDialogProxy::data(const QModelIndex &proxyIndex, int role) const {
+QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole) {
     const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 

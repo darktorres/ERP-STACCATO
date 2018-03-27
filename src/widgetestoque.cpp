@@ -36,6 +36,7 @@ bool WidgetEstoque::setupTables() {
   // REFAC: merge this setquery with the one in montaFiltro
 
   model.setQuery(view_estoque2 + " GROUP BY e.idEstoque HAVING restante > 0");
+
   if (model.lastError().isValid()) {
     emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
     return false;
@@ -62,6 +63,7 @@ bool WidgetEstoque::setupTables() {
   model.setHeaderData("dataRealReceb", "Receb.");
   model.setHeaderData("dataPrevEnt", "Prev. Ent.");
   model.setHeaderData("dataRealEnt", "Entrega");
+  model.setHeaderData("ordemCompra", "OC");
 
   auto *proxyFilter = new QSortFilterProxyModel(this);
   proxyFilter->setDynamicSortFilter(true);
@@ -91,7 +93,7 @@ bool WidgetEstoque::updateTables() {
 }
 
 void WidgetEstoque::on_table_activated(const QModelIndex &index) {
-  auto *estoque = new Estoque(model.data(index.row(), "idEstoque").toString(), true, this);
+  auto *estoque = new Estoque(ui->table->model()->data(ui->table->model()->index(index.row(), model.record().indexOf("idEstoque"))).toString(), true, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
 }
 
@@ -100,6 +102,7 @@ void WidgetEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeCol
 void WidgetEstoque::montaFiltro() {
   // FIXME: digitar hifen causa erro na pesquisa
   // TODO: arrumar query (está nas gambiarras temporariamente)
+  // TODO: this query is different from view_estoque2 string and some columns change
 
   ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("restante est") : ui->table->hideColumn("restante est");
 
@@ -131,10 +134,6 @@ void WidgetEstoque::montaFiltro() {
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
-  // TODO: 0para filtrar corretamente pela data refazer a view para considerar o `restante est` na data desejada e nao na
-  // atual
-  // TODO: 0adicionar caixas
-
   // 1. codigo produto
   // 2. descricao
   // 3. ncm
@@ -143,29 +142,29 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   // 6. valor
   // 7. aliquota icms (se tiver)
 
-  const QString data = ui->dateEditMes->date().toString("yyyy-MM-dd");
+  const QString data = ui->dateEditMes->date().addDays(1).toString("yyyy-MM-dd");
 
   SqlQueryModel modelContabil;
   modelContabil.setQuery(
-      "SELECT e.idEstoque, group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, pf.fornecedor, e.descricao, e.quant - coalesce(e2.consumoVenda, 0) + ajuste AS contabil, "
-      " e2.consumoEst, e.un AS `unEst`, if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
-      "(e.quant - coalesce(e2.consumoVenda, 0) + ajuste / `p`.`m2cx`), (e.quant - coalesce(e2.consumoVenda, 0) + ajuste / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, "
-      "group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant - coalesce(e2.consumoVenda, 0) + ajuste) AS custo, "
-      "p.precoVenda * (e.quant - coalesce(e2.consumoVenda, 0) + ajuste) AS precoVenda, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, "
+      "SELECT e.idEstoque, group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, p.fornecedor, e.descricao, e.quant + coalesce(e2.consumoEst, 0) + ajuste AS contabil, "
+      "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
+      "((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), ((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, "
+      "group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS custo, "
+      "p.precoVenda * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS precoVenda, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, "
       "e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS restante, sum(CASE WHEN consumo.status = "
-      "'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' AND e.created < "
-      "'" +
+      "'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' "
+      "AND e.created < '" +
       data +
-      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, sum(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO', vp.quant, 0)) AS consumoVenda, vp.dataRealEnt FROM "
+      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, sum(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, vp.dataRealEnt FROM "
       "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
       data +
       "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
       "pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN "
-      "nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto LEFT JOIN estoque_has_consumo ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN venda_has_produto "
-      "vp ON ehc2.idVendaProduto = vp.idVendaProduto GROUP BY e.idEstoque HAVING contabil > 0");
+      "nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto "
+      " GROUP BY e.idEstoque HAVING contabil > 0");
 
   if (modelContabil.lastError().isValid()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + modelContabil.lastError().text());
+    emit errorSignal("Erro lendo tabela: " + modelContabil.lastError().text());
     return;
   }
 
@@ -178,28 +177,23 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
   if (not modelo.exists()) {
-    QMessageBox::critical(this, "Erro!", "Não encontrou o modelo do Excel!");
+    emit errorSignal("Não encontrou o modelo do Excel!");
     return;
   }
 
-  //  const QString fileName = dir + "/relatorio-" + ui->dateEditMes->date().toString("MM-yyyy") + ".xlsx";
   const QString fileName = dir + "/relatorio_contabil.xlsx";
 
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível abrir o arquivo para escrita: " + fileName);
-    QMessageBox::critical(this, "Erro!", "Erro: " + file.errorString());
+    emit errorSignal("Não foi possível abrir o arquivo para escrita: " + fileName);
+    emit errorSignal("Erro: " + file.errorString());
     return;
   }
 
   file.close();
 
   QXlsx::Document xlsx(arquivoModelo);
-
-  //  xlsx.currentWorksheet()->setFitToPage(true);
-  //  xlsx.currentWorksheet()->setFitToHeight(true);
-  //  xlsx.currentWorksheet()->setOrientationVertical(false);
 
   xlsx.selectSheet("Sheet1");
 
@@ -216,12 +210,12 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   }
 
   if (not xlsx.saveAs(fileName)) {
-    QMessageBox::critical(this, "Erro!", "Ocorreu algum erro ao salvar o arquivo.");
+    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
     return;
   }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
+  emit informationSignal("Arquivo salvo como " + fileName);
 }
 
 // NOTE: gerenciar lugares de estoque (cadastro/permissoes)

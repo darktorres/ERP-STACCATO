@@ -70,19 +70,18 @@ QString InputDialogConfirmacao::getRecebeu() const { return ui->lineEditRecebeu-
 QString InputDialogConfirmacao::getEntregou() const { return ui->lineEditEntregou->text(); }
 
 bool InputDialogConfirmacao::cadastrar() {
-  if (not model.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela: " + model.lastError().text());
-    return false;
+  if (tipo == Tipo::Recebimento) {
+    if (not modelEstoque.submitAll()) {
+      emit errorSignal("Erro salvando dados na tabela: " + modelEstoque.lastError().text());
+      return false;
+    }
   }
 
-  if (not modelVenda.submitAll()) {
-    emit errorSignal("Erro salvando produto venda: " + modelVenda.lastError().text());
-    return false;
-  }
-
-  if (not modelCliente.submitAll()) {
-    emit errorSignal("Erro salvando crédito: " + modelCliente.lastError().text());
-    return false;
+  if (tipo == Tipo::Entrega) {
+    if (not modelVeiculo.submitAll()) {
+      emit errorSignal("Erro salvando dados na tabela: " + modelVeiculo.lastError().text());
+      return false;
+    }
   }
 
   return true;
@@ -99,11 +98,11 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
     return;
   }
 
-  emit transactionStarted();
-
   if (tipo != Tipo::Representacao) {
-    QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-    QSqlQuery("START TRANSACTION").exec();
+    emit transactionStarted();
+
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+    if (not QSqlQuery("START TRANSACTION").exec()) return;
 
     if (not cadastrar()) {
       QSqlQuery("ROLLBACK").exec();
@@ -111,7 +110,7 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
       return;
     }
 
-    QSqlQuery("COMMIT").exec();
+    if (not QSqlQuery("COMMIT").exec()) return;
 
     emit transactionEnded();
   }
@@ -125,50 +124,28 @@ void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate &date) {
 }
 
 void InputDialogConfirmacao::setupTables() {
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
   if (tipo == Tipo::Recebimento) {
-    model.setTable("estoque");
-    model.setHeaderData("status", "Status");
-    model.setHeaderData("local", "Local");
-    model.setHeaderData("fornecedor", "Fornecedor");
-    model.setHeaderData("descricao", "Produto");
-    model.setHeaderData("quant", "Quant.");
-    model.setHeaderData("un", "Un.");
-    model.setHeaderData("caixas", "Cx.");
-    model.setHeaderData("codComercial", "Cód. Com.");
-    model.setHeaderData("lote", "Lote");
-    model.setHeaderData("bloco", "Bloco");
-  }
+    modelEstoque.setTable("estoque");
+    modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
+    modelEstoque.setHeaderData("status", "Status");
+    modelEstoque.setHeaderData("local", "Local");
+    modelEstoque.setHeaderData("fornecedor", "Fornecedor");
+    modelEstoque.setHeaderData("descricao", "Produto");
+    modelEstoque.setHeaderData("quant", "Quant.");
+    modelEstoque.setHeaderData("un", "Un.");
+    modelEstoque.setHeaderData("caixas", "Cx.");
+    modelEstoque.setHeaderData("codComercial", "Cód. Com.");
+    modelEstoque.setHeaderData("lote", "Lote");
+    modelEstoque.setHeaderData("bloco", "Bloco");
 
-  if (tipo == Tipo::Entrega) {
-    model.setTable("veiculo_has_produto");
-    model.setHeaderData("idVenda", "Venda");
-    model.setHeaderData("status", "Status");
-    model.setHeaderData("fornecedor", "Fornecedor");
-    model.setHeaderData("produto", "Produto");
-    model.setHeaderData("obs", "Obs.");
-    model.setHeaderData("caixas", "Cx.");
-    model.setHeaderData("kg", "Kg.");
-    model.setHeaderData("quant", "Quant.");
-    model.setHeaderData("un", "Un.");
-    model.setHeaderData("unCaixa", "Un./Cx.");
-    model.setHeaderData("codComercial", "Cód. Com.");
-    model.setHeaderData("formComercial", "Form. Com.");
-  }
+    modelEstoque.setFilter("0");
 
-  if (tipo != Tipo::Representacao) {
-    model.setFilter("0");
-
-    if (not model.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
+    if (not modelEstoque.select()) {
+      emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
       return;
     }
 
-    ui->tableLogistica->setModel(&model);
-  }
-
-  if (tipo == Tipo::Recebimento) {
+    ui->tableLogistica->setModel(&modelEstoque);
     ui->tableLogistica->hideColumn("idEstoque");
     ui->tableLogistica->hideColumn("recebidoPor");
     ui->tableLogistica->hideColumn("idProduto");
@@ -211,6 +188,29 @@ void InputDialogConfirmacao::setupTables() {
   }
 
   if (tipo == Tipo::Entrega) {
+    modelVeiculo.setTable("veiculo_has_produto");
+    modelVeiculo.setEditStrategy(QSqlTableModel::OnManualSubmit);
+    modelVeiculo.setHeaderData("idVenda", "Venda");
+    modelVeiculo.setHeaderData("status", "Status");
+    modelVeiculo.setHeaderData("fornecedor", "Fornecedor");
+    modelVeiculo.setHeaderData("produto", "Produto");
+    modelVeiculo.setHeaderData("obs", "Obs.");
+    modelVeiculo.setHeaderData("caixas", "Cx.");
+    modelVeiculo.setHeaderData("kg", "Kg.");
+    modelVeiculo.setHeaderData("quant", "Quant.");
+    modelVeiculo.setHeaderData("un", "Un.");
+    modelVeiculo.setHeaderData("unCaixa", "Un./Cx.");
+    modelVeiculo.setHeaderData("codComercial", "Cód. Com.");
+    modelVeiculo.setHeaderData("formComercial", "Form. Com.");
+
+    modelVeiculo.setFilter("0");
+
+    if (not modelVeiculo.select()) {
+      emit errorSignal("Erro lendo tabela veiculo: " + modelVeiculo.lastError().text());
+      return;
+    }
+
+    ui->tableLogistica->setModel(&modelVeiculo);
     ui->tableLogistica->hideColumn("id");
     ui->tableLogistica->hideColumn("data");
     ui->tableLogistica->hideColumn("idEvento");
@@ -224,42 +224,42 @@ void InputDialogConfirmacao::setupTables() {
   }
 }
 
-bool InputDialogConfirmacao::setFilter(const QString &id, const QString &idEvento) { // entrega
+bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &idEvento) { // entrega
   if (id.isEmpty()) {
-    model.setFilter("0");
+    modelVeiculo.setFilter("0");
     QMessageBox::critical(this, "Erro!", "IdsCompra vazio!");
     return false;
   }
 
   const QString filter = "idVenda = '" + id + "' AND idEvento = " + idEvento;
 
-  model.setFilter(filter);
+  modelVeiculo.setFilter(filter);
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
+  if (not modelVeiculo.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelVeiculo.lastError().text());
     return false;
   }
 
   ui->tableLogistica->resizeColumnsToContents();
 
-  ui->dateEditEvento->setDateTime(model.data(0, "data").toDateTime());
+  ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
   return true;
 }
 
-bool InputDialogConfirmacao::setFilter(const QStringList &ids) { // recebimento
+bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebimento
   if (ids.isEmpty()) {
-    model.setFilter("0");
+    modelEstoque.setFilter("0");
     QMessageBox::critical(this, "Erro!", "IdsCompra vazio!");
     return false;
   }
 
   const QString filter = "idEstoque = " + ids.join(" OR idEstoque = ");
 
-  model.setFilter(filter);
+  modelEstoque.setFilter(filter);
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
+  if (not modelEstoque.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelEstoque.lastError().text());
     return false;
   }
 
@@ -287,13 +287,15 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 
   //
 
+  QString produto;
+  double unCaixa = 0;
+
   if (tipo == Tipo::Recebimento) {
-    const QString produto = model.data(row, "descricao").toString();
-    const int caixas = model.data(row, "caixas").toInt();
+    produto = modelEstoque.data(row, "descricao").toString();
 
     QSqlQuery query;
     query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
-    query.bindValue(":idProduto", model.data(row, "idProduto"));
+    query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
 
     if (not query.exec() or not query.first()) {
       emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
@@ -305,31 +307,13 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
     const double pccx = query.value("pccx").toDouble();
 
     unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
-
-    qDebug() << "unCaixa: " << unCaixa;
-
-    QInputDialog input;
-    bool ok = false;
-    caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok);
-
-    qDebug() << caixas - caixasDefeito;
-
-    if (not ok or caixasDefeito == 0) return;
   }
 
+  int choice = -1;
+
   if (tipo == Tipo::Entrega) {
-    const QString produto = model.data(row, "produto").toString();
-    // TODO: verificar porque essa caixa é double
-    const double caixas = model.data(row, "caixas").toDouble();
-    unCaixa = model.data(row, "unCaixa").toDouble(); // *
-
-    QInputDialog input;
-    bool ok = false;
-    caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok); // REFAC: fix warning
-
-    if (not ok or caixasDefeito == 0) return;
-
-    // perguntar se gerar credito ou reposicao
+    produto = modelVeiculo.data(row, "produto").toString();
+    unCaixa = modelVeiculo.data(row, "unCaixa").toDouble(); // *
 
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
     msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
@@ -338,43 +322,51 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 
     choice = msgBox.exec();
   }
+
+  const double caixas = modelVeiculo.data(row, "caixas").toDouble();
+
+  bool ok;
+  const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
+
+  if (not ok or qFuzzyIsNull(caixasDefeito)) return;
   //
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
-  if (not processarQuebra(row)) {
+  if (not processarQuebra(row, choice, caixasDefeito, unCaixa)) {
     QSqlQuery("ROLLBACK").exec();
     emit transactionEnded();
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
-  QMessageBox::information(this, "Aviso!", "Operação realizada com sucesso!");
+  emit informationSignal("Operação realizada com sucesso!");
 }
 
-bool InputDialogConfirmacao::processarQuebra(const int row) {
+bool InputDialogConfirmacao::processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) {
   // TODO: ao quebrar linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
-  if (tipo == Tipo::Recebimento and not quebraRecebimento(row)) return false;
-  if (tipo == Tipo::Entrega and not quebraEntrega(row)) return false;
+  // TODO: fazer no recebimento o mesmo fluxo da entrega (criar nova linha, etc)
+  if (tipo == Tipo::Recebimento and not quebrarRecebimento(row, caixasDefeito, unCaixa)) return false;
+  if (tipo == Tipo::Entrega and not quebrarEntrega(row, choice, caixasDefeito, unCaixa)) return false;
 
   return true;
 }
 
-bool InputDialogConfirmacao::quebraRecebimento(const int row) {
-  // TODO: 0finish this part
+bool InputDialogConfirmacao::quebrarRecebimento(const int row, const double caixasDefeito, const double unCaixa) {
+  // REFAC: 0finish this part
 
   // model is estoque
   // perguntar quant. quebrada - QInputDialog
 
   //  const QString produto = model.data(row, "descricao").toString();
-  const int idEstoque = model.data(row, "idEstoque").toInt();
-  const int caixas = model.data(row, "caixas").toInt();
+  const int idEstoque = modelEstoque.data(row, "idEstoque").toInt();
+  const int caixas = modelEstoque.data(row, "caixas").toInt();
 
   //  QSqlQuery query;
   //  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
@@ -393,17 +385,16 @@ bool InputDialogConfirmacao::quebraRecebimento(const int row) {
 
   //  qDebug() << "unCaixa: " << unCaixa;
 
-  //  QInputDialog input;
   //  bool ok = false;
   //  // TODO: 0put this outside transaction
-  //  caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok);
+  //  caixasDefeito = QInputDialog::getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok);
 
   //  if (not ok or caixasDefeito == 0) return false;
 
   // TODO: inline this
-  if (not quebrarLinha(row, caixas)) return false;
+  if (not quebrarLinhaRecebimento(row, caixas, caixasDefeito, unCaixa)) return false;
   //  if (not criarConsumo(row)) return false;
-  if (not desfazerConsumo(idEstoque)) return false;
+  if (not desfazerConsumo(idEstoque, caixasDefeito)) return false;
 
   // ****
 
@@ -431,80 +422,111 @@ bool InputDialogConfirmacao::quebraRecebimento(const int row) {
   return true;
 }
 
-bool InputDialogConfirmacao::quebraEntrega(const int row) {
-  // model is veiculo_has_produto
+bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, const double caixasDefeito, const double unCaixa) {
+  // NOTE: na tabela veiculo_has_produto é separado a linha em 2:
+  // -linha original mantem a quant. entregue
+  // -linha nova mostra a quant. quebrada
 
-  //  const QString produto = model.data(row, "produto").toString();
-  const double caixas = model.data(row, "caixas").toDouble();
-  //  unCaixa = model.data(row, "unCaixa").toDouble(); // *
+  // na tabela venda_has_produto é separado a linha em:
+  // -linha original mantem a quant. entregue
+  // -linha nova mostar a quant. quebrada
+  // -caso tenha reposicao é criada uma terceira linha 'repo.' (mesma quant. da 'quebrada')
 
-  //  QInputDialog input;
-  //  bool ok = false;
-  //  // TODO: 0put this outside transaction
-  //  caixasDefeito = input.getInt(this, produto, "Caixas quebradas/faltando: ", 0, 0, caixas, 1, &ok); // REFAC: fix warning
-
-  //  if (not ok or caixasDefeito == 0) return false;
+  const double caixas = modelVeiculo.data(row, "caixas").toDouble();
 
   // diminuir quantidade da linha selecionada
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not model.setData(row, "caixas", caixas - caixasDefeito)) return false;
-  if (not model.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
+  if (not modelVeiculo.setData(row, "caixas", caixas - caixasDefeito)) return false;
+  if (not modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
 
   // copiar linha com quantDefeito
 
-  const int rowQuebrado = model.rowCount();
-  model.insertRow(rowQuebrado);
+  const int rowQuebrado = modelVeiculo.rowCount();
+  modelVeiculo.insertRow(rowQuebrado);
 
-  for (int col = 0; col < model.columnCount(); ++col) {
-    if (model.fieldIndex("id") == col) continue;
-    if (model.fieldIndex("created") == col) continue;
-    if (model.fieldIndex("lastUpdated") == col) continue;
+  for (int col = 0; col < modelVeiculo.columnCount(); ++col) {
+    if (modelVeiculo.fieldIndex("id") == col) continue;
+    if (modelVeiculo.fieldIndex("created") == col) continue;
+    if (modelVeiculo.fieldIndex("lastUpdated") == col) continue;
 
-    if (not model.setData(rowQuebrado, col, model.data(row, col))) return false;
+    if (not modelVeiculo.setData(rowQuebrado, col, modelVeiculo.data(row, col))) return false;
   }
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not model.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
-  if (not model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
-  if (not model.setData(rowQuebrado, "status", "QUEBRADO")) return false;
+  if (not modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
+  if (not modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
+  if (not modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO")) return false;
 
   //  // perguntar se gerar credito ou reposicao
 
-  //  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-  //  msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
-  //  msgBox.setButtonText(QMessageBox::No, "Gerar crédito");
-  //  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
-
-  //  const int choice = msgBox.exec();
-
   if (choice == QMessageBox::Cancel) return false;
 
-  //
-  modelVenda.setTable("venda_has_produto");
-  modelVenda.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  SqlRelationalTableModel modelVendaProduto;
+  modelVendaProduto.setTable("venda_has_produto");
+  modelVendaProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelVenda.setFilter("idVendaProduto = " + model.data(row, "idVendaProduto").toString());
+  modelVendaProduto.setFilter("idVendaProduto = " + modelVeiculo.data(row, "idVendaProduto").toString());
 
-  if (not modelVenda.select()) {
-    emit errorSignal("Erro lendo tabela produto venda: " + modelVenda.lastError().text());
+  if (not modelVendaProduto.select()) {
+    emit errorSignal("Erro lendo tabela produto venda: " + modelVendaProduto.lastError().text());
     return false;
   }
+
+  if (not modelVendaProduto.setData(0, "caixas", caixas - caixasDefeito)) return false;
+  if (not modelVendaProduto.setData(0, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
+
+  const int rowQuebrado2 = modelVendaProduto.rowCount();
+  // NOTE: *quebralinha venda_produto/pedido_fornecedor
+  modelVendaProduto.insertRow(rowQuebrado2);
+
+  for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
+    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) continue;
+    if (modelVendaProduto.fieldIndex("entregou") == col) continue;
+    if (modelVendaProduto.fieldIndex("idCompra") == col) continue;
+    if (modelVendaProduto.fieldIndex("idNFeSaida") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevCompra") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealCompra") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevConf") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealConf") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevFat") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealFat") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevColeta") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealColeta") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevReceb") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealReceb") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevEnt") == col) continue;
+    if (modelVendaProduto.fieldIndex("created") == col) continue;
+    if (modelVendaProduto.fieldIndex("lastUpdated") == col) continue;
+
+    if (not modelVendaProduto.setData(rowQuebrado2, col, modelVendaProduto.data(0, col))) return false;
+  }
+
+  if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) return false;
+  if (not modelVendaProduto.setData(rowQuebrado2, "quant", caixasDefeito * unCaixa)) return false;
+  if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) return false;
+
   //
 
-  choice == QMessageBox::Yes ? criarReposicaoCliente() : gerarCreditoCliente();
+  choice == QMessageBox::Yes ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, unCaixa) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, unCaixa);
+
+  if (not modelVendaProduto.submitAll()) {
+    emit errorSignal("Erro salvando produto venda: " + modelVendaProduto.lastError().text());
+    return false;
+  }
 
   return true;
 }
 
-bool InputDialogConfirmacao::gerarCreditoCliente() {
-  const QString idVenda = modelVenda.data(0, "idVenda").toString();
-  const double descUnitario = modelVenda.data(0, "descUnitario").toDouble();
+bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
+  const QString idVenda = modelVendaProduto.data(0, "idVenda").toString();
+  const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
 
   const double credito = caixasDefeito * unCaixa * descUnitario;
 
-  QMessageBox::information(this, "Crédito", "Gerado crédito no valor de R$ " + QLocale(QLocale::Portuguese).toString(credito));
+  emit informationSignal("Gerado crédito no valor de R$ " + QLocale(QLocale::Portuguese).toString(credito));
 
+  SqlRelationalTableModel modelCliente;
   modelCliente.setTable("cliente");
   modelCliente.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -528,129 +550,97 @@ bool InputDialogConfirmacao::gerarCreditoCliente() {
 
   if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) return false;
 
-  return true;
-}
-
-bool InputDialogConfirmacao::criarReposicaoCliente() {
-  const int newRow = modelVenda.rowCount();
-  modelVenda.insertRow(newRow);
-
-  // copiar linha com quantidade quebrada
-  for (int col = 0; col < modelVenda.columnCount(); ++col) {
-    if (modelVenda.fieldIndex("idVendaProduto") == col) continue;
-    if (modelVenda.fieldIndex("entregou") == col) continue;
-    if (modelVenda.fieldIndex("idCompra") == col) continue;
-    if (modelVenda.fieldIndex("idNFeSaida") == col) continue;
-    if (modelVenda.fieldIndex("dataPrevCompra") == col) continue;
-    if (modelVenda.fieldIndex("dataRealCompra") == col) continue;
-    if (modelVenda.fieldIndex("dataPrevConf") == col) continue;
-    if (modelVenda.fieldIndex("dataRealConf") == col) continue;
-    if (modelVenda.fieldIndex("dataPrevFat") == col) continue;
-    if (modelVenda.fieldIndex("dataRealFat") == col) continue;
-    if (modelVenda.fieldIndex("dataPrevColeta") == col) continue;
-    if (modelVenda.fieldIndex("dataRealColeta") == col) continue;
-    if (modelVenda.fieldIndex("dataPrevReceb") == col) continue;
-    if (modelVenda.fieldIndex("dataRealReceb") == col) continue;
-    if (modelVenda.fieldIndex("dataPrevEnt") == col) continue;
-    if (modelVenda.fieldIndex("created") == col) continue;
-    if (modelVenda.fieldIndex("lastUpdated") == col) continue;
-
-    if (not modelVenda.setData(newRow, col, modelVenda.data(0, col))) return false;
+  if (not modelCliente.submitAll()) {
+    emit errorSignal("Erro salvando crédito: " + modelCliente.lastError().text());
+    return false;
   }
 
-  if (not modelVenda.setData(newRow, "quant", caixasDefeito * unCaixa)) return false;
-  if (not modelVenda.setData(newRow, "caixas", caixasDefeito)) return false;
-  if (not modelVenda.setData(newRow, "parcial", 0)) return false;
-  if (not modelVenda.setData(newRow, "desconto", 0)) return false;
-  if (not modelVenda.setData(newRow, "parcialDesc", 0)) return false;
-  if (not modelVenda.setData(newRow, "descGlobal", 0)) return false;
-  if (not modelVenda.setData(newRow, "total", 0)) return false;
-  if (not modelVenda.setData(newRow, "status", "REPO. ENTREGA")) return false;
-  if (not modelVenda.setData(newRow, "reposicao", true)) return false;
+  return true;
+}
 
+bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
+  const int newRow = modelVendaProduto.rowCount();
+  // NOTE: *quebralinha venda_produto/pedido_fornecedor
+  modelVendaProduto.insertRow(newRow);
+
+  // copiar linha com quantidade quebrada
+  for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
+    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) continue;
+    if (modelVendaProduto.fieldIndex("entregou") == col) continue;
+    if (modelVendaProduto.fieldIndex("idCompra") == col) continue;
+    if (modelVendaProduto.fieldIndex("idNFeSaida") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevCompra") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealCompra") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevConf") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealConf") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevFat") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealFat") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevColeta") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealColeta") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevReceb") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataRealReceb") == col) continue;
+    if (modelVendaProduto.fieldIndex("dataPrevEnt") == col) continue;
+    if (modelVendaProduto.fieldIndex("created") == col) continue;
+    if (modelVendaProduto.fieldIndex("lastUpdated") == col) continue;
+
+    if (not modelVendaProduto.setData(newRow, col, modelVendaProduto.data(0, col))) return false;
+  }
+
+  if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) return false;
+  if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) return false;
+  if (not modelVendaProduto.setData(newRow, "parcial", 0)) return false;
+  if (not modelVendaProduto.setData(newRow, "desconto", 0)) return false;
+  if (not modelVendaProduto.setData(newRow, "parcialDesc", 0)) return false;
+  if (not modelVendaProduto.setData(newRow, "descGlobal", 0)) return false;
+  if (not modelVendaProduto.setData(newRow, "total", 0)) return false;
+  if (not modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA")) return false;
+  if (not modelVendaProduto.setData(newRow, "reposicao", true)) return false;
+
+  // REFAC: this blocks the transaction
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
-  if (not modelVenda.setData(newRow, "obs", "(REPO. ENTREGA) " + obs)) return false;
+  if (not modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs)) return false;
 
   return true;
 }
 
-bool InputDialogConfirmacao::quebrarLinha(const int row, const int caixas) {
+bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int caixas, const double caixasDefeito, const double unCaixa) {
   // TODO: 5ao marcar caixas quebradas e só houver uma nao dividir em duas linhas (para nao ficar linha zerado)
   // diminuir quant. da linha selecionada
 
-  if (not model.setData(row, "caixas", caixas - caixasDefeito)) return false;
-  if (not model.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
+  if (not modelEstoque.setData(row, "caixas", caixas - caixasDefeito)) return false;
+  if (not modelEstoque.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
 
   // copiar linha com defeito
 
-  const int rowQuebrado = model.rowCount();
-  model.insertRow(rowQuebrado);
+  const int rowQuebrado = modelEstoque.rowCount();
+  modelEstoque.insertRow(rowQuebrado);
 
-  for (int col = 0; col < model.columnCount(); ++col) {
-    if (model.fieldIndex("idEstoque") == col) continue;
-    if (model.fieldIndex("created") == col) continue;
-    if (model.fieldIndex("lastUpdated") == col) continue;
+  for (int col = 0; col < modelEstoque.columnCount(); ++col) {
+    if (modelEstoque.fieldIndex("idEstoque") == col) continue;
+    if (modelEstoque.fieldIndex("created") == col) continue;
+    if (modelEstoque.fieldIndex("lastUpdated") == col) continue;
 
-    if (not model.setData(rowQuebrado, col, model.data(row, col))) return false;
+    if (not modelEstoque.setData(rowQuebrado, col, modelEstoque.data(row, col))) return false;
   }
 
-  const QString obs = "Estoque: " + model.data(row, "idEstoque").toString() + " - " + QInputDialog::getText(this, "Observacao", "Observacao: ");
+  const QString obs = "Estoque: " + modelEstoque.data(row, "idEstoque").toString() + " - " + QInputDialog::getText(this, "Observacao", "Observacao: ");
   qDebug() << "obs: " << obs;
 
-  if (not model.setData(rowQuebrado, "observacao", obs)) return false;
-  if (not model.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
-  if (not model.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
-  if (not model.setData(rowQuebrado, "status", "QUEBRADO")) return false;
+  if (not modelEstoque.setData(rowQuebrado, "observacao", obs)) return false;
+  if (not modelEstoque.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
+  if (not modelEstoque.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
+  if (not modelEstoque.setData(rowQuebrado, "status", "QUEBRADO")) return false;
   // TODO: recalcular proporcional dos valores
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro dividindo linhas: " + model.lastError().text());
+  if (not modelEstoque.submitAll()) {
+    emit errorSignal("Erro dividindo linhas: " + modelEstoque.lastError().text());
     return false;
   }
 
   return true;
 }
 
-bool InputDialogConfirmacao::criarConsumo(const int row) {
-  SqlRelationalTableModel modelConsumo;
-  modelConsumo.setTable("estoque_has_consumo");
-  modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelConsumo.setFilter("idEstoque = " + model.data(row, "idEstoque").toString());
-
-  if (not modelConsumo.select()) {
-    emit errorSignal("Erro lendo tabela consumo: " + modelConsumo.lastError().text());
-    return false;
-  }
-
-  // criar consumo 'quebrado'
-
-  const int rowConsumo = modelConsumo.rowCount();
-  modelConsumo.insertRow(rowConsumo);
-
-  if (not modelConsumo.setData(rowConsumo, "idEstoque", model.data(row, "idEstoque"))) return false;
-  if (not modelConsumo.setData(rowConsumo, "idVendaProduto", 0)) return false;
-  if (not modelConsumo.setData(rowConsumo, "status", "QUEBRADO")) return false;
-  if (not modelConsumo.setData(rowConsumo, "local", "TEMP")) return false;
-  if (not modelConsumo.setData(rowConsumo, "idProduto", model.data(row, "idProduto"))) return false;
-  if (not modelConsumo.setData(rowConsumo, "fornecedor", model.data(row, "fornecedor"))) return false;
-  if (not modelConsumo.setData(rowConsumo, "descricao", model.data(row, "descricao"))) return false;
-  if (not modelConsumo.setData(rowConsumo, "quant", caixasDefeito * unCaixa * -1)) return false;
-  if (not modelConsumo.setData(rowConsumo, "quantUpd", 5)) return false;
-  if (not modelConsumo.setData(rowConsumo, "caixas", caixasDefeito)) return false;
-
-  qDebug() << "quant quebrado: " << caixasDefeito * unCaixa * -1;
-  qDebug() << "caixas quebrado: " << caixasDefeito;
-
-  if (not modelConsumo.submitAll()) {
-    emit errorSignal("Erro atualizando consumo: " + modelConsumo.lastError().text());
-    return false;
-  }
-
-  return true;
-}
-
-bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
+bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
   // REFAC: pass this responsability to Estoque class
   // NOTE: verificar WidgetCompraOC::desfazerConsumo
 
@@ -663,6 +653,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
     return false;
   }
 
+  // REFAC: why this int is stored in a double?
   double sobra = query.value("sobra").toInt();
   qDebug() << "sobra: " << sobra;
   qDebug() << "caixasDefeito: " << caixasDefeito;
@@ -670,33 +661,37 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque) {
   if (sobra < 0) {
     // faltando pecas para consumo, desfazer os consumos com prazo maior
 
-    query.prepare("SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = "
-                  "vp.idVendaProduto LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
-    query.bindValue(":idEstoque", idEstoque);
+    QSqlQuery query2;
+    query2.prepare("SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = "
+                   "vp.idVendaProduto LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
+    query2.bindValue(":idEstoque", idEstoque);
 
-    if (not query.exec()) {
-      emit errorSignal("Erro buscando consumo estoque: " + query.lastError().text());
+    if (not query2.exec()) {
+      emit errorSignal("Erro buscando consumo estoque: " + query2.lastError().text());
       return false;
     }
 
-    while (query.next()) {
-      const int caixas = query.value("caixas").toInt();
+    QSqlQuery query3;
+    // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
+    query3.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
-      QSqlQuery query2;
-      // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
-      query2.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
-      query2.bindValue(":idConsumo", query.value("idConsumo"));
+    QSqlQuery query4;
+    query4.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto");
 
-      if (not query2.exec()) {
-        emit errorSignal("Erro removendo consumo: " + query2.lastError().text());
+    while (query2.next()) {
+      const int caixas = query2.value("caixas").toInt();
+
+      query3.bindValue(":idConsumo", query2.value("idConsumo"));
+
+      if (not query3.exec()) {
+        emit errorSignal("Erro removendo consumo: " + query3.lastError().text());
         return false;
       }
 
-      query2.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.' WHERE idVendaProduto = :idVendaProduto");
-      query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
+      query4.bindValue(":idVendaProduto", query2.value("idVendaProduto"));
 
-      if (not query2.exec()) {
-        emit errorSignal("Erro voltando produto para pendente: " + query2.lastError().text());
+      if (not query4.exec()) {
+        emit errorSignal("Erro voltando produto para pendente: " + query4.lastError().text());
         return false;
       }
 

@@ -41,7 +41,7 @@ namespace LimeReport {
 class InternalComboBox : public QComboBox {
   Q_OBJECT
 public:
-  InternalComboBox(QWidget *parent = 0) : QComboBox(parent), m_popup(false) {}
+  InternalComboBox(QWidget *parent = nullptr) : QComboBox(parent), m_popup(false) {}
   void showPopup() {
     m_popup = true;
     QComboBox::showPopup();
@@ -60,7 +60,7 @@ class ComboBoxEditor : public QWidget {
   Q_OBJECT
 public:
   // explicit ComboBoxEditor(QWidget *parent = 0);
-  ComboBoxEditor(QWidget *parent = 0, bool clearable = false);
+  ComboBoxEditor(QWidget *parent = nullptr, bool clearable = false);
   void addItems(const QStringList &values);
   void setTextValue(const QString &value);
   QString text();

@@ -20,7 +20,7 @@ public:
   auto setUpdating(const bool value) -> void;
   auto getInTransaction() const -> bool;
   auto setInTransaction(const bool value) -> void;
-  auto showErrors() -> void;
+  auto showMessages() -> void;
   auto dbConnect() -> bool;
   auto updater() -> void;
   // REFAC: make those private?
@@ -33,6 +33,8 @@ signals:
 
 public slots:
   void endTransaction();
+  void enqueueWarning(const QString &warning);
+  void enqueueInformation(const QString &information);
   void enqueueError(const QString &error);
   void startTransaction();
 
@@ -42,6 +44,8 @@ private:
   bool updating = false;
   const QPalette defaultPalette = palette();
   QStringList errorQueue;
+  QStringList informationQueue;
+  QStringList warningQueue;
   // methods
   auto storeSelection() -> void;
   auto readSettingsFile() -> void;

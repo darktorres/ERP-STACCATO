@@ -25,7 +25,7 @@ private:
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods
-  auto atualizarVenda(const int row, const QDate &dataPrevista) -> bool;
+  auto atualizarVenda(const int row) -> bool;
   auto comprar(const QModelIndexList &list, const QDate &dataPrevista) -> bool;
   auto consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) -> bool;
   auto enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) -> bool;

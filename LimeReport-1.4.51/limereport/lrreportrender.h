@@ -76,7 +76,7 @@ public:
   enum ResetPageNuberType { BandReset, PageReset };
   typedef QSharedPointer<ReportRender> Ptr;
   ~ReportRender();
-  ReportRender(QObject *parent = 0);
+  ReportRender(QObject *parent = nullptr);
   void setDatasources(DataSourceManager *value);
   void setScriptContext(ScriptEngineContext *scriptContext);
   DataSourceManager *datasources() { return m_datasources; }

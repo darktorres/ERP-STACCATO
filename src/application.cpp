@@ -15,7 +15,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.5.67");
+  setApplicationVersion("0.6.8");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -59,11 +59,11 @@ bool Application::dbConnect() {
 
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
-  db.setPassword("1234");
+  db.setPassword("12345");
   db.setDatabaseName("mydb");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_RECONNECT=1;MYSQL_OPT_CONNECT_TIMEOUT=10;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=20");
+  db.setConnectOptions("CLIENT_COMPRESS=1");
 
   QSqlQuery query;
 
@@ -104,8 +104,16 @@ bool Application::dbConnect() {
   }
 
   if (query.value("lastInvalidated").toDate() < QDate::currentDate()) {
+    // REFAC: renomear isso para 'invalidar_produtos_expirados'
     if (not query.exec("CALL invalidate_expired()")) {
       QMessageBox::critical(nullptr, "Erro!", "Erro executando InvalidarExpirados: " + query.lastError().text());
+      return false;
+    }
+
+    // REFAC: verify through the code to make sure this is not necessary
+    // REFAC: renomear isso para 'invalidar_orcamentos_expirados'
+    if (not query.exec("CALL update_orcamento_status()")) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro executando update_orcamento_status: " + query.lastError().text());
       return false;
     }
 
@@ -116,12 +124,6 @@ bool Application::dbConnect() {
       QMessageBox::critical(nullptr, "Erro", "Erro atualizando lastInvalidated: " + query.lastError().text());
       return false;
     }
-  }
-
-  // REFAC: verify through the code to make sure this is not necessary
-  if (not query.exec("CALL update_orcamento_status()")) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro executando update_orcamento_status: " + query.lastError().text());
-    return false;
   }
 
   startSqlPing();
@@ -181,15 +183,28 @@ void Application::lightTheme() {
 void Application::endTransaction() {
   inTransaction = false;
 
-  showErrors();
+  showMessages();
+}
+
+void Application::enqueueWarning(const QString &warning) {
+  warningQueue << warning;
+
+  if (not updating) showMessages();
+}
+
+void Application::enqueueInformation(const QString &information) {
+  informationQueue << information;
+
+  if (not updating) showMessages();
 }
 
 void Application::enqueueError(const QString &error) {
   errorQueue << error;
 
-  if (not updating) showErrors();
+  if (not updating) showMessages();
 }
 
+// TODO: if inTransaction is true give a error message and abort (to avoid nested transactions)
 void Application::startTransaction() { inTransaction = true; }
 
 void Application::storeSelection() {
@@ -198,7 +213,7 @@ void Application::storeSelection() {
 
     const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
 
-    // REFAC: test if empty
+    if (loja.isEmpty()) return;
 
     UserSession::setSetting("Login/hostname", mapLojas.value(loja));
   }
@@ -211,22 +226,26 @@ void Application::setInTransaction(const bool value) { inTransaction = value; }
 void Application::setUpdating(const bool value) {
   updating = value;
 
-  if (value == false) showErrors();
+  if (value == false) showMessages();
 }
 
 bool Application::getUpdating() const { return updating; }
 
-void Application::showErrors() {
+void Application::showMessages() {
   if (inTransaction or updating) return;
-  if (errorQueue.size() == 0) return;
+  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) return;
 
   showingErrors = true;
 
   // TODO: deal with 'Lost connection to MySQL server'
 
   for (const auto &error : std::as_const(errorQueue)) QMessageBox::critical(nullptr, "Erro!", error);
+  for (const auto &warning : std::as_const(warningQueue)) QMessageBox::warning(nullptr, "Aviso!", warning);
+  for (const auto &information : std::as_const(informationQueue)) QMessageBox::information(nullptr, "Informação!", information);
 
   errorQueue.clear();
+  warningQueue.clear();
+  informationQueue.clear();
 
   emit verifyDb();
 

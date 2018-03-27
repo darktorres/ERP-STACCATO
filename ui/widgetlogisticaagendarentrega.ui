@@ -289,6 +289,9 @@
        </item>
        <item row="2" column="0">
         <widget class="QLineEdit" name="lineEditAviso">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="styleSheet">
           <string notr="true">color: rgb(255, 0, 0);</string>
          </property>

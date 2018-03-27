@@ -39,7 +39,7 @@ namespace LimeReport {
 class ColorIndicator : public QWidget {
   Q_OBJECT
 public:
-  ColorIndicator(QWidget *parent = 0);
+  ColorIndicator(QWidget *parent = nullptr);
   QColor color() const;
   void setColor(const QColor &color);
   QSize sizeHint() const;
@@ -54,7 +54,7 @@ private:
 class ColorEditor : public QWidget {
   Q_OBJECT
 public:
-  explicit ColorEditor(QWidget *parent = 0);
+  explicit ColorEditor(QWidget *parent = nullptr);
   QColor color() { return m_color; }
   void setColor(const QColor &value);
 

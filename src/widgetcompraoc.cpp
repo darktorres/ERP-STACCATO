@@ -5,6 +5,7 @@
 #include "acbr.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "ui_widgetcompraoc.h"
 #include "widgetcompraoc.h"
 
@@ -44,7 +45,7 @@ void WidgetCompraOC::setupTables() {
   modelPedido.setTable("view_ordemcompra");
   modelPedido.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelPedido.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedidos: " + modelPedido.lastError().text());
+  if (not modelPedido.select()) emit errorSignal("Erro lendo tabela pedidos: " + modelPedido.lastError().text());
 
   ui->tablePedido->setModel(&modelPedido);
 
@@ -70,7 +71,7 @@ void WidgetCompraOC::setupTables() {
 
   modelProduto.setFilter("0");
 
-  if (not modelProduto.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pedido: " + modelProduto.lastError().text());
+  if (not modelProduto.select()) emit errorSignal("Erro lendo tabela produtos pedido: " + modelProduto.lastError().text());
 
   ui->tableProduto->setModel(&modelProduto);
   ui->tableProduto->setItemDelegateForColumn("quant", new DoubleDelegate(this));
@@ -107,7 +108,7 @@ void WidgetCompraOC::setupTables() {
 
   modelNFe.setFilter("0");
 
-  if (not modelNFe.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela nfe: " + modelNFe.lastError().text());
+  if (not modelNFe.select()) emit errorSignal("Erro lendo tabela nfe: " + modelNFe.lastError().text());
 
   ui->tableNFe->setModel(&modelNFe);
   ui->tableNFe->hideColumn("ordemCompra");
@@ -126,7 +127,7 @@ void WidgetCompraOC::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableNFe->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
 
@@ -145,9 +146,11 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
+
+  const int row = list.first().row();
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Continuar");
@@ -155,85 +158,80 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) return;
 
+  const QString idVenda = modelProduto.data(row, "idVenda").toString();
+
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
-  if (not desfazerConsumo(list)) {
+  if (not desfazerConsumo(row)) {
     QSqlQuery("ROLLBACK").exec();
     emit transactionEnded();
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not Sql::updateVendaStatus(idVenda)) return;
+
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
   updateTables();
 
-  QMessageBox::information(this, "Aviso!", "Operação realizada com sucesso!");
+  emit informationSignal("Operação realizada com sucesso!");
 }
 
-bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
+bool WidgetCompraOC::desfazerConsumo(const int row) {
   // REFAC: pass this responsability to Estoque class
-  // REFAC: put prepare outside loop?
 
-  for (const auto &item : list) {
-    const int idVendaProduto = modelProduto.data(item.row(), "idVendaProduto").toInt();
+  const int idVendaProduto = modelProduto.data(row, "idVendaProduto").toInt();
 
-    QSqlQuery query;
+  QSqlQuery query1;
+  query1.prepare("SELECT status FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
+  query1.bindValue(":idVendaProduto", idVendaProduto);
 
-    query.prepare("SELECT status FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", idVendaProduto);
+  if (not query1.exec()) {
+    emit errorSignal("Erro buscando status do consumo estoque: " + query1.lastError().text());
+    return false;
+  }
 
-    if (not query.exec()) {
-      emit errorSignal("Erro buscando status do consumo estoque: " + query.lastError().text());
-      return false;
-    }
-
-    if (not query.first()) {
-      emit errorSignal("Não encontrou consumo!");
-      return false;
-    }
-
-    const QString status = query.value("status").toString();
+  if (query1.first()) {
+    const QString status = query1.value("status").toString();
 
     if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") {
       emit errorSignal("Consumo do estoque está em entrega/entregue!");
       return false;
     }
 
-    // TODO: juntar linhas sem consumo do mesmo tipo?
+    QSqlQuery query2;
+    query2.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
+    query2.bindValue(":idVendaProduto", idVendaProduto);
 
-    query.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", idVendaProduto);
-
-    if (not query.exec()) {
-      emit errorSignal("Erro atualizando pedido compra: " + query.lastError().text());
+    if (not query2.exec()) {
+      emit errorSignal("Erro removendo consumo estoque: " + query2.lastError().text());
       return false;
     }
+  }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", idVendaProduto);
+  // TODO: juntar linhas sem consumo do mesmo tipo?
 
-    if (not query.exec()) {
-      emit errorSignal("Erro atualizando pedido venda: " + query.lastError().text());
-      return false;
-    }
+  QSqlQuery query3;
+  query3.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto");
+  query3.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query.exec("CALL update_venda_status()")) {
-      emit errorSignal("Erro atualizando status da venda: " + query.lastError().text());
-      return false;
-    }
+  if (not query3.exec()) {
+    emit errorSignal("Erro atualizando pedido compra: " + query3.lastError().text());
+    return false;
+  }
 
-    query.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", idVendaProduto);
+  QSqlQuery query4;
+  query4.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto");
+  query4.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query.exec()) {
-      emit errorSignal("Erro removendo consumo estoque: " + query.lastError().text());
-      return false;
-    }
+  if (not query4.exec()) {
+    emit errorSignal("Erro atualizando pedido venda: " + query4.lastError().text());
+    return false;
   }
 
   return true;
@@ -242,5 +240,5 @@ bool WidgetCompraOC::desfazerConsumo(const QModelIndexList &list) {
 void WidgetCompraOC::on_lineEditBusca_textChanged(const QString &text) {
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
 
-  if (not modelPedido.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedidos: " + modelPedido.lastError().text());
+  if (not modelPedido.select()) emit errorSignal("Erro lendo tabela pedidos: " + modelPedido.lastError().text());
 }

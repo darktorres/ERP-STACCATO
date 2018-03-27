@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <optional>
 
 class ACBr final : public QObject {
   Q_OBJECT

@@ -55,7 +55,7 @@ void FontEditorWidget::initEditor() {
 
   m_fontNameEditor = new QFontComboBox(this);
   m_fontNameEditor->setFontFilters(QFontComboBox::AllFonts);
-  connect(m_fontNameEditor, SIGNAL(currentFontChanged(QFont)), this, SLOT(slotFontChanged(QFont)));
+  connect(m_fontNameEditor, &QFontComboBox::currentFontChanged, this, &FontEditorWidget::slotFontChanged);
   addWidget(m_fontNameEditor);
 
   m_fontSizeModel.setStringList(QStringList() << "6"
@@ -79,7 +79,7 @@ void FontEditorWidget::initEditor() {
   m_fontSizeEditor = new QComboBox(this);
   m_fontSizeEditor->setModel(&m_fontSizeModel);
   m_fontSizeEditor->setEditable(true);
-  connect(m_fontSizeEditor, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotFontSizeChanged(QString)));
+  connect(m_fontSizeEditor, QOverload<const QString &>::of(&QComboBox::currentIndexChanged), this, &FontEditorWidget::slotFontSizeChanged);
   addWidget(m_fontSizeEditor);
 
   addSeparator();
@@ -88,24 +88,22 @@ void FontEditorWidget::initEditor() {
   m_fontBold = new QAction(tr("Font bold"), this);
   m_fontBold->setIcon(QIcon(":/report/images/textBold"));
   m_fontBold->setCheckable(true);
-  connect(m_fontBold, SIGNAL(toggled(bool)), this, SLOT(slotFontAttribsChanged(bool)));
+  connect(m_fontBold, &QAction::toggled, this, &FontEditorWidget::slotFontAttribsChanged);
   addAction(m_fontBold);
 
   m_fontItalic = new QAction(tr("Font Italic"), this);
   m_fontItalic->setIcon(QIcon(":/report/images/textItalic"));
   m_fontItalic->setCheckable(true);
-  connect(m_fontItalic, SIGNAL(toggled(bool)), this, SLOT(slotFontAttribsChanged(bool)));
+  connect(m_fontItalic, &QAction::toggled, this, &FontEditorWidget::slotFontAttribsChanged);
   addAction(m_fontItalic);
 
   m_fontUnderline = new QAction(tr("Font Underline"), this);
   m_fontUnderline->setIcon(QIcon(":/report/images/textUnderline"));
   m_fontUnderline->setCheckable(true);
-  connect(m_fontUnderline, SIGNAL(toggled(bool)), this, SLOT(slotFontAttribsChanged(bool)));
+  connect(m_fontUnderline, &QAction::toggled, this, &FontEditorWidget::slotFontAttribsChanged);
   addAction(m_fontUnderline);
 
-  if (reportEditor()) {
-    connect(reportEditor(), SIGNAL(itemPropertyChanged(QString, QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QString, QVariant, QVariant)));
-  }
+  if (reportEditor()) connect(reportEditor(), &ReportDesignWidget::itemPropertyChanged, this, &FontEditorWidget::slotPropertyChanged);
 }
 
 void FontEditorWidget::updateValues(const QFont &font) {

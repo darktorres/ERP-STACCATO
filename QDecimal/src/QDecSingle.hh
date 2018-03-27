@@ -83,23 +83,23 @@ public:
 
   // UTILITIES & CONVERSIONS
   QDecSingle &fromBCD(int32_t exp, const QByteArray &bcd, int32_t sign) {
-    decSingleFromBCD(&m_data, exp, (const uint8_t *)bcd.data(), sign);
+    decSingleFromBCD(&m_data, exp, reinterpret_cast<const uint8_t *>(bcd.data()), sign);
     return *this;
   }
 
   QDecSingle &fromDouble(double d);
 
   QDecSingle &fromPacked(int32_t exp, const QByteArray &pack) {
-    decSingleFromPacked(&m_data, exp, (const uint8_t *)pack.data());
+    decSingleFromPacked(&m_data, exp, reinterpret_cast<const uint8_t *>(pack.data()));
     return *this;
   }
 
   QDecSingle &fromPackedChecked(int32_t exp, const QByteArray &pack) {
-    decSingleFromPackedChecked(&m_data, exp, (const uint8_t *)pack.data());
+    decSingleFromPackedChecked(&m_data, exp, reinterpret_cast<const uint8_t *>(pack.data()));
     return *this;
   }
 
-  QDecSingle &fromString(const char *str, QDecContext *c = 0) {
+  QDecSingle &fromString(const char *str, QDecContext *c = nullptr) {
     decSingleFromString(&m_data, str, CXT(c));
     return *this;
   }
@@ -107,34 +107,34 @@ public:
   //! Hexadecimal string in network byte order
   QDecSingle &fromHexString(const char *str);
 
-  QDecSingle &fromQDecDouble(const QDecDouble &d, QDecContext *c = 0) { return fromWider(d, c); }
+  QDecSingle &fromQDecDouble(const QDecDouble &d, QDecContext *c = nullptr) { return fromWider(d, c); }
 
-  QDecSingle &fromQDecNumber(const QDecNumber &n, QDecContext *c = 0);
+  QDecSingle &fromQDecNumber(const QDecNumber &n, QDecContext *c = nullptr);
 
   QDecSingle &fromQDecPacked(const QDecPacked &p);
 
-  QDecSingle &fromWider(const QDecDouble &d, QDecContext *c = 0);
+  QDecSingle &fromWider(const QDecDouble &d, QDecContext *c = nullptr);
 
   int32_t getCoefficient(QByteArray &bcd) const {
     bcd.resize(DECSINGLE_Pmax);
-    return decSingleGetCoefficient(&m_data, (uint8_t *)bcd.data());
+    return decSingleGetCoefficient(&m_data, reinterpret_cast<uint8_t *>(bcd.data()));
   }
 
   int32_t getExponent() const { return decSingleGetExponent(&m_data); }
 
   QDecSingle &setCoefficient(const QByteArray &bcd, int32_t sign) {
-    decSingleSetCoefficient(&m_data, (const uint8_t *)bcd.data(), sign);
+    decSingleSetCoefficient(&m_data, reinterpret_cast<const uint8_t *>(bcd.data()), sign);
     return *this;
   }
 
-  QDecSingle &setExponent(int32_t exp, QDecContext *c = 0) {
+  QDecSingle &setExponent(int32_t exp, QDecContext *c = nullptr) {
     decSingleSetExponent(&m_data, CXT(c), exp);
     return *this;
   }
 
   int32_t toBCD(int32_t &exp, QByteArray &bcd) {
     bcd.resize(DECSINGLE_Pmax);
-    return decSingleToBCD(&m_data, &exp, (uint8_t *)bcd.data());
+    return decSingleToBCD(&m_data, &exp, reinterpret_cast<uint8_t *>(bcd.data()));
   }
 
   double toDouble() const;
@@ -151,7 +151,7 @@ public:
 
   int32_t toPacked(int32_t &exp, QByteArray &pack) {
     pack.resize(DECSINGLE_Pmax);
-    return decSingleToPacked(&m_data, &exp, (uint8_t *)pack.data());
+    return decSingleToPacked(&m_data, &exp, reinterpret_cast<uint8_t *>(pack.data()));
   }
 
   QDecDouble toQDecDouble() const;

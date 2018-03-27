@@ -39,32 +39,33 @@ namespace LimeReport {
 bool lesThen(ObjectPropItem *v1, ObjectPropItem *v2) { return v1->displayName().compare(v2->displayName()) < 0; }
 
 ObjectPropItem::ObjectPropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, ObjectPropItem *parent, bool isClass)
-    : m_object(object), m_name(name), m_displayName(displayName), m_haveValue(false), m_parent(parent), m_colorIndex(-1), m_readonly(true), m_model(0), m_isClass(isClass), m_changingValue(false) {
+    : m_object(object), m_name(name), m_displayName(displayName), m_haveValue(false), m_parent(parent), m_colorIndex(-1), m_readonly(true), m_model(nullptr), m_isClass(isClass),
+      m_changingValue(false) {
   if (parent) setModel(parent->model());
   m_index = QModelIndex();
-  // if (objects) foreach(QObject* item, *objects) m_objects.append(item);
+  // if (objects) for(QObject* item : *objects) m_objects.append(item);
   m_objects = objects;
 #ifdef INSPECT_BASEDESIGN
   BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(object);
   if (item) {
-    connect(item, SIGNAL(propertyChanged(QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QVariant, QVariant)));
-    connect(item, SIGNAL(propertyObjectNameChanged(QString, QString)), this, SLOT(slotPropertyObjectName(QString, QString)));
+    connect(item, &BaseDesignIntf::propertyChanged, this, &ObjectPropItem::slotPropertyChanged);
+    connect(item, &BaseDesignIntf::propertyObjectNameChanged, this, &ObjectPropItem::slotPropertyObjectName);
   }
 #endif
 }
 
 ObjectPropItem::ObjectPropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, const QVariant &value, ObjectPropItem *parent, bool readonly)
-    : m_object(object), m_name(name), m_displayName(displayName), m_value(value), m_haveValue(true), m_parent(parent), m_colorIndex(-1), m_readonly(readonly), m_model(0), m_isClass(false),
+    : m_object(object), m_name(name), m_displayName(displayName), m_value(value), m_haveValue(true), m_parent(parent), m_colorIndex(-1), m_readonly(readonly), m_model(nullptr), m_isClass(false),
       m_changingValue(false) {
   if (parent) setModel(parent->model());
   m_index = QModelIndex();
-  // if (objects) foreach(QObject* item, *objects) m_objects.append(item);
+  // if (objects) for(QObject* item : *objects) m_objects.append(item);
   m_objects = objects;
 #ifdef INSPECT_BASEDESIGN
   BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(object);
   if (item) {
-    connect(item, SIGNAL(propertyChanged(QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QVariant, QVariant)));
-    connect(item, SIGNAL(propertyObjectNameChanged(QString, QString)), this, SLOT(slotPropertyObjectName(QString, QString)));
+    connect(item, &BaseDesignIntf::propertyChanged, this, &ObjectPropItem::slotPropertyChanged);
+    connect(item, &BaseDesignIntf::propertyObjectNameChanged, this, &ObjectPropItem::slotPropertyObjectName);
   }
 #endif
 }
@@ -87,7 +88,7 @@ void ObjectPropItem::setPropertyValue(QVariant value) {
   LimeReport::QObjectPropertyModel *itemModel = dynamic_cast<LimeReport::QObjectPropertyModel *>(model());
   if (itemModel) {
     itemModel->itemDataChanged(modelIndex());
-    foreach (ObjectPropItem *item, children()) {
+    for (ObjectPropItem *item : children()) {
       if (item->modelIndex().isValid()) itemModel->itemDataChanged(item->modelIndex());
     }
   }
@@ -125,24 +126,24 @@ void ObjectPropItem::slotPropertyObjectName(const QString &oldValue, const QStri
 void ObjectPropItem::setValueToObject(const QString &propertyName, QVariant propertyValue) {
   object()->setProperty(propertyName.toLatin1(), propertyValue);
   if (objects()) {
-    foreach (QObject *item, *objects()) {
+    for (QObject *item : *objects()) {
       if (item->metaObject()->indexOfProperty(propertyName.toLatin1()) != -1) item->setProperty(propertyName.toLatin1(), propertyValue);
     }
   }
 }
 
 ObjectPropItem *ObjectPropItem::findChild(const QString &name) {
-  foreach (ObjectPropItem *item, m_childItems) {
+  for (ObjectPropItem *item : m_childItems) {
     if (item->propertyName() == name) return item;
   }
-  return 0;
+  return nullptr;
 }
 
 ObjectPropItem *ObjectPropItem::findPropertyItem(const QString &propertyName) {
-  foreach (ObjectPropItem *item, m_globalPropList) {
+  for (ObjectPropItem *item : m_globalPropList) {
     if (item->propertyName() == propertyName) return item;
   }
-  return 0;
+  return nullptr;
 }
 
 void ObjectPropItem::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }

@@ -62,7 +62,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   if (not qApp->dbConnect()) return;
 
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
-    QMessageBox::critical(this, "Erro!", "Login inválido!");
+    emit errorSignal("Login inválido!");
     ui->lineEditPass->setFocus();
     return;
   }

@@ -20,7 +20,7 @@ public:
 private:
   // attributes
   QString fornecedor;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewColeta;
   Ui::WidgetLogisticaColeta *ui;
   // methods
   auto cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) -> bool;

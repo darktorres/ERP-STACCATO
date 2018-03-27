@@ -21,7 +21,7 @@ private:
   // attributes
   // REFAC: convert this to constructor enum/bool?
   bool financeiro = false;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
   auto montaFiltro() -> void;

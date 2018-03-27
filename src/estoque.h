@@ -20,7 +20,7 @@ public:
 private:
   // attributes
   const QString idEstoque;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelEstoque;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelViewConsumo;
   SqlRelationalTableModel modelCompra;
@@ -36,7 +36,7 @@ private:
   };
 
   // methods
-  auto atualizaQuantEstoque(const int idVendaProduto) -> bool;
+  auto atualizaQuantEstoque() -> bool;
   auto calcularRestante() -> void;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
@@ -46,6 +46,7 @@ private:
   auto quebrarCompra(const int idVendaProduto, const double quant) -> bool;
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
+  bool desfazerConsumo();
 };
 
 #endif // ESTOQUE_H

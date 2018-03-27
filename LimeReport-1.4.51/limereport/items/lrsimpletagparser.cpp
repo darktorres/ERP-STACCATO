@@ -87,7 +87,7 @@ void HtmlContext::parseSymbs(QString text) {
     text.remove(pos, rx.matchedLength());
   }
 
-  foreach (QString pattern, m_symbPatterns) {
+  for (QString pattern : m_symbPatterns) {
     rx.setPattern(pattern);
     while (text.contains(rx)) {
       int pos = rx.indexIn(text);
@@ -159,7 +159,7 @@ QVector<TagDiff> HtmlContext::tagVectDiff(QVector<Tag *> source, QVector<Tag *> 
 
 bool HtmlContext::isVectorEqual(QVector<Tag *> source, QVector<Tag *> dest) {
   if (source.count() != dest.count()) return false;
-  foreach (Tag *tag, source) {
+  for (Tag *tag : source) {
     if (!dest.contains(tag)) return false;
   }
   return true;
@@ -176,7 +176,7 @@ QString HtmlContext::extendTextByTags(QString text, int pos) {
     QVector<Tag *> tagsAtPos = tagsAt(pos);
     if (!HtmlContext::isVectorEqual(curTags, tagsAtPos)) {
       QVector<TagDiff> diffs = HtmlContext::tagVectDiff(curTags, tagsAtPos);
-      foreach (TagDiff diff, diffs) {
+      for (TagDiff diff : diffs) {
         if (diff.direction == TagDiff::Inner) {
           curText += '<' + diff.tag->tagText() + '>';
           curTags.append(diff.tag);
@@ -206,28 +206,26 @@ QString HtmlContext::extendTextByTags(QString text, int pos) {
 
 QVector<Tag *> HtmlContext::tagsAt(int pos) {
   QVector<Tag *> result;
-  foreach (Tag *tag, m_tags) {
+  for (Tag *tag : m_tags) {
     if ((pos >= tag->begin()) && (pos <= tag->end())) result.append(tag);
   }
   return result;
 }
 
 Symb HtmlContext::symbAt(int pos) {
-  foreach (Symb *symb, m_symbs) {
+  for (Symb *symb : m_symbs) {
     if (pos == symb->pos()) return *symb;
   }
   return Symb();
 }
 
 void HtmlContext::clearTags() {
-  foreach (Tag *tag, m_tags)
-    delete tag;
+  for (Tag *tag : m_tags) delete tag;
   m_tags.clear();
 }
 
 void HtmlContext::clearSymbs() {
-  foreach (Symb *symb, m_symbs)
-    delete symb;
+  for (Symb *symb : m_symbs) delete symb;
   m_tags.clear();
 }
 

@@ -62,7 +62,6 @@ bool NumFormatParser::isDateTime(const QString &formatCode) {
     // so only the first section of the format make sense.
     case ';':
       return false;
-      break;
 
     // days
     case 'D':

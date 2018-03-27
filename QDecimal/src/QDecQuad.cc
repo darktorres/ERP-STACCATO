@@ -11,90 +11,71 @@
 
 #include "QDecQuad.hh"
 extern "C" {
- #include "decimal128.h"
+#include "decimal128.h"
 }
-#include <stdlib.h>
-#include <QTextStream>
+#include "QDecDouble.hh"
 #include "QDecNumber.hh"
 #include "QDecPacked.hh"
-#include "QDecDouble.hh"
+#include <QTextStream>
+#include <stdlib.h>
 
+QDecQuad &QDecQuad::fromDouble(double d) {
+  char str[MaxStrSize] = {0};
 
-QDecQuad& QDecQuad::fromDouble(double d)
-{
-  char str[MaxStrSize] = { 0 };
-
- #if defined(_MSC_VER)
+#if defined(_MSC_VER)
   _snprintf(str, MaxStrSize, "%.*g", QDecNumDigits, d);
- #else
+#else
   snprintf(str, MaxStrSize, "%.*g", QDecNumDigits, d);
- #endif
-  
+#endif
+
   return fromString(str);
 }
 
-
-QDecQuad& QDecQuad::fromHexString(const char* str)
-{
+QDecQuad &QDecQuad::fromHexString(const char *str) {
   QByteArray ba = QByteArray::fromHex(str);
   int size = sizeof(m_data);
-  char* p = (char*)&m_data;
+  char *p = reinterpret_cast<char *>(&m_data);
   int i = 0;
-  int j = size-1;
-  for(; i<size; i++,j--)
-    p[j] = ba.at(i);
+  int j = size - 1;
+  for (; i < size; i++, j--) p[j] = ba.at(i);
 
   return *this;
 }
 
-
-QDecQuad& QDecQuad::fromQDecDouble(const QDecDouble& d)
-{
+QDecQuad &QDecQuad::fromQDecDouble(const QDecDouble &d) {
   decDoubleToWider(d.data(), &m_data);
   return *this;
 }
 
-QDecQuad& QDecQuad::fromQDecNumber(const QDecNumber& n, QDecContext* c)
-{
+QDecQuad &QDecQuad::fromQDecNumber(const QDecNumber &n, QDecContext *c) {
   decQuadFromNumber(&m_data, n.data(), CXT(c));
   return *this;
 }
-  
-QDecQuad& QDecQuad::fromQDecPacked(const QDecPacked& p)
-{
+
+QDecQuad &QDecQuad::fromQDecPacked(const QDecPacked &p) {
   fromQDecNumber(p.toQDecNumber());
   return *this;
 }
 
-double QDecQuad::toDouble() const
-{
-  char str[MaxStrSize] = { 0 };
+double QDecQuad::toDouble() const {
+  char str[MaxStrSize] = {0};
   decQuadToString(&m_data, str);
-  return strtod(str, 0);
+  return strtod(str, nullptr);
 }
 
-QDecDouble QDecQuad::toQDecDouble(QDecContext* c) const
-{
+QDecDouble QDecQuad::toQDecDouble(QDecContext *c) const {
   decDouble d;
   return decDoubleFromWider(&d, &m_data, CXT(c));
 }
-  
-QDecPacked QDecQuad::toQDecPacked() const
-{
-  return QDecPacked(toQDecNumber());
-}  
-  
-QDecNumber QDecQuad::toQDecNumber() const
-{
+
+QDecPacked QDecQuad::toQDecPacked() const { return QDecPacked(toQDecNumber()); }
+
+QDecNumber QDecQuad::toQDecNumber() const {
   decNumber n;
   return decQuadToNumber(&m_data, &n);
 }
 
-
-QTextStream& operator<<(QTextStream& ts, const QDecQuad& d)
-{
+QTextStream &operator<<(QTextStream &ts, const QDecQuad &d) {
   ts << d.toString();
   return ts;
 }
-
-

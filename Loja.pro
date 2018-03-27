@@ -13,7 +13,7 @@ TEMPLATE = app
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
-VERSION = 0.5
+VERSION = 0.6
 QMAKE_TARGET_COMPANY = Staccato Revestimentos
 QMAKE_TARGET_PRODUCT = ERP
 QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
@@ -21,9 +21,9 @@ QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
 CONFIG += c++1z
 
-gcc|clang{
+win32-g++{
 QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
-#QMAKE_CXXFLAGS += -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wshadow=local -Wformat=2
+QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
 
 QMAKE_CXXFLAGS_DEBUG += -O0
 QMAKE_CXXFLAGS_RELEASE  = -O0
@@ -47,10 +47,15 @@ linux-g++{
 }
 
 linux-clang{
-    QMAKE_CC = ccache clang-5.0
-    QMAKE_CXX = ccache clang++-5.0
+    QMAKE_CC = ccache clang-7
+    QMAKE_CXX = ccache clang++-7
 
-    QMAKE_LFLAGS += -fuse-ld=lld-5.0
+    QMAKE_LFLAGS += -fuse-ld=lld-7
+
+    QMAKE_CXXFLAGS += -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
+    QMAKE_CXXFLAGS += -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
+    QMAKE_CXXFLAGS += -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
+    QMAKE_CXXFLAGS += -Wno-shadow -Wno-shadow-field
 
     #QMAKE_CXXFLAGS += -flto=thin
     #QMAKE_LFLAGS += -flto=thin
@@ -82,6 +87,7 @@ SOURCES += \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
     src/cadastrousuario.cpp \
+    src/calculofrete.cpp \
     src/cepcompleter.cpp \
     src/checkboxdelegate.cpp \
     src/combobox.cpp \
@@ -98,8 +104,9 @@ SOURCES += \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
+    src/horizontalproxymodel.cpp \
     src/importaprodutos.cpp \
-    src/importaprodutosproxy.cpp \
+    src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
     src/impressao.cpp \
     src/inputdialog.cpp \
@@ -129,10 +136,11 @@ SOURCES += \
     src/registeraddressdialog.cpp \
     src/registerdialog.cpp \
     src/searchdialog.cpp \
-    src/searchdialogproxy.cpp \
+    src/searchdialogproxymodel.cpp \
     src/sendmail.cpp \
     src/singleeditdelegate.cpp \
     src/smtp.cpp \
+    src/sql.cpp \
     src/sqlquerymodel.cpp \
     src/sqlrelationaltablemodel.cpp \
     src/tableview.cpp \
@@ -188,6 +196,7 @@ HEADERS  += \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
     src/cadastrousuario.h \
+    src/calculofrete.h \
     src/cepcompleter.h \
     src/checkboxdelegate.h \
     src/combobox.h \
@@ -204,8 +213,9 @@ HEADERS  += \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
+    src/horizontalproxymodel.h \
     src/importaprodutos.h \
-    src/importaprodutosproxy.h \
+    src/importaprodutosproxymodel.h \
     src/importarxml.h \
     src/impressao.h \
     src/inputdialog.h \
@@ -234,10 +244,11 @@ HEADERS  += \
     src/registeraddressdialog.h \
     src/registerdialog.h \
     src/searchdialog.h \
-    src/searchdialogproxy.h \
+    src/searchdialogproxymodel.h \
     src/sendmail.h \
     src/singleeditdelegate.h \
     src/smtp.h \
+    src/sql.h \
     src/sqlquerymodel.h \
     src/sqlrelationaltablemodel.h \
     src/tableview.h \
@@ -291,6 +302,7 @@ FORMS += \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \
     ui/cadastrousuario.ui \
+    ui/calculofrete.ui \
     ui/contas.ui \
     ui/devolucao.ui \
     ui/estoque.ui \

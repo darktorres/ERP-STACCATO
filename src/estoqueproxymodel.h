@@ -9,7 +9,7 @@ class EstoqueProxyModel final : public QIdentityProxyModel {
 
 public:
   explicit EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
-  ~EstoqueProxyModel() = default;
+  ~EstoqueProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:

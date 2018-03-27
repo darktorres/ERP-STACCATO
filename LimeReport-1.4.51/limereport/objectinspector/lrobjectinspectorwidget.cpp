@@ -37,7 +37,7 @@
 
 namespace LimeReport {
 
-ObjectInspectorWidget::ObjectInspectorWidget(QWidget *parent) : QTreeView(parent), m_propertyDelegate(0) {
+ObjectInspectorWidget::ObjectInspectorWidget(QWidget *parent) : QTreeView(parent), m_propertyDelegate(nullptr) {
   setRootIsDecorated(false);
   initColorMap();
   setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed);

@@ -43,7 +43,7 @@ void Contas::validarData(const QModelIndex &index) {
     query.bindValue(":idPagamento", idPagamento);
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando dataPagamento: " + query.lastError().text());
+      emit errorSignal("Erro buscando dataPagamento: " + query.lastError().text());
       return;
     }
 
@@ -53,12 +53,12 @@ void Contas::validarData(const QModelIndex &index) {
     if (oldDate.isNull()) return;
 
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
-      QMessageBox::critical(this, "Erro!", "Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
+      emit errorSignal("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
       if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) return;
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
-      QMessageBox::critical(this, "Erro!", "Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
+      emit errorSignal("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
       if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) return;
     }
   }
@@ -71,7 +71,7 @@ void Contas::preencher(const QModelIndex &index) {
     query.bindValue(":idPagamento", modelPendentes.data(index.row(), "idPagamento"));
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando valor: " + query.lastError().text());
+      emit errorSignal("Erro buscando valor: " + query.lastError().text());
       return;
     }
 
@@ -79,7 +79,7 @@ void Contas::preencher(const QModelIndex &index) {
     const double newValor = modelPendentes.data(index.row(), "valor").toDouble();
 
     if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
-      QMessageBox::critical(this, "Erro!", "Limite de alteração de valor excedido! Use a função de corrigir fluxo!");
+      emit errorSignal("Limite de alteração de valor excedido! Use a função de corrigir fluxo!");
       if (not modelPendentes.setData(index.row(), "valor", oldValor)) return;
     }
   }
@@ -246,37 +246,37 @@ bool Contas::verifyFields() {
   for (int row = 0; row < modelPendentes.rowCount(); ++row) {
     if ((tipo == Tipo::Pagar and modelPendentes.data(row, "status").toString() == "PAGO") or (tipo == Tipo::Receber and modelPendentes.data(row, "status").toString() == "RECEBIDO")) {
       if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'Data Realizado' vazio!");
+        emit errorSignal("'Data Realizado' vazio!");
         return false;
       }
 
       if (modelPendentes.data(row, "valorReal").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'R$ Real' vazio!");
+        emit errorSignal("'R$ Real' vazio!");
         return false;
       }
 
       if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'Tipo Real' vazio!");
+        emit errorSignal("'Tipo Real' vazio!");
         return false;
       }
 
       if (modelPendentes.data(row, "parcelaReal").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'Parcela Real' vazio!");
+        emit errorSignal("'Parcela Real' vazio!");
         return false;
       }
 
       if (modelPendentes.data(row, "contaDestino").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'Conta Dest.' vazio!");
+        emit errorSignal("'Conta Dest.' vazio!");
         return false;
       }
 
       if (modelPendentes.data(row, "centroCusto").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'Centro Custo' vazio!");
+        emit errorSignal("'Centro Custo' vazio!");
         return false;
       }
 
       if (modelPendentes.data(row, "grupo").toString().isEmpty()) {
-        QMessageBox::critical(this, "Erro!", "'Grupo' vazio!");
+        emit errorSignal("'Grupo' vazio!");
         return false;
       }
     }
@@ -289,7 +289,7 @@ void Contas::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) return;
 
   if (not modelPendentes.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + modelPendentes.lastError().text());
+    emit errorSignal("Erro salvando dados: " + modelPendentes.lastError().text());
     return;
   }
 
@@ -303,7 +303,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     query.bindValue(":idPagamento", idPagamento);
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando dados: " + query.lastError().text());
+      emit errorSignal("Erro buscando dados: " + query.lastError().text());
       return;
     }
 
@@ -314,9 +314,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE"
                                                : "idVenda LIKE '" + idVenda + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
 
-    if (not modelPendentes.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text());
-    }
+    if (not modelPendentes.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text());
 
     ui->tablePendentes->resizeColumnsToContents();
 
@@ -331,9 +329,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE"
                                                  : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE");
 
-    if (not modelProcessados.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());
-    }
+    if (not modelProcessados.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());
 
     for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");
@@ -345,12 +341,11 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
   if (tipo == Tipo::Pagar) {
     QSqlQuery query;
-    query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN "
-                  "pedido_fornecedor_has_produto pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
+    query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN pedido_fornecedor_has_produto pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando dados: " + query.lastError().text());
+      emit errorSignal("Erro buscando dados: " + query.lastError().text());
       return;
     }
 
@@ -362,9 +357,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO')"
                                              : "idCompra = '" + idCompra + "' AND (status = 'PENDENTE' OR status = 'CONFERIDO')");
 
-    if (not modelPendentes.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text());
-    }
+    if (not modelPendentes.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text());
 
     ui->tablePendentes->resizeColumnsToContents();
 
@@ -379,9 +372,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'"
                                                : "idCompra = '" + idCompra + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'");
 
-    if (not modelProcessados.select()) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());
-    }
+    if (not modelProcessados.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());
 
     for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");

@@ -20,10 +20,10 @@ WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : Wi
 WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 
 bool WidgetLogisticaRepresentacao::updateTables() {
-  if (model.tableName().isEmpty()) setupTables();
+  if (modelViewLogisticaRepresentacao.tableName().isEmpty()) setupTables();
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
+  if (not modelViewLogisticaRepresentacao.select()) {
+    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewLogisticaRepresentacao.lastError().text());
     return false;
   }
 
@@ -37,10 +37,10 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
 
   ui->lineEditBusca->clear();
 
-  model.setFilter("fornecedor = '" + fornecedor + "'");
+  modelViewLogisticaRepresentacao.setFilter("fornecedor = '" + fornecedor + "'");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
+  if (not modelViewLogisticaRepresentacao.select()) {
+    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewLogisticaRepresentacao.lastError().text());
     return;
   }
 
@@ -52,25 +52,25 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
 void WidgetLogisticaRepresentacao::setupTables() {
   // REFAC: refactor this to not select in here
 
-  model.setTable("view_logistica_representacao");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelViewLogisticaRepresentacao.setTable("view_logistica_representacao");
+  modelViewLogisticaRepresentacao.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  model.setHeaderData("idVenda", "Venda");
-  model.setHeaderData("cliente", "Cliente");
-  model.setHeaderData("descricao", "Produto");
-  model.setHeaderData("codComercial", "Cód. Com.");
-  model.setHeaderData("quant", "Quant.");
-  model.setHeaderData("un", "Un.");
-  model.setHeaderData("caixas", "Cx.");
-  model.setHeaderData("kgcx", "Kg./Cx.");
-  model.setHeaderData("ordemCompra", "OC");
-  model.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelViewLogisticaRepresentacao.setHeaderData("idVenda", "Venda");
+  modelViewLogisticaRepresentacao.setHeaderData("cliente", "Cliente");
+  modelViewLogisticaRepresentacao.setHeaderData("descricao", "Produto");
+  modelViewLogisticaRepresentacao.setHeaderData("codComercial", "Cód. Com.");
+  modelViewLogisticaRepresentacao.setHeaderData("quant", "Quant.");
+  modelViewLogisticaRepresentacao.setHeaderData("un", "Un.");
+  modelViewLogisticaRepresentacao.setHeaderData("caixas", "Cx.");
+  modelViewLogisticaRepresentacao.setHeaderData("kgcx", "Kg./Cx.");
+  modelViewLogisticaRepresentacao.setHeaderData("ordemCompra", "OC");
+  modelViewLogisticaRepresentacao.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  model.setFilter("0");
+  modelViewLogisticaRepresentacao.setFilter("0");
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelViewLogisticaRepresentacao.select()) emit errorSignal("Erro lendo tabela: " + modelViewLogisticaRepresentacao.lastError().text());
 
-  ui->table->setModel(new EstoquePrazoProxyModel(&model, this));
+  ui->table->setModel(new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this));
   ui->table->hideColumn("idPedido");
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("status");
@@ -81,7 +81,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
 
@@ -91,8 +91,8 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
   if (not processRows(list, input.getDateTime(), input.getRecebeu())) {
     QSqlQuery("ROLLBACK").exec();
@@ -100,12 +100,12 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
   updateTables();
-  QMessageBox::information(this, "Aviso!", "Atualizado!");
+  emit informationSignal("Atualizado!");
 }
 
 bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) {
@@ -117,7 +117,7 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 
   for (const auto &item : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);
-    query1.bindValue(":idVendaProduto", model.data(item.row(), "idVendaProduto"));
+    query1.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
 
     if (not query1.exec()) {
       emit errorSignal("Erro salvando status no pedido_fornecedor: " + query1.lastError().text());
@@ -125,7 +125,7 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
-    query2.bindValue(":idVendaProduto", model.data(item.row(), "idVendaProduto"));
+    query2.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
     query2.bindValue(":recebeu", recebeu);
 
     if (not query2.exec()) {
@@ -140,9 +140,9 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 void WidgetLogisticaRepresentacao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) {
-  model.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
+  modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelViewLogisticaRepresentacao.select()) emit errorSignal("Erro lendo tabela: " + modelViewLogisticaRepresentacao.lastError().text());
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

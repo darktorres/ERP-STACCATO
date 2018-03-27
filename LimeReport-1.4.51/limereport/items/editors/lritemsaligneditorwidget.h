@@ -40,10 +40,10 @@ class ItemsAlignmentEditorWidget : public QToolBar
 {
     Q_OBJECT
 public:
-    explicit ItemsAlignmentEditorWidget(ReportDesignWidget* reportEditor, const QString &title, QWidget *parent = 0);
-    explicit ItemsAlignmentEditorWidget(ReportDesignWidget* reportEditor, QWidget *parent = 0);
-    explicit ItemsAlignmentEditorWidget(PageDesignIntf* page, const QString &title, QWidget *parent = 0);
-    explicit ItemsAlignmentEditorWidget(PageDesignIntf* page, QWidget *parent = 0);
+    explicit ItemsAlignmentEditorWidget(ReportDesignWidget* reportEditor, const QString &title, QWidget *parent = nullptr);
+    explicit ItemsAlignmentEditorWidget(ReportDesignWidget* reportEditor, QWidget *parent = nullptr);
+    explicit ItemsAlignmentEditorWidget(PageDesignIntf* page, const QString &title, QWidget *parent = nullptr);
+    explicit ItemsAlignmentEditorWidget(PageDesignIntf* page, QWidget *parent = nullptr);
 private slots:
     void slotBrinToFront();
     void slotSendToBack();

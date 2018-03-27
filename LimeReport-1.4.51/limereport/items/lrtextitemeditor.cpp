@@ -112,20 +112,24 @@ void TextItemEditor::initUI() {
     ui->twData->setModel(dm->datasourcesModel());
     ui->twScriptEngine->setModel(se.model());
 
-    foreach (const QString &dsName, dm->dataSourceNames()) {
-      foreach (const QString &field, dm->fieldNames(dsName)) { dataWords << dsName + "." + field; }
+    for (const QString &dsName : dm->dataSourceNames()) {
+      for (const QString &field : dm->fieldNames(dsName)) {
+        dataWords << dsName + "." + field;
+      }
     }
   } else {
     ui->tabWidget->setVisible(false);
   }
 
-  foreach (LimeReport::ScriptFunctionDesc functionDesc, se.functionsDescriber()) { dataWords << functionDesc.name; }
+  for (LimeReport::ScriptFunctionDesc functionDesc : se.functionsDescriber()) {
+    dataWords << functionDesc.name;
+  }
 
   m_completer->setModel(new QStringListModel(dataWords, m_completer));
   ui->gbSettings->setVisible(false);
 
   if (ui->twScriptEngine->selectionModel()) {
-    connect(ui->twScriptEngine->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(slotScriptItemsSelectionChanged(QModelIndex, QModelIndex)));
+    connect(ui->twScriptEngine->selectionModel(), &QItemSelectionModel::currentChanged, this, &TextItemEditor::slotScriptItemsSelectionChanged);
   }
 
   BandDesignIntf *band = findParentBand();
@@ -141,7 +145,9 @@ void TextItemEditor::initUI() {
 QStringListModel *TextItemEditor::getDataSources() {
   LimeReport::DataSourceManager *dm = m_page->datasourceManager();
   QStringList dataSources;
-  foreach (QString dsName, dm->dataSourceNames()) { dataSources << dsName; }
+  for (QString dsName : dm->dataSourceNames()) {
+    dataSources << dsName;
+  }
   return new QStringListModel(dataSources, m_completer);
 }
 
@@ -155,7 +161,9 @@ QStringListModel *TextItemEditor::getPrefixes() {
 QStringListModel *TextItemEditor::getColumns(QString datasource) {
   QStringList fields;
   LimeReport::DataSourceManager *dm = m_page->datasourceManager();
-  foreach (QString field, dm->fieldNames(datasource)) { fields << field; }
+  for (QString field : dm->fieldNames(datasource)) {
+    fields << field;
+  }
   return new QStringListModel(fields, m_completer);
 }
 
@@ -167,7 +175,7 @@ void TextItemEditor::slotFieldSelected() {
 }
 
 void TextItemEditor::readSetting() {
-  if (settings() == 0) return;
+  if (settings() == nullptr) return;
 
   m_isReadingSetting = true;
 
@@ -194,7 +202,7 @@ void TextItemEditor::readSetting() {
 }
 
 void TextItemEditor::writeSetting() {
-  if (settings() != 0) {
+  if (settings() != nullptr) {
     settings()->beginGroup("TextItemEditor");
     settings()->setValue("Geometry", saveGeometry());
     settings()->setValue("State", ui->splitter->saveState());
@@ -202,16 +210,16 @@ void TextItemEditor::writeSetting() {
   }
 }
 
-CompleaterTextEditor::CompleaterTextEditor(QWidget *parent) : QTextEdit(parent), m_compleater(0) {}
+CompleaterTextEditor::CompleaterTextEditor(QWidget *parent) : QTextEdit(parent), m_compleater(nullptr) {}
 
 void CompleaterTextEditor::setCompleter(QCompleter *value) {
-  if (value) disconnect(value, 0, this, 0);
+  if (value) disconnect(value, nullptr, this, nullptr);
   m_compleater = value;
   if (!m_compleater) return;
   m_compleater->setWidget(this);
   m_compleater->setCompletionMode(QCompleter::PopupCompletion);
   m_compleater->setCaseSensitivity(Qt::CaseInsensitive);
-  connect(m_compleater, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
+  connect(m_compleater, QOverload<const QString &>::of(&QCompleter::activated), this, &CompleaterTextEditor::insertCompletion);
 }
 
 void CompleaterTextEditor::keyPressEvent(QKeyEvent *e) {
@@ -338,7 +346,7 @@ void TextItemEditor::slotScriptItemsSelectionChanged(const QModelIndex &to, cons
 }
 
 BandDesignIntf *TextItemEditor::findParentBand() {
-  BandDesignIntf *result = 0;
+  BandDesignIntf *result = nullptr;
   BaseDesignIntf *item = m_textItem;
   while (true) {
     item = dynamic_cast<BaseDesignIntf *>(item->parentItem());

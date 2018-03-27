@@ -10,14 +10,16 @@ UserConfig::UserConfig(QWidget *parent) : Dialog(parent), ui(new Ui::UserConfig)
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
+
+  if (const auto key = UserSession::getSetting("User/servidorACBr"); key) ui->lineEditACBrServidor->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/portaACBr"); key) ui->lineEditACBrPorta->setText(key.value().toString());
   if (const auto key = UserSession::getSetting("User/lojaACBr"); key) ui->itemBoxLoja->setValue(key.value());
-  // REFAC: remove these two
+
   if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) ui->lineEditEmailContabilidade->setText(key.value().toString());
   if (const auto key = UserSession::getSetting("User/emailLogistica"); key) ui->lineEditEmailLogistica->setText(key.value().toString());
 
   if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) ui->lineEditServidorSMTP->setText(key.value().toString());
   if (const auto key = UserSession::getSetting("User/portaSMTP"); key) ui->lineEditPortaSMTP->setText(key.value().toString());
-  // REFAC: rename this to email
   if (const auto key = UserSession::getSetting("User/emailCompra"); key) ui->lineEditEmail->setText(key.value().toString());
   if (const auto key = UserSession::getSetting("User/emailSenha"); key) ui->lineEditEmailSenha->setText(key.value().toString());
   if (const auto key = UserSession::getSetting("User/emailCopia"); key) ui->lineEditEmailCopia->setText(key.value().toString());
@@ -64,6 +66,8 @@ void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonSalvar_clicked() {
+  UserSession::setSetting("User/servidorACBr", ui->lineEditACBrServidor->text());
+  UserSession::setSetting("User/portaACBr", ui->lineEditACBrPorta->text());
   UserSession::setSetting("User/lojaACBr", ui->itemBoxLoja->getValue());
   UserSession::setSetting("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
   UserSession::setSetting("User/emailLogistica", ui->lineEditEmailLogistica->text());

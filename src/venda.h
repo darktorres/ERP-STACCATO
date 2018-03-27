@@ -24,6 +24,7 @@ public:
 private:
   // attributes
   bool financeiro = false;
+  bool correcao = false;
   double minimoFrete;
   double porcFrete;
   QString idOrcamento;

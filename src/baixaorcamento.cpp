@@ -7,11 +7,7 @@
 BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : Dialog(parent), ui(new Ui::BaixaOrcamento) {
   ui->setupUi(this);
 
-  model.setTable("orcamento");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  model.setFilter("idOrcamento = '" + idOrcamento + "'");
-
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela orcamento: " + model.lastError().text());
+  setupTables(idOrcamento);
 
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonCancelar_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &BaixaOrcamento::on_pushButtonSalvar_clicked);
@@ -19,11 +15,19 @@ BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : Di
 
 BaixaOrcamento::~BaixaOrcamento() { delete ui; }
 
+void BaixaOrcamento::setupTables(const QString &idOrcamento) {
+  modelOrcamento.setTable("orcamento");
+  modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelOrcamento.setFilter("idOrcamento = '" + idOrcamento + "'");
+
+  if (not modelOrcamento.select()) emit errorSignal("Erro lendo tabela orcamento: " + modelOrcamento.lastError().text());
+}
+
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
   if (ui->plainTextEditObservacao->toPlainText().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Deve preencher a observação!");
+    emit errorSignal("Deve preencher a observação!");
     return;
   }
 
@@ -34,16 +38,16 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
   }
 
   if (motivo.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Deve escolher um motivo!");
+    emit errorSignal("Deve escolher um motivo!");
     return;
   }
 
-  if (not model.setData(0, "status", "PERDIDO")) return;
-  if (not model.setData(0, "motivoCancelamento", motivo)) return;
-  if (not model.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) return;
+  if (not modelOrcamento.setData(0, "status", "PERDIDO")) return;
+  if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) return;
+  if (not modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) return;
 
-  if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro cancelando orçamento: " + model.lastError().text());
+  if (not modelOrcamento.submitAll()) {
+    emit errorSignal("Erro cancelando orçamento: " + modelOrcamento.lastError().text());
     return;
   }
 

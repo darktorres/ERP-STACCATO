@@ -6,10 +6,17 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "excel.h"
 #include "usersession.h"
 
-Excel::Excel(const QString &id, QWidget *parent) : id(id), parent(parent) { verificaTipo(); }
+Excel::Excel(const QString &id, QWidget *parent) : id(id), parent(parent) {
+  connect(this, &Excel::informationSignal, qApp, &Application::enqueueInformation);
+  connect(this, &Excel::warningSignal, qApp, &Application::enqueueWarning);
+  connect(this, &Excel::errorSignal, qApp, &Application::enqueueError);
+
+  verificaTipo();
+}
 
 void Excel::verificaTipo() {
   QSqlQuery query;
@@ -17,7 +24,7 @@ void Excel::verificaTipo() {
   query.bindValue(":idOrcamento", id);
 
   if (not query.exec()) {
-    QMessageBox::critical(parent, "Erro!", "Erro verificando se id é Orçamento!");
+    emit errorSignal("Erro verificando se id é Orçamento!");
     return;
   }
 
@@ -36,7 +43,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   const auto folderKey = UserSession::getSetting(folder);
 
   if (not folderKey or folderKey.value().toString().isEmpty()) {
-    QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
+    emit errorSignal("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
     return false;
   }
 
@@ -45,7 +52,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QDir dir(path);
 
   if (not dir.exists() and not dir.mkdir(path)) {
-    QMessageBox::critical(parent, "Erro!", "Erro ao criar a pasta escolhida nas configurações!");
+    emit errorSignal("Erro ao criar a pasta escolhida nas configurações!");
     return false;
   }
 
@@ -54,12 +61,12 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
   if (not modelo.exists()) {
-    QMessageBox::critical(parent, "Erro!", "Não encontrou o modelo do Excel!");
+    emit errorSignal("Não encontrou o modelo do Excel!");
     return false;
   }
 
   if (not setQuerys()) {
-    QMessageBox::critical(parent, "Erro!", "Processo interrompido, ocorreu algum erro!");
+    emit errorSignal("Processo interrompido, ocorreu algum erro!");
     return false;
   }
 
@@ -69,8 +76,8 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(parent, "Erro!", "Não foi possível abrir o arquivo para escrita:\n" + fileName);
-    QMessageBox::critical(parent, "Erro!", "Erro: " + file.errorString());
+    emit errorSignal("Não foi possível abrir o arquivo para escrita:\n" + fileName);
+    emit errorSignal("Erro: " + file.errorString());
     return false;
   }
 
@@ -153,7 +160,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
                       "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
   if (not queryPgt1.exec() or not queryPgt1.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando pagamentos 1: " + queryPgt1.lastError().text());
+    emit errorSignal("Erro buscando pagamentos 1: " + queryPgt1.lastError().text());
     return false;
   }
 
@@ -166,7 +173,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
                       "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
   if (not queryPgt2.exec() or not queryPgt2.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando pagamentos 2: " + queryPgt2.lastError().text());
+    emit errorSignal("Erro buscando pagamentos 2: " + queryPgt2.lastError().text());
     return false;
   }
 
@@ -179,7 +186,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
                       "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
   if (not queryPgt3.exec() or not queryPgt3.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando pagamentos 3: " + queryPgt3.lastError().text());
+    emit errorSignal("Erro buscando pagamentos 3: " + queryPgt3.lastError().text());
     return false;
   }
 
@@ -194,7 +201,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
                       "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
   if (not queryPgt4.exec() or not queryPgt4.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando pagamentos 4: " + queryPgt4.lastError().text());
+    emit errorSignal("Erro buscando pagamentos 4: " + queryPgt4.lastError().text());
     return false;
   }
 
@@ -209,7 +216,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
                       "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
   if (not queryPgt5.exec() or not queryPgt5.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando pagamentos 5: " + queryPgt5.lastError().text());
+    emit errorSignal("Erro buscando pagamentos 5: " + queryPgt5.lastError().text());
     return false;
   }
 
@@ -236,7 +243,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     query.bindValue(":idProduto", queryProduto.value("idProduto"));
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(parent, "Erro!", "Erro buscando dados do produto: " + query.lastError().text());
+      emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
       return false;
     }
 
@@ -271,12 +278,12 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   hideUnusedRows(xlsx);
 
   if (not xlsx.saveAs(fileName)) {
-    QMessageBox::critical(parent, "Erro!", "Ocorreu algum erro ao salvar o arquivo.");
+    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
     return false;
   }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  QMessageBox::information(parent, "Ok!", "Arquivo salvo como " + fileName);
+  emit informationSignal("Arquivo salvo como " + fileName);
 
   return true;
 }
@@ -289,8 +296,8 @@ bool Excel::setQuerys() {
                   "idOrcamento = :idOrcamento");
     query.bindValue(":idOrcamento", id);
 
-    queryProduto.prepare("SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, "
-                         "desconto, quant, un, parcial, parcialDesc FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
+    queryProduto.prepare(
+        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
     queryProduto.bindValue(":idOrcamento", id);
   }
 
@@ -299,18 +306,18 @@ bool Excel::setQuerys() {
                   "prazoEntrega, observacao FROM venda WHERE idVenda = :idVenda");
     query.bindValue(":idVenda", id);
 
-    queryProduto.prepare("SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, "
-                         "desconto, quant, un, parcial, parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda");
+    queryProduto.prepare(
+        "SELECT idProduto, fornecedor, codComercial, formComercial, produto, obs, prcUnitario, desconto, quant, un, parcial, parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda");
     queryProduto.bindValue(":idVenda", id);
   }
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando dados da venda/orçamento: " + query.lastError().text());
+    emit errorSignal("Erro buscando dados da venda/orçamento: " + query.lastError().text());
     return false;
   }
 
   if (not queryProduto.exec() or not queryProduto.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando dados dos produtos: " + query.lastError().text());
+    emit errorSignal("Erro buscando dados dos produtos: " + query.lastError().text());
     return false;
   }
 
@@ -318,7 +325,7 @@ bool Excel::setQuerys() {
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
   if (not queryCliente.exec() or not queryCliente.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando cliente: " + queryCliente.lastError().text());
+    emit errorSignal("Erro buscando cliente: " + queryCliente.lastError().text());
     return false;
   }
 
@@ -326,7 +333,7 @@ bool Excel::setQuerys() {
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
   if (not queryEndEnt.exec() or not queryEndEnt.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text());
+    emit errorSignal("Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text());
     return false;
   }
 
@@ -334,7 +341,7 @@ bool Excel::setQuerys() {
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
   if (not queryEndFat.exec() or not queryEndFat.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando dados do endereço: " + queryEndFat.lastError().text());
+    emit errorSignal("Erro buscando dados do endereço: " + queryEndFat.lastError().text());
     return false;
   }
 
@@ -342,7 +349,7 @@ bool Excel::setQuerys() {
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
   if (not queryProfissional.exec() or not queryProfissional.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando profissional: " + queryProfissional.lastError().text());
+    emit errorSignal("Erro buscando profissional: " + queryProfissional.lastError().text());
     return false;
   }
 
@@ -350,7 +357,7 @@ bool Excel::setQuerys() {
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
   if (not queryVendedor.exec() or not queryVendedor.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando vendedor: " + queryVendedor.lastError().text());
+    emit errorSignal("Erro buscando vendedor: " + queryVendedor.lastError().text());
     return false;
   }
 
@@ -358,7 +365,7 @@ bool Excel::setQuerys() {
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLoja.exec() or not queryLoja.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando loja: " + queryLoja.lastError().text());
+    emit errorSignal("Erro buscando loja: " + queryLoja.lastError().text());
     return false;
   }
 
@@ -366,7 +373,7 @@ bool Excel::setQuerys() {
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLojaEnd.exec() or not queryLojaEnd.first()) {
-    QMessageBox::critical(parent, "Erro!", "Erro buscando endereço loja: " + queryLojaEnd.lastError().text());
+    emit errorSignal("Erro buscando endereço loja: " + queryLojaEnd.lastError().text());
     return false;
   }
 

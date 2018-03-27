@@ -5,11 +5,11 @@
 
 #include "sqlrelationaltablemodel.h"
 
-class ImportaProdutosProxy final : public QIdentityProxyModel {
+class ImportaProdutosProxyModel final : public QIdentityProxyModel {
 
 public:
-  ImportaProdutosProxy(SqlRelationalTableModel *model, QObject *parent = nullptr);
-  ~ImportaProdutosProxy() = default;
+  ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  ~ImportaProdutosProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:

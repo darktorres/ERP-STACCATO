@@ -18,7 +18,7 @@ void WidgetCompraResumo::setupTables() {
 
   modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
 
-  //  if (not modelResumo.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela resumo: " + modelResumo.lastError().text());
+  //  if (not modelResumo.select()) emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
 
   ui->tableResumo->setModel(&modelResumo);
   ui->tableResumo->hideColumn("idVenda");

@@ -78,7 +78,7 @@ public:
 class VariablesHolder : public QObject, public IVariablesContainer {
   Q_OBJECT
 public:
-  explicit VariablesHolder(QObject *parent = 0);
+  explicit VariablesHolder(QObject *parent = nullptr);
   ~VariablesHolder();
   void addVariable(const QString &name, const QVariant &value, VarDesc::VarType type = VarDesc::User, RenderPass pass = FirstPass);
   void deleteVariable(const QString &name);

@@ -29,6 +29,7 @@ private:
   auto on_actionCadastrarProfissional_triggered() -> void;
   auto on_actionCadastrarUsuario_triggered() -> void;
   auto on_actionCalculadora_triggered() -> void;
+  auto on_actionCalcular_frete_triggered() -> void;
   auto on_actionClaro_triggered() -> void;
   auto on_actionConfiguracoes_triggered() -> void;
   auto on_actionCriarOrcamento_triggered() -> void;

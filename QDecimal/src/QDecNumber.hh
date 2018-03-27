@@ -87,7 +87,7 @@ public:
 
   // CONVERSIONS
   QDecNumber &fromBCD(QByteArray &bcd) {
-    decNumberSetBCD(&m_data, (const uint8_t *)bcd.data(), bcd.size());
+    decNumberSetBCD(&m_data, reinterpret_cast<const uint8_t *>(bcd.data()), bcd.size());
     return *this;
   }
 
@@ -103,14 +103,14 @@ public:
     return *this;
   }
 
-  QDecNumber &fromString(const char *str, QDecContext *c = 0) {
+  QDecNumber &fromString(const char *str, QDecContext *c = nullptr) {
     decNumberFromString(&m_data, str, CXT(c));
     return *this;
   }
 
   QByteArray toBCD() const {
     QByteArray bcd(m_data.digits + 1, '\0');
-    decNumberGetBCD(&m_data, (uint8_t *)bcd.data());
+    decNumberGetBCD(&m_data, reinterpret_cast<uint8_t *>(bcd.data()));
     return bcd;
   }
 
@@ -126,177 +126,177 @@ public:
     return decNumberToString(&m_data, str);
   }
 
-  int32_t toInt32(QDecContext *c = 0) const { return decNumberToInt32(&m_data, CXT(c)); }
+  int32_t toInt32(QDecContext *c = nullptr) const { return decNumberToInt32(&m_data, CXT(c)); }
 
-  uint32_t toUInt32(QDecContext *c = 0) const { return decNumberToUInt32(&m_data, CXT(c)); }
+  uint32_t toUInt32(QDecContext *c = nullptr) const { return decNumberToUInt32(&m_data, CXT(c)); }
 
   // COMPUTATIONAL FUNCTIONS
-  QDecNumber abs(QDecContext *c = 0) const {
+  QDecNumber abs(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberAbs(&n, &m_data, CXT(c));
   }
 
-  QDecNumber add(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber add(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberAdd(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber digitAnd(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber digitAnd(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberAnd(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber compare(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber compare(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberCompare(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber compareSignal(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber compareSignal(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberCompareSignal(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber compareTotal(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber compareTotal(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberCompareTotal(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber compareTotalMag(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber compareTotalMag(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberCompareTotalMag(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber divide(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber divide(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberDivide(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber divideInteger(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber divideInteger(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberDivideInteger(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber exp(QDecContext *c = 0) const {
+  QDecNumber exp(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberExp(&n, &m_data, CXT(c));
   }
 
-  QDecNumber fma(const QDecNumber &mo, const QDecNumber &ao, QDecContext *c = 0) const {
+  QDecNumber fma(const QDecNumber &mo, const QDecNumber &ao, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberFMA(&n, &m_data, &mo.m_data, &ao.m_data, CXT(c));
   }
 
-  QDecNumber invert(QDecContext *c = 0) const {
+  QDecNumber invert(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberInvert(&n, &m_data, CXT(c));
   }
 
-  QDecNumber ln(QDecContext *c = 0) const {
+  QDecNumber ln(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberLn(&n, &m_data, CXT(c));
   }
 
-  QDecNumber logB(QDecContext *c = 0) const {
+  QDecNumber logB(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberLogB(&n, &m_data, CXT(c));
   }
 
-  QDecNumber log10(QDecContext *c = 0) const {
+  QDecNumber log10(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberLog10(&n, &m_data, CXT(c));
   }
 
-  QDecNumber max(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber max(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberMax(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber maxMag(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber maxMag(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberMaxMag(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber min(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber min(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberMin(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber minMag(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber minMag(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberMinMag(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber minus(QDecContext *c = 0) const {
+  QDecNumber minus(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberMinus(&n, &m_data, CXT(c));
   }
 
-  QDecNumber multiply(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber multiply(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberMultiply(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber nextMinus(QDecContext *c = 0) {
+  QDecNumber nextMinus(QDecContext *c = nullptr) {
     decNumber n;
     return decNumberNextMinus(&n, &m_data, CXT(c));
   }
 
-  QDecNumber nextPlus(QDecContext *c = 0) {
+  QDecNumber nextPlus(QDecContext *c = nullptr) {
     decNumber n;
     return decNumberNextPlus(&n, &m_data, CXT(c));
   }
 
-  QDecNumber nextToward(const QDecNumber &o, QDecContext *c = 0) {
+  QDecNumber nextToward(const QDecNumber &o, QDecContext *c = nullptr) {
     decNumber n;
     return decNumberNextToward(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber normalize(QDecContext *c = 0) const {
+  QDecNumber normalize(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberNormalize(&n, &m_data, CXT(c));
   }
 
-  QDecNumber digitOr(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber digitOr(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberOr(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber plus(QDecContext *c = 0) const {
+  QDecNumber plus(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberPlus(&n, &m_data, CXT(c));
   }
 
-  QDecNumber power(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber power(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberPower(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber quantize(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber quantize(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberQuantize(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber reduce(QDecContext *c = 0) const {
+  QDecNumber reduce(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberReduce(&n, &m_data, CXT(c));
   }
 
-  QDecNumber remainder(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber remainder(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberRemainder(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber remainderNear(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber remainderNear(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberRemainderNear(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber rescale(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber rescale(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberRescale(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber rotate(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber rotate(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberRotate(&n, &m_data, &o.m_data, CXT(c));
   }
@@ -307,37 +307,37 @@ public:
     return !r.isZero();
   }
 
-  QDecNumber scaleB(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber scaleB(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberScaleB(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber shift(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber shift(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberShift(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber squareRoot(QDecContext *c = 0) const {
+  QDecNumber squareRoot(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberSquareRoot(&n, &m_data, CXT(c));
   }
 
-  QDecNumber subtract(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber subtract(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberSubtract(&n, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecNumber toIntegralExact(QDecContext *c = 0) const {
+  QDecNumber toIntegralExact(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberToIntegralExact(&n, &m_data, CXT(c));
   }
 
-  QDecNumber toIntegralValue(QDecContext *c = 0) const {
+  QDecNumber toIntegralValue(QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberToIntegralValue(&n, &m_data, CXT(c));
   }
 
-  QDecNumber digitXor(const QDecNumber &o, QDecContext *c = 0) const {
+  QDecNumber digitXor(const QDecNumber &o, QDecContext *c = nullptr) const {
     decNumber n;
     return decNumberXor(&n, &m_data, &o.m_data, CXT(c));
   }
@@ -362,12 +362,12 @@ public:
   bool isZero() const { return decNumberIsZero(&m_data); }
 
   // TEST FUNCTIONS (CONTEXT DEPENDENT)
-  bool isNormal(QDecContext *c = 0) const { return decNumberIsNormal(&m_data, CXT(c)); }
+  bool isNormal(QDecContext *c = nullptr) const { return decNumberIsNormal(&m_data, CXT(c)); }
 
-  bool isSubnormal(QDecContext *c = 0) const { return decNumberIsSubnormal(&m_data, CXT(c)); }
+  bool isSubnormal(QDecContext *c = nullptr) const { return decNumberIsSubnormal(&m_data, CXT(c)); }
 
   // UTILITIES
-  enum decClass toClass(QDecContext *c = 0) const { return decNumberClass(&m_data, CXT(c)); }
+  enum decClass toClass(QDecContext *c = nullptr) const { return decNumberClass(&m_data, CXT(c)); }
 
   QDecNumber &copy(const QDecNumber &o) {
     decNumberCopy(&m_data, &o.m_data);

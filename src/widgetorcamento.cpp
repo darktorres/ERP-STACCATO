@@ -62,9 +62,9 @@ void WidgetOrcamento::setPermissions() {
 }
 
 void WidgetOrcamento::setupTables() {
-  model.setTable("view_orcamento"); // REFAC: 5refactor other querys that use 'find last of'
+  modelViewOrcamento.setTable("view_orcamento"); // REFAC: 5refactor other querys that use 'find last of'
 
-  ui->table->setModel(new OrcamentoProxyModel(&model, this));
+  ui->table->setModel(new OrcamentoProxyModel(&modelViewOrcamento, this));
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
@@ -89,15 +89,15 @@ void WidgetOrcamento::setupConnections() {
 }
 
 bool WidgetOrcamento::updateTables() {
-  if (model.tableName().isEmpty()) {
+  if (modelViewOrcamento.tableName().isEmpty()) {
     setPermissions();
     setupTables();
     montaFiltro();
     setupConnections();
   }
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela orçamento: " + model.lastError().text());
+  if (not modelViewOrcamento.select()) {
+    emit errorSignal("Erro lendo tabela orçamento: " + modelViewOrcamento.lastError().text());
     return false;
   }
 
@@ -109,7 +109,7 @@ bool WidgetOrcamento::updateTables() {
 void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
-  orcamento->viewRegisterById(model.data(index.row(), "Código"));
+  orcamento->viewRegisterById(modelViewOrcamento.data(index.row(), "Código"));
 
   orcamento->show();
 }
@@ -149,7 +149,7 @@ void WidgetOrcamento::montaFiltro() {
       textoBusca.isEmpty() ? ""
                            : " AND (Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  model.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
+  modelViewOrcamento.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
 
   ui->table->resizeColumnsToContents();
 }
@@ -160,11 +160,11 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
-  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Orcamento, this);
+  FollowUp *followup = new FollowUp(modelViewOrcamento.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }

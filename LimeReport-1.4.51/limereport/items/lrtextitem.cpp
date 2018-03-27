@@ -55,7 +55,7 @@ bool VARIABLE_IS_NOT_USED registred = LimeReport::DesignElementsFactory::instanc
 namespace LimeReport {
 
 TextItem::TextItem(QObject *owner, QGraphicsItem *parent)
-    : ContentItemDesignIntf(xmlTag, owner, parent), m_angle(Angle0), m_trimValue(true), m_allowHTML(false), m_allowHTMLInFields(false), m_followTo(""), m_follower(0), m_textIndent(0),
+    : ContentItemDesignIntf(xmlTag, owner, parent), m_angle(Angle0), m_trimValue(true), m_allowHTML(false), m_allowHTMLInFields(false), m_followTo(""), m_follower(nullptr), m_textIndent(0),
       m_textLayoutDirection(Qt::LayoutDirectionAuto) {
   PageItemDesignIntf *pageItem = dynamic_cast<PageItemDesignIntf *>(parent);
   BaseDesignIntf *parentItem = dynamic_cast<BaseDesignIntf *>(parent);
@@ -404,6 +404,7 @@ QString TextItem::formatFieldValue() {
       double dbl = value.toDouble(&bOk);
       value = (bOk ? QVariant(dbl) : m_varValue);
     }
+      [[fallthrough]];
     default:
       break;
     }
@@ -506,11 +507,11 @@ void TextItem::setFollowTo(const QString &followTo) {
           notify("followTo", oldValue, followTo);
         } else {
           m_followTo = "";
-          QMessageBox::critical(0, tr("Error"), tr("TextItem \" %1 \" already has folower \" %2 \" ").arg(fi->objectName()).arg(fi->follower()->objectName()));
+          QMessageBox::critical(nullptr, tr("Error"), tr("TextItem \" %1 \" already has folower \" %2 \" ").arg(fi->objectName()).arg(fi->follower()->objectName()));
           notify("followTo", followTo, "");
         }
       } else if (m_followTo != "") {
-        QMessageBox::critical(0, tr("Error"), tr("TextItem \" %1 \" not found!").arg(m_followTo));
+        QMessageBox::critical(nullptr, tr("Error"), tr("TextItem \" %1 \" not found!").arg(m_followTo));
         notify("followTo", followTo, "");
       }
     }
@@ -523,9 +524,9 @@ void TextItem::setFollower(TextItem *follower) {
   }
 }
 
-void TextItem::clearFollower() { m_follower = 0; }
+void TextItem::clearFollower() { m_follower = nullptr; }
 
-bool TextItem::hasFollower() const { return m_follower != 0; }
+bool TextItem::hasFollower() const { return m_follower != nullptr; }
 
 bool TextItem::initFollower(QString follower) {
   TextItem *fi = scene()->findChild<TextItem *>(follower);
@@ -710,7 +711,7 @@ void TextItem::restoreLinksEvent() {
   if (!followTo().isEmpty()) {
     BaseDesignIntf *pi = dynamic_cast<BaseDesignIntf *>(parentItem());
     if (pi) {
-      foreach (BaseDesignIntf *bi, pi->childBaseItems()) {
+      for (BaseDesignIntf *bi : pi->childBaseItems()) {
         if (bi->patternName().compare(followTo()) == 0) {
           TextItem *ti = dynamic_cast<TextItem *>(bi);
           if (ti) {
@@ -765,7 +766,7 @@ void TextItem::setTextItemFont(QFont value) {
 }
 
 QWidget *TextItem::defaultEditor() {
-  QSettings *l_settings = (page()->settings() != 0) ? page()->settings() : (page()->reportEditor() != 0) ? page()->reportEditor()->settings() : 0;
+  QSettings *l_settings = (page()->settings() != nullptr) ? page()->settings() : (page()->reportEditor() != nullptr) ? page()->reportEditor()->settings() : nullptr;
   QWidget *editor = new TextItemEditor(this, page(), l_settings);
   editor->setAttribute(Qt::WA_DeleteOnClose);
   return editor;

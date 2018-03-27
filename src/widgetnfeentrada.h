@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewNFeEntrada;
   Ui::WidgetNfeEntrada *ui;
   // methods
   auto cancelar(const int row) -> bool;

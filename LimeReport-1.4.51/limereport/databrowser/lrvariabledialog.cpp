@@ -34,7 +34,7 @@
 #include "lrvariabledialog.h"
 #include "ui_lrvariabledialog.h"
 
-LRVariableDialog::LRVariableDialog(QWidget *parent) : QDialog(parent), ui(new Ui::LRVariableDialog), m_variableName(""), m_variablesContainer(0), m_changeMode(false), m_oldVariableName("") {
+LRVariableDialog::LRVariableDialog(QWidget *parent) : QDialog(parent), ui(new Ui::LRVariableDialog), m_variableName(""), m_variablesContainer(nullptr), m_changeMode(false), m_oldVariableName("") {
   ui->setupUi(this);
   ui->cbbType->setVisible(false);
   ui->lblType->setVisible(false);

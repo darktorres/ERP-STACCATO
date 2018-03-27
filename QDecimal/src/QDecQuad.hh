@@ -81,7 +81,7 @@ public:
 
   // UTILITIES & CONVERSIONS
   QDecQuad &fromBCD(int32_t exp, const QByteArray &bcd, int32_t sign) {
-    decQuadFromBCD(&m_data, exp, (const uint8_t *)bcd.data(), sign);
+    decQuadFromBCD(&m_data, exp, reinterpret_cast<const uint8_t *>(bcd.data()), sign);
     return *this;
   }
 
@@ -93,16 +93,16 @@ public:
   }
 
   QDecQuad &fromPacked(int32_t exp, const QByteArray &pack) {
-    decQuadFromPacked(&m_data, exp, (const uint8_t *)pack.data());
+    decQuadFromPacked(&m_data, exp, reinterpret_cast<const uint8_t *>(pack.data()));
     return *this;
   }
 
   QDecQuad &fromPackedChecked(int32_t exp, const QByteArray &pack) {
-    decQuadFromPackedChecked(&m_data, exp, (const uint8_t *)pack.data());
+    decQuadFromPackedChecked(&m_data, exp, reinterpret_cast<const uint8_t *>(pack.data()));
     return *this;
   }
 
-  QDecQuad &fromString(const char *str, QDecContext *c = 0) {
+  QDecQuad &fromString(const char *str, QDecContext *c = nullptr) {
     decQuadFromString(&m_data, str, CXT(c));
     return *this;
   }
@@ -112,7 +112,7 @@ public:
 
   QDecQuad &fromQDecDouble(const QDecDouble &d);
 
-  QDecQuad &fromQDecNumber(const QDecNumber &n, QDecContext *c = 0);
+  QDecQuad &fromQDecNumber(const QDecNumber &n, QDecContext *c = nullptr);
 
   QDecQuad &fromQDecPacked(const QDecPacked &p);
 
@@ -123,22 +123,22 @@ public:
 
   int32_t getCoefficient(QByteArray &bcd) const {
     bcd.resize(DECQUAD_Pmax);
-    return decQuadGetCoefficient(&m_data, (uint8_t *)bcd.data());
+    return decQuadGetCoefficient(&m_data, reinterpret_cast<uint8_t *>(bcd.data()));
   }
 
   QDecQuad &setCoefficient(const QByteArray &bcd, int32_t sign) {
-    decQuadSetCoefficient(&m_data, (const uint8_t *)bcd.data(), sign);
+    decQuadSetCoefficient(&m_data, reinterpret_cast<const uint8_t *>(bcd.data()), sign);
     return *this;
   }
 
-  QDecQuad &setExponent(int32_t exp, QDecContext *c = 0) {
+  QDecQuad &setExponent(int32_t exp, QDecContext *c = nullptr) {
     decQuadSetExponent(&m_data, CXT(c), exp);
     return *this;
   }
 
   int32_t toBCD(int32_t &exp, QByteArray &bcd) {
     bcd.resize(DECQUAD_Pmax);
-    return decQuadToBCD(&m_data, &exp, (uint8_t *)bcd.data());
+    return decQuadToBCD(&m_data, &exp, reinterpret_cast<uint8_t *>(bcd.data()));
   }
 
   double toDouble() const;
@@ -150,7 +150,7 @@ public:
 
   int32_t toPacked(int32_t &exp, QByteArray &pack) {
     pack.resize(DECQUAD_Pmax);
-    return decQuadToPacked(&m_data, &exp, (uint8_t *)pack.data());
+    return decQuadToPacked(&m_data, &exp, reinterpret_cast<uint8_t *>(pack.data()));
   }
 
   QByteArray toString() const {
@@ -158,7 +158,7 @@ public:
     return decQuadToString(&m_data, str);
   }
 
-  QDecDouble toQDecDouble(QDecContext *c = 0) const;
+  QDecDouble toQDecDouble(QDecContext *c = nullptr) const;
 
   QDecPacked toQDecPacked() const;
 
@@ -170,153 +170,153 @@ public:
   }
 
   // COMPUTATIONAL
-  QDecQuad abs(QDecContext *c = 0) const {
+  QDecQuad abs(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadAbs(&q, &m_data, CXT(c));
   }
 
-  QDecQuad add(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad add(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadAdd(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad digitAnd(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad digitAnd(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadAnd(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad divide(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad divide(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadDivide(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad divideInteger(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad divideInteger(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadDivideInteger(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad fma(const QDecQuad &o, const QDecQuad &o2, QDecContext *c = 0) const {
+  QDecQuad fma(const QDecQuad &o, const QDecQuad &o2, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadFMA(&q, &m_data, &o.m_data, &o2.m_data, CXT(c));
   }
 
-  QDecQuad invert(QDecContext *c = 0) const {
+  QDecQuad invert(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadInvert(&q, &m_data, CXT(c));
   }
 
-  QDecQuad logB(QDecContext *c = 0) const {
+  QDecQuad logB(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadLogB(&q, &m_data, CXT(c));
   }
 
-  QDecQuad max(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad max(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadMax(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad maxMag(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad maxMag(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadMaxMag(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad minus(QDecContext *c = 0) const {
+  QDecQuad minus(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadMinus(&q, &m_data, CXT(c));
   }
 
-  QDecQuad multiply(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad multiply(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadMultiply(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad nextMinus(QDecContext *c = 0) const {
+  QDecQuad nextMinus(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadNextMinus(&q, &m_data, CXT(c));
   }
 
-  QDecQuad nextPlus(QDecContext *c = 0) const {
+  QDecQuad nextPlus(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadNextPlus(&q, &m_data, CXT(c));
   }
 
-  QDecQuad nextToward(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad nextToward(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadNextToward(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad digitOr(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad digitOr(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadOr(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad plus(QDecContext *c = 0) const {
+  QDecQuad plus(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadPlus(&q, &m_data, CXT(c));
   }
 
-  QDecQuad quantize(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad quantize(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadQuantize(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad reduce(QDecContext *c = 0) const {
+  QDecQuad reduce(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadReduce(&q, &m_data, CXT(c));
   }
 
-  QDecQuad remainder(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad remainder(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadRemainder(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad remainderNear(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad remainderNear(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadRemainderNear(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad rotate(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad rotate(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadRotate(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad scaleB(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad scaleB(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadScaleB(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad shift(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad shift(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadShift(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad subtract(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad subtract(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadSubtract(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad toIntegralValue(enum rounding r, QDecContext *c = 0) const {
+  QDecQuad toIntegralValue(enum rounding r, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadToIntegralValue(&q, &m_data, CXT(c), r);
   }
 
-  QDecQuad toIntegralExact(QDecContext *c = 0) const {
+  QDecQuad toIntegralExact(QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadToIntegralExact(&q, &m_data, CXT(c));
   }
 
-  QDecQuad digitXor(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad digitXor(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadXor(&q, &m_data, &o.m_data, CXT(c));
   }
 
   // COMPARISONS
-  QDecQuad compare(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad compare(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadCompare(&q, &m_data, &o.m_data, CXT(c));
   }
 
-  QDecQuad compareSignal(const QDecQuad &o, QDecContext *c = 0) const {
+  QDecQuad compareSignal(const QDecQuad &o, QDecContext *c = nullptr) const {
     decQuad q;
     return decQuadCompareSignal(&q, &m_data, &o.m_data, CXT(c));
   }

@@ -59,10 +59,10 @@
 
 namespace LimeReport {
 
-ReportDesignWindow *ReportDesignWindow::m_instance = 0;
+ReportDesignWindow *ReportDesignWindow::m_instance = nullptr;
 
 ReportDesignWindow::ReportDesignWindow(ReportEnginePrivate *report, QWidget *parent, QSettings *settings)
-    : QMainWindow(parent), m_textAttibutesIsChanging(false), m_settings(settings), m_ownedSettings(false), m_progressDialog(0), m_showProgressDialog(true) {
+    : QMainWindow(parent), m_textAttibutesIsChanging(false), m_settings(settings), m_ownedSettings(false), m_progressDialog(nullptr), m_showProgressDialog(true) {
   initReportEditor(report);
   createActions();
   createMainMenu();
@@ -83,7 +83,7 @@ ReportDesignWindow::ReportDesignWindow(ReportEnginePrivate *report, QWidget *par
 }
 
 ReportDesignWindow::~ReportDesignWindow() {
-  m_instance = 0;
+  m_instance = nullptr;
   delete m_validator;
   if (m_ownedSettings && m_settings) delete m_settings;
 }
@@ -92,107 +92,107 @@ void ReportDesignWindow::createActions() {
   m_newReportAction = new QAction(tr("New Report"), this);
   m_newReportAction->setIcon(QIcon(":/report/images/newReport"));
   m_newReportAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
-  connect(m_newReportAction, SIGNAL(triggered()), this, SLOT(slotNewReport()));
+  connect(m_newReportAction, &QAction::triggered, this, &ReportDesignWindow::slotNewReport);
 
   m_newPageAction = new QAction(tr("New Report Page"), this);
   m_newPageAction->setIcon(QIcon(":/report/images/addPage"));
-  connect(m_newPageAction, SIGNAL(triggered()), this, SLOT(slotNewPage()));
+  connect(m_newPageAction, &QAction::triggered, this, &ReportDesignWindow::slotNewPage);
 
   m_deletePageAction = new QAction(tr("Delete Report Page"), this);
   m_deletePageAction->setIcon(QIcon(":/report/images/deletePage"));
-  connect(m_deletePageAction, SIGNAL(triggered()), this, SLOT(slotDeletePage()));
+  connect(m_deletePageAction, &QAction::triggered, this, &ReportDesignWindow::slotDeletePage);
   m_deletePageAction->setEnabled(false);
 
   m_editModeAction = new QAction(tr("Edit Mode"), this);
   m_editModeAction->setIcon(QIcon(":/report/images/editMode"));
   m_editModeAction->setCheckable(true);
   m_editModeAction->setChecked(true);
-  connect(m_editModeAction, SIGNAL(triggered()), this, SLOT(slotEditMode()));
+  connect(m_editModeAction, &QAction::triggered, this, &ReportDesignWindow::slotEditMode);
 
   m_undoAction = new QAction(tr("Undo"), this);
   m_undoAction->setIcon(QIcon(":/report/images/undo"));
   m_undoAction->setEnabled(false);
   m_undoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
-  connect(m_undoAction, SIGNAL(triggered()), this, SLOT(slotUndo()));
+  connect(m_undoAction, &QAction::triggered, this, &ReportDesignWindow::slotUndo);
 
   m_redoAction = new QAction(tr("Redo"), this);
   m_redoAction->setIcon(QIcon(":/report/images/redo"));
   m_redoAction->setEnabled(false);
   m_redoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
-  connect(m_redoAction, SIGNAL(triggered()), this, SLOT(slotRedo()));
+  connect(m_redoAction, &QAction::triggered, this, &ReportDesignWindow::slotRedo);
 
   m_copyAction = new QAction(tr("Copy"), this);
   m_copyAction->setIcon(QIcon(":/report/images/copy"));
   m_copyAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-  connect(m_copyAction, SIGNAL(triggered()), this, SLOT(slotCopy()));
+  connect(m_copyAction, &QAction::triggered, this, &ReportDesignWindow::slotCopy);
 
   m_pasteAction = new QAction(tr("Paste"), this);
   m_pasteAction->setIcon(QIcon(":/report/images/paste"));
   m_pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
-  connect(m_pasteAction, SIGNAL(triggered()), this, SLOT(slotPaste()));
+  connect(m_pasteAction, &QAction::triggered, this, &ReportDesignWindow::slotPaste);
 
   m_cutAction = new QAction(tr("Cut"), this);
   m_cutAction->setIcon(QIcon(":/report/images/cut"));
   m_cutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
-  connect(m_cutAction, SIGNAL(triggered()), this, SLOT(slotCut()));
+  connect(m_cutAction, &QAction::triggered, this, &ReportDesignWindow::slotCut);
 
   m_settingsAction = new QAction(tr("Settings"), this);
   m_settingsAction->setIcon(QIcon(":/report/images/settings"));
-  connect(m_settingsAction, SIGNAL(triggered()), this, SLOT(slotEditSettings()));
+  connect(m_settingsAction, &QAction::triggered, this, &ReportDesignWindow::slotEditSettings);
 
   m_useGridAction = new QAction(tr("Use grid"), this);
   m_useGridAction->setIcon(QIcon(":/report/images/grid"));
   m_useGridAction->setCheckable(true);
   m_useGridAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
-  connect(m_useGridAction, SIGNAL(toggled(bool)), this, SLOT(slotUseGrid(bool)));
+  connect(m_useGridAction, &QAction::toggled, this, &ReportDesignWindow::slotUseGrid);
 
   m_useMagnetAction = new QAction(tr("Use magnet"), this);
   m_useMagnetAction->setIcon(QIcon(":/report/images/magnet"));
   m_useMagnetAction->setCheckable(true);
   m_useMagnetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
-  connect(m_useMagnetAction, SIGNAL(toggled(bool)), this, SLOT(slotUseMagnet(bool)));
+  connect(m_useMagnetAction, &QAction::toggled, this, &ReportDesignWindow::slotUseMagnet);
 
   m_newTextItemAction = new QAction(tr("Text Item"), this);
   m_newTextItemAction->setIcon(QIcon(":/items/TextItem"));
   m_actionMap.insert("TextItem", m_newTextItemAction);
-  connect(m_newTextItemAction, SIGNAL(triggered()), this, SLOT(slotNewTextItem()));
+  connect(m_newTextItemAction, &QAction::triggered, this, &ReportDesignWindow::slotNewTextItem);
 
   m_saveReportAction = new QAction(tr("Save Report"), this);
   m_saveReportAction->setIcon(QIcon(":/report/images/save"));
   m_saveReportAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-  connect(m_saveReportAction, SIGNAL(triggered()), this, SLOT(slotSaveReport()));
+  connect(m_saveReportAction, &QAction::triggered, this, &ReportDesignWindow::slotSaveReport);
 
   m_saveReportAsAction = new QAction(tr("Save Report As"), this);
   m_saveReportAsAction->setIcon(QIcon(":/report/images/saveas"));
   m_saveReportAsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
-  connect(m_saveReportAsAction, SIGNAL(triggered()), this, SLOT(slotSaveReportAs()));
+  connect(m_saveReportAsAction, &QAction::triggered, this, &ReportDesignWindow::slotSaveReportAs);
 
   m_loadReportAction = new QAction(tr("Load Report"), this);
   m_loadReportAction->setIcon(QIcon(":/report/images/folder"));
   m_loadReportAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
-  connect(m_loadReportAction, SIGNAL(triggered()), this, SLOT(slotLoadReport()));
+  connect(m_loadReportAction, &QAction::triggered, this, &ReportDesignWindow::slotLoadReport);
 
   m_deleteItemAction = new QAction(tr("Delete item"), this);
   m_deleteItemAction->setShortcut(QKeySequence("Del"));
   m_deleteItemAction->setIcon(QIcon(":/report/images/delete"));
-  connect(m_deleteItemAction, SIGNAL(triggered()), this, SLOT(slotDelete()));
+  connect(m_deleteItemAction, &QAction::triggered, this, &ReportDesignWindow::slotDelete);
 
   m_zoomInReportAction = new QAction(tr("Zoom In"), this);
   m_zoomInReportAction->setIcon(QIcon(":/report/images/zoomIn"));
-  connect(m_zoomInReportAction, SIGNAL(triggered()), this, SLOT(slotZoomIn()));
+  connect(m_zoomInReportAction, &QAction::triggered, this, &ReportDesignWindow::slotZoomIn);
 
   m_zoomOutReportAction = new QAction(tr("Zoom Out"), this);
   m_zoomOutReportAction->setIcon(QIcon(":/report/images/zoomOut"));
-  connect(m_zoomOutReportAction, SIGNAL(triggered()), this, SLOT(slotZoomOut()));
+  connect(m_zoomOutReportAction, &QAction::triggered, this, &ReportDesignWindow::slotZoomOut);
 
   m_previewReportAction = new QAction(tr("Render Report"), this);
   m_previewReportAction->setIcon(QIcon(":/report/images/render"));
   m_previewReportAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
-  connect(m_previewReportAction, SIGNAL(triggered()), this, SLOT(slotPreviewReport()));
+  connect(m_previewReportAction, &QAction::triggered, this, &ReportDesignWindow::slotPreviewReport);
 
   m_testAction = new QAction("test", this);
   m_testAction->setIcon(QIcon(":/report/images/pin"));
-  connect(m_testAction, SIGNAL(triggered()), this, SLOT(slotTest()));
+  connect(m_testAction, &QAction::triggered, this, &ReportDesignWindow::slotTest);
 
   //    m_printReportAction = new QAction(tr("Print Report"),this);
   //    m_printReportAction->setIcon(QIcon(":/report/images/print"));
@@ -202,27 +202,27 @@ void ReportDesignWindow::createActions() {
   m_editLayoutMode = new QAction(tr("Edit layouts mode"), this);
   m_editLayoutMode->setIcon(QIcon(":/report/images/editlayout"));
   m_editLayoutMode->setCheckable(true);
-  connect(m_editLayoutMode, SIGNAL(triggered()), this, SLOT(slotEditLayoutMode()));
+  connect(m_editLayoutMode, &QAction::triggered, this, &ReportDesignWindow::slotEditLayoutMode);
 
   m_addHLayout = new QAction(tr("Horizontal layout"), this);
   m_addHLayout->setIcon(QIcon(":/report/images/hlayout"));
-  connect(m_addHLayout, SIGNAL(triggered()), this, SLOT(slotHLayout()));
+  connect(m_addHLayout, &QAction::triggered, this, &ReportDesignWindow::slotHLayout);
 
   m_aboutAction = new QAction(tr("About"), this);
   m_aboutAction->setIcon(QIcon(":/report/images/copyright"));
-  connect(m_aboutAction, SIGNAL(triggered()), this, SLOT(slotShowAbout()));
+  connect(m_aboutAction, &QAction::triggered, this, &ReportDesignWindow::slotShowAbout);
 
   m_hideLeftPanel = new QAction(tr("Hide left panel"), this);
   m_hideLeftPanel->setCheckable(true);
   //    m_hideLeftPanel->setChecked(true);
   m_hideLeftPanel->setIcon(QIcon(":/report/images/hideLeftPanel"));
-  connect(m_hideLeftPanel, SIGNAL(toggled(bool)), this, SLOT(slotHideLeftPanel(bool)));
+  connect(m_hideLeftPanel, &QAction::toggled, this, &ReportDesignWindow::slotHideLeftPanel);
 
   m_hideRightPanel = new QAction(tr("Hide right panel"), this);
   m_hideRightPanel->setCheckable(true);
   //    m_hideRightPanel->setChecked(true);
   m_hideRightPanel->setIcon(QIcon(":/report/images/hideRightPanel"));
-  connect(m_hideRightPanel, SIGNAL(toggled(bool)), this, SLOT(slotHideRightPanel(bool)));
+  connect(m_hideRightPanel, &QAction::toggled, this, &ReportDesignWindow::slotHideRightPanel);
 }
 
 void ReportDesignWindow::createReportToolBar() {
@@ -308,12 +308,12 @@ void ReportDesignWindow::createToolBars() {
 }
 
 void ReportDesignWindow::createItemsActions() {
-  foreach (ItemAttribs items, DesignElementsFactory::instance().attribsMap().values()) {
+  for (ItemAttribs items : DesignElementsFactory::instance().attribsMap().values()) {
     if (items.m_tag.compare("Item", Qt::CaseInsensitive) == 0) {
       QAction *tmpAction = new QAction(QObject::tr(items.m_alias.toLatin1()), this);
       tmpAction->setWhatsThis(DesignElementsFactory::instance().attribsMap().key(items));
       tmpAction->setIcon(QIcon(":/items/" + tmpAction->whatsThis()));
-      connect(tmpAction, SIGNAL(triggered()), this, SLOT(slotItemActionCliked()));
+      connect(tmpAction, &QAction::triggered, this, &ReportDesignWindow::slotItemActionCliked);
       m_reportToolBar->addAction(tmpAction);
       m_actionMap.insert(tmpAction->whatsThis(), tmpAction);
     }
@@ -554,9 +554,9 @@ void ReportDesignWindow::createRecentFilesMenu() {
   if (m_recentFilesMenu) {
     m_recentFilesMenu->clear();
     removeNotExistedRecentFiles();
-    foreach (QString fileName, m_recentFiles.keys()) {
+    for (QString fileName : m_recentFiles.keys()) {
       QAction *tmpAction = new QAction(QIcon(":/report/images/newReport"), fileName, this);
-      connect(tmpAction, SIGNAL(triggered()), m_recentFilesSignalMap, SLOT(map()));
+      connect(tmpAction, &QAction::triggered, m_recentFilesSignalMap, QOverload<>::of(&QSignalMapper::map));
       m_recentFilesSignalMap->setMapping(tmpAction, fileName);
       m_recentFilesMenu->addAction(tmpAction);
     }
@@ -577,7 +577,7 @@ void ReportDesignWindow::removeNotExistedRecentFiles() {
 
 void ReportDesignWindow::removeNotExistedRecentFilesFromMenu(const QString &fileName) {
   if (m_recentFilesMenu) {
-    foreach (QAction *action, m_recentFilesMenu->actions()) {
+    for (QAction *action : m_recentFilesMenu->actions()) {
       if (action->text().compare(fileName) == 0) {
         m_recentFilesMenu->removeAction(action);
         break;
@@ -801,7 +801,7 @@ void ReportDesignWindow::slotMultiItemSelected() {
   m_objectInspector->commitActiveEditorData();
 
   QList<QObject *> selectionList;
-  foreach (QGraphicsItem *gi, m_reportDesignWidget->activePage()->selectedItems()) {
+  for (QGraphicsItem *gi : m_reportDesignWidget->activePage()->selectedItems()) {
     QObject *oi = dynamic_cast<QObject *>(gi);
     if (oi) selectionList.append(oi);
   }
@@ -866,7 +866,7 @@ void ReportDesignWindow::slotLoadReport() {
         m_reportDesignWidget->clear();
         if (m_reportDesignWidget->loadFromFile(fileName)) {
           m_lblReportName->setText(fileName);
-          m_propertyModel->setObject(0);
+          m_propertyModel->setObject(nullptr);
           updateRedoUndo();
           setWindowTitle(m_reportDesignWidget->report()->reportName() + " - Lime Report Designer");
           if (!m_recentFiles.contains(fileName)) {
@@ -985,6 +985,7 @@ void ReportDesignWindow::slotBandDeleted(PageDesignIntf *, BandDesignIntf *band)
       [[fallthrough]];
     case BandDesignIntf::TearOffBand:
       m_newTearOffBand->setEnabled(true);
+      [[fallthrough]];
     default:
       break;
     }
@@ -1000,7 +1001,7 @@ void ReportDesignWindow::updateAvaibleBands() {
   m_newReportFooter->setEnabled(true);
   m_newTearOffBand->setEnabled(true);
 
-  foreach (BandDesignIntf *band, m_reportDesignWidget->activePage()->pageItem()->bands()) {
+  for (BandDesignIntf *band : m_reportDesignWidget->activePage()->pageItem()->bands()) {
     switch (band->bandType()) {
     case BandDesignIntf::PageHeader:
       m_newPageHeader->setEnabled(false);
@@ -1016,6 +1017,7 @@ void ReportDesignWindow::updateAvaibleBands() {
       [[fallthrough]];
     case BandDesignIntf::TearOffBand:
       m_newTearOffBand->setEnabled(false);
+      [[fallthrough]];
     default:
       break;
     }
@@ -1023,7 +1025,7 @@ void ReportDesignWindow::updateAvaibleBands() {
 }
 
 void ReportDesignWindow::slotActivePageChanged() {
-  m_propertyModel->setObject(0);
+  m_propertyModel->setObject(nullptr);
   updateRedoUndo();
   updateAvaibleBands();
 }
@@ -1045,7 +1047,7 @@ void ReportDesignWindow::renderFinished() {
     m_progressDialog->close();
     delete m_progressDialog;
   }
-  m_progressDialog = 0;
+  m_progressDialog = nullptr;
 }
 
 void ReportDesignWindow::slotShowAbout() {
@@ -1055,7 +1057,7 @@ void ReportDesignWindow::slotShowAbout() {
 
 bool ReportDesignWindow::isDockAreaVisible(Qt::DockWidgetArea area) {
   QList<QDockWidget *> dockWidgets = findChildren<QDockWidget *>();
-  foreach (QDockWidget *dw, dockWidgets) {
+  for (QDockWidget *dw : dockWidgets) {
     if ((dockWidgetArea(dw) == area) && !dw->isHidden()) return true;
   }
   return false;
@@ -1063,7 +1065,7 @@ bool ReportDesignWindow::isDockAreaVisible(Qt::DockWidgetArea area) {
 
 void ReportDesignWindow::hideDockWidgets(Qt::DockWidgetArea area, bool value) {
   QList<QDockWidget *> dockWidgets = findChildren<QDockWidget *>();
-  foreach (QDockWidget *dw, dockWidgets) {
+  for (QDockWidget *dw : dockWidgets) {
     if (dockWidgetArea(dw) == area) value ? dw->show() : dw->hide();
   }
 }
@@ -1086,7 +1088,7 @@ void ReportDesignWindow::slotLoadRecentFile(const QString fileName) {
       m_reportDesignWidget->clear();
       m_reportDesignWidget->loadFromFile(fileName);
       m_lblReportName->setText(fileName);
-      m_propertyModel->setObject(0);
+      m_propertyModel->setObject(nullptr);
       updateRedoUndo();
       unsetCursor();
       setWindowTitle(m_reportDesignWidget->report()->reportName() + " - Lime Report Designer");

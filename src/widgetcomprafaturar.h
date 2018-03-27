@@ -18,12 +18,12 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewFaturamento;
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;
-  auto faturarCompra(const QDateTime &dataReal, const QStringList &idsCompra) -> bool;
+  auto faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) -> bool;
   auto montaFiltro() -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonMarcarFaturado_clicked() -> void;

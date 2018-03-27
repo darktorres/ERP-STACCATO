@@ -41,7 +41,7 @@ ItemsBordersEditorWidget::ItemsBordersEditorWidget(ReportDesignWidget *reportEdi
 void ItemsBordersEditorWidget::setItemEvent(BaseDesignIntf *item) {
   QVariant borders = item->property("borders");
   if (borders.isValid()) {
-    updateValues((BaseDesignIntf::BorderLines)borders.toInt());
+    updateValues(static_cast<BaseDesignIntf::BorderLines>(borders.toInt()));
     setEnabled(true);
   }
 }
@@ -50,21 +50,21 @@ void ItemsBordersEditorWidget::properyChangedEvent(const QString &property, cons
   Q_UNUSED(oldValue)
   if (property == "borders") {
     m_changing = true;
-    updateValues((BaseDesignIntf::BorderLines)newValue.toInt());
+    updateValues(static_cast<BaseDesignIntf::BorderLines>(newValue.toInt()));
     m_changing = false;
   }
 }
 
 void ItemsBordersEditorWidget::noBordesClicked() {
-  if (reportEditor()) reportEditor()->setBorders(0);
-  updateValues(0);
+  if (reportEditor()) reportEditor()->setBorders(nullptr);
+  updateValues(nullptr);
 }
 
 void ItemsBordersEditorWidget::allBordesClicked() {
   int borders = BaseDesignIntf::LeftLine | BaseDesignIntf::RightLine | BaseDesignIntf::TopLine | BaseDesignIntf::BottomLine;
 
-  updateValues((BaseDesignIntf::BorderLines)borders);
-  if (reportEditor()) reportEditor()->setBorders((BaseDesignIntf::BorderLines)borders);
+  updateValues(static_cast<BaseDesignIntf::BorderLines>(borders));
+  if (reportEditor()) reportEditor()->setBorders(static_cast<BaseDesignIntf::BorderLines>(borders));
 }
 
 void ItemsBordersEditorWidget::buttonClicked(bool) {
@@ -127,7 +127,7 @@ BaseDesignIntf::BorderLines ItemsBordersEditorWidget::createBorders() {
   borders += (m_bottomLine->isChecked()) ? BaseDesignIntf::BottomLine : 0;
   borders += (m_leftLine->isChecked()) ? BaseDesignIntf::LeftLine : 0;
   borders += (m_rightLine->isChecked()) ? BaseDesignIntf::RightLine : 0;
-  return (BaseDesignIntf::BorderLines)borders;
+  return static_cast<BaseDesignIntf::BorderLines>(borders);
 }
 
 } // namespace LimeReport

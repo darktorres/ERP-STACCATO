@@ -131,11 +131,9 @@ QVariant ScriptEngineModel::data(const QModelIndex &index, int role) const {
   case Qt::DisplayRole:
     if (!node) return QVariant();
     return node->name();
-    break;
   case Qt::DecorationRole:
     if (!node) return QIcon();
     return node->icon();
-    break;
   default:
     return QVariant();
   }
@@ -159,7 +157,7 @@ void ScriptEngineModel::updateModel() {
   beginResetModel();
   m_rootNode->clear();
   QMap<QString, ScriptEngineNode *> categories;
-  foreach (ScriptFunctionDesc funcDesc, m_scriptManager->functionsDescriber()) {
+  for (ScriptFunctionDesc funcDesc : m_scriptManager->functionsDescriber()) {
     ScriptEngineNode *categ;
     QString categoryName = (!funcDesc.category.isEmpty()) ? funcDesc.category : "NO CATEGORY";
     if (categories.contains(categoryName)) {
@@ -310,12 +308,12 @@ QScriptValue groupFunction(QScriptContext *pcontext, QScriptEngine *pengine) { r
 
 ScriptEngineManager::~ScriptEngineManager() {
   delete m_model;
-  m_model = 0;
+  m_model = nullptr;
   delete m_scriptEngine;
 }
 
 bool ScriptEngineManager::isFunctionExists(const QString &functionName) const {
-  foreach (ScriptFunctionDesc desc, m_functions) {
+  for (ScriptFunctionDesc desc : m_functions) {
     if (desc.name.compare(functionName, Qt::CaseInsensitive) == 0) {
       return true;
     }
@@ -333,7 +331,7 @@ void ScriptEngineManager::deleteFunction(const QString &functionsName) {
 }
 
 bool ScriptEngineManager::containsFunction(const QString &functionName) {
-  foreach (ScriptFunctionDesc funct, m_functions) {
+  for (ScriptFunctionDesc funct : m_functions) {
     if (funct.name.compare(functionName) == 0) {
       return true;
     }
@@ -381,7 +379,7 @@ bool ScriptEngineManager::addFunction(const QString &name, const QString &script
 
 QStringList ScriptEngineManager::functionsNames() {
   QStringList res;
-  foreach (ScriptFunctionDesc func, m_functions) { res << func.name; }
+  for (ScriptFunctionDesc func : m_functions) res << func.name;
   return res;
 }
 
@@ -389,11 +387,11 @@ void ScriptEngineManager::setDataManager(DataSourceManager *dataManager) {
   if (m_dataManager != dataManager) {
     m_dataManager = dataManager;
     if (m_dataManager) {
-      foreach (QString func, m_dataManager->groupFunctionNames()) {
+      for (QString func : m_dataManager->groupFunctionNames()) {
         if (isFunctionExists(func)) deleteFunction(func);
         addFunction(func, groupFunction, tr("GROUP FUNCTIONS"), func + "(\"" + tr("Value") + "\",\"" + tr("BandName") + "\")");
       }
-      foreach (ScriptFunctionDesc func, m_functions) {
+      for (ScriptFunctionDesc func : m_functions) {
         if (func.type == ScriptFunctionDesc::Native) m_scriptEngine->globalObject().setProperty(func.name, func.scriptValue);
       }
     }
@@ -549,7 +547,7 @@ QVariant ScriptEngineManager::evaluateScript(const QString &script) {
 
     ScriptExtractor scriptExtractor(script);
     if (scriptExtractor.parse()) {
-      QString scriptBody = expandDataFields(scriptExtractor.bodyAt(0), EscapeSymbols, varValue, 0);
+      QString scriptBody = expandDataFields(scriptExtractor.bodyAt(0), EscapeSymbols, varValue, nullptr);
       scriptBody = expandUserVariables(scriptBody, FirstPass, EscapeSymbols, varValue);
       QScriptValue value = se->evaluate(scriptBody);
       if (!se->hasUncaughtException()) {
@@ -562,7 +560,7 @@ QVariant ScriptEngineManager::evaluateScript(const QString &script) {
 
 void ScriptEngineManager::updateModel() {}
 
-ScriptEngineManager::ScriptEngineManager() : m_model(0), m_dataManager(0) {
+ScriptEngineManager::ScriptEngineManager() : m_model(nullptr), m_dataManager(nullptr) {
   m_scriptEngine = new QScriptEngine;
 
   // addFunction("dateToStr",dateToStr,"DATE", "dateToStr(\"value\",\"format\")");
@@ -589,11 +587,11 @@ ScriptEngineManager::ScriptEngineManager() : m_model(0), m_dataManager(0) {
   QScriptValue fontConstructor = m_scriptEngine->newFunction(QFontPrototype::constructorQFont, fontProto);
   m_scriptEngine->globalObject().setProperty("QFont", fontConstructor);
 
-  //    foreach(QString func, dataManager()->groupFunctionNames()){
+  //    for (QString func : dataManager()->groupFunctionNames()){
   //        addFunction(func, groupFunction,"GROUP FUNCTIONS", func+"(\""+tr("FieldName")+"\",\""+tr("BandName")+"\")");
   //    }
 
-  //    foreach(ScriptFunctionDesc func, m_functions){
+  //    for (ScriptFunctionDesc func : m_functions){
   //        if (func.type==ScriptFunctionDesc::Native)
   //            m_scriptEngine->globalObject().setProperty(func.name,func.scriptValue);
   //    }
@@ -623,6 +621,7 @@ bool ScriptExtractor::parse(int &curPos, const State &state) {
         if (isStartScriptLexem(curPos)) extractScript(curPos, substring(m_context, startPos, curPos));
         if (isStartFieldLexem(curPos) || isStartVariableLexem(curPos)) skipField(curPos);
       }
+      [[fallthrough]];
     default:
       break;
     }
@@ -673,6 +672,7 @@ bool ScriptExtractor::isStartLexem(int &curPos, QChar value) {
         return true;
       } else if (m_context[pos] != ' ')
         return false;
+      [[fallthrough]];
     default:
       break;
     }
@@ -712,7 +712,7 @@ bool ScriptEngineContext::previewDialog(const QString &dialogName) {
 }
 
 bool ScriptEngineContext::containsDialog(const QString &dialogName) {
-  foreach (DialogDescriber::Ptr dialog, m_dialogs) {
+  for (DialogDescriber::Ptr dialog : m_dialogs) {
     if (dialog->name() == dialogName) return true;
   }
   return false;
@@ -762,7 +762,7 @@ QObject *ScriptEngineContext::createElement(const QString &collectionName, const
 #else
   Q_UNUSED(collectionName)
 #endif
-  return 0;
+  return nullptr;
 }
 
 int ScriptEngineContext::elementsCount(const QString &collectionName) {
@@ -785,7 +785,7 @@ QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index
   Q_UNUSED(collectionName)
   Q_UNUSED(index)
 #endif
-  return 0;
+  return nullptr;
 }
 
 void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName); }
@@ -802,19 +802,19 @@ QDialog *ScriptEngineContext::createDialog(DialogDescriber *cont) {
 }
 
 QDialog *ScriptEngineContext::findDialog(const QString &dialogName) {
-  foreach (DialogPtr dialog, m_createdDialogs) {
+  for (DialogPtr dialog : m_createdDialogs) {
     if (dialog->objectName() == dialogName) return dialog.data();
   }
-  return 0;
+  return nullptr;
 }
 
 DialogDescriber *ScriptEngineContext::findDialogContainer(const QString &dialogName) {
-  foreach (DialogDescriber::Ptr dialogCont, m_dialogs) {
+  for (DialogDescriber::Ptr dialogCont : m_dialogs) {
     if (dialogCont->name().compare(dialogName, Qt::CaseInsensitive) == 0) {
       return dialogCont.data();
     }
   }
-  return 0;
+  return nullptr;
 }
 
 QDialog *ScriptEngineContext::getDialog(const QString &dialogName) {
@@ -828,7 +828,7 @@ QDialog *ScriptEngineContext::getDialog(const QString &dialogName) {
       if (dialog) return dialog;
     }
   }
-  return 0;
+  return nullptr;
 }
 #endif
 QString ScriptEngineContext::initScript() const { return m_initScript; }

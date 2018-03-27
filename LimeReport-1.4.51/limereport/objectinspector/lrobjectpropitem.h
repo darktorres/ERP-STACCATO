@@ -63,7 +63,7 @@ public:
   virtual bool isValueReadonly() const { return m_readonly; }
   void setValueReadOnly(bool value) { m_readonly = value; }
   virtual bool isValueModified() const { return false; }
-  virtual QWidget *createProperyEditor(QWidget * /*parent*/) const { return 0; }
+  virtual QWidget *createProperyEditor(QWidget * /*parent*/) const { return nullptr; }
   virtual void setPropertyEditorData(QWidget *, const QModelIndex &) const {}
   virtual void setModelData(QWidget * /*editor*/, QAbstractItemModel * /*model*/, const QModelIndex & /*index*/) {}
   virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex & /*index*/) const;
@@ -97,11 +97,12 @@ private slots:
 private:
   bool m_valid;
   void invalidate() {
-    m_object = 0;
-    m_objects = 0;
+    m_object = nullptr;
+    m_objects = nullptr;
     m_valid = false;
     m_name = "";
-    m_value = QVariant(), m_isClass = false;
+    m_value = QVariant();
+    m_isClass = false;
   }
 
 protected:

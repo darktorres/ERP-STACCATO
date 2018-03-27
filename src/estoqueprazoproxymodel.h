@@ -9,8 +9,8 @@ class EstoquePrazoProxyModel final : public QIdentityProxyModel {
 
 public:
   explicit EstoquePrazoProxyModel(SqlRelationalTableModel *model, QObject *parent);
-  ~EstoquePrazoProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, const int role) const final;
+  ~EstoquePrazoProxyModel() final = default;
+  auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
   const int dias;

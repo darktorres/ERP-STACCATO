@@ -25,6 +25,10 @@ WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::W
   ui->dateEditMes->setDate(QDate::currentDate());
 
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetRelatorio::dateEditMes_dateChanged);
+  connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetRelatorio::on_pushButtonExcel_clicked);
+  connect(ui->tableRelatorio, &TableView::entered, this, &WidgetRelatorio::on_tableRelatorio_entered);
+  connect(ui->tableTotalLoja, &TableView::entered, this, &WidgetRelatorio::on_tableTotalLoja_entered);
+  connect(ui->tableTotalVendedor, &TableView::entered, this, &WidgetRelatorio::on_tableTotalVendedor_entered);
 }
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
@@ -44,9 +48,9 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   filter += " ORDER BY Loja, Vendedor";
 
-  modelTotalVendedor.setFilter(filter);
+  modelViewRelatorioVendedor.setFilter(filter);
 
-  if (not modelTotalVendedor.select()) emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelTotalVendedor.lastError().text());
+  if (not modelViewRelatorioVendedor.select()) emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelViewRelatorioVendedor.lastError().text());
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
@@ -60,27 +64,27 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   filter += " ORDER BY Loja";
 
-  modelTotalLoja.setFilter(filter);
+  modelViewRelatorioLoja.setFilter(filter);
 
-  if (not modelTotalLoja.select()) emit errorSignal("Erro lendo tabela relatorio_loja: " + modelTotalLoja.lastError().text());
+  if (not modelViewRelatorioLoja.select()) emit errorSignal("Erro lendo tabela relatorio_loja: " + modelViewRelatorioLoja.lastError().text());
 }
 
 bool WidgetRelatorio::setupTables() {
   // REFAC: refactor this to not select in here
 
-  modelRelatorio.setTable("view_relatorio");
-  modelRelatorio.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelViewRelatorio.setTable("view_relatorio");
+  modelViewRelatorio.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelRelatorio.setHeaderData("idVenda", "Venda");
+  modelViewRelatorio.setHeaderData("idVenda", "Venda");
 
-  modelRelatorio.setFilter("0");
+  modelViewRelatorio.setFilter("0");
 
-  if (not modelRelatorio.select()) {
-    emit errorSignal("Erro lendo tabela relatorio: " + modelRelatorio.lastError().text());
+  if (not modelViewRelatorio.select()) {
+    emit errorSignal("Erro lendo tabela relatorio: " + modelViewRelatorio.lastError().text());
     return false;
   }
 
-  ui->tableRelatorio->setModel(&modelRelatorio);
+  ui->tableRelatorio->setModel(&modelViewRelatorio);
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
@@ -90,17 +94,17 @@ bool WidgetRelatorio::setupTables() {
 
   //------------------------------------------------------------------------------
 
-  modelTotalVendedor.setTable("view_relatorio_vendedor");
-  modelTotalVendedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelViewRelatorioVendedor.setTable("view_relatorio_vendedor");
+  modelViewRelatorioVendedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelTotalVendedor.setFilter("0");
+  modelViewRelatorioVendedor.setFilter("0");
 
-  if (not modelTotalVendedor.select()) {
-    emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelTotalVendedor.lastError().text());
+  if (not modelViewRelatorioVendedor.select()) {
+    emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelViewRelatorioVendedor.lastError().text());
     return false;
   }
 
-  ui->tableTotalVendedor->setModel(&modelTotalVendedor);
+  ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
@@ -110,17 +114,17 @@ bool WidgetRelatorio::setupTables() {
 
   //--------------------------------------------------
 
-  modelTotalLoja.setTable("view_relatorio_loja");
-  modelTotalLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelViewRelatorioLoja.setTable("view_relatorio_loja");
+  modelViewRelatorioLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelTotalLoja.setFilter("0");
+  modelViewRelatorioLoja.setFilter("0");
 
-  if (not modelTotalLoja.select()) {
-    emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelTotalLoja.lastError().text());
+  if (not modelViewRelatorioLoja.select()) {
+    emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelViewRelatorioLoja.lastError().text());
     return false;
   }
 
-  ui->tableTotalLoja->setModel(&modelTotalLoja);
+  ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
@@ -136,15 +140,15 @@ void WidgetRelatorio::calcularTotalGeral() {
   double comissao = 0;
   double porcentagem = 0;
 
-  for (int row = 0; row < modelTotalLoja.rowCount(); ++row) {
-    totalGeral += modelTotalLoja.data(row, "Faturamento").toDouble();
-    comissao += modelTotalLoja.data(row, "Valor Comissão").toDouble();
-    porcentagem += modelTotalLoja.data(row, "% Comissão").toDouble();
+  for (int row = 0; row < modelViewRelatorioLoja.rowCount(); ++row) {
+    totalGeral += modelViewRelatorioLoja.data(row, "Faturamento").toDouble();
+    comissao += modelViewRelatorioLoja.data(row, "Valor Comissão").toDouble();
+    porcentagem += modelViewRelatorioLoja.data(row, "% Comissão").toDouble();
   }
 
   ui->doubleSpinBoxGeral->setValue(totalGeral);
   ui->doubleSpinBoxValorComissao->setValue(comissao);
-  ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelTotalLoja.rowCount());
+  ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioLoja.rowCount());
 }
 
 void WidgetRelatorio::setFilterRelatorio() {
@@ -162,9 +166,9 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
 
-  modelRelatorio.setFilter(filter);
+  modelViewRelatorio.setFilter(filter);
 
-  if (not modelRelatorio.select()) emit errorSignal("Erro lendo tabela relatorio: " + modelRelatorio.lastError().text());
+  if (not modelViewRelatorio.select()) emit errorSignal("Erro lendo tabela relatorio: " + modelViewRelatorio.lastError().text());
 }
 
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
@@ -172,7 +176,7 @@ void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
 bool WidgetRelatorio::updateTables() {
-  if (modelRelatorio.tableName().isEmpty() and not setupTables()) return false;
+  if (modelViewRelatorio.tableName().isEmpty() and not setupTables()) return false;
 
   setFilterRelatorio();
   setFilterTotaisVendedor();
@@ -185,16 +189,8 @@ bool WidgetRelatorio::updateTables() {
   calcularTotalGeral();
 
   QSqlQuery query;
-  // REFAC: use a join in the view so as to not need setting it manually
-  query.prepare("SET @mydate = :mydate");
-  query.bindValue(":mydate", ui->dateEditMes->date().toString("yyyy-MM"));
 
-  if (not query.exec()) {
-    emit errorSignal("Erro setando mydate: " + query.lastError().text());
-    return false;
-  }
-
-  if (not query.exec("SELECT @mydate") or not query.first()) {
+  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) {
     emit errorSignal("Erro comunicando com o banco de dados: " + query.lastError().text());
     return false;
   }
@@ -245,7 +241,7 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
   if (not modelo.exists()) {
-    QMessageBox::critical(this, "Erro!", "Não encontrou o modelo do Excel!");
+    emit errorSignal("Não encontrou o modelo do Excel!");
     return;
   }
 
@@ -254,8 +250,8 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível abrir o arquivo para escrita: " + fileName);
-    QMessageBox::critical(this, "Erro!", "Erro: " + file.errorString());
+    emit errorSignal("Não foi possível abrir o arquivo para escrita: " + fileName);
+    emit errorSignal("Erro: " + file.errorString());
     return;
   }
 
@@ -271,18 +267,18 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   char column = 'A';
 
-  for (int col = 0; col < modelRelatorio.columnCount(); ++col, ++column) {
-    xlsx.write(column + QString::number(1), modelRelatorio.headerData(col, Qt::Horizontal).toString());
+  for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) {
+    xlsx.write(column + QString::number(1), modelViewRelatorio.headerData(col, Qt::Horizontal).toString());
   }
 
   column = 'A';
 
-  for (int row = 0; row < modelRelatorio.rowCount(); ++row) {
-    for (int col = 0; col < modelRelatorio.columnCount(); ++col, ++column) {
+  for (int row = 0; row < modelViewRelatorio.rowCount(); ++row) {
+    for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) {
       if (col == 7) {
-        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col).toDouble() / 100);
+        xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col).toDouble() / 100);
       } else {
-        xlsx.write(column + QString::number(row + 2), modelRelatorio.data(row, col));
+        xlsx.write(column + QString::number(row + 2), modelViewRelatorio.data(row, col));
       }
     }
 
@@ -291,18 +287,16 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   xlsx.selectSheet("Sheet2");
 
-  for (int col = 0; col < modelTotalVendedor.columnCount(); ++col, ++column) {
-    xlsx.write(column + QString::number(1), modelTotalVendedor.headerData(col, Qt::Horizontal).toString());
-  }
+  for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) xlsx.write(column + QString::number(1), modelViewRelatorioVendedor.headerData(col, Qt::Horizontal).toString());
 
   column = 'A';
 
-  for (int row = 0; row < modelTotalVendedor.rowCount(); ++row) {
-    for (int col = 0; col < modelTotalVendedor.columnCount(); ++col, ++column) {
+  for (int row = 0; row < modelViewRelatorioVendedor.rowCount(); ++row) {
+    for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) {
       if (col == 5) {
-        xlsx.write(column + QString::number(row + 2), modelTotalVendedor.data(row, col).toDouble() / 100);
+        xlsx.write(column + QString::number(row + 2), modelViewRelatorioVendedor.data(row, col).toDouble() / 100);
       } else {
-        xlsx.write(column + QString::number(row + 2), modelTotalVendedor.data(row, col));
+        xlsx.write(column + QString::number(row + 2), modelViewRelatorioVendedor.data(row, col));
       }
     }
 
@@ -310,10 +304,10 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
   }
 
   if (not xlsx.saveAs(fileName)) {
-    QMessageBox::critical(this, "Erro!", "Ocorreu algum erro ao salvar o arquivo.");
+    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
     return;
   }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  QMessageBox::information(this, "Ok!", "Arquivo salvo como " + fileName);
+  emit informationSignal("Arquivo salvo como " + fileName);
 }

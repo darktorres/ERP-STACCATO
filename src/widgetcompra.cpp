@@ -25,27 +25,4 @@ bool WidgetCompra::updateTables() {
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }
 
-void WidgetCompra::setConnections() {
-  // REFAC: couldnt I connect directly to Application?
-
-  connect(ui->widgetOC, &WidgetCompraOC::errorSignal, this, &WidgetCompra::errorSignal);
-  connect(ui->widgetDevolucao, &WidgetCompraDevolucao::errorSignal, this, &WidgetCompra::errorSignal);
-  connect(ui->widgetPendentes, &WidgetCompraPendentes::errorSignal, this, &WidgetCompra::errorSignal);
-  connect(ui->widgetGerar, &WidgetCompraGerar::errorSignal, this, &WidgetCompra::errorSignal);
-  connect(ui->widgetConfirmar, &WidgetCompraConfirmar::errorSignal, this, &WidgetCompra::errorSignal);
-  connect(ui->widgetFaturar, &WidgetCompraFaturar::errorSignal, this, &WidgetCompra::errorSignal);
-
-  connect(ui->widgetOC, &WidgetCompraOC::transactionStarted, this, &WidgetCompra::transactionStarted);
-  connect(ui->widgetDevolucao, &WidgetCompraDevolucao::transactionStarted, this, &WidgetCompra::transactionStarted);
-  connect(ui->widgetPendentes, &WidgetCompraPendentes::transactionStarted, this, &WidgetCompra::transactionStarted);
-  connect(ui->widgetGerar, &WidgetCompraGerar::transactionStarted, this, &WidgetCompra::transactionStarted);
-  connect(ui->widgetConfirmar, &WidgetCompraConfirmar::transactionStarted, this, &WidgetCompra::transactionStarted);
-  connect(ui->widgetFaturar, &WidgetCompraFaturar::transactionStarted, this, &WidgetCompra::transactionStarted);
-
-  connect(ui->widgetOC, &WidgetCompraOC::transactionEnded, this, &WidgetCompra::transactionEnded);
-  connect(ui->widgetDevolucao, &WidgetCompraDevolucao::transactionEnded, this, &WidgetCompra::transactionEnded);
-  connect(ui->widgetPendentes, &WidgetCompraPendentes::transactionEnded, this, &WidgetCompra::transactionEnded);
-  connect(ui->widgetGerar, &WidgetCompraGerar::transactionEnded, this, &WidgetCompra::transactionEnded);
-  connect(ui->widgetConfirmar, &WidgetCompraConfirmar::transactionEnded, this, &WidgetCompra::transactionEnded);
-  connect(ui->widgetFaturar, &WidgetCompraFaturar::transactionEnded, this, &WidgetCompra::transactionEnded);
-}
+void WidgetCompra::setConnections() { connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetCompra::on_tabWidget_currentChanged); }

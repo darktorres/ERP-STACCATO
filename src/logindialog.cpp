@@ -5,8 +5,13 @@
 #include "ui_logindialog.h"
 #include "usersession.h"
 
-LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
+LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
+
+  connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged);
+  connect(ui->lineEditHostname, &QLineEdit::textChanged, this, &LoginDialog::on_lineEditHostname_textChanged);
+  connect(ui->pushButtonConfig, &QPushButton::clicked, this, &LoginDialog::on_pushButtonConfig_clicked);
+  connect(ui->pushButtonLogin, &QPushButton::clicked, this, &LoginDialog::on_pushButtonLogin_clicked);
 
   setWindowTitle("ERP Login");
   setWindowModality(Qt::WindowModal);
@@ -38,7 +43,7 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 }
 
 void LoginDialog::setComboBox() {
-  for (const auto &loja : qApp->mapLojas.keys()) ui->comboBoxLoja->addItem(loja);
+  Q_FOREACH (const auto &loja, qApp->mapLojas.keys()) { ui->comboBoxLoja->addItem(loja); }
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
@@ -57,7 +62,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   if (not qApp->dbConnect()) return;
 
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
-    QMessageBox::critical(this, "Erro!", "Login inválido!");
+    emit errorSignal("Login inválido!");
     ui->lineEditPass->setFocus();
     return;
   }

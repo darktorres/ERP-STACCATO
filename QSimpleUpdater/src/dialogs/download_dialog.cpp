@@ -139,8 +139,8 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
     QString _total_string;
     QString _received_string;
 
-    float _total = total;
-    float _received = received;
+    double _total = total;
+    double _received = received;
 
     if (_total < 1024) {
       _total_string = tr("%1 bytes").arg(_total);
@@ -199,4 +199,4 @@ void DownloadDialog::ignoreSslErrors(QNetworkReply *reply, const QList<QSslError
 #endif
 }
 
-float DownloadDialog::roundNumber(const float &input) { return roundf(input * 100) / 100; }
+double DownloadDialog::roundNumber(const double &input) { return round(input * 100) / 100; }

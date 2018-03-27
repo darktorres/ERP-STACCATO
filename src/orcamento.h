@@ -2,7 +2,6 @@
 #define ORCAMENTO_H
 
 #include "registerdialog.h"
-#include "searchdialogproxy.h"
 
 namespace Ui {
 class Orcamento;
@@ -12,12 +11,9 @@ class Orcamento final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Orcamento(QWidget *parent = 0);
+  explicit Orcamento(QWidget *parent = nullptr);
   ~Orcamento();
-  void show();
-
-private slots:
-  void on_pushButtonCalculadora_clicked();
+  auto show() -> void;
 
 private:
   // attributes
@@ -30,55 +26,57 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  bool atualizaReplica();
-  bool buscarParametrosFrete();
-  bool cadastrar() final;
-  bool generateId();
-  bool newRegister() final;
-  bool savingProcedures() final;
-  bool verificaCadastroCliente();
-  bool verifyFields() final;
-  bool viewRegister() final;
-  void adicionarItem(const bool isUpdate = false); // REFAC: refac this to enum
-  void atualizarItem();
-  void calcPrecoGlobalTotal();
-  void clearFields() final;
-  void novoItem();
-  void on_checkBoxFreteManual_clicked(const bool checked);
-  void on_checkBoxRepresentacao_toggled(const bool checked);
-  void on_comboBoxLoja_currentTextChanged(const QString &);
-  void on_doubleSpinBoxCaixas_valueChanged(const double caixas);
-  void on_doubleSpinBoxDesconto_valueChanged(const double desconto);
-  void on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto);
-  void on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto);
-  void on_doubleSpinBoxFrete_valueChanged(const double frete);
-  void on_doubleSpinBoxQuant_valueChanged(const double quant);
-  void on_doubleSpinBoxTotal_valueChanged(const double total);
-  void on_doubleSpinBoxTotalItem_valueChanged(const double);
-  void on_itemBoxCliente_textChanged(const QString &);
-  void on_itemBoxProduto_valueChanged(const QVariant &);
-  void on_itemBoxVendedor_textChanged(const QString &);
-  void on_pushButtonAdicionarItem_clicked();
-  void on_pushButtonApagarOrc_clicked();
-  void on_pushButtonAtualizarItem_clicked();
-  void on_pushButtonAtualizarOrcamento_clicked();
-  void on_pushButtonCadastrarOrcamento_clicked();
-  void on_pushButtonGerarExcel_clicked();
-  void on_pushButtonGerarVenda_clicked();
-  void on_pushButtonImprimir_clicked();
-  void on_pushButtonLimparSelecao_clicked();
-  void on_pushButtonRemoverItem_clicked();
-  void on_pushButtonReplicar_clicked();
-  void on_tableProdutos_clicked(const QModelIndex &index);
-  void registerMode() final;
-  void removeItem();
-  void setupConnections();
-  void setupMapper() final;
-  void setupTables();
-  void successMessage() final;
-  void unsetConnections();
-  void updateMode() final;
-  bool recalcularTotais();
+  auto adicionarItem(const bool isUpdate = false) -> void; // REFAC: refac this to enum
+  auto atualizaReplica() -> bool;
+  auto atualizarItem() -> void;
+  auto buscarParametrosFrete() -> bool;
+  auto cadastrar() -> bool final;
+  auto calcPrecoGlobalTotal() -> void;
+  auto clearFields() -> void final;
+  auto generateId() -> bool;
+  auto newRegister() -> bool final;
+  auto novoItem() -> void;
+  auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
+  auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
+  auto on_comboBoxLoja_currentTextChanged(const QString &) -> void;
+  auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDesconto_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
+  auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
+  auto on_doubleSpinBoxTotalItem_valueChanged(const double) -> void;
+  auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
+  auto on_itemBoxCliente_textChanged(const QString &) -> void;
+  auto on_itemBoxProduto_valueChanged(const QVariant &) -> void;
+  auto on_itemBoxVendedor_textChanged(const QString &) -> void;
+  auto on_pushButtonAdicionarItem_clicked() -> void;
+  auto on_pushButtonApagarOrc_clicked() -> void;
+  auto on_pushButtonAtualizarItem_clicked() -> void;
+  auto on_pushButtonAtualizarOrcamento_clicked() -> void;
+  auto on_pushButtonCadastrarOrcamento_clicked() -> void;
+  auto on_pushButtonCalculadora_clicked() -> void;
+  auto on_pushButtonCalcularFrete_clicked() -> void;
+  auto on_pushButtonGerarExcel_clicked() -> void;
+  auto on_pushButtonGerarVenda_clicked() -> void;
+  auto on_pushButtonImprimir_clicked() -> void;
+  auto on_pushButtonLimparSelecao_clicked() -> void;
+  auto on_pushButtonRemoverItem_clicked() -> void;
+  auto on_pushButtonReplicar_clicked() -> void;
+  auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
+  auto recalcularTotais() -> bool;
+  auto registerMode() -> void final;
+  auto removeItem() -> void;
+  auto savingProcedures() -> bool final;
+  auto setupConnections() -> void;
+  auto setupMapper() -> void final;
+  auto setupTables() -> void;
+  auto successMessage() -> void final;
+  auto unsetConnections() -> void;
+  auto updateMode() -> void final;
+  auto verificaCadastroCliente() -> bool;
+  auto verifyFields() -> bool final;
+  auto viewRegister() -> bool final;
 };
 
 #endif // ORCAMENTO_H

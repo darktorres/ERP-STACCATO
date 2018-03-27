@@ -12,27 +12,25 @@ class WidgetOrcamento final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetOrcamento(QWidget *parent = 0);
+  explicit WidgetOrcamento(QWidget *parent = nullptr);
   ~WidgetOrcamento();
-  bool updateTables();
-
-private slots:
-  void montaFiltro();
-  void on_comboBoxLojas_currentIndexChanged(const int);
-  void on_groupBoxStatus_toggled(const bool enabled);
-  void on_pushButtonCriarOrc_clicked();
-  void on_pushButtonFollowup_clicked();
-  void on_table_activated(const QModelIndex &index);
-  void on_table_entered(const QModelIndex &);
+  auto updateTables() -> bool;
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
-  void setupTables();
-  void setPermissions();
-  void setupConnections();
+  auto montaFiltro() -> void;
+  auto on_comboBoxLojas_currentIndexChanged(const int) -> void;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
+  auto on_pushButtonCriarOrc_clicked() -> void;
+  auto on_pushButtonFollowup_clicked() -> void;
+  auto on_table_activated(const QModelIndex &index) -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
+  auto setPermissions() -> void;
+  auto setupConnections() -> void;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETORCAMENTO_H

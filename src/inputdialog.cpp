@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 
@@ -11,8 +10,11 @@
 #include "ui_inputdialog.h"
 #include "usersession.h"
 
-InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
+InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
+
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialog::on_dateEditEvento_dateChanged);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialog::on_pushButtonSalvar_clicked);
 
   setWindowFlags(Qt::Window);
 
@@ -110,7 +112,7 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
 void InputDialog::on_pushButtonSalvar_clicked() {
   if (tipo == Tipo::ReagendarPedido) {
     if (ui->lineEditObservacao->text().isEmpty()) {
-      QMessageBox::critical(this, "Erro!", "Observação não pode estar vazio!");
+      emit errorSignal("Observação não pode estar vazio!");
       return;
     }
   }

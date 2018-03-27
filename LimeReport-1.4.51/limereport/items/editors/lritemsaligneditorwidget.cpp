@@ -32,15 +32,15 @@
 namespace LimeReport {
 
 ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(LimeReport::ReportDesignWidget *reportEditor, const QString &title, QWidget *parent)
-    : QToolBar(title, parent), m_reportEditor(reportEditor), m_page(0) {
+    : QToolBar(title, parent), m_reportEditor(reportEditor), m_page(nullptr) {
   initEditor();
 }
 
-ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent) : QToolBar(parent), m_reportEditor(reportEditor), m_page(0) { initEditor(); }
+ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent) : QToolBar(parent), m_reportEditor(reportEditor), m_page(nullptr) { initEditor(); }
 
-ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent) : QToolBar(title, parent), m_reportEditor(0), m_page(page) { initEditor(); }
+ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent) : QToolBar(title, parent), m_reportEditor(nullptr), m_page(page) { initEditor(); }
 
-ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(PageDesignIntf *page, QWidget *parent) : QToolBar(parent), m_reportEditor(0), m_page(page) { initEditor(); }
+ItemsAlignmentEditorWidget::ItemsAlignmentEditorWidget(PageDesignIntf *page, QWidget *parent) : QToolBar(parent), m_reportEditor(nullptr), m_page(page) { initEditor(); }
 
 void ItemsAlignmentEditorWidget::slotBrinToFront() {
   if (m_reportEditor) m_reportEditor->brinToFront();
@@ -95,52 +95,52 @@ void ItemsAlignmentEditorWidget::slotSameWidth() {
 void ItemsAlignmentEditorWidget::initEditor() {
   m_bringToFront = new QAction(tr("Bring to top"), this);
   m_bringToFront->setIcon(QIcon(":/report/images/bringToTop"));
-  connect(m_bringToFront, SIGNAL(triggered()), this, SLOT(slotBrinToFront()));
+  connect(m_bringToFront, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotBrinToFront);
   addAction(m_bringToFront);
 
   m_sendToBack = new QAction(tr("Send to back"), this);
   m_sendToBack->setIcon(QIcon(":/report/images/sendToBack"));
-  connect(m_sendToBack, SIGNAL(triggered()), this, SLOT(slotSendToBack()));
+  connect(m_sendToBack, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotSendToBack);
   addAction(m_sendToBack);
 
   m_alignToLeft = new QAction(tr("Align to left"), this);
   m_alignToLeft->setIcon(QIcon(":/report/images/alignToLeft"));
-  connect(m_alignToLeft, SIGNAL(triggered()), this, SLOT(slotAlignToLeft()));
+  connect(m_alignToLeft, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotAlignToLeft);
   addAction(m_alignToLeft);
 
   m_alignToRight = new QAction(tr("Align to right"), this);
   m_alignToRight->setIcon(QIcon(":/report/images/alignToRight"));
-  connect(m_alignToRight, SIGNAL(triggered()), this, SLOT(slotAlignToRight()));
+  connect(m_alignToRight, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotAlignToRight);
   addAction(m_alignToRight);
 
   m_alignToVCenter = new QAction(tr("Align to vertical center"), this);
   m_alignToVCenter->setIcon(QIcon(":/report/images/alignToVCenter"));
-  connect(m_alignToVCenter, SIGNAL(triggered()), this, SLOT(slotAlignToVCenter()));
+  connect(m_alignToVCenter, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotAlignToVCenter);
   addAction(m_alignToVCenter);
 
   m_alignToTop = new QAction(tr("Align to top"), this);
   m_alignToTop->setIcon(QIcon(":/report/images/alignToTop"));
-  connect(m_alignToTop, SIGNAL(triggered()), this, SLOT(slotAlignToTop()));
+  connect(m_alignToTop, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotAlignToTop);
   addAction(m_alignToTop);
 
   m_alignToBottom = new QAction(tr("Align to bottom"), this);
   m_alignToBottom->setIcon(QIcon(":/report/images/alignToBottom"));
-  connect(m_alignToBottom, SIGNAL(triggered()), this, SLOT(slotAlignToBottom()));
+  connect(m_alignToBottom, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotAlignToBottom);
   addAction(m_alignToBottom);
 
   m_alignToHCenter = new QAction(tr("Align to horizontal center"), this);
   m_alignToHCenter->setIcon(QIcon(":/report/images/alignToHCenter"));
-  connect(m_alignToHCenter, SIGNAL(triggered()), this, SLOT(slotAlignToHCenter()));
+  connect(m_alignToHCenter, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotAlignToHCenter);
   addAction(m_alignToHCenter);
 
   m_sameHeight = new QAction(tr("Set same height"), this);
   m_sameHeight->setIcon(QIcon(":/report/images/sameHeight"));
-  connect(m_sameHeight, SIGNAL(triggered()), this, SLOT(slotSameHeight()));
+  connect(m_sameHeight, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotSameHeight);
   addAction(m_sameHeight);
 
   m_sameWidth = new QAction(tr("Set same width"), this);
   m_sameWidth->setIcon(QIcon(":/report/images/sameWidth"));
-  connect(m_sameWidth, SIGNAL(triggered()), this, SLOT(slotSameWidth()));
+  connect(m_sameWidth, &QAction::triggered, this, &ItemsAlignmentEditorWidget::slotSameWidth);
   addAction(m_sameWidth);
 }
 

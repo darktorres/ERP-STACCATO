@@ -45,7 +45,7 @@ class PropertyDelegate : public QItemDelegate
 {
   Q_OBJECT
 public:
-  PropertyDelegate(QObject *parent = 0);
+  PropertyDelegate(QObject *parent = nullptr);
   void setObjectInspector(ObjectInspectorWidget *objectInspector);
   void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
   QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;

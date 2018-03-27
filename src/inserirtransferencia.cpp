@@ -5,8 +5,11 @@
 #include "inserirtransferencia.h"
 #include "ui_inserirtransferencia.h"
 
-InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
+InserirTransferencia::InserirTransferencia(QWidget *parent) : Dialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonSalvar_clicked);
 
   setupTables();
 
@@ -23,8 +26,8 @@ void InserirTransferencia::on_pushButtonSalvar_clicked() {
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
@@ -32,11 +35,11 @@ void InserirTransferencia::on_pushButtonSalvar_clicked() {
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
-  QMessageBox::information(this, "Aviso!", "Transferência registrada com sucesso!");
+  emit informationSignal("Transferência registrada com sucesso!");
   close();
 }
 

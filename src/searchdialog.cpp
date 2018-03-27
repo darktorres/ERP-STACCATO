@@ -8,13 +8,20 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialog.h"
-#include "searchdialogproxy.h"
+#include "searchdialogproxymodel.h"
 #include "ui_searchdialog.h"
 #include "usersession.h"
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
-    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
+    : Dialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
+  connect(ui->radioButtonProdAtivos, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
+  connect(ui->radioButtonProdDesc, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdDesc_toggled);
+  connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
+  connect(ui->table, &TableView::entered, this, &SearchDialog::on_table_entered);
 
   setWindowTitle(title);
   setWindowModality(Qt::NonModal);
@@ -47,7 +54,7 @@ void SearchDialog::setupTables(const QString &table, const QString &filter) {
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
   setFilter(filter);
 
-  ui->table->setModel(new SearchDialogProxy(&model, this));
+  ui->table->setModel(new SearchDialogProxyModel(&model, this));
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
@@ -137,9 +144,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
 
-    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) {
-      QMessageBox::warning(this, "Aviso!", "Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!");
-    }
+    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) emit warningSignal("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!");
   }
 
   sendUpdateMessage();
@@ -156,7 +161,7 @@ QString SearchDialog::getText(const QVariant &value) {
 
   QString queryText;
 
-  for (const auto &key : textKeys) queryText += queryText.isEmpty() ? key : ", " + key;
+  Q_FOREACH (const auto &key, textKeys) { queryText += queryText.isEmpty() ? key : ", " + key; }
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + value.toString() + "'";
 
@@ -169,7 +174,7 @@ QString SearchDialog::getText(const QVariant &value) {
 
   QString res;
 
-  for (const auto &key : textKeys) {
+  Q_FOREACH (const auto &key, textKeys) {
     if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) {
       res += (res.isEmpty() ? "" : " - ") + query.value(key).toString();
     }

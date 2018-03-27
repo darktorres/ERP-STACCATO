@@ -34,12 +34,12 @@
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlQueryModel>
 
 #include "lrconnectiondialog.h"
 #include "lrdatabrowser.h"
@@ -50,16 +50,16 @@
 
 namespace LimeReport {
 
-DataBrowser::DataBrowser(QWidget *parent) : QWidget(parent), ui(new Ui::DataBrowser), m_report(0), m_closingWindows(false), m_settings(0), m_ownedSettings(false) {
+DataBrowser::DataBrowser(QWidget *parent) : QWidget(parent), ui(new Ui::DataBrowser), m_report(nullptr), m_closingWindows(false), m_settings(nullptr), m_ownedSettings(false) {
   ui->setupUi(this);
-  connect(ui->addConnection, SIGNAL(clicked()), this, SLOT(slotAddConnection()));
-  connect(ui->deleteConection, SIGNAL(clicked()), this, SLOT(slotDeleteConnection()));
-  connect(ui->addDataSource, SIGNAL(clicked()), this, SLOT(slotAddDataSource()));
-  connect(ui->viewDataSource, SIGNAL(clicked()), this, SLOT(slotViewDatasource()));
-  connect(ui->editDataSource, SIGNAL(clicked()), this, SLOT(slotEditDatasource()));
-  connect(ui->deleteDataSource, SIGNAL(clicked()), this, SLOT(slotDeleteDatasource()));
-  connect(ui->changeConnection, SIGNAL(clicked()), this, SLOT(slotChangeConnection()));
-  connect(ui->pbConnect, SIGNAL(clicked()), this, SLOT(slotChangeConnectionState()));
+  connect(ui->addConnection, &QAbstractButton::clicked, this, &DataBrowser::slotAddConnection);
+  connect(ui->deleteConection, &QAbstractButton::clicked, this, &DataBrowser::slotDeleteConnection);
+  connect(ui->addDataSource, &QAbstractButton::clicked, this, &DataBrowser::slotAddDataSource);
+  connect(ui->viewDataSource, &QAbstractButton::clicked, this, &DataBrowser::slotViewDatasource);
+  connect(ui->editDataSource, &QAbstractButton::clicked, this, &DataBrowser::slotEditDatasource);
+  connect(ui->deleteDataSource, &QAbstractButton::clicked, this, &DataBrowser::slotDeleteDatasource);
+  connect(ui->changeConnection, &QAbstractButton::clicked, this, &DataBrowser::slotChangeConnection);
+  connect(ui->pbConnect, &QAbstractButton::clicked, this, &DataBrowser::slotChangeConnectionState);
 
   ui->dataTree->setHeaderLabel(tr("Datasources"));
   ui->pbConnect->setEnabled(false);
@@ -72,15 +72,15 @@ DataBrowser::~DataBrowser() {
 QSize DataBrowser::sizeHint() const { return QSize(100, 200); }
 
 void DataBrowser::slotAddConnection() {
-  ConnectionDialog *connectionEdit = new ConnectionDialog(this, 0, this);
+  ConnectionDialog *connectionEdit = new ConnectionDialog(this, nullptr, this);
   connectionEdit->setAttribute(Qt::WA_DeleteOnClose, true);
 #ifdef Q_OS_MAC
   connectionEdit->setWindowModality(Qt::WindowModal);
 #else
   connectionEdit->setWindowModality(Qt::ApplicationModal);
 #endif
-  // connect(connectionEdit,SIGNAL(finished(int)),this,SLOT(slotConnectionEditFinished(int)));
-  // connect(connectionEdit,SIGNAL(conectionRegistred(QString)),this,SLOT(slotConnectionRegistred(QString)));
+  //   connect(connectionEdit,SIGNAL(finished(int)),this,SLOT(slotConnectionEditFinished(int)));
+  //   connect(connectionEdit,SIGNAL(conectionRegistred(QString)),this,SLOT(slotConnectionRegistred(QString)));
   connectionEdit->exec();
 }
 
@@ -95,6 +95,7 @@ void DataBrowser::slotSQLEditingFinished(SQLEditResult result) {
       break;
     case SQLEditResult::SubProxy:
       addProxy(result);
+      [[fallthrough]];
     default:
       break;
     }
@@ -135,7 +136,7 @@ void DataBrowser::slotAddDataSource() {
   sqlEdit->setSettings(settings());
   sqlEdit->setDataSources(m_report->dataManager());
   sqlEdit->setDefaultConnection(getConnectionName(NameForReport));
-  connect(sqlEdit, SIGNAL(signalSqlEditingFinished(SQLEditResult)), this, SLOT(slotSQLEditingFinished(SQLEditResult)));
+  connect(sqlEdit, &SQLEditDialog::signalSqlEditingFinished, this, &DataBrowser::slotSQLEditingFinished);
   sqlEdit->exec();
 }
 
@@ -150,7 +151,7 @@ void DataBrowser::updateDataTree() {
 
   initConnections();
 
-  foreach (QString dataSourceName, m_report->datasourcesNames()) {
+  for (QString dataSourceName : m_report->datasourcesNames()) {
 
     QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(dataSourceName), DataBrowserTree::Table);
     QTreeWidgetItem *parentItem = findByNameAndType(ConnectionDesc::connectionNameForUser(m_report->dataManager()->connectionName(dataSourceName)), DataBrowserTree::Connection);
@@ -198,7 +199,7 @@ void DataBrowser::updateVariablesTree() {
   ui->variablesTree->addTopLevelItem(systemVariables);
   ui->variablesTree->addTopLevelItem(externalVariables);
 
-  foreach (QString variableName, m_report->dataManager()->variableNames()) {
+  for (QString variableName : m_report->dataManager()->variableNames()) {
     QStringList values;
     values << variableName + ((m_report->dataManager()->variableIsSystem(variableName)) ? "" : "  [" + m_report->dataManager()->variable(variableName).toString() + "]") << variableName;
     QTreeWidgetItem *item = new QTreeWidgetItem(values, DataBrowserTree::Variable);
@@ -210,7 +211,7 @@ void DataBrowser::updateVariablesTree() {
     }
   }
 
-  foreach (QString variableName, m_report->dataManager()->namesOfUserVariables()) {
+  for (QString variableName : m_report->dataManager()->namesOfUserVariables()) {
     if (!m_report->dataManager()->variableNames().contains(variableName)) {
       QStringList values;
       values << variableName + "  [" + m_report->dataManager()->variable(variableName).toString() + "]" << variableName;
@@ -265,7 +266,7 @@ void DataBrowser::fillFields(QTreeWidgetItem *parentItem, LimeReport::IDataSourc
 }
 
 QTreeWidgetItem *DataBrowser::findByNameAndType(QString name, int itemType) {
-  if (name.isEmpty()) return 0;
+  if (name.isEmpty()) return nullptr;
   QList<QTreeWidgetItem *> items = ui->dataTree->findItems(name, Qt::MatchContains | Qt::MatchRecursive);
   if (!items.isEmpty()) {
     for (int i = 0; i < items.count(); i++) {
@@ -274,7 +275,7 @@ QTreeWidgetItem *DataBrowser::findByNameAndType(QString name, int itemType) {
       }
     }
   }
-  return 0;
+  return nullptr;
 }
 
 void DataBrowser::slotViewDatasource() {
@@ -299,7 +300,7 @@ QTreeWidgetItem *findConnectionItem(QTreeWidgetItem *item) {
     if (item->parent())
       return findConnectionItem(item->parent());
     else
-      return 0;
+      return nullptr;
   }
 }
 
@@ -338,7 +339,7 @@ void DataBrowser::slotEditDatasource() {
 #endif
     sqlEdit->setSettings(settings());
     sqlEdit->setDataSources(m_report->dataManager(), getDatasourceName());
-    connect(sqlEdit, SIGNAL(signalSqlEditingFinished(SQLEditResult)), this, SLOT(slotSQLEditingFinished(SQLEditResult)));
+    connect(sqlEdit, &SQLEditDialog::signalSqlEditingFinished, this, &DataBrowser::slotSQLEditingFinished);
     sqlEdit->exec();
   }
 }
@@ -356,16 +357,15 @@ void DataBrowser::slotDeleteDatasource() {
 
 void DataBrowser::setReportEditor(LimeReport::ReportDesignWidget *report) {
   m_report = report;
-  connect(m_report, SIGNAL(cleared()), this, SLOT(slotClear()));
-  connect(m_report->dataManager(), SIGNAL(datasourcesChanged()), this, SLOT(slotDatasourcesChanged()));
+  connect(m_report, &ReportDesignWidget::cleared, this, &DataBrowser::slotClear);
+  connect(m_report->dataManager(), &DataSourceManager::datasourcesChanged, this, &DataBrowser::slotDatasourcesChanged);
   updateDataTree();
   updateVariablesTree();
 }
 
 void DataBrowser::slotClear() {
   ui->dataTree->clear();
-  foreach (QDockWidget *window, m_dataWindows.values())
-    window->close();
+  for (QDockWidget *window : m_dataWindows.values()) window->close();
   updateDataTree();
   updateVariablesTree();
 }
@@ -375,13 +375,13 @@ void DataBrowser::initConnections() {
   QList<QTreeWidgetItem *> items;
 
   QStringList connections = QSqlDatabase::connectionNames();
-  foreach (QString connectionName, m_report->dataManager()->connectionNames()) {
+  for (QString connectionName : m_report->dataManager()->connectionNames()) {
     if (!connections.contains(connectionName, Qt::CaseInsensitive)) {
       connections.append(connectionName);
     }
   }
   std::sort(connections.begin(), connections.end());
-  foreach (QString connectionName, connections) {
+  for (QString connectionName : connections) {
     QTreeWidgetItem *item = new QTreeWidgetItem(ui->dataTree, QStringList(ConnectionDesc::connectionNameForUser(connectionName)), DataBrowserTree::Connection);
     if (!m_report->dataManager()->connectionNames().contains(ConnectionDesc::connectionNameForReport(connectionName), Qt::CaseInsensitive)) {
       item->setIcon(0, QIcon(":/databrowser/images/database_connected"));
@@ -394,7 +394,7 @@ void DataBrowser::initConnections() {
     items.append(item);
   }
 
-  //    foreach (QString connectionName, connections) {
+  //    for (QString connectionName : connections) {
   //        QTreeWidgetItem *item=new QTreeWidgetItem(
   //            ui->dataTree,
   //            QStringList(ConnectionDesc::connectionNameForUser(connectionName)),
@@ -405,7 +405,7 @@ void DataBrowser::initConnections() {
 
   //    connections = m_report->dataManager()->connectionNames();
   //    qSort(connections);
-  //    foreach(QString connectionName,connectionName){
+  //    for(QString connectionName : connectionName){
   //        if (!QSqlDatabase::contains(connectionName)){
   //            QTreeWidgetItem *item=new QTreeWidgetItem(
   //                ui->dataTree,
@@ -439,7 +439,7 @@ QDockWidget *DataBrowser::createDataWindow(QString datasourceName) {
 
   window->setWidget(tableView);
   window->setAttribute(Qt::WA_DeleteOnClose);
-  connect(window, SIGNAL(destroyed()), this, SLOT(slotDataWindowClosed()));
+  connect(window, &QObject::destroyed, this, &DataBrowser::slotDataWindowClosed);
 
   if (!m_dataWindows.isEmpty())
     m_mainWindow->tabifyDockWidget(m_dataWindows.values().at(0), window);
@@ -646,7 +646,7 @@ void LimeReport::DataBrowser::on_addVariable_clicked() {
   dialog.setWindowModality(Qt::ApplicationModal);
 #endif
   dialog.setVariableContainer(m_report->dataManager());
-  connect(&dialog, SIGNAL(signalVariableAccepted(QString)), this, SLOT(slotVariableEditorAccept(QString)));
+  connect(&dialog, &LRVariableDialog::signalVariableAccepted, this, &DataBrowser::slotVariableEditorAccept);
   dialog.exec();
 }
 
@@ -661,7 +661,7 @@ void DataBrowser::on_editVariable_clicked() {
     dialog.setVariableContainer(m_report->dataManager());
     QString varName = getVariable();
     dialog.setVariableName(varName);
-    connect(&dialog, SIGNAL(signalVariableAccepted(QString)), this, SLOT(slotVariableEditorAccept(QString)));
+    connect(&dialog, &LRVariableDialog::signalVariableAccepted, this, &DataBrowser::slotVariableEditorAccept);
     dialog.exec();
   }
 }
@@ -728,7 +728,7 @@ void DataBrowser::on_variablesTree_itemDoubleClicked(QTreeWidgetItem *item, int)
 #endif
       dialog.setVariableContainer(m_report->dataManager());
       dialog.setVariableName(varName);
-      connect(&dialog, SIGNAL(signalVariableAccepted(QString)), this, SLOT(slotVariableEditorAccept(QString)));
+      connect(&dialog, &LRVariableDialog::signalVariableAccepted, this, &DataBrowser::slotVariableEditorAccept);
       dialog.exec();
     }
   }

@@ -14,15 +14,15 @@ class Application : public QApplication {
 
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
-  void darkTheme();
-  void lightTheme();
-  bool getUpdating() const;
-  void setUpdating(const bool value);
-  bool getInTransaction() const;
-  void setInTransaction(const bool value);
-  void showErrors();
-  bool dbConnect();
-  void updater();
+  auto darkTheme() -> void;
+  auto lightTheme() -> void;
+  auto getUpdating() const -> bool;
+  auto setUpdating(const bool value) -> void;
+  auto getInTransaction() const -> bool;
+  auto setInTransaction(const bool value) -> void;
+  auto showMessages() -> void;
+  auto dbConnect() -> bool;
+  auto updater() -> void;
   // REFAC: make those private?
   bool showingErrors = false;
   bool isConnected = false;
@@ -33,6 +33,8 @@ signals:
 
 public slots:
   void endTransaction();
+  void enqueueWarning(const QString &warning);
+  void enqueueInformation(const QString &information);
   void enqueueError(const QString &error);
   void startTransaction();
 
@@ -42,10 +44,12 @@ private:
   bool updating = false;
   const QPalette defaultPalette = palette();
   QStringList errorQueue;
+  QStringList informationQueue;
+  QStringList warningQueue;
   // methods
-  void storeSelection();
-  void readSettingsFile();
-  void startSqlPing();
+  auto storeSelection() -> void;
+  auto readSettingsFile() -> void;
+  auto startSqlPing() -> void;
 };
 
 #endif // APPLICATION_H

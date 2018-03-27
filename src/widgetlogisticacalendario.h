@@ -1,33 +1,31 @@
 #ifndef WIDGETLOGISTICACALENDARIO_H
 #define WIDGETLOGISTICACALENDARIO_H
 
-#include <QWidget>
+#include "widget.h"
 
 namespace Ui {
 class WidgetLogisticaCalendario;
 }
 
-class WidgetLogisticaCalendario final : public QWidget {
+class WidgetLogisticaCalendario final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaCalendario(QWidget *parent = 0);
+  explicit WidgetLogisticaCalendario(QWidget *parent = nullptr);
   ~WidgetLogisticaCalendario();
-  bool updateTables();
-
-private slots:
-  void on_checkBoxMostrarFiltros_toggled(bool checked);
-  void on_pushButtonProximo_clicked();
-  void on_pushButtonAnterior_clicked();
-  void on_calendarWidget_selectionChanged();
+  auto updateTables() -> bool;
 
 private:
   // attributes
   bool setup = false;
   Ui::WidgetLogisticaCalendario *ui;
   // methods
-  bool updateCalendar(const QDate &startDate);
-  void updateFilter();
+  auto on_calendarWidget_selectionChanged() -> void;
+  auto on_checkBoxMostrarFiltros_toggled(bool checked) -> void;
+  auto on_pushButtonAnterior_clicked() -> void;
+  auto on_pushButtonProximo_clicked() -> void;
+  auto updateCalendar(const QDate &startDate) -> bool;
+  auto updateFilter() -> void;
 };
 
 #endif // WIDGETLOGISTICACALENDARIO_H

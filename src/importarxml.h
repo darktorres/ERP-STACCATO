@@ -4,7 +4,9 @@
 #include <QDataWidgetMapper>
 #include <QDate>
 #include <QFileDialog>
+#include <optional>
 
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 #include "xml.h"
 
@@ -12,25 +14,12 @@ namespace Ui {
 class ImportarXML;
 }
 
-class ImportarXML final : public QDialog {
+class ImportarXML final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent = 0);
+  explicit ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent = nullptr);
   ~ImportarXML();
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_pushButtonCancelar_clicked();
-  void on_pushButtonImportar_clicked();
-  void on_pushButtonProcurar_clicked();
-  void on_tableCompra_entered(const QModelIndex &);
-  void on_tableConsumo_entered(const QModelIndex &);
-  void on_tableEstoque_entered(const QModelIndex &);
 
 private:
   // attributes
@@ -53,24 +42,31 @@ private:
   };
 
   // methods
-  bool associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido);
-  bool cadastrarNFe(XML &xml);
-  bool cadastrarProdutoEstoque();
-  bool criarConsumo(const int rowCompra, const int rowEstoque, const double quantAdicionar);
-  bool importar();
-  bool inserirItemSql(XML &xml);
-  bool inserirNoSqlModel(XML &xml, const QStandardItem *item);
-  bool lerXML(QFile &file);
-  bool limparAssociacoes();
-  bool parear();
-  bool perguntarLocal(XML &xml);
-  bool verificaCNPJ(const XML &xml);
-  bool verificaExiste(const XML &xml);
-  void procurar();
-  void setupTables(const QStringList &idsCompra);
-  void WrapParear(); // REFAC: simplify this
-  std::optional<double> buscarCaixas(const int rowEstoque);
-  bool produtoCompativel(const int rowCompra, const QString &codComercialEstoque);
+  auto associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) -> bool;
+  auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
+  auto cadastrarNFe(XML &xml) -> bool;
+  auto cadastrarProdutoEstoque() -> bool;
+  auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
+  auto importar() -> bool;
+  auto inserirItemSql(XML &xml) -> bool;
+  auto inserirNoSqlModel(XML &xml, const QStandardItem *item) -> bool;
+  auto lerXML(QFile &file) -> bool;
+  auto limparAssociacoes() -> bool;
+  auto on_pushButtonCancelar_clicked() -> void;
+  auto on_pushButtonImportar_clicked() -> void;
+  auto on_pushButtonProcurar_clicked() -> void;
+  auto on_tableCompra_entered(const QModelIndex &) -> void;
+  auto on_tableConsumo_entered(const QModelIndex &) -> void;
+  auto on_tableEstoque_entered(const QModelIndex &) -> void;
+  auto parear() -> bool;
+  auto perguntarLocal(XML &xml) -> bool;
+  auto procurar() -> void;
+  auto produtoCompativel(const int rowCompra, const QString &codComercialEstoque) -> bool;
+  auto setupTables(const QStringList &idsCompra) -> void;
+  auto verificaCNPJ(const XML &xml) -> bool;
+  auto verificaExiste(const XML &xml) -> bool;
+  auto verifyFields() -> bool;
+  auto wrapParear() -> void; // REFAC: simplify this
 };
 
 #endif // IMPORTARXML_H

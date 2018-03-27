@@ -33,25 +33,23 @@
        </item>
        <item row="1" column="0" colspan="3">
         <layout class="QGridLayout" name="gridLayout_5">
-         <item row="1" column="3">
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxQuant">
-           <property name="maximumSize">
-            <size>
-             <width>75</width>
-             <height>16777215</height>
-            </size>
+         <item row="0" column="6">
+          <widget class="QLabel" name="labelTotalItem_2">
+           <property name="text">
+            <string>Crédito</string>
            </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quantidade por unidade&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </widget>
+         </item>
+         <item row="1" column="6">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxCredito">
+           <property name="showGroupSeparator" stdset="0">
+            <bool>true</bool>
            </property>
-           <property name="correctionMode">
-            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-           </property>
-           <property name="decimals">
-            <number>4</number>
+           <property name="prefix">
+            <string>R$ </string>
            </property>
            <property name="maximum">
-            <double>9999999.000000000000000</double>
+            <double>999999.989999999990687</double>
            </property>
           </widget>
          </item>
@@ -71,6 +69,42 @@
            </property>
            <property name="prefix">
             <string>R$ </string>
+           </property>
+           <property name="maximum">
+            <double>9999999.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="labelPrecoUn">
+           <property name="text">
+            <string>Preço un.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="labelCaixas">
+           <property name="text">
+            <string>Caixas</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxQuant">
+           <property name="maximumSize">
+            <size>
+             <width>75</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quantidade por unidade&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="correctionMode">
+            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+           </property>
+           <property name="decimals">
+            <number>4</number>
            </property>
            <property name="maximum">
             <double>9999999.000000000000000</double>
@@ -108,24 +142,10 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="labelPrecoUn">
+         <item row="0" column="3">
+          <widget class="QLabel" name="labelQuant">
            <property name="text">
-            <string>Preço un.</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="labelCaixas">
-           <property name="text">
-            <string>Caixas</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="4">
-          <widget class="QLabel" name="labelUn">
-           <property name="text">
-            <string>Unidade</string>
+            <string>Quant.</string>
            </property>
           </widget>
          </item>
@@ -136,6 +156,13 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="4">
+          <widget class="QLabel" name="labelUn">
+           <property name="text">
+            <string>Unidade</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="7" rowspan="2">
           <widget class="QPushButton" name="pushButtonDevolverItem">
            <property name="text">
@@ -143,36 +170,20 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
-          <widget class="QLabel" name="labelQuant">
-           <property name="text">
-            <string>Quant.</string>
+         <item row="1" column="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxCaixas">
+           <property name="maximumSize">
+            <size>
+             <width>55</width>
+             <height>16777215</height>
+            </size>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="6" rowspan="2">
-          <widget class="QGroupBox" name="groupBoxCredito">
-           <property name="title">
-            <string>Gerar crédito?</string>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quantidade de caixas&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="checkable">
-            <bool>true</bool>
+           <property name="correctionMode">
+            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
            </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_4">
-            <item row="0" column="0">
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxCredito">
-              <property name="prefix">
-               <string>R$ </string>
-              </property>
-              <property name="maximum">
-               <double>999999.989999999990687</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </widget>
          </item>
          <item row="1" column="0">
@@ -203,22 +214,6 @@
            </property>
            <property name="maximum">
             <double>9999999.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxCaixas">
-           <property name="maximumSize">
-            <size>
-             <width>55</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quantidade de caixas&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="correctionMode">
-            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
            </property>
           </widget>
          </item>

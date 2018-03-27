@@ -55,8 +55,8 @@ private:
   void init();
   QDomElement putQObjectItem(QString name, QObject *item);
   void putChildQObjectItem(QString name, QObject *item, QDomElement *parentNode);
-  void putCollectionItem(QObject *item, QDomElement *parentNode = 0);
-  void putQObjectProperty(QString propertyName, QObject *item, QDomElement *parentNode = 0);
+  void putCollectionItem(QObject *item, QDomElement *parentNode = nullptr);
+  void putQObjectProperty(QString propertyName, QObject *item, QDomElement *parentNode = nullptr);
   void saveProperties(QObject *item, QDomElement *node);
   bool setContent(QString fileName);
   void saveProperty(QString name, QObject *item, QDomElement *node);

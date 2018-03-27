@@ -135,7 +135,7 @@ public:
     NPageSize = Custom
   };
 
-  explicit PageDesignIntf(QObject *parent = 0);
+  explicit PageDesignIntf(QObject *parent = nullptr);
   ~PageDesignIntf();
   void updatePageRect();
   Orientation getOrientation();
@@ -165,8 +165,8 @@ public:
   BaseDesignIntf *reportItemByName(const QString &name);
   QList<BaseDesignIntf *> reportItemsByName(const QString &name);
   BaseDesignIntf *addReportItem(const QString &itemType, QPointF pos, QSizeF size);
-  BaseDesignIntf *addReportItem(const QString &itemType, QObject *owner = 0, BaseDesignIntf *parent = 0);
-  BaseDesignIntf *createReportItem(const QString &itemType, QObject *owner = 0, BaseDesignIntf *parent = 0);
+  BaseDesignIntf *addReportItem(const QString &itemType, QObject *owner = nullptr, BaseDesignIntf *parent = nullptr);
+  BaseDesignIntf *createReportItem(const QString &itemType, QObject *owner = nullptr, BaseDesignIntf *parent = nullptr);
   void removeReportItem(BaseDesignIntf *item, bool createComand = true);
   CommandIf::Ptr removeReportItemCommand(BaseDesignIntf *item);
   bool saveCommand(CommandIf::Ptr command, bool runCommand = true);

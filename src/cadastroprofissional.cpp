@@ -11,7 +11,31 @@
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
 
-  for (const auto &line : findChildren<QLineEdit *>()) connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty);
+  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroProfissional::on_checkBoxMostrarInativos_clicked);
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroProfissional::on_lineEditCEP_textChanged);
+  connect(ui->lineEditCNPJ, &QLineEdit::editingFinished, this, &CadastroProfissional::on_lineEditCNPJ_editingFinished);
+  connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroProfissional::on_lineEditCNPJ_textEdited);
+  connect(ui->lineEditCNPJBancario, &QLineEdit::textEdited, this, &CadastroProfissional::on_lineEditCNPJBancario_textEdited);
+  connect(ui->lineEditCPF, &QLineEdit::editingFinished, this, &CadastroProfissional::on_lineEditCPF_editingFinished);
+  connect(ui->lineEditCPF, &QLineEdit::textEdited, this, &CadastroProfissional::on_lineEditCPF_textEdited);
+  connect(ui->lineEditCPFBancario, &QLineEdit::textEdited, this, &CadastroProfissional::on_lineEditCPFBancario_textEdited);
+  connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroProfissional::on_lineEditContatoCPF_textEdited);
+  connect(ui->lineEditProfissional, &QLineEdit::editingFinished, this, &CadastroProfissional::on_lineEditProfissional_editingFinished);
+  connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonAdicionarEnd_clicked);
+  connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonAtualizar_clicked);
+  connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonAtualizarEnd_clicked);
+  connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonBuscar_clicked);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonEndLimpar_clicked);
+  connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonNovoCad_clicked);
+  connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemover_clicked);
+  connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemoverEnd_clicked);
+  connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroProfissional::on_radioButtonPF_toggled);
+  connect(ui->tableEndereco, &TableView::clicked, this, &CadastroProfissional::on_tableEndereco_clicked);
+  connect(ui->tableEndereco, &TableView::entered, this, &CadastroProfissional::on_tableEndereco_entered);
+
+  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setWindowModality(Qt::NonModal);
 
@@ -116,7 +140,7 @@ bool CadastroProfissional::viewRegister() {
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + " AND desativado = FALSE");
 
   if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço profissional: " + modelEnd.lastError().text());
+    emit errorSignal("Erro lendo tabela endereço profissional: " + modelEnd.lastError().text());
     return false;
   }
 
@@ -170,17 +194,17 @@ bool CadastroProfissional::cadastrar() {
 }
 
 bool CadastroProfissional::verifyFields() {
-  for (const auto &line : ui->frame->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->frame->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
   if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    QMessageBox::critical(this, "Erro!", "CPF inválido!");
+    emit errorSignal("CPF inválido!");
     return false;
   }
 
   if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    QMessageBox::critical(this, "Erro!", "CNPJ inválido!");
+    emit errorSignal("CNPJ inválido!");
     return false;
   }
 
@@ -233,7 +257,7 @@ void CadastroProfissional::clearFields() {
   ui->radioButtonPF->setChecked(true);
   novoEndereco();
 
-  for (const auto &box : findChildren<ItemBox *>()) box->clear();
+  Q_FOREACH (const auto &box, findChildren<ItemBox *>()) { box->clear(); }
 
   setupUi();
 
@@ -268,13 +292,13 @@ void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
-  for (const auto &line : ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
+  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) return false;
   }
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    QMessageBox::critical(this, "Erro!", "CEP inválido!");
+    emit errorSignal("CEP inválido!");
     return false;
   }
 
@@ -300,13 +324,9 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
   return true;
 }
 
-void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() {
-  cadastrarEndereco() ? novoEndereco() : static_cast<void>(QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este endereço!"));
-}
+void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : emit errorSignal("Não foi possível cadastrar este endereço!"); }
 
-void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() {
-  cadastrarEndereco(true) ? novoEndereco() : static_cast<void>(QMessageBox::critical(this, "Erro!", "Não foi possível atualizar este endereço!"));
-}
+void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : emit errorSignal("Não foi possível atualizar este endereço!"); }
 
 void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   if (not ui->lineEditCEP->isValid()) return;
@@ -317,7 +337,7 @@ void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   CepCompleter cc;
 
   if (not cc.buscaCEP(cep)) {
-    QMessageBox::warning(this, "Aviso!", "CEP não encontrado!");
+    emit warningSignal("CEP não encontrado!");
     return;
   }
 
@@ -342,9 +362,7 @@ void CadastroProfissional::on_lineEditContatoCPF_textEdited(const QString &text)
 void CadastroProfissional::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço: " + modelEnd.lastError().text());
-  }
+  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
 }
 
 void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {
@@ -354,12 +372,12 @@ void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {
 
   if (msgBox.exec() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando desativado!");
+      emit errorSignal("Erro marcando desativado!");
       return;
     }
 
     if (not modelEnd.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + modelEnd.lastError().text());
+      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
       return;
     }
 
@@ -368,7 +386,7 @@ void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {
 }
 
 void CadastroProfissional::on_radioButtonPF_toggled(const bool checked) {
-  tipoPFPJ = checked ? "PF" : "PJ";
+  tipoPFPJ = checked ? QString("PF") : QString("PJ");
   ui->lineEditCNPJ->setHidden(checked);
   ui->labelCNPJ->setHidden(checked);
   ui->lineEditCPF->setVisible(checked);
@@ -388,7 +406,7 @@ void CadastroProfissional::on_lineEditCNPJBancario_textEdited(const QString &tex
   ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroProfissional::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
+void CadastroProfissional::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
 
 void CadastroProfissional::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

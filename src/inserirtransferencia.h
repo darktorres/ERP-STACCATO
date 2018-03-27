@@ -1,37 +1,31 @@
 #ifndef INSERIRTRANSFERENCIA_H
 #define INSERIRTRANSFERENCIA_H
 
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
-
-#include <QDialog>
 
 namespace Ui {
 class InserirTransferencia;
 }
 
-class InserirTransferencia final : public QDialog {
+class InserirTransferencia final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit InserirTransferencia(QWidget *parent = 0);
+  explicit InserirTransferencia(QWidget *parent = nullptr);
   ~InserirTransferencia();
 
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_pushButtonSalvar_clicked();
-  void on_pushButtonCancelar_clicked();
-
 private:
+  // attributes
   SqlRelationalTableModel modelDe;
   SqlRelationalTableModel modelPara;
   Ui::InserirTransferencia *ui;
-  bool verifyFields();
-  void setupTables();
-  bool cadastrar();
+  // methods
+  auto cadastrar() -> bool;
+  auto on_pushButtonCancelar_clicked() -> void;
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto setupTables() -> void;
+  auto verifyFields() -> bool;
 };
 
 #endif // INSERIRTRANSFERENCIA_H

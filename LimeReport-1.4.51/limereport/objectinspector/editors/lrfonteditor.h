@@ -39,7 +39,7 @@ namespace LimeReport {
 class FontEditor : public QWidget {
   Q_OBJECT
 public:
-  explicit FontEditor(QWidget *parent = 0);
+  explicit FontEditor(QWidget *parent = nullptr);
   ~FontEditor();
   void setFontValue(const QFont &font);
   QFont fontValue();

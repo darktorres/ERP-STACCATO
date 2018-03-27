@@ -72,12 +72,12 @@ public:
   static void setSettings(QSettings *value) { m_settings = value; }
 
 public:
-  explicit ReportEngine(QObject *parent = 0);
+  explicit ReportEngine(QObject *parent = nullptr);
   ~ReportEngine();
-  bool printReport(QPrinter *printer = 0);
+  bool printReport(QPrinter *printer = nullptr);
   bool printPages(ReportPages pages, QPrinter *printer);
   void printToFile(const QString &fileName);
-  PageDesignIntf *createPreviewScene(QObject *parent = 0);
+  PageDesignIntf *createPreviewScene(QObject *parent = nullptr);
   bool printToPDF(const QString &fileName);
   void previewReport(PreviewHints hints = PreviewBarsUserSetting);
   void designReport();
@@ -97,7 +97,7 @@ public:
   void setCurrentReportsDir(const QString &dirName);
   void setReportName(const QString &name);
   QString reportName();
-  PreviewReportWidget *createPreviewWidget(QWidget *parent = 0);
+  PreviewReportWidget *createPreviewWidget(QWidget *parent = nullptr);
   void setPreviewWindowTitle(const QString &title);
   void setPreviewWindowIcon(const QIcon &icon);
   void setResultEditable(bool value);
@@ -116,7 +116,7 @@ public slots:
 
 protected:
   ReportEnginePrivate *const d_ptr;
-  ReportEngine(ReportEnginePrivate &dd, QObject *parent = 0);
+  ReportEngine(ReportEnginePrivate &dd, QObject *parent = nullptr);
 
 private:
   Q_DECLARE_PRIVATE(ReportEngine)

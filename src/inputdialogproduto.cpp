@@ -10,7 +10,7 @@
 #include "singleeditdelegate.h"
 #include "ui_inputdialogproduto.h"
 
-InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
+InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -29,7 +29,7 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->labelEvento->setText("Data compra:");
     ui->labelProximoEvento->setText("Data prevista confirmação:");
 
-    connect(&model, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+    connect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
   if (tipo == Tipo::Faturamento) {
@@ -44,6 +44,8 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->labelEvento->setText("Data faturamento:");
   }
 
+  setConnections();
+
   adjustSize();
 
   showMaximized();
@@ -51,27 +53,45 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
 
 InputDialogProduto::~InputDialogProduto() { delete ui; }
 
-void InputDialogProduto::setupTables() {
-  model.setTable("pedido_fornecedor_has_produto");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  model.setHeaderData("idVenda", "Código");
-  model.setHeaderData("fornecedor", "Fornecedor");
-  model.setHeaderData("descricao", "Produto");
-  model.setHeaderData("colecao", "Coleção");
-  model.setHeaderData("caixas", "Caixas");
-  model.setHeaderData("prcUnitario", "$ Unit.");
-  model.setHeaderData("quant", "Quant.");
-  model.setHeaderData("preco", "Total");
-  model.setHeaderData("un", "Un.");
-  model.setHeaderData("un2", "Un.2");
-  model.setHeaderData("kgcx", "Kg./Cx.");
-  model.setHeaderData("formComercial", "Formato");
-  model.setHeaderData("codComercial", "Cód. Com.");
-  model.setHeaderData("obs", "Obs.");
-  model.setHeaderData("aliquotaSt", "Alíquota ST");
-  model.setHeaderData("st", "ST");
+void InputDialogProduto::setConnections() {
+  connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
+  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
+  connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
+  connect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
+  connect(ui->table, &TableView::entered, this, &InputDialogProduto::on_table_entered);
+}
 
-  ui->table->setModel(&model);
+void InputDialogProduto::unsetConnections() {
+  disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
+  disconnect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
+  disconnect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
+  disconnect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
+  disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
+  disconnect(ui->table, &TableView::entered, this, &InputDialogProduto::on_table_entered);
+}
+
+void InputDialogProduto::setupTables() {
+  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
+  modelPedidoFornecedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelPedidoFornecedor.setHeaderData("idVenda", "Código");
+  modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
+  modelPedidoFornecedor.setHeaderData("descricao", "Produto");
+  modelPedidoFornecedor.setHeaderData("colecao", "Coleção");
+  modelPedidoFornecedor.setHeaderData("caixas", "Caixas");
+  modelPedidoFornecedor.setHeaderData("prcUnitario", "$ Unit.");
+  modelPedidoFornecedor.setHeaderData("quant", "Quant.");
+  modelPedidoFornecedor.setHeaderData("preco", "Total");
+  modelPedidoFornecedor.setHeaderData("un", "Un.");
+  modelPedidoFornecedor.setHeaderData("un2", "Un.2");
+  modelPedidoFornecedor.setHeaderData("kgcx", "Kg./Cx.");
+  modelPedidoFornecedor.setHeaderData("formComercial", "Formato");
+  modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
+  modelPedidoFornecedor.setHeaderData("obs", "Obs.");
+  modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
+  modelPedidoFornecedor.setHeaderData("st", "ST");
+
+  ui->table->setModel(&modelPedidoFornecedor);
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
@@ -107,7 +127,7 @@ void InputDialogProduto::setupTables() {
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {
   if (ids.isEmpty()) {
-    model.setFilter("0");
+    modelPedidoFornecedor.setFilter("0");
     QMessageBox::critical(this, "Erro!", "Ids vazio!");
     return false;
   }
@@ -122,10 +142,10 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
     return false;
   }
 
-  model.setFilter(filter);
+  modelPedidoFornecedor.setFilter(filter);
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + model.lastError().text());
+  if (not modelPedidoFornecedor.select()) {
+    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelPedidoFornecedor.lastError().text());
     return false;
   }
 
@@ -135,7 +155,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   QSqlQuery query;
   query.prepare("SELECT aliquotaSt, st FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  query.bindValue(":razaoSocial", model.data(0, "fornecedor"));
+  query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
   if (not query.exec() or not query.first()) {
     QMessageBox::critical(this, "Erro!", "Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text());
@@ -145,7 +165,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
 
-  if (tipo == Tipo::GerarCompra) QMessageBox::information(this, "Aviso!", "Ajustar preço e quantidade se necessário.");
+  if (tipo == Tipo::GerarCompra) emit informationSignal("Ajustar preço e quantidade se necessário.");
 
   return true;
 }
@@ -155,29 +175,30 @@ QDateTime InputDialogProduto::getDate() const { return ui->dateEditEvento->dateT
 QDateTime InputDialogProduto::getNextDate() const { return ui->dateEditProximo->dateTime(); }
 
 void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
-  const QString header = model.headerData(topLeft.column(), Qt::Horizontal).toString();
+  const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
   const int row = topLeft.row();
 
   if (header == "Quant." or header == "$ Unit.") {
-    const double preco = model.data(row, "quant").toDouble() * model.data(row, "prcUnitario").toDouble();
-    if (not model.setData(row, "preco", preco)) return;
+    const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
+    if (not modelPedidoFornecedor.setData(row, "preco", preco)) return;
   }
 
   if (header == "Total") {
-    const double preco = model.data(row, "preco").toDouble() / model.data(row, "quant").toDouble();
-    if (not model.setData(row, "prcUnitario", preco)) return;
+    const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
+    if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) return;
   }
 
-  processST();
-  //  calcularTotal();
+  calcularTotal();
 }
 
 void InputDialogProduto::calcularTotal() {
   double total = 0;
 
-  for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) total += modelPedidoFornecedor.data(row, "preco").toDouble();
 
-  ui->doubleSpinBoxTotal->setValue(total);
+  ui->doubleSpinBoxTotal->setValue(total + ui->doubleSpinBoxST->value());
+
+  ui->doubleSpinBoxST->setMaximum(total * 0.2);
 }
 
 void InputDialogProduto::on_pushButtonSalvar_clicked() {
@@ -188,8 +209,8 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
 }
 
 bool InputDialogProduto::cadastrar() {
-  if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados na tabela: " + model.lastError().text());
+  if (not modelPedidoFornecedor.submitAll()) {
+    QMessageBox::critical(this, "Erro!", "Erro salvando dados na tabela: " + modelPedidoFornecedor.lastError().text());
     return false;
   }
 
@@ -200,31 +221,47 @@ void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
   if (ui->dateEditProximo->date() < date) ui->dateEditProximo->setDate(date);
 }
 
-void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double) { processST(); }
-
-void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double value) {
-  // calcular a aliquota e jogar no spinbox para recalcular os totais
-  isBlockedAliquota = true;
+void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
+  unsetConnections();
 
   double total = 0;
 
-  for (int row = 0; row < model.rowCount(); ++row) total += model.data(row, "preco").toDouble();
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) total += modelPedidoFornecedor.data(row, "preco").toDouble();
 
-  const double aliquota = value / total * 100;
+  const double valueSt = total * aliquota / 100;
+
+  ui->doubleSpinBoxST->setValue(valueSt);
+
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) return;
+  }
+
+  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+
+  setConnections();
+}
+
+void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
+  unsetConnections();
+
+  double total = 0;
+
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) total += modelPedidoFornecedor.data(row, "preco").toDouble();
+
+  const double aliquota = valueSt * 100 / total;
 
   ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-  isBlockedAliquota = false;
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) return;
+  }
+
+  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+
+  setConnections();
 }
 
-void InputDialogProduto::processST() {
-  calcularTotal();
-
-  const QString text = ui->comboBoxST->currentText();
-
-  const double aliquota = ui->doubleSpinBoxAliquota->value();
-  double total = ui->doubleSpinBoxTotal->value();
-
+void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
   if (text == "Sem ST") {
     ui->doubleSpinBoxST->setValue(0);
 
@@ -232,54 +269,20 @@ void InputDialogProduto::processST() {
     ui->doubleSpinBoxAliquota->hide();
     ui->labelST->hide();
     ui->doubleSpinBoxST->hide();
-
-    for (int row = 0; row < model.rowCount(); ++row) {
-      if (not model.setData(row, "aliquotaSt", aliquota)) return;
-      if (not model.setData(row, "st", text)) return;
-    }
   }
 
-  if (text == "ST Fornecedor") {
+  if (text == "ST Fornecedor" or text == "ST Loja") {
     ui->labelAliquota->show();
     ui->doubleSpinBoxAliquota->show();
     ui->labelST->show();
     ui->doubleSpinBoxST->show();
 
-    const double st = total * aliquota / 100;
-
-    if (not isBlockedAliquota) ui->doubleSpinBoxST->setValue(st);
-
-    for (int row = 0; row < model.rowCount(); ++row) {
-      if (not model.setData(row, "aliquotaSt", aliquota)) return;
-      if (not model.setData(row, "st", text)) return;
-    }
-
-    total += total * aliquota / 100;
-    ui->doubleSpinBoxTotal->setValue(total);
+    ui->doubleSpinBoxAliquota->setValue(4.68);
   }
 
-  if (text == "ST Loja") {
-    ui->labelAliquota->show();
-    ui->doubleSpinBoxAliquota->show();
-    ui->labelST->show();
-    ui->doubleSpinBoxST->show();
-
-    const double st = total * aliquota / 100;
-
-    if (not isBlockedAliquota) ui->doubleSpinBoxST->setValue(st);
-
-    for (int row = 0; row < model.rowCount(); ++row) {
-      if (not model.setData(row, "aliquotaSt", aliquota)) return;
-      if (not model.setData(row, "st", text)) return;
-    }
-
-    total += total * aliquota / 100;
-    ui->doubleSpinBoxTotal->setValue(total);
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+    if (not modelPedidoFornecedor.setData(row, "st", text)) return;
   }
-
-  ui->table->resizeColumnsToContents();
 }
-
-void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &) { processST(); }
 
 void InputDialogProduto::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

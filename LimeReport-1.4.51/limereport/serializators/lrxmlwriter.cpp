@@ -119,7 +119,7 @@ void XMLWriter::saveProperty(QString name, QObject *item, QDomElement *node) {
   else
     typeName = item->property(name.toLatin1()).typeName();
 
-  CreateSerializator creator = 0;
+  CreateSerializator creator = nullptr;
   if (isCollection(name, item)) {
     saveCollection(name, item, node);
     return;

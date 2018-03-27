@@ -7,7 +7,14 @@
 #include "ui_widgetlogisticacalendario.h"
 #include "widgetlogisticacalendario.h"
 
-WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
+WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCalendario) {
+  ui->setupUi(this);
+
+  connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
+  connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
+  connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked);
+  connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked);
+}
 
 WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 
@@ -16,7 +23,7 @@ bool WidgetLogisticaCalendario::updateTables() {
     QSqlQuery query;
 
     if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando veiculos: " + query.lastError().text());
+      emit errorSignal("Erro buscando veiculos: " + query.lastError().text());
       return false;
     }
 
@@ -50,7 +57,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
   QStringList list;
 
-  for (const auto &item : ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &item, ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
     if (not item->isChecked()) continue;
 
     veiculos++;
@@ -84,7 +91,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   query.bindValue(":end", startDate.addDays(6));
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro query: " + query.lastError().text());
+    emit errorSignal("Erro query: " + query.lastError().text());
     return false;
   }
 
@@ -117,7 +124,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     if (not query.value("bairro").toString().isEmpty()) text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString();
 
     // TODO: 0dont show this to compact screen? or show this only on doubleclick
-    text += query.value("text").toString();
+    text += "\n" + query.value("text").toString();
 
     text += "\n           Status: " + query.value("status").toString();
 

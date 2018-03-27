@@ -63,7 +63,7 @@ QString replaceHTMLSymbols(const QString &value) {
 
 QVector<QString> normalizeCaptures(const QRegExp &reg) {
   QVector<QString> result;
-  foreach (QString cap, reg.capturedTexts()) {
+  for (QString cap : reg.capturedTexts()) {
     if (!cap.isEmpty()) result.append(cap);
   }
   return result;

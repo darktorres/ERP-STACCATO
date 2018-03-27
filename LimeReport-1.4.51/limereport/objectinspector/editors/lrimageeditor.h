@@ -39,7 +39,7 @@ class ImageEditor : public QWidget {
   Q_OBJECT
 
 public:
-  ImageEditor(QWidget *parent = 0);
+  ImageEditor(QWidget *parent = nullptr);
   QImage image();
   void setImage(const QImage &image) { m_image = image; }
 signals:

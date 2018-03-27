@@ -53,7 +53,7 @@ public:
     if (m_factoryMap.contains(id)) {
       return m_factoryMap[id];
     } else {
-      return 0;
+      return nullptr;
     }
   }
   const FactoryMap &map() { return m_factoryMap; }

@@ -47,7 +47,7 @@ QStringList BandsManager::bandNames() {
   QStringList bandsList;
   bandsList << QObject::tr("Report Header") << QObject::tr("Page Header") << QObject::tr("Page Footer") << QObject::tr("Report Footer") << QObject::tr("Data") << QObject::tr("SubDetail");
 
-  foreach (ItemAttribs attr, LimeReport::DesignElementsFactory::instance().attribsMap().values()) {
+  for (ItemAttribs attr : LimeReport::DesignElementsFactory::instance().attribsMap().values()) {
     if ((attr.m_tag == LimeReport::Const::bandTAG) && (!bandsList.contains(attr.m_alias))) bandsList.append(attr.m_alias);
   }
 
@@ -89,7 +89,7 @@ BandDesignIntf *BandsManager::createBand(BandDesignIntf::BandsType bandType, QOb
     return new TearOffBand(owner, parent);
   }
 
-  return 0;
+  return nullptr;
 }
 
 } // namespace LimeReport

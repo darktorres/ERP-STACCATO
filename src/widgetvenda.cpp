@@ -13,18 +13,20 @@
 
 WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) {
   ui->setupUi(this);
+
+  setPermissions();
   setConnections();
 }
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
 void WidgetVenda::setupTables() {
-  model.setTable("view_venda");
+  modelViewVenda.setTable("view_venda");
 
-  model.setHeaderData("statusFinanceiro", "Financeiro");
-  model.setHeaderData("dataFinanceiro", "Data Fin.");
+  modelViewVenda.setHeaderData("statusFinanceiro", "Financeiro");
+  modelViewVenda.setHeaderData("dataFinanceiro", "Data Fin.");
 
-  ui->table->setModel(new VendaProxyModel(&model, this));
+  ui->table->setModel(new VendaProxyModel(&modelViewVenda, this));
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
@@ -43,7 +45,7 @@ void WidgetVenda::montaFiltro() {
     query.bindValue(":descricao", ui->comboBoxLojas->currentText());
 
     if (not query.exec() or not query.first()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando sigla da loja: " + query.lastError().text());
+      emit errorSignal("Erro buscando sigla da loja: " + query.lastError().text());
       return;
     }
 
@@ -57,13 +59,13 @@ void WidgetVenda::montaFiltro() {
   QString filtroCheck;
 
   if (financeiro) {
-    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+    Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
       if (child->isChecked()) {
         filtroCheck += filtroCheck.isEmpty() ? "statusFinanceiro = '" + child->text().toUpper() + "'" : " OR statusFinanceiro = '" + child->text().toUpper() + "'";
       }
     }
   } else {
-    for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+    Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
       if (child->isChecked()) {
         filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
       }
@@ -82,13 +84,13 @@ void WidgetVenda::montaFiltro() {
       textoBusca.isEmpty() ? ""
                            : " AND (Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  model.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
+  modelViewVenda.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
 
   ui->table->resizeColumnsToContents();
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -139,25 +141,32 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxEntregaAgend, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEntregue, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->checkBoxFinalizado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  connect(ui->comboBoxLojas, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
   connect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
+  connect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
   connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
 }
 
 bool WidgetVenda::updateTables() {
-  setPermissions();
   setupTables();
   montaFiltro();
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela vendas: " + model.lastError().text());
+  if (not modelViewVenda.select()) {
+    emit errorSignal("Erro lendo tabela vendas: " + modelViewVenda.lastError().text());
     return false;
   }
 
@@ -166,18 +175,14 @@ bool WidgetVenda::updateTables() {
   return true;
 }
 
-void WidgetVenda::on_table_activated(const QModelIndex &index) {
+void WidgetVenda::on_table_activated(const QModelIndex index) {
   auto *vendas = new Venda(this);
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) vendas->setFinanceiro();
-  vendas->viewRegisterById(model.data(index.row(), "Código"));
-
-  connect(vendas, &Venda::errorSignal, this, &WidgetVenda::errorSignal);
-  connect(vendas, &Venda::transactionStarted, this, &WidgetVenda::transactionStarted);
-  connect(vendas, &Venda::transactionEnded, this, &WidgetVenda::transactionEnded);
+  vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
 }
 
-void WidgetVenda::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+void WidgetVenda::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
   if (UserSession::tipoUsuario() == "VENDEDOR") checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide();
@@ -208,18 +213,20 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
-  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Venda, this);
+  FollowUp *followup = new FollowUp(modelViewVenda.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
 
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
 }
+
+// TODO: verificar os pedidos de devolucao que estao com o status errado (update_venda_status)

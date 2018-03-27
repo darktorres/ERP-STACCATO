@@ -14,26 +14,14 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : Widget(parent), ui(new Ui::W
 
   setConnections();
 
-  ui->tableForn->setModel(&model);
+  ui->tableForn->setModel(&modelViewLogistica);
 }
 
 WidgetLogistica::~WidgetLogistica() { delete ui; }
 
 void WidgetLogistica::setConnections() {
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::errorSignal, this, &WidgetLogistica::errorSignal);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::errorSignal, this, &WidgetLogistica::errorSignal);
-
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::transactionStarted, this, &WidgetLogistica::transactionStarted);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::transactionStarted, this, &WidgetLogistica::transactionStarted);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::transactionStarted, this, &WidgetLogistica::transactionStarted);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::transactionStarted, this, &WidgetLogistica::transactionStarted);
-
-  connect(ui->widgetCalendarioEntrega, &WidgetLogisticaEntregas::transactionEnded, this, &WidgetLogistica::transactionEnded);
-  connect(ui->widgetAgendarColeta, &WidgetLogisticaAgendarColeta::transactionEnded, this, &WidgetLogistica::transactionEnded);
-  connect(ui->widgetRecebimento, &WidgetLogisticaRecebimento::transactionEnded, this, &WidgetLogistica::transactionEnded);
-  connect(ui->widgetAgendaEntrega, &WidgetLogisticaAgendarEntrega::transactionEnded, this, &WidgetLogistica::transactionEnded);
+  connect(ui->tableForn, &TableView::activated, this, &WidgetLogistica::on_tableForn_activated);
+  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged);
 }
 
 bool WidgetLogistica::updateTables() {
@@ -42,10 +30,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Agendar Coleta") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_agendar_coleta");
+    modelViewLogistica.setTable("view_fornecedor_logistica_agendar_coleta");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -56,10 +44,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Coleta") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_coleta");
+    modelViewLogistica.setTable("view_fornecedor_logistica_coleta");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -70,10 +58,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Recebimento") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_recebimento");
+    modelViewLogistica.setTable("view_fornecedor_logistica_recebimento");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -99,10 +87,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Representação") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_representacao");
+    modelViewLogistica.setTable("view_fornecedor_logistica_representacao");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -124,7 +112,7 @@ bool WidgetLogistica::updateTables() {
 }
 
 void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {
-  const QString fornecedor = model.data(index.row(), "fornecedor").toString();
+  const QString fornecedor = modelViewLogistica.data(index.row(), "fornecedor").toString();
 
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 

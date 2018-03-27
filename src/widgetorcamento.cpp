@@ -10,7 +10,16 @@
 #include "usersession.h"
 #include "widgetorcamento.h"
 
-WidgetOrcamento::WidgetOrcamento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
+WidgetOrcamento::WidgetOrcamento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetOrcamento) {
+  ui->setupUi(this);
+
+  connect(ui->comboBoxLojas, QOverload<int>::of(&ComboBox::currentIndexChanged), this, &WidgetOrcamento::on_comboBoxLojas_currentIndexChanged);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetOrcamento::on_groupBoxStatus_toggled);
+  connect(ui->pushButtonCriarOrc, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonCriarOrc_clicked);
+  connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetOrcamento::on_pushButtonFollowup_clicked);
+  connect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetOrcamento::on_table_entered);
+}
 
 WidgetOrcamento::~WidgetOrcamento() { delete ui; }
 
@@ -53,9 +62,9 @@ void WidgetOrcamento::setPermissions() {
 }
 
 void WidgetOrcamento::setupTables() {
-  model.setTable("view_orcamento"); // REFAC: 5refactor other querys that use 'find last of'
+  modelViewOrcamento.setTable("view_orcamento"); // REFAC: 5refactor other querys that use 'find last of'
 
-  ui->table->setModel(new OrcamentoProxyModel(&model, this));
+  ui->table->setModel(new OrcamentoProxyModel(&modelViewOrcamento, this));
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
@@ -80,15 +89,15 @@ void WidgetOrcamento::setupConnections() {
 }
 
 bool WidgetOrcamento::updateTables() {
-  if (model.tableName().isEmpty()) {
+  if (modelViewOrcamento.tableName().isEmpty()) {
     setPermissions();
     setupTables();
     montaFiltro();
     setupConnections();
   }
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela orçamento: " + model.lastError().text());
+  if (not modelViewOrcamento.select()) {
+    emit errorSignal("Erro lendo tabela orçamento: " + modelViewOrcamento.lastError().text());
     return false;
   }
 
@@ -100,11 +109,7 @@ bool WidgetOrcamento::updateTables() {
 void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
-  orcamento->viewRegisterById(model.data(index.row(), "Código"));
-
-  connect(orcamento, &Orcamento::errorSignal, this, &WidgetOrcamento::errorSignal);
-  connect(orcamento, &Orcamento::transactionStarted, this, &WidgetOrcamento::transactionStarted);
-  connect(orcamento, &Orcamento::transactionEnded, this, &WidgetOrcamento::transactionEnded);
+  orcamento->viewRegisterById(modelViewOrcamento.data(index.row(), "Código"));
 
   orcamento->show();
 }
@@ -112,10 +117,6 @@ void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
 void WidgetOrcamento::on_pushButtonCriarOrc_clicked() {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
-
-  connect(orcamento, &Orcamento::errorSignal, this, &WidgetOrcamento::errorSignal);
-  connect(orcamento, &Orcamento::transactionStarted, this, &WidgetOrcamento::transactionStarted);
-  connect(orcamento, &Orcamento::transactionEnded, this, &WidgetOrcamento::transactionEnded);
 
   orcamento->show();
 }
@@ -130,7 +131,7 @@ void WidgetOrcamento::montaFiltro() {
 
   QString filtroCheck;
 
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) {
       filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
     }
@@ -148,7 +149,7 @@ void WidgetOrcamento::montaFiltro() {
       textoBusca.isEmpty() ? ""
                            : " AND (Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  model.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
+  modelViewOrcamento.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
 
   ui->table->resizeColumnsToContents();
 }
@@ -159,17 +160,17 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
-  FollowUp *followup = new FollowUp(model.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Orcamento, this);
+  FollowUp *followup = new FollowUp(modelViewOrcamento.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
 
 void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
-  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

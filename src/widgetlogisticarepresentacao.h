@@ -1,41 +1,33 @@
 #ifndef WIDGETLOGISTICAREPRESENTACAO_H
 #define WIDGETLOGISTICAREPRESENTACAO_H
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+#include "widget.h"
 
 namespace Ui {
 class WidgetLogisticaRepresentacao;
 }
 
-class WidgetLogisticaRepresentacao final : public QWidget {
+class WidgetLogisticaRepresentacao final : public Widget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaRepresentacao(QWidget *parent = 0);
+  explicit WidgetLogisticaRepresentacao(QWidget *parent = nullptr);
   ~WidgetLogisticaRepresentacao();
-  bool updateTables();
-  void tableFornLogistica_activated(const QString &fornecedor);
-
-signals:
-  void errorSignal(const QString &error);
-  void transactionEnded();
-  void transactionStarted();
-
-private slots:
-  void on_lineEditBusca_textChanged(const QString &text);
-  void on_pushButtonMarcarEntregue_clicked();
-  void on_table_entered(const QModelIndex &);
+  auto updateTables() -> bool;
+  auto tableFornLogistica_activated(const QString &fornecedor) -> void;
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewLogisticaRepresentacao;
   QString fornecedor;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
-  bool processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu);
-  void setupTables();
+  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto on_pushButtonMarcarEntregue_clicked() -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
+  auto processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) -> bool;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETLOGISTICAREPRESENTACAO_H

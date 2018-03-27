@@ -92,12 +92,12 @@ BaseDesignIntf *ItemDesignIntf::cloneEmpty(int height, QObject *owner, QGraphics
 }
 
 QGraphicsItem *ItemDesignIntf::bandByPos() {
-  foreach (QGraphicsItem *item, scene()->items()) {
+  for (QGraphicsItem *item : scene()->items()) {
     if (dynamic_cast<BandDesignIntf *>(item) && item->collidesWithItem(this)) {
       return item;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 void ItemDesignIntf::initFlags() {

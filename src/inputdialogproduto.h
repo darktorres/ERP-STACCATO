@@ -1,47 +1,43 @@
 #ifndef INPUTDIALOGPRODUTO_H
 #define INPUTDIALOGPRODUTO_H
 
-#include <QDialog>
-
+#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogProduto;
 }
 
-class InputDialogProduto final : public QDialog {
+class InputDialogProduto final : public Dialog {
   Q_OBJECT
 
 public:
   enum class Tipo { GerarCompra, Faturamento };
 
-  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = 0);
+  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogProduto();
-  QDateTime getDate() const;
-  QDateTime getNextDate() const;
-  bool setFilter(const QStringList &ids);
-
-private slots:
-  void on_comboBoxST_currentTextChanged(const QString &);
-  void on_dateEditEvento_dateChanged(const QDate &date);
-  void on_doubleSpinBoxAliquota_valueChanged(double);
-  void on_doubleSpinBoxST_valueChanged(double value);
-  void on_pushButtonSalvar_clicked();
-  void on_table_entered(const QModelIndex &);
+  auto getDate() const -> QDateTime;
+  auto getNextDate() const -> QDateTime;
+  auto setFilter(const QStringList &ids) -> bool;
 
 private:
   // attributes
-  // REFAC: refactor this out
-  bool isBlockedAliquota = false;
   const Tipo tipo;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelPedidoFornecedor;
   Ui::InputDialogProduto *ui;
   // methods
-  bool cadastrar();
-  void calcularTotal();
-  void processST();
-  void setupTables();
-  void updateTableData(const QModelIndex &topLeft);
+  auto cadastrar() -> bool;
+  auto calcularTotal() -> void;
+  auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
+  auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
+  auto on_doubleSpinBoxAliquota_valueChanged(double aliquota) -> void;
+  auto on_doubleSpinBoxST_valueChanged(double valueSt) -> void;
+  auto on_pushButtonSalvar_clicked() -> void;
+  auto on_table_entered(const QModelIndex &) -> void;
+  auto setConnections() -> void;
+  auto setupTables() -> void;
+  auto unsetConnections() -> void;
+  auto updateTableData(const QModelIndex &topLeft) -> void;
 };
 
 #endif // INPUTDIALOGPRODUTO_H

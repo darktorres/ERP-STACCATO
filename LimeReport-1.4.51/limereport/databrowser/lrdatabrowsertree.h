@@ -38,7 +38,7 @@ class DataBrowserTree : public QTreeWidget {
   Q_OBJECT
 public:
   enum NodeType { Connection, Table, Row, Category, Variable, ExternalVariable };
-  explicit DataBrowserTree(QWidget *parent = 0);
+  explicit DataBrowserTree(QWidget *parent = nullptr);
 
 protected:
   QMimeData *mimeData(const QList<QTreeWidgetItem *> items) const;

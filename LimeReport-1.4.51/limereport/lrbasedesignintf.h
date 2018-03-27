@@ -53,7 +53,7 @@ class BaseDesignIntf;
 
 class Marker : public QGraphicsItem {
 public:
-  Marker(QGraphicsItem *parent = 0) : QGraphicsItem(parent), m_object(NULL) {}
+  Marker(QGraphicsItem *parent = nullptr) : QGraphicsItem(parent), m_object(nullptr) {}
   QRectF boundingRect() const;
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
   void setRect(QRectF rect) {
@@ -73,7 +73,7 @@ private:
 
 class SelectionMarker : public Marker {
 public:
-  SelectionMarker(QGraphicsItem *parent = 0);
+  SelectionMarker(QGraphicsItem *parent = nullptr);
 
 protected:
   void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
@@ -135,7 +135,7 @@ public:
   friend class SelectionMarker;
 
 public:
-  BaseDesignIntf(const QString &storageTypeName, QObject *owner = 0, QGraphicsItem *parent = 0);
+  BaseDesignIntf(const QString &storageTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   virtual ~BaseDesignIntf();
 
   void setParentReportItem(const QString &value);
@@ -210,18 +210,18 @@ public:
 
   virtual void updateItemSize(DataSourceManager *dataManager, RenderPass pass = FirstPass, int maxHeight = 0);
   virtual bool isNeedUpdateSize(RenderPass) const;
-  virtual BaseDesignIntf *cloneItem(LimeReport::BaseDesignIntf::ItemMode mode, QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *cloneItemWOChild(LimeReport::BaseDesignIntf::ItemMode mode, QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0) = 0;
+  virtual BaseDesignIntf *cloneItem(LimeReport::BaseDesignIntf::ItemMode mode, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *cloneItemWOChild(LimeReport::BaseDesignIntf::ItemMode mode, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr) = 0;
   void initFromItem(BaseDesignIntf *source);
 
   virtual bool canBeSplitted(int height) const;
   virtual qreal minHeight() const { return 0; }
   virtual bool isSplittable() const { return false; }
   virtual bool isEmpty() const;
-  virtual BaseDesignIntf *cloneUpperPart(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *cloneBottomPart(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *cloneEmpty(int height, QObject *owner = 0, QGraphicsItem *parent = 0);
+  virtual BaseDesignIntf *cloneUpperPart(int height, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *cloneBottomPart(int height, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *cloneEmpty(int height, QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 
   bool isLoaded() { return m_objectState == ObjectLoaded; }
   bool isLoading() { return m_objectState == ObjectLoading; }

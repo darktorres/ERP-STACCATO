@@ -45,7 +45,7 @@ public:
   enum DataType { Variable, Field, Script, ContentItem };
   GroupFunction(const QString &expression, const QString &dataBandName, DataSourceManager *dataManager);
   bool isValid() { return m_isValid; }
-  void setInvalid(QString message) { m_isValid = false, m_errorMessage = message; }
+  void setInvalid(QString message) { m_isValid = false; m_errorMessage = message; }
   const QString &name() { return m_name; }
   const QString &data() { return m_data; }
   const QString &error() { return m_errorMessage; }

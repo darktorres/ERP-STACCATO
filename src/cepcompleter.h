@@ -8,11 +8,11 @@ class CepCompleter final {
 public:
   CepCompleter() = default;
   ~CepCompleter() = default;
-  bool buscaCEP(const QString &cep);
-  QString getBairro() const;
-  QString getCidade() const;
-  QString getEndereco() const;
-  QString getUf() const;
+  auto buscaCEP(const QString &cep) -> bool;
+  auto getBairro() const -> QString;
+  auto getCidade() const -> QString;
+  auto getEndereco() const -> QString;
+  auto getUf() const -> QString;
 
 private:
   QString cidade;

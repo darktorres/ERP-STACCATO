@@ -8,13 +8,13 @@
 class EstoqueProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent = 0);
-  ~EstoqueProxyModel() = default;
-  QVariant data(const QModelIndex &proxyIndex, const int role) const final;
+  explicit EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  ~EstoqueProxyModel() final = default;
+  auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
   const int quantUpdIndex;
-  enum class Status { Ok = 1, QuantDifere, NaoEncontrado, Consumo, Devolucao };
+  enum class Status { Ok = 1, QuantDifere = 2, NaoEncontrado = 3, Consumo = 4, Devolucao = 5 };
 };
 
 #endif // ESTOQUEPROXYMODEL_H

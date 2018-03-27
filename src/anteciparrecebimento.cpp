@@ -4,7 +4,6 @@
 #include <QSqlQuery>
 
 #include "anteciparrecebimento.h"
-#include "checkboxdelegate.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
 #include "ui_anteciparrecebimento.h"
@@ -18,9 +17,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : Dialog(parent), ui
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT DISTINCT(SUBSTRING(tipo FROM 4)) AS tipo FROM view_conta_receber")) {
-    QMessageBox::critical(this, "Erro!", "Erro comunicando com banco de dados: " + query.lastError().text());
-  }
+  if (not query.exec("SELECT DISTINCT(SUBSTRING(tipo FROM 4)) AS tipo FROM view_conta_receber")) emit errorSignal("Erro comunicando com banco de dados: " + query.lastError().text());
 
   ui->comboBox->addItem("");
 
@@ -28,13 +25,13 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : Dialog(parent), ui
 
   ui->dateEditEvento->setDate(QDate::currentDate());
 
-  connect(ui->doubleSpinBoxDescMes, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
-  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
-  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
   connect(ui->comboBox, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
+  connect(ui->doubleSpinBoxDescMes, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
   connect(ui->doubleSpinBoxValorPresente, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged);
   connect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked);
   connect(ui->table, &TableView::entered, this, &AnteciparRecebimento::on_table_entered);
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
 }
 
 AnteciparRecebimento::~AnteciparRecebimento() { delete ui; }
@@ -50,13 +47,13 @@ void AnteciparRecebimento::calcularTotais() {
   int prazoMedio = 0;
 
   for (const auto &item : list) {
-    const QString tipo = model.data(item.row(), "tipo").toString();
-    const double valor = model.data(item.row(), "valor").toDouble();
-    const QDate dataPagamento = model.data(item.row(), "dataPagamento").toDate();
+    const QString tipo = modelViewContaReceber.data(item.row(), "tipo").toString();
+    const double valor = modelViewContaReceber.data(item.row(), "valor").toDouble();
+    const QDate dataPagamento = modelViewContaReceber.data(item.row(), "dataPagamento").toDate();
 
     if (not tipo.contains("Taxa Cartão")) bruto += valor;
 
-    liquido += model.data(item.row(), "valor").toDouble();
+    liquido += modelViewContaReceber.data(item.row(), "valor").toDouble();
 
     // valor aqui deve considerar a taxa cartao
     const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor; // REFAC: fix warning
@@ -78,36 +75,36 @@ void AnteciparRecebimento::calcularTotais() {
 }
 
 void AnteciparRecebimento::setupTables() {
-  model.setTable("view_conta_receber");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelViewContaReceber.setTable("view_conta_receber");
+  modelViewContaReceber.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  model.setHeaderData("dataEmissao", "Data Emissão");
-  model.setHeaderData("idVenda", "Código");
-  model.setHeaderData("valor", "R$");
-  model.setHeaderData("tipo", "Tipo");
-  model.setHeaderData("parcela", "Parcela");
-  model.setHeaderData("dataPagamento", "Data Pag.");
-  model.setHeaderData("observacao", "Obs.");
-  model.setHeaderData("status", "Status");
-  model.setHeaderData("representacao", "Representação");
-  model.setHeaderData("dataRealizado", "Data Realizado");
-  model.setHeaderData("valorReal", "Valor Real");
-  model.setHeaderData("tipoReal", "Tipo Real");
-  model.setHeaderData("parcelaReal", "Parcela Real");
-  model.setHeaderData("contaDestino", "Conta Destino");
-  model.setHeaderData("tipoDet", "Tipo Det");
-  model.setHeaderData("centroCusto", "Centro Custo");
-  model.setHeaderData("grupo", "Grupo");
-  model.setHeaderData("subGrupo", "SubGrupo");
-  model.setHeaderData("contraParte", "Contraparte");
-  model.setHeaderData("statusFinanceiro", "Financeiro");
+  modelViewContaReceber.setHeaderData("dataEmissao", "Data Emissão");
+  modelViewContaReceber.setHeaderData("idVenda", "Código");
+  modelViewContaReceber.setHeaderData("valor", "R$");
+  modelViewContaReceber.setHeaderData("tipo", "Tipo");
+  modelViewContaReceber.setHeaderData("parcela", "Parcela");
+  modelViewContaReceber.setHeaderData("dataPagamento", "Data Pag.");
+  modelViewContaReceber.setHeaderData("observacao", "Obs.");
+  modelViewContaReceber.setHeaderData("status", "Status");
+  modelViewContaReceber.setHeaderData("representacao", "Representação");
+  modelViewContaReceber.setHeaderData("dataRealizado", "Data Realizado");
+  modelViewContaReceber.setHeaderData("valorReal", "Valor Real");
+  modelViewContaReceber.setHeaderData("tipoReal", "Tipo Real");
+  modelViewContaReceber.setHeaderData("parcelaReal", "Parcela Real");
+  modelViewContaReceber.setHeaderData("contaDestino", "Conta Destino");
+  modelViewContaReceber.setHeaderData("tipoDet", "Tipo Det");
+  modelViewContaReceber.setHeaderData("centroCusto", "Centro Custo");
+  modelViewContaReceber.setHeaderData("grupo", "Grupo");
+  modelViewContaReceber.setHeaderData("subGrupo", "SubGrupo");
+  modelViewContaReceber.setHeaderData("contraParte", "Contraparte");
+  modelViewContaReceber.setHeaderData("statusFinanceiro", "Financeiro");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelViewContaReceber.select()) {
+    emit errorSignal("Erro lendo tabela: " + modelViewContaReceber.lastError().text());
     return;
   }
 
-  ui->table->setModel(&model);
+  ui->table->setModel(&modelViewContaReceber);
   ui->table->hideColumn("representacao");
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
@@ -118,15 +115,12 @@ void AnteciparRecebimento::setupTables() {
 void AnteciparRecebimento::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &text) {
-  model.setFilter("tipo LIKE '%" + text + "%' AND status = 'PENDENTE' AND dataPagamento > NOW()");
+  modelViewContaReceber.setFilter("tipo LIKE '%" + text + "%' AND status = 'PENDENTE' AND dataPagamento > NOW()");
 
-  if (text == "Cartão de crédito") {
-    model.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Taxa Cartão%') AND status = 'PENDENTE' AND "
-                    "dataPagamento > NOW()");
-  }
+  if (text == "Cartão de crédito") modelViewContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Taxa Cartão%') AND status = 'PENDENTE' AND dataPagamento > NOW()");
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelViewContaReceber.select()) {
+    emit errorSignal("Erro lendo tabela: " + modelViewContaReceber.lastError().text());
     return;
   }
 }
@@ -196,7 +190,7 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhum item selecionado!");
+    emit errorSignal("Nenhum item selecionado!");
     return;
   }
 

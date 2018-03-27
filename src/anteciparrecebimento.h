@@ -20,7 +20,7 @@ private:
   // REFAC: 0refactor those out
   bool isBlockedPresente = false;
   bool isBlockedMes = false;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
   auto calcularTotais() -> void;

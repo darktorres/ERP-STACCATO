@@ -31,20 +31,20 @@
 
 namespace LimeReport {
 
-ItemEditorWidget::ItemEditorWidget(ReportDesignWidget *reportEditor, const QString &title, QWidget *parent) : QToolBar(title, parent), m_reportEditor(reportEditor), m_item(0), m_page(0) {}
+ItemEditorWidget::ItemEditorWidget(ReportDesignWidget *reportEditor, const QString &title, QWidget *parent) : QToolBar(title, parent), m_reportEditor(reportEditor), m_item(nullptr), m_page(nullptr) {}
 
-ItemEditorWidget::ItemEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent) : QToolBar(parent), m_reportEditor(reportEditor), m_item(0), m_page(0) {}
+ItemEditorWidget::ItemEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent) : QToolBar(parent), m_reportEditor(reportEditor), m_item(nullptr), m_page(nullptr) {}
 
-ItemEditorWidget::ItemEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent) : QToolBar(title, parent), m_reportEditor(0), m_item(0), m_page(page) {}
+ItemEditorWidget::ItemEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent) : QToolBar(title, parent), m_reportEditor(nullptr), m_item(nullptr), m_page(page) {}
 
-ItemEditorWidget::ItemEditorWidget(PageDesignIntf *page, QWidget *parent) : QToolBar(parent), m_reportEditor(0), m_item(0), m_page(page) {}
+ItemEditorWidget::ItemEditorWidget(PageDesignIntf *page, QWidget *parent) : QToolBar(parent), m_reportEditor(nullptr), m_item(nullptr), m_page(page) {}
 
 void ItemEditorWidget::setItem(BaseDesignIntf *item) {
   if (m_item != item) {
     if (m_item) m_item->disconnect(this);
     m_item = item;
-    connect(m_item, SIGNAL(destroyed(QObject *)), this, SLOT(slotItemDestroyed(QObject *)));
-    connect(m_item, SIGNAL(propertyChanged(QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QVariant, QVariant)));
+    connect(m_item, &QObject::destroyed, this, &ItemEditorWidget::slotItemDestroyed);
+    connect(m_item, &BaseDesignIntf::propertyChanged, this, &ItemEditorWidget::slotPropertyChanged);
     setEnabled(false);
     setItemEvent(item);
   }
@@ -58,7 +58,7 @@ void ItemEditorWidget::properyChangedEvent(const QString &propertName, const QVa
 
 void ItemEditorWidget::slotItemDestroyed(QObject *item) {
   if (item == m_item) {
-    m_item = 0;
+    m_item = nullptr;
     setEnabled(false);
   }
 }

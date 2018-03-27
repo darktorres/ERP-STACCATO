@@ -4,6 +4,7 @@
 #include <QSqlError>
 
 #include "doubledelegate.h"
+#include "sql.h"
 #include "ui_widgetlogisticaentregues.h"
 #include "usersession.h"
 #include "vendaproxymodel.h"
@@ -90,7 +91,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
                          modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`");
 
   if (modelProdutos.lastError().isValid()) {
-    QMessageBox::critical(this, "Erro!", "Erro: " + modelProdutos.lastError().text());
+    emit errorSignal("Erro: " + modelProdutos.lastError().text());
     return;
   }
 
@@ -124,9 +125,13 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
+
+  QStringList idVendas;
+
+  for (const auto &index : list) idVendas << modelProdutos.data(index.row(), "idVenda").toString();
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
@@ -138,8 +143,8 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -147,41 +152,35 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
-  QSqlQuery query;
-
-  if (not query.exec("CALL update_venda_status()")) {
-    QMessageBox::critical(this, "Erro!", "Erro atualizando status das vendas: " + query.lastError().text());
-    return;
-  }
-
   updateTables();
-  QMessageBox::information(this, "Aviso!", "Entrega cancelada! Produto voltou para 'EM ENTREGA'!");
+  emit informationSignal("Entrega cancelada!");
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
-  // TODO: 0testar essa funcao
-  // TODO: 0dataPrevEnt nao foi limpa
-  QSqlQuery query;
+  QSqlQuery query1;
+  query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
 
   for (const auto &item : list) {
-    // TODO: 0cancelar no lugar de voltar para em entrega?
-    query.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
+    query1.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
-    if (not query.exec()) {
-      emit errorSignal("Erro atualizando veiculo_produto: " + query.lastError().text());
+    if (not query1.exec()) {
+      emit errorSignal("Erro atualizando veiculo_produto: " + query1.lastError().text());
       return false;
     }
 
-    query.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
+    query2.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
-    if (not query.exec()) {
-      emit errorSignal("Erro atualizando venda_produto: " + query.lastError().text());
+    if (not query2.exec()) {
+      emit errorSignal("Erro atualizando venda_produto: " + query2.lastError().text());
       return false;
     }
   }

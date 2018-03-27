@@ -4,7 +4,8 @@
 #include <QDomElement>
 #include <QStandardItemModel>
 
-class XML final {
+class XML final : public QObject {
+  Q_OBJECT
 
 public:
   XML(const QByteArray &fileContent, const QString &fileName = QString());
@@ -89,6 +90,11 @@ public:
 
   // xml
   int idNFe = 0;
+
+signals:
+  void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
 
   // methods
 private:

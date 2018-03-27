@@ -16,6 +16,8 @@ public:
 
 signals:
   void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
   void transactionEnded();
   void transactionStarted();
 };

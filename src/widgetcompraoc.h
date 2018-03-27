@@ -23,7 +23,7 @@ private:
   SqlRelationalTableModel modelProduto;
   Ui::WidgetCompraOC *ui;
   // methods
-  auto desfazerConsumo(const QModelIndexList &list) -> bool;
+  auto desfazerConsumo(const int row) -> bool;
   auto on_lineEditBusca_textChanged(const QString &text) -> void;
   auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;

@@ -26,7 +26,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -690,19 +690,6 @@ color: rgb(0, 0, 0);</string>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
-           <item row="2" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
            <item row="0" column="0">
             <widget class="QGroupBox" name="groupBoxFrete">
              <property name="title">
@@ -762,31 +749,110 @@ color: rgb(0, 0, 0);</string>
              </layout>
             </widget>
            </item>
+           <item row="2" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item row="1" column="0">
             <widget class="QGroupBox" name="groupBox">
              <property name="title">
-              <string>Certificado</string>
+              <string>Transporte</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_8">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_9">
-                <property name="text">
-                 <string>Número de série:</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEditCertificadoSerie"/>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>Senha:</string>
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransportePorTon">
+                <property name="prefix">
+                 <string>R$ </string>
+                </property>
+                <property name="maximum">
+                 <double>9999.989999999999782</double>
                 </property>
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEditCertificadoSenha"/>
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransporte2Ton">
+                <property name="suffix">
+                 <string> %</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransporteAcima2Ton">
+                <property name="suffix">
+                 <string> %</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Custo acima 2 ton.:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Custo até 2 ton.:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_11">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Custo por ton.:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_12">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Custo funcionário:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoFuncionario">
+                <property name="prefix">
+                 <string>R$ </string>
+                </property>
+                <property name="maximum">
+                 <double>9999.989999999999782</double>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>

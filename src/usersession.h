@@ -3,6 +3,7 @@
 
 #include <QSettings>
 #include <QSqlQuery>
+#include <optional>
 
 class UserSession final {
 

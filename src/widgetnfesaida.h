@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewNFeSaida;
   Ui::WidgetNfeSaida *ui;
   // methods
   auto atualizarNFe(const int idNFe, const QString &xml) -> bool;

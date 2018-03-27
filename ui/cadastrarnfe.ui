@@ -1060,7 +1060,7 @@
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>0</y>
+                   <y>-35</y>
                    <width>1563</width>
                    <height>333</height>
                   </rect>
@@ -1286,6 +1286,9 @@
                           </item>
                           <item row="8" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvbc">
+                            <property name="prefix">
+                             <string>R$ </string>
+                            </property>
                             <property name="maximum">
                              <double>99999.990000000005239</double>
                             </property>
@@ -1322,6 +1325,9 @@
                           </item>
                           <item row="10" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvicms">
+                            <property name="prefix">
+                             <string>R$ </string>
+                            </property>
                             <property name="maximum">
                              <double>99999.990000000005239</double>
                             </property>
@@ -1416,6 +1422,9 @@
                           </item>
                           <item row="11" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvicmsst">
+                            <property name="prefix">
+                             <string>R$ </string>
+                            </property>
                             <property name="maximum">
                              <double>99999.990000000005239</double>
                             </property>
@@ -1423,6 +1432,9 @@
                           </item>
                           <item row="9" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvbcst">
+                            <property name="prefix">
+                             <string>R$ </string>
+                            </property>
                             <property name="maximum">
                              <double>99999.990000000005239</double>
                             </property>
@@ -1972,8 +1984,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>196</width>
-                   <height>115</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -2252,8 +2264,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>294</width>
-                   <height>174</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -2291,6 +2303,9 @@
                      </item>
                      <item row="1" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxPISvbc">
+                       <property name="prefix">
+                        <string>R$ </string>
+                       </property>
                        <property name="maximum">
                         <double>99999.000000000000000</double>
                        </property>
@@ -2311,6 +2326,9 @@
                      </item>
                      <item row="3" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxPISvpis">
+                       <property name="prefix">
+                        <string>R$ </string>
+                       </property>
                        <property name="maximum">
                         <double>99999.990000000005239</double>
                        </property>
@@ -2848,8 +2866,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>338</width>
-                   <height>174</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -3080,6 +3098,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                      </item>
                      <item row="1" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSvbc">
+                       <property name="prefix">
+                        <string>R$ </string>
+                       </property>
                        <property name="maximum">
                         <double>99999.990000000005239</double>
                        </property>
@@ -3126,6 +3147,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                      </item>
                      <item row="3" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSvcofins">
+                       <property name="prefix">
+                        <string>R$ </string>
+                       </property>
                        <property name="maximum">
                         <double>99999.990000000005239</double>
                        </property>

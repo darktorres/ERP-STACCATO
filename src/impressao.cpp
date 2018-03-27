@@ -7,10 +7,15 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "impressao.h"
 #include "usersession.h"
 
 Impressao::Impressao(const QString &id) : id(id), report(new LimeReport::ReportEngine(this)) {
+  connect(this, &Impressao::informationSignal, qApp, &Application::enqueueInformation);
+  connect(this, &Impressao::warningSignal, qApp, &Application::enqueueWarning);
+  connect(this, &Impressao::errorSignal, qApp, &Application::enqueueError);
+
   verificaTipo();
 
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
@@ -18,7 +23,7 @@ Impressao::Impressao(const QString &id) : id(id), report(new LimeReport::ReportE
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
-  if (not modelItem.select()) QMessageBox::critical(nullptr, "Erro!", "Erro lendo tabela: " + modelItem.lastError().text());
+  if (not modelItem.select()) emit errorSignal("Erro lendo tabela: " + modelItem.lastError().text());
 }
 
 void Impressao::verificaTipo() {
@@ -27,7 +32,7 @@ void Impressao::verificaTipo() {
   query.bindValue(":idOrcamento", id);
 
   if (not query.exec()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro verificando se id é Orçamento!");
+    emit errorSignal("Erro verificando se id é Orçamento!");
     return;
   }
 
@@ -40,7 +45,7 @@ void Impressao::print() {
   const auto folderKey = UserSession::getSetting(folder);
 
   if (not folderKey or folderKey.value().toString().isEmpty()) {
-    QMessageBox::critical(nullptr, "Erro!", "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
+    emit errorSignal("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
     return;
   }
 
@@ -51,7 +56,7 @@ void Impressao::print() {
   dataManager->addModel(tipo == Tipo::Orcamento ? "orcamento" : "venda", &modelItem, true);
 
   if (not report->loadFromFile(tipo == Tipo::Orcamento ? "orcamento.lrxml" : "venda.lrxml")) {
-    QMessageBox::critical(nullptr, "Erro!", "Não encontrou o modelo de impressão!");
+    emit errorSignal("Não encontrou o modelo de impressão!");
     return;
   }
 
@@ -108,7 +113,7 @@ void Impressao::print() {
                         "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt1.exec() or not queryPgt1.first()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 1: " + queryPgt1.lastError().text());
+      emit errorSignal("Erro buscando pagamentos 1: " + queryPgt1.lastError().text());
       return;
     }
 
@@ -122,7 +127,7 @@ void Impressao::print() {
                         "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt2.exec() or not queryPgt2.first()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 2: " + queryPgt2.lastError().text());
+      emit errorSignal("Erro buscando pagamentos 2: " + queryPgt2.lastError().text());
       return;
     }
 
@@ -138,7 +143,7 @@ void Impressao::print() {
                         "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt3.exec() or not queryPgt3.first()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 3: " + queryPgt3.lastError().text());
+      emit errorSignal("Erro buscando pagamentos 3: " + queryPgt3.lastError().text());
       return;
     }
 
@@ -154,7 +159,7 @@ void Impressao::print() {
                         "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt4.exec() or not queryPgt4.first()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 4: " + queryPgt4.lastError().text());
+      emit errorSignal("Erro buscando pagamentos 4: " + queryPgt4.lastError().text());
       return;
     }
 
@@ -170,7 +175,7 @@ void Impressao::print() {
                         "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt5.exec() or not queryPgt5.first()) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro buscando pagamentos 5: " + queryPgt5.lastError().text());
+      emit errorSignal("Erro buscando pagamentos 5: " + queryPgt5.lastError().text());
       return;
     }
 
@@ -188,7 +193,7 @@ void Impressao::print() {
   QDir dir(path);
 
   if (not dir.exists() and not dir.mkdir(path)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro ao criar a pasta escolhida nas configurações!");
+    emit errorSignal("Erro ao criar a pasta escolhida nas configurações!");
     return;
   }
 
@@ -197,8 +202,8 @@ void Impressao::print() {
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Não foi possível abrir o arquivo para escrita: " + fileName);
-    QMessageBox::critical(nullptr, "Erro!", "Erro: " + file.errorString());
+    emit errorSignal("Não foi possível abrir o arquivo para escrita: " + fileName);
+    emit errorSignal("Erro: " + file.errorString());
     return;
   }
 
@@ -206,7 +211,7 @@ void Impressao::print() {
 
   report->printToPDF(fileName);
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  QMessageBox::information(nullptr, "Ok!", "Arquivo salvo como " + fileName);
+  emit informationSignal("Arquivo salvo como " + fileName);
 }
 
 bool Impressao::setQuerys() {
@@ -223,7 +228,7 @@ bool Impressao::setQuerys() {
   }
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando dados da venda/orçamento: " + query.lastError().text());
+    emit errorSignal("Erro buscando dados da venda/orçamento: " + query.lastError().text());
     return false;
   }
 
@@ -231,7 +236,7 @@ bool Impressao::setQuerys() {
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
   if (not queryCliente.exec() or not queryCliente.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando cliente: " + queryCliente.lastError().text());
+    emit errorSignal("Erro buscando cliente: " + queryCliente.lastError().text());
     return false;
   }
 
@@ -239,7 +244,7 @@ bool Impressao::setQuerys() {
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
   if (not queryEndEnt.exec() or not queryEndEnt.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando endereço: " + queryEndEnt.lastError().text());
+    emit errorSignal("Erro buscando endereço: " + queryEndEnt.lastError().text());
     return false;
   }
 
@@ -247,7 +252,7 @@ bool Impressao::setQuerys() {
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
   if (not queryEndFat.exec() or not queryEndFat.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando dados do endereço: " + queryEndFat.lastError().text());
+    emit errorSignal("Erro buscando dados do endereço: " + queryEndFat.lastError().text());
     return false;
   }
 
@@ -255,7 +260,7 @@ bool Impressao::setQuerys() {
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
   if (not queryProfissional.exec() or not queryProfissional.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando profissional: " + queryProfissional.lastError().text());
+    emit errorSignal("Erro buscando profissional: " + queryProfissional.lastError().text());
     return false;
   }
 
@@ -263,7 +268,7 @@ bool Impressao::setQuerys() {
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
   if (not queryVendedor.exec() or not queryVendedor.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando vendedor: " + queryVendedor.lastError().text());
+    emit errorSignal("Erro buscando vendedor: " + queryVendedor.lastError().text());
     return false;
   }
 
@@ -271,7 +276,7 @@ bool Impressao::setQuerys() {
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLoja.exec() or not queryLoja.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando loja: " + queryLoja.lastError().text());
+    emit errorSignal("Erro buscando loja: " + queryLoja.lastError().text());
     return false;
   }
 
@@ -279,7 +284,7 @@ bool Impressao::setQuerys() {
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLojaEnd.exec() or not queryLojaEnd.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando loja endereço: " + queryLojaEnd.lastError().text());
+    emit errorSignal("Erro buscando loja endereço: " + queryLojaEnd.lastError().text());
     return false;
   }
 

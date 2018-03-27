@@ -115,9 +115,9 @@ class ConnectionDesc : public QObject {
   Q_PROPERTY(bool keepDBCredentials READ keepDBCredentials WRITE setKeepDBCredentials)
 public:
   typedef QSharedPointer<ConnectionDesc> Ptr;
-  ConnectionDesc(QSqlDatabase db, QObject *parent = 0);
-  ConnectionDesc(QObject *parent = 0);
-  Ptr create(QSqlDatabase db, QObject *parent = 0);
+  ConnectionDesc(QSqlDatabase db, QObject *parent = nullptr);
+  explicit ConnectionDesc(QObject *parent = nullptr);
+  Ptr create(QSqlDatabase db, QObject *parent = nullptr);
   void setName(const QString &value);
   QString name() { return m_connectionName; }
   void setDriver(const QString &value) { m_connectionDriver = value; }
@@ -172,7 +172,7 @@ class QueryDesc : public QObject {
   Q_PROPERTY(QString connectionName READ connectionName WRITE setConnectionName)
 public:
   QueryDesc(QString queryName, QString queryText, QString connection);
-  explicit QueryDesc(QObject *parent = 0) : QObject(parent) {}
+  explicit QueryDesc(QObject *parent = nullptr) : QObject(parent) {}
   void setQueryName(QString value) { m_queryName = value; }
   QString queryName() { return m_queryName; }
   void setQueryText(QString value) {
@@ -237,7 +237,7 @@ class SubQueryDesc : public QueryDesc {
   Q_PROPERTY(QString master READ master WRITE setMaster)
 public:
   SubQueryDesc(QString queryName, QString queryText, QString connection, QString master);
-  explicit SubQueryDesc(QObject *parent = 0) : QueryDesc(parent) {}
+  explicit SubQueryDesc(QObject *parent = nullptr) : QueryDesc(parent) {}
   void setMaster(QString value) { m_masterDatasourceName = value; }
   QString master() { return m_masterDatasourceName; }
 
@@ -314,7 +314,7 @@ private:
 class MasterDetailProxyModel : public QSortFilterProxyModel {
   Q_OBJECT
 public:
-  MasterDetailProxyModel(DataSourceManager *dataManager) : m_maps(0), m_dataManager(dataManager) {}
+  MasterDetailProxyModel(DataSourceManager *dataManager) : m_maps(nullptr), m_dataManager(dataManager) {}
   void setMaster(QString name);
   void setChildName(QString name) { m_childName = name; }
   void setFieldsMap(QList<FieldMapDesc *> *fieldsMap) { m_maps = fieldsMap; }
@@ -417,7 +417,7 @@ public:
   int columnIndexByName(QString name);
   bool isInvalid() const { return false; }
   QString lastError() { return ""; }
-  QAbstractItemModel *model() { return 0; }
+  QAbstractItemModel *model() { return nullptr; }
 
 private:
   bool checkNextRecord(int recordNum);

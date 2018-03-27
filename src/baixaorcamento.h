@@ -17,9 +17,10 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelOrcamento;
   Ui::BaixaOrcamento *ui;
   // methods
+  auto setupTables(const QString &idOrcamento) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
 };

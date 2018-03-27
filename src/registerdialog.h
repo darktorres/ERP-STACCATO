@@ -40,7 +40,6 @@ protected:
   auto confirmationMessage() -> bool;
   auto data(const QString &key) -> QVariant;
   auto data(const int row, const QString &key) -> QVariant;
-  auto errorMessage() -> void;
   auto getTextKeys() const -> QStringList;
   auto keyPressEvent(QKeyEvent *event) -> void override;
   auto remove() -> void;

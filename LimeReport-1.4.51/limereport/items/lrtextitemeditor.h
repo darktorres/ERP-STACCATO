@@ -47,7 +47,7 @@ class CompleaterTextEditor :public QTextEdit
 {
     Q_OBJECT
 public:
-    CompleaterTextEditor(QWidget* parent=0);
+    CompleaterTextEditor(QWidget* parent=nullptr);
     void setCompleter(QCompleter* value);
     QCompleter* compleater() const{ return m_compleater;}
 protected:
@@ -66,7 +66,7 @@ class TextItemEditor : public QWidget
     Q_OBJECT  
 public:
     explicit TextItemEditor(LimeReport::TextItem* item, LimeReport::PageDesignIntf* page,
-                             QSettings* settings=0, QWidget *parent = 0);
+                             QSettings* settings=nullptr, QWidget *parent = nullptr);
     ~TextItemEditor();
     void setSettings(QSettings* value);
     QSettings* settings();

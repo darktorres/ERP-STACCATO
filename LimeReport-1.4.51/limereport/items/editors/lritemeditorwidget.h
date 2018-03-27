@@ -39,10 +39,10 @@ namespace LimeReport {
 class ItemEditorWidget : public QToolBar {
   Q_OBJECT
 public:
-  explicit ItemEditorWidget(ReportDesignWidget *reportEditor, const QString &title, QWidget *parent = 0);
-  explicit ItemEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent = 0);
-  explicit ItemEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent = 0);
-  explicit ItemEditorWidget(PageDesignIntf *page, QWidget *parent = 0);
+  explicit ItemEditorWidget(ReportDesignWidget *reportEditor, const QString &title, QWidget *parent = nullptr);
+  explicit ItemEditorWidget(ReportDesignWidget *reportEditor, QWidget *parent = nullptr);
+  explicit ItemEditorWidget(PageDesignIntf *page, const QString &title, QWidget *parent = nullptr);
+  explicit ItemEditorWidget(PageDesignIntf *page, QWidget *parent = nullptr);
 
   void setItem(BaseDesignIntf *item);
   void setReportEditor(ReportDesignWidget *editor) { m_reportEditor = editor; }

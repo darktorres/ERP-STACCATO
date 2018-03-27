@@ -16,7 +16,7 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
   model.setFilter("0");
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not model.select()) emit errorSignal("Erro lendo tabela: " + model.lastError().text());
 
   mapper.setModel(&model);
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
@@ -29,19 +29,19 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
   primaryId = id.toString();
 
   if (primaryId.isEmpty()) {
-    QMessageBox::critical(this, "Erro", "primaryId vazio!");
+    emit errorSignal("primaryId vazio!");
     return false;
   }
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
   if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro ao acessar a tabela " + model.tableName() + ": " + model.lastError().text());
+    emit errorSignal("Erro ao acessar a tabela " + model.tableName() + ": " + model.lastError().text());
     return false;
   }
 
   if (model.rowCount() == 0) {
-    QMessageBox::critical(this, "Erro!", "Item não encontrado.");
+    emit errorSignal("Item não encontrado.");
     close();
     return false;
   }
@@ -60,7 +60,7 @@ bool RegisterDialog::viewRegister() {
   if (not primaryId.isEmpty()) {
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
-    if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+    if (not model.select()) emit errorSignal("Erro lendo tabela: " + model.lastError().text());
   }
 
   mapper.setCurrentIndex(0);
@@ -92,7 +92,7 @@ QVariant RegisterDialog::data(const int row, const QString &key) { return model.
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
   if (model.fieldIndex(key) == -1) {
-    QMessageBox::critical(this, "Erro!", "Chave " + key + " não encontrada na tabela " + model.tableName());
+    emit errorSignal("Chave " + key + " não encontrada na tabela " + model.tableName());
     return;
   }
 
@@ -131,7 +131,7 @@ bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
   if ((line->text().isEmpty()) or (line->text() == "0,00") or (line->text() == "../-") or (line->text().size() < line->inputMask().remove(";").remove(">").remove("_").size()) or
       (line->text().size() < line->placeholderText().size() - 1)) {
     if (not silent) {
-      QMessageBox::critical(this, "Erro!", "Você não preencheu um campo obrigatório: " + line->accessibleName());
+      emit errorSignal("Você não preencheu um campo obrigatório: " + line->accessibleName());
       line->setFocus();
     }
 
@@ -173,15 +173,13 @@ bool RegisterDialog::confirmationMessage() {
   return true;
 }
 
-void RegisterDialog::errorMessage() { QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este item."); }
-
 bool RegisterDialog::newRegister() {
   if (not confirmationMessage()) return false;
 
   model.setFilter("0");
 
   if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+    emit errorSignal("Erro lendo tabela: " + model.lastError().text());
     return false;
   }
 
@@ -198,8 +196,8 @@ bool RegisterDialog::save(const bool silent) {
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return false;
+  if (not QSqlQuery("START TRANSACTION").exec()) return false;
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
@@ -209,7 +207,7 @@ bool RegisterDialog::save(const bool silent) {
     return false;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return false;
 
   emit transactionEnded();
 
@@ -238,7 +236,7 @@ void RegisterDialog::remove() {
     if (not setData("desativado", true)) return;
 
     if (not model.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + model.lastError().text());
+      emit errorSignal("Não foi possível remover este item: " + model.lastError().text());
       return;
     }
 
@@ -278,7 +276,7 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
   if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) {
-    QMessageBox::critical(this, "Erro!", "CNPJ inválido!");
+    emit errorSignal("CNPJ inválido!");
     return false;
   }
 
@@ -290,7 +288,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   if (text == "00000000000" or text == "11111111111" or text == "22222222222" or text == "33333333333" or text == "44444444444" or text == "55555555555" or text == "66666666666" or
       text == "77777777777" or text == "88888888888" or text == "99999999999") {
-    QMessageBox::critical(this, "Erro!", "CPF inválido!");
+    emit errorSignal("CPF inválido!");
     return false;
   }
 
@@ -323,7 +321,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
   if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) {
-    QMessageBox::critical(this, "Erro!", "CPF inválido!");
+    emit errorSignal("CPF inválido!");
     return false;
   }
 

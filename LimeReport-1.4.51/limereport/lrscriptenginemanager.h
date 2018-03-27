@@ -63,7 +63,7 @@ struct ScriptFunctionDesc {
 class ScriptEngineNode {
 public:
   enum NodeType { Root, Category, Function, Dialog, DialogElement };
-  ScriptEngineNode(const QString &name = "", const QString &description = "", NodeType type = Root, ScriptEngineNode *parent = 0, const QIcon &icon = QIcon())
+  ScriptEngineNode(const QString &name = "", const QString &description = "", NodeType type = Root, ScriptEngineNode *parent = nullptr, const QIcon &icon = QIcon())
       : m_name(name), m_description(description), m_icon(icon), m_type(type), m_parent(parent) {}
   virtual ~ScriptEngineNode();
   int childCount() { return m_childs.count(); }
@@ -92,7 +92,7 @@ class ScriptEngineModel : public QAbstractItemModel {
   Q_OBJECT
 public:
   friend class ScriptEngineManager;
-  explicit ScriptEngineModel() : m_scriptManager(0), m_rootNode(new ScriptEngineNode()) {}
+  explicit ScriptEngineModel() : m_scriptManager(nullptr), m_rootNode(new ScriptEngineNode()) {}
   explicit ScriptEngineModel(ScriptEngineManager *scriptManager);
   ~ScriptEngineModel();
   QModelIndex parent(const QModelIndex &child) const;
@@ -140,7 +140,7 @@ public:
 #ifdef HAVE_UI_LOADER
   typedef QSharedPointer<QDialog> DialogPtr;
 #endif
-  explicit ScriptEngineContext(QObject *parent = 0) : QObject(parent) {}
+  explicit ScriptEngineContext(QObject *parent = nullptr) : QObject(parent) {}
 #ifdef HAVE_UI_LOADER
   void addDialog(const QString &name, const QByteArray &description);
   bool previewDialog(const QString &dialogName);
@@ -249,7 +249,7 @@ class QFontPrototype : public QObject, public QScriptable {
   Q_PROPERTY(bool italic READ italic)
   Q_PROPERTY(bool underline READ underline)
 public:
-  QFontPrototype(QObject *parent = NULL) : QObject(parent), QScriptable() { this->setObjectName("QFontPrototype"); }
+  QFontPrototype(QObject *parent = nullptr) : QObject(parent), QScriptable() { this->setObjectName("QFontPrototype"); }
   QString family() const {
     QFont font(qscriptvalue_cast<QFont>(this->thisObject()));
     return font.family();

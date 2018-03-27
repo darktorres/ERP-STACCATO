@@ -20,7 +20,7 @@ public:
 private:
   // attributes
   QString fornecedor;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;

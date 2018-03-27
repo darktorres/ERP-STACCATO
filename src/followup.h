@@ -20,7 +20,7 @@ private:
   // attributes
   const QString id;
   const Tipo tipo;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewFollowup;
   Ui::FollowUp *ui;
   // methods
   auto on_dateFollowup_dateChanged(const QDate &date) -> void;

@@ -10,18 +10,16 @@
  */
 
 #include "QDecContext.hh"
-//include <sstream>
-#include <QtGlobal>
+// include <sstream>
+#include "QDecFwd.hh"
 #include <QByteArray>
 #include <QTextStream>
-#include "QDecFwd.hh"
+#include <QtGlobal>
 
 using namespace std;
 
-
-QDecContext::QDecContext(int32_t kind)
-{
-  switch(kind) {
+QDecContext::QDecContext(int32_t kind) {
+  switch (kind) {
   case DEC_INIT_BASE:
   case DEC_INIT_DECIMAL32:
   case DEC_INIT_DECIMAL64:
@@ -44,58 +42,39 @@ QDecContext::QDecContext(int32_t kind)
   setDigits(QDecNumDigits);
 }
 
-
-QByteArray QDecContext::statusFlags() const
-{
+QByteArray QDecContext::statusFlags() const {
   uint32_t status = m_data.status;
   QByteArray str;
   QTextStream os(&str);
-  //ostringstream os;
+  // ostringstream os;
   const char sep = '|'; // Separator
 
-  if(status & DEC_Conversion_syntax) 
-    os << DEC_Condition_CS << sep;
-  if(status & DEC_Division_by_zero)
-    os << DEC_Condition_DZ << sep;
-  if(status & DEC_Division_impossible)
-    os << DEC_Condition_DI << sep;
-  if(status & DEC_Division_undefined)
-    os << DEC_Condition_DU << sep;
-  if(status & DEC_Inexact)
-    os << DEC_Condition_IE << sep;
-  if(status & DEC_Invalid_context)
-    os << DEC_Condition_IC << sep;
-  if(status & DEC_Insufficient_storage)
-    os << DEC_Condition_IS << sep;
-  if(status & DEC_Invalid_operation)
-    os << DEC_Condition_IO << sep;
-#if DECSUBSET  
-  if(status & DEC_Lost_digits)
-    os << DEC_Condition_LD << sep;
-#endif  
-  if(status & DEC_Overflow)
-    os << DEC_Condition_OV << sep;
-  if(status & DEC_Clamped)
-    os << DEC_Condition_PA << sep;
-  if(status & DEC_Rounded)
-    os << DEC_Condition_RO << sep;
-  if(status & DEC_Subnormal)
-    os << DEC_Condition_SU << sep;
-  if(status & DEC_Underflow)
-    os << DEC_Condition_UN << sep;
-  if(0==status)
-    os << DEC_Condition_ZE << sep;
-  
+  if (status & DEC_Conversion_syntax) os << DEC_Condition_CS << sep;
+  if (status & DEC_Division_by_zero) os << DEC_Condition_DZ << sep;
+  if (status & DEC_Division_impossible) os << DEC_Condition_DI << sep;
+  if (status & DEC_Division_undefined) os << DEC_Condition_DU << sep;
+  if (status & DEC_Inexact) os << DEC_Condition_IE << sep;
+  if (status & DEC_Invalid_context) os << DEC_Condition_IC << sep;
+  if (status & DEC_Insufficient_storage) os << DEC_Condition_IS << sep;
+  if (status & DEC_Invalid_operation) os << DEC_Condition_IO << sep;
+#if DECSUBSET
+  if (status & DEC_Lost_digits) os << DEC_Condition_LD << sep;
+#endif
+  if (status & DEC_Overflow) os << DEC_Condition_OV << sep;
+  if (status & DEC_Clamped) os << DEC_Condition_PA << sep;
+  if (status & DEC_Rounded) os << DEC_Condition_RO << sep;
+  if (status & DEC_Subnormal) os << DEC_Condition_SU << sep;
+  if (status & DEC_Underflow) os << DEC_Condition_UN << sep;
+  if (0 == status) os << DEC_Condition_ZE << sep;
+
   os << "0x" << hex << status;
 
   os.flush();
-    //return os.str().c_str();
+  // return os.str().c_str();
   return str;
 }
 
-
-uint8_t QDecContext::extended() const
-{
+uint8_t QDecContext::extended() const {
 #if DECSUBSET
   return m_data.extended;
 #else
@@ -103,9 +82,7 @@ uint8_t QDecContext::extended() const
 #endif
 }
 
-
-void QDecContext::setExtended(uint8_t ext)
-{
+void QDecContext::setExtended(uint8_t ext) {
 #if DECSUBSET
   m_data.extended = ext;
 #else
@@ -113,19 +90,17 @@ void QDecContext::setExtended(uint8_t ext)
 #endif
 }
 
-
-QTextStream& operator<<(QTextStream& ts, const QDecContext ctx)
-{
+QTextStream &operator<<(QTextStream &ts, const QDecContext ctx) {
   char c = ' ';
-  ts << "digits=" << ctx.digits()
-     << c << "emax=" << ctx.emax()
-     << c << "emin=" << ctx.emin()
-     << c << "extended=" << ctx.extended()
-     << c << "clamp=" << ctx.clamp()
-     << c << "round=" << ctx.round()
-     << c << "traps=" << ctx.traps()
-     << c << "status=" << ctx.status()
-     << c << ctx.statusToString();
-  
+  ts << "digits=" << ctx.digits();
+  ts << c << "emax=" << ctx.emax();
+  ts << c << "emin=" << ctx.emin();
+  ts << c << "extended=" << ctx.extended();
+  ts << c << "clamp=" << ctx.clamp();
+  ts << c << "round=" << ctx.round();
+  ts << c << "traps=" << ctx.traps();
+  ts << c << "status=" << ctx.status();
+  ts << c << ctx.statusToString();
+
   return ts;
 }

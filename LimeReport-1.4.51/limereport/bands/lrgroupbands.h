@@ -45,7 +45,7 @@ class GroupBandHeader : public BandDesignIntf, public IGroupBand {
   Q_PROPERTY(bool reprintOnEachPage READ reprintOnEachPage WRITE setReprintOnEachPage)
   Q_PROPERTY(QString condition READ condition WRITE setCondition)
 public:
-  GroupBandHeader(QObject *owner = 0, QGraphicsItem *parent = 0);
+  GroupBandHeader(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   virtual bool isUnique() const;
   QVariant groupFieldValue() { return m_groupFieldValue; }
   void setGroupFieldValue(QVariant value) { m_groupFieldValue = value; }
@@ -62,7 +62,7 @@ public:
   void setCondition(const QString &condition);
 
 private:
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   void startGroup(DataSourceManager *dataManager);
   bool isNeedToClose(DataSourceManager *dataManager);
   bool isStarted();
@@ -84,13 +84,13 @@ private:
 class GroupBandFooter : public BandDesignIntf {
   Q_OBJECT
 public:
-  GroupBandFooter(QObject *owner = 0, QGraphicsItem *parent = 0);
+  GroupBandFooter(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   virtual bool isUnique() const;
   QColor bandColor() const;
   virtual bool isFooter() const { return true; }
 
 private:
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 };
 
 } // namespace LimeReport

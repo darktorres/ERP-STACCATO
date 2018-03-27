@@ -2,7 +2,6 @@
 #define ORCAMENTO_H
 
 #include "registerdialog.h"
-#include "searchdialogproxy.h"
 
 namespace Ui {
 class Orcamento;
@@ -57,6 +56,7 @@ private:
   auto on_pushButtonAtualizarOrcamento_clicked() -> void;
   auto on_pushButtonCadastrarOrcamento_clicked() -> void;
   auto on_pushButtonCalculadora_clicked() -> void;
+  auto on_pushButtonCalcularFrete_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonGerarVenda_clicked() -> void;
   auto on_pushButtonImprimir_clicked() -> void;

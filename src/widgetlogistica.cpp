@@ -14,7 +14,7 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : Widget(parent), ui(new Ui::W
 
   setConnections();
 
-  ui->tableForn->setModel(&model);
+  ui->tableForn->setModel(&modelViewLogistica);
 }
 
 WidgetLogistica::~WidgetLogistica() { delete ui; }
@@ -30,10 +30,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Agendar Coleta") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_agendar_coleta");
+    modelViewLogistica.setTable("view_fornecedor_logistica_agendar_coleta");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -44,10 +44,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Coleta") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_coleta");
+    modelViewLogistica.setTable("view_fornecedor_logistica_coleta");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -58,10 +58,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Recebimento") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_recebimento");
+    modelViewLogistica.setTable("view_fornecedor_logistica_recebimento");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -87,10 +87,10 @@ bool WidgetLogistica::updateTables() {
   if (currentText == "Representação") {
     ui->frameForn->show();
 
-    model.setTable("view_fornecedor_logistica_representacao");
+    modelViewLogistica.setTable("view_fornecedor_logistica_representacao");
 
-    if (not model.select()) {
-      emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not modelViewLogistica.select()) {
+      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
       return false;
     }
 
@@ -112,7 +112,7 @@ bool WidgetLogistica::updateTables() {
 }
 
 void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {
-  const QString fornecedor = model.data(index.row(), "fornecedor").toString();
+  const QString fornecedor = modelViewLogistica.data(index.row(), "fornecedor").toString();
 
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 

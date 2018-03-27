@@ -23,32 +23,32 @@ PrecoEstoque::PrecoEstoque(QWidget *parent) : Dialog(parent), ui(new Ui::PrecoEs
 PrecoEstoque::~PrecoEstoque() { delete ui; }
 
 void PrecoEstoque::setupTables() {
-  model.setTable("produto");
-  model.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
+  modelProduto.setTable("produto");
+  modelProduto.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
-  model.setHeaderData("fornecedor", "Fornecedor");
-  model.setHeaderData("descricao", "Descrição");
-  model.setHeaderData("estoqueRestante", "Estoque Disp.");
-  model.setHeaderData("un", "Un.");
-  model.setHeaderData("un2", "Un.2");
-  model.setHeaderData("colecao", "Coleção");
-  model.setHeaderData("tipo", "Tipo");
-  model.setHeaderData("minimo", "Mínimo");
-  model.setHeaderData("multiplo", "Múltiplo");
-  model.setHeaderData("m2cx", "M/Cx.");
-  model.setHeaderData("pccx", "Pç./Cx.");
-  model.setHeaderData("kgcx", "Kg./Cx.");
-  model.setHeaderData("formComercial", "Form. Com.");
-  model.setHeaderData("codComercial", "Cód. Com.");
-  model.setHeaderData("precoVenda", "R$");
-  model.setHeaderData("validade", "Validade");
-  model.setHeaderData("ui", "UI");
+  modelProduto.setHeaderData("fornecedor", "Fornecedor");
+  modelProduto.setHeaderData("descricao", "Descrição");
+  modelProduto.setHeaderData("estoqueRestante", "Estoque Disp.");
+  modelProduto.setHeaderData("un", "Un.");
+  modelProduto.setHeaderData("un2", "Un.2");
+  modelProduto.setHeaderData("colecao", "Coleção");
+  modelProduto.setHeaderData("tipo", "Tipo");
+  modelProduto.setHeaderData("minimo", "Mínimo");
+  modelProduto.setHeaderData("multiplo", "Múltiplo");
+  modelProduto.setHeaderData("m2cx", "M/Cx.");
+  modelProduto.setHeaderData("pccx", "Pç./Cx.");
+  modelProduto.setHeaderData("kgcx", "Kg./Cx.");
+  modelProduto.setHeaderData("formComercial", "Form. Com.");
+  modelProduto.setHeaderData("codComercial", "Cód. Com.");
+  modelProduto.setHeaderData("precoVenda", "R$");
+  modelProduto.setHeaderData("validade", "Validade");
+  modelProduto.setHeaderData("ui", "UI");
 
-  model.setFilter("estoque = TRUE AND estoqueRestante > 0");
+  modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produto: " + model.lastError().text());
+  if (not modelProduto.select()) emit errorSignal("Erro lendo tabela produto: " + modelProduto.lastError().text());
 
-  ui->table->setModel(&model);
+  ui->table->setModel(&modelProduto);
   ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("atualizarTabelaPreco");
   ui->table->hideColumn("cfop");
@@ -77,8 +77,8 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("st");
   ui->table->hideColumn("temLote");
 
-  for (int column = 0, columnCount = model.columnCount(); column < columnCount; ++column) {
-    if (model.record().fieldName(column).endsWith("Upd")) ui->table->setColumnHidden(column, true);
+  for (int column = 0, columnCount = modelProduto.columnCount(); column < columnCount; ++column) {
+    if (modelProduto.record().fieldName(column).endsWith("Upd")) ui->table->setColumnHidden(column, true);
   }
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
@@ -86,22 +86,22 @@ void PrecoEstoque::setupTables() {
 }
 
 void PrecoEstoque::on_pushButtonSalvar_clicked() {
-  if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + model.lastError().text());
+  if (not modelProduto.submitAll()) {
+    emit errorSignal("Erro salvando dados: " + modelProduto.lastError().text());
     return;
   }
 
-  QMessageBox::information(this, "Aviso!", "Dados atualizados!");
+  emit informationSignal("Dados atualizados!");
   close();
 }
 
 void PrecoEstoque::on_pushButtonCancelar_clicked() { close(); }
 
 void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
-  model.setFilter(text.isEmpty() ? "estoque = TRUE AND estoqueRestante > 0"
-                                 : "MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('+" + text + "*' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
+  modelProduto.setFilter(text.isEmpty() ? "estoque = TRUE AND estoqueRestante > 0"
+                                        : "MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('+" + text + "*' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produto: " + model.lastError().text());
+  if (not modelProduto.select()) emit errorSignal("Erro lendo tabela produto: " + modelProduto.lastError().text());
 }
 
 void PrecoEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

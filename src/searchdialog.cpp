@@ -8,7 +8,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialog.h"
-#include "searchdialogproxy.h"
+#include "searchdialogproxymodel.h"
 #include "ui_searchdialog.h"
 #include "usersession.h"
 
@@ -54,7 +54,7 @@ void SearchDialog::setupTables(const QString &table, const QString &filter) {
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
   setFilter(filter);
 
-  ui->table->setModel(new SearchDialogProxy(&model, this));
+  ui->table->setModel(new SearchDialogProxyModel(&model, this));
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
@@ -144,9 +144,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
 
-    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) {
-      QMessageBox::warning(this, "Aviso!", "Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!");
-    }
+    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) emit warningSignal("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!");
   }
 
   sendUpdateMessage();

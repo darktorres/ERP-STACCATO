@@ -34,6 +34,9 @@ public:
 signals:
   void montarFluxoCaixa();
   void valueChanged();
+  void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
 
 private:
   // attributes

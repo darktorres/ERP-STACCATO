@@ -18,13 +18,13 @@ WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : Widget(parent), 
 WidgetCompraDevolucao::~WidgetCompraDevolucao() { delete ui; }
 
 bool WidgetCompraDevolucao::updateTables() {
-  if (model.tableName().isEmpty()) {
+  if (modelVendaProduto.tableName().isEmpty()) {
     setupTables();
     ui->radioButtonFiltroPendente->setChecked(true);
   }
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela faturamento: " + model.lastError().text());
+  if (not modelVendaProduto.select()) {
+    emit errorSignal("Erro lendo tabela faturamento: " + modelVendaProduto.lastError().text());
     return false;
   }
 
@@ -36,26 +36,26 @@ bool WidgetCompraDevolucao::updateTables() {
 void WidgetCompraDevolucao::setupTables() {
   // REFAC: refactor this to not select in here
 
-  model.setTable("venda_has_produto");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  modelVendaProduto.setTable("venda_has_produto");
+  modelVendaProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  model.setHeaderData("status", "Status");
-  model.setHeaderData("fornecedor", "Fornecedor");
-  model.setHeaderData("idVenda", "Venda");
-  model.setHeaderData("produto", "Produto");
-  model.setHeaderData("obs", "Obs.");
-  model.setHeaderData("caixas", "Cx.");
-  model.setHeaderData("quant", "Quant.");
-  model.setHeaderData("un", "Un.");
-  model.setHeaderData("unCaixa", "Un./Cx.");
-  model.setHeaderData("codComercial", "Cód. Com.");
-  model.setHeaderData("formComercial", "Form. Com.");
+  modelVendaProduto.setHeaderData("status", "Status");
+  modelVendaProduto.setHeaderData("fornecedor", "Fornecedor");
+  modelVendaProduto.setHeaderData("idVenda", "Venda");
+  modelVendaProduto.setHeaderData("produto", "Produto");
+  modelVendaProduto.setHeaderData("obs", "Obs.");
+  modelVendaProduto.setHeaderData("caixas", "Cx.");
+  modelVendaProduto.setHeaderData("quant", "Quant.");
+  modelVendaProduto.setHeaderData("un", "Un.");
+  modelVendaProduto.setHeaderData("unCaixa", "Un./Cx.");
+  modelVendaProduto.setHeaderData("codComercial", "Cód. Com.");
+  modelVendaProduto.setHeaderData("formComercial", "Form. Com.");
 
-  model.setFilter("0");
+  modelVendaProduto.setFilter("0");
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela produtos pendentes: " + model.lastError().text());
+  if (not modelVendaProduto.select()) emit errorSignal("Erro lendo tabela produtos pendentes: " + modelVendaProduto.lastError().text());
 
-  ui->table->setModel(&model);
+  ui->table->setModel(&modelVendaProduto);
 
   ui->table->sortByColumn("idVenda");
   ui->table->hideColumn("recebeu");
@@ -100,33 +100,41 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Não selecionou nenhuma linha!");
+    emit errorSignal("Não selecionou nenhuma linha!");
     return;
   }
 
   for (const auto &item : list) {
-    if (not model.setData(item.row(), "status", "DEVOLVIDO FORN.")) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando status: " + model.lastError().text());
+    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) {
+      emit errorSignal("Erro marcando status: " + modelVendaProduto.lastError().text());
       return;
     }
   }
 
-  if (not model.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando status processado: " + model.lastError().text());
+  if (not modelVendaProduto.submitAll()) {
+    emit errorSignal("Erro salvando status processado: " + modelVendaProduto.lastError().text());
     return;
   }
 
-  QMessageBox::information(this, "Aviso!", "Retornado para fornecedor!");
+  emit informationSignal("Retornado para fornecedor!");
 }
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
+  // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
+
+  QSqlQuery query;
+  // TODO: add quant too?
+  // TODO: e se tiver varios consumos?
+  query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto");
+
   for (const auto &item : list) {
-    const QString status = model.data(item.row(), "status").toString();
+    const QString status = modelVendaProduto.data(item.row(), "status").toString();
+
+    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) return false;
 
     // TODO: 5refazer isso para bloquear o botao
     if (status == "PENDENTE" or status == "INICIADO" or status == "EM COMPRA" or status == "EM FATURAMENTO") {
       // se nao faturado nao faz nada
-      if (not model.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) return false;
 
       // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo
       // idVendaProduto)
@@ -139,13 +147,9 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       // se faturado criar devolucao estoque_has_consumo
       // 1.procurar em estoque pelo idVendaProduto
       // 2.copiar linha consumo mudando quant, status para devolucao e idCompra 0
-      if (not model.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) return false;
 
-      QSqlQuery query;
-      // TODO: add quant too?
-      query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto");
-      query.bindValue(":idVenda", model.data(item.row(), "idVenda").toString().left(11));
-      query.bindValue(":idProduto", model.data(item.row(), "idProduto"));
+      query.bindValue(":idVenda", modelVendaProduto.data(item.row(), "idVenda").toString().left(11));
+      query.bindValue(":idProduto", modelVendaProduto.data(item.row(), "idProduto"));
 
       if (not query.exec() or not query.first()) {
         emit errorSignal("Erro buscando idVendaProduto: " + query.lastError().text());
@@ -154,50 +158,50 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       const QString idVendaProduto = query.value("idVendaProduto").toString();
 
-      SqlRelationalTableModel modelEstoque;
-      modelEstoque.setTable("estoque_has_consumo");
-      modelEstoque.setFilter("idVendaProduto = " + idVendaProduto);
+      SqlRelationalTableModel modelConsumo;
+      modelConsumo.setTable("estoque_has_consumo");
+      modelConsumo.setFilter("idVendaProduto = " + idVendaProduto);
 
-      if (not modelEstoque.select()) {
-        emit errorSignal("Erro buscando consumo estoque: " + modelEstoque.lastError().text());
+      if (not modelConsumo.select()) {
+        emit errorSignal("Erro buscando consumo estoque: " + modelConsumo.lastError().text());
         return false;
       }
 
-      if (modelEstoque.rowCount() == 0) {
+      if (modelConsumo.rowCount() == 0) {
         emit errorSignal("Não encontrou estoque!");
         return false;
       }
 
-      const int newRow = modelEstoque.rowCount();
-      modelEstoque.insertRow(newRow);
+      const int newRow = modelConsumo.rowCount();
+      modelConsumo.insertRow(newRow);
 
-      for (int column = 0; column < modelEstoque.columnCount(); ++column) {
-        if (modelEstoque.fieldIndex("idConsumo") == column) continue;
-        if (modelEstoque.fieldIndex("idVendaProduto") == column) continue;
-        if (modelEstoque.fieldIndex("created") == column) continue;
-        if (modelEstoque.fieldIndex("lastUpdated") == column) continue;
+      for (int column = 0; column < modelConsumo.columnCount(); ++column) {
+        if (modelConsumo.fieldIndex("idConsumo") == column) continue;
+        if (modelConsumo.fieldIndex("idVendaProduto") == column) continue;
+        if (modelConsumo.fieldIndex("created") == column) continue;
+        if (modelConsumo.fieldIndex("lastUpdated") == column) continue;
 
-        if (not modelEstoque.setData(newRow, column, modelEstoque.data(0, column))) {
-          emit errorSignal("Erro copiando dados do consumo: " + modelEstoque.lastError().text());
+        if (not modelConsumo.setData(newRow, column, modelConsumo.data(0, column))) {
+          emit errorSignal("Erro copiando dados do consumo: " + modelConsumo.lastError().text());
           return false;
         }
       }
 
       // TODO: update caixas and other fields
-      if (not modelEstoque.setData(newRow, "idVendaProduto", model.data(item.row(), "idVendaProduto"))) return false;
-      if (not modelEstoque.setData(newRow, "status", "DEVOLVIDO")) return false;
-      if (not modelEstoque.setData(newRow, "quant", model.data(item.row(), "quant").toDouble() * -1)) return false;
-      if (not modelEstoque.setData(newRow, "quantUpd", 5)) return false;
+      if (not modelConsumo.setData(newRow, "idVendaProduto", modelVendaProduto.data(item.row(), "idVendaProduto"))) return false;
+      if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) return false;
+      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) return false;
+      if (not modelConsumo.setData(newRow, "quantUpd", 5)) return false;
 
-      if (not modelEstoque.submitAll()) {
-        emit errorSignal("Erro salvando devolução de estoque: " + modelEstoque.lastError().text());
+      if (not modelConsumo.submitAll()) {
+        emit errorSignal("Erro salvando devolução de estoque: " + modelConsumo.lastError().text());
         return false;
       }
     }
   }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro salvando status processado: " + model.lastError().text());
+  if (not modelVendaProduto.submitAll()) {
+    emit errorSignal("Erro salvando status processado: " + modelVendaProduto.lastError().text());
     return false;
   }
 
@@ -208,14 +212,14 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Não selecionou nenhuma linha!");
+    emit errorSignal("Não selecionou nenhuma linha!");
     return;
   }
 
   emit transactionStarted();
 
-  QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec();
-  QSqlQuery("START TRANSACTION").exec();
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
 
   if (not retornarEstoque(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -223,22 +227,22 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelVendaProduto.select()) emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text());
 
-  QMessageBox::information(this, "Aviso!", "Retornado para estoque!");
+  emit informationSignal("Retornado para estoque!");
 }
 
 void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(bool checked) {
   ui->pushButtonDevolucaoFornecedor->setEnabled(checked);
   ui->pushButtonRetornarEstoque->setEnabled(checked);
 
-  model.setFilter("quant < 0 AND " + QString(checked ? "status != 'DEVOLVIDO ESTOQUE' AND status != 'DEVOLVIDO FORN.'" : "(status = 'DEVOLVIDO ESTOQUE' OR status = 'DEVOLVIDO FORN.')"));
+  modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status != 'DEVOLVIDO ESTOQUE' AND status != 'DEVOLVIDO FORN.'" : "(status = 'DEVOLVIDO ESTOQUE' OR status = 'DEVOLVIDO FORN.')"));
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelVendaProduto.select()) emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text());
 }
 
 void WidgetCompraDevolucao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

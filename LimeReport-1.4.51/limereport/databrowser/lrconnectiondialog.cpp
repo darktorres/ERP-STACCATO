@@ -43,7 +43,7 @@ ConnectionDialog::ConnectionDialog(LimeReport::IConnectionController *conControl
     : QDialog(parent), ui(new Ui::ConnectionDialog), m_connection(connectionDesc), m_controller(conControl), m_savedConnectionName("") {
   ui->setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose, true);
-  m_changeMode = m_connection != 0;
+  m_changeMode = m_connection != nullptr;
 }
 
 ConnectionDialog::~ConnectionDialog() { delete ui; }

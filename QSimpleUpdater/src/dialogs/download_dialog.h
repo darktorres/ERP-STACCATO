@@ -58,7 +58,7 @@ private:
 
   uint m_start_time;
 
-  float roundNumber(const float &input);
+  double roundNumber(const double &input);
 };
 
 #endif

@@ -50,8 +50,8 @@ ScriptBrowser::~ScriptBrowser() { delete ui; }
 
 void ScriptBrowser::setReportEditor(ReportDesignWidget *report) {
   m_report = report;
-  connect(m_report, SIGNAL(cleared()), this, SLOT(slotClear()));
-  connect(m_report, SIGNAL(loaded()), this, SLOT(slotUpdate()));
+  connect(m_report, &ReportDesignWidget::cleared, this, &ScriptBrowser::slotClear);
+  connect(m_report, &ReportDesignWidget::loaded, this, &ScriptBrowser::slotUpdate);
   updateFunctionTree();
 }
 
@@ -59,7 +59,7 @@ void ScriptBrowser::updateFunctionTree() {
   ui->twFunctions->clear();
   ScriptEngineManager *sm = reportEditor()->scriptManager();
   QMap<QString, QTreeWidgetItem *> categ;
-  foreach (ScriptFunctionDesc fd, sm->functionsDescriber()) {
+  for (ScriptFunctionDesc fd : sm->functionsDescriber()) {
     QString functionCategory = (fd.category != "") ? fd.category : tr("NO CATEGORY");
     if (categ.contains(functionCategory)) {
       QTreeWidgetItem *item = new QTreeWidgetItem(categ.value(fd.category), QStringList(fd.name));
@@ -91,7 +91,7 @@ void ScriptBrowser::fillDialog(QTreeWidgetItem *dialogItem, const QString &descr
   buff.open(QIODevice::ReadOnly);
   QDialog *dialog = dynamic_cast<QDialog *>(loader.load(&buff));
   if (dialog) {
-    foreach (QObject *child, dialog->children()) {
+    for (QObject *child : dialog->children()) {
       if (!child->objectName().isEmpty()) {
         QStringList row;
         row << child->metaObject()->className() << child->objectName();
@@ -107,7 +107,7 @@ void ScriptBrowser::fillDialog(QTreeWidgetItem *dialogItem, const QString &descr
 void ScriptBrowser::updateDialogsTree() {
   ui->twDialogs->clear();
   ScriptEngineContext *sc = reportEditor()->scriptContext();
-  foreach (DialogDescriber::Ptr dc, sc->dialogsDescriber()) {
+  for (DialogDescriber::Ptr dc : sc->dialogsDescriber()) {
     QTreeWidgetItem *dialogItem = new QTreeWidgetItem(ui->twDialogs, QStringList(dc->name()));
     dialogItem->setIcon(0, QIcon(":/scriptbrowser/images/dialog"));
     fillDialog(dialogItem, dc->description());
@@ -134,7 +134,7 @@ void ScriptBrowser::on_tbAddDialog_clicked() {
     QUiLoader loader;
 
     if (!fileNames.isEmpty()) {
-      foreach (QString fileName, fileNames) {
+      for (QString fileName : fileNames) {
         QFile file(fileName);
         file.open(QIODevice::ReadOnly);
         if (file.isOpen()) {
@@ -162,13 +162,13 @@ void ScriptBrowser::on_tbAddDialog_clicked() {
 }
 
 void ScriptBrowser::on_tbRunDialog_clicked() {
-  if (ui->twDialogs->currentItem() && ui->twDialogs->currentItem()->parent() == 0) {
+  if (ui->twDialogs->currentItem() && ui->twDialogs->currentItem()->parent() == nullptr) {
     m_report->scriptContext()->previewDialog(ui->twDialogs->currentItem()->text(0));
   }
 }
 
 void ScriptBrowser::on_tbDeleteDialog_clicked() {
-  if (ui->twDialogs->currentItem() && ui->twDialogs->currentItem()->parent() == 0) {
+  if (ui->twDialogs->currentItem() && ui->twDialogs->currentItem()->parent() == nullptr) {
     m_report->scriptContext()->deleteDialog(ui->twDialogs->currentItem()->text(0));
     updateDialogsTree();
   }

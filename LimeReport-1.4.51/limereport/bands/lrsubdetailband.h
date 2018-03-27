@@ -43,14 +43,14 @@ class SubDetailBand : public DataBandDesignIntf {
   Q_PROPERTY(bool keepFooterTogether READ keepFooterTogether WRITE setKeepFooterTogether)
   Q_PROPERTY(QColor alternateBackgroundColor READ alternateBackgroundColor WRITE setAlternateBackgroundColor)
 public:
-  SubDetailBand(QObject *owner = 0, QGraphicsItem *parent = 0);
+  SubDetailBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   bool isUnique() const { return false; }
   int bandNestingLevel() { return 1; }
   bool isHasHeader() const;
   bool isHasFooter() const;
 
 private:
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 
 protected:
   virtual QColor bandColor() const;
@@ -62,7 +62,7 @@ class SubDetailHeaderBand : public BandDesignIntf {
   Q_PROPERTY(BandColumnsLayoutType columnsFillDirection READ columnsFillDirection WRITE setColumnsFillDirection)
   Q_PROPERTY(bool printAlways READ printAlways WRITE setPrintAlways)
 public:
-  SubDetailHeaderBand(QObject *owner = 0, QGraphicsItem *parent = 0);
+  SubDetailHeaderBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   bool isUnique() const;
   bool isHeader() const { return true; }
   int bandNestingLevel() { return 1; }
@@ -71,7 +71,7 @@ protected:
   QColor bandColor() const;
 
 private:
-  BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 };
 
 class SubDetailFooterBand : public BandDesignIntf {
@@ -80,7 +80,7 @@ class SubDetailFooterBand : public BandDesignIntf {
   Q_PROPERTY(BandColumnsLayoutType columnsFillDirection READ columnsFillDirection WRITE setColumnsFillDirection)
   Q_PROPERTY(bool printAlways READ printAlways() WRITE setPrintAlways())
 public:
-  SubDetailFooterBand(QObject *owner = 0, QGraphicsItem *parent = 0);
+  SubDetailFooterBand(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   virtual bool isUnique() const;
   bool isFooter() const { return true; }
   int bandNestingLevel() { return 1; }
@@ -89,7 +89,7 @@ protected:
   QColor bandColor() const;
 
 private:
-  BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
 
 private:
 };

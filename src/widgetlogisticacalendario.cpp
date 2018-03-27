@@ -23,7 +23,7 @@ bool WidgetLogisticaCalendario::updateTables() {
     QSqlQuery query;
 
     if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando veiculos: " + query.lastError().text());
+      emit errorSignal("Erro buscando veiculos: " + query.lastError().text());
       return false;
     }
 
@@ -91,7 +91,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   query.bindValue(":end", startDate.addDays(6));
 
   if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro query: " + query.lastError().text());
+    emit errorSignal("Erro query: " + query.lastError().text());
     return false;
   }
 
@@ -124,7 +124,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     if (not query.value("bairro").toString().isEmpty()) text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString();
 
     // TODO: 0dont show this to compact screen? or show this only on doubleclick
-    text += query.value("text").toString();
+    text += "\n" + query.value("text").toString();
 
     text += "\n           Status: " + query.value("status").toString();
 

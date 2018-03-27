@@ -18,9 +18,9 @@ PagamentosDia::PagamentosDia(QWidget *parent) : Dialog(parent), ui(new Ui::Pagam
 PagamentosDia::~PagamentosDia() { delete ui; }
 
 void PagamentosDia::setupTables() {
-  model.setTable("view_fluxo_caixa");
+  modelViewFluxoCaixa.setTable("view_fluxo_caixa");
 
-  ui->tableView->setModel(&model);
+  ui->tableView->setModel(&modelViewFluxoCaixa);
 
   // TODO: 5usar outra coluna no lugar de idCompra?
   // TODO: 5renomear/esconder colunas de data
@@ -37,14 +37,14 @@ void PagamentosDia::setupTables() {
 bool PagamentosDia::setFilter(const QDate &date, const QString &idConta) {
   const QString filtroConta = idConta.isEmpty() ? "" : "AND idConta = " + idConta;
 
-  model.setFilter("`Data` = '" + date.toString("yyyy-MM-dd") + "' AND (status = 'PAGO' OR status = 'RECEBIDO') " + filtroConta);
+  modelViewFluxoCaixa.setFilter("`Data` = '" + date.toString("yyyy-MM-dd") + "' AND (status = 'PAGO' OR status = 'RECEBIDO') " + filtroConta);
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (not modelViewFluxoCaixa.select()) {
+    emit errorSignal("Erro lendo tabela: " + modelViewFluxoCaixa.lastError().text());
     return false;
   }
 
-  setWindowTitle(date.toString("dd-MM-yyyy"));
+  setWindowTitle(date.toString("dd/MM/yyyy"));
 
   return true;
 }

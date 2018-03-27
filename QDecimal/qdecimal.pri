@@ -28,8 +28,6 @@ HEADERS += $$PWD/decnumber/decContext.h \
            $$PWD/decnumber/decSingle.h \
            $$PWD/decnumber/decCommon.c \
            $$PWD/decnumber/decBasic.c \
-           $$PWD/decnumber/Port_stdint.h \
-           $$PWD/decnumber/VCpp_stdint.h
 
 SOURCES += $$PWD/decnumber/decBasic.c \
            $$PWD/decnumber/decCommon.c \

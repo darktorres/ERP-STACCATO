@@ -19,7 +19,7 @@ public:
 
 private:
   // attributes
-  bool createNewId = false;
+  bool createNewId = false; // REFAC: make this a local variable
   const QString idVenda;
   QDataWidgetMapper mapperItem;
   QString idDevolucao;
@@ -34,18 +34,17 @@ private:
   auto calcPrecoItemTotal() -> void;
   auto criarContas() -> bool;
   auto criarDevolucao() -> bool;
-  auto desvincularCompra() -> bool;
   auto determinarIdDevolucao() -> void;
-  auto devolverItem(const QModelIndexList &list) -> bool;
-  auto inserirItens(const QModelIndexList &list) -> bool;
+  auto devolverItem(const int currentRow) -> bool;
+  auto inserirItens(const int currentRow) -> bool;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxQuant_editingFinished() -> void;
   auto on_doubleSpinBoxQuant_valueChanged(double) -> void;
   auto on_doubleSpinBoxTotalItem_valueChanged(double value) -> void;
-  auto on_groupBoxCredito_toggled(bool) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
+  auto removerVinculoCompra(const int currentRow) -> bool;
   auto salvarCredito() -> bool;
   auto setupTables() -> void;
 };

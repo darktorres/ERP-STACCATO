@@ -27,14 +27,15 @@
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
-#include "lrobjectbrowser.h"
+#include <QVBoxLayout>
+
 #include "lrbanddesignintf.h"
 #include "lritemdesignintf.h"
-#include <QVBoxLayout>
+#include "lrobjectbrowser.h"
 
 namespace LimeReport {
 
-ObjectBrowser::ObjectBrowser(QWidget *parent) : QWidget(parent), m_report(NULL), m_mainWindow(NULL), m_changingItemSelection(false) {
+ObjectBrowser::ObjectBrowser(QWidget *parent) : QWidget(parent), m_report(nullptr), m_mainWindow(nullptr), m_changingItemSelection(false) {
   QVBoxLayout *layout = new QVBoxLayout(this);
   setLayout(layout);
   layout->setMargin(2);
@@ -46,19 +47,19 @@ ObjectBrowser::ObjectBrowser(QWidget *parent) : QWidget(parent), m_report(NULL),
 
 void ObjectBrowser::setReportEditor(ReportDesignWidget *report) {
   m_report = report;
-  connect(m_report, SIGNAL(cleared()), this, SLOT(slotClear()));
-  connect(m_report, SIGNAL(loaded()), this, SLOT(slotReportLoaded()));
-  connect(m_report, SIGNAL(activePageChanged()), this, SLOT(slotActivePageChanged()));
+  connect(m_report, &ReportDesignWidget::cleared, this, &ObjectBrowser::slotClear);
+  connect(m_report, &ReportDesignWidget::loaded, this, &ObjectBrowser::slotReportLoaded);
+  connect(m_report, &ReportDesignWidget::activePageChanged, this, &ObjectBrowser::slotActivePageChanged);
 
-  connect(m_report, SIGNAL(itemAdded(LimeReport::PageDesignIntf *, LimeReport::BaseDesignIntf *)), this, SLOT(slotItemAdded(LimeReport::PageDesignIntf *, LimeReport::BaseDesignIntf *)));
-  connect(m_report, SIGNAL(itemDeleted(LimeReport::PageDesignIntf *, LimeReport::BaseDesignIntf *)), this, SLOT(slotItemDeleted(LimeReport::PageDesignIntf *, LimeReport::BaseDesignIntf *)));
-  connect(m_report, SIGNAL(bandAdded(LimeReport::PageDesignIntf *, LimeReport::BandDesignIntf *)), this, SLOT(slotBandAdded(LimeReport::PageDesignIntf *, LimeReport::BandDesignIntf *)));
-  connect(m_report, SIGNAL(bandDeleted(LimeReport::PageDesignIntf *, LimeReport::BandDesignIntf *)), this, SLOT(slotBandDeleted(LimeReport::PageDesignIntf *, LimeReport::BandDesignIntf *)));
-  connect(m_treeView, SIGNAL(itemSelectionChanged()), this, SLOT(slotObjectTreeItemSelectionChanged()));
-  connect(m_report, SIGNAL(itemSelected(LimeReport::BaseDesignIntf *)), this, SLOT(slotItemSelected(LimeReport::BaseDesignIntf *)));
-  connect(m_report, SIGNAL(multiItemSelected()), this, SLOT(slotMultiItemSelected()));
-  connect(m_report, SIGNAL(activePageUpdated(LimeReport::PageDesignIntf *)), this, SLOT(slotActivePageUpdated(LimeReport::PageDesignIntf *)));
-  connect(m_treeView, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(slotItemDoubleClicked(QTreeWidgetItem *, int)));
+  connect(m_report, &ReportDesignWidget::itemAdded, this, &ObjectBrowser::slotItemAdded);
+  connect(m_report, &ReportDesignWidget::itemDeleted, this, &ObjectBrowser::slotItemDeleted);
+  connect(m_report, &ReportDesignWidget::bandAdded, this, &ObjectBrowser::slotBandAdded);
+  connect(m_report, &ReportDesignWidget::bandDeleted, this, &ObjectBrowser::slotBandDeleted);
+  connect(m_treeView, &QTreeWidget::itemSelectionChanged, this, &ObjectBrowser::slotObjectTreeItemSelectionChanged);
+  connect(m_report, &ReportDesignWidget::itemSelected, this, &ObjectBrowser::slotItemSelected);
+  connect(m_report, &ReportDesignWidget::multiItemSelected, this, &ObjectBrowser::slotMultiItemSelected);
+  connect(m_report, &ReportDesignWidget::activePageUpdated, this, &ObjectBrowser::slotActivePageUpdated);
+  connect(m_treeView, &QTreeWidget::itemDoubleClicked, this, &ObjectBrowser::slotItemDoubleClicked);
 
   buildTree();
 }
@@ -68,17 +69,15 @@ void ObjectBrowser::setMainWindow(QMainWindow *mainWindow) { m_mainWindow = main
 void ObjectBrowser::slotClear() {}
 
 void ObjectBrowser::fillNode(QTreeWidgetItem *parentNode, BaseDesignIntf *reportItem, BaseDesignIntf *ignoredItem) {
-  foreach (BaseDesignIntf *item, reportItem->childBaseItems()) {
+  for (BaseDesignIntf *item : reportItem->childBaseItems()) {
     if (item != ignoredItem) {
       ObjectBrowserNode *treeItem = new ObjectBrowserNode(parentNode);
       treeItem->setText(0, item->objectName());
       treeItem->setObject(item);
       treeItem->setIcon(0, QIcon(":/items/" + extractClassName(item->metaObject()->className())));
-      connect(item, SIGNAL(propertyObjectNameChanged(QString, QString)), this, SLOT(slotPropertyObjectNameChanged(QString, QString)));
+      connect(item, &BaseDesignIntf::propertyObjectNameChanged, this, &ObjectBrowser::slotPropertyObjectNameChanged);
       ItemDesignIntf *i = dynamic_cast<ItemDesignIntf *>(item);
-      if (i) {
-        connect(i, SIGNAL(itemLocationChanged(BaseDesignIntf *, BaseDesignIntf *)), this, SLOT(slotItemParentChanged(BaseDesignIntf *, BaseDesignIntf *)));
-      }
+      if (i) connect(i, &ItemDesignIntf::itemLocationChanged, this, &ObjectBrowser::slotItemParentChanged);
       m_itemsMap.insert(item, treeItem);
       parentNode->addChild(treeItem);
       if (!item->childBaseItems().isEmpty()) fillNode(treeItem, item, ignoredItem);
@@ -99,10 +98,10 @@ void ObjectBrowser::buildTree(BaseDesignIntf *ignoredItem) {
 
   m_treeView->addTopLevelItem(topLevelItem);
   QList<QGraphicsItem *> itemsList = m_report->activePage()->items();
-  foreach (QGraphicsItem *item, itemsList) {
+  for (QGraphicsItem *item : itemsList) {
     if (item != ignoredItem) {
       BaseDesignIntf *reportItem = dynamic_cast<BaseDesignIntf *>(item);
-      if (reportItem && reportItem->parentItem() == 0) {
+      if (reportItem && reportItem->parentItem() == nullptr) {
         ObjectBrowserNode *tItem = new ObjectBrowserNode(topLevelItem);
         tItem->setText(0, reportItem->objectName());
         tItem->setObject(reportItem);
@@ -171,7 +170,7 @@ void ObjectBrowser::slotObjectTreeItemSelectionChanged() {
   if (!m_changingItemSelection && m_report->activePage()) {
     m_changingItemSelection = true;
     m_report->activePage()->clearSelection();
-    foreach (QTreeWidgetItem *item, m_treeView->selectedItems()) {
+    for (QTreeWidgetItem *item : m_treeView->selectedItems()) {
       ObjectBrowserNode *tn = dynamic_cast<ObjectBrowserNode *>(item);
       if (tn) {
         BaseDesignIntf *si = dynamic_cast<BaseDesignIntf *>(tn->object());
@@ -208,7 +207,7 @@ void ObjectBrowser::slotMultiItemSelected() {
 
     m_treeView->selectionModel()->clear();
 
-    foreach (QGraphicsItem *item, m_report->activePage()->selectedItems()) {
+    for (QGraphicsItem *item : m_report->activePage()->selectedItems()) {
       BaseDesignIntf *bg = dynamic_cast<BaseDesignIntf *>(item);
       if (bg) {
         ObjectBrowserNode *node = m_itemsMap.value(bg);
@@ -247,9 +246,9 @@ void ObjectBrowserNode::setObject(QObject *value) { m_object = value; }
 
 QObject *ObjectBrowserNode::object() const { return m_object; }
 
-ObjectBrowserNode::ObjectBrowserNode(QTreeWidget *view) : QTreeWidgetItem(view), m_object(0) {}
+ObjectBrowserNode::ObjectBrowserNode(QTreeWidget *view) : QTreeWidgetItem(view), m_object(nullptr) {}
 
-ObjectBrowserNode::ObjectBrowserNode(QTreeWidgetItem *parent) : QTreeWidgetItem(parent), m_object(0) {}
+ObjectBrowserNode::ObjectBrowserNode(QTreeWidgetItem *parent) : QTreeWidgetItem(parent), m_object(nullptr) {}
 
 bool ObjectBrowserNode::operator<(const QTreeWidgetItem &other) const {
   BandDesignIntf *band1 = dynamic_cast<BandDesignIntf *>(m_object);

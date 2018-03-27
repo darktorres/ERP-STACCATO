@@ -14,6 +14,11 @@ public:
   Impressao(const Impressao &) = delete;
   auto print() -> void;
 
+signals:
+  void errorSignal(const QString &error);
+  void warningSignal(const QString &warning);
+  void informationSignal(const QString &information);
+
 private:
   // attributes
   enum class Tipo { Orcamento, Venda } tipo;

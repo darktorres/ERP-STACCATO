@@ -127,23 +127,29 @@ GroupFunction *GroupFunctionFactory::createGroupFunction(const QString &function
   if (m_creators.contains(functionName)) {
     return m_creators.value(functionName)->createFunction(expression, dataBandName, dataManager);
   }
-  return 0;
+  return nullptr;
 }
 
 GroupFunctionFactory::~GroupFunctionFactory() {
-  foreach (GroupFunctionCreator *creator, m_creators.values()) { delete creator; }
+  for (GroupFunctionCreator *creator : m_creators.values()) {
+    delete creator;
+  }
   m_creators.clear();
 }
 
 QVariant SumGroupFunction::calculate() {
   QVariant res = 0;
-  foreach (QVariant value, values()) { res = addition(res, value); }
+  for (QVariant value : values()) {
+    res = addition(res, value);
+  }
   return res;
 }
 
 QVariant AvgGroupFunction::calculate() {
   QVariant res = QVariant();
-  foreach (QVariant value, values()) { res = addition(res, value); }
+  for (QVariant value : values()) {
+    res = addition(res, value);
+  }
   if (!res.isNull() && (values().count() > 0)) {
     res = division(res, values().count());
   }
@@ -153,7 +159,7 @@ QVariant AvgGroupFunction::calculate() {
 QVariant MinGroupFunction::calculate() {
   QVariant res = QVariant();
   if (!values().empty()) res = values().at(0);
-  foreach (QVariant value, values()) {
+  for (QVariant value : values()) {
     if (res.toDouble() > value.toDouble()) res = value;
   }
 
@@ -163,7 +169,7 @@ QVariant MinGroupFunction::calculate() {
 QVariant MaxGroupFunction::calculate() {
   QVariant res = QVariant();
   if (!values().empty()) res = values().at(0);
-  foreach (QVariant value, values()) {
+  for (QVariant value : values()) {
     if (res.toDouble() < value.toDouble()) res = value;
   }
 

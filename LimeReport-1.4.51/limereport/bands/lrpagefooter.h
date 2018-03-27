@@ -41,8 +41,8 @@ class PageFooter : public LimeReport::BandDesignIntf {
   Q_PROPERTY(bool printOnFirstPage READ printOnFirstPage WRITE setPrintOnFirstPage)
   Q_PROPERTY(bool printOnLastPage READ printOnLastPage WRITE setPrintOnLastPage)
 public:
-  PageFooter(QObject *owner = 0, QGraphicsItem *parent = 0);
-  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+  PageFooter(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
+  virtual BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
   virtual bool isFooter() const { return true; }
   bool printOnLastPage() const;
   void setPrintOnLastPage(bool printOnLastPage);

@@ -59,7 +59,7 @@ class ObjectBrowser;
 class ReportDesignWindow : public QMainWindow {
   Q_OBJECT
 public:
-  explicit ReportDesignWindow(ReportEnginePrivate *report, QWidget *parent = 0, QSettings *settings = 0);
+  explicit ReportDesignWindow(ReportEnginePrivate *report, QWidget *parent = nullptr, QSettings *settings = nullptr);
   ~ReportDesignWindow();
   static ReportDesignWindow *instance() { return m_instance; }
 

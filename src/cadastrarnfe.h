@@ -34,7 +34,7 @@ private:
   QString chaveNum;
   QString xml;
   SqlRelationalTableModel modelLoja;
-  SqlRelationalTableModel modelProdutos;
+  SqlRelationalTableModel modelViewProdutoEstoque;
   SqlRelationalTableModel modelVenda;
   Ui::CadastrarNFe *ui;
   // methods

@@ -56,25 +56,25 @@ void TextAlignmentEditorWidget::initEditor() {
   m_textAliginLeft = new QAction(tr("Text align left"), this);
   m_textAliginLeft->setIcon(QIcon(":/report/images/textAlignHLeft"));
   m_textAliginLeft->setCheckable(true);
-  connect(m_textAliginLeft, SIGNAL(toggled(bool)), this, SLOT(slotTextHAttribsChanged(bool)));
+  connect(m_textAliginLeft, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextHAttribsChanged);
   addAction(m_textAliginLeft);
 
   m_textAliginHCenter = new QAction(tr("Text align center"), this);
   m_textAliginHCenter->setIcon(QIcon(":/report/images/textAlignHCenter"));
   m_textAliginHCenter->setCheckable(true);
-  connect(m_textAliginHCenter, SIGNAL(toggled(bool)), this, SLOT(slotTextHAttribsChanged(bool)));
+  connect(m_textAliginHCenter, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextHAttribsChanged);
   addAction(m_textAliginHCenter);
 
   m_textAliginRight = new QAction(tr("Text align right"), this);
   m_textAliginRight->setIcon(QIcon(":/report/images/textAlignHRight"));
   m_textAliginRight->setCheckable(true);
-  connect(m_textAliginRight, SIGNAL(toggled(bool)), this, SLOT(slotTextHAttribsChanged(bool)));
+  connect(m_textAliginRight, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextHAttribsChanged);
   addAction(m_textAliginRight);
 
   m_textAliginJustify = new QAction(tr("Text align justify"), this);
   m_textAliginJustify->setIcon(QIcon(":/report/images/textAlignHJustify"));
   m_textAliginJustify->setCheckable(true);
-  connect(m_textAliginJustify, SIGNAL(toggled(bool)), this, SLOT(slotTextHAttribsChanged(bool)));
+  connect(m_textAliginJustify, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextHAttribsChanged);
   addAction(m_textAliginJustify);
 
   addSeparator();
@@ -82,26 +82,26 @@ void TextAlignmentEditorWidget::initEditor() {
   m_textAliginTop = new QAction(tr("Text align top"), this);
   m_textAliginTop->setIcon(QIcon(":/report/images/textAlignVTop"));
   m_textAliginTop->setCheckable(true);
-  connect(m_textAliginTop, SIGNAL(toggled(bool)), this, SLOT(slotTextVAttribsChanged(bool)));
+  connect(m_textAliginTop, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextVAttribsChanged);
   addAction(m_textAliginTop);
 
   m_textAliginVCenter = new QAction(tr("Text align center"), this);
   m_textAliginVCenter->setIcon(QIcon(":/report/images/textAlignVCenter"));
   m_textAliginVCenter->setCheckable(true);
-  connect(m_textAliginVCenter, SIGNAL(toggled(bool)), this, SLOT(slotTextVAttribsChanged(bool)));
+  connect(m_textAliginVCenter, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextVAttribsChanged);
   addAction(m_textAliginVCenter);
 
   m_textAliginBottom = new QAction(tr("Text align bottom"), this);
   m_textAliginBottom->setIcon(QIcon(":/report/images/textAlignVBottom"));
   m_textAliginBottom->setCheckable(true);
-  connect(m_textAliginBottom, SIGNAL(toggled(bool)), this, SLOT(slotTextVAttribsChanged(bool)));
+  connect(m_textAliginBottom, &QAction::toggled, this, &TextAlignmentEditorWidget::slotTextVAttribsChanged);
   addAction(m_textAliginBottom);
 
   if (reportEditor()) {
-    connect(reportEditor(), SIGNAL(itemPropertyChanged(QString, QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QString, QVariant, QVariant)));
+    connect(reportEditor(), &ReportDesignWidget::itemPropertyChanged, this, &TextAlignmentEditorWidget::slotPropertyChanged);
   }
   if (page()) {
-    connect(page(), SIGNAL(itemPropertyChanged(QString, QString, QVariant, QVariant)), this, SLOT(slotPropertyChanged(QString, QString, QVariant, QVariant)));
+    connect(page(), &PageDesignIntf::itemPropertyChanged, this, &TextAlignmentEditorWidget::slotPropertyChanged);
   }
   setEnabled(false);
 }
@@ -119,7 +119,7 @@ void TextAlignmentEditorWidget::updateValues(const Qt::Alignment &align) {
 }
 
 Qt::Alignment TextAlignmentEditorWidget::createAlignment() {
-  Qt::Alignment align = 0;
+  Qt::Alignment align = nullptr;
   if (m_textAliginLeft->isChecked()) align |= Qt::AlignLeft;
   if (m_textAliginHCenter->isChecked()) align |= Qt::AlignHCenter;
   if (m_textAliginRight->isChecked()) align |= Qt::AlignRight;

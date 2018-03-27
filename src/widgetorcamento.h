@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
   auto montaFiltro() -> void;

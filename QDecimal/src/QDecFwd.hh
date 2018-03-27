@@ -43,7 +43,7 @@ extern "C" {
  #if !defined(int32_t)
   #if defined(_MSC_VER) 
    /* MS Visual C */
-   #include <VCpp_stdint.h>
+   #include <stdint.h>
   #else
    /* C99 standard integers */
    #include <stdint.h>      

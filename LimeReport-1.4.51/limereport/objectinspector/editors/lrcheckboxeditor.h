@@ -38,8 +38,8 @@ class CheckBoxEditor : public QWidget {
   Q_OBJECT
 
 public:
-  CheckBoxEditor(QWidget *parent = 0);
-  CheckBoxEditor(const QString &text, QWidget *parent = 0);
+  CheckBoxEditor(QWidget *parent = nullptr);
+  CheckBoxEditor(const QString &text, QWidget *parent = nullptr);
   ~CheckBoxEditor();
   void setEditing(bool value);
   void setChecked(bool value);

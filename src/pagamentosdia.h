@@ -17,7 +17,7 @@ public:
   auto setFilter(const QDate &date, const QString &idConta) -> bool;
 
 private:
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewFluxoCaixa;
   Ui::PagamentosDia *ui;
   //
   auto setupTables() -> void;

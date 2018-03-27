@@ -19,9 +19,9 @@ public:
 private:
   // attributes
   SqlRelationalTableModel modelOrcamento;
-  SqlRelationalTableModel modelRelatorio;
-  SqlRelationalTableModel modelTotalLoja;
-  SqlRelationalTableModel modelTotalVendedor;
+  SqlRelationalTableModel modelViewRelatorio;
+  SqlRelationalTableModel modelViewRelatorioLoja;
+  SqlRelationalTableModel modelViewRelatorioVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;

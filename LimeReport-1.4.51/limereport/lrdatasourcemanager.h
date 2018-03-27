@@ -47,7 +47,7 @@ class DataSourceManager;
 class DataNode {
 public:
   enum NodeType { Root, Connection, DataSources, Query, SubQuery, Model, Field, Variables, Variable };
-  DataNode(const QString &name = "", NodeType type = Root, DataNode *parent = 0, const QIcon &icon = QIcon()) : m_name(name), m_icon(icon), m_type(type), m_parent(parent) {}
+  DataNode(const QString &name = "", NodeType type = Root, DataNode *parent = nullptr, const QIcon &icon = QIcon()) : m_name(name), m_icon(icon), m_type(type), m_parent(parent) {}
   virtual ~DataNode();
   int childCount() { return m_childs.count(); }
   DataNode *child(int index) { return m_childs[index]; }
@@ -72,7 +72,7 @@ class DataSourceModel : public QAbstractItemModel {
   friend class DataSourceManager;
 
 public:
-  DataSourceModel() : m_dataManager(NULL), m_rootNode(new DataNode()) {}
+  DataSourceModel() : m_dataManager(nullptr), m_rootNode(new DataNode()) {}
   DataSourceModel(DataSourceManager *dataManager);
   ~DataSourceModel();
   QModelIndex index(int row, int column, const QModelIndex &parent) const;
@@ -241,7 +241,7 @@ private slots:
   void slotVariableHasBeenChanged(const QString &variableName);
 
 private:
-  explicit DataSourceManager(QObject *parent = 0);
+  explicit DataSourceManager(QObject *parent = nullptr);
   bool initAndOpenDB(QSqlDatabase &db, ConnectionDesc &connectionDesc);
   Q_DISABLE_COPY(DataSourceManager)
 private:

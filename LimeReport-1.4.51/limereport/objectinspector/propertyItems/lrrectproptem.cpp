@@ -94,10 +94,8 @@ QString LimeReport::RectPropItem::displayValue() const {
   switch (propertyValue().type()) {
   case QVariant::Rect:
     return rectToString(propertyValue().toRect());
-    break;
   case QVariant::RectF:
     return rectToString(propertyValue().toRect());
-    break;
   default:
     return ObjectPropItem::displayValue();
   }
@@ -114,10 +112,10 @@ LimeReport::RectMMPropItem::RectMMPropItem(QObject *object, ObjectsList *objects
     this->appendItem(new LimeReport::RectMMValuePropItem(object, objects, "width", tr("width"), rect.width() / 10, this, true));
     this->appendItem(new LimeReport::RectMMValuePropItem(object, objects, "height", tr("height"), rect.height() / 10, this, false));
   } else if (page) {
-    this->appendItem(new LimeReport::RectMMValuePropItem(object, 0, "x", "x", rect.x() / 10, this, true));
-    this->appendItem(new LimeReport::RectMMValuePropItem(object, 0, "y", "y", rect.y() / 10, this, true));
-    this->appendItem(new LimeReport::RectMMValuePropItem(object, 0, "width", tr("width"), rect.width() / 10, this, false));
-    this->appendItem(new LimeReport::RectMMValuePropItem(object, 0, "height", tr("height"), rect.height() / 10, this, false));
+    this->appendItem(new LimeReport::RectMMValuePropItem(object, nullptr, "x", "x", rect.x() / 10, this, true));
+    this->appendItem(new LimeReport::RectMMValuePropItem(object, nullptr, "y", "y", rect.y() / 10, this, true));
+    this->appendItem(new LimeReport::RectMMValuePropItem(object, nullptr, "width", tr("width"), rect.width() / 10, this, false));
+    this->appendItem(new LimeReport::RectMMValuePropItem(object, nullptr, "height", tr("height"), rect.height() / 10, this, false));
   } else {
     this->appendItem(new LimeReport::RectMMValuePropItem(object, objects, "x", "x", rect.x() / 10, this, false));
     this->appendItem(new LimeReport::RectMMValuePropItem(object, objects, "y", "y", rect.y() / 10, this, false));

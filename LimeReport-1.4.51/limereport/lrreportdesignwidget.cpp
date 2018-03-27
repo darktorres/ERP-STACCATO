@@ -143,7 +143,9 @@ void ReportDesignWidget::createTabs() {
     view->setFrameShape(QFrame::NoFrame);
     view->setScene(m_report->pageAt(i));
 
-    foreach (QGraphicsItem *item, m_report->pageAt(i)->selectedItems()) { item->setSelected(false); }
+    for (QGraphicsItem *item : m_report->pageAt(i)->selectedItems()) {
+      item->setSelected(false);
+    }
 
     view->centerOn(0, 0);
     view->scale(0.5, 0.5);
@@ -206,7 +208,7 @@ void ReportDesignWidget::startEditMode() {
 
 PageDesignIntf *ReportDesignWidget::activePage() {
   if (activeView()) return qobject_cast<PageDesignIntf *>(activeView()->scene());
-  return 0;
+  return nullptr;
 }
 
 QList<QGraphicsItem *> ReportDesignWidget::selectedItems() { return activePage()->selectedItems(); }
@@ -490,8 +492,7 @@ void ReportDesignWidget::slotCurrentTabChanged(int index) {
   QGraphicsView *view = dynamic_cast<QGraphicsView *>(m_tabWidget->widget(index));
   if (view) {
     if (view->scene()) {
-      foreach (QGraphicsItem *item, view->scene()->selectedItems())
-        item->setSelected(false);
+      for (QGraphicsItem *item : view->scene()->selectedItems()) item->setSelected(false);
     }
     m_zoomer->setView(view);
   }

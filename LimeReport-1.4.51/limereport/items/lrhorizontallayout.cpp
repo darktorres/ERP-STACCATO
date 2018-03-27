@@ -61,7 +61,7 @@ HorizontalLayout::HorizontalLayout(QObject *owner, QGraphicsItem *parent) : Layo
 HorizontalLayout::~HorizontalLayout() {
   if (m_layoutMarker) {
     delete m_layoutMarker;
-    m_layoutMarker = 0;
+    m_layoutMarker = nullptr;
   }
 }
 
@@ -90,7 +90,7 @@ void HorizontalLayout::geometryChangedEvent(QRectF newRect, QRectF) {
 }
 
 void HorizontalLayout::setChildVisibility(bool value) {
-  foreach (QGraphicsItem *child, childItems()) {
+  for (QGraphicsItem *child : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(child);
     if (item) item->setVisible(value);
   }
@@ -108,7 +108,7 @@ void HorizontalLayout::initMode(BaseDesignIntf::ItemMode mode) {
 }
 
 bool HorizontalLayout::canBeSplitted(int height) const {
-  foreach (QGraphicsItem *qgItem, childItems()) {
+  for (QGraphicsItem *qgItem : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
     if (item)
       if (!item->canBeSplitted(height - item->pos().y())) return false;
@@ -120,7 +120,7 @@ BaseDesignIntf *HorizontalLayout::cloneUpperPart(int height, QObject *owner, QGr
   HorizontalLayout *upperPart = dynamic_cast<HorizontalLayout *>(createSameTypeItem(owner, parent));
   upperPart->initFromItem(this);
   qreal maxHeight = 0;
-  foreach (BaseDesignIntf *item, childBaseItems()) {
+  for (BaseDesignIntf *item : childBaseItems()) {
 
     if ((item->geometry().top() < height) && (item->geometry().bottom() > height)) {
       int sliceHeight = height - item->geometry().top();
@@ -134,7 +134,9 @@ BaseDesignIntf *HorizontalLayout::cloneUpperPart(int height, QObject *owner, QGr
     }
   }
 
-  foreach (BaseDesignIntf *item, upperPart->childBaseItems()) { item->setHeight((maxHeight < height) ? maxHeight : height); }
+  for (BaseDesignIntf *item : upperPart->childBaseItems()) {
+    item->setHeight((maxHeight < height) ? maxHeight : height);
+  }
   upperPart->setHeight(height);
 
   return upperPart;
@@ -144,7 +146,7 @@ BaseDesignIntf *HorizontalLayout::cloneBottomPart(int height, QObject *owner, QG
   qreal maxHeight = 0;
   HorizontalLayout *bottomPart = dynamic_cast<HorizontalLayout *>(createSameTypeItem(owner, parent));
   bottomPart->initFromItem(this);
-  foreach (BaseDesignIntf *item, childBaseItems()) {
+  for (BaseDesignIntf *item : childBaseItems()) {
     if ((item->geometry().top() < height) && (item->geometry().bottom() > height)) {
       BaseDesignIntf *tmpItem = item->cloneBottomPart(height, bottomPart, bottomPart);
       tmpItem->setPos(tmpItem->pos().x(), 0);
@@ -153,7 +155,9 @@ BaseDesignIntf *HorizontalLayout::cloneBottomPart(int height, QObject *owner, QG
   }
 
   if (!bottomPart->isEmpty()) {
-    foreach (BaseDesignIntf *item, bottomPart->childBaseItems()) { item->setHeight(maxHeight); }
+    for (BaseDesignIntf *item : bottomPart->childBaseItems()) {
+      item->setHeight(maxHeight);
+    }
     bottomPart->setHeight(maxHeight);
   }
   return bottomPart;
@@ -172,7 +176,9 @@ void HorizontalLayout::setBorderLinesFlags(BaseDesignIntf::BorderLines flags) {
 QVariant HorizontalLayout::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
   if (change == QGraphicsItem::ItemSelectedHasChanged) {
     m_isRelocating = true;
-    foreach (BaseDesignIntf *item, m_children) { item->setVisible(!value.toBool()); }
+    for (BaseDesignIntf *item : m_children) {
+      item->setVisible(!value.toBool());
+    }
     m_isRelocating = false;
   }
   return LayoutDesignIntf::itemChange(change, value);
@@ -180,7 +186,7 @@ QVariant HorizontalLayout::itemChange(QGraphicsItem::GraphicsItemChange change, 
 
 void HorizontalLayout::paint(QPainter *ppainter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
   if (isSelected()) {
-    foreach (BaseDesignIntf *item, m_children) {
+    for (BaseDesignIntf *item : m_children) {
       ppainter->save();
       ppainter->setPen(Qt::red);
       ppainter->drawRect(QRectF(item->pos().x(), item->pos().y(), item->rect().bottomRight().rx(), item->rect().bottomRight().ry()));
@@ -194,7 +200,7 @@ void HorizontalLayout::restoreChild(BaseDesignIntf *item) {
   if (m_children.contains(item)) return;
 
   m_isRelocating = true;
-  foreach (BaseDesignIntf *child, childBaseItems()) {
+  for (BaseDesignIntf *child : childBaseItems()) {
     if (child->pos() == item->pos()) {
       int index = m_children.indexOf(child) - 1;
       m_children.insert(index, item);
@@ -219,7 +225,7 @@ void HorizontalLayout::restoreChild(BaseDesignIntf *item) {
 bool HorizontalLayout::isEmpty() const {
   bool isEmpty = true;
   bool allItemsIsText = true;
-  foreach (QGraphicsItem *qgItem, childItems()) {
+  for (QGraphicsItem *qgItem : childItems()) {
     ContentItemDesignIntf *item = dynamic_cast<ContentItemDesignIntf *>(qgItem);
     if (item && !item->content().isEmpty()) isEmpty = false;
     if (!item && dynamic_cast<BaseDesignIntf *>(qgItem)) allItemsIsText = false;
@@ -254,9 +260,9 @@ void HorizontalLayout::collectionLoadFinished(const QString &collectionName) {
   ItemDesignIntf::collectionLoadFinished(collectionName);
   if (collectionName.compare("children", Qt::CaseInsensitive) == 0) {
 #ifdef HAVE_QT5
-    foreach (QObject *obj, children()) {
+    for (QObject *obj : children()) {
 #else
-    foreach (QObject *obj, QObject::children()) {
+    for (QObject *obj : QObject::children()) {
 #endif
       BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(obj);
       if (item) {
@@ -275,7 +281,7 @@ void HorizontalLayout::updateLayoutSize() {
   int spaceBorder = (borderLines() != 0) ? borderLineSize() : 0;
   int w = spaceBorder * 2;
   qreal h = 0;
-  foreach (BaseDesignIntf *item, m_children) {
+  for (BaseDesignIntf *item : m_children) {
     if (item->isVisible()) {
       if (h < item->height()) h = item->height();
       w += item->width();
@@ -289,12 +295,14 @@ void HorizontalLayout::relocateChildren() {
   int spaceBorder = (borderLines() != 0) ? borderLineSize() : 0;
   if (m_children.count() < childItems().size() - 1) {
     m_children.clear();
-    foreach (BaseDesignIntf *item, childBaseItems()) { m_children.append(item); }
+    for (BaseDesignIntf *item : childBaseItems()) {
+      m_children.append(item);
+    }
   }
   std::sort(m_children.begin(), m_children.end(), lessThen);
   qreal curX = spaceBorder;
   m_isRelocating = true;
-  foreach (BaseDesignIntf *item, m_children) {
+  for (BaseDesignIntf *item : m_children) {
     if (item->isVisible() || itemMode() == DesignMode) {
       item->setPos(curX, spaceBorder);
       curX += item->width();
@@ -307,9 +315,9 @@ void HorizontalLayout::relocateChildren() {
 void HorizontalLayout::beforeDelete() {
   m_children.clear();
 #ifdef HAVE_QT5
-  foreach (QObject *item, children()) {
+  for (QObject *item : children()) {
 #else
-  foreach (QObject *item, QObject::children()) {
+  for (QObject *item : QObject::children()) {
 #endif
     BaseDesignIntf *bdItem = dynamic_cast<BaseDesignIntf *>(item);
     if (bdItem) {
@@ -326,7 +334,7 @@ void HorizontalLayout::beforeDelete() {
 void HorizontalLayout::updateItemSize(DataSourceManager *dataManager, RenderPass pass, int maxHeight) {
   m_isRelocating = true;
   ItemDesignIntf::updateItemSize(dataManager, pass, maxHeight);
-  foreach (QGraphicsItem *child, childItems()) {
+  for (QGraphicsItem *child : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(child);
     if (item) item->updateItemSize(dataManager, pass, maxHeight);
   }
@@ -337,7 +345,7 @@ void HorizontalLayout::updateItemSize(DataSourceManager *dataManager, RenderPass
 }
 
 bool HorizontalLayout::isNeedUpdateSize(RenderPass pass) const {
-  foreach (QGraphicsItem *child, childItems()) {
+  for (QGraphicsItem *child : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(child);
     if (item && item->isNeedUpdateSize(pass)) return true;
   }
@@ -360,7 +368,9 @@ void HorizontalLayout::slotOnChildDestroy(QObject *child) {
 BaseDesignIntf *HorizontalLayout::findNext(BaseDesignIntf *item) {
   if (m_children.count() < childItems().size() - 1) {
     m_children.clear();
-    foreach (BaseDesignIntf *childItem, childBaseItems()) { m_children.append(childItem); }
+    for (BaseDesignIntf *childItem : childBaseItems()) {
+      m_children.append(childItem);
+    }
   }
   std::sort(m_children.begin(), m_children.end(), lessThen);
   for (int i = 0; i < m_children.count(); ++i) {
@@ -368,13 +378,15 @@ BaseDesignIntf *HorizontalLayout::findNext(BaseDesignIntf *item) {
       return m_children[i + 1];
     }
   }
-  return 0;
+  return nullptr;
 }
 
 BaseDesignIntf *HorizontalLayout::findPrior(BaseDesignIntf *item) {
   if (m_children.count() < childItems().size() - 1) {
     m_children.clear();
-    foreach (BaseDesignIntf *childItem, childBaseItems()) { m_children.append(childItem); }
+    for (BaseDesignIntf *childItem : childBaseItems()) {
+      m_children.append(childItem);
+    }
   }
   std::sort(m_children.begin(), m_children.end(), lessThen);
   for (int i = 0; i < m_children.count(); ++i) {
@@ -382,7 +394,7 @@ BaseDesignIntf *HorizontalLayout::findPrior(BaseDesignIntf *item) {
       return m_children[i - 1];
     }
   }
-  return 0;
+  return nullptr;
 }
 
 void HorizontalLayout::divideSpace() {
@@ -391,7 +403,7 @@ void HorizontalLayout::divideSpace() {
   int visibleItemsCount = 0;
   int spaceBorder = (borderLines() != 0) ? borderLineSize() : 0;
 
-  foreach (BaseDesignIntf *item, m_children) {
+  for (BaseDesignIntf *item : m_children) {
     if (item->isVisible() || itemMode() == DesignMode) {
       itemsSumSize += item->width();
       visibleItemsCount++;

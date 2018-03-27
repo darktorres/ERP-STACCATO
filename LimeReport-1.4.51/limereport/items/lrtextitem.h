@@ -78,7 +78,7 @@ public:
     enum ValueType{Default,DateTime,Double};
 
     void Init();
-    TextItem(QObject* owner=0, QGraphicsItem* parent=0);
+    TextItem(QObject* owner=nullptr, QGraphicsItem* parent=nullptr);
     ~TextItem();
 
     void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*);
@@ -107,7 +107,7 @@ public:
     bool isEmpty() const{return m_strText.trimmed().isEmpty() /*m_text->isEmpty()*/;}
     BaseDesignIntf* cloneUpperPart(int height, QObject *owner, QGraphicsItem *parent);
     BaseDesignIntf* cloneBottomPart(int height, QObject *owner, QGraphicsItem *parent);
-    BaseDesignIntf* createSameTypeItem(QObject* owner=0, QGraphicsItem* parent=0);
+    BaseDesignIntf* createSameTypeItem(QObject* owner=nullptr, QGraphicsItem* parent=nullptr);
     BaseDesignIntf* cloneEmpty(int height, QObject *owner, QGraphicsItem *parent);
     void objectLoadFinished();
 

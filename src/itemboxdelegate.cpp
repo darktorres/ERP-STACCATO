@@ -13,7 +13,7 @@ QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
   if (tipo == Tipo::Loja) editor->setSearchDialog(SearchDialog::loja(parent));
   if (tipo == Tipo::Conta) editor->setSearchDialog(SearchDialog::conta(parent));
 
-  connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitAndCloseEditor);
+  connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitEditor);
 
   return editor;
 }
@@ -28,8 +28,7 @@ void ItemBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, c
 
 void ItemBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }
 
-void ItemBoxDelegate::commitAndCloseEditor() {
+void ItemBoxDelegate::commitEditor() {
   QWidget *editor = qobject_cast<QWidget *>(sender());
   emit commitData(editor);
-  emit closeEditor(editor);
 }

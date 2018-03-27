@@ -38,7 +38,7 @@
 namespace LimeReport {
 
 SQLEditDialog::SQLEditDialog(QWidget *parent, LimeReport::DataSourceManager *dataSources, SQLDialogMode dialogMode)
-    : QDialog(parent), ui(new Ui::SQLEditDialog), m_datasources(dataSources), m_dialogMode(dialogMode), m_oldDatasourceName(""), m_settings(0), m_ownedSettings(false) {
+    : QDialog(parent), ui(new Ui::SQLEditDialog), m_datasources(dataSources), m_dialogMode(dialogMode), m_oldDatasourceName(""), m_settings(nullptr), m_ownedSettings(false) {
   ui->setupUi(this);
   m_masterDatasources = new QCompleter(this);
   ui->leMaster->setCompleter(m_masterDatasources);
@@ -60,8 +60,8 @@ SQLEditDialog::SQLEditDialog(QWidget *parent, LimeReport::DataSourceManager *dat
   ui->fieldsMap->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 #endif
   ui->pnlChildDatasource->setVisible(false);
-  connect(ui->pbPreview, SIGNAL(pressed()), this, SLOT(slotPreviewData()));
-  connect(ui->pbHidePreview, SIGNAL(pressed()), this, SLOT(slotHidePreview()));
+  connect(ui->pbPreview, &QAbstractButton::pressed, this, &SQLEditDialog::slotPreviewData);
+  connect(ui->pbHidePreview, &QAbstractButton::pressed, this, &SQLEditDialog::slotHidePreview);
 }
 
 SQLEditDialog::~SQLEditDialog() {
@@ -145,11 +145,11 @@ void SQLEditDialog::check() {
 }
 
 void SQLEditDialog::initConnections() {
-  foreach (QString connectionName, QSqlDatabase::connectionNames()) {
+  for (QString connectionName : QSqlDatabase::connectionNames()) {
     ui->cbbConnection->addItem(QIcon(":/databrowser/images/plug-connect.png"), ConnectionDesc::connectionNameForUser(connectionName));
   }
 
-  foreach (QString connectionName, m_datasources->connectionNames()) {
+  for (QString connectionName : m_datasources->connectionNames()) {
     connectionName = (connectionName.compare(QSqlDatabase::defaultConnection) == 0) ? tr("defaultConnection") : connectionName;
     if (ui->cbbConnection->findText(connectionName, Qt::MatchExactly) == -1)
       ui->cbbConnection->addItem(QIcon(":/databrowser/images/plug-disconnect.png"), ConnectionDesc::connectionNameForUser(connectionName));
@@ -179,7 +179,7 @@ void SQLEditDialog::setDataSources(LimeReport::DataSourceManager *dataSources, Q
       ui->leChild->setText(proxyDesc->child());
       ui->leMaster->setText(proxyDesc->master());
       int curIndex = 0;
-      foreach (LimeReport::FieldMapDesc *fields, *proxyDesc->fieldsMap()) {
+      for (LimeReport::FieldMapDesc *fields : *proxyDesc->fieldsMap()) {
         ui->fieldsMap->setRowCount(curIndex + 1);
         ui->fieldsMap->setItem(curIndex, 0, new QTableWidgetItem(fields->master()));
         ui->fieldsMap->setItem(curIndex, 1, new QTableWidgetItem(fields->detail()));
@@ -287,7 +287,7 @@ void SQLEditDialog::slotPreviewData() {
 void SQLEditDialog::slotHidePreview() { hidePreview(); }
 
 void SQLEditDialog::writeSetting() {
-  if (settings() != 0) {
+  if (settings() != nullptr) {
     settings()->beginGroup("SQLEditor");
     settings()->setValue("Geometry", saveGeometry());
     settings()->endGroup();
@@ -295,7 +295,7 @@ void SQLEditDialog::writeSetting() {
 }
 
 void SQLEditDialog::readSettings() {
-  if (settings() == 0) return;
+  if (settings() == nullptr) return;
   settings()->beginGroup("SQLEditor");
   QVariant v = settings()->value("Geometry");
   if (v.isValid()) {

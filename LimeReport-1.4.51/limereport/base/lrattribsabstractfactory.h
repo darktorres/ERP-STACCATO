@@ -55,7 +55,7 @@ public:
     if (m_factoryMap.contains(id)) {
       return m_factoryMap[id];
     } else
-      return 0;
+      return nullptr;
   }
   QString attribs(const IdentifierType &id) {
     if (m_attribsMap.contains(id)) {

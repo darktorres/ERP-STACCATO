@@ -47,7 +47,7 @@ class DataBrowser;
 class DataBrowser : public QWidget, public IConnectionController {
   Q_OBJECT
 public:
-  explicit DataBrowser(QWidget *parent = 0);
+  explicit DataBrowser(QWidget *parent = nullptr);
   ~DataBrowser();
   QSize sizeHint() const;
   void setReportEditor(LimeReport::ReportDesignWidget *report);

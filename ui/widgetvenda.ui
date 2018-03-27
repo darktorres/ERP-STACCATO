@@ -209,7 +209,7 @@
                <bool>false</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_40">
-               <item row="11" column="0">
+               <item row="12" column="0">
                 <widget class="QCheckBox" name="checkBoxCancelado">
                  <property name="enabled">
                   <bool>true</bool>
@@ -245,6 +245,29 @@
                  </property>
                 </widget>
                </item>
+               <item row="10" column="0">
+                <widget class="QCheckBox" name="checkBoxRepoReceb">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Repo. Receb.</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="13" column="0">
+                <widget class="QCheckBox" name="checkBoxDevolvido">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Devolvido</string>
+                 </property>
+                </widget>
+               </item>
                <item row="5" column="0">
                 <widget class="QCheckBox" name="checkBoxEmRecebimento">
                  <property name="enabled">
@@ -258,26 +281,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="10" column="0">
-                <widget class="QCheckBox" name="checkBoxFinalizado">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string>Finalizado</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="12" column="0">
-                <widget class="QCheckBox" name="checkBoxDevolvido">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string>Devolvido</string>
-                 </property>
-                </widget>
-               </item>
                <item row="6" column="0">
                 <widget class="QCheckBox" name="checkBoxEstoque">
                  <property name="enabled">
@@ -285,19 +288,6 @@
                  </property>
                  <property name="text">
                   <string>Estoque</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="7" column="0">
-                <widget class="QCheckBox" name="checkBoxEntregaAgend">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string>Entrega Agend.</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
@@ -317,6 +307,19 @@
                  </property>
                 </widget>
                </item>
+               <item row="7" column="0">
+                <widget class="QCheckBox" name="checkBoxEntregaAgend">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Entrega Agend.</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
                <item row="8" column="0">
                 <widget class="QCheckBox" name="checkBoxEmEntrega">
                  <property name="enabled">
@@ -324,19 +327,6 @@
                  </property>
                  <property name="text">
                   <string>Em Entrega</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QCheckBox" name="checkBoxPendente">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string>Pendente</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
@@ -356,6 +346,19 @@
                  </property>
                 </widget>
                </item>
+               <item row="0" column="0">
+                <widget class="QCheckBox" name="checkBoxPendente">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Pendente</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
                <item row="1" column="0">
                 <widget class="QCheckBox" name="checkBoxIniciado">
                  <property name="enabled">
@@ -363,6 +366,19 @@
                  </property>
                  <property name="text">
                   <string>Iniciado</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="0">
+                <widget class="QCheckBox" name="checkBoxRepoEntrega">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Repo. Entrega</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>

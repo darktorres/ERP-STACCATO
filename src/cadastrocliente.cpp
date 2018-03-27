@@ -88,12 +88,12 @@ bool CadastroCliente::verifyFields() {
   }
 
   if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    QMessageBox::critical(this, "Erro!", "CPF inválido!");
+    emit errorSignal("CPF inválido!");
     return false;
   }
 
   if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    QMessageBox::critical(this, "Erro!", "CNPJ inválido!");
+    emit errorSignal("CNPJ inválido!");
     return false;
   }
 
@@ -104,12 +104,12 @@ bool CadastroCliente::verifyFields() {
     query.bindValue(":cnpj", ui->lineEditCNPJ->text());
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro verificando se CPF/CNPJ já cadastrado!");
+      emit errorSignal("Erro verificando se CPF/CNPJ já cadastrado!");
       return false;
     }
 
     if (query.first()) {
-      QMessageBox::critical(this, "Erro!", "CPF/CNPJ já cadastrado!");
+      emit errorSignal("CPF/CNPJ já cadastrado!");
       return false;
     }
   }
@@ -203,13 +203,13 @@ bool CadastroCliente::viewRegister() {
   if (not RegisterDialog::viewRegister()) return false;
 
   if (data("idCliente").toString().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "idCliente vazio!");
+    emit errorSignal("idCliente vazio!");
     return false;
   }
 
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço do cliente: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço do cliente: " + modelEnd.lastError().text());
 
   ui->itemBoxCliente->getSearchDialog()->setFilter("idCliente NOT IN (" + data("idCliente").toString() + ")");
 
@@ -243,12 +243,12 @@ void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
     query.bindValue(":cpf", text);
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando CPF: " + query.lastError().text());
+      emit errorSignal("Erro buscando CPF: " + query.lastError().text());
       return;
     }
 
     if (query.first()) {
-      QMessageBox::critical(this, "Erro!", "CPF já cadastrado!");
+      emit errorSignal("CPF já cadastrado!");
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -263,12 +263,12 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
     query.bindValue(":cnpj", text);
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro buscando CNPJ: " + query.lastError().text());
+      emit errorSignal("Erro buscando CNPJ: " + query.lastError().text());
       return;
     }
 
     if (query.first()) {
-      QMessageBox::critical(this, "Erro!", "CNPJ já cadastrado!");
+      emit errorSignal("CNPJ já cadastrado!");
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -281,13 +281,13 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    QMessageBox::critical(this, "Erro!", "CEP inválido!");
+    emit errorSignal("CEP inválido!");
     return false;
   }
 
   if (ui->lineEditNro->text().isEmpty()) {
     ui->lineEditNro->setFocus();
-    QMessageBox::critical(this, "Erro!", "Número vazio!");
+    emit errorSignal("Número vazio!");
     return false;
   }
 
@@ -368,7 +368,7 @@ bool CadastroCliente::cadastrar() {
 
 void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
   if (not cadastrarEndereco()) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível cadastrar este endereço!");
+    emit errorSignal("Não foi possível cadastrar este endereço!");
     return;
   }
 
@@ -377,7 +377,7 @@ void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
 
 void CadastroCliente::on_pushButtonAtualizarEnd_clicked() {
   if (not cadastrarEndereco(Tipo::Atualizar)) {
-    QMessageBox::critical(this, "Erro!", "Não foi possível atualizar este endereço!");
+    emit errorSignal("Não foi possível atualizar este endereço!");
     return;
   }
 
@@ -393,7 +393,7 @@ void CadastroCliente::on_lineEditCEP_textChanged(const QString &cep) {
   CepCompleter cc;
 
   if (not cc.buscaCEP(cep)) {
-    QMessageBox::warning(this, "Aviso!", "CEP não encontrado!");
+    emit warningSignal("CEP não encontrado!");
     return;
   }
 
@@ -467,7 +467,7 @@ void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) { ui
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela endereço: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
 }
 
 void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
@@ -477,12 +477,12 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
 
   if (msgBox.exec() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) {
-      QMessageBox::critical(this, "Erro!", "Erro marcando desativado!");
+      emit errorSignal("Erro marcando desativado!");
       return;
     }
 
     if (not modelEnd.submitAll()) {
-      QMessageBox::critical(this, "Erro!", "Não foi possível remover este item: " + modelEnd.lastError().text());
+      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
       return;
     }
 
@@ -490,7 +490,7 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroCliente::successMessage() { QMessageBox::information(this, "Atenção!", tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
+void CadastroCliente::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
 
 void CadastroCliente::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

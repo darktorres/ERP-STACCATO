@@ -84,7 +84,7 @@ public:
 class FontPropItem : public ObjectPropItem {
   Q_OBJECT
 public:
-  FontPropItem() : ObjectPropItem(), m_pointSize(NULL), m_bold(NULL), m_italic(NULL), m_underline(NULL), m_family(NULL) {}
+  FontPropItem() : ObjectPropItem(), m_pointSize(nullptr), m_bold(nullptr), m_italic(nullptr), m_underline(nullptr), m_family(nullptr) {}
   FontPropItem(QObject *object, ObjectsList *objects, const QString &name, const QString &displayName, const QVariant &value, ObjectPropItem *parent, bool readonly);
   QWidget *createProperyEditor(QWidget *parent) const;
   QString displayValue() const;

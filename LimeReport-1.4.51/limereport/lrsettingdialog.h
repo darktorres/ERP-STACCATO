@@ -13,7 +13,7 @@ class SettingDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit SettingDialog(QWidget *parent = 0);
+  explicit SettingDialog(QWidget *parent = nullptr);
   ~SettingDialog();
   int verticalGridStep();
   int horizontalGridStep();

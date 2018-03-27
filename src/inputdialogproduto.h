@@ -23,7 +23,7 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelPedidoFornecedor;
   Ui::InputDialogProduto *ui;
   // methods
   auto cadastrar() -> bool;

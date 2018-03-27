@@ -10,74 +10,60 @@
  */
 
 #include "QDecPacked.hh"
-#include "QDecNumber.hh"
-#include "QDecSingle.hh"
 #include "QDecDouble.hh"
+#include "QDecNumber.hh"
 #include "QDecQuad.hh"
+#include "QDecSingle.hh"
 
-QDecPacked::QDecPacked(const char* str)
-{ *this = fromQDecNumber(QDecNumber(str)); }
+QDecPacked::QDecPacked(const char *str) { *this = fromQDecNumber(QDecNumber(str)); }
 
-QDecPacked::QDecPacked(double d)
-{ *this = fromQDecNumber(QDecNumber(d)); }
+QDecPacked::QDecPacked(double d) { *this = fromQDecNumber(QDecNumber(d)); }
 
-QDecPacked::QDecPacked(const QDecSingle& s)
-{ *this = s.toQDecPacked(); }
+QDecPacked::QDecPacked(const QDecSingle &s) { *this = s.toQDecPacked(); }
 
-QDecPacked::QDecPacked(const QDecDouble& d)
-{ *this = d.toQDecPacked(); }
+QDecPacked::QDecPacked(const QDecDouble &d) { *this = d.toQDecPacked(); }
 
-QDecPacked::QDecPacked(const QDecQuad& q)
-{ *this = q.toQDecPacked(); }
+QDecPacked::QDecPacked(const QDecQuad &q) { *this = q.toQDecPacked(); }
 
-
-QDecPacked& QDecPacked::fromQDecNumber(const QDecNumber& d)
-{
-  uint8_t bfr[QDecNumDigits] = { 0 };
+QDecPacked &QDecPacked::fromQDecNumber(const QDecNumber &d) {
+  uint8_t bfr[QDecNumDigits] = {0};
   int32_t scale = 0;
 
-  uint8_t* rv = decPackedFromNumber(bfr, QDecNumDigits, &scale, d.data());
+  uint8_t *rv = decPackedFromNumber(bfr, QDecNumDigits, &scale, d.data());
 
-  if(rv) {
+  if (rv) {
     m_scale = scale;
-    
-    char* p = (char*)bfr;
+
+    char *p = reinterpret_cast<char *>(bfr);
     int i = 0;
     // Skip null bytes at the left
-    for(; p[i] == '\0' || i==QDecNumDigits; ++i);
+    for (; p[i] == '\0' || i == QDecNumDigits; ++i)
+      ;
 
     // Construct byte array from the beginning of BCD bytes
-    m_bytes = QByteArray(&p[i], QDecNumDigits-i);
+    m_bytes = QByteArray(&p[i], QDecNumDigits - i);
   }
 
   return *this;
 }
 
-QDecNumber QDecPacked::toQDecNumber() const
-{
-  if(length() > 0) {
+QDecNumber QDecPacked::toQDecNumber() const {
+  if (length() > 0) {
     decNumber n;
     return decPackedToNumber(bytesRaw(), length(), &m_scale, &n);
-  }
-  else
+  } else
     // Not initialized, return default QDecNumber value
     return QDecNumber();
 }
 
-QDecPacked& QDecPacked::fromDouble(double d)
-{
+QDecPacked &QDecPacked::fromDouble(double d) {
   *this = fromQDecNumber(QDecNumber(d));
   return *this;
 }
 
-QDecPacked& QDecPacked::fromString(const char* str)
-{
+QDecPacked &QDecPacked::fromString(const char *str) {
   *this = fromQDecNumber(QDecNumber(str));
   return *this;
 }
 
-QByteArray QDecPacked::toString() const
-{
-  return toQDecNumber().toString();
-}
-
+QByteArray QDecPacked::toString() const { return toQDecNumber().toString(); }

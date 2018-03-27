@@ -19,7 +19,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewLogisticaRepresentacao;
   QString fornecedor;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods

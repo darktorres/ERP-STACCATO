@@ -39,9 +39,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
     query.bindValue(":idLoja", UserSession::idLoja());
 
-    if (not query.exec()) {
-      QMessageBox::critical(parent, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text());
-    }
+    if (not query.exec()) QMessageBox::critical(parent, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text());
 
     list << "";
 
@@ -68,6 +66,12 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     list << "";
 
     while (query.next()) list << query.value("tipo").toString();
+  }
+
+  if (tipo == Tipo::ST) {
+    list << "Sem ST"
+         << "ST Fornecedor"
+         << "ST Loja";
   }
 
   editor->addItems(list);

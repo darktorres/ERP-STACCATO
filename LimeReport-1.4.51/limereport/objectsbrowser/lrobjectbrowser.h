@@ -53,13 +53,13 @@ private:
 class ObjectBrowser : public QWidget {
   Q_OBJECT
 public:
-  ObjectBrowser(QWidget *parent = 0);
+  ObjectBrowser(QWidget *parent = nullptr);
   void setReportEditor(LimeReport::ReportDesignWidget *report);
   void setMainWindow(QMainWindow *mainWindow);
 
 protected:
-  void fillNode(QTreeWidgetItem *parentNode, BaseDesignIntf *reportItem, BaseDesignIntf *ignoredItem = 0);
-  void buildTree(BaseDesignIntf *ignoredItem = 0);
+  void fillNode(QTreeWidgetItem *parentNode, BaseDesignIntf *reportItem, BaseDesignIntf *ignoredItem = nullptr);
+  void buildTree(BaseDesignIntf *ignoredItem = nullptr);
   void removeItem(BaseDesignIntf *item);
   void findAndRemove(QTreeWidgetItem *node, BaseDesignIntf *item);
 private slots:

@@ -106,7 +106,7 @@ void XMLReader::readItemFromNode(QObject *item, QDomElement *node) {
 
   BaseDesignIntf *baseObj = dynamic_cast<BaseDesignIntf *>(item);
   if (baseObj) {
-    foreach (QGraphicsItem *childItem, baseObj->childItems()) {
+    for (QGraphicsItem *childItem : baseObj->childItems()) {
       BaseDesignIntf *baseItem = dynamic_cast<BaseDesignIntf *>(childItem);
       if (baseItem) baseItem->parentObjectLoadFinished();
     }
@@ -131,7 +131,7 @@ bool XMLReader::extractFirstNode() {
 void XMLReader::readProperty(QObject *item, QDomElement *node) { item->setProperty(node->nodeName().toLatin1(), getValue(node)); }
 
 QVariant XMLReader::getValue(QDomElement *node) {
-  CreateSerializator creator = 0;
+  CreateSerializator creator = nullptr;
   try {
     creator = XMLAbstractSerializatorFactory::instance().objectCreator(node->attribute("Type"));
   } catch (ReportError &e) {

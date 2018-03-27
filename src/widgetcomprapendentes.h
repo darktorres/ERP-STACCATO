@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
   auto insere(const QDate &dataPrevista) -> bool;

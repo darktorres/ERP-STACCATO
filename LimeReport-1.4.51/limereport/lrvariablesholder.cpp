@@ -114,7 +114,9 @@ VarDesc *VariablesHolder::userVariableAt(int index) { return m_userVariables.at(
 
 QStringList VariablesHolder::variableNames() {
   QStringList result;
-  foreach (QString varName, m_varNames.keys()) { result << varName; }
+  for (QString varName : m_varNames.keys()) {
+    result << varName;
+  }
   return result;
 }
 

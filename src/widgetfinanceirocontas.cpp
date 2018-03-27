@@ -91,15 +91,23 @@ bool WidgetFinanceiroContas::updateTables() {
 
   ui->table->resizeColumnsToContents();
 
-  // REFAC: return false if querys has error
-
   modelVencidos.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString(tipo == Tipo::Receber ? "view_a_receber_vencidos_base" : "view_a_pagar_vencidos_base") +
                          " v JOIN (SELECT @running_total := 0) r");
+
+  if (modelVencidos.lastError().isValid()) {
+    emit errorSignal("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text());
+    return false;
+  }
 
   ui->tableVencidos->resizeColumnsToContents();
 
   modelVencer.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString(tipo == Tipo::Receber ? "view_a_receber_vencer_base" : "view_a_pagar_vencer_base") +
                        " v JOIN (SELECT @running_total := 0) r");
+
+  if (modelVencer.lastError().isValid()) {
+    emit errorSignal("Erro atualizando tabela vencer: " + modelVencer.lastError().text());
+    return false;
+  }
 
   ui->tableVencer->resizeColumnsToContents();
 
@@ -204,7 +212,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                    "`cr`.`tipo`, `cr`.`parcela` DESC");
   }
 
-  if (model.lastError().isValid()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela: " + model.lastError().text());
+  if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela: " + model.lastError().text());
 
   ui->table->resizeColumnsToContents();
 }
@@ -278,7 +286,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
@@ -292,13 +300,13 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro excluindo lançamento: " + query.lastError().text());
+      emit errorSignal("Erro excluindo lançamento: " + query.lastError().text());
       return;
     }
 
     montaFiltro();
 
-    QMessageBox::information(this, "Aviso!", "Lançamento excluído com sucesso!");
+    emit informationSignal("Lançamento excluído com sucesso!");
   }
 }
 
@@ -308,7 +316,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Nenhuma linha selecionada!");
+    emit errorSignal("Nenhuma linha selecionada!");
     return;
   }
 
@@ -317,17 +325,17 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
   if (not queryPagamento.exec() or not queryPagamento.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando pagamento: " + queryPagamento.lastError().text());
+    emit errorSignal("Erro buscando pagamento: " + queryPagamento.lastError().text());
     return;
   }
 
   if (queryPagamento.value("dataPagamento").toDate().daysTo(QDate::currentDate()) > 5) {
-    QMessageBox::critical(this, "Erro!", "No máximo 5 dias para reverter!");
+    emit errorSignal("No máximo 5 dias para reverter!");
     return;
   }
 
   if (queryPagamento.value("grupo").toString() == "Transferência") {
-    QMessageBox::critical(this, "Erro!", "Não pode reverter transferência!");
+    emit errorSignal("Não pode reverter transferência!");
     return;
   }
 
@@ -341,12 +349,12 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
     if (not query.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro revertendo lançamento: " + query.lastError().text());
+      emit errorSignal("Erro revertendo lançamento: " + query.lastError().text());
       return;
     }
 
     updateTables();
 
-    QMessageBox::information(this, "Aviso!", "Lançamento revertido com sucesso!");
+    emit informationSignal("Lançamento revertido com sucesso!");
   }
 }

@@ -48,7 +48,7 @@ PageItemDesignIntf::Ptr PreviewReportWidgetPrivate::currentPage() {
   if (m_reportPages.count() > 0 && m_reportPages.count() >= m_currentPage)
     return m_reportPages.at(m_currentPage - 1);
   else
-    return PageItemDesignIntf::Ptr(0);
+    return PageItemDesignIntf::Ptr(nullptr);
 }
 
 PreviewReportWidget::PreviewReportWidget(ReportEnginePrivate *report, QWidget *parent) : QWidget(parent), ui(new Ui::PreviewReportWidget), d_ptr(new PreviewReportWidgetPrivate(this)) {
@@ -66,7 +66,7 @@ PreviewReportWidget::PreviewReportWidget(ReportEnginePrivate *report, QWidget *p
 
 PreviewReportWidget::~PreviewReportWidget() {
   delete d_ptr->m_previewPage;
-  d_ptr->m_previewPage = 0;
+  d_ptr->m_previewPage = nullptr;
   delete d_ptr->m_zoomer;
   delete d_ptr;
   delete ui;
@@ -136,7 +136,9 @@ void PreviewReportWidget::print() {
   QPrintDialog dialog(&printer, QApplication::activeWindow());
   if (dialog.exec() == QDialog::Accepted) {
     if (!d_ptr->m_reportPages.isEmpty()) ReportEnginePrivate::printReport(d_ptr->m_reportPages, printer);
-    foreach (PageItemDesignIntf::Ptr pageItem, d_ptr->m_reportPages) { d_ptr->m_previewPage->reactivatePageItem(pageItem); }
+    for (PageItemDesignIntf::Ptr pageItem : d_ptr->m_reportPages) {
+      d_ptr->m_previewPage->reactivatePageItem(pageItem);
+    }
   }
 }
 
@@ -149,10 +151,8 @@ void PreviewReportWidget::printToPDF() {
     QPrinter printer;
     printer.setOutputFileName(fileName);
     printer.setOutputFormat(QPrinter::PdfFormat);
-    if (!d_ptr->m_reportPages.isEmpty()) {
-      ReportEnginePrivate::printReport(d_ptr->m_reportPages, printer);
-    }
-    foreach (PageItemDesignIntf::Ptr pageItem, d_ptr->m_reportPages) { d_ptr->m_previewPage->reactivatePageItem(pageItem); }
+    if (!d_ptr->m_reportPages.isEmpty()) ReportEnginePrivate::printReport(d_ptr->m_reportPages, printer);
+    for (PageItemDesignIntf::Ptr pageItem : d_ptr->m_reportPages) d_ptr->m_previewPage->reactivatePageItem(pageItem);
   }
 }
 
@@ -170,7 +170,7 @@ void PreviewReportWidget::saveToFile() {
   QString fileName = QFileDialog::getSaveFileName(this, tr("Report file name"));
   if (!fileName.isEmpty()) {
     QScopedPointer<ItemsWriterIntf> writer(new XMLWriter());
-    foreach (PageItemDesignIntf::Ptr page, d_ptr->m_reportPages) { writer->putItem(page.data()); }
+    for (PageItemDesignIntf::Ptr page : d_ptr->m_reportPages) writer->putItem(page.data());
     writer->saveToFile(fileName);
   }
 }
@@ -199,7 +199,7 @@ void PreviewReportWidget::fitPage() {
 }
 
 void PreviewReportWidget::setErrorMessages(const QStringList &value) {
-  foreach (QString line, value) { ui->errorsView->append(line); }
+  for (QString line : value) ui->errorsView->append(line);
 }
 
 void PreviewReportWidget::emitPageSet() { emit pagesSet(d_ptr->m_reportPages.count()); }
@@ -244,7 +244,7 @@ void PreviewReportWidget::slotSliderMoved(int value) {
 
 void PreviewReportWidget::reportEngineDestroyed(QObject *object) {
   if (object == d_ptr->m_report) {
-    d_ptr->m_report = 0;
+    d_ptr->m_report = nullptr;
   }
 }
 

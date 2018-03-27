@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel model;
+  SqlRelationalTableModel modelVendaProduto;
   Ui::WidgetCompraDevolucao *ui;
   // methods
   auto on_pushButtonDevolucaoFornecedor_clicked() -> void;

@@ -38,7 +38,7 @@ class HorizontalLayout;
 
 class LayoutMarker : public QGraphicsItem{
 public:
-    explicit LayoutMarker(HorizontalLayout* layout, QGraphicsItem *parent=0);
+    explicit LayoutMarker(HorizontalLayout* layout, QGraphicsItem *parent=nullptr);
     virtual QRectF boundingRect() const{return m_rect;}
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
     void setHeight(qreal height);
@@ -62,9 +62,9 @@ class HorizontalLayout : public LayoutDesignIntf
 public:
     friend class LayoutMarker;
     enum LayoutType{Layout,Table};
-    HorizontalLayout(QObject *owner = 0, QGraphicsItem *parent = 0);
+    HorizontalLayout(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
     ~HorizontalLayout();
-    BaseDesignIntf *createSameTypeItem(QObject *owner = 0, QGraphicsItem *parent = 0);
+    BaseDesignIntf *createSameTypeItem(QObject *owner = nullptr, QGraphicsItem *parent = nullptr);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
     void geometryChangedEvent(QRectF newRect, QRectF);
@@ -91,8 +91,8 @@ protected:
     void initMode(ItemMode mode);
 
     bool canBeSplitted(int height) const;
-    BaseDesignIntf* cloneUpperPart(int height, QObject* owner=0, QGraphicsItem* parent=0);
-    BaseDesignIntf* cloneBottomPart(int height, QObject *owner=0, QGraphicsItem *parent=0);
+    BaseDesignIntf* cloneUpperPart(int height, QObject* owner=nullptr, QGraphicsItem* parent=nullptr);
+    BaseDesignIntf* cloneBottomPart(int height, QObject *owner=nullptr, QGraphicsItem *parent=nullptr);
 
     void setItemAlign(const ItemAlign &itemAlign);
     void setBorderLinesFlags(BorderLines flags);

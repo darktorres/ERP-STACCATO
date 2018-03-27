@@ -323,7 +323,7 @@ void Styles::writeNumFmts(QXmlStreamWriter &writer) const {
 }
 
 /*
-*/
+ */
 void Styles::writeFonts(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("fonts"));
   writer.writeAttribute(QStringLiteral("count"), QString::number(m_fontsList.count()));
@@ -653,10 +653,10 @@ bool Styles::readNumFmts(QXmlStreamReader &reader) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("numFmt")) {
-        QXmlStreamAttributes attributes = reader.attributes();
+        QXmlStreamAttributes attributes2 = reader.attributes();
         QSharedPointer<XlsxFormatNumberData> fmt(new XlsxFormatNumberData);
-        fmt->formatIndex = attributes.value(QLatin1String("numFmtId")).toString().toInt();
-        fmt->formatString = attributes.value(QLatin1String("formatCode")).toString();
+        fmt->formatIndex = attributes2.value(QLatin1String("numFmtId")).toString().toInt();
+        fmt->formatString = attributes2.value(QLatin1String("formatCode")).toString();
         if (fmt->formatIndex >= m_nextCustomNumFmtId) m_nextCustomNumFmtId = fmt->formatIndex + 1;
         m_customNumFmtIdMap.insert(fmt->formatIndex, fmt);
         m_customNumFmtsHash.insert(fmt->formatString, fmt);

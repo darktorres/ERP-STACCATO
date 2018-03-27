@@ -40,7 +40,7 @@ bool itemSortContainerLessThen(const PItemSortContainer c1, const PItemSortConta
 
 class ItemsContainerDesignInft : public BaseDesignIntf {
 public:
-  ItemsContainerDesignInft(const QString &xmlTypeName, QObject *owner = 0, QGraphicsItem *parent = 0) : BaseDesignIntf(xmlTypeName, owner, parent) {}
+  ItemsContainerDesignInft(const QString &xmlTypeName, QObject *owner = nullptr, QGraphicsItem *parent = nullptr) : BaseDesignIntf(xmlTypeName, owner, parent) {}
 
 protected:
   void snapshotItemsLayout();

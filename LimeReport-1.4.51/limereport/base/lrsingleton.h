@@ -37,7 +37,7 @@ namespace LimeReport {
 template <typename T> class Singleton {
 public:
   static T &instance() {
-    if (0 == inst) {
+    if (inst == nullptr) {
       inst = new T();
       ::atexit(destroy);
     } else {
@@ -52,6 +52,6 @@ private:
   static void destroy() { delete inst; }
 };
 
-template <typename T> T *Singleton<T>::inst = 0;
+template <typename T> T *Singleton<T>::inst = nullptr;
 } // namespace LimeReport
 #endif // LRSINGLETON_H

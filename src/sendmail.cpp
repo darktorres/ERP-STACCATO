@@ -28,7 +28,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) QMessageBox::critical(this, "Erro!", "Erro buscando email do fornecedor: " + query.lastError().text());
+    if (not query.exec()) emit errorSignal("Erro buscando email do fornecedor: " + query.lastError().text());
 
     QString representante;
 
@@ -53,7 +53,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     ui->textEdit->setHtml(
         R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"><html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;"><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">)" +
         QString(QTime::currentTime().hour() > 12 ? "Boa tarde" : "Bom dia") + " prezado(a) " + (representante.isEmpty() ? "parceiro(a)" : representante) +
-        R"(;</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">Segue pedido, aguardo espelho como confirmação e previsão de disponibilidade/ coleta do mesmo.</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Grato!</p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">   Att.</p></body></html>)");
+        R"(;</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">Segue pedido, aguardo espelho como confirmação e previsão de disponibilidade/ coleta do mesmo.</span></p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family: 'MS Shell Dlg 2'; font-size: 8.25pt; font-weight: 400; font-style: normal;">Grato!</p><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style="font-family: 'MS Shell Dlg 2'; font-size: 8.25pt; font-weight: 400; font-style: normal;">   Att.</p></body></html>)");
 
     ui->textEdit->document()->addResource(QTextDocument::ImageResource, QUrl("cid:assinatura.png@gmail.com"), QImage("://assinatura conrado.png"));
     ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
@@ -121,9 +121,9 @@ void SendMail::mailSent(const QString &status) {
 }
 
 void SendMail::successStatus() {
-  QMessageBox::information(nullptr, tr("Qt Simple SMTP client"), tr("Mensagem enviada!"));
+  emit informationSignal(tr("Mensagem enviada!"));
 
   QDialog::accept();
 }
 
-void SendMail::failureStatus(const QString &status) { QMessageBox::critical(nullptr, tr("Qt Simple SMTP client"), "Ocorreu erro: " + status); }
+void SendMail::failureStatus(const QString &status) { emit errorSignal("Ocorreu erro: " + status); }

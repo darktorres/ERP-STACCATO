@@ -1,6 +1,5 @@
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 
 #include "followup.h"

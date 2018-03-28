@@ -1,7 +1,5 @@
-#include <QMessageBox>
-
-#include "application.h"
 #include "xml.h"
+#include "application.h"
 
 XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) {
   connect(this, &XML::informationSignal, qApp, &Application::enqueueInformation);

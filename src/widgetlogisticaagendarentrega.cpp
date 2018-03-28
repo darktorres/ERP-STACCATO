@@ -483,7 +483,10 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
 
   for (const auto &item : list) modelTransp.removeRow(item.row());
 
-  modelTransp.submitAll();
+  if (not modelTransp.submitAll()) {
+    emit errorSignal("Erro comunicando com banco de dados: " + modelTransp.lastError().text());
+    return;
+  }
 }
 
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {

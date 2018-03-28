@@ -1,7 +1,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QVBoxLayout>

@@ -862,7 +862,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
     return false;
   }
 
-  const double quant = query.value("quant").toDouble();
+  const double quant = qMin(query.value("quant").toDouble(), modelEstoque.data(rowEstoque, "quant").toDouble());
 
   // -------------------------------------
 

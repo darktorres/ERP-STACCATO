@@ -1,10 +1,10 @@
 #include <QDebug>
-#include <QDecDouble.hh>
-#include <QDecSingle.hh>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 
+#include "QDecDouble.hh"
+#include "QDecSingle.hh"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
 #include "devolucao.h"

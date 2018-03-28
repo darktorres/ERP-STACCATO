@@ -210,7 +210,7 @@ bool CadastroUsuario::cadastrar() {
       return false;
     }
 
-    QSqlQuery("FLUSH PRIVILEGES").exec();
+    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) return false;
 
     //
 

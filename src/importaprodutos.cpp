@@ -782,7 +782,7 @@ void ImportaProdutos::salvar() {
   if (not modelProduto.submitAll()) {
     emit errorSignal("Ocorreu um erro ao salvar os dados: " + modelProduto.lastError().text());
     // TODO: 5refactor this because after this runs the transaction is no more
-    // TODO: wrap in a lambda
+    // REFAC: wrap in a lambda
     QSqlQuery("ROLLBACK").exec();
     emit transactionEnded();
     return;
@@ -806,7 +806,7 @@ void ImportaProdutos::salvar() {
     return;
   }
 
-  QSqlQuery("COMMIT").exec();
+  if (not QSqlQuery("COMMIT").exec()) return;
 
   emit transactionEnded();
 

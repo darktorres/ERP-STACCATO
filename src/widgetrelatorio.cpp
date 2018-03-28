@@ -1,7 +1,6 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QSqlError>
 
 #include "porcentagemdelegate.h"

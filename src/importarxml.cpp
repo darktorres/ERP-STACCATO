@@ -547,7 +547,7 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
   if (not modelCompra.setData(rowCompra, "quantUpd", static_cast<int>(qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? FieldColors::Green : FieldColors::Yellow))) return false;
   if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoqueConsumido, quantEstoque) ? FieldColors::Green : FieldColors::Yellow))) return false;
 
-  auto caixas = buscarCaixas(rowEstoque);
+  const auto caixas = buscarCaixas(rowEstoque);
 
   if (not caixas) return false;
 

@@ -453,7 +453,10 @@ void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
 
   for (const auto &item : list) modelTransp.removeRow(item.row());
 
-  modelTransp.submitAll();
+  if (not modelTransp.submitAll()) {
+    emit errorSignal("Erro comunicando com banco de dados: " + modelTransp.lastError().text());
+    return;
+  }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {

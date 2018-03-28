@@ -240,7 +240,8 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
     if (not modelContaReceber.setData(item.row(), "observacao", modelContaReceber.data(item.row(), "observacao").toString() + "Antecipação")) return false;
   }
-  modelContaReceber.submitAll();
+
+  if (not modelContaReceber.submitAll()) return false;
 
   const int newRow = modelContaReceber.rowCount();
   if (not modelContaReceber.insertRow(newRow)) return false;

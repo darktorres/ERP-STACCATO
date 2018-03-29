@@ -722,6 +722,8 @@ bool Venda::viewRegister() {
 
     ui->checkBoxRT->setChecked(false);
     ui->checkBoxRT->setHidden(true);
+
+    if (data("devolucao").toBool()) ui->pushButtonDevolucao->hide();
   }();
 
   setupConnections();
@@ -1321,8 +1323,8 @@ bool Venda::generateId() {
 }
 
 void Venda::on_pushButtonDevolucao_clicked() {
-  // TODO: bloquear/esconder o botao caso o pedido aberto já seja de devolucao
   auto *devolucao = new Devolucao(data("idVenda").toString(), this);
+  connect(devolucao, &Devolucao::finished, [=] { this->viewRegisterById(ui->lineEditVenda->text()); });
   devolucao->show();
 }
 

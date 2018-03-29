@@ -15,7 +15,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.9");
+  setApplicationVersion("0.6.10");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -104,15 +104,12 @@ bool Application::dbConnect() {
   }
 
   if (query.value("lastInvalidated").toDate() < QDate::currentDate()) {
-    // REFAC: renomear isso para 'invalidar_produtos_expirados'
-    if (not query.exec("CALL invalidate_expired()")) {
+    if (not query.exec("CALL invalidar_produtos_expirados()")) {
       QMessageBox::critical(nullptr, "Erro!", "Erro executando InvalidarExpirados: " + query.lastError().text());
       return false;
     }
 
-    // REFAC: verify through the code to make sure this is not necessary
-    // REFAC: renomear isso para 'invalidar_orcamentos_expirados'
-    if (not query.exec("CALL update_orcamento_status()")) {
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) {
       QMessageBox::critical(nullptr, "Erro!", "Erro executando update_orcamento_status: " + query.lastError().text());
       return false;
     }
@@ -206,6 +203,12 @@ void Application::enqueueError(const QString &error) {
 
 // TODO: if inTransaction is true give a error message and abort (to avoid nested transactions)
 void Application::startTransaction() { inTransaction = true; }
+
+bool Application::getShowingErrors() const { return showingErrors; }
+
+bool Application::getIsConnected() const { return isConnected; }
+
+QMap<QString, QString> Application::getMapLojas() const { return mapLojas; }
 
 void Application::storeSelection() {
   if (not UserSession::getSetting("Login/hostname")) {

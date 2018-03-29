@@ -36,15 +36,13 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizarEnd_clicked);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonBuscar_clicked);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, [=] { novoEndereco(); });
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemover_clicked);
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked);
   connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroFornecedor::on_tableEndereco_clicked);
   connect(ui->tableEndereco, &TableView::entered, this, &CadastroFornecedor::on_tableEndereco_entered);
-
-  // TODO: botao de limpar endereco nao esta programado
-  //    connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroFornecedor::)
 }
 
 CadastroFornecedor::~CadastroFornecedor() { delete ui; }
@@ -359,7 +357,7 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
     return false;
   }
 
-  if (not query.exec("CALL invalidate_expired()")) {
+  if (not query.exec("CALL invalidar_produtos_expirados()")) {
     emit errorSignal("Erro executando InvalidarExpirados: " + query.lastError().text());
     return false;
   }

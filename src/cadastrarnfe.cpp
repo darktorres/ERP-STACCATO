@@ -116,13 +116,12 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setModel(&modelViewProdutoEstoque);
   ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
-  // REFAC: fix
-  //  ui->tableItens->setItemDelegateForColumn("vBCPIS", new ReaisDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("vPIS", new ReaisDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("vBCCOFINS", new ReaisDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vBCPIS", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vPIS", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vBCCOFINS", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
   ui->tableItens->hideColumn("idProduto");
   ui->tableItens->hideColumn("idVendaProduto");
 }
@@ -241,21 +240,8 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::sendEmail(const QString &fileName) {
-  // REFAC: actually check these two before and not only before sending the email
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
-
-  if (not emailContabilidade) {
-    emit errorSignal("A chave 'emailContabilidade' não está configurada!");
-    return;
-  }
-
   const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
-
-  if (not emailLogistica) {
-    emit errorSignal("A chave 'emailLogistica' não está configurada!");
-    return;
-  }
-
   const QString email = emailContabilidade.value().toString();
   const QString copia = emailLogistica.value().toString();
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
@@ -273,10 +259,30 @@ void CadastrarNFe::sendEmail(const QString &fileName) {
   emit informationSignal(*resposta);
 }
 
+bool CadastrarNFe::verificarConfiguracaoEmail() {
+  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+
+  if (not emailContabilidade) {
+    emit errorSignal("A chave 'emailContabilidade' não está configurada!");
+    return false;
+  }
+
+  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+
+  if (not emailLogistica) {
+    emit errorSignal("A chave 'emailLogistica' não está configurada!");
+    return false;
+  }
+
+  return true;
+}
+
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
   // TODO: colocar um qprogressdialog
   // TODO: quando um campo é maior que o permitido o ACBr retorna 'OK' e na linha seguinte 'Alertas:'
+
+  if (not verificarConfiguracaoEmail()) return;
 
   if (not validar()) return;
 
@@ -880,14 +886,15 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
       stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl;
-      stream << "pFCPUFDest = 2" << endl; // REFAC: dont hardcode (2% FCP)
+      stream << "pFCPUFDest = 2" << endl; // REFAC: depende do estado
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
       stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() << endl;
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
       const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
-      stream << "pICMSInterPart = 80" << endl;                                                                            // REFAC: o valor depende do ano atual
+      // REFAC: o valor depende do ano atual; a partir de 2019 é 100% para o estado de destino
+      stream << "pICMSInterPart = 80" << endl;
       stream << "vFCPUFDest = " + QString::number(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * 0.02) << endl; // 2% FCP
       stream << "vICMSUFDest = " + QString::number(difal * 0.8) << endl;
       stream << "vICMSUFRemet = " + QString::number(difal * 0.2) << endl;

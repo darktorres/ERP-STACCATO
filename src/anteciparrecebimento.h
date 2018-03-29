@@ -17,9 +17,6 @@ public:
 
 private:
   // attributes
-  // REFAC: 0refactor those out
-  bool isBlockedPresente = false;
-  bool isBlockedMes = false;
   SqlRelationalTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
@@ -29,7 +26,9 @@ private:
   auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
   auto on_pushButtonGerar_clicked() -> void;
   auto on_table_entered(const QModelIndex) -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };
 
 #endif // ANTECIPARRECEBIMENTO_H

@@ -85,6 +85,7 @@ private:
   auto setupTables() -> void;
   auto updateImpostos() -> void;
   auto validar() -> bool;
+  auto verificarConfiguracaoEmail() -> bool;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;
   auto writeIdentificacao(QTextStream &stream) const -> void;

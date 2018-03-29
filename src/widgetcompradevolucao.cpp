@@ -187,9 +187,10 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
         }
       }
 
-      // TODO: update caixas and other fields
+      // TODO: update other fields
       if (not modelConsumo.setData(newRow, "idVendaProduto", modelVendaProduto.data(item.row(), "idVendaProduto"))) return false;
       if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) return false;
+      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(item.row(), "caixas").toDouble() * -1)) return false;
       if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) return false;
       if (not modelConsumo.setData(newRow, "quantUpd", 5)) return false;
 

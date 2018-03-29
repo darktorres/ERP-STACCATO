@@ -267,6 +267,8 @@ bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebi
 
   setWindowTitle("Estoque: " + ids.join(", "));
 
+  ui->pushButtonQuebrado->setDisabled(true); // TODO: remove this after it's fixed
+
   return true;
 }
 

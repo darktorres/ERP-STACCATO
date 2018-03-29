@@ -15,18 +15,17 @@ class Application : public QApplication {
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
   auto darkTheme() -> void;
-  auto lightTheme() -> void;
-  auto getUpdating() const -> bool;
-  auto setUpdating(const bool value) -> void;
-  auto getInTransaction() const -> bool;
-  auto setInTransaction(const bool value) -> void;
-  auto showMessages() -> void;
   auto dbConnect() -> bool;
+  auto getInTransaction() const -> bool;
+  auto getIsConnected() const -> bool;
+  auto getMapLojas() const -> QMap<QString, QString>;
+  auto getShowingErrors() const -> bool;
+  auto getUpdating() const -> bool;
+  auto lightTheme() -> void;
+  auto setInTransaction(const bool value) -> void;
+  auto setUpdating(const bool value) -> void;
+  auto showMessages() -> void;
   auto updater() -> void;
-  // REFAC: make those private?
-  bool showingErrors = false;
-  bool isConnected = false;
-  QMap<QString, QString> mapLojas;
 
 signals:
   void verifyDb();
@@ -40,12 +39,15 @@ public slots:
 
 private:
   // attributes
-  bool inTransaction = false;
-  bool updating = false;
-  const QPalette defaultPalette = palette();
+  QMap<QString, QString> mapLojas;
   QStringList errorQueue;
   QStringList informationQueue;
   QStringList warningQueue;
+  bool inTransaction = false;
+  bool isConnected = false;
+  bool showingErrors = false;
+  bool updating = false;
+  const QPalette defaultPalette = palette();
   // methods
   auto storeSelection() -> void;
   auto readSettingsFile() -> void;

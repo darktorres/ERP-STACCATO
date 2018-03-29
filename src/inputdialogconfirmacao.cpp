@@ -289,9 +289,11 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 
   QString produto;
   double unCaixa = 0;
+  double caixas = 0;
 
   if (tipo == Tipo::Recebimento) {
     produto = modelEstoque.data(row, "descricao").toString();
+    caixas = modelEstoque.data(row, "caixas").toDouble();
 
     QSqlQuery query;
     query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
@@ -306,7 +308,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
     const double m2cx = query.value("m2cx").toDouble();
     const double pccx = query.value("pccx").toDouble();
 
-    unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
+    unCaixa = (un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx);
   }
 
   int choice = -1;
@@ -314,6 +316,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
   if (tipo == Tipo::Entrega) {
     produto = modelVeiculo.data(row, "produto").toString();
     unCaixa = modelVeiculo.data(row, "unCaixa").toDouble(); // *
+    caixas = modelVeiculo.data(row, "caixas").toDouble();
 
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Criar reposição ou gerar crédito?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
     msgBox.setButtonText(QMessageBox::Yes, "Criar reposição");
@@ -322,8 +325,6 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 
     choice = msgBox.exec();
   }
-
-  const double caixas = modelVeiculo.data(row, "caixas").toDouble();
 
   bool ok;
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);

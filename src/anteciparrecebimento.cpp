@@ -34,6 +34,12 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : Dialog(parent), ui
 
   ui->dateEditEvento->setDate(QDate::currentDate());
 
+  setConnections();
+}
+
+AnteciparRecebimento::~AnteciparRecebimento() { delete ui; }
+
+void AnteciparRecebimento::setConnections() {
   connect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
   connect(ui->comboBox, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
   connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
@@ -45,12 +51,20 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : Dialog(parent), ui
   connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
 }
 
-AnteciparRecebimento::~AnteciparRecebimento() { delete ui; }
+void AnteciparRecebimento::unsetConnections() {
+  disconnect(ui->checkBoxIOF, &QCheckBox::clicked, this, &AnteciparRecebimento::calcularTotais);
+  disconnect(ui->comboBox, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
+  disconnect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &AnteciparRecebimento::on_comboBox_currentTextChanged);
+  disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &AnteciparRecebimento::calcularTotais);
+  disconnect(ui->doubleSpinBoxDescMes, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::calcularTotais);
+  disconnect(ui->doubleSpinBoxValorPresente, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged);
+  disconnect(ui->pushButtonGerar, &QPushButton::clicked, this, &AnteciparRecebimento::on_pushButtonGerar_clicked);
+  disconnect(ui->table, &TableView::entered, this, &AnteciparRecebimento::on_table_entered);
+  disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AnteciparRecebimento::calcularTotais);
+}
 
 void AnteciparRecebimento::calcularTotais() {
   // TODO: 1ao selecionar parcelas de cartao somar a taxa tambem
-  if (isBlockedPresente) return;
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   double bruto = 0;
@@ -67,22 +81,22 @@ void AnteciparRecebimento::calcularTotais() {
     liquido += valor;
 
     // valor aqui deve considerar a taxa cartao
-    const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor; // REFAC: fix warning
+    const double prazo = ui->dateEditEvento->date().daysTo(dataPagamento) * valor;
 
-    prazoMedio += prazo; // REFAC: fix warning
+    prazoMedio += prazo;
   }
 
   // be careful about division by 0
-  prazoMedio /= liquido; // REFAC: fix warning
+  prazoMedio /= liquido;
 
   ui->doubleSpinBoxDescTotal->setValue(ui->doubleSpinBoxDescMes->value() / 30 * prazoMedio);
   ui->doubleSpinBoxPrazoMedio->setValue(prazoMedio);
   ui->doubleSpinBoxValorBruto->setValue(bruto);
   ui->doubleSpinBoxValorLiquido->setValue(liquido);
 
-  isBlockedMes = true;
+  unsetConnections();
   ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100));
-  isBlockedMes = false;
+  setConnections();
 
   ui->doubleSpinBoxIOF->setValue(0);
   if (ui->checkBoxIOF->isChecked()) ui->doubleSpinBoxIOF->setValue(ui->doubleSpinBoxValorPresente->value() * (0.0038 + 0.0041 * prazoMedio));
@@ -160,8 +174,6 @@ void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &text) {
 }
 
 void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
-  if (isBlockedMes) return;
-
   const double presente = ui->doubleSpinBoxValorPresente->value();
   const double liquido = ui->doubleSpinBoxValorLiquido->value();
   const double descTotal = 1 - (presente / liquido);
@@ -169,54 +181,14 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 
   ui->doubleSpinBoxDescTotal->setValue(descTotal * 100);
 
-  isBlockedPresente = true;
   const double valor = descTotal / prazoMedio * 30 * 100;
+  unsetConnections();
   ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor);
-  isBlockedPresente = false;
+  setConnections();
   ui->doubleSpinBoxIOF->setValue(0);
   if (ui->checkBoxIOF->isChecked()) ui->doubleSpinBoxIOF->setValue(ui->doubleSpinBoxValorPresente->value() * (0.0038 + 0.0041 * prazoMedio));
   ui->doubleSpinBoxLiqIOF->setValue(ui->doubleSpinBoxValorPresente->value() - ui->doubleSpinBoxIOF->value());
 }
-
-// TODO: 0implementar antecipacao
-
-// O Cálculo do prazo médio de vencimento das duplicatas é feito da seguinte forma:
-
-// Com a soma dos valores das parcelas, obtém-se o primeiro valor(A).
-// O segundo passo, é a totalização, da multiplicação do número de dias de cada parcela, por seu respectivo valor (B).
-// Para obter o prazo médio, é só dividir os valores (B) por (A).
-
-// Ex. 3 parcelas de R$100,00 -> vencimento em 10/20/30 dias
-
-// A = 100,00 + 100,00 + 100,00.
-// A = 300,00.
-
-// B = (10 * 100,00) + (20 * 100,00) + (30 * 100,00).
-// B = 6.000,00
-
-// Cálculo do prazo médio = 6.000,00 / 300,00
-// PRAZO MÉDIO = 20.
-
-// datas / valor liquido
-
-// prazo medio = somatorio de cada linha usando -> (dias parcela * valor) / valor liquido
-// ((data do pag - data do evento) * valor[valor lanc. - mdr]) / valor liquido
-// valor bruto = soma das linhas que nao sao mdr
-// valor liquido = soma inclusive mdr
-// taxa desc total = taxa desc mes / 30 * prazo medio
-// valor presente = valor liquido * (1 - taxa desc total)
-
-// MDR 2%
-// Taxa Antec. 5%
-
-// valor bruto = R$ 100
-// valor liq. = R$ 98
-// taxa desc = (5% / 30) * (quant. dias antecipados)
-//     taxa desc = (5% / 30) * 60d
-//     taxa desc = 5% * 2 = 10%
-// valor presente = R$ 98 - (R$ 98 * 10%) = R$ 88,2
-
-// TODO: 1para recebiveis diferentes de cartao calcular IOF
 
 bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   for (const auto &item : list) {
@@ -246,16 +218,11 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   const int newRow = modelContaReceber.rowCount();
   if (not modelContaReceber.insertRow(newRow)) return false;
 
-  //  modelContaReceber.setData(newRow, "status", "PAGO");
-  //  modelContaReceber.setData(newRow, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
-  //  modelContaReceber.setData(newRow, "observacao", "Juros da antecipação");
-  //  modelContaReceber.setData(newRow, "tipo", "JUROS ANTECIPAÇÃO");
+  //----------------------------------
 
   SqlRelationalTableModel modelContaPagar;
   modelContaPagar.setTable("conta_a_pagar_has_pagamento");
   modelContaPagar.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  //
 
   QSqlQuery query;
   query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
@@ -343,3 +310,43 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 
   emit informationSignal("Operação realizada com sucesso!");
 }
+
+// TODO: 0implementar antecipacao
+
+// O Cálculo do prazo médio de vencimento das duplicatas é feito da seguinte forma:
+
+// Com a soma dos valores das parcelas, obtém-se o primeiro valor(A).
+// O segundo passo, é a totalização, da multiplicação do número de dias de cada parcela, por seu respectivo valor (B).
+// Para obter o prazo médio, é só dividir os valores (B) por (A).
+
+// Ex. 3 parcelas de R$100,00 -> vencimento em 10/20/30 dias
+
+// A = 100,00 + 100,00 + 100,00.
+// A = 300,00.
+
+// B = (10 * 100,00) + (20 * 100,00) + (30 * 100,00).
+// B = 6.000,00
+
+// Cálculo do prazo médio = 6.000,00 / 300,00
+// PRAZO MÉDIO = 20.
+
+// datas / valor liquido
+
+// prazo medio = somatorio de cada linha usando -> (dias parcela * valor) / valor liquido
+// ((data do pag - data do evento) * valor[valor lanc. - mdr]) / valor liquido
+// valor bruto = soma das linhas que nao sao mdr
+// valor liquido = soma inclusive mdr
+// taxa desc total = taxa desc mes / 30 * prazo medio
+// valor presente = valor liquido * (1 - taxa desc total)
+
+// MDR 2%
+// Taxa Antec. 5%
+
+// valor bruto = R$ 100
+// valor liq. = R$ 98
+// taxa desc = (5% / 30) * (quant. dias antecipados)
+//     taxa desc = (5% / 30) * 60d
+//     taxa desc = 5% * 2 = 10%
+// valor presente = R$ 98 - (R$ 98 * 10%) = R$ 88,2
+
+// TODO: 1para recebiveis diferentes de cartao calcular IOF

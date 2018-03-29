@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     return;
   }
 
-  const QString hostnameText = qApp->mapLojas.key(hostname.value().toString());
+  const QString hostnameText = qApp->getMapLojas().key(hostname.value().toString());
 
   setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
 
@@ -324,8 +324,8 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
 
 void MainWindow::updateTables() {
   if (qApp->getUpdating()) return;
-  if (not qApp->isConnected) return;
-  if (qApp->showingErrors) return;
+  if (not qApp->getIsConnected()) return;
+  if (qApp->getShowingErrors()) return;
 
   qApp->setUpdating(true);
 

@@ -43,7 +43,7 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : Dialog(parent), tip
 }
 
 void LoginDialog::setComboBox() {
-  Q_FOREACH (const auto &loja, qApp->mapLojas.keys()) { ui->comboBoxLoja->addItem(loja); }
+  Q_FOREACH (const auto &loja, qApp->getMapLojas().keys()) { ui->comboBoxLoja->addItem(loja); }
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
@@ -72,7 +72,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   if (tipo == Tipo::Login) UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
 }
 
-void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(qApp->mapLojas.value(loja)); }
+void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(qApp->getMapLojas().value(loja)); }
 
 void LoginDialog::on_lineEditHostname_textChanged(const QString &) {
   UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());

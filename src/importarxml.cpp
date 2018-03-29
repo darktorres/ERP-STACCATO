@@ -880,6 +880,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
 
+  // REFAC: ??? const double caixas = qRound(proporcao / unCaixa * 100) / 100.;
   const double caixas = qRound(quant / unCaixa * 100) / 100.;
 
   const double proporcao = quant / modelEstoque.data(rowEstoque, "quant").toDouble();

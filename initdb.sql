@@ -895,6 +895,24 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
+-- Table `mydb`.`log`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`log` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`log` (
+  `idLog` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idUsuario` INT(10) NULL DEFAULT NULL,
+  `message` VARCHAR(500) NULL DEFAULT NULL,
+  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `lastUpdated` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idLog`),
+  INDEX `log_usuario_idx` (`idUsuario` ASC))
+ENGINE = InnoDB
+AUTO_INCREMENT = 8
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
 -- Table `mydb`.`loja_has_conta`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `mydb`.`loja_has_conta` ;

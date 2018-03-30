@@ -80,7 +80,6 @@ private:
   auto preCadastrarNota(const QString &fileName) -> std::optional<int>;
   auto preencherNumeroNFe() -> bool;
   auto processarResposta(const QString &resposta, const QString &fileName, const int &idNFe) -> bool;
-  auto sendEmail(const QString &fileName) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto updateImpostos() -> void;

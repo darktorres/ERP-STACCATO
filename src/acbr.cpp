@@ -160,3 +160,19 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
 
   return resposta;
 }
+
+bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &anexo) {
+  const auto resposta = ACBr::enviarComando("NFE.EnviarEmail(" + emailDestino + "," + anexo + ",1,'" + assunto + "', " + emailCopia + ")");
+
+  if (not resposta) return false;
+
+  // TODO: perguntar se deseja tentar enviar novamente?
+  if (not resposta->contains("OK: Email enviado com sucesso")) {
+    QMessageBox::critical(nullptr, "Erro!", *resposta);
+    return false;
+  }
+
+  QMessageBox::information(nullptr, "Aviso!", *resposta);
+
+  return true;
+}

@@ -44,6 +44,7 @@ private:
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> bool;
   auto gravarNota() -> QString;
+  auto listarCfop() -> bool;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxICMSModBcSt_currentIndexChanged(const int index) -> void;
@@ -82,6 +83,7 @@ private:
   auto processarResposta(const QString &resposta, const QString &fileName, const int &idNFe) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
   auto updateImpostos() -> void;
   auto validar() -> bool;
   auto verificarConfiguracaoEmail() -> bool;

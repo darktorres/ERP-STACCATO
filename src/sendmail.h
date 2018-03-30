@@ -13,7 +13,7 @@ class SendMail final : public Dialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { GerarCompra, CancelarNFe, Vazio };
+  enum class Tipo { GerarCompra, Vazio };
   explicit SendMail(const Tipo tipo, const QString &arquivo = QString(), const QString &fornecedor = QString(), QWidget *parent = nullptr);
   ~SendMail() final;
 

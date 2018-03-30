@@ -59,20 +59,6 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     ui->textEdit->append(R"(<img src="cid:assinatura.png@gmail.com" />)");
   }
 
-  if (tipo == Tipo::CancelarNFe) {
-    const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
-
-    if (emailContabilidade) ui->comboBoxDest->addItem(emailContabilidade.value().toString());
-
-    ui->lineEditTitulo->setText("CANCELAMENTO DE NFe - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA");
-
-    // corpo email ...
-
-    // REFAC: finish this
-
-    ui->textEdit->setText("Cancelamento da NFe de numero 1234...");
-  }
-
   if (tipo != Tipo::Vazio) {
     if (const auto key = UserSession::getSetting("User/emailCompra"); key) ui->lineEditEmail->setText(key.value().toString());
     if (const auto key = UserSession::getSetting("User/emailCopia"); key) ui->lineEditCopia->setText(key.value().toString());

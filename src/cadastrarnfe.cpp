@@ -734,7 +734,7 @@ bool CadastrarNFe::criarChaveAcesso() {
                                  ui->lineEditModelo->text(),
                                  ui->lineEditSerie->text(),
                                  ui->lineEditNumero->text(),
-                                 ui->comboBoxTipo->currentText().left(1),
+                                 "1",
                                  ui->lineEditCodigo->text()};
 
   chaveNum = listChave.join("");

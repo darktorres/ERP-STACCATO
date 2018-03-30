@@ -239,26 +239,6 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   return true;
 }
 
-void CadastrarNFe::sendEmail(const QString &fileName) {
-  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
-  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
-  const QString email = emailContabilidade.value().toString();
-  const QString copia = emailLogistica.value().toString();
-  const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
-
-  const auto resposta = ACBr::enviarComando("NFE.EnviarEmail(" + email + "," + fileName + ",1,'" + assunto + "', " + copia + ")");
-
-  if (not resposta) return;
-
-  // TODO: perguntar se deseja tentar enviar novamente?
-  if (not resposta->contains("OK: Email enviado com sucesso")) {
-    emit errorSignal(*resposta);
-    return;
-  }
-
-  emit informationSignal(*resposta);
-}
-
 bool CadastrarNFe::verificarConfiguracaoEmail() {
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
 
@@ -282,7 +262,23 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // TODO: colocar um qprogressdialog
   // TODO: quando um campo é maior que o permitido o ACBr retorna 'OK' e na linha seguinte 'Alertas:'
 
-  if (not verificarConfiguracaoEmail()) return;
+  // se os emails nao estiverem configurados avisar antes de gerar a nota
+  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+
+  if (not emailContabilidade) {
+    emit errorSignal("A chave 'emailContabilidade' não está configurada!");
+    return;
+  }
+
+  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+
+  if (not emailLogistica) {
+    emit errorSignal("A chave 'emailLogistica' não está configurada!");
+    return;
+  }
+
+  //
+  //  if (not verificarConfiguracaoEmail()) return;
 
   if (not validar()) return;
 
@@ -297,17 +293,17 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
     return;
   }
 
-  const QString fileName = QString(*resposta).remove("OK: ").remove("\r").remove("\n");
+  const QString filePath = QString(*resposta).remove("OK: ").remove("\r").remove("\n");
 
-  const auto idNFe = preCadastrarNota(fileName);
+  const auto idNFe = preCadastrarNota(filePath);
 
   if (not idNFe) return;
 
-  auto resposta2 = ACBr::enviarComando("NFE.EnviarNFe(" + fileName + ", 1, 1, 0, 1)");
+  const auto resposta2 = ACBr::enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)");
 
   if (not resposta2) return;
 
-  if (not processarResposta(*resposta2, fileName, *idNFe)) return;
+  if (not processarResposta(*resposta2, filePath, *idNFe)) return;
 
   emit transactionStarted();
 
@@ -326,7 +322,9 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   emit informationSignal(*resposta2);
 
-  sendEmail(fileName);
+  const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
+
+  if (not ACBr::enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath)) return;
 
   if (not ACBr::gerarDanfe(xml.toLatin1())) return;
 

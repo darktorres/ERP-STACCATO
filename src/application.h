@@ -27,9 +27,6 @@ public:
   auto showMessages() -> void;
   auto updater() -> void;
 
-signals:
-  void verifyDb();
-
 public slots:
   void endTransaction();
   void enqueueWarning(const QString &warning);

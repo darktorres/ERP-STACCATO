@@ -110,7 +110,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->statusBar->addWidget(pushButtonStatus);
 
   connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::verifyDb);
-  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb);
 
   //  QSqlQuery queryChart;
 

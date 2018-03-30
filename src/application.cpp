@@ -250,8 +250,6 @@ void Application::showMessages() {
   warningQueue.clear();
   informationQueue.clear();
 
-  emit verifyDb();
-
   showingErrors = false;
 }
 

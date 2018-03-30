@@ -114,8 +114,8 @@ void CadastrarNFe::setupTables() {
   modelViewProdutoEstoque.setHeaderData("cfop", "CFOP");
 
   ui->tableItens->setModel(&modelViewProdutoEstoque);
-  ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBCPIS", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vPIS", new ReaisDelegate(this));
@@ -261,6 +261,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
   // TODO: colocar um qprogressdialog
   // TODO: quando um campo é maior que o permitido o ACBr retorna 'OK' e na linha seguinte 'Alertas:'
+  // TODO: quando clicar em enviar dar um submitAll no model para salvar os dados preenchidos?
 
   // se os emails nao estiverem configurados avisar antes de gerar a nota
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
@@ -284,7 +285,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not criarChaveAcesso()) return;
 
-  auto resposta = ACBr::enviarComando(gravarNota());
+  const auto resposta = ACBr::enviarComando(gravarNota());
 
   if (not resposta) return;
 
@@ -324,6 +325,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
+  // TODO: enviar email separado para cliente
   if (not ACBr::enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath)) return;
 
   if (not ACBr::gerarDanfe(xml.toLatin1())) return;
@@ -380,6 +382,7 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
 }
 
 void CadastrarNFe::updateImpostos() {
+  // TODO: receber como parametro a coluna alterada, se for por exemplo valorCOFINS deve fazer o calculo reverso da base de calculo
   // TODO: readd IPI?
   double baseICMS = 0;
   double valorICMS = 0;
@@ -412,6 +415,7 @@ void CadastrarNFe::updateImpostos() {
   const QString texto = "Venda de código " + modelVenda.data(0, "idVenda").toString() + ";END. ENTREGA: " + endereco +
                         ";Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;Total Aproximado de tributos federais, estaduais e municipais: R$ " +
                         QLocale(QLocale::Portuguese).toString(total);
+
   ui->infCompSistema->setPlainText(texto);
 }
 
@@ -716,7 +720,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) ui->comboBoxDestinoOperacao->setCurrentIndex(1);
   }
 
-  validar();
+  if (not validar()) return;
 
   //
 
@@ -978,8 +982,6 @@ void CadastrarNFe::writeVolume(QTextStream &stream) const {
   stream << "PesoBruto = " << QString::number(ui->doubleSpinBoxVolumesPesoBruto->value()) << endl;
 }
 
-// TODO: 1criar tela para configurar emails de saida: inicialmente para contabilidade, posteriormente para cliente tambem
-
 void CadastrarNFe::on_tableItens_entered(const QModelIndex &) { ui->tableItens->resizeColumnsToContents(); }
 
 void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
@@ -1058,7 +1060,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   mapper.setCurrentModelIndex(index);
 }
 
-void CadastrarNFe::on_tabWidget_currentChanged(int index) {
+void CadastrarNFe::on_tabWidget_currentChanged(const int index) {
   if (index == 4) updateImpostos();
 }
 
@@ -1339,7 +1341,7 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_2_currentTextChanged(const QStr
   }
 }
 
-void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(int index) {
+void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(const int index) {
   if (index == 0) return;
 
   const auto list = ui->tableItens->selectionModel()->selectedRows();
@@ -1349,7 +1351,7 @@ void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(int index) {
   if (not modelViewProdutoEstoque.setData(list.first().row(), "orig", index - 1)) return;
 }
 
-void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(int index) {
+void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
   // modBC
 
   if (index == 0) return;
@@ -1358,6 +1360,7 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(int index) {
 
   if (list.isEmpty()) return;
 
+  // REFAC: wrap in a unset/set so updateImpostos is called only once in the end?
   if (not modelViewProdutoEstoque.setData(list.first().row(), "modBC", index - 1)) return;
 
   if (ui->comboBoxICMSModBc->currentText() == "Valor da Operação") {
@@ -1370,7 +1373,7 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(int index) {
   updateImpostos();
 }
 
-void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(int index) {
+void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(const int index) {
   // modBCST
 
   if (index == 0) return;
@@ -1382,7 +1385,7 @@ void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(int index) {
   if (not modelViewProdutoEstoque.setData(list.first().row(), "modBCST", index - 1)) return;
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(double value) {
+void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) return;
@@ -1390,7 +1393,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(double value) {
   if (not modelViewProdutoEstoque.setData(list.first().row(), "vICMS", value)) return;
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(double value) {
+void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) return;
@@ -1414,7 +1417,7 @@ void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
   if (not modelViewProdutoEstoque.setData(list.first().row(), "cstPIS", text.left(2))) return;
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(double value) {
+void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) return;
@@ -1430,7 +1433,7 @@ void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) 
   if (not modelViewProdutoEstoque.setData(list.first().row(), "cstCOFINS", text.left(2))) return;
 }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(double value) {
+void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) return;
@@ -1442,10 +1445,9 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(double) { ui->double
 
 void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
   QSqlQuery queryTransp;
-  queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, "
-                      "the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM transportadora_has_veiculo thv LEFT JOIN transportadora "
-                      "t ON thv.idTransportadora = t.idTransportadora LEFT JOIN transportadora_has_endereco the ON "
-                      "the.idTransportadora = t.idTransportadora WHERE thv.idVeiculo = :idVeiculo");
+  queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
+                      "transportadora_has_veiculo thv LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT JOIN transportadora_has_endereco the ON the.idTransportadora = "
+                      "t.idTransportadora WHERE thv.idVeiculo = :idVeiculo");
   queryTransp.bindValue(":idVeiculo", ui->itemBoxVeiculo->getValue());
 
   if (not queryTransp.exec() or not queryTransp.first()) {
@@ -1691,7 +1693,7 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
-  auto resposta = ACBr::enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
+  const auto resposta = ACBr::enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
 
   if (not resposta) return;
 
@@ -1717,7 +1719,7 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   emit informationSignal(*resposta);
 }
 
-void CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged(double value) {
+void CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged(const double value) {
   // TODO: 1refazer rateamento do frete
   Q_UNUSED(value)
 }
@@ -1739,7 +1741,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
     return;
   }
 
-  if (auto resposta = ACBr::enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
+  if (const auto resposta = ACBr::enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
       not resposta or not resposta->contains("OK")) {
     emit errorSignal(*resposta);
     ui->itemBoxLoja->clear();

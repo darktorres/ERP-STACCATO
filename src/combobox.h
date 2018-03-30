@@ -9,10 +9,8 @@ class ComboBox final : public QComboBox {
 public:
   explicit ComboBox(QWidget *parent);
   ~ComboBox() = default;
-  QVariant getCurrentValue() const;
-
-public slots:
-  bool setCurrentValue(const QVariant &value);
+  auto getCurrentValue() const -> QVariant;
+  auto setCurrentValue(const QVariant &value) -> bool;
 
 private:
   Q_PROPERTY(QVariant currentValue READ getCurrentValue WRITE setCurrentValue STORED false)

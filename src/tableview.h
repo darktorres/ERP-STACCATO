@@ -16,9 +16,7 @@ public:
   auto setItemDelegateForColumn(const int column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;
   auto showColumn(const QString &column) -> void;
-
-public slots:
-  void sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder);
+  auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
 };
 
 #endif // TABLEVIEW_H

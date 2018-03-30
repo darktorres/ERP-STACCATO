@@ -44,55 +44,47 @@ class QSimpleUpdater : public QObject {
 
 public:
   explicit QSimpleUpdater(QObject *parent = nullptr);
-
-  QString changeLog() const;
-  QString latestVersion() const;
-  QString installedVersion() const;
-
-  bool silent() const;
-  bool newerVersionAvailable() const;
-
-  void checkForUpdates();
-  void openDownloadLink();
-  void downloadLatestVersion();
-
-public slots:
-  void setSilent(bool silent);
-  void setDownloadUrl(const QString &url);
-  void setReferenceUrl(const QString &url);
-  void setChangelogUrl(const QString &url);
-  void setShowNewestVersionMessage(bool show);
-  void setShowUpdateAvailableMessage(bool show);
-  void setApplicationVersion(const QString &version);
+  auto changeLog() const -> QString;
+  auto checkForUpdates() -> void;
+  auto downloadLatestVersion() -> void;
+  auto installedVersion() const -> QString;
+  auto latestVersion() const -> QString;
+  auto newerVersionAvailable() const -> bool;
+  auto openDownloadLink() -> void;
+  auto setApplicationVersion(const QString &version) -> void;
+  auto setChangelogUrl(const QString &url) -> void;
+  auto setDownloadUrl(const QString &url) -> void;
+  auto setReferenceUrl(const QString &url) -> void;
+  auto setShowNewestVersionMessage(bool show) -> void;
+  auto setShowUpdateAvailableMessage(bool show) -> void;
+  auto setSilent(bool silent) -> void;
+  auto silent() const -> bool;
 
 signals:
   void checkingFinished();
 
-private slots:
-  void cancel();
-  void showErrorMessage();
-  void onCheckingFinished();
-  void checkDownloadedVersion(QNetworkReply *reply);
-  void processDownloadedChangelog(QNetworkReply *reply);
-  void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error);
-
 private:
-  QString m_changelog;
-  QString m_latest_version;
-  QString m_installed_version;
-  QNetworkAccessManager *m_manager;
-
-  QUrl m_download_url;
-  QUrl m_reference_url;
-  QUrl m_changelog_url;
-
-  bool m_silent;
-  bool m_show_newest_version;
-  bool m_show_update_available;
-  bool m_new_version_available;
-
+  // attributes
   DownloadDialog *m_downloadDialog;
   ProgressDialog *m_progressDialog;
+  QNetworkAccessManager *m_manager;
+  QString m_changelog;
+  QString m_installed_version;
+  QString m_latest_version;
+  QUrl m_changelog_url;
+  QUrl m_download_url;
+  QUrl m_reference_url;
+  bool m_new_version_available;
+  bool m_show_newest_version;
+  bool m_show_update_available;
+  bool m_silent;
+  // methods
+  auto cancel() -> void;
+  auto checkDownloadedVersion(QNetworkReply *reply) -> void;
+  auto ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) -> void;
+  auto onCheckingFinished() -> void;
+  auto processDownloadedChangelog(QNetworkReply *reply) -> void;
+  auto showErrorMessage() -> void;
 };
 
 #endif

@@ -16,6 +16,10 @@ public:
   Application(int &argc, char **argv, int = ApplicationFlags);
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
+  auto endTransaction() -> void;
+  auto enqueueError(const QString &error) -> void;
+  auto enqueueInformation(const QString &information) -> void;
+  auto enqueueWarning(const QString &warning) -> void;
   auto getInTransaction() const -> bool;
   auto getIsConnected() const -> bool;
   auto getMapLojas() const -> QMap<QString, QString>;
@@ -25,14 +29,8 @@ public:
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto showMessages() -> void;
+  auto startTransaction() -> void;
   auto updater() -> void;
-
-public slots:
-  void endTransaction();
-  void enqueueWarning(const QString &warning);
-  void enqueueInformation(const QString &information);
-  void enqueueError(const QString &error);
-  void startTransaction();
 
 private:
   // attributes

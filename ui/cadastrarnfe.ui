@@ -1060,7 +1060,7 @@
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>-35</y>
+                   <y>0</y>
                    <width>1563</width>
                    <height>333</height>
                   </rect>
@@ -1984,13 +1984,16 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>196</width>
+                   <height>115</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
                   <item row="0" column="0">
                    <widget class="QGroupBox" name="groupBox_8">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="title">
                      <string>Saída</string>
                     </property>
@@ -2264,13 +2267,16 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>308</width>
+                   <height>174</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
                   <item row="0" column="0">
                    <widget class="QGroupBox" name="groupBox_9">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="title">
                      <string>Saída</string>
                     </property>
@@ -2866,13 +2872,16 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>352</width>
+                   <height>174</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
                   <item row="0" column="0">
                    <widget class="QGroupBox" name="groupBox_10">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="title">
                      <string>Saída</string>
                     </property>
@@ -3457,189 +3466,194 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </attribute>
              <layout class="QGridLayout" name="gridLayout_86">
               <item row="0" column="0">
-               <layout class="QGridLayout" name="gridLayout_43">
-                <item row="0" column="0">
-                 <layout class="QGridLayout" name="gridLayout_41">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_56">
-                    <property name="text">
-                     <string>Percentual ICMS relativo ao FCP na UF de destino</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="label_57">
-                    <property name="text">
-                     <string>Valor da base de cálculo na UF do destinatário</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_58">
-                    <property name="text">
-                     <string>Alíquota interna da UF do destinatário</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="label_59">
-                    <property name="text">
-                     <string>Alíquota interestadual</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="label_60">
-                    <property name="text">
-                     <string>Percentual provisório de partilha</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="label_61">
-                    <property name="text">
-                     <string>Valor ICMS de partilha para UF do destinatário</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="label_62">
-                    <property name="text">
-                     <string>Valor ICMS de partilha para UF do remetente</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="label_63">
-                    <property name="text">
-                     <string>Valor ICMS relativo ao FCP da UF de destino</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item row="0" column="1">
-                 <layout class="QGridLayout" name="gridLayout_42">
-                  <item row="7" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxFcpDestino">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="prefix">
-                     <string>R$ </string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaRemetente">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="prefix">
-                     <string>R$ </string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInternaDestinatario">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="suffix">
-                     <string>%</string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualPartilha">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="suffix">
-                     <string>%</string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaDestinatario">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="prefix">
-                     <string>R$ </string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInter">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="suffix">
-                     <string>%</string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualFcpDestino">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="suffix">
-                     <string>%</string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0" colspan="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseCalculoDestinatario">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                    <property name="prefix">
-                     <string>R$ </string>
-                    </property>
-                    <property name="maximum">
-                     <double>99999.990000000005239</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="2">
-                   <spacer name="horizontalSpacer_4">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
+               <widget class="QFrame" name="frameInter">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_43">
+                 <item row="0" column="0">
+                  <layout class="QGridLayout" name="gridLayout_41">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_56">
+                     <property name="text">
+                      <string>Percentual ICMS relativo ao FCP na UF de destino</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_57">
+                     <property name="text">
+                      <string>Valor da base de cálculo na UF do destinatário</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="label_58">
+                     <property name="text">
+                      <string>Alíquota interna da UF do destinatário</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_59">
+                     <property name="text">
+                      <string>Alíquota interestadual</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label_60">
+                     <property name="text">
+                      <string>Percentual provisório de partilha</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="label_61">
+                     <property name="text">
+                      <string>Valor ICMS de partilha para UF do destinatário</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="6" column="0">
+                    <widget class="QLabel" name="label_62">
+                     <property name="text">
+                      <string>Valor ICMS de partilha para UF do remetente</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="7" column="0">
+                    <widget class="QLabel" name="label_63">
+                     <property name="text">
+                      <string>Valor ICMS relativo ao FCP da UF de destino</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="0" column="1">
+                  <layout class="QGridLayout" name="gridLayout_42">
+                   <item row="7" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxFcpDestino">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="prefix">
+                      <string>R$ </string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="6" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaRemetente">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="prefix">
+                      <string>R$ </string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInternaDestinatario">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="suffix">
+                      <string>%</string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualPartilha">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="suffix">
+                      <string>%</string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaDestinatario">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="prefix">
+                      <string>R$ </string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInter">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="suffix">
+                      <string>%</string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualFcpDestino">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="suffix">
+                      <string>%</string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0" colspan="2">
+                    <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseCalculoDestinatario">
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                     <property name="prefix">
+                      <string>R$ </string>
+                     </property>
+                     <property name="maximum">
+                      <double>99999.990000000005239</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="2">
+                    <spacer name="horizontalSpacer_4">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
               </item>
              </layout>
             </widget>

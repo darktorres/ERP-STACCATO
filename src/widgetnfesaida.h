@@ -22,6 +22,8 @@ private:
   Ui::WidgetNfeSaida *ui;
   // methods
   auto atualizarNFe(const int idNFe, const QString &xml) -> bool;
+  auto cancelarNFe(const QString &chaveAcesso, const int row) -> bool;
+  auto gravarArquivo(const QString &resposta) -> bool;
   auto montaFiltro() -> bool;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCancelarNFe_clicked() -> void;

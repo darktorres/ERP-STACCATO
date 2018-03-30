@@ -117,9 +117,6 @@ bool WidgetNfeSaida::montaFiltro() {
 void WidgetNfeSaida::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
-  // REFAC: colocar transaction
-  // REFAC: code is all over the place, out of order
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
@@ -140,13 +137,11 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
     return;
   }
 
-  const int idNFe = modelViewNFeSaida.data(list.first().row(), "idNFe").toInt();
-  const int numeroNFe = modelViewNFeSaida.data(list.first().row(), "NFe").toInt();
-  Q_UNUSED(numeroNFe);
+  const int row = list.first().row();
 
-  const QString chaveAcesso = modelViewNFeSaida.data(list.first().row(), "chaveAcesso").toString();
+  const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
 
-  auto resposta = ACBr::enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
+  const auto resposta = ACBr::enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
   if (not resposta) return;
 
@@ -156,54 +151,46 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
     return;
   }
 
-  QSqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
-  query.bindValue(":chaveAcesso", chaveAcesso);
+  emit transactionStarted();
 
-  if (not query.exec()) {
-    emit errorSignal("Erro marcando nota como cancelada: " + query.lastError().text());
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
+  if (not QSqlQuery("START TRANSACTION").exec()) return;
+
+  if (not cancelarNFe(chaveAcesso, row)) {
+    QSqlQuery("ROLLBACK").exec();
+    emit transactionEnded();
     return;
   }
+
+  if (not QSqlQuery("COMMIT").exec()) return;
+
+  emit transactionEnded();
 
   emit informationSignal(*resposta);
 
-  QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
+  if (not gravarArquivo(*resposta)) return;
 
-  if (not arquivo.open(QFile::WriteOnly)) {
-    emit errorSignal("Erro abrindo arquivo para escrita: " + arquivo.errorString());
+  const QString anexoPath = QDir::currentPath() + "/cancelamento.xml";
+
+  //
+
+  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+
+  if (not emailContabilidade) {
+    emit errorSignal("A chave 'emailContabilidade' não está configurada!");
     return;
   }
 
-  QTextStream stream(&arquivo);
+  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
 
-  stream << *resposta;
-
-  arquivo.close();
-
-  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
-  query.bindValue(":idNFe", idNFe);
-
-  if (not query.exec()) {
-    emit errorSignal("Erro removendo NFe da venda_produto: " + query.lastError().text());
+  if (not emailLogistica) {
+    emit errorSignal("A chave 'emailLogistica' não está configurada!");
     return;
   }
 
-  query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
-  query.bindValue(":idNFe", idNFe);
+  const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  if (not query.exec()) {
-    emit errorSignal("Erro removendo NFe do veiculo_produto: " + query.lastError().text());
-    return;
-  }
-
-  const QString anexo = QDir::currentPath() + "/cancelamento.xml";
-
-  // TODO: 0enviar resposta xml do cancelamento para a contabilidade
-  // TODO: em caso de erro perguntar se deseja tentar novamente
-  auto *mail = new SendMail(SendMail::Tipo::CancelarNFe, anexo, QString(), this);
-  mail->setAttribute(Qt::WA_DeleteOnClose);
-
-  mail->exec();
+  ACBr::enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, anexoPath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -420,6 +407,54 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
     emit errorSignal("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text());
     return false;
   }
+
+  return true;
+}
+
+bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
+  QSqlQuery query;
+  query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", chaveAcesso);
+
+  if (not query.exec()) {
+    emit errorSignal("Erro marcando nota como cancelada: " + query.lastError().text());
+    return false;
+  }
+
+  const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
+
+  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) {
+    emit errorSignal("Erro removendo NFe da venda_produto: " + query.lastError().text());
+    return false;
+  }
+
+  query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFe");
+  query.bindValue(":idNFe", idNFe);
+
+  if (not query.exec()) {
+    emit errorSignal("Erro removendo NFe do veiculo_produto: " + query.lastError().text());
+    return false;
+  }
+
+  return true;
+}
+
+bool WidgetNfeSaida::gravarArquivo(const QString &resposta) {
+  QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
+
+  if (not arquivo.open(QFile::WriteOnly)) {
+    emit errorSignal("Erro abrindo arquivo para escrita: " + arquivo.errorString());
+    return false;
+  }
+
+  QTextStream stream(&arquivo);
+
+  stream << resposta;
+
+  arquivo.close();
 
   return true;
 }

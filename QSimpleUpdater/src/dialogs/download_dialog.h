@@ -36,29 +36,24 @@ class DownloadDialog : public QWidget {
 public:
   explicit DownloadDialog(QWidget *parent = nullptr);
   ~DownloadDialog();
-
-  void beginDownload(const QUrl &url);
-
-private slots:
-  void openDownload();
-  void installUpdate();
-  void cancelDownload();
-  void downloadFinished();
-  void updateProgress(qint64 received, qint64 total);
-  void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error);
+  auto beginDownload(const QUrl &url) -> void;
 
 private:
+  // attributes
   Ui::DownloadDialog *ui;
-
   QString m_path;
   bool m_download_paused;
-
   QNetworkReply *m_reply;
   QNetworkAccessManager *m_manager;
-
   uint m_start_time;
-
   double roundNumber(const double &input);
+  // methods
+  auto cancelDownload() -> void;
+  auto downloadFinished() -> void;
+  auto ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) -> void;
+  auto installUpdate() -> void;
+  auto openDownload() -> void;
+  auto updateProgress(qint64 received, qint64 total) -> void;
 };
 
 #endif

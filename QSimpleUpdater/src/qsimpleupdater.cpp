@@ -83,7 +83,7 @@
  * Initializes and configures the class.
  */
 
-QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_silent(false), m_show_newest_version(true), m_show_update_available(true), m_new_version_available(false) {
+QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version_available(false), m_show_newest_version(true), m_show_update_available(true), m_silent(false) {
 
   m_progressDialog = new ProgressDialog();
   m_downloadDialog = new DownloadDialog();

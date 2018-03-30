@@ -31,11 +31,11 @@ public:
 signals:
   void cancelClicked();
 
-private slots:
-  void cancel();
-
 private:
+  // attributes
   Ui::ProgressDialog *ui;
+  // methods
+  auto cancel() -> void;
 };
 
 #endif // PROGRESS_DIALOG_H

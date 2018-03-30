@@ -46,6 +46,8 @@ bool Application::dbConnect() {
 
   QSqlDatabase db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
 
+  if (db.isOpen()) return true;
+
   const auto hostname = UserSession::getSetting("Login/hostname");
 
   if (not hostname) {

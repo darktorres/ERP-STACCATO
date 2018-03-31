@@ -17,7 +17,6 @@ public:
 
 private:
   // attributes
-  bool incompleto = false;
   QString tipoPFPJ;
   SearchDialog *sdCliente;
   Ui::CadastroCliente *ui;

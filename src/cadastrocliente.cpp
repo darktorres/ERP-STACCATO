@@ -81,8 +81,6 @@ void CadastroCliente::setupTables() {
 }
 
 bool CadastroCliente::verifyFields() {
-  if (modelEnd.rowCount() == 0) incompleto = true;
-
   Q_FOREACH (const auto &line, ui->frame->findChildren<QLineEdit *>()) {
     if (not verifyRequiredField(line)) { return false; }
   }
@@ -137,7 +135,7 @@ bool CadastroCliente::savingProcedures() {
   if (not setData("idProfissionalRel", ui->itemBoxProfissional->getValue())) { return false; }
   if (not setData("idUsuarioRel", ui->itemBoxVendedor->getValue())) { return false; }
   if (not setData("pfpj", tipoPFPJ)) { return false; }
-  if (not setData("incompleto", incompleto)) { return false; }
+  if (not setData("incompleto", modelEnd.rowCount() == 0)) { return false; }
   if (not setData("credito", ui->doubleSpinBoxCredito->value())) { return false; }
 
   return true;

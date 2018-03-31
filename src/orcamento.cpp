@@ -1035,7 +1035,7 @@ bool Orcamento::verificaCadastroCliente() {
     return false;
   }
 
-  queryCadastro.prepare("SELECT incompleto FROM orcamento LEFT JOIN cliente ON orcamento.idCliente = cliente.idCliente WHERE cliente.idCliente = :idCliente AND incompleto = TRUE");
+  queryCadastro.prepare("SELECT c.incompleto FROM orcamento o LEFT JOIN cliente c ON o.idCliente = c.idCliente WHERE c.idCliente = :idCliente AND c.incompleto = TRUE");
   queryCadastro.bindValue(":idCliente", idCliente);
 
   if (not queryCadastro.exec()) {

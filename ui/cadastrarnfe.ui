@@ -59,7 +59,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -1061,18 +1061,15 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1563</width>
-                   <height>333</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
                   <item row="0" column="0">
-                   <widget class="QGroupBox" name="groupBox_7">
+                   <widget class="QFrame" name="frame_7">
                     <property name="enabled">
                      <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Saída</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_47">
                      <item row="0" column="0">
@@ -1510,459 +1507,6 @@
                     </layout>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QGroupBox" name="groupBox_21">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Entrada</string>
-                    </property>
-                    <layout class="QGridLayout" name="gridLayout_49">
-                     <item row="0" column="0">
-                      <layout class="QGridLayout" name="gridLayout_78">
-                       <item row="2" column="1">
-                        <widget class="QComboBox" name="comboBoxSituacaoTributaria_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="editable">
-                          <bool>true</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="1">
-                        <widget class="QComboBox" name="comboBoxICMSOrig_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="editable">
-                          <bool>true</bool>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string/>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>0 - Nacional, exceto as indicadas nos códigos 3 a 5 </string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>1 - Estrangeira - Importação direta, exceto a indicada no código 6</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>2 - Estrangeira - Adquirida no mercado interno, exceto a indicada no código 7</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>3 - Nacional, mercadoria ou bem com Conteúdo de Importação superior a 40% (quarenta por cento)</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>4 - Nacional, cuja produção tenha sido feita em conformidade com os processos produtivos básicos de que tratam o Decreto-Lei nº 288/67, e as Leis nºs 8.248/91, 8.387/91, 10.176/01 e 11 . 4 8 4 / 0 7</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>5 - Nacional, mercadoria ou bem com Conteúdo de Importação inferior ou igual a 40% (quarenta por cento)</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>6 - Estrangeira - Importação direta, sem similar nacional, constante em lista de Resolução CAMEX</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>7 - Estrangeira - Adquirida no mercado interno, sem similar nacional, constante em lista de Resolução CAMEX”</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>8 - Nacional, mercadoria ou bem com Conteúdo de Importação superior a 70% (setenta por cento).</string>
-                          </property>
-                         </item>
-                        </widget>
-                       </item>
-                       <item row="1" column="0">
-                        <widget class="QLabel" name="label_126">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string> Regime:</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="0">
-                        <widget class="QLabel" name="label_125">
-                         <property name="text">
-                          <string> Situação tributária:</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="0">
-                        <widget class="QLabel" name="label_127">
-                         <property name="text">
-                          <string> Origem</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QComboBox" name="comboBoxRegime_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="editable">
-                          <bool>true</bool>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string/>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>Tributação Normal</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>Simples Nacional</string>
-                          </property>
-                         </item>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QComboBox" name="comboBoxCfop_2">
-                         <property name="enabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="editable">
-                          <bool>true</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="0">
-                        <widget class="QLabel" name="label_23">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>CFOP:</string>
-                         </property>
-                        </widget>
-                       </item>
-                      </layout>
-                     </item>
-                     <item row="1" column="0">
-                      <layout class="QGridLayout" name="gridLayout_48">
-                       <item row="0" column="0">
-                        <widget class="QFrame" name="frame_3">
-                         <property name="frameShape">
-                          <enum>QFrame::StyledPanel</enum>
-                         </property>
-                         <property name="frameShadow">
-                          <enum>QFrame::Raised</enum>
-                         </property>
-                         <layout class="QGridLayout" name="gridLayout_76">
-                          <item row="9" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSpicms_3">
-                            <property name="suffix">
-                             <string> %</string>
-                            </property>
-                            <property name="maximum">
-                             <double>100.000000000000000</double>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="9" column="0">
-                           <widget class="QLabel" name="label_102">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>Alíquota do ICMS</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="7" column="0">
-                           <widget class="QLabel" name="label_103">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>Modalid. de deter. da BC ICMS</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="8" column="0">
-                           <widget class="QLabel" name="label_104">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>BC ICMS</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="8" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvbc_3">
-                            <property name="maximum">
-                             <double>99999.990000000005239</double>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="7" column="1">
-                           <widget class="QComboBox" name="comboBoxICMSModBc_2">
-                            <property name="editable">
-                             <bool>true</bool>
-                            </property>
-                            <item>
-                             <property name="text">
-                              <string/>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Margem Valor Agregado</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Pauta (valor)</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Preço Tabelado Máx. (valor)</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Valor da Operação</string>
-                             </property>
-                            </item>
-                           </widget>
-                          </item>
-                          <item row="10" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvicms_3">
-                            <property name="maximum">
-                             <double>99999.990000000005239</double>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="10" column="0">
-                           <widget class="QLabel" name="label_119">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>ICMS</string>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QFrame" name="frame_4">
-                         <property name="frameShape">
-                          <enum>QFrame::StyledPanel</enum>
-                         </property>
-                         <property name="frameShadow">
-                          <enum>QFrame::Raised</enum>
-                         </property>
-                         <layout class="QGridLayout" name="gridLayout_77">
-                          <item row="7" column="0">
-                           <widget class="QLabel" name="label_120">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>% margem de valor adic. ICMS ST</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="10" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSpicmsst_2">
-                            <property name="suffix">
-                             <string> %</string>
-                            </property>
-                            <property name="maximum">
-                             <double>100.000000000000000</double>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="10" column="0">
-                           <widget class="QLabel" name="label_121">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>Alíquota do ICMS ST</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="11" column="0">
-                           <widget class="QLabel" name="label_122">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>ICMS ST</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="9" column="0">
-                           <widget class="QLabel" name="label_123">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>BC ICMS ST</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="11" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvicmsst_2">
-                            <property name="maximum">
-                             <double>99999.990000000005239</double>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="9" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvbcst_2">
-                            <property name="maximum">
-                             <double>99999.990000000005239</double>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="1">
-                           <widget class="QComboBox" name="comboBoxICMSModBcSt_2">
-                            <property name="editable">
-                             <bool>true</bool>
-                            </property>
-                            <item>
-                             <property name="text">
-                              <string/>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Preço Tabelado ou Máximo Sugerido</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Lista Negativa (valor)</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Lista Positiva (valor)</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Lista Neutra (valor)</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Margem Valor Agregado (%)</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Pauta (valor)</string>
-                             </property>
-                            </item>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QLabel" name="label_124">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>Modalid. de deter. da BC ICMS ST</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="7" column="1">
-                           <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSpmvast_2">
-                            <property name="suffix">
-                             <string> %</string>
-                            </property>
-                            <property name="maximum">
-                             <double>100.000000000000000</double>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </widget>
-                       </item>
-                      </layout>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
                  </layout>
                 </widget>
                </widget>
@@ -1984,18 +1528,15 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>196</width>
-                   <height>115</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
                   <item row="0" column="0">
-                   <widget class="QGroupBox" name="groupBox_8">
+                   <widget class="QFrame" name="frame_8">
                     <property name="enabled">
                      <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Saída</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_45">
                      <item row="1" column="0">
@@ -2116,136 +1657,6 @@
                     </layout>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QGroupBox" name="groupBox_22">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Entrada</string>
-                    </property>
-                    <layout class="QGridLayout" name="gridLayout_79">
-                     <item row="1" column="0">
-                      <widget class="QLabel" name="label_128">
-                       <property name="text">
-                        <string>cEnq:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QLineEdit" name="lineEditIPIcEnq_3"/>
-                     </item>
-                     <item row="3" column="1">
-                      <spacer name="verticalSpacer_10">
-                       <property name="orientation">
-                        <enum>Qt::Vertical</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>20</width>
-                         <height>40</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="label_129">
-                       <property name="text">
-                        <string>CST:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QComboBox" name="comboBoxIPIcst_2">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="editable">
-                        <bool>true</bool>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>00 - Entrada com Recuperação de Crédito</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>01 - Entrada Tributável com Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>02 - Entrada Isenta</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>03 - Entrada Não-Tributada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>04 - Entrada Imune</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>05 - Entrada com Suspensão</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>49 - Outras Entradas</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>50 - Saída Tributada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>51 - Saída Tributável com Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>52 - Saída Isenta</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>53 - Saída Não-Tributada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>54 - Saída Imune</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>55 - Saída com Suspensão</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>99 - Outras Saídas</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
                  </layout>
                 </widget>
                </widget>
@@ -2267,18 +1678,15 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>308</width>
-                   <height>174</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
                   <item row="0" column="0">
-                   <widget class="QGroupBox" name="groupBox_9">
+                   <widget class="QFrame" name="frame_9">
                     <property name="enabled">
                      <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Saída</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_2">
                      <item row="1" column="0">
@@ -2563,294 +1971,6 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                     </layout>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QGroupBox" name="groupBox_23">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Entrada</string>
-                    </property>
-                    <layout class="QGridLayout" name="gridLayout_80">
-                     <item row="1" column="0">
-                      <widget class="QLabel" name="label_130">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>vBC:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="0">
-                      <widget class="QLabel" name="label_131">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>pPIS:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QDoubleSpinBox" name="doubleSpinBoxPISvbc_3">
-                       <property name="maximum">
-                        <double>99999.000000000000000</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="1">
-                      <widget class="QDoubleSpinBox" name="doubleSpinBoxPISppis_3">
-                       <property name="suffix">
-                        <string> %</string>
-                       </property>
-                       <property name="maximum">
-                        <double>100.000000000000000</double>
-                       </property>
-                       <property name="value">
-                        <double>0.650000000000000</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="1">
-                      <widget class="QDoubleSpinBox" name="doubleSpinBoxPISvpis_3">
-                       <property name="maximum">
-                        <double>99999.990000000005239</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="0">
-                      <widget class="QLabel" name="label_132">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>vPIS:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="label_133">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>CST:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="1">
-                      <spacer name="verticalSpacer_15">
-                       <property name="orientation">
-                        <enum>Qt::Vertical</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>20</width>
-                         <height>40</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QComboBox" name="comboBoxPIScst_2">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="editable">
-                        <bool>true</bool>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>01 - Operação Tributável com Alíquota Básica</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>02 - Operação Tributável com Alíquota Diferenciada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>03 - Operação Tributável com Alíquota por Unidade de Medida de Produto</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>04 - Operação Tributável Monofásica - Revenda a Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>05 - Operação Tributável por Substituição Tributária</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>06 - Operação Tributável a Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>07 - Operação Isenta da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>08 - Operação sem Incidência da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>09 - Operação com Suspensão da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>49 - Outras Operações de Saída</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>50 - Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>51 - Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>52 - Operação com Direito a Crédito - Vinculada Exclusivamente a Receita de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>53 -
-Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>54 - Operação com Direito a Crédito - Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>55 - Operação com Direito a Crédito - Vinculada a Receitas Não Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>56 - Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>60 - Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>61 - Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>62 - Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>63 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>64 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>65 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>66 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>67 - Crédito Presumido - Outras Operações</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>70 - Operação de Aquisição sem Direito a Crédito</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>71 - Operação de Aquisição com Isenção</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>72 - Operação de Aquisição com Suspensão</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>73 - Operação de Aquisição a Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>74 - Operação de Aquisição sem Incidência da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>75 - Operação de Aquisição por Substituição Tributária</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>98 - Outras Operações de Entrada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>99 - Outras Operações</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
                  </layout>
                 </widget>
                </widget>
@@ -2872,18 +1992,15 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>352</width>
-                   <height>174</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
                   <item row="0" column="0">
-                   <widget class="QGroupBox" name="groupBox_10">
+                   <widget class="QFrame" name="frame_10">
                     <property name="enabled">
                      <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Saída</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_37">
                      <item row="0" column="1">
@@ -3167,293 +2284,6 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                     </layout>
                    </widget>
                   </item>
-                  <item row="0" column="1">
-                   <widget class="QGroupBox" name="groupBox_24">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="title">
-                     <string>Entrada</string>
-                    </property>
-                    <layout class="QGridLayout" name="gridLayout_82">
-                     <item row="0" column="1">
-                      <widget class="QComboBox" name="comboBoxCOFINScst_3">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="editable">
-                        <bool>true</bool>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>01 - Operação Tributável com Alíquota Básica</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>02 - Operação Tributável com Alíquota Diferenciada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>03 - Operação Tributável com Alíquota por Unidade de Medida de Produto</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>04 - Operação Tributável Monofásica - Revenda a Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>05 - Operação Tributável por Substituição Tributária</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>06 - Operação Tributável a Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>07 - Operação Isenta da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>08 - Operação sem Incidência da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>09 - Operação com Suspensão da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>49 - Outras Operações de Saída</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>50 - Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>51 - Operação com Direito a Crédito - Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>52 - Operação com Direito a Crédito - Vinculada Exclusivamente a Receita de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>53 - Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>54 - Operação com Direito a Crédito - Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>55 - Operação com Direito a Crédito - Vinculada a Receitas Não Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>56 - Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>60 - Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>61 - Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>62 - Crédito Presumido - Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>63 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>64 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>65 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>66 - Crédito Presumido - Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>67 - Crédito Presumido - Outras Operações</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>70 - Operação de Aquisição sem Direito a Crédito</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>71 - Operação de Aquisição com Isenção</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>72 - Operação de Aquisição com Suspensão</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>73 - Operação de Aquisição a Alíquota Zero</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>74 - Operação de Aquisição sem Incidência da Contribuição</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>75 - Operação de Aquisição por Substituição Tributária</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>98 - Outras Operações de Entrada</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>99 - Outras Operações</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="label_138">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>CST:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="1">
-                      <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSpcofins_4">
-                       <property name="suffix">
-                        <string> %</string>
-                       </property>
-                       <property name="maximum">
-                        <double>100.000000000000000</double>
-                       </property>
-                       <property name="value">
-                        <double>3.000000000000000</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="0">
-                      <widget class="QLabel" name="label_139">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>vCOFINS:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSvbc_4">
-                       <property name="maximum">
-                        <double>99999.990000000005239</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="1">
-                      <spacer name="verticalSpacer_17">
-                       <property name="orientation">
-                        <enum>Qt::Vertical</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>20</width>
-                         <height>40</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="QLabel" name="label_140">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>vBC:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="0">
-                      <widget class="QLabel" name="label_141">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>pCOFINS:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="1">
-                      <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSvcofins_4">
-                       <property name="maximum">
-                        <double>99999.990000000005239</double>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
                  </layout>
                 </widget>
                </widget>
@@ -3464,195 +2294,204 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              <attribute name="title">
               <string>ICMS Interestadual</string>
              </attribute>
-             <layout class="QGridLayout" name="gridLayout_86">
+             <layout class="QGridLayout" name="gridLayout_48">
               <item row="0" column="0">
-               <widget class="QFrame" name="frameInter">
-                <property name="enabled">
-                 <bool>false</bool>
+               <widget class="QScrollArea" name="scrollArea_5">
+                <property name="widgetResizable">
+                 <bool>true</bool>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_43">
-                 <item row="0" column="0">
-                  <layout class="QGridLayout" name="gridLayout_41">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_56">
-                     <property name="text">
-                      <string>Percentual ICMS relativo ao FCP na UF de destino</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_57">
-                     <property name="text">
-                      <string>Valor da base de cálculo na UF do destinatário</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="label_58">
-                     <property name="text">
-                      <string>Alíquota interna da UF do destinatário</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0">
-                    <widget class="QLabel" name="label_59">
-                     <property name="text">
-                      <string>Alíquota interestadual</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0">
-                    <widget class="QLabel" name="label_60">
-                     <property name="text">
-                      <string>Percentual provisório de partilha</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="5" column="0">
-                    <widget class="QLabel" name="label_61">
-                     <property name="text">
-                      <string>Valor ICMS de partilha para UF do destinatário</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="0">
-                    <widget class="QLabel" name="label_62">
-                     <property name="text">
-                      <string>Valor ICMS de partilha para UF do remetente</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="0">
-                    <widget class="QLabel" name="label_63">
-                     <property name="text">
-                      <string>Valor ICMS relativo ao FCP da UF de destino</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="0" column="1">
-                  <layout class="QGridLayout" name="gridLayout_42">
-                   <item row="7" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxFcpDestino">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="prefix">
-                      <string>R$ </string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaRemetente">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="prefix">
-                      <string>R$ </string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInternaDestinatario">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="suffix">
-                      <string>%</string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualPartilha">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="suffix">
-                      <string>%</string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="5" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaDestinatario">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="prefix">
-                      <string>R$ </string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInter">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="suffix">
-                      <string>%</string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualFcpDestino">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="suffix">
-                      <string>%</string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0" colspan="2">
-                    <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseCalculoDestinatario">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                     <property name="prefix">
-                      <string>R$ </string>
-                     </property>
-                     <property name="maximum">
-                      <double>99999.990000000005239</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <spacer name="horizontalSpacer_4">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
+                <widget class="QWidget" name="scrollAreaWidgetContents_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>966</width>
+                   <height>312</height>
+                  </rect>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_86">
+                  <item row="0" column="0">
+                   <widget class="QFrame" name="frame_3">
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_49">
+                     <item row="1" column="0">
+                      <layout class="QGridLayout" name="gridLayout_41">
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="label_56">
+                         <property name="text">
+                          <string>Percentual ICMS relativo ao FCP na UF de destino</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_57">
+                         <property name="text">
+                          <string>Valor da base de cálculo na UF do destinatário</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="label_58">
+                         <property name="text">
+                          <string>Alíquota interna da UF do destinatário</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QLabel" name="label_59">
+                         <property name="text">
+                          <string>Alíquota interestadual</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="4" column="0">
+                        <widget class="QLabel" name="label_60">
+                         <property name="text">
+                          <string>Percentual provisório de partilha</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="5" column="0">
+                        <widget class="QLabel" name="label_61">
+                         <property name="text">
+                          <string>Valor ICMS de partilha para UF do destinatário</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="6" column="0">
+                        <widget class="QLabel" name="label_62">
+                         <property name="text">
+                          <string>Valor ICMS de partilha para UF do remetente</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="7" column="0">
+                        <widget class="QLabel" name="label_63">
+                         <property name="text">
+                          <string>Valor ICMS relativo ao FCP da UF de destino</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                     <item row="1" column="1">
+                      <layout class="QGridLayout" name="gridLayout_42">
+                       <item row="7" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxFcpDestino">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="prefix">
+                          <string>R$ </string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="6" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaRemetente">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="prefix">
+                          <string>R$ </string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInternaDestinatario">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="suffix">
+                          <string>%</string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="4" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualPartilha">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="suffix">
+                          <string>%</string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="5" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaDestinatario">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="prefix">
+                          <string>R$ </string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquotaInter">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="suffix">
+                          <string>%</string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxPercentualFcpDestino">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="suffix">
+                          <string>%</string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0" colspan="2">
+                        <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseCalculoDestinatario">
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                         <property name="prefix">
+                          <string>R$ </string>
+                         </property>
+                         <property name="maximum">
+                          <double>99999.990000000005239</double>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
                </widget>
               </item>
              </layout>

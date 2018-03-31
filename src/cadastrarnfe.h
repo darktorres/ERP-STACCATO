@@ -47,14 +47,13 @@ private:
   auto listarCfop() -> bool;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;
+  auto on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxICMSModBcSt_currentIndexChanged(const int index) -> void;
   auto on_comboBoxICMSModBc_currentIndexChanged(const int index) -> void;
   auto on_comboBoxICMSOrig_currentIndexChanged(const int index) -> void;
   auto on_comboBoxIPIcst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxPIScst_currentTextChanged(const QString &text) -> void;
-  auto on_comboBoxRegime_2_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxRegime_currentTextChanged(const QString &text) -> void;
-  auto on_comboBoxSituacaoTributaria_2_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxSituacaoTributaria_currentTextChanged(const QString &text) -> void;
   auto on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) -> void;
   auto on_doubleSpinBoxCOFINSvbc_valueChanged(const double) -> void;

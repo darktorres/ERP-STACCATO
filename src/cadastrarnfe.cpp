@@ -697,7 +697,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   // TODO: place in the right place
 
-  ui->tabWidget_4->setTabEnabled(4, false); // hide icms interestadual
+  //  ui->tabWidget_4->setTabEnabled(4, false); // hide icms interestadual
 
   if (not ui->lineEditDestinatarioUF_2->text().isEmpty()) {
     if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) { ui->comboBoxDestinoOperacao->setCurrentIndex(1); }

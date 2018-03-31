@@ -64,12 +64,6 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : Dialog(par
   connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado);
 
   ui->frame_2->hide();
-  ui->frame_4->hide();
-
-  ui->groupBox_21->hide();
-  ui->groupBox_22->hide();
-  ui->groupBox_23->hide();
-  ui->groupBox_24->hide();
 }
 
 CadastrarNFe::~CadastrarNFe() { delete ui; }
@@ -393,7 +387,7 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
 
 void CadastrarNFe::updateImpostos() {
   // TODO: receber como parametro a coluna alterada, se for por exemplo valorCOFINS deve fazer o calculo reverso da base de calculo
-  qDebug() << "a";
+  //  qDebug() << "a";
   // TODO: readd IPI?
   double baseICMS = 0;
   double valorICMS = 0;
@@ -703,8 +697,12 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   // TODO: place in the right place
 
+  ui->tabWidget_4->setTabEnabled(4, false); // hide icms interestadual
+
   if (not ui->lineEditDestinatarioUF_2->text().isEmpty()) {
-    if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) ui->comboBoxDestinoOperacao->setCurrentIndex(1);
+    if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) {
+      ui->comboBoxDestinoOperacao->setCurrentIndex(1);
+    }
   }
 
   if (not validar()) return;
@@ -975,25 +973,23 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   unsetConnections();
 
   [=] {
-    ui->groupBox_7->setEnabled(true);
-    ui->groupBox_8->setEnabled(true);
-    ui->groupBox_9->setEnabled(true);
-    ui->groupBox_10->setEnabled(true);
-    ui->frameInter->setEnabled(true);
+    ui->frame_7->setEnabled(true);
+    ui->frame_8->setEnabled(true);
+    ui->frame_9->setEnabled(true);
+    ui->frame_10->setEnabled(true);
 
     if (not listarCfop()) return;
 
     ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelViewProdutoEstoque.data(index.row(), "cfop").toString(), Qt::MatchStartsWith));
     ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelViewProdutoEstoque.data(index.row(), "orig").toString(), Qt::MatchStartsWith));
     ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelViewProdutoEstoque.data(index.row(), "cstICMS").toString(), Qt::MatchStartsWith));
+    // TODO: fix properly
+    this->on_comboBoxSituacaoTributaria_currentTextChanged(ui->comboBoxSituacaoTributaria->currentText());
     ui->comboBoxICMSModBc->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "modBC").toInt() + 1);
     ui->comboBoxICMSModBcSt->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "modBCST").toInt() + 1);
     ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelViewProdutoEstoque.data(index.row(), "cstIPI").toString(), Qt::MatchStartsWith));
     ui->comboBoxPIScst->setCurrentIndex(ui->comboBoxPIScst->findText(modelViewProdutoEstoque.data(index.row(), "cstPIS").toString(), Qt::MatchStartsWith));
     ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelViewProdutoEstoque.data(index.row(), "cstCOFINS").toString(), Qt::MatchStartsWith));
-
-    ui->comboBoxRegime_2->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "tipoICMS").toString().length() == 6 ? 1 : 2); // ICMSXX : ICMSSQN
-    ui->comboBoxRegime_2->setCurrentText(modelViewProdutoEstoque.data(index.row(), "tipoICMS").toString().length() == 6 ? "Tributação Normal" : "Simples Nacional");
 
     QSqlQuery queryCfop;
     if (ui->comboBoxTipo->currentText() == "0 Entrada") queryCfop.prepare("SELECT NAT FROM cfop_entr WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop");
@@ -1005,38 +1001,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
       return;
     }
 
-    // ICMS
-    if (queryCfop.first()) ui->comboBoxCfop_2->setCurrentText(modelViewProdutoEstoque.data(index.row(), "cfop").toString() + " - " + queryCfop.value("NAT").toString().left(50));
-    ui->comboBoxICMSOrig_2->setCurrentIndex(ui->comboBoxICMSOrig_2->findText(modelViewProdutoEstoque.data(index.row(), "orig").toString(), Qt::MatchStartsWith));
-    ui->comboBoxSituacaoTributaria_2->setCurrentIndex(ui->comboBoxSituacaoTributaria_2->findText(modelViewProdutoEstoque.data(index.row(), "cstICMS").toString(), Qt::MatchStartsWith));
-    // TODO: fix properly
-    this->on_comboBoxSituacaoTributaria_currentTextChanged(ui->comboBoxSituacaoTributaria->currentText());
     //
-    ui->comboBoxICMSModBc_2->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "modBC").toInt() + 1);
-    ui->doubleSpinBoxICMSvbc_3->setValue(modelViewProdutoEstoque.data(index.row(), "vBC").toDouble());
-    ui->doubleSpinBoxICMSpicms_3->setValue(modelViewProdutoEstoque.data(index.row(), "pICMS").toDouble());
-    ui->doubleSpinBoxICMSvicms_3->setValue(modelViewProdutoEstoque.data(index.row(), "vICMS").toDouble());
-    ui->comboBoxICMSModBcSt_2->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "modBCST").toInt() + 1);
-    ui->doubleSpinBoxICMSpmvast_2->setValue(modelViewProdutoEstoque.data(index.row(), "pMVAST").toDouble());
-    ui->doubleSpinBoxICMSvbcst_2->setValue(modelViewProdutoEstoque.data(index.row(), "vBCST").toDouble());
-    ui->doubleSpinBoxICMSpicmsst_2->setValue(modelViewProdutoEstoque.data(index.row(), "pICMSST").toDouble());
-    ui->doubleSpinBoxICMSvicmsst_2->setValue(modelViewProdutoEstoque.data(index.row(), "pICMSST").toDouble());
-
-    // IPI
-    ui->comboBoxIPIcst_2->setCurrentIndex(ui->comboBoxIPIcst_2->findText(modelViewProdutoEstoque.data(index.row(), "cstIPI").toString(), Qt::MatchStartsWith));
-    ui->lineEditIPIcEnq_3->setText(modelViewProdutoEstoque.data(index.row(), "cEnq").toString());
-
-    // PIS
-    ui->comboBoxPIScst_2->setCurrentIndex(ui->comboBoxPIScst_2->findText(modelViewProdutoEstoque.data(index.row(), "cstPIS").toString(), Qt::MatchStartsWith));
-    ui->doubleSpinBoxPISvbc_3->setValue(modelViewProdutoEstoque.data(index.row(), "vBCPIS").toDouble());
-    ui->doubleSpinBoxPISppis_3->setValue(modelViewProdutoEstoque.data(index.row(), "pPIS").toDouble());
-    ui->doubleSpinBoxPISvpis_3->setValue(modelViewProdutoEstoque.data(index.row(), "vPIS").toDouble());
-
-    // COFINS
-    ui->comboBoxCOFINScst_3->setCurrentIndex(ui->comboBoxCOFINScst_3->findText(modelViewProdutoEstoque.data(index.row(), "cstCOFINS").toString(), Qt::MatchStartsWith));
-    ui->doubleSpinBoxCOFINSvbc_4->setValue(modelViewProdutoEstoque.data(index.row(), "vBCCOFINS").toDouble());
-    ui->doubleSpinBoxCOFINSpcofins_4->setValue(modelViewProdutoEstoque.data(index.row(), "pCOFINS").toDouble());
-    ui->doubleSpinBoxCOFINSvcofins_4->setValue(modelViewProdutoEstoque.data(index.row(), "vCOFINS").toDouble());
 
     // ICMS Inter
 
@@ -1269,41 +1234,6 @@ void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
   }
 }
 
-void CadastrarNFe::on_comboBoxRegime_2_currentTextChanged(const QString &text) {
-  if (text == "Tributação Normal") {
-    const QStringList list = {"00 - Tributada integralmente",
-                              "10 - Tributada e com cobrança do ICMS por substituição tributária",
-                              "20 - Com redução de base de cálculo",
-                              "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária",
-                              "40 - Isenta",
-                              "41 - Não tributada",
-                              "50 - Suspensão",
-                              "51 - Diferimento",
-                              "60 - ICMS cobrado anteriormente por substituição tributária",
-                              "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária",
-                              "90 - Outras"};
-
-    ui->comboBoxSituacaoTributaria_2->clear();
-    ui->comboBoxSituacaoTributaria_2->addItems(list);
-  }
-
-  if (text == "Simples Nacional") {
-    const QStringList list = {"101 - Tributada pelo Simples Nacional com permissão de crédito",
-                              "102 - Tributada pelo Simples Nacional sem permissão de crédito",
-                              "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta",
-                              "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária",
-                              "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária",
-                              "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária",
-                              "300 - Imune",
-                              "400 - Não tributada pelo Simples Nacional",
-                              "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação",
-                              "900 - Outros"};
-
-    ui->comboBoxSituacaoTributaria_2->clear();
-    ui->comboBoxSituacaoTributaria_2->addItems(list);
-  }
-}
-
 void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QString &text) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
@@ -1349,77 +1279,6 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
     ui->label_7->hide();
     ui->doubleSpinBoxICMSpmvast->hide();
     // TODO: icms retido anteriormente, é outro campo?
-  }
-
-  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {
-  }
-
-  if (text == "90 - Outras") {
-  }
-
-  // simples nacional
-
-  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {
-  }
-
-  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {
-  }
-
-  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {
-  }
-
-  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {
-  }
-
-  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {
-  }
-
-  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {
-  }
-
-  if (text == "400 - Não tributada pelo Simples Nacional") {
-  }
-
-  if (text == "300 - Imune") {
-  }
-
-  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {
-  }
-
-  if (text == "900 - Outros") {
-  }
-}
-
-void CadastrarNFe::on_comboBoxSituacaoTributaria_2_currentTextChanged(const QString &text) {
-  if (text == "00 - Tributada integralmente") {
-    ui->frame_3->show();
-    ui->frame_4->hide();
-  }
-
-  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {
-  }
-
-  if (text == "20 - Com redução de base de cálculo") {
-  }
-
-  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {
-  }
-
-  if (text == "40 - Isenta") {
-  }
-
-  if (text == "41 - Não tributada") {
-  }
-
-  if (text == "50 - Suspensão") {
-  }
-
-  if (text == "51 - Diferimento") {
-  }
-
-  if (text == "60 - ICMS cobrado anteriormente por substituição tributária") {
-    ui->frame_3->hide();
-    ui->frame_4->show();
   }
 
   if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {
@@ -1963,16 +1822,15 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 }
 
 void CadastrarNFe::setConnections() {
-  connect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged);
   connect(ui->comboBoxCOFINScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged);
+  connect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged);
+  connect(ui->comboBoxDestinoOperacao, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged);
   connect(ui->comboBoxICMSModBc, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged);
   connect(ui->comboBoxICMSModBcSt, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged);
   connect(ui->comboBoxICMSOrig, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged);
   connect(ui->comboBoxIPIcst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxIPIcst_currentTextChanged);
   connect(ui->comboBoxPIScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxPIScst_currentTextChanged);
-  connect(ui->comboBoxRegime_2, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxRegime_2_currentTextChanged);
   connect(ui->comboBoxRegime, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxRegime_currentTextChanged);
-  connect(ui->comboBoxSituacaoTributaria_2, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxSituacaoTributaria_2_currentTextChanged);
   connect(ui->comboBoxSituacaoTributaria, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged);
   connect(ui->doubleSpinBoxCOFINSpcofins, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged);
   connect(ui->doubleSpinBoxCOFINSvbc, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged);
@@ -1993,22 +1851,21 @@ void CadastrarNFe::setConnections() {
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged);
   connect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
   connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
   connect(ui->tableItens, &TableView::entered, this, &CadastrarNFe::on_tableItens_entered);
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
 }
 
 void CadastrarNFe::unsetConnections() {
-  disconnect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged);
   disconnect(ui->comboBoxCOFINScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged);
+  disconnect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged);
+  disconnect(ui->comboBoxDestinoOperacao, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged);
   disconnect(ui->comboBoxICMSModBc, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged);
   disconnect(ui->comboBoxICMSModBcSt, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged);
   disconnect(ui->comboBoxICMSOrig, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged);
   disconnect(ui->comboBoxIPIcst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxIPIcst_currentTextChanged);
   disconnect(ui->comboBoxPIScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxPIScst_currentTextChanged);
-  disconnect(ui->comboBoxRegime_2, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxRegime_2_currentTextChanged);
   disconnect(ui->comboBoxRegime, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxRegime_currentTextChanged);
-  disconnect(ui->comboBoxSituacaoTributaria_2, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxSituacaoTributaria_2_currentTextChanged);
   disconnect(ui->comboBoxSituacaoTributaria, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged);
   disconnect(ui->doubleSpinBoxCOFINSpcofins, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged);
   disconnect(ui->doubleSpinBoxCOFINSvbc, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged);
@@ -2029,9 +1886,9 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged);
   disconnect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
   disconnect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
+  disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
   disconnect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
   disconnect(ui->tableItens, &TableView::entered, this, &CadastrarNFe::on_tableItens_entered);
-  disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
 }
 
 bool CadastrarNFe::listarCfop() {
@@ -2057,6 +1914,8 @@ bool CadastrarNFe::listarCfop() {
 
   return true;
 }
+
+void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) { ui->tabWidget_4->setTabEnabled(4, text == "2 Operação interestadual"); }
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo
 // TODO: 3criar logo para nota

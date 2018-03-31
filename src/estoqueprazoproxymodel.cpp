@@ -12,7 +12,7 @@ QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int r
     if (proxyIndex.column() == this->dias) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->dias), Qt::DisplayRole).toDate();
 
-      if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::red);
+      if (prazo < QDate::currentDate() and not prazo.isNull()) { return QBrush(Qt::red); }
     }
   }
 
@@ -23,7 +23,7 @@ QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int r
     if (proxyIndex.column() == this->dias) {
       const QDate prazo = QIdentityProxyModel::data(index(proxyIndex.row(), this->dias), Qt::DisplayRole).toDate();
 
-      if (prazo < QDate::currentDate() and not prazo.isNull()) return QBrush(Qt::black);
+      if (prazo < QDate::currentDate() and not prazo.isNull()) { return QBrush(Qt::black); }
     }
 
     //

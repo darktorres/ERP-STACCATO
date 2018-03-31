@@ -59,7 +59,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
   UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
 
-  if (not qApp->dbConnect()) return;
+  if (not qApp->dbConnect()) { return; }
 
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
     emit errorSignal("Login inválido!");

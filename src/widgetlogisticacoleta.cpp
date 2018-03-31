@@ -98,12 +98,12 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   InputDialog input(InputDialog::Tipo::Coleta);
 
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cadastrar(list, input.getDate(), input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
@@ -111,9 +111,9 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -199,12 +199,12 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   InputDialog input(InputDialog::Tipo::AgendarColeta);
 
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not reagendar(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
@@ -212,7 +212,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -278,7 +278,7 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
     const QString idVenda = modelViewColeta.data(item.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
-    if (ids.isEmpty()) return;
+    if (ids.isEmpty()) { return; }
 
     for (const auto &id : ids) {
       auto *venda = new Venda(this);
@@ -342,12 +342,12 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -355,7 +355,7 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

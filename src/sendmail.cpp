@@ -43,9 +43,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
 
       representante = list.join(" ");
 
-      do {
-        ui->comboBoxDest->addItem(query.value("email").toString());
-      } while (query.next());
+      do { ui->comboBoxDest->addItem(query.value("email").toString()); } while (query.next());
     }
 
     // REFAC: 5dont hardcode this

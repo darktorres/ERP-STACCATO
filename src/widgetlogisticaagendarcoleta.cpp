@@ -238,8 +238,8 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not processRows(list, ui->dateTimeEdit->date(), true)) {
     QSqlQuery("ROLLBACK").exec();
@@ -247,7 +247,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -268,12 +268,12 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   InputDialog input(InputDialog::Tipo::AgendarColeta, this);
   // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
 
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not processRows(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
@@ -281,7 +281,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -314,8 +314,8 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       const int idEvento = query.value(0).toInt();
 
-      if (not modelTransp.setData(item.row(), "data", dataPrevColeta)) return false;
-      if (not modelTransp.setData(item.row(), "idEvento", idEvento)) return false;
+      if (not modelTransp.setData(item.row(), "data", dataPrevColeta)) { return false; }
+      if (not modelTransp.setData(item.row(), "idEvento", idEvento)) { return false; }
 
       idEstoque = modelTransp.data(item.row(), "idEstoque").toInt();
 
@@ -402,19 +402,19 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
 
     //
 
-    if (not modelTransp.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) return false;
-    if (not modelTransp.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) return false;
-    if (not modelTransp.setData(row, "formComercial", modelEstoque.data(item.row(), "formComercial"))) return false;
-    if (not modelTransp.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) return false;
-    if (not modelTransp.setData(row, "idEstoque", modelEstoque.data(item.row(), "idEstoque"))) return false;
-    if (not modelTransp.setData(row, "idProduto", modelEstoque.data(item.row(), "idProduto"))) return false;
-    if (not modelTransp.setData(row, "produto", modelEstoque.data(item.row(), "produto"))) return false;
-    if (not modelTransp.setData(row, "codComercial", modelEstoque.data(item.row(), "codComercial"))) return false;
-    if (not modelTransp.setData(row, "un", modelEstoque.data(item.row(), "un"))) return false;
-    if (not modelTransp.setData(row, "caixas", modelEstoque.data(item.row(), "caixas"))) return false;
-    if (not modelTransp.setData(row, "kg", peso)) return false;
-    if (not modelTransp.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) return false;
-    if (not modelTransp.setData(row, "status", "EM COLETA")) return false;
+    if (not modelTransp.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) { return false; }
+    if (not modelTransp.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) { return false; }
+    if (not modelTransp.setData(row, "formComercial", modelEstoque.data(item.row(), "formComercial"))) { return false; }
+    if (not modelTransp.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
+    if (not modelTransp.setData(row, "idEstoque", modelEstoque.data(item.row(), "idEstoque"))) { return false; }
+    if (not modelTransp.setData(row, "idProduto", modelEstoque.data(item.row(), "idProduto"))) { return false; }
+    if (not modelTransp.setData(row, "produto", modelEstoque.data(item.row(), "produto"))) { return false; }
+    if (not modelTransp.setData(row, "codComercial", modelEstoque.data(item.row(), "codComercial"))) { return false; }
+    if (not modelTransp.setData(row, "un", modelEstoque.data(item.row(), "un"))) { return false; }
+    if (not modelTransp.setData(row, "caixas", modelEstoque.data(item.row(), "caixas"))) { return false; }
+    if (not modelTransp.setData(row, "kg", peso)) { return false; }
+    if (not modelTransp.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) { return false; }
+    if (not modelTransp.setData(row, "status", "EM COLETA")) { return false; }
   }
 
   ui->tableTransp->resizeColumnsToContents();
@@ -464,7 +464,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   ui->frameCaminhao->hide();
   ui->pushButtonAgendarColeta->show();
@@ -481,13 +481,13 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
     return;
   }
 
-  if (not ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) return;
+  if (not ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date) {
-  if (ui->itemBoxVeiculo->text().isEmpty()) return;
+  if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTransp2.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
 
@@ -511,7 +511,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
     const QString idVenda = modelEstoque.data(item.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
-    if (ids.isEmpty()) return;
+    if (ids.isEmpty()) { return; }
 
     for (const auto &id : ids) {
       auto *venda = new Venda(this);

@@ -47,8 +47,10 @@ void CalculoFrete::handleNetworkData(QNetworkReply *networkReply) {
     QByteArray response(networkReply->readAll());
     qDebug() << "response: " << response;
     QXmlStreamReader xml(response);
-    while (!xml.atEnd()) {
+
+    while (not xml.atEnd()) {
       xml.readNext();
+
       if (xml.tokenType() == QXmlStreamReader::StartElement) {
         if (xml.name() == "origin_address") {
           xml.readNext();
@@ -63,6 +65,7 @@ void CalculoFrete::handleNetworkData(QNetworkReply *networkReply) {
         if (xml.name() == "distance") {
           while (not xml.atEnd()) {
             xml.readNext();
+
             if (xml.tokenType() == QXmlStreamReader::StartElement) {
               if (xml.name() == "text") {
                 xml.readNext();

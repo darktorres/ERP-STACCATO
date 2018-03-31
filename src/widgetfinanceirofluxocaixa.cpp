@@ -44,13 +44,13 @@ bool WidgetFinanceiroFluxoCaixa::updateTables() {
     isReady = true;
   }
 
-  if (not montaFiltro()) return false;
+  if (not montaFiltro()) { return false; }
 
   return true;
 }
 
 bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
-  if (not isReady) return false; // REFAC: testar
+  if (not isReady) { return false; } // REFAC: testar
 
   const QString filtroData = ui->groupBoxMes->isChecked() ? "`Data` IS NOT NULL AND DATE_FORMAT(`Data`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`Data` IS NOT NULL";
 

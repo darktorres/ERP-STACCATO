@@ -81,17 +81,17 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QString idVenda = modelViewCompras.data(row, "Venda").toString();
 
   InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra);
-  if (not inputDlg.setFilter(idCompra)) return;
+  if (not inputDlg.setFilter(idCompra)) { return; }
 
-  if (inputDlg.exec() != InputDialogFinanceiro::Accepted) return;
+  if (inputDlg.exec() != InputDialogFinanceiro::Accepted) { return; }
 
   const QDateTime dataPrevista = inputDlg.getDate();
   const QDateTime dataConf = inputDlg.getNextDate();
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not confirmarCompra(idCompra, dataPrevista, dataConf)) {
     QSqlQuery("ROLLBACK").exec();
@@ -99,9 +99,9 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVenda)) return;
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -207,12 +207,12 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cancelar(row)) {
     QSqlQuery("ROLLBACK").exec();
@@ -220,9 +220,9 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVenda)) return;
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

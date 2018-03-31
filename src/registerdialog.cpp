@@ -52,7 +52,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 bool RegisterDialog::viewRegister() {
   tipo = Tipo::Atualizar;
 
-  if (not confirmationMessage()) return false;
+  if (not confirmationMessage()) { return false; }
 
   clearFields();
   updateMode();
@@ -70,7 +70,7 @@ bool RegisterDialog::viewRegister() {
 
 bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   for (const auto &line : list) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   return true;
@@ -168,13 +168,13 @@ bool RegisterDialog::confirmationMessage() {
 
   //  if (escolha == QMessageBox::Save) return save();
   //  if (escolha == QMessageBox::Discard) return true;
-  //  if (escolha == QMessageBox::Cancel) return false;
+  //  if (escolha == QMessageBox::Cancel) { return false; }
 
   return true;
 }
 
 bool RegisterDialog::newRegister() {
-  if (not confirmationMessage()) return false;
+  if (not confirmationMessage()) { return false; }
 
   model.setFilter("0");
 
@@ -192,12 +192,12 @@ bool RegisterDialog::newRegister() {
 }
 
 bool RegisterDialog::save(const bool silent) {
-  if (not verifyFields()) return false;
+  if (not verifyFields()) { return false; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return false;
-  if (not QSqlQuery("START TRANSACTION").exec()) return false;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return false; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return false; }
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
@@ -207,7 +207,7 @@ bool RegisterDialog::save(const bool silent) {
     return false;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return false;
+  if (not QSqlQuery("COMMIT").exec()) { return false; }
 
   emit transactionEnded();
 
@@ -233,7 +233,7 @@ void RegisterDialog::remove() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    if (not setData("desativado", true)) return;
+    if (not setData("desativado", true)) { return; }
 
     if (not model.submitAll()) {
       emit errorSignal("Não foi possível remover este item: " + model.lastError().text());
@@ -245,7 +245,7 @@ void RegisterDialog::remove() {
 }
 
 bool RegisterDialog::validaCNPJ(const QString &text) {
-  if (text.size() != 14) return false;
+  if (text.size() != 14) { return false; }
 
   const QString sub = text.left(12);
 
@@ -284,7 +284,7 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 }
 
 bool RegisterDialog::validaCPF(const QString &text) {
-  if (text.size() != 11) return false;
+  if (text.size() != 11) { return false; }
 
   if (text == "00000000000" or text == "11111111111" or text == "22222222222" or text == "33333333333" or text == "44444444444" or text == "55555555555" or text == "66666666666" or
       text == "77777777777" or text == "88888888888" or text == "99999999999") {

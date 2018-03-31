@@ -305,8 +305,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not processRows()) {
     QSqlQuery("ROLLBACK").exec();
@@ -314,9 +314,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -346,8 +346,8 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
   query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelTransp.rowCount(); ++row) {
-    if (not modelTransp.setData(row, "data", dataPrevEnt)) return false;
-    if (not modelTransp.setData(row, "idEvento", idEvento)) return false;
+    if (not modelTransp.setData(row, "data", dataPrevEnt)) { return false; }
+    if (not modelTransp.setData(row, "idEvento", idEvento)) { return false; }
 
     const int idVendaProduto = modelTransp.data(row, "idVendaProduto").toInt();
 
@@ -405,20 +405,20 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
 
     //
 
-    if (not modelTransp.setData(row, "fornecedor", modelViewProdutos.data(item.row(), "fornecedor"))) return false;
-    if (not modelTransp.setData(row, "unCaixa", modelViewProdutos.data(item.row(), "unCaixa"))) return false;
-    if (not modelTransp.setData(row, "formComercial", modelViewProdutos.data(item.row(), "formComercial"))) return false;
-    if (not modelTransp.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) return false;
-    if (not modelTransp.setData(row, "idVenda", modelViewProdutos.data(item.row(), "idVenda"))) return false;
-    if (not modelTransp.setData(row, "idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"))) return false;
-    if (not modelTransp.setData(row, "idProduto", modelViewProdutos.data(item.row(), "idProduto"))) return false;
-    if (not modelTransp.setData(row, "produto", modelViewProdutos.data(item.row(), "produto"))) return false;
-    if (not modelTransp.setData(row, "codComercial", modelViewProdutos.data(item.row(), "codComercial"))) return false;
-    if (not modelTransp.setData(row, "un", modelViewProdutos.data(item.row(), "un"))) return false;
-    if (not modelTransp.setData(row, "caixas", modelViewProdutos.data(item.row(), "caixas"))) return false;
-    if (not modelTransp.setData(row, "kg", peso)) return false;
-    if (not modelTransp.setData(row, "quant", modelViewProdutos.data(item.row(), "quant"))) return false;
-    if (not modelTransp.setData(row, "status", "ENTREGA AGEND.")) return false;
+    if (not modelTransp.setData(row, "fornecedor", modelViewProdutos.data(item.row(), "fornecedor"))) { return false; }
+    if (not modelTransp.setData(row, "unCaixa", modelViewProdutos.data(item.row(), "unCaixa"))) { return false; }
+    if (not modelTransp.setData(row, "formComercial", modelViewProdutos.data(item.row(), "formComercial"))) { return false; }
+    if (not modelTransp.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
+    if (not modelTransp.setData(row, "idVenda", modelViewProdutos.data(item.row(), "idVenda"))) { return false; }
+    if (not modelTransp.setData(row, "idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"))) { return false; }
+    if (not modelTransp.setData(row, "idProduto", modelViewProdutos.data(item.row(), "idProduto"))) { return false; }
+    if (not modelTransp.setData(row, "produto", modelViewProdutos.data(item.row(), "produto"))) { return false; }
+    if (not modelTransp.setData(row, "codComercial", modelViewProdutos.data(item.row(), "codComercial"))) { return false; }
+    if (not modelTransp.setData(row, "un", modelViewProdutos.data(item.row(), "un"))) { return false; }
+    if (not modelTransp.setData(row, "caixas", modelViewProdutos.data(item.row(), "caixas"))) { return false; }
+    if (not modelTransp.setData(row, "kg", peso)) { return false; }
+    if (not modelTransp.setData(row, "quant", modelViewProdutos.data(item.row(), "quant"))) { return false; }
+    if (not modelTransp.setData(row, "status", "ENTREGA AGEND.")) { return false; }
   }
 
   ui->tableTransp->resizeColumnsToContents();
@@ -535,7 +535,7 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() {
 }
 
 void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &date) {
-  if (ui->itemBoxVeiculo->text().isEmpty()) return;
+  if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTransp2.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
 
@@ -607,12 +607,12 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   const int quantAgendar = QInputDialog::getInt(this, "Agendar", "Quantidade de caixas: ", quantTotal, 0, quantTotal, 1, &ok);
 
-  if (quantAgendar == 0 or not ok) return;
+  if (quantAgendar == 0 or not ok) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not adicionarProdutoParcial(row, quantAgendar, quantTotal)) {
     QSqlQuery("ROLLBACK").exec();
@@ -620,7 +620,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 }
@@ -628,7 +628,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int quantAgendar, const int quantTotal) {
   // quebrar se necessario
   if (quantAgendar < quantTotal) {
-    if (not quebrarProduto(row, quantAgendar, quantTotal)) return false;
+    if (not quebrarProduto(row, quantAgendar, quantTotal)) { return false; }
   }
 
   //
@@ -647,20 +647,20 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
   const int newRow = modelTransp.rowCount();
   modelTransp.insertRow(newRow);
 
-  if (not modelTransp.setData(newRow, "fornecedor", modelViewProdutos.data(row, "fornecedor"))) return false;
-  if (not modelTransp.setData(newRow, "unCaixa", modelViewProdutos.data(row, "unCaixa"))) return false;
-  if (not modelTransp.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"))) return false;
-  if (not modelTransp.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getValue())) return false;
-  if (not modelTransp.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"))) return false;
-  if (not modelTransp.setData(newRow, "idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"))) return false;
-  if (not modelTransp.setData(newRow, "idProduto", modelViewProdutos.data(row, "idProduto"))) return false;
-  if (not modelTransp.setData(newRow, "produto", modelViewProdutos.data(row, "produto"))) return false;
-  if (not modelTransp.setData(newRow, "codComercial", modelViewProdutos.data(row, "codComercial"))) return false;
-  if (not modelTransp.setData(newRow, "un", modelViewProdutos.data(row, "un"))) return false;
-  if (not modelTransp.setData(newRow, "caixas", quantAgendar)) return false;
-  if (not modelTransp.setData(newRow, "kg", kg * quantAgendar)) return false;
-  if (not modelTransp.setData(newRow, "quant", quantAgendar * unCaixa)) return false;
-  if (not modelTransp.setData(newRow, "status", "ENTREGA AGEND.")) return false;
+  if (not modelTransp.setData(newRow, "fornecedor", modelViewProdutos.data(row, "fornecedor"))) { return false; }
+  if (not modelTransp.setData(newRow, "unCaixa", modelViewProdutos.data(row, "unCaixa"))) { return false; }
+  if (not modelTransp.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"))) { return false; }
+  if (not modelTransp.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
+  if (not modelTransp.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"))) { return false; }
+  if (not modelTransp.setData(newRow, "idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"))) { return false; }
+  if (not modelTransp.setData(newRow, "idProduto", modelViewProdutos.data(row, "idProduto"))) { return false; }
+  if (not modelTransp.setData(newRow, "produto", modelViewProdutos.data(row, "produto"))) { return false; }
+  if (not modelTransp.setData(newRow, "codComercial", modelViewProdutos.data(row, "codComercial"))) { return false; }
+  if (not modelTransp.setData(newRow, "un", modelViewProdutos.data(row, "un"))) { return false; }
+  if (not modelTransp.setData(newRow, "caixas", quantAgendar)) { return false; }
+  if (not modelTransp.setData(newRow, "kg", kg * quantAgendar)) { return false; }
+  if (not modelTransp.setData(newRow, "quant", quantAgendar * unCaixa)) { return false; }
+  if (not modelTransp.setData(newRow, "status", "ENTREGA AGEND.")) { return false; }
 
   ui->tableTransp->resizeColumnsToContents();
 
@@ -689,7 +689,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
     const QVariant value = modelProdutos.data(0, column);
 
-    if (not modelProdutos.setData(newRow, column, value)) return false;
+    if (not modelProdutos.setData(newRow, column, value)) { return false; }
   }
 
   const double unCaixa = modelProdutos.data(0, "unCaixa").toDouble();
@@ -699,11 +699,11 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   const double parcialDesc = modelProdutos.data(0, "parcialDesc").toDouble() * proporcao;
   const double total = modelProdutos.data(0, "total").toDouble() * proporcao;
 
-  if (not modelProdutos.setData(0, "quant", quantAgendar * unCaixa)) return false;
-  if (not modelProdutos.setData(0, "caixas", quantAgendar)) return false;
-  if (not modelProdutos.setData(0, "parcial", parcial)) return false;
-  if (not modelProdutos.setData(0, "parcialDesc", parcialDesc)) return false;
-  if (not modelProdutos.setData(0, "total", total)) return false;
+  if (not modelProdutos.setData(0, "quant", quantAgendar * unCaixa)) { return false; }
+  if (not modelProdutos.setData(0, "caixas", quantAgendar)) { return false; }
+  if (not modelProdutos.setData(0, "parcial", parcial)) { return false; }
+  if (not modelProdutos.setData(0, "parcialDesc", parcialDesc)) { return false; }
+  if (not modelProdutos.setData(0, "total", total)) { return false; }
 
   // alterar quant, precos, etc da linha nova
   const double proporcaoNovo = double((quantTotal - quantAgendar)) / quantTotal;
@@ -711,11 +711,11 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   const double parcialDescNovo = modelProdutos.data(newRow, "parcialDesc").toDouble() * proporcaoNovo;
   const double totalNovo = modelProdutos.data(newRow, "total").toDouble() * proporcaoNovo;
 
-  if (not modelProdutos.setData(newRow, "quant", (quantTotal - quantAgendar) * unCaixa)) return false;
-  if (not modelProdutos.setData(newRow, "caixas", quantTotal - quantAgendar)) return false;
-  if (not modelProdutos.setData(newRow, "parcial", parcialNovo)) return false;
-  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo)) return false;
-  if (not modelProdutos.setData(newRow, "total", totalNovo)) return false;
+  if (not modelProdutos.setData(newRow, "quant", (quantTotal - quantAgendar) * unCaixa)) { return false; }
+  if (not modelProdutos.setData(newRow, "caixas", quantTotal - quantAgendar)) { return false; }
+  if (not modelProdutos.setData(newRow, "parcial", parcialNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "total", totalNovo)) { return false; }
 
   if (not modelProdutos.submitAll()) {
     emit errorSignal("Erro salvando dados venda_produto: " + modelProdutos.lastError().text());
@@ -758,7 +758,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
     const QVariant value = modelConsumo.data(0, column);
 
-    if (not modelConsumo.setData(rowConsumo, column, value)) return false;
+    if (not modelConsumo.setData(rowConsumo, column, value)) { return false; }
   }
 
   // alterar quant, caixas, valor
@@ -768,9 +768,9 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   const int caixasConsumo = modelConsumo.data(0, "caixas").toInt() * proporcao;
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble() * proporcao;
 
-  if (not modelConsumo.setData(0, "quant", quantConsumo)) return false;
-  if (not modelConsumo.setData(0, "caixas", caixasConsumo)) return false;
-  if (not modelConsumo.setData(0, "valor", valorConsumo)) return false;
+  if (not modelConsumo.setData(0, "quant", quantConsumo)) { return false; }
+  if (not modelConsumo.setData(0, "caixas", caixasConsumo)) { return false; }
+  if (not modelConsumo.setData(0, "valor", valorConsumo)) { return false; }
 
   // alterar linha nova
   const double quantConsumo2 = modelConsumo.data(rowConsumo, "quant").toDouble() * proporcaoNovo;
@@ -778,10 +778,10 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   const int caixasConsumo2 = modelConsumo.data(rowConsumo, "caixas").toInt() * proporcaoNovo;
   const double valorConsumo2 = modelConsumo.data(rowConsumo, "valor").toDouble() * proporcaoNovo;
 
-  if (not modelConsumo.setData(rowConsumo, "quant", quantConsumo2)) return false;
-  if (not modelConsumo.setData(rowConsumo, "caixas", caixasConsumo2)) return false;
-  if (not modelConsumo.setData(rowConsumo, "valor", valorConsumo2)) return false;
-  if (not modelConsumo.setData(rowConsumo, "idVendaProduto", lastId)) return false;
+  if (not modelConsumo.setData(rowConsumo, "quant", quantConsumo2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "caixas", caixasConsumo2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "valor", valorConsumo2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "idVendaProduto", lastId)) { return false; }
 
   if (not modelConsumo.submitAll()) {
     emit errorSignal("Erro quebrando consumo em duas linhas: " + modelConsumo.lastError().text());
@@ -806,12 +806,12 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 
   InputDialog input(InputDialog::Tipo::ReagendarPedido);
 
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not reagendar(list, input.getNextDate(), input.getObservacao())) {
     QSqlQuery("ROLLBACK").exec();
@@ -819,7 +819,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

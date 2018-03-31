@@ -44,7 +44,7 @@ void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
   InputDialogFinanceiro input(InputDialogFinanceiro::Tipo::Financeiro);
   input.setFilter(modelViewComprasFinanceiro.data(index.row(), "Compra").toString());
 
-  if (input.exec() != InputDialogFinanceiro::Accepted) return;
+  if (input.exec() != InputDialogFinanceiro::Accepted) { return; }
 }
 
 void WidgetFinanceiroCompra::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

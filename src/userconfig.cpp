@@ -11,24 +11,24 @@ UserConfig::UserConfig(QWidget *parent) : Dialog(parent), ui(new Ui::UserConfig)
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (const auto key = UserSession::getSetting("User/servidorACBr"); key) ui->lineEditACBrServidor->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/portaACBr"); key) ui->lineEditACBrPorta->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) ui->itemBoxLoja->setValue(key.value());
+  if (const auto key = UserSession::getSetting("User/servidorACBr"); key) { ui->lineEditACBrServidor->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/portaACBr"); key) { ui->lineEditACBrPorta->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) { ui->itemBoxLoja->setValue(key.value()); }
 
-  if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) ui->lineEditEmailContabilidade->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/emailLogistica"); key) ui->lineEditEmailLogistica->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) { ui->lineEditEmailContabilidade->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/emailLogistica"); key) { ui->lineEditEmailLogistica->setText(key.value().toString()); }
 
-  if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) ui->lineEditServidorSMTP->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/portaSMTP"); key) ui->lineEditPortaSMTP->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/emailCompra"); key) ui->lineEditEmail->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/emailSenha"); key) ui->lineEditEmailSenha->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/emailCopia"); key) ui->lineEditEmailCopia->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidorSMTP->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPortaSMTP->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditEmailSenha->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditEmailCopia->setText(key.value().toString()); }
 
-  if (const auto key = UserSession::getSetting("User/OrcamentosFolder"); key) ui->lineEditOrcamentosFolder->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/VendasFolder"); key) ui->lineEditVendasFolder->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/ComprasFolder"); key) ui->lineEditComprasFolder->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder"); key) ui->lineEditEntregasXmlFolder->setText(key.value().toString());
-  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder"); key) ui->lineEditEntregasPdfFolder->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("User/OrcamentosFolder"); key) { ui->lineEditOrcamentosFolder->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/VendasFolder"); key) { ui->lineEditVendasFolder->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/ComprasFolder"); key) { ui->lineEditComprasFolder->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder"); key) { ui->lineEditEntregasXmlFolder->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder"); key) { ui->lineEditEntregasPdfFolder->setText(key.value().toString()); }
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();
@@ -60,7 +60,7 @@ UserConfig::~UserConfig() { delete ui; }
 void UserConfig::on_pushButtonOrcamentosFolder_clicked() {
   const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
 
-  if (path.isEmpty()) return;
+  if (path.isEmpty()) { return; }
 
   ui->lineEditOrcamentosFolder->setText(path);
 }
@@ -100,7 +100,7 @@ void UserConfig::on_pushButtonAlterarDados_clicked() {
 void UserConfig::on_pushButtonVendasFolder_clicked() {
   const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
 
-  if (path.isEmpty()) return;
+  if (path.isEmpty()) { return; }
 
   ui->lineEditVendasFolder->setText(path);
 }
@@ -108,7 +108,7 @@ void UserConfig::on_pushButtonVendasFolder_clicked() {
 void UserConfig::on_pushButtonComprasFolder_clicked() {
   const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
 
-  if (path.isEmpty()) return;
+  if (path.isEmpty()) { return; }
 
   ui->lineEditComprasFolder->setText(path);
 }
@@ -116,7 +116,7 @@ void UserConfig::on_pushButtonComprasFolder_clicked() {
 void UserConfig::on_pushButtonEntregasXmlFolder_clicked() {
   const QString path = QFileDialog::getExistingDirectory(this, "Pasta XML", QDir::currentPath());
 
-  if (path.isEmpty()) return;
+  if (path.isEmpty()) { return; }
 
   ui->lineEditEntregasXmlFolder->setText(path);
 }
@@ -124,7 +124,7 @@ void UserConfig::on_pushButtonEntregasXmlFolder_clicked() {
 void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
   const QString path = QFileDialog::getExistingDirectory(this, "Pasta PDF/Excel", QDir::currentPath());
 
-  if (path.isEmpty()) return;
+  if (path.isEmpty()) { return; }
 
   ui->lineEditEntregasPdfFolder->setText(path);
 }

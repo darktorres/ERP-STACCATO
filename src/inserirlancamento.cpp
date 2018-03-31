@@ -91,14 +91,14 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   const int newRow = modelContaPagamento.rowCount();
   modelContaPagamento.insertRow(newRow);
 
-  if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) return;
-  if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) return;
+  if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
+  if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) { return; }
 
   openPersistentEditor();
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) return;
+  if (not verifyFields()) { return; }
 
   if (not modelContaPagamento.submitAll()) {
     QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + modelContaPagamento.lastError().text());
@@ -169,7 +169,7 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
     if (modelContaPagamento.fieldIndex("created") == col) continue;
     if (modelContaPagamento.fieldIndex("lastUpdated") == col) continue;
 
-    if (not modelContaPagamento.setData(newRow, col, modelContaPagamento.data(row, col))) return;
+    if (not modelContaPagamento.setData(newRow, col, modelContaPagamento.data(row, col))) { return; }
   }
 
   openPersistentEditor();

@@ -10,11 +10,11 @@ QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) 
   if (role == Qt::BackgroundRole) {
     const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), quantUpdIndex), Qt::DisplayRole).toInt());
 
-    if (quantUpd == Status::Ok) return QBrush(Qt::green);
-    if (quantUpd == Status::QuantDifere) return QBrush(Qt::yellow);
-    if (quantUpd == Status::NaoEncontrado) return QBrush(Qt::red);
-    if (quantUpd == Status::Consumo) return QBrush(QColor(0, 190, 0));
-    if (quantUpd == Status::Devolucao) return QBrush(Qt::cyan);
+    if (quantUpd == Status::Ok) { return QBrush(Qt::green); }
+    if (quantUpd == Status::QuantDifere) { return QBrush(Qt::yellow); }
+    if (quantUpd == Status::NaoEncontrado) { return QBrush(Qt::red); }
+    if (quantUpd == Status::Consumo) { return QBrush(QColor(0, 190, 0)); }
+    if (quantUpd == Status::Devolucao) { return QBrush(Qt::cyan); }
   }
 
   if (role == Qt::ForegroundRole) {
@@ -23,11 +23,11 @@ QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) 
 
     const Status quantUpd = static_cast<Status>(QIdentityProxyModel::data(index(proxyIndex.row(), quantUpdIndex), Qt::DisplayRole).toInt());
 
-    if (quantUpd == Status::Ok) return QBrush(Qt::black);
-    if (quantUpd == Status::QuantDifere) return QBrush(Qt::black);
-    if (quantUpd == Status::NaoEncontrado) return QBrush(Qt::black);
-    if (quantUpd == Status::Consumo) return QBrush(Qt::black);
-    if (quantUpd == Status::Devolucao) return QBrush(Qt::black);
+    if (quantUpd == Status::Ok) { return QBrush(Qt::black); }
+    if (quantUpd == Status::QuantDifere) { return QBrush(Qt::black); }
+    if (quantUpd == Status::NaoEncontrado) { return QBrush(Qt::black); }
+    if (quantUpd == Status::Consumo) { return QBrush(Qt::black); }
+    if (quantUpd == Status::Devolucao) { return QBrush(Qt::black); }
 
     //
 

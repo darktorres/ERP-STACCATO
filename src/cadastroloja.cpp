@@ -159,27 +159,27 @@ void CadastroLoja::clearFields() {
 
 bool CadastroLoja::verifyFields() {
   Q_FOREACH (const auto &line, ui->groupBoxCadastro->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   return true;
 }
 
 bool CadastroLoja::savingProcedures() {
-  if (not setData("descricao", ui->lineEditDescricao->text())) return false;
-  if (not setData("razaoSocial", ui->lineEditRazaoSocial->text())) return false;
-  if (not setData("sigla", ui->lineEditSIGLA->text())) return false;
-  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) return false;
-  if (not setData("cnpj", ui->lineEditCNPJ->text())) return false;
-  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) return false;
-  if (not setData("tel", ui->lineEditTel->text())) return false;
-  if (not setData("tel2", ui->lineEditTel2->text())) return false;
-  if (not setData("valorMinimoFrete", ui->doubleSpinBoxValorMinimoFrete->value())) return false;
-  if (not setData("porcentagemFrete", ui->doubleSpinBoxPorcFrete->value())) return false;
-  if (not setData("custoTransporteTon", ui->doubleSpinBoxCustoTransportePorTon->value())) return false;
-  if (not setData("custoTransporte1", ui->doubleSpinBoxCustoTransporte2Ton->value())) return false;
-  if (not setData("custoTransporte2", ui->doubleSpinBoxCustoTransporteAcima2Ton->value())) return false;
-  if (not setData("custoFuncionario", ui->doubleSpinBoxCustoFuncionario->value())) return false;
+  if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
+  if (not setData("razaoSocial", ui->lineEditRazaoSocial->text())) { return false; }
+  if (not setData("sigla", ui->lineEditSIGLA->text())) { return false; }
+  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
+  if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
+  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
+  if (not setData("tel", ui->lineEditTel->text())) { return false; }
+  if (not setData("tel2", ui->lineEditTel2->text())) { return false; }
+  if (not setData("valorMinimoFrete", ui->doubleSpinBoxValorMinimoFrete->value())) { return false; }
+  if (not setData("porcentagemFrete", ui->doubleSpinBoxPorcFrete->value())) { return false; }
+  if (not setData("custoTransporteTon", ui->doubleSpinBoxCustoTransportePorTon->value())) { return false; }
+  if (not setData("custoTransporte1", ui->doubleSpinBoxCustoTransporte2Ton->value())) { return false; }
+  if (not setData("custoTransporte2", ui->doubleSpinBoxCustoTransporteAcima2Ton->value())) { return false; }
+  if (not setData("custoFuncionario", ui->doubleSpinBoxCustoFuncionario->value())) { return false; }
 
   return true;
 }
@@ -302,7 +302,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
 
 bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   if (not ui->lineEditCEP->isValid()) {
@@ -315,16 +315,16 @@ bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
 
   if (not isUpdate) modelEnd.insertRow(currentRowEnd);
 
-  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) return false;
-  if (not setDataEnd("cep", ui->lineEditCEP->text())) return false;
-  if (not setDataEnd("logradouro", ui->lineEditLogradouro->text())) return false;
-  if (not setDataEnd("numero", ui->lineEditNro->text())) return false;
-  if (not setDataEnd("complemento", ui->lineEditComp->text())) return false;
-  if (not setDataEnd("bairro", ui->lineEditBairro->text())) return false;
-  if (not setDataEnd("cidade", ui->lineEditCidade->text())) return false;
-  if (not setDataEnd("uf", ui->lineEditUF->text())) return false;
-  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) return false;
-  if (not setDataEnd("desativado", false)) return false;
+  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
+  if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
+  if (not setDataEnd("logradouro", ui->lineEditLogradouro->text())) { return false; }
+  if (not setDataEnd("numero", ui->lineEditNro->text())) { return false; }
+  if (not setDataEnd("complemento", ui->lineEditComp->text())) { return false; }
+  if (not setDataEnd("bairro", ui->lineEditBairro->text())) { return false; }
+  if (not setDataEnd("cidade", ui->lineEditCidade->text())) { return false; }
+  if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
+  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
+  if (not setDataEnd("desativado", false)) { return false; }
 
   ui->tableEndereco->resizeColumnsToContents();
 
@@ -351,7 +351,7 @@ void CadastroLoja::clearEndereco() {
 }
 
 void CadastroLoja::on_lineEditCEP_textChanged(const QString &cep) {
-  if (not ui->lineEditCEP->isValid()) return;
+  if (not ui->lineEditCEP->isValid()) { return; }
 
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
@@ -376,7 +376,7 @@ void CadastroLoja::on_tableEndereco_clicked(const QModelIndex &index) {
 }
 
 bool CadastroLoja::viewRegister() {
-  if (not RegisterDialog::viewRegister()) return false;
+  if (not RegisterDialog::viewRegister()) { return false; }
 
   modelEnd.setFilter("idLoja = " + primaryId + " AND desativado = FALSE");
 
@@ -444,12 +444,12 @@ bool CadastroLoja::cadastrar() {
     return false;
   }
 
-  if (not savingProcedures()) return false;
+  if (not savingProcedures()) { return false; }
 
   for (int column = 0; column < model.rowCount(); ++column) {
     const QVariant dado = model.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -468,13 +468,13 @@ bool CadastroLoja::cadastrar() {
   //
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
-    if (not modelEnd.setData(row, primaryKey, primaryId)) return false;
+    if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }
   }
 
   for (int column = 0; column < modelEnd.rowCount(); ++column) {
     const QVariant dado = modelEnd.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -486,7 +486,7 @@ bool CadastroLoja::cadastrar() {
   //
 
   for (int row = 0; row < modelConta.rowCount(); ++row) {
-    if (not modelConta.setData(row, primaryKey, primaryId)) return false;
+    if (not modelConta.setData(row, primaryKey, primaryId)) { return false; }
   }
 
   if (not modelConta.submitAll()) {
@@ -506,7 +506,7 @@ void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
 }
 
 bool CadastroLoja::newRegister() {
-  if (not RegisterAddressDialog::newRegister()) return false;
+  if (not RegisterAddressDialog::newRegister()) { return false; }
 
   modelConta.setFilter("0");
 
@@ -520,16 +520,16 @@ bool CadastroLoja::newRegister() {
 
 bool CadastroLoja::cadastrarConta(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxConta->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   const int rowConta = isUpdate ? mapperConta.currentIndex() : modelConta.rowCount();
 
   if (not isUpdate) modelConta.insertRow(rowConta);
 
-  if (not modelConta.setData(rowConta, "banco", ui->lineEditBanco->text())) return false;
-  if (not modelConta.setData(rowConta, "agencia", ui->lineEditAgencia->text())) return false;
-  if (not modelConta.setData(rowConta, "conta", ui->lineEditConta->text())) return false;
+  if (not modelConta.setData(rowConta, "banco", ui->lineEditBanco->text())) { return false; }
+  if (not modelConta.setData(rowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
+  if (not modelConta.setData(rowConta, "conta", ui->lineEditConta->text())) { return false; }
 
   ui->tableConta->resizeColumnsToContents();
 
@@ -606,8 +606,8 @@ bool CadastroLoja::adicionarPagamento() {
     return false;
   }
 
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) return false;
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) return false;
+  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
+  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
 
   if (not modelPagamentos.submitAll()) {
     emit errorSignal("Erro salvando dados pagamentos: " + modelPagamentos.lastError().text());
@@ -623,9 +623,9 @@ bool CadastroLoja::adicionarPagamento() {
       return false;
     }
 
-    if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) return false;
-    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) return false;
-    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) return false;
+    if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) { return false; }
+    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
+    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
   }
 
   if (not modelTaxas.submitAll()) {
@@ -646,8 +646,8 @@ bool CadastroLoja::adicionarPagamento() {
 void CadastroLoja::on_pushButtonAdicionarPagamento_clicked() {
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not adicionarPagamento()) {
     QSqlQuery("ROLLBACK").exec();
@@ -655,7 +655,7 @@ void CadastroLoja::on_pushButtonAdicionarPagamento_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 }
@@ -707,8 +707,8 @@ void CadastroLoja::on_pushButtonRemoverPagamento_clicked() {
 bool CadastroLoja::atualizarPagamento() {
   const int row = mapperPagamento.currentIndex();
 
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) return false;
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) return false;
+  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
+  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
 
   if (not modelTaxas.removeRows(0, modelTaxas.rowCount())) {
     emit errorSignal("Erro removendo linha: " + modelTaxas.lastError().text());
@@ -722,9 +722,9 @@ bool CadastroLoja::atualizarPagamento() {
       return false;
     }
 
-    if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(rowTaxas, "idPagamento"))) return false;
-    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) return false;
-    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) return false;
+    if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(rowTaxas, "idPagamento"))) { return false; }
+    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
+    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
   }
 
   if (not modelPagamentos.submitAll()) {
@@ -756,8 +756,8 @@ bool CadastroLoja::atualizarPagamento() {
 void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not atualizarPagamento()) {
     QSqlQuery("ROLLBACK").exec();
@@ -765,7 +765,7 @@ void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 }

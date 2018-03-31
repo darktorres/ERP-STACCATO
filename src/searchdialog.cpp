@@ -87,7 +87,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 void SearchDialog::sendUpdateMessage() {
   const auto selection = ui->table->selectionModel()->selection().indexes();
 
-  if (selection.isEmpty()) return;
+  if (selection.isEmpty()) { return; }
 
   emit itemSelected(model.data(selection.first().row(), primaryKey).toString());
 }
@@ -175,9 +175,7 @@ QString SearchDialog::getText(const QVariant &value) {
   QString res;
 
   Q_FOREACH (const auto &key, textKeys) {
-    if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) {
-      res += (res.isEmpty() ? "" : " - ") + query.value(key).toString();
-    }
+    if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) { res += (res.isEmpty() ? "" : " - ") + query.value(key).toString(); }
   }
 
   return res;

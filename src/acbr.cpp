@@ -33,7 +33,7 @@ bool ACBr::gerarDanfe(const int idNFe) {
 std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
   const auto respostaSaveXml = enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")");
 
-  if (not respostaSaveXml) return {};
+  if (not respostaSaveXml) { return {}; }
 
   if (not respostaSaveXml->contains("OK")) {
     QMessageBox::critical(nullptr, "Erro!", "Erro salvando XML: " + *respostaSaveXml);
@@ -42,7 +42,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
 
   auto respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(xml.xml)");
 
-  if (not respostaSavePdf) return {};
+  if (not respostaSavePdf) { return {}; }
 
   if (not respostaSavePdf->contains("Arquivo criado em:")) {
     QMessageBox::critical(nullptr, "Erro!", *respostaSavePdf);
@@ -52,7 +52,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
 
   respostaSavePdf = respostaSavePdf->remove("OK: Arquivo criado em: ");
 
-  if (openFile) abrirPdf(*respostaSavePdf);
+  if (openFile) { abrirPdf(*respostaSavePdf); }
 
   return respostaSavePdf;
 
@@ -84,7 +84,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   auto resposta = ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")");
 
-  if (not resposta) return {};
+  if (not resposta) { return {}; }
 
   if (not resposta->contains("XMotivo=Autorizado o uso da NF-e")) {
     QMessageBox::critical(nullptr, "Resposta ConsultarNFe: ", *resposta);
@@ -149,7 +149,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
 
   connect(socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
 
-  while (not progressDialog->wasCanceled()) QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+  while (not progressDialog->wasCanceled()) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
 
   const QString resposta = QString(socket->readAll()).remove("\u0003");
 
@@ -164,7 +164,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
 bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &anexo) {
   const auto resposta = ACBr::enviarComando("NFE.EnviarEmail(" + emailDestino + "," + anexo + ",1,'" + assunto + "', " + emailCopia + ")");
 
-  if (not resposta) return false;
+  if (not resposta) { return false; }
 
   // TODO: perguntar se deseja tentar enviar novamente?
   if (not resposta->contains("OK: Email enviado com sucesso")) {

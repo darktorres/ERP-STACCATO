@@ -115,7 +115,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
   const auto list = ui->table->selectionModel()->selectedRows();
 
   for (const auto &item : list) {
-    if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", aliquota)) return;
+    if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", aliquota)) { return; }
 
     total += modelPedidoFornecedor.data(item.row(), "preco").toDouble();
   }
@@ -224,7 +224,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   unsetConnections();
 
   [=]() {
-    if (representacao) return;
+    if (representacao) { return; }
 
     if (not modelFluxoCaixa.select()) emit errorSignal("Erro lendo tabela: " + modelFluxoCaixa.lastError().text());
 
@@ -252,19 +252,19 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
           const int row = modelFluxoCaixa.rowCount();
           modelFluxoCaixa.insertRow(row);
-          if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) return;
-          if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
-          if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) return;
-          if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return; // Geral
+          if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+          if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
+          if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+          if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
           const QString currentText = ui->widgetPgts->listComboData.at(i)->currentText();
           const QDate currentDate = ui->widgetPgts->listDatePgt.at(i)->date();
           const QDate dataPgt =
               (currentText == "Data + 1 Mês" ? currentDate.addMonths(x + 1) : currentText == "Data Mês" ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x + 1)));
-          if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) return;
-          if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) return;
-          if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) return;
-          if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) return;
-          if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text())) return;
+          if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
+          if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
+          if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) { return; }
+          if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) { return; }
+          if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text())) { return; }
         }
       }
     }
@@ -272,15 +272,15 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     if (ui->doubleSpinBoxFrete->value() > 0) {
       const int row = modelFluxoCaixa.rowCount();
       modelFluxoCaixa.insertRow(row);
-      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) return;
-      if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
-      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) return;
-      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return;                           // Geral
-      if (not modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate())) return; // TODO: 5redo this with a editable date
-      if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value())) return;
-      if (not modelFluxoCaixa.setData(row, "tipo", "Frete")) return;
-      if (not modelFluxoCaixa.setData(row, "parcela", 1)) return;
-      if (not modelFluxoCaixa.setData(row, "observacao", "")) return;
+      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
+      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; }                           // Geral
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate())) { return; } // TODO: 5redo this with a editable date
+      if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value())) { return; }
+      if (not modelFluxoCaixa.setData(row, "tipo", "Frete")) { return; }
+      if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
+      if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
 
     // set st date
@@ -322,30 +322,30 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       const int row = modelFluxoCaixa.rowCount();
       modelFluxoCaixa.insertRow(row);
 
-      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) return;
-      if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
-      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) return;
-      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return; // Geral
-      if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) return;
-      if (not modelFluxoCaixa.setData(row, "valor", stForn)) return;
-      if (not modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor")) return;
-      if (not modelFluxoCaixa.setData(row, "parcela", 1)) return;
-      if (not modelFluxoCaixa.setData(row, "observacao", "")) return;
+      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
+      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) { return; }
+      if (not modelFluxoCaixa.setData(row, "valor", stForn)) { return; }
+      if (not modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor")) { return; }
+      if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
+      if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
 
     if (stLoja > 0) {
       const int row = modelFluxoCaixa.rowCount();
       modelFluxoCaixa.insertRow(row);
 
-      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) return;
-      if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) return;
-      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) return;
-      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) return; // Geral
-      if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) return;
-      if (not modelFluxoCaixa.setData(row, "valor", stLoja)) return;
-      if (not modelFluxoCaixa.setData(row, "tipo", "ST Loja")) return;
-      if (not modelFluxoCaixa.setData(row, "parcela", 1)) return;
-      if (not modelFluxoCaixa.setData(row, "observacao", "")) return;
+      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
+      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) { return; }
+      if (not modelFluxoCaixa.setData(row, "valor", stLoja)) { return; }
+      if (not modelFluxoCaixa.setData(row, "tipo", "ST Loja")) { return; }
+      if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
+      if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
 
     //----------------------------------------------
@@ -380,12 +380,12 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
   if (header == "Quant." or header == "$ Unit.") {
     const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
-    if (not modelPedidoFornecedor.setData(row, "preco", preco)) return;
+    if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
   }
 
   if (header == "Total") {
     const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
-    if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) return;
+    if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
   }
 
   calcularTotal();
@@ -462,12 +462,12 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 }
 
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) return;
+  if (not verifyFields()) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cadastrar()) {
     QSqlQuery("ROLLBACK").exec();
@@ -475,7 +475,7 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -522,7 +522,7 @@ bool InputDialogFinanceiro::cadastrar() {
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) return false;
+      if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) { return false; }
     }
   }
 
@@ -582,7 +582,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(double) {
 }
 
 void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
-  if (text == "Escolha uma opção!") return;
+  if (text == "Escolha uma opção!") { return; }
 
   QSqlQuery query;
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
@@ -614,7 +614,7 @@ void InputDialogFinanceiro::on_pushButtonAdicionarPagamento_clicked() {
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxTotalPag_valueChanged(double) {
-  if (ui->widgetPgts->listDoubleSpinPgt.size() <= 1) return;
+  if (ui->widgetPgts->listDoubleSpinPgt.size() <= 1) { return; }
 
   double sumWithoutLast = 0;
 
@@ -646,7 +646,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
     ui->doubleSpinBoxAliquota->setValue(aliquota);
 
     for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", aliquota)) return;
+      if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", aliquota)) { return; }
     }
 
     ui->doubleSpinBoxTotal->setValue(total);
@@ -684,8 +684,8 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
     for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
       if (not modelPedidoFornecedor.data(row, "selecionado").toBool()) continue;
 
-      if (not modelPedidoFornecedor.setData(row, "st", text)) return;
-      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", ui->doubleSpinBoxAliquota->value())) return;
+      if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
+      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
     }
   }();
 

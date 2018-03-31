@@ -49,7 +49,7 @@ bool WidgetNfeSaida::updateTables() {
   //    emit errorSignal("Erro lendo tabela NFe: " + model.lastError().text());
   //    return false;
   //  }
-  if (not montaFiltro()) return false;
+  if (not montaFiltro()) { return false; }
 
   ui->table->resizeColumnsToContents();
 
@@ -128,7 +128,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   const QString justificativa = QInputDialog::getText(this, "Justificativa", "Entre 15 e 200 caracteres: ");
 
@@ -143,7 +143,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const auto resposta = ACBr::enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
-  if (not resposta) return;
+  if (not resposta) { return; }
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
   if (not resposta->contains("xEvento=Cancelamento registrado")) {
@@ -153,8 +153,8 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cancelarNFe(chaveAcesso, row)) {
     QSqlQuery("ROLLBACK").exec();
@@ -162,13 +162,13 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
   emit informationSignal(*resposta);
 
-  if (not gravarArquivo(*resposta)) return;
+  if (not gravarArquivo(*resposta)) { return; }
 
   const QString anexoPath = QDir::currentPath() + "/cancelamento.xml";
 
@@ -329,7 +329,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     auto pdfOrigem = ACBr::gerarDanfe(query.value("xml").toByteArray(), false);
 
-    if (not pdfOrigem) return;
+    if (not pdfOrigem) { return; }
 
     if (pdfOrigem->isEmpty()) {
       emit errorSignal("Resposta vazia!");
@@ -380,8 +380,8 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
     emit transactionStarted();
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-    if (not QSqlQuery("START TRANSACTION").exec()) return;
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
     if (not atualizarNFe(idNFe, xml)) {
       QSqlQuery("ROLLBACK").exec();
@@ -389,7 +389,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
       return;
     }
 
-    if (not QSqlQuery("COMMIT").exec()) return;
+    if (not QSqlQuery("COMMIT").exec()) { return; }
 
     emit transactionEnded();
 

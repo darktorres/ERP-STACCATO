@@ -161,15 +161,15 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento);
   inputDlg.setFilterRecebe(ids);
 
-  if (inputDlg.exec() != InputDialogConfirmacao::Accepted) return;
+  if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
   const QDateTime dataReceb = inputDlg.getDateTime();
   const QString recebidoPor = inputDlg.getRecebeu();
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not processRows(list, dataReceb, recebidoPor)) {
     QSqlQuery("ROLLBACK").exec();
@@ -177,9 +177,9 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -207,12 +207,12 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
   InputDialog input(InputDialog::Tipo::AgendarRecebimento);
 
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not reagendar(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
@@ -220,7 +220,7 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -275,7 +275,7 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
     const QString idVenda = modelViewRecebimento.data(item.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
-    if (ids.isEmpty()) return;
+    if (ids.isEmpty()) { return; }
 
     for (const auto &id : ids) {
       auto *venda = new Venda(this);
@@ -301,12 +301,12 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -314,9 +314,9 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

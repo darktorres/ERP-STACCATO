@@ -20,7 +20,7 @@ void BaixaOrcamento::setupTables(const QString &idOrcamento) {
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
   modelOrcamento.setFilter("idOrcamento = '" + idOrcamento + "'");
 
-  if (not modelOrcamento.select()) emit errorSignal("Erro lendo tabela orcamento: " + modelOrcamento.lastError().text());
+  if (not modelOrcamento.select()) { emit errorSignal("Erro lendo tabela orcamento: " + modelOrcamento.lastError().text()); }
 }
 
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
@@ -34,7 +34,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
   QString motivo;
 
   Q_FOREACH (const auto &child, ui->groupBox->findChildren<QRadioButton *>()) {
-    if (child->isChecked()) motivo = child->text();
+    if (child->isChecked()) { motivo = child->text(); }
   }
 
   if (motivo.isEmpty()) {
@@ -42,9 +42,9 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     return;
   }
 
-  if (not modelOrcamento.setData(0, "status", "PERDIDO")) return;
-  if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) return;
-  if (not modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) return;
+  if (not modelOrcamento.setData(0, "status", "PERDIDO")) { return; }
+  if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) { return; }
+  if (not modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) { return; }
 
   if (not modelOrcamento.submitAll()) {
     emit errorSignal("Erro cancelando orçamento: " + modelOrcamento.lastError().text());

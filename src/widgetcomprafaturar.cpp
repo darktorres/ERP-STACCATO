@@ -128,8 +128,8 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   }
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento);
-  if (not inputDlg.setFilter(idsCompra)) return;
-  if (inputDlg.exec() != InputDialogProduto::Accepted) return;
+  if (not inputDlg.setFilter(idsCompra)) { return; }
+  if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
   const QDateTime dataReal = inputDlg.getDate();
 
@@ -140,8 +140,8 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (pularNota) {
     emit transactionStarted();
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-    if (not QSqlQuery("START TRANSACTION").exec()) return;
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
     if (not faturarRepresentacao(dataReal, idsCompra)) {
       QSqlQuery("ROLLBACK").exec();
@@ -149,7 +149,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
       return;
     }
 
-    if (not QSqlQuery("COMMIT").exec()) return;
+    if (not QSqlQuery("COMMIT").exec()) { return; }
 
     emit transactionEnded();
   } else {
@@ -157,10 +157,10 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     import->setAttribute(Qt::WA_DeleteOnClose);
     import->showMaximized();
 
-    if (import->exec() != QDialog::Accepted) return;
+    if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
   updateTables();
   emit informationSignal("Confirmado faturamento!");
@@ -228,12 +228,12 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cancelar(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -241,9 +241,9 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -260,7 +260,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   }
 
   InputDialog input(InputDialog::Tipo::Faturamento);
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   const QDate dataPrevista = input.getNextDate();
 

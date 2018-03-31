@@ -355,8 +355,8 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 bool InputDialogConfirmacao::processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) {
   // TODO: ao quebrar linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
   // TODO: fazer no recebimento o mesmo fluxo da entrega (criar nova linha, etc)
-  if (tipo == Tipo::Recebimento and not quebrarRecebimento(row, caixasDefeito, unCaixa)) return false;
-  if (tipo == Tipo::Entrega and not quebrarEntrega(row, choice, caixasDefeito, unCaixa)) return false;
+  if (tipo == Tipo::Recebimento and not quebrarRecebimento(row, caixasDefeito, unCaixa)) { return false; }
+  if (tipo == Tipo::Entrega and not quebrarEntrega(row, choice, caixasDefeito, unCaixa)) { return false; }
 
   return true;
 }
@@ -392,12 +392,12 @@ bool InputDialogConfirmacao::quebrarRecebimento(const int row, const double caix
   //  // TODO: 0put this outside transaction
   //  caixasDefeito = QInputDialog::getInt(this, produto, "Caixas quebradas/faltando: ", caixas, 0, caixas, 1, &ok);
 
-  //  if (not ok or caixasDefeito == 0) return false;
+  //  if (not ok or caixasDefeito == 0) { return false; }
 
   // TODO: inline this
-  if (not quebrarLinhaRecebimento(row, caixas, caixasDefeito, unCaixa)) return false;
-  //  if (not criarConsumo(row)) return false;
-  if (not desfazerConsumo(idEstoque, caixasDefeito)) return false;
+  if (not quebrarLinhaRecebimento(row, caixas, caixasDefeito, unCaixa)) { return false; }
+  //  if (not criarConsumo(row)) { return false; }
+  if (not desfazerConsumo(idEstoque, caixasDefeito)) { return false; }
 
   // ****
 
@@ -440,8 +440,8 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   // diminuir quantidade da linha selecionada
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not modelVeiculo.setData(row, "caixas", caixas - caixasDefeito)) return false;
-  if (not modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
+  if (not modelVeiculo.setData(row, "caixas", caixas - caixasDefeito)) { return false; }
+  if (not modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) { return false; }
 
   // copiar linha com quantDefeito
 
@@ -453,17 +453,17 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
     if (modelVeiculo.fieldIndex("created") == col) continue;
     if (modelVeiculo.fieldIndex("lastUpdated") == col) continue;
 
-    if (not modelVeiculo.setData(rowQuebrado, col, modelVeiculo.data(row, col))) return false;
+    if (not modelVeiculo.setData(rowQuebrado, col, modelVeiculo.data(row, col))) { return false; }
   }
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
-  if (not modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
-  if (not modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO")) return false;
+  if (not modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito)) { return false; }
+  if (not modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) { return false; }
+  if (not modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO")) { return false; }
 
   //  // perguntar se gerar credito ou reposicao
 
-  if (choice == QMessageBox::Cancel) return false;
+  if (choice == QMessageBox::Cancel) { return false; }
 
   SqlRelationalTableModel modelVendaProduto;
   modelVendaProduto.setTable("venda_has_produto");
@@ -476,8 +476,8 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
     return false;
   }
 
-  if (not modelVendaProduto.setData(0, "caixas", caixas - caixasDefeito)) return false;
-  if (not modelVendaProduto.setData(0, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
+  if (not modelVendaProduto.setData(0, "caixas", caixas - caixasDefeito)) { return false; }
+  if (not modelVendaProduto.setData(0, "quant", (caixas - caixasDefeito) * unCaixa)) { return false; }
 
   const int rowQuebrado2 = modelVendaProduto.rowCount();
   // NOTE: *quebralinha venda_produto/pedido_fornecedor
@@ -502,12 +502,12 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
     if (modelVendaProduto.fieldIndex("created") == col) continue;
     if (modelVendaProduto.fieldIndex("lastUpdated") == col) continue;
 
-    if (not modelVendaProduto.setData(rowQuebrado2, col, modelVendaProduto.data(0, col))) return false;
+    if (not modelVendaProduto.setData(rowQuebrado2, col, modelVendaProduto.data(0, col))) { return false; }
   }
 
-  if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) return false;
-  if (not modelVendaProduto.setData(rowQuebrado2, "quant", caixasDefeito * unCaixa)) return false;
-  if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) return false;
+  if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
+  if (not modelVendaProduto.setData(rowQuebrado2, "quant", caixasDefeito * unCaixa)) { return false; }
+  if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
 
   //
 
@@ -551,7 +551,7 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 
   const double creditoAntigo = modelCliente.data(0, "credito").toDouble();
 
-  if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) return false;
+  if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) { return false; }
 
   if (not modelCliente.submitAll()) {
     emit errorSignal("Erro salvando crédito: " + modelCliente.lastError().text());
@@ -586,22 +586,22 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
     if (modelVendaProduto.fieldIndex("created") == col) continue;
     if (modelVendaProduto.fieldIndex("lastUpdated") == col) continue;
 
-    if (not modelVendaProduto.setData(newRow, col, modelVendaProduto.data(0, col))) return false;
+    if (not modelVendaProduto.setData(newRow, col, modelVendaProduto.data(0, col))) { return false; }
   }
 
-  if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) return false;
-  if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) return false;
-  if (not modelVendaProduto.setData(newRow, "parcial", 0)) return false;
-  if (not modelVendaProduto.setData(newRow, "desconto", 0)) return false;
-  if (not modelVendaProduto.setData(newRow, "parcialDesc", 0)) return false;
-  if (not modelVendaProduto.setData(newRow, "descGlobal", 0)) return false;
-  if (not modelVendaProduto.setData(newRow, "total", 0)) return false;
-  if (not modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA")) return false;
-  if (not modelVendaProduto.setData(newRow, "reposicao", true)) return false;
+  if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "parcial", 0)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "desconto", 0)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "parcialDesc", 0)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "descGlobal", 0)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "total", 0)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA")) { return false; }
+  if (not modelVendaProduto.setData(newRow, "reposicao", true)) { return false; }
 
   // REFAC: this blocks the transaction
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
-  if (not modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs)) return false;
+  if (not modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs)) { return false; }
 
   return true;
 }
@@ -610,8 +610,8 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
   // TODO: 5ao marcar caixas quebradas e só houver uma nao dividir em duas linhas (para nao ficar linha zerado)
   // diminuir quant. da linha selecionada
 
-  if (not modelEstoque.setData(row, "caixas", caixas - caixasDefeito)) return false;
-  if (not modelEstoque.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) return false;
+  if (not modelEstoque.setData(row, "caixas", caixas - caixasDefeito)) { return false; }
+  if (not modelEstoque.setData(row, "quant", (caixas - caixasDefeito) * unCaixa)) { return false; }
 
   // copiar linha com defeito
 
@@ -623,16 +623,16 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
     if (modelEstoque.fieldIndex("created") == col) continue;
     if (modelEstoque.fieldIndex("lastUpdated") == col) continue;
 
-    if (not modelEstoque.setData(rowQuebrado, col, modelEstoque.data(row, col))) return false;
+    if (not modelEstoque.setData(rowQuebrado, col, modelEstoque.data(row, col))) { return false; }
   }
 
   const QString obs = "Estoque: " + modelEstoque.data(row, "idEstoque").toString() + " - " + QInputDialog::getText(this, "Observacao", "Observacao: ");
   qDebug() << "obs: " << obs;
 
-  if (not modelEstoque.setData(rowQuebrado, "observacao", obs)) return false;
-  if (not modelEstoque.setData(rowQuebrado, "caixas", caixasDefeito)) return false;
-  if (not modelEstoque.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) return false;
-  if (not modelEstoque.setData(rowQuebrado, "status", "QUEBRADO")) return false;
+  if (not modelEstoque.setData(rowQuebrado, "observacao", obs)) { return false; }
+  if (not modelEstoque.setData(rowQuebrado, "caixas", caixasDefeito)) { return false; }
+  if (not modelEstoque.setData(rowQuebrado, "quant", caixasDefeito * unCaixa)) { return false; }
+  if (not modelEstoque.setData(rowQuebrado, "status", "QUEBRADO")) { return false; }
   // TODO: recalcular proporcional dos valores
 
   if (not modelEstoque.submitAll()) {

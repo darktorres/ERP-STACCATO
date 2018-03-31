@@ -23,7 +23,7 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
 
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") ui->table->hide();
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->table->hide(); }
 
   setupTables();
   fillCombobox();
@@ -51,7 +51,7 @@ void CadastroUsuario::setupTables() {
 
   modelPermissoes.setFilter("0");
 
-  if (not modelPermissoes.select()) emit errorSignal("Erro lendo tabela permissões: " + modelPermissoes.lastError().text());
+  if (not modelPermissoes.select()) { emit errorSignal("Erro lendo tabela permissões: " + modelPermissoes.lastError().text()); }
 
   auto *proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
   ui->table->setModel(proxyModel);
@@ -74,7 +74,7 @@ void CadastroUsuario::modificarUsuario() {
 
 bool CadastroUsuario::verifyFields() {
   Q_FOREACH (const auto &line, ui->tab->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
@@ -109,24 +109,24 @@ void CadastroUsuario::updateMode() {
 }
 
 bool CadastroUsuario::savingProcedures() {
-  if (not setData("nome", ui->lineEditNome->text())) return false;
-  if (not setData("idLoja", ui->comboBoxLoja->getCurrentValue())) return false;
-  if (not setData("tipo", ui->comboBoxTipo->currentText())) return false;
-  if (not setData("user", ui->lineEditUser->text())) return false;
-  if (not setData("email", ui->lineEditEmail->text())) return false;
-  if (not setData("user", ui->lineEditUser->text())) return false;
+  if (not setData("nome", ui->lineEditNome->text())) { return false; }
+  if (not setData("idLoja", ui->comboBoxLoja->getCurrentValue())) { return false; }
+  if (not setData("tipo", ui->comboBoxTipo->currentText())) { return false; }
+  if (not setData("user", ui->lineEditUser->text())) { return false; }
+  if (not setData("email", ui->lineEditEmail->text())) { return false; }
+  if (not setData("user", ui->lineEditUser->text())) { return false; }
 
   if (ui->lineEditPasswd->text() != "********") {
     QSqlQuery query("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')");
-    if (not query.first()) return false;
-    if (not setData("passwd", query.value(0))) return false;
+    if (not query.first()) { return false; }
+    if (not setData("passwd", query.value(0))) { return false; }
   }
 
   return true;
 }
 
 bool CadastroUsuario::viewRegister() {
-  if (not RegisterDialog::viewRegister()) return false;
+  if (not RegisterDialog::viewRegister()) { return false; }
 
   ui->lineEditPasswd->setText("********");
   ui->lineEditPasswd_2->setText("********");
@@ -135,7 +135,7 @@ bool CadastroUsuario::viewRegister() {
 
   modelPermissoes.select();
 
-  for (int row = 0; row < ui->table->model()->rowCount(); ++row) ui->table->openPersistentEditor(row, 0);
+  for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
 
   return true;
 }
@@ -143,7 +143,7 @@ bool CadastroUsuario::viewRegister() {
 void CadastroUsuario::fillCombobox() {
   QSqlQuery query("SELECT descricao, idLoja FROM loja");
 
-  while (query.next()) ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja"));
+  while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
   ui->comboBoxLoja->setCurrentValue(UserSession::idLoja());
 }
@@ -171,12 +171,12 @@ bool CadastroUsuario::cadastrar() {
     return false;
   }
 
-  if (not savingProcedures()) return false;
+  if (not savingProcedures()) { return false; }
 
   for (int column = 0; column < model.rowCount(); ++column) {
     const QVariant dado = model.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -210,17 +210,17 @@ bool CadastroUsuario::cadastrar() {
       return false;
     }
 
-    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) return false;
+    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
 
     //
 
     const int row2 = modelPermissoes.rowCount();
     modelPermissoes.insertRow(row2);
 
-    if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) return false;
-    if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) return false;
-    if (not modelPermissoes.setData(row2, "view_tab_venda", true)) return false;
-    if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) return false;
+    if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
+    if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
+    if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
+    if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
 
     if (not modelPermissoes.submitAll()) {
       emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());

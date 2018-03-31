@@ -143,7 +143,7 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
     msgBox.setButtonText(QMessageBox::Yes, "Continuar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-    if (msgBox.exec() == QMessageBox::No) return;
+    if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
   auto *produtos = new ProdutosPendentes(this);
@@ -197,7 +197,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho);
 
-  if (inputDlg.exec() != InputDialog::Accepted) return;
+  if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
   const QDate dataPrevista = inputDlg.getNextDate();
 

@@ -22,7 +22,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 
   storeSelection();
 
-  if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") darkTheme();
+  if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") { darkTheme(); }
 }
 
 void Application::readSettingsFile() {
@@ -35,7 +35,7 @@ void Application::readSettingsFile() {
 
   const QStringList lines = QString(file.readAll()).split("\r\n", QString::SkipEmptyParts);
 
-  for (int i = 0; i < lines.size(); i += 2) mapLojas.insert(lines.at(i), lines.at(i + 1));
+  for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
 
 bool Application::dbConnect() {
@@ -46,7 +46,7 @@ bool Application::dbConnect() {
 
   QSqlDatabase db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
 
-  if (db.isOpen()) return true;
+  if (db.isOpen()) { return true; }
 
   const auto hostname = UserSession::getSetting("Login/hostname");
 
@@ -57,7 +57,7 @@ bool Application::dbConnect() {
 
   const auto lastuser = UserSession::getSetting("User/lastuser");
 
-  if (not lastuser) return false;
+  if (not lastuser) { return false; }
 
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
@@ -132,10 +132,7 @@ bool Application::dbConnect() {
 
 void Application::startSqlPing() {
   auto *timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, [] {
-    QSqlQuery query;
-    query.exec("DO 0");
-  });
+  connect(timer, &QTimer::timeout, this, [] { QSqlQuery("DO 0").exec(); });
   timer->start(60000);
 
   // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
@@ -188,19 +185,19 @@ void Application::endTransaction() {
 void Application::enqueueWarning(const QString &warning) {
   warningQueue << warning;
 
-  if (not updating) showMessages();
+  if (not updating) { showMessages(); }
 }
 
 void Application::enqueueInformation(const QString &information) {
   informationQueue << information;
 
-  if (not updating) showMessages();
+  if (not updating) { showMessages(); }
 }
 
 void Application::enqueueError(const QString &error) {
   errorQueue << error;
 
-  if (not updating) showMessages();
+  if (not updating) { showMessages(); }
 }
 
 // TODO: if inTransaction is true give a error message and abort (to avoid nested transactions)
@@ -218,7 +215,7 @@ void Application::storeSelection() {
 
     const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
 
-    if (loja.isEmpty()) return;
+    if (loja.isEmpty()) { return; }
 
     UserSession::setSetting("Login/hostname", mapLojas.value(loja));
   }
@@ -231,22 +228,22 @@ void Application::setInTransaction(const bool value) { inTransaction = value; }
 void Application::setUpdating(const bool value) {
   updating = value;
 
-  if (value == false) showMessages();
+  if (value == false) { showMessages(); }
 }
 
 bool Application::getUpdating() const { return updating; }
 
 void Application::showMessages() {
-  if (inTransaction or updating) return;
-  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) return;
+  if (inTransaction or updating) { return; }
+  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) { return; }
 
   showingErrors = true;
 
   // TODO: deal with 'Lost connection to MySQL server'
 
-  for (const auto &error : std::as_const(errorQueue)) QMessageBox::critical(nullptr, "Erro!", error);
-  for (const auto &warning : std::as_const(warningQueue)) QMessageBox::warning(nullptr, "Aviso!", warning);
-  for (const auto &information : std::as_const(informationQueue)) QMessageBox::information(nullptr, "Informação!", information);
+  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(nullptr, "Erro!", error); }
+  for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(nullptr, "Aviso!", warning); }
+  for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(nullptr, "Informação!", information); }
 
   errorQueue.clear();
   warningQueue.clear();
@@ -258,7 +255,7 @@ void Application::showMessages() {
 void Application::updater() {
   const auto hostname = UserSession::getSetting("Login/hostname");
 
-  if (not hostname) return;
+  if (not hostname) { return; }
 
   auto *updater = new QSimpleUpdater();
   updater->setApplicationVersion(qApp->applicationVersion());

@@ -131,7 +131,7 @@ void WidgetCompraOC::on_pushButtonDanfe_clicked() {
     return;
   }
 
-  if (not ACBr::gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) return;
+  if (not ACBr::gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetCompraOC::on_tablePedido_entered(const QModelIndex &) { ui->tablePedido->resizeColumnsToContents(); }
@@ -156,14 +156,14 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Continuar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not desfazerConsumo(row)) {
     QSqlQuery("ROLLBACK").exec();
@@ -171,9 +171,9 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVenda)) return;
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

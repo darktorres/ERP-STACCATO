@@ -84,19 +84,19 @@ void CadastroTransportadora::clearFields() {
 
 bool CadastroTransportadora::verifyFields() {
   Q_FOREACH (const auto &line, ui->groupBox_7->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   return true;
 }
 
 bool CadastroTransportadora::savingProcedures() {
-  if (not setData("cnpj", ui->lineEditCNPJ->text())) return false;
-  if (not setData("razaoSocial", ui->lineEditRazaoSocial->text())) return false;
-  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) return false;
-  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) return false;
-  if (not setData("tel", ui->lineEditTel->text())) return false;
-  if (not setData("antt", ui->lineEditANTT->text())) return false;
+  if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
+  if (not setData("razaoSocial", ui->lineEditRazaoSocial->text())) { return false; }
+  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
+  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
+  if (not setData("tel", ui->lineEditTel->text())) { return false; }
+  if (not setData("antt", ui->lineEditANTT->text())) { return false; }
 
   return true;
 }
@@ -206,7 +206,7 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
 
 bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   if (not ui->lineEditCEP->isValid()) {
@@ -219,16 +219,16 @@ bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
 
   if (not isUpdate) modelEnd.insertRow(currentRowEnd);
 
-  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) return false;
-  if (not setDataEnd("CEP", ui->lineEditCEP->text())) return false;
-  if (not setDataEnd("logradouro", ui->lineEditLogradouro->text())) return false;
-  if (not setDataEnd("numero", ui->lineEditNro->text())) return false;
-  if (not setDataEnd("complemento", ui->lineEditComp->text())) return false;
-  if (not setDataEnd("bairro", ui->lineEditBairro->text())) return false;
-  if (not setDataEnd("cidade", ui->lineEditCidade->text())) return false;
-  if (not setDataEnd("uf", ui->lineEditUF->text())) return false;
-  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) return false;
-  if (not setDataEnd("desativado", false)) return false;
+  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
+  if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
+  if (not setDataEnd("logradouro", ui->lineEditLogradouro->text())) { return false; }
+  if (not setDataEnd("numero", ui->lineEditNro->text())) { return false; }
+  if (not setDataEnd("complemento", ui->lineEditComp->text())) { return false; }
+  if (not setDataEnd("bairro", ui->lineEditBairro->text())) { return false; }
+  if (not setDataEnd("cidade", ui->lineEditCidade->text())) { return false; }
+  if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
+  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
+  if (not setDataEnd("desativado", false)) { return false; }
 
   ui->tableEndereco->resizeColumnsToContents();
 
@@ -255,7 +255,7 @@ void CadastroTransportadora::clearEndereco() {
 }
 
 void CadastroTransportadora::on_lineEditCEP_textChanged(const QString &cep) {
-  if (not ui->lineEditCEP->isValid()) return;
+  if (not ui->lineEditCEP->isValid()) { return; }
 
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
@@ -291,7 +291,7 @@ void CadastroTransportadora::setupUi() {
 }
 
 bool CadastroTransportadora::viewRegister() {
-  if (not RegisterDialog::viewRegister()) return false;
+  if (not RegisterDialog::viewRegister()) { return false; }
 
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + " AND desativado = FALSE");
 
@@ -320,21 +320,21 @@ void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui-
 
 bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   const int row = isUpdate ? mapperVeiculo.currentIndex() : modelVeiculo.rowCount();
 
   if (not isUpdate) modelVeiculo.insertRow(row);
 
-  if (not modelVeiculo.setData(row, "modelo", ui->lineEditModelo->text())) return false;
-  if (not modelVeiculo.setData(row, "capacidade", ui->lineEditCarga->text().toInt())) return false;
+  if (not modelVeiculo.setData(row, "modelo", ui->lineEditModelo->text())) { return false; }
+  if (not modelVeiculo.setData(row, "capacidade", ui->lineEditCarga->text().toInt())) { return false; }
 
   if (ui->lineEditPlaca->text() != "-") {
-    if (not modelVeiculo.setData(row, "placa", ui->lineEditPlaca->text())) return false;
+    if (not modelVeiculo.setData(row, "placa", ui->lineEditPlaca->text())) { return false; }
   }
 
-  if (not modelVeiculo.setData(row, "ufPlaca", ui->lineEditUfPlaca->text())) return false;
+  if (not modelVeiculo.setData(row, "ufPlaca", ui->lineEditUfPlaca->text())) { return false; }
 
   ui->tableVeiculo->resizeColumnsToContents();
 
@@ -410,12 +410,12 @@ bool CadastroTransportadora::cadastrar() {
     return false;
   }
 
-  if (not savingProcedures()) return false;
+  if (not savingProcedures()) { return false; }
 
   for (int column = 0; column < model.rowCount(); ++column) {
     const QVariant dado = model.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -432,13 +432,13 @@ bool CadastroTransportadora::cadastrar() {
   }
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
-    if (not modelEnd.setData(row, primaryKey, primaryId)) return false;
+    if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }
   }
 
   for (int column = 0, columnCount = modelEnd.columnCount(); column < columnCount; ++column) {
     const QVariant dado = modelEnd.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -448,13 +448,13 @@ bool CadastroTransportadora::cadastrar() {
   }
 
   for (int row = 0, rowCount = modelVeiculo.rowCount(); row < rowCount; ++row) {
-    if (not modelVeiculo.setData(row, primaryKey, primaryId)) return false;
+    if (not modelVeiculo.setData(row, primaryKey, primaryId)) { return false; }
   }
 
   for (int column = 0, columnCount = modelVeiculo.columnCount(); column < columnCount; ++column) {
     const QVariant dado = modelVeiculo.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not modelVeiculo.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not modelVeiculo.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 

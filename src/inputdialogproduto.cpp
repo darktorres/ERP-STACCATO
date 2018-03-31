@@ -180,12 +180,12 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
 
   if (header == "Quant." or header == "$ Unit.") {
     const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
-    if (not modelPedidoFornecedor.setData(row, "preco", preco)) return;
+    if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
   }
 
   if (header == "Total") {
     const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
-    if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) return;
+    if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
   }
 
   calcularTotal();
@@ -202,7 +202,7 @@ void InputDialogProduto::calcularTotal() {
 }
 
 void InputDialogProduto::on_pushButtonSalvar_clicked() {
-  if (not cadastrar()) return;
+  if (not cadastrar()) { return; }
 
   QDialog::accept();
   close();
@@ -233,7 +233,7 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
   ui->doubleSpinBoxST->setValue(valueSt);
 
   for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) return;
+    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
   }
 
   ui->doubleSpinBoxTotal->setValue(total + valueSt);
@@ -253,7 +253,7 @@ void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
   ui->doubleSpinBoxAliquota->setValue(aliquota);
 
   for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) return;
+    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
   }
 
   ui->doubleSpinBoxTotal->setValue(total + valueSt);
@@ -281,7 +281,7 @@ void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
   }
 
   for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "st", text)) return;
+    if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
   }
 }
 

@@ -32,7 +32,7 @@ void Excel::verificaTipo() {
 }
 
 void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
-  for (int row = queryProduto.size() + 12; row < 111; ++row) xlsx.setRowHidden(row, true);
+  for (int row = queryProduto.size() + 12; row < 111; ++row) { xlsx.setRowHidden(row, true); }
 }
 
 bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &representacao) {
@@ -125,7 +125,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     }
   }
 
-  if (tipo == Tipo::Orcamento) xlsx.write("D2", id);
+  if (tipo == Tipo::Orcamento) { xlsx.write("D2", id); }
 
   xlsx.write("D3", queryCliente.value("nome_razao"));
   xlsx.write("D4", queryCliente.value("email"));
@@ -270,7 +270,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     const QString totalDescNeg = "R$ " + locale.toString(queryProduto.value("parcialDesc").toDouble(), 'f', 2);
     xlsx.write("N" + QString::number(12 + row), porc < 0 ? totalDescNeg : total + totalDesc);
 
-    if (desc > 0.01) xlsx.setColumnWidth(11, 28);
+    if (desc > 0.01) { xlsx.setColumnWidth(11, 28); }
 
     ++row;
   } while (queryProduto.next());

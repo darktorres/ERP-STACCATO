@@ -11,9 +11,9 @@ QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   auto *model = new SqlQueryModel(parent);
 
-  if (tipo == Tipo::ContraPartePagar) model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_pagar_has_pagamento");
-  if (tipo == Tipo::ContraParteReceber) model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_receber_has_pagamento");
-  if (tipo == Tipo::Grupo) model->setQuery("SELECT tipo FROM despesa");
+  if (tipo == Tipo::ContraPartePagar) { model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_pagar_has_pagamento"); }
+  if (tipo == Tipo::ContraParteReceber) { model->setQuery("SELECT DISTINCT(contraParte) FROM conta_a_receber_has_pagamento"); }
+  if (tipo == Tipo::Grupo) { model->setQuery("SELECT tipo FROM despesa"); }
 
   auto *completer = new QCompleter(model, parent);
   completer->setCaseSensitivity(Qt::CaseInsensitive);

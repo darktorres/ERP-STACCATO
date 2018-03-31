@@ -241,9 +241,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &value) {
     ui->radioButtonRecebido->hide();
   }
 
-  if (tipo == Tipo::Receber) {
-    ui->radioButtonPago->hide();
-  }
+  if (tipo == Tipo::Receber) { ui->radioButtonPago->hide(); }
 }
 
 void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {

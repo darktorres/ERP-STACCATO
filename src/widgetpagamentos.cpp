@@ -197,7 +197,7 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text, const double creditoTotal) {
-  if (text == "Escolha uma opção!") return;
+  if (text == "Escolha uma opção!") { return; }
 
   if (text == "Conta Cliente") {
     listDoubleSpinPgt.at(index)->setMaximum(creditoTotal);
@@ -230,7 +230,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
-  if (text == "Escolha uma opção!") return;
+  if (text == "Escolha uma opção!") { return; }
 
   QSqlQuery query;
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");

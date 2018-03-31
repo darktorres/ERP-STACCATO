@@ -130,7 +130,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   for (const auto &item : list) {
     const QString status = modelVendaProduto.data(item.row(), "status").toString();
 
-    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) return false;
+    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
     // TODO: 5refazer isso para bloquear o botao
     if (status == "PENDENTE" or status == "INICIADO" or status == "EM COMPRA" or status == "EM FATURAMENTO") {
@@ -188,11 +188,11 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       }
 
       // TODO: update other fields
-      if (not modelConsumo.setData(newRow, "idVendaProduto", modelVendaProduto.data(item.row(), "idVendaProduto"))) return false;
-      if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) return false;
-      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(item.row(), "caixas").toDouble() * -1)) return false;
-      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) return false;
-      if (not modelConsumo.setData(newRow, "quantUpd", 5)) return false;
+      if (not modelConsumo.setData(newRow, "idVendaProduto", modelVendaProduto.data(item.row(), "idVendaProduto"))) { return false; }
+      if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
+      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(item.row(), "caixas").toDouble() * -1)) { return false; }
+      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) { return false; }
+      if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
 
       if (not modelConsumo.submitAll()) {
         emit errorSignal("Erro salvando devolução de estoque: " + modelConsumo.lastError().text());
@@ -219,8 +219,8 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not retornarEstoque(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -228,7 +228,7 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

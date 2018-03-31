@@ -7,7 +7,7 @@ CheckBoxDelegate::CheckBoxDelegate(QObject *parent, const bool readOnly) : QStyl
 
 QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
   auto *editor = new QCheckBox(parent);
-  if (readOnly) editor->setDisabled(true);
+  if (readOnly) { editor->setDisabled(true); }
 
   connect(editor, &QCheckBox::toggled, this, &CheckBoxDelegate::commitEditor);
 
@@ -15,11 +15,11 @@ QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 }
 
 void CheckBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
-  if (auto *cb = qobject_cast<QCheckBox *>(editor)) cb->setChecked(index.data(Qt::EditRole).toBool());
+  if (auto *cb = qobject_cast<QCheckBox *>(editor)) { cb->setChecked(index.data(Qt::EditRole).toBool()); }
 }
 
 void CheckBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
-  if (auto *cb = qobject_cast<QCheckBox *>(editor)) model->setData(index, cb->isChecked(), Qt::EditRole);
+  if (auto *cb = qobject_cast<QCheckBox *>(editor)) { model->setData(index, cb->isChecked(), Qt::EditRole); }
 }
 
 void CheckBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }

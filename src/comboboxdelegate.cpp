@@ -39,11 +39,11 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
     query.bindValue(":idLoja", UserSession::idLoja());
 
-    if (not query.exec()) QMessageBox::critical(parent, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text());
+    if (not query.exec()) { QMessageBox::critical(parent, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text()); }
 
     list << "";
 
-    while (query.next()) list << query.value("pagamento").toString();
+    while (query.next()) { list << query.value("pagamento").toString(); }
 
     list << "Conta Cliente";
   }
@@ -51,21 +51,21 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   if (tipo == Tipo::Conta) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) QMessageBox::critical(parent, "Erro!", "Erro lendo contas da loja: " + query.lastError().text());
+    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) { QMessageBox::critical(parent, "Erro!", "Erro lendo contas da loja: " + query.lastError().text()); }
 
     list << "";
 
-    while (query.next()) list << query.value("banco").toString() + " - " + query.value("agencia").toString() + " - " + query.value("conta").toString();
+    while (query.next()) { list << query.value("banco").toString() + " - " + query.value("agencia").toString() + " - " + query.value("conta").toString(); }
   }
 
   if (tipo == Tipo::Grupo) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) QMessageBox::critical(parent, "Erro!", "Erro lendo grupos de despesa: " + query.lastError().text());
+    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) { QMessageBox::critical(parent, "Erro!", "Erro lendo grupos de despesa: " + query.lastError().text()); }
 
     list << "";
 
-    while (query.next()) list << query.value("tipo").toString();
+    while (query.next()) { list << query.value("tipo").toString(); }
   }
 
   if (tipo == Tipo::ST) {
@@ -83,7 +83,7 @@ void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
   if (auto *cb = qobject_cast<QComboBox *>(editor)) {
     const int cbIndex = cb->findText(index.data(Qt::EditRole).toString());
 
-    if (cbIndex >= 0) cb->setCurrentIndex(cbIndex);
+    if (cbIndex >= 0) { cb->setCurrentIndex(cbIndex); }
 
     return;
   }

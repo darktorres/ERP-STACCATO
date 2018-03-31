@@ -87,12 +87,12 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao);
 
-  if (input.exec() != InputDialogConfirmacao::Accepted) return;
+  if (input.exec() != InputDialogConfirmacao::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not processRows(list, input.getDateTime(), input.getRecebeu())) {
     QSqlQuery("ROLLBACK").exec();
@@ -100,7 +100,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

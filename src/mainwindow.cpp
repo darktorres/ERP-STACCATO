@@ -322,9 +322,9 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
 }
 
 void MainWindow::updateTables() {
-  if (qApp->getUpdating()) return;
-  if (not qApp->getIsConnected()) return;
-  if (qApp->getShowingErrors()) return;
+  if (qApp->getUpdating()) { return; }
+  if (not qApp->getIsConnected()) { return; }
+  if (qApp->getShowingErrors()) { return; }
 
   qApp->setUpdating(true);
 

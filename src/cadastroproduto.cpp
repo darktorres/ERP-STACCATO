@@ -37,7 +37,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") ui->pushButtonRemover->setDisabled(true);
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->pushButtonRemover->setDisabled(true); }
 
   if (UserSession::tipoUsuario() == "VENDEDOR") {
     ui->pushButtonCadastrar->setVisible(false);
@@ -52,7 +52,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 CadastroProduto::~CadastroProduto() { delete ui; }
 
 bool CadastroProduto::viewRegister() {
-  if (not RegisterDialog::viewRegister()) return false;
+  if (not RegisterDialog::viewRegister()) { return false; }
 
   // TODO: implement necessary stuff here
 
@@ -86,7 +86,7 @@ void CadastroProduto::registerMode() {
 
 bool CadastroProduto::verifyFields() {
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   if (ui->comboBoxUn->currentText().isEmpty()) {
@@ -186,33 +186,33 @@ void CadastroProduto::setupMapper() {
 void CadastroProduto::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
 
 bool CadastroProduto::savingProcedures() {
-  if (not setData("codBarras", ui->lineEditCodBarras->text())) return false;
-  if (not setData("codComercial", ui->lineEditCodComer->text())) return false;
-  if (not setData("colecao", ui->lineEditColecao->text())) return false;
-  if (not setData("comissao", ui->doubleSpinBoxComissao->value())) return false;
-  if (not setData("cst", ui->comboBoxCST->currentText())) return false;
-  if (not setData("custo", ui->doubleSpinBoxCusto->value())) return false;
-  if (not setData("descricao", ui->lineEditDescricao->text())) return false;
-  if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) return false;
-  if (not setData("formComercial", ui->lineEditFormComer->text())) return false;
-  if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) return false;
-  if (not setData("icms", ui->lineEditICMS->text())) return false;
-  if (not setData("idFornecedor", ui->itemBoxFornecedor->getValue())) return false;
-  if (not setData("ipi", ui->doubleSpinBoxIPI->value())) return false;
-  if (not setData("kgcx", ui->doubleSpinBoxKgCx->value())) return false;
-  if (not setData("m2cx", ui->doubleSpinBoxM2Cx->value())) return false;
-  if (not setData("markup", ui->doubleSpinBoxMarkup->value())) return false;
-  if (not setData("ncm", ui->lineEditNCM->text())) return false;
-  if (not setData("observacoes", ui->textEditObserv->toPlainText())) return false;
-  if (not setData("origem", ui->comboBoxOrigem->currentData())) return false;
-  if (not setData("pccx", ui->doubleSpinBoxPcCx->value())) return false;
-  if (not setData("precoVenda", ui->doubleSpinBoxVenda->value())) return false;
-  if (not setData("qtdPallet", ui->doubleSpinBoxQtePallet->value())) return false;
-  if (not setData("st", ui->doubleSpinBoxST->value())) return false;
-  if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) return false;
-  if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) return false;
-  if (not setData("un", ui->comboBoxUn->currentText())) return false;
-  if (not setData("validade", ui->dateEditValidade->date())) return false;
+  if (not setData("codBarras", ui->lineEditCodBarras->text())) { return false; }
+  if (not setData("codComercial", ui->lineEditCodComer->text())) { return false; }
+  if (not setData("colecao", ui->lineEditColecao->text())) { return false; }
+  if (not setData("comissao", ui->doubleSpinBoxComissao->value())) { return false; }
+  if (not setData("cst", ui->comboBoxCST->currentText())) { return false; }
+  if (not setData("custo", ui->doubleSpinBoxCusto->value())) { return false; }
+  if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
+  if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) { return false; }
+  if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
+  if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) { return false; }
+  if (not setData("icms", ui->lineEditICMS->text())) { return false; }
+  if (not setData("idFornecedor", ui->itemBoxFornecedor->getValue())) { return false; }
+  if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }
+  if (not setData("kgcx", ui->doubleSpinBoxKgCx->value())) { return false; }
+  if (not setData("m2cx", ui->doubleSpinBoxM2Cx->value())) { return false; }
+  if (not setData("markup", ui->doubleSpinBoxMarkup->value())) { return false; }
+  if (not setData("ncm", ui->lineEditNCM->text())) { return false; }
+  if (not setData("observacoes", ui->textEditObserv->toPlainText())) { return false; }
+  if (not setData("origem", ui->comboBoxOrigem->currentData())) { return false; }
+  if (not setData("pccx", ui->doubleSpinBoxPcCx->value())) { return false; }
+  if (not setData("precoVenda", ui->doubleSpinBoxVenda->value())) { return false; }
+  if (not setData("qtdPallet", ui->doubleSpinBoxQtePallet->value())) { return false; }
+  if (not setData("st", ui->doubleSpinBoxST->value())) { return false; }
+  if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) { return false; }
+  if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) { return false; }
+  if (not setData("un", ui->comboBoxUn->currentText())) { return false; }
+  if (not setData("validade", ui->dateEditValidade->date())) { return false; }
 
   QSqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
@@ -225,8 +225,8 @@ bool CadastroProduto::savingProcedures() {
 
   const bool representacao = query.value("representacao").toBool();
 
-  if (not setData("representacao", representacao)) return false;
-  if (not setData("descontinuado", ui->dateEditValidade->date() < QDate::currentDate())) return false;
+  if (not setData("representacao", representacao)) { return false; }
+  if (not setData("descontinuado", ui->dateEditValidade->date() < QDate::currentDate())) { return false; }
 
   return true;
 }
@@ -261,12 +261,12 @@ bool CadastroProduto::cadastrar() {
     return false;
   }
 
-  if (not savingProcedures()) return false;
+  if (not savingProcedures()) { return false; }
 
   for (int column = 0; column < model.rowCount(); ++column) {
     const QVariant dado = model.data(currentRow, column);
     if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 

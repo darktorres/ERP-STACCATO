@@ -134,7 +134,7 @@ void Estoque::calcularRestante() {
 
     quantRestante += quant;
 
-    if (statusProduto == "ENTREGUE") quantComprometidoNaoEntregue -= quant * -1;
+    if (statusProduto == "ENTREGUE") { quantComprometidoNaoEntregue -= quant * -1; }
   }
 
   const QString un = modelEstoque.data(0, "un").toString();
@@ -197,7 +197,7 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   calcularRestante();
 
-  if (showWindow) show();
+  if (showWindow) { show(); }
 
   return true;
 }
@@ -253,7 +253,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
 
   //
 
-  if (not quebrarCompra(idVendaProduto, quant)) return false;
+  if (not quebrarCompra(idVendaProduto, quant)) { return false; }
 
   //
 
@@ -267,10 +267,10 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
     const int index = modelConsumo.fieldIndex(field);
     const QVariant value = modelEstoque.data(row, column);
 
-    if (field == "created") continue;
-    if (field == "lastUpdated") continue;
+    if (field == "created") { continue; }
+    if (field == "lastUpdated") { continue; }
 
-    if (index != -1 and not modelConsumo.setData(newRow, index, value)) return false;
+    if (index != -1 and not modelConsumo.setData(newRow, index, value)) { return false; }
   }
 
   QSqlQuery query;
@@ -305,29 +305,29 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
 
   // -------------------------------------
 
-  if (not modelConsumo.setData(newRow, "quant", quant * -1)) return false;
-  if (not modelConsumo.setData(newRow, "caixas", caixas)) return false;
-  if (not modelConsumo.setData(newRow, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) return false;
-  if (not modelConsumo.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
-  if (not modelConsumo.setData(newRow, "idEstoque", modelEstoque.data(row, "idEstoque"))) return false;
-  if (not modelConsumo.setData(newRow, "status", "CONSUMO")) return false;
+  if (not modelConsumo.setData(newRow, "quant", quant * -1)) { return false; }
+  if (not modelConsumo.setData(newRow, "caixas", caixas)) { return false; }
+  if (not modelConsumo.setData(newRow, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
+  if (not modelConsumo.setData(newRow, "idVendaProduto", idVendaProduto)) { return false; }
+  if (not modelConsumo.setData(newRow, "idEstoque", modelEstoque.data(row, "idEstoque"))) { return false; }
+  if (not modelConsumo.setData(newRow, "status", "CONSUMO")) { return false; }
 
-  if (not modelConsumo.setData(newRow, "valor", valor)) return false;
-  if (not modelConsumo.setData(newRow, "vBC", vBC)) return false;
-  if (not modelConsumo.setData(newRow, "vICMS", vICMS)) return false;
-  if (not modelConsumo.setData(newRow, "vBCST", vBCST)) return false;
-  if (not modelConsumo.setData(newRow, "vICMSST", vICMSST)) return false;
-  if (not modelConsumo.setData(newRow, "vBCPIS", vBCPIS)) return false;
-  if (not modelConsumo.setData(newRow, "vPIS", vPIS)) return false;
-  if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS)) return false;
-  if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS)) return false;
+  if (not modelConsumo.setData(newRow, "valor", valor)) { return false; }
+  if (not modelConsumo.setData(newRow, "vBC", vBC)) { return false; }
+  if (not modelConsumo.setData(newRow, "vICMS", vICMS)) { return false; }
+  if (not modelConsumo.setData(newRow, "vBCST", vBCST)) { return false; }
+  if (not modelConsumo.setData(newRow, "vICMSST", vICMSST)) { return false; }
+  if (not modelConsumo.setData(newRow, "vBCPIS", vBCPIS)) { return false; }
+  if (not modelConsumo.setData(newRow, "vPIS", vPIS)) { return false; }
+  if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS)) { return false; }
+  if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS)) { return false; }
 
   if (not modelConsumo.submitAll()) {
     emit errorSignal("Erro salvando dados: " + modelConsumo.lastError().text());
     return false;
   }
 
-  if (not atualizaQuantEstoque()) return false;
+  if (not atualizaQuantEstoque()) { return false; }
 
   return true;
 }
@@ -336,7 +336,7 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
   // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
   // senao fazer a quebra
 
-  if (modelCompra.rowCount() == 0) return true;
+  if (modelCompra.rowCount() == 0) { return true; }
 
   QSqlQuery query;
   query.prepare("SELECT idVenda FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
@@ -353,13 +353,13 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
     modelCompra.insertRow(newRow);
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
-      if (modelCompra.fieldIndex("idPedido") == column) continue;
-      if (modelCompra.fieldIndex("created") == column) continue;
-      if (modelCompra.fieldIndex("lastUpdated") == column) continue;
+      if (modelCompra.fieldIndex("idPedido") == column) { continue; }
+      if (modelCompra.fieldIndex("created") == column) { continue; }
+      if (modelCompra.fieldIndex("lastUpdated") == column) { continue; }
 
       const QVariant value = modelCompra.data(0, column);
 
-      if (not modelCompra.setData(newRow, column, value)) return false;
+      if (not modelCompra.setData(newRow, column, value)) { return false; }
     }
 
     const double caixas = modelCompra.data(0, "caixas").toDouble();
@@ -369,21 +369,21 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
     const double proporcaoNovo = quant / quantOriginal;
     const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
 
-    if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) return false;
-    if (not modelCompra.setData(newRow, "idVendaProduto", idVendaProduto)) return false;
-    if (not modelCompra.setData(newRow, "quant", quant)) return false;
-    if (not modelCompra.setData(newRow, "quantConsumida", qMin(quant, quantConsumida))) return false;
-    if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) return false;
-    if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) return false;
+    if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return false; }
+    if (not modelCompra.setData(newRow, "idVendaProduto", idVendaProduto)) { return false; }
+    if (not modelCompra.setData(newRow, "quant", quant)) { return false; }
+    if (not modelCompra.setData(newRow, "quantConsumida", qMin(quant, quantConsumida))) { return false; }
+    if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) { return false; }
+    if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) { return false; }
 
-    if (not modelCompra.setData(0, "quant", quantOriginal - quant)) return false;
-    if (not modelCompra.setData(0, "quantConsumida", qMin(quantOriginal - quant, quantConsumida))) return false;
-    if (not modelCompra.setData(0, "caixas", caixas * proporcaoAntigo)) return false;
-    if (not modelCompra.setData(0, "preco", prcUnitario * (quantOriginal - quant))) return false;
+    if (not modelCompra.setData(0, "quant", quantOriginal - quant)) { return false; }
+    if (not modelCompra.setData(0, "quantConsumida", qMin(quantOriginal - quant, quantConsumida))) { return false; }
+    if (not modelCompra.setData(0, "caixas", caixas * proporcaoAntigo)) { return false; }
+    if (not modelCompra.setData(0, "preco", prcUnitario * (quantOriginal - quant))) { return false; }
 
   } else {
-    if (not modelCompra.setData(0, "idVenda", query.value("idVenda"))) return false;
-    if (not modelCompra.setData(0, "idVendaProduto", idVendaProduto)) return false;
+    if (not modelCompra.setData(0, "idVenda", query.value("idVenda"))) { return false; }
+    if (not modelCompra.setData(0, "idVendaProduto", idVendaProduto)) { return false; }
   }
 
   if (not modelCompra.submitAll()) {

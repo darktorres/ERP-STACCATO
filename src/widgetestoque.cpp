@@ -78,7 +78,7 @@ bool WidgetEstoque::setupTables() {
 }
 
 bool WidgetEstoque::updateTables() {
-  if (model.query().executedQuery().isEmpty() and not setupTables()) return false;
+  if (model.query().executedQuery().isEmpty() and not setupTables()) { return false; }
 
   model.setQuery(model.query().executedQuery());
 
@@ -170,7 +170,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
 
-  if (dir.isEmpty()) return;
+  if (dir.isEmpty()) { return; }
 
   const QString arquivoModelo = "modelo relatorio contabil.xlsx";
 

@@ -49,7 +49,7 @@ void Impressao::print() {
     return;
   }
 
-  if (not setQuerys()) return;
+  if (not setQuerys()) { return; }
 
   auto dataManager = report->dataManager();
 

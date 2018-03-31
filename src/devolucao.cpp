@@ -272,26 +272,26 @@ void Devolucao::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant
 
 bool Devolucao::criarDevolucao() {
   const int newRow = modelVenda.rowCount();
-  if (not modelVenda.insertRow(newRow)) return false;
+  if (not modelVenda.insertRow(newRow)) { return false; }
 
   for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
     if (modelVenda.fieldIndex("created") == column) continue;
     if (modelVenda.fieldIndex("lastUpdated") == column) continue;
 
-    if (not modelVenda.setData(newRow, column, modelVenda.data(0, column))) return false;
+    if (not modelVenda.setData(newRow, column, modelVenda.data(0, column))) { return false; }
   }
 
-  if (not modelVenda.setData(newRow, "idVenda", idDevolucao)) return false;
-  if (not modelVenda.setData(newRow, "data", QDateTime::currentDateTime())) return false;
-  if (not modelVenda.setData(newRow, "subTotalBru", 0)) return false;
-  if (not modelVenda.setData(newRow, "subTotalLiq", 0)) return false;
-  if (not modelVenda.setData(newRow, "descontoPorc", 0)) return false;
-  if (not modelVenda.setData(newRow, "descontoReais", 0)) return false;
-  if (not modelVenda.setData(newRow, "frete", 0)) return false;
-  if (not modelVenda.setData(newRow, "total", 0)) return false;
-  if (not modelVenda.setData(newRow, "prazoEntrega", 0)) return false;
-  if (not modelVenda.setData(newRow, "devolucao", true)) return false;
-  if (not modelVenda.setData(newRow, "status", "DEVOLVIDO")) return false;
+  if (not modelVenda.setData(newRow, "idVenda", idDevolucao)) { return false; }
+  if (not modelVenda.setData(newRow, "data", QDateTime::currentDateTime())) { return false; }
+  if (not modelVenda.setData(newRow, "subTotalBru", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "subTotalLiq", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "descontoPorc", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "descontoReais", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "frete", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "total", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "prazoEntrega", 0)) { return false; }
+  if (not modelVenda.setData(newRow, "devolucao", true)) { return false; }
+  if (not modelVenda.setData(newRow, "status", "DEVOLVIDO")) { return false; }
 
   if (not modelVenda.submitAll()) {
     emit errorSignal("Erro salvando dados do pedido de devolução: " + modelVenda.lastError().text());
@@ -309,61 +309,61 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   // copiar linha para devolucao
   const int rowDevolucao = modelProdutos.rowCount();
-  if (not modelProdutos.insertRow(rowDevolucao)) return false;
+  if (not modelProdutos.insertRow(rowDevolucao)) { return false; }
 
   for (int column = 0; column < modelProdutos.columnCount(); ++column) {
     if (modelProdutos.fieldIndex("idVendaProduto") == column) continue;
     if (modelProdutos.fieldIndex("created") == column) continue;
     if (modelProdutos.fieldIndex("lastUpdated") == column) continue;
 
-    if (not modelProdutos.setData(rowDevolucao, column, modelProdutos.data(currentRow, column))) return false;
+    if (not modelProdutos.setData(rowDevolucao, column, modelProdutos.data(currentRow, column))) { return false; }
   }
 
-  if (not modelProdutos.setData(rowDevolucao, "idVenda", idDevolucao)) return false;
+  if (not modelProdutos.setData(rowDevolucao, "idVenda", idDevolucao)) { return false; }
   const QDecDouble quantDevolvidaInvertida = quantDevolvida * -1;
   const QDecDouble parcialDevolvido = ui->doubleSpinBoxTotalItem->value() * -1;
   const QDecDouble prcUnitarioDevolvido = parcialDevolvido / quantDevolvidaInvertida;
-  if (not modelProdutos.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido.toDouble())) return false;
-  if (not modelProdutos.setData(rowDevolucao, "descUnitario", prcUnitarioDevolvido.toDouble())) return false;
-  if (not modelProdutos.setData(rowDevolucao, "caixas", QDecDouble(quantDevolvida / step * -1).toDouble())) return false;
-  if (not modelProdutos.setData(rowDevolucao, "quant", quantDevolvidaInvertida.toDouble())) return false;
-  if (not modelProdutos.setData(rowDevolucao, "parcial", parcialDevolvido.toDouble())) return false;
-  if (not modelProdutos.setData(rowDevolucao, "desconto", 0)) return false;
-  if (not modelProdutos.setData(rowDevolucao, "parcialDesc", ui->doubleSpinBoxTotalItem->value() * -1)) return false;
-  if (not modelProdutos.setData(rowDevolucao, "descGlobal", 0)) return false;
-  if (not modelProdutos.setData(rowDevolucao, "total", ui->doubleSpinBoxTotalItem->value() * -1)) return false;
+  if (not modelProdutos.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "descUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "caixas", QDecDouble(quantDevolvida / step * -1).toDouble())) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "quant", quantDevolvidaInvertida.toDouble())) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "parcial", parcialDevolvido.toDouble())) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "desconto", 0)) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "parcialDesc", ui->doubleSpinBoxTotalItem->value() * -1)) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "descGlobal", 0)) { return false; }
+  if (not modelProdutos.setData(rowDevolucao, "total", ui->doubleSpinBoxTotalItem->value() * -1)) { return false; }
   //------------------------------------
 
   if (restante > 0) {
     const int newRowRestante = modelProdutos.rowCount();
     // NOTE: *quebralinha venda_produto/pedido_fornecedor
-    if (not modelProdutos.insertRow(newRowRestante)) return false;
+    if (not modelProdutos.insertRow(newRowRestante)) { return false; }
 
     for (int column = 0; column < modelProdutos.columnCount(); ++column) {
       if (modelProdutos.fieldIndex("idVendaProduto") == column) continue;
       if (modelProdutos.fieldIndex("created") == column) continue;
       if (modelProdutos.fieldIndex("lastUpdated") == column) continue;
 
-      if (not modelProdutos.setData(newRowRestante, column, modelProdutos.data(currentRow, column))) return false;
+      if (not modelProdutos.setData(newRowRestante, column, modelProdutos.data(currentRow, column))) { return false; }
     }
 
-    if (not modelProdutos.setData(newRowRestante, "caixas", (restante / step).toDouble())) return false;
-    if (not modelProdutos.setData(newRowRestante, "quant", restante.toDouble())) return false;
+    if (not modelProdutos.setData(newRowRestante, "caixas", (restante / step).toDouble())) { return false; }
+    if (not modelProdutos.setData(newRowRestante, "quant", restante.toDouble())) { return false; }
 
     const QDecDouble prcUnitario = modelProdutos.data(newRowRestante, "prcUnitario").toDouble();
     const QDecDouble parcial = restante * prcUnitario;
 
-    if (not modelProdutos.setData(newRowRestante, "parcial", parcial.toDouble())) return false;
+    if (not modelProdutos.setData(newRowRestante, "parcial", parcial.toDouble())) { return false; }
 
     const QDecDouble desconto = modelProdutos.data(newRowRestante, "desconto").toDouble();
     const QDecDouble parcialDesc = parcial * (1 - (desconto / 100).toDouble());
 
-    if (not modelProdutos.setData(newRowRestante, "parcialDesc", parcialDesc.toDouble())) return false;
+    if (not modelProdutos.setData(newRowRestante, "parcialDesc", parcialDesc.toDouble())) { return false; }
 
     const QDecDouble descGlobal = modelProdutos.data(newRowRestante, "descGlobal").toDouble();
     const QDecDouble total = parcialDesc * (1 - (descGlobal / 100).toDouble());
 
-    if (not modelProdutos.setData(newRowRestante, "total", total.toDouble())) return false;
+    if (not modelProdutos.setData(newRowRestante, "total", total.toDouble())) { return false; }
   }
 
   // ------------------------------------
@@ -376,21 +376,21 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   const QDecDouble caixas = quantDevolvida / step;
 
-  if (not modelProdutos.setData(currentRow, "caixas", caixas.toDouble())) return false;
-  if (not modelProdutos.setData(currentRow, "quant", quantDevolvida.toDouble())) return false;
+  if (not modelProdutos.setData(currentRow, "caixas", caixas.toDouble())) { return false; }
+  if (not modelProdutos.setData(currentRow, "quant", quantDevolvida.toDouble())) { return false; }
 
   const QDecDouble parcialRestante = quantDevolvida * prcUnitario;
 
-  if (not modelProdutos.setData(currentRow, "parcial", parcialRestante.toDouble())) return false;
+  if (not modelProdutos.setData(currentRow, "parcial", parcialRestante.toDouble())) { return false; }
 
   const QDecDouble parcialDescRestante = parcialRestante * (1 - (desconto / 100).toDouble());
 
-  if (not modelProdutos.setData(currentRow, "parcialDesc", parcialDescRestante.toDouble())) return false;
+  if (not modelProdutos.setData(currentRow, "parcialDesc", parcialDescRestante.toDouble())) { return false; }
 
   const QDecDouble totalRestante = parcialDescRestante * (1 - (descGlobal / 100).toDouble());
 
-  if (not modelProdutos.setData(currentRow, "total", totalRestante.toDouble())) return false;
-  if (not modelProdutos.setData(currentRow, "status", "DEVOLVIDO")) return false;
+  if (not modelProdutos.setData(currentRow, "total", totalRestante.toDouble())) { return false; }
+  if (not modelProdutos.setData(currentRow, "status", "DEVOLVIDO")) { return false; }
 
   //----------------------------------------------
 
@@ -407,22 +407,22 @@ bool Devolucao::criarContas() {
   // de contas
 
   const int newRowPag = modelPagamentos.rowCount();
-  if (not modelPagamentos.insertRow(newRowPag)) return false;
+  if (not modelPagamentos.insertRow(newRowPag)) { return false; }
 
-  if (not modelPagamentos.setData(newRowPag, "contraParte", modelCliente.data(0, "nome_razao"))) return false;
-  if (not modelPagamentos.setData(newRowPag, "dataEmissao", QDate::currentDate())) return false;
-  if (not modelPagamentos.setData(newRowPag, "idVenda", idDevolucao)) return false;
-  if (not modelPagamentos.setData(newRowPag, "idLoja", UserSession::idLoja())) return false;
-  if (not modelPagamentos.setData(newRowPag, "valor", ui->doubleSpinBoxCredito->value() * -1)) return false;
-  if (not modelPagamentos.setData(newRowPag, "tipo", "1. Conta Cliente")) return false;
-  if (not modelPagamentos.setData(newRowPag, "parcela", 1)) return false;
-  if (not modelPagamentos.setData(newRowPag, "observacao", "")) return false;
-  if (not modelPagamentos.setData(newRowPag, "status", "RECEBIDO")) return false;
-  if (not modelPagamentos.setData(newRowPag, "dataPagamento", QDate::currentDate())) return false;
-  if (not modelPagamentos.setData(newRowPag, "dataRealizado", QDate::currentDate())) return false;
-  if (not modelPagamentos.setData(newRowPag, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) return false;
+  if (not modelPagamentos.setData(newRowPag, "contraParte", modelCliente.data(0, "nome_razao"))) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataEmissao", QDate::currentDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "idVenda", idDevolucao)) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "idLoja", UserSession::idLoja())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "valor", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "tipo", "1. Conta Cliente")) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "parcela", 1)) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "observacao", "")) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "status", "RECEBIDO")) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataPagamento", QDate::currentDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataRealizado", QDate::currentDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
   // REFAC: 0dont hardcode
-  if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) return false;
+  if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) { return false; }
 
   //----------------
 
@@ -430,7 +430,7 @@ bool Devolucao::criarContas() {
 
   //  if (modelVenda.data(0, "representacao").toBool()) {
   //    const int row = modelPagamentos.rowCount();
-  //    if (not modelPagamentos.insertRow(row)) return false;
+  //    if (not modelPagamentos.insertRow(row)) { return false; }
 
   //    const QString fornecedor = modelProdutos.data(0, "fornecedor").toString();
 
@@ -478,7 +478,7 @@ bool Devolucao::criarContas() {
 bool Devolucao::salvarCredito() {
   const double credito = modelCliente.data(0, "credito").toDouble() + ui->doubleSpinBoxCredito->value();
 
-  if (not modelCliente.setData(0, "credito", credito)) return false;
+  if (not modelCliente.setData(0, "credito", credito)) { return false; }
 
   if (not modelCliente.submitAll()) {
     emit errorSignal("Erro salvando crédito do cliente: " + modelCliente.lastError().text());
@@ -502,15 +502,15 @@ bool Devolucao::removerVinculoCompra(const int currentRow) {
 }
 
 bool Devolucao::devolverItem(const int currentRow) {
-  if (createNewId and not criarDevolucao()) return false;
+  if (createNewId and not criarDevolucao()) { return false; }
 
   // REFAC: move submitAll outside those functions?
 
-  if (not criarContas()) return false;
-  if (not salvarCredito()) return false;
-  if (not removerVinculoCompra(currentRow)) return false;
-  if (not inserirItens(currentRow)) return false;
-  if (not atualizarDevolucao()) return false;
+  if (not criarContas()) { return false; }
+  if (not salvarCredito()) { return false; }
+  if (not removerVinculoCompra(currentRow)) { return false; }
+  if (not inserirItens(currentRow)) { return false; }
+  if (not atualizarDevolucao()) { return false; }
 
   if (not modelDevolvidos.select()) {
     emit errorSignal("Erro lendo tabela devolvidos: " + modelDevolvidos.lastError().text());
@@ -563,8 +563,8 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not devolverItem(list.first().row())) {
     QSqlQuery("ROLLBACK").exec();
@@ -572,7 +572,7 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

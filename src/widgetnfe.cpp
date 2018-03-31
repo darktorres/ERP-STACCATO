@@ -18,8 +18,8 @@ void WidgetNfe::setConnections() { connect(ui->tabWidgetNfe, &QTabWidget::curren
 bool WidgetNfe::updateTables() {
   const QString currentText = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());
 
-  if (currentText == "Entrada" and not ui->widgetEntrada->updateTables()) return false;
-  if (currentText == "Saída" and not ui->widgetSaida->updateTables()) return false;
+  if (currentText == "Entrada" and not ui->widgetEntrada->updateTables()) { return false; }
+  if (currentText == "Saída" and not ui->widgetSaida->updateTables()) { return false; }
 
   return true;
 }

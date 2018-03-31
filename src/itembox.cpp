@@ -52,12 +52,12 @@ void ItemBox::resizeEvent(QResizeEvent *event) {
 }
 
 void ItemBox::search() {
-  if (searchDialog) searchDialog->show();
+  if (searchDialog) { searchDialog->show(); }
 }
 
 void ItemBox::edit() {
   if (registerDialog) {
-    if (not value.isNull()) registerDialog->viewRegisterById(value);
+    if (not value.isNull()) { registerDialog->viewRegisterById(value); }
 
     registerDialog->show();
   }
@@ -76,12 +76,12 @@ SearchDialog *ItemBox::getSearchDialog() { return searchDialog; }
 QVariant ItemBox::getValue() const { return value; }
 
 void ItemBox::setValue(const QVariant &value) {
-  if (value.isNull()) return;
-  if (this->value == value) return;
+  if (value.isNull()) { return; }
+  if (this->value == value) { return; }
 
   this->value = value;
 
-  if (searchDialog) setText(searchDialog->getText(value));
+  if (searchDialog) { setText(searchDialog->getText(value)); }
 
   QLineEdit::setToolTip(text());
 
@@ -116,7 +116,7 @@ void ItemBox::changeItem(const QVariant &value) {
 }
 
 void ItemBox::mouseDoubleClickEvent(QMouseEvent *event) {
-  if (readOnlyItemBox) return;
+  if (readOnlyItemBox) { return; }
 
   search();
   event->accept();

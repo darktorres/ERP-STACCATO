@@ -158,12 +158,12 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   InputDialog input(InputDialog::Tipo::AgendarEntrega);
 
-  if (input.exec() != InputDialog::Accepted) return;
+  if (input.exec() != InputDialog::Accepted) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not reagendar(list, input.getNextDate())) {
     QSqlQuery("ROLLBACK").exec();
@@ -171,7 +171,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -355,7 +355,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());
 
-  if (inputDlg.exec() != InputDialogConfirmacao::Accepted) return;
+  if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
   const QDateTime dataRealEnt = inputDlg.getDateTime();
   const QString entregou = inputDlg.getEntregou();
@@ -363,8 +363,8 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not confirmarEntrega(dataRealEnt, entregou, recebeu)) {
     QSqlQuery("ROLLBACK").exec();
@@ -372,9 +372,9 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
     return;
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) return;
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -390,7 +390,7 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
     return;
   }
 
-  if (not ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) return;
+  if (not ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &text) {
@@ -414,12 +414,12 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::No) return;
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not cancelarEntrega(list)) {
     QSqlQuery("ROLLBACK").exec();
@@ -427,7 +427,7 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -491,8 +491,8 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
     emit transactionStarted();
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-    if (not QSqlQuery("START TRANSACTION").exec()) return;
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
     if (not consultarNFe(idNFe, xml)) {
       QSqlQuery("ROLLBACK").exec();
@@ -500,7 +500,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
       return;
     }
 
-    if (not QSqlQuery("COMMIT").exec()) return;
+    if (not QSqlQuery("COMMIT").exec()) { return; }
 
     emit transactionEnded();
 

@@ -37,19 +37,19 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   const QString tipoUsuario = UserSession::tipoUsuario();
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") filter += " AND idUsuario = " + QString::number(UserSession::idUsuario());
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario()); }
 
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor";
 
   modelViewRelatorioVendedor.setFilter(filter);
 
-  if (not modelViewRelatorioVendedor.select()) emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelViewRelatorioVendedor.lastError().text());
+  if (not modelViewRelatorioVendedor.select()) { emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelViewRelatorioVendedor.lastError().text()); }
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
@@ -58,14 +58,14 @@ void WidgetRelatorio::setFilterTotaisLoja() {
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
   }
 
   filter += " ORDER BY Loja";
 
   modelViewRelatorioLoja.setFilter(filter);
 
-  if (not modelViewRelatorioLoja.select()) emit errorSignal("Erro lendo tabela relatorio_loja: " + modelViewRelatorioLoja.lastError().text());
+  if (not modelViewRelatorioLoja.select()) { emit errorSignal("Erro lendo tabela relatorio_loja: " + modelViewRelatorioLoja.lastError().text()); }
 }
 
 bool WidgetRelatorio::setupTables() {
@@ -155,19 +155,19 @@ void WidgetRelatorio::setFilterRelatorio() {
   const QString tipoUsuario = UserSession::tipoUsuario();
   QString filter = "Mês = '" + date + "'";
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") filter += " AND idUsuario = " + QString::number(UserSession::idUsuario());
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario()); }
 
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) filter += " AND Loja = '" + descricaoLoja.value().toString() + "'";
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
 
   modelViewRelatorio.setFilter(filter);
 
-  if (not modelViewRelatorio.select()) emit errorSignal("Erro lendo tabela relatorio: " + modelViewRelatorio.lastError().text());
+  if (not modelViewRelatorio.select()) { emit errorSignal("Erro lendo tabela relatorio: " + modelViewRelatorio.lastError().text()); }
 }
 
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
@@ -175,7 +175,7 @@ void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
 bool WidgetRelatorio::updateTables() {
-  if (modelViewRelatorio.tableName().isEmpty() and not setupTables()) return false;
+  if (modelViewRelatorio.tableName().isEmpty() and not setupTables()) { return false; }
 
   setFilterRelatorio();
   setFilterTotaisVendedor();
@@ -200,7 +200,7 @@ bool WidgetRelatorio::updateTables() {
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor");
+    if (descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor"); }
   }
 
   if (not modelOrcamento.select()) {
@@ -233,7 +233,7 @@ void WidgetRelatorio::on_tableTotalVendedor_entered(const QModelIndex &) { ui->t
 void WidgetRelatorio::on_pushButtonExcel_clicked() {
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
 
-  if (dir.isEmpty()) return;
+  if (dir.isEmpty()) { return; }
 
   const QString arquivoModelo = "relatorio.xlsx";
 
@@ -266,9 +266,7 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   char column = 'A';
 
-  for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) {
-    xlsx.write(column + QString::number(1), modelViewRelatorio.headerData(col, Qt::Horizontal).toString());
-  }
+  for (int col = 0; col < modelViewRelatorio.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelViewRelatorio.headerData(col, Qt::Horizontal).toString()); }
 
   column = 'A';
 
@@ -286,7 +284,7 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   xlsx.selectSheet("Sheet2");
 
-  for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) xlsx.write(column + QString::number(1), modelViewRelatorioVendedor.headerData(col, Qt::Horizontal).toString());
+  for (int col = 0; col < modelViewRelatorioVendedor.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelViewRelatorioVendedor.headerData(col, Qt::Horizontal).toString()); }
 
   column = 'A';
 

@@ -83,7 +83,7 @@ void CadastroFornecedor::novoEndereco() {
 
 bool CadastroFornecedor::verifyFields() {
   Q_FOREACH (const auto &line, ui->frameCadastro->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
@@ -95,22 +95,22 @@ bool CadastroFornecedor::verifyFields() {
 }
 
 bool CadastroFornecedor::savingProcedures() {
-  if (not setData("razaoSocial", ui->lineEditFornecedor->text())) return false;
-  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) return false;
-  if (not setData("contatoNome", ui->lineEditContatoNome->text())) return false;
-  if (not setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"))) return false;
-  if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) return false;
-  if (not setData("contatoRG", ui->lineEditContatoRG->text().remove(".").remove("-"))) return false;
-  if (not setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"))) return false;
-  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) return false;
-  if (not setData("tel", ui->lineEditTel_Res->text())) return false;
-  if (not setData("telCel", ui->lineEditTel_Cel->text())) return false;
-  if (not setData("telCom", ui->lineEditTel_Com->text())) return false;
-  if (not setData("nextel", ui->lineEditNextel->text())) return false;
-  if (not setData("email", ui->lineEditEmail->text())) return false;
-  if (not setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value())) return false;
-  if (not setData("st", ui->comboBoxSt->currentText())) return false;
-  if (not setData("comissao1", ui->doubleSpinBoxComissao->value())) return false;
+  if (not setData("razaoSocial", ui->lineEditFornecedor->text())) { return false; }
+  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
+  if (not setData("contatoNome", ui->lineEditContatoNome->text())) { return false; }
+  if (not setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"))) { return false; }
+  if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) { return false; }
+  if (not setData("contatoRG", ui->lineEditContatoRG->text().remove(".").remove("-"))) { return false; }
+  if (not setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"))) { return false; }
+  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
+  if (not setData("tel", ui->lineEditTel_Res->text())) { return false; }
+  if (not setData("telCel", ui->lineEditTel_Cel->text())) { return false; }
+  if (not setData("telCom", ui->lineEditTel_Com->text())) { return false; }
+  if (not setData("nextel", ui->lineEditNextel->text())) { return false; }
+  if (not setData("email", ui->lineEditEmail->text())) { return false; }
+  if (not setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value())) { return false; }
+  if (not setData("st", ui->comboBoxSt->currentText())) { return false; }
+  if (not setData("comissao1", ui->doubleSpinBoxComissao->value())) { return false; }
 
   return true;
 }
@@ -175,15 +175,15 @@ bool CadastroFornecedor::cadastrar() {
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) return false;
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return false; }
 
-  if (not savingProcedures()) return false;
+  if (not savingProcedures()) { return false; }
 
   for (int column = 0; column < model.rowCount(); ++column) {
     const QVariant dado = model.data(currentRow, column);
 
     if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) return false;
+      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -225,7 +225,7 @@ void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco
 
 bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) return false;
+    if (not verifyRequiredField(line)) { return false; }
   }
 
   if (not ui->lineEditCEP->isValid()) {
@@ -238,16 +238,16 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
 
   if (not isUpdate) modelEnd.insertRow(currentRowEnd);
 
-  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) return false;
-  if (not setDataEnd("cep", ui->lineEditCEP->text())) return false;
-  if (not setDataEnd("logradouro", ui->lineEditEndereco->text())) return false;
-  if (not setDataEnd("numero", ui->lineEditNro->text())) return false;
-  if (not setDataEnd("complemento", ui->lineEditComp->text())) return false;
-  if (not setDataEnd("bairro", ui->lineEditBairro->text())) return false;
-  if (not setDataEnd("cidade", ui->lineEditCidade->text())) return false;
-  if (not setDataEnd("uf", ui->lineEditUF->text())) return false;
-  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) return false;
-  if (not setDataEnd("desativado", false)) return false;
+  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
+  if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
+  if (not setDataEnd("logradouro", ui->lineEditEndereco->text())) { return false; }
+  if (not setDataEnd("numero", ui->lineEditNro->text())) { return false; }
+  if (not setDataEnd("complemento", ui->lineEditComp->text())) { return false; }
+  if (not setDataEnd("bairro", ui->lineEditBairro->text())) { return false; }
+  if (not setDataEnd("cidade", ui->lineEditCidade->text())) { return false; }
+  if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
+  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
+  if (not setDataEnd("desativado", false)) { return false; }
 
   ui->tableEndereco->resizeColumnsToContents();
 
@@ -257,7 +257,7 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
 }
 
 void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
-  if (not ui->lineEditCEP->isValid()) return;
+  if (not ui->lineEditCEP->isValid()) { return; }
 
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
@@ -284,7 +284,7 @@ void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
 }
 
 bool CadastroFornecedor::viewRegister() {
-  if (not RegisterDialog::viewRegister()) return false;
+  if (not RegisterDialog::viewRegister()) { return false; }
 
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + " AND desativado = FALSE");
 
@@ -370,12 +370,12 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
 
   const int novaValidade = QInputDialog::getInt(this, "Validade", "Quantos dias de validade para os produtos: ", 0, -1, 1000, 1, &ok);
 
-  if (not ok) return;
+  if (not ok) { return; }
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not ajustarValidade(novaValidade)) {
     QSqlQuery("ROLLBACK").exec();
@@ -383,7 +383,7 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 

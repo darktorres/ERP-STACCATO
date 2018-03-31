@@ -15,7 +15,7 @@ int HorizontalProxyModel::rowCount(const QModelIndex &) const { return sourceMod
 int HorizontalProxyModel::columnCount(const QModelIndex &) const { return sourceModel() ? sourceModel()->rowCount() : 0; }
 
 QVariant HorizontalProxyModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (not sourceModel()) return QVariant();
+  if (not sourceModel()) { return QVariant(); }
 
   Qt::Orientation new_orientation = orientation == Qt::Horizontal ? Qt::Vertical : Qt::Horizontal;
   return sourceModel()->headerData(section, new_orientation, role);

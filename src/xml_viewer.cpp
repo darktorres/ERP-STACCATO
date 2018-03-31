@@ -19,7 +19,7 @@ XML_Viewer::XML_Viewer(QWidget *parent) : Dialog(parent), ui(new Ui::XML_Viewer)
 XML_Viewer::~XML_Viewer() { delete ui; }
 
 void XML_Viewer::exibirXML(const QByteArray &content) {
-  if (content.isEmpty()) return;
+  if (content.isEmpty()) { return; }
 
   fileContent = content;
 

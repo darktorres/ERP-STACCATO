@@ -30,7 +30,7 @@ FollowUp::~FollowUp() { delete ui; }
 void FollowUp::on_pushButtonCancelar_clicked() { close(); }
 
 void FollowUp::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) return;
+  if (not verifyFields()) { return; }
 
   QSqlQuery query;
   if (tipo == Tipo::Orcamento) {

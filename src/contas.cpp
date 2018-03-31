@@ -50,16 +50,16 @@ void Contas::validarData(const QModelIndex &index) {
     const QDate oldDate = query.value("dataPagamento").toDate();
     const QDate newDate = modelPendentes.data(index.row(), "dataPagamento").toDate();
 
-    if (oldDate.isNull()) return;
+    if (oldDate.isNull()) { return; }
 
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
       emit errorSignal("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
-      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) return;
+      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) { return; }
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
       emit errorSignal("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
-      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) return;
+      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) { return; }
     }
   }
 }
@@ -80,17 +80,17 @@ void Contas::preencher(const QModelIndex &index) {
 
     if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
       emit errorSignal("Limite de alteração de valor excedido! Use a função de corrigir fluxo!");
-      if (not modelPendentes.setData(index.row(), "valor", oldValor)) return;
+      if (not modelPendentes.setData(index.row(), "valor", oldValor)) { return; }
     }
   }
 
   if (index.column() == modelPendentes.fieldIndex("dataRealizado")) {
-    if (not modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) return;
-    if (not modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"))) return;
-    if (not modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"))) return;
-    if (not modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"))) return;
-    if (not modelPendentes.setData(index.row(), "contaDestino", 3)) return;
-    if (not modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"))) return;
+    if (not modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) { return; }
+    if (not modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"))) { return; }
+    if (not modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"))) { return; }
+    if (not modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"))) { return; }
+    if (not modelPendentes.setData(index.row(), "contaDestino", 3)) { return; }
+    if (not modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"))) { return; }
 
     //
 
@@ -100,19 +100,19 @@ void Contas::preencher(const QModelIndex &index) {
     for (const auto &indexMatch : list) {
       if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) continue;
 
-      if (not modelPendentes.setData(indexMatch.row(), "dataRealizado", modelPendentes.data(index.row(), "dataRealizado"))) return;
-      if (not modelPendentes.setData(indexMatch.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) return;
-      if (not modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"))) return;
-      if (not modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"))) return;
-      if (not modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"))) return;
-      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", 3)) return;
-      if (not modelPendentes.setData(indexMatch.row(), "centroCusto", modelPendentes.data(indexMatch.row(), "idLoja"))) return;
+      if (not modelPendentes.setData(indexMatch.row(), "dataRealizado", modelPendentes.data(index.row(), "dataRealizado"))) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"))) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"))) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"))) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", 3)) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "centroCusto", modelPendentes.data(indexMatch.row(), "idLoja"))) { return; }
     }
   }
 
   if (index.column() != modelPendentes.fieldIndex("dataRealizado")) {
     if (modelPendentes.data(index.row(), "status").toString() == "PENDENTE") {
-      if (not modelPendentes.setData(index.row(), "status", "CONFERIDO")) return;
+      if (not modelPendentes.setData(index.row(), "status", "CONFERIDO")) { return; }
     }
   }
 }
@@ -286,7 +286,7 @@ bool Contas::verifyFields() {
 }
 
 void Contas::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) return;
+  if (not verifyFields()) { return; }
 
   if (not modelPendentes.submitAll()) {
     emit errorSignal("Erro salvando dados: " + modelPendentes.lastError().text());
@@ -314,7 +314,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE"
                                                : "idVenda LIKE '" + idVenda + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
 
-    if (not modelPendentes.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text());
+    if (not modelPendentes.select()) { emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text()); }
 
     ui->tablePendentes->resizeColumnsToContents();
 
@@ -329,7 +329,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE"
                                                  : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE");
 
-    if (not modelProcessados.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());
+    if (not modelProcessados.select()) { emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text()); }
 
     for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");

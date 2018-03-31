@@ -101,7 +101,8 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   this->from = from;
 
   rcpt.append(to.split(";"));
-  if (not cc.isEmpty()) rcpt.append(cc.split(";"));
+
+  if (not cc.isEmpty()) { rcpt.append(cc.split(";")); }
 
   state = States::Init;
   socket->connectToHostEncrypted(host, port); //"smtp.gmail.com" and 465 for gmail TLS
@@ -127,14 +128,14 @@ void Smtp::stateChanged(QAbstractSocket::SocketState socketState) {
 }
 
 void Smtp::errorReceived(QAbstractSocket::SocketError socketError) {
-  if (socketError == QAbstractSocket::RemoteHostClosedError) return;
+  if (socketError == QAbstractSocket::RemoteHostClosedError) { return; }
   //  qDebug() << "error: " << socketError;
   if (socketError == QAbstractSocket::HostNotFoundError) emit status("Não encontrou o servidor SMTP!");
 }
 
 void Smtp::disconnected() {
   //  qDebug() << "disconneted";
-  if (socket->errorString() == "The remote host closed the connection") return;
+  if (socket->errorString() == "The remote host closed the connection") { return; }
   //  qDebug() << "error " << socket->errorString();
 }
 
@@ -159,9 +160,9 @@ void Smtp::readyRead() {
   //  qDebug() << "Server response: " << response;
   //  qDebug() << "State: " << state;
 
-  if (state == States::Close) return;
+  if (state == States::Close) { return; }
 
-  if (responseLine == "221") return;
+  if (responseLine == "221") { return; }
 
   if (state == States::Init and responseLine == "220") {
     // banner was okay, let's go on

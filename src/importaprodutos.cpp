@@ -195,7 +195,8 @@ bool ImportaProdutos::importar() {
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
-  emit informationSignal(resultado);
+
+  QMessageBox::information(this, "Aviso!", resultado);
 
   return true;
 }

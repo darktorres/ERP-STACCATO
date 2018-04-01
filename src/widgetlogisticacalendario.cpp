@@ -58,7 +58,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   QStringList list;
 
   Q_FOREACH (const auto &item, ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
-    if (not item->isChecked()) continue;
+    if (not item->isChecked()) { continue; }
 
     veiculos++;
 
@@ -107,7 +107,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
       }
     }
 
-    if (row == -1) continue;
+    if (row == -1) { continue; }
 
     const int diaSemana = query.value("data").toDate().dayOfWeek();
 

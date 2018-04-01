@@ -524,7 +524,7 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() {
   for (int row = 0; row < modelTransp2.rowCount(); ++row) {
     const int hour = modelTransp2.data(row, "data").toDateTime().time().hour();
 
-    if (hour != ui->dateTimeEdit->time().hour()) continue;
+    if (hour != ui->dateTimeEdit->time().hour()) { continue; }
 
     peso += modelTransp2.data(row, "kg").toDouble();
   }
@@ -683,9 +683,9 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
   // copiar colunas
   for (int column = 0, columnCount = modelProdutos.columnCount(); column < columnCount; ++column) {
-    if (modelProdutos.fieldIndex("idVendaProduto") == column) continue;
-    if (modelProdutos.fieldIndex("created") == column) continue;
-    if (modelProdutos.fieldIndex("lastUpdated") == column) continue;
+    if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
+    if (modelProdutos.fieldIndex("created") == column) { continue; }
+    if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
 
     const QVariant value = modelProdutos.data(0, column);
 
@@ -751,10 +751,10 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   modelConsumo.insertRow(rowConsumo);
 
   for (int column = 0, columnCount = modelConsumo.columnCount(); column < columnCount; ++column) {
-    if (modelConsumo.fieldIndex("idConsumo") == column) continue;
-    if (modelConsumo.fieldIndex("idVendaProduto") == column) continue;
-    if (modelConsumo.fieldIndex("created") == column) continue;
-    if (modelConsumo.fieldIndex("lastUpdated") == column) continue;
+    if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
+    if (modelConsumo.fieldIndex("idVendaProduto") == column) { continue; }
+    if (modelConsumo.fieldIndex("created") == column) { continue; }
+    if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 
     const QVariant value = modelConsumo.data(0, column);
 

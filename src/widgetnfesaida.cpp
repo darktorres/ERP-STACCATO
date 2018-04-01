@@ -298,7 +298,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (modelViewNFeSaida.data(item.row(), "status").toString() != "AUTORIZADO") continue;
+    if (modelViewNFeSaida.data(item.row(), "status").toString() != "AUTORIZADO") { continue; }
 
     // pegar xml do bd e salvar em arquivo
 

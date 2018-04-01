@@ -43,9 +43,7 @@ void DocPropsApp::addHeadingPair(const QString &name, int value) { m_headingPair
 
 bool DocPropsApp::setProperty(const QString &name, const QString &value) {
   static QStringList validKeys;
-  if (validKeys.isEmpty()) {
-    validKeys << QStringLiteral("manager") << QStringLiteral("company");
-  }
+  if (validKeys.isEmpty()) { validKeys << QStringLiteral("manager") << QStringLiteral("company"); }
 
   if (not validKeys.contains(name)) return false;
 
@@ -117,7 +115,7 @@ bool DocPropsApp::loadFromXmlFile(QIODevice *device) {
   while (not reader.atEnd()) {
     QXmlStreamReader::TokenType token = reader.readNext();
     if (token == QXmlStreamReader::StartElement) {
-      if (reader.name() == QLatin1String("Properties")) continue;
+      if (reader.name() == QLatin1String("Properties")) { continue; }
 
       if (reader.name() == QStringLiteral("Manager")) {
         setProperty(QStringLiteral("manager"), reader.readElementText());
@@ -126,11 +124,9 @@ bool DocPropsApp::loadFromXmlFile(QIODevice *device) {
       }
     }
 
-    if (reader.hasError()) {
-      qDebug("Error when read doc props app file.");
-    }
+    if (reader.hasError()) { qDebug("Error when read doc props app file."); }
   }
   return true;
 }
 
-} // namespace
+} // namespace QXlsx

@@ -43,7 +43,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   ui->groupBoxFinanceiro->hide();
   ui->tableFluxoCaixa2->hide();
 
-  for (auto &item : ui->frameRT->findChildren<QWidget *>()) item->setHidden(true);
+  for (auto &item : ui->frameRT->findChildren<QWidget *>()) { item->setHidden(true); }
 
   ui->splitter->setStretchFactor(0, 1);
   ui->splitter->setStretchFactor(1, 0);
@@ -319,9 +319,9 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     for (int column = 0, columnCount = queryProdutos.record().count(); column < columnCount; ++column) {
       const QString field = queryProdutos.record().fieldName(column);
 
-      if (field == "created") continue;
-      if (field == "lastUpdated") continue;
-      if (modelItem.fieldIndex(field) == -1) continue;
+      if (field == "created") { continue; }
+      if (field == "lastUpdated") { continue; }
+      if (modelItem.fieldIndex(field) == -1) { continue; }
 
       if (not modelItem.setData(rowItem, field, queryProdutos.value(field))) { return; }
     }
@@ -814,9 +814,9 @@ void Venda::montarFluxoCaixa() {
 
       // calculo comissao
       for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
-        if (modelFluxoCaixa.data(z, "representacao").toBool() == false) continue;
-        if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) continue;
-        if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") continue;
+        if (modelFluxoCaixa.data(z, "representacao").toBool() == false) { continue; }
+        if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
+        if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
 
         const QString fornecedor = modelItem.data(0, "fornecedor").toString();
 
@@ -854,10 +854,10 @@ void Venda::montarFluxoCaixa() {
 
       // calculo taxas cartao
       for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
-        if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) continue;
-        if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") continue;
-        if (modelFluxoCaixa.data(z, "representacao").toBool()) continue;
-        if (modelFluxoCaixa.data(z, "tipo").toString().contains("Conta Cliente")) continue;
+        if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
+        if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
+        if (modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
+        if (modelFluxoCaixa.data(z, "tipo").toString().contains("Conta Cliente")) { continue; }
 
         QSqlQuery query;
         query.prepare("SELECT taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento WHERE pagamento = :pagamento AND parcela = :parcela");
@@ -869,7 +869,7 @@ void Venda::montarFluxoCaixa() {
           return;
         }
 
-        if (qFuzzyIsNull(query.value("taxa").toDouble())) continue;
+        if (qFuzzyIsNull(query.value("taxa").toDouble())) { continue; }
 
         const double taxa = query.value("taxa").toDouble() / 100;
 
@@ -1197,7 +1197,7 @@ bool Venda::cancelamento() {
   //---------------------------
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) {
-      if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") continue;
+      if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
 
       query.prepare("UPDATE cliente SET credito = credito + :valor WHERE idCliente = :idCliente");

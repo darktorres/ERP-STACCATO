@@ -306,7 +306,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     for (const auto &item : list) {
       const QString tipoSt = modelPedidoFornecedor.data(item.row(), "st").toString();
 
-      if (tipoSt == "Sem ST") continue;
+      if (tipoSt == "Sem ST") { continue; }
 
       const double aliquotaSt = modelPedidoFornecedor.data(item.row(), "aliquotaSt").toDouble();
       const double preco = modelPedidoFornecedor.data(item.row(), "preco").toDouble();
@@ -682,7 +682,7 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
     }
 
     for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      if (not modelPedidoFornecedor.data(row, "selecionado").toBool()) continue;
+      if (not modelPedidoFornecedor.data(row, "selecionado").toBool()) { continue; }
 
       if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
       if (not modelPedidoFornecedor.setData(row, "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }

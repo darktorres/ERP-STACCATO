@@ -275,8 +275,8 @@ bool Devolucao::criarDevolucao() {
   if (not modelVenda.insertRow(newRow)) { return false; }
 
   for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
-    if (modelVenda.fieldIndex("created") == column) continue;
-    if (modelVenda.fieldIndex("lastUpdated") == column) continue;
+    if (modelVenda.fieldIndex("created") == column) { continue; }
+    if (modelVenda.fieldIndex("lastUpdated") == column) { continue; }
 
     if (not modelVenda.setData(newRow, column, modelVenda.data(0, column))) { return false; }
   }
@@ -312,9 +312,9 @@ bool Devolucao::inserirItens(const int currentRow) {
   if (not modelProdutos.insertRow(rowDevolucao)) { return false; }
 
   for (int column = 0; column < modelProdutos.columnCount(); ++column) {
-    if (modelProdutos.fieldIndex("idVendaProduto") == column) continue;
-    if (modelProdutos.fieldIndex("created") == column) continue;
-    if (modelProdutos.fieldIndex("lastUpdated") == column) continue;
+    if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
+    if (modelProdutos.fieldIndex("created") == column) { continue; }
+    if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
 
     if (not modelProdutos.setData(rowDevolucao, column, modelProdutos.data(currentRow, column))) { return false; }
   }
@@ -340,9 +340,9 @@ bool Devolucao::inserirItens(const int currentRow) {
     if (not modelProdutos.insertRow(newRowRestante)) { return false; }
 
     for (int column = 0; column < modelProdutos.columnCount(); ++column) {
-      if (modelProdutos.fieldIndex("idVendaProduto") == column) continue;
-      if (modelProdutos.fieldIndex("created") == column) continue;
-      if (modelProdutos.fieldIndex("lastUpdated") == column) continue;
+      if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
+      if (modelProdutos.fieldIndex("created") == column) { continue; }
+      if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
 
       if (not modelProdutos.setData(newRowRestante, column, modelProdutos.data(currentRow, column))) { return false; }
     }

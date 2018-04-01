@@ -4,8 +4,7 @@ sudo: required
 dist: trusty
     
 before_install:
-  - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
-#  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
 
@@ -17,17 +16,16 @@ install:
   - "sudo apt-get install freetds-common libbluetooth3 libegl1-mesa-drivers libmng2 libmtdev1
   libopenal-data libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1
   libsybdb5 libwayland-egl1-mesa libwebp5 libwebpdemux1 libxcb-icccm4
-  libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 qt59base
-  qt59connectivity qt59gamepad qt59graphicaleffects qt59imageformats 
-  qt59location qt59multimedia qt59quickcontrols qt59quickcontrols2 
-  qt59remoteobjects qt59script qt59scxml qt59sensors qt59serialbus 
-  qt59serialport qt59speech qt59svg qt59tools qt59translations 
-  qt59webchannel qt59websockets qt59x11extras qt59xmlpatterns qt59charts-no-lgpl"
+  libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 qt510base
+  qt510connectivity qt510gamepad qt510graphicaleffects qt510imageformats 
+  qt510location qt510multimedia qt510quickcontrols qt510quickcontrols2 
+  qt510remoteobjects qt510script qt510scxml qt510sensors qt510serialbus 
+  qt510serialport qt510speech qt510svg qt510tools qt510translations 
+  qt510webchannel qt510websockets qt510x11extras qt510xmlpatterns qt510charts-no-lgpl"
   
 script:
-  - source /opt/qt59/bin/qt59-env.sh
-#  - source /opt/qt510/bin/qt510-env.sh
-  - /opt/qt59/bin/qmake Loja.pro
+  - source /opt/qt510/bin/qt510-env.sh
+  - /opt/qt510/bin/qmake Loja.pro
   - make -j3
   
   # TODO:

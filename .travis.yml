@@ -22,8 +22,9 @@ before_install:
   - sudo apt-get update
 
 install:
-  - sudo apt-get install g++-7
+  - sudo apt-get install g++-7 gcc-7
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90
   - sudo apt-get install dh-make
   - "sudo apt-get install freetds-common libbluetooth3 libegl1-mesa-drivers libmng2 libmtdev1
   libopenal-data libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1

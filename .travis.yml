@@ -12,8 +12,7 @@ install:
   - sudo apt-get install g++-7 gcc-7
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90
-  - sudo apt-get install dh-make
-  - "sudo apt-get install freetds-common libbluetooth3 libegl1-mesa-drivers libmng2 libmtdev1
+  - "sudo apt-get install dh-make freetds-common libbluetooth3 libegl1-mesa-drivers libmng2 libmtdev1
   libopenal-data libopenal1 libopenvg1-mesa libopus0 libsdl2-2.0-0 libsnappy1
   libsybdb5 libwayland-egl1-mesa libwebp5 libwebpdemux1 libxcb-icccm4
   libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 qt510base

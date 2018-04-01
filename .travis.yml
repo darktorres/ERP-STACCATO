@@ -2,18 +2,6 @@ language: cpp
 compiler: gcc
 sudo: required
 dist: trusty
-
-#matrix:
-#  include:
-#    - compiler: gcc
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#          packages:
-#            - gcc-7
-#            - g++-7
-#      env: COMPILER=g++-7
     
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
@@ -41,3 +29,8 @@ script:
 #  - source /opt/qt510/bin/qt510-env.sh
   - /opt/qt59/bin/qmake Loja.pro
   - make -j3
+  
+  # TODO:
+  # cache ccache cache folder?
+  # cache /usr/bin
+  # cache qt folder /opt/qt?

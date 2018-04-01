@@ -164,10 +164,10 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   modelContaPagamento.insertRow(newRow);
 
   for (int col = 0; col < modelContaPagamento.columnCount(); ++col) {
-    if (modelContaPagamento.fieldIndex("valor") == col) continue;
-    if (modelContaPagamento.fieldIndex("desativado") == col) continue;
-    if (modelContaPagamento.fieldIndex("created") == col) continue;
-    if (modelContaPagamento.fieldIndex("lastUpdated") == col) continue;
+    if (modelContaPagamento.fieldIndex("valor") == col) { continue; }
+    if (modelContaPagamento.fieldIndex("desativado") == col) { continue; }
+    if (modelContaPagamento.fieldIndex("created") == col) { continue; }
+    if (modelContaPagamento.fieldIndex("lastUpdated") == col) { continue; }
 
     if (not modelContaPagamento.setData(newRow, col, modelContaPagamento.data(row, col))) { return; }
   }

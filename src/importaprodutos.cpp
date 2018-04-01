@@ -168,7 +168,7 @@ bool ImportaProdutos::importar() {
       break;
     }
 
-    if (query.value(record.indexOf("fornecedor")).toString().isEmpty()) continue;
+    if (query.value(record.indexOf("fornecedor")).toString().isEmpty()) { continue; }
 
     variantMap.insert("fornecedor", query.value(record.indexOf("fornecedor")));
     progressDialog->setValue(current++);
@@ -426,7 +426,7 @@ bool ImportaProdutos::cadastraFornecedores() {
   QSqlQuery query("SELECT DISTINCT(fornecedor) FROM [BASE$]", db);
 
   while (query.next()) {
-    if (query.value("fornecedor").toString().isEmpty()) continue;
+    if (query.value("fornecedor").toString().isEmpty()) { continue; }
 
     fornecedor = query.value("fornecedor").toString();
 
@@ -505,8 +505,8 @@ void ImportaProdutos::consistenciaDados() {
 
 void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &record) {
   Q_FOREACH (const auto &key, variantMap.keys()) {
-    if (key == "ncmEx") continue;
-    if (key == "multiplo") continue;
+    if (key == "ncmEx") { continue; }
+    if (key == "multiplo") { continue; }
 
     QVariant value = query.value(record.indexOf(key));
 

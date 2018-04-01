@@ -449,9 +449,9 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   modelVeiculo.insertRow(rowQuebrado);
 
   for (int col = 0; col < modelVeiculo.columnCount(); ++col) {
-    if (modelVeiculo.fieldIndex("id") == col) continue;
-    if (modelVeiculo.fieldIndex("created") == col) continue;
-    if (modelVeiculo.fieldIndex("lastUpdated") == col) continue;
+    if (modelVeiculo.fieldIndex("id") == col) { continue; }
+    if (modelVeiculo.fieldIndex("created") == col) { continue; }
+    if (modelVeiculo.fieldIndex("lastUpdated") == col) { continue; }
 
     if (not modelVeiculo.setData(rowQuebrado, col, modelVeiculo.data(row, col))) { return false; }
   }
@@ -484,23 +484,23 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   modelVendaProduto.insertRow(rowQuebrado2);
 
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
-    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) continue;
-    if (modelVendaProduto.fieldIndex("entregou") == col) continue;
-    if (modelVendaProduto.fieldIndex("idCompra") == col) continue;
-    if (modelVendaProduto.fieldIndex("idNFeSaida") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevCompra") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealCompra") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevConf") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealConf") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevFat") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealFat") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevColeta") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealColeta") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevReceb") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealReceb") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevEnt") == col) continue;
-    if (modelVendaProduto.fieldIndex("created") == col) continue;
-    if (modelVendaProduto.fieldIndex("lastUpdated") == col) continue;
+    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("entregou") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("idCompra") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("idNFeSaida") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevCompra") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealCompra") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevConf") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealConf") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevFat") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealFat") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevColeta") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealColeta") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevReceb") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealReceb") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevEnt") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("created") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("lastUpdated") == col) { continue; }
 
     if (not modelVendaProduto.setData(rowQuebrado2, col, modelVendaProduto.data(0, col))) { return false; }
   }
@@ -568,23 +568,23 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
 
   // copiar linha com quantidade quebrada
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
-    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) continue;
-    if (modelVendaProduto.fieldIndex("entregou") == col) continue;
-    if (modelVendaProduto.fieldIndex("idCompra") == col) continue;
-    if (modelVendaProduto.fieldIndex("idNFeSaida") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevCompra") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealCompra") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevConf") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealConf") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevFat") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealFat") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevColeta") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealColeta") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevReceb") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataRealReceb") == col) continue;
-    if (modelVendaProduto.fieldIndex("dataPrevEnt") == col) continue;
-    if (modelVendaProduto.fieldIndex("created") == col) continue;
-    if (modelVendaProduto.fieldIndex("lastUpdated") == col) continue;
+    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("entregou") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("idCompra") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("idNFeSaida") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevCompra") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealCompra") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevConf") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealConf") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevFat") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealFat") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevColeta") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealColeta") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevReceb") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataRealReceb") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("dataPrevEnt") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("created") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("lastUpdated") == col) { continue; }
 
     if (not modelVendaProduto.setData(newRow, col, modelVendaProduto.data(0, col))) { return false; }
   }
@@ -619,9 +619,9 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
   modelEstoque.insertRow(rowQuebrado);
 
   for (int col = 0; col < modelEstoque.columnCount(); ++col) {
-    if (modelEstoque.fieldIndex("idEstoque") == col) continue;
-    if (modelEstoque.fieldIndex("created") == col) continue;
-    if (modelEstoque.fieldIndex("lastUpdated") == col) continue;
+    if (modelEstoque.fieldIndex("idEstoque") == col) { continue; }
+    if (modelEstoque.fieldIndex("created") == col) { continue; }
+    if (modelEstoque.fieldIndex("lastUpdated") == col) { continue; }
 
     if (not modelEstoque.setData(rowQuebrado, col, modelEstoque.data(row, col))) { return false; }
   }

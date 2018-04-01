@@ -176,10 +176,10 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       modelConsumo.insertRow(newRow);
 
       for (int column = 0; column < modelConsumo.columnCount(); ++column) {
-        if (modelConsumo.fieldIndex("idConsumo") == column) continue;
-        if (modelConsumo.fieldIndex("idVendaProduto") == column) continue;
-        if (modelConsumo.fieldIndex("created") == column) continue;
-        if (modelConsumo.fieldIndex("lastUpdated") == column) continue;
+        if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
+        if (modelConsumo.fieldIndex("idVendaProduto") == column) { continue; }
+        if (modelConsumo.fieldIndex("created") == column) { continue; }
+        if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 
         if (not modelConsumo.setData(newRow, column, modelConsumo.data(0, column))) {
           emit errorSignal("Erro copiando dados do consumo: " + modelConsumo.lastError().text());

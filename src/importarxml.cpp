@@ -266,14 +266,14 @@ bool ImportarXML::cadastrarProdutoEstoque() {
     double consumo = 0;
 
     for (int row2 = 0; row2 < modelConsumo.rowCount(); ++row2) {
-      if (modelConsumo.data(row2, "idEstoque").toInt() != modelEstoque.data(row, "idEstoque").toInt()) continue;
+      if (modelConsumo.data(row2, "idEstoque").toInt() != modelEstoque.data(row, "idEstoque").toInt()) { continue; }
 
       consumo += modelConsumo.data(row2, "quant").toDouble();
     }
 
     const double estoqueRestante = modelEstoque.data(row, "quant").toDouble() + consumo;
 
-    if (qFuzzyIsNull(estoqueRestante)) continue;
+    if (qFuzzyIsNull(estoqueRestante)) { continue; }
 
     query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
     query.bindValue(":idEstoque", modelEstoque.data(row, "idEstoque"));
@@ -343,9 +343,9 @@ bool ImportarXML::importar() {
     const FieldColors color = static_cast<FieldColors>(modelCompra.data(row, "quantUpd").toInt());
     const QString status = modelCompra.data(row, "status").toString();
 
-    if (idVendaProduto == 0) continue;
-    if (color == FieldColors::White) continue;
-    if (status != "EM FATURAMENTO") continue;
+    if (idVendaProduto == 0) { continue; }
+    if (color == FieldColors::White) { continue; }
+    if (status != "EM FATURAMENTO") { continue; }
 
     query.bindValue(":dataRealFat", dataReal);
     query.bindValue(":idVendaProduto", modelCompra.data(row, "idVendaProduto"));
@@ -437,7 +437,7 @@ bool ImportarXML::limparAssociacoes() {
     const QString status = modelCompra.data(row, "status").toString();
     const int color = modelCompra.data(row, "quantUpd").toInt();
 
-    if (status != "EM FATURAMENTO" and color == static_cast<int>(FieldColors::Green)) continue;
+    if (status != "EM FATURAMENTO" and color == static_cast<int>(FieldColors::Green)) { continue; }
 
     if (not modelCompra.setData(row, "quantUpd", static_cast<int>(FieldColors::White))) { return false; }
     if (not modelCompra.setData(row, "quantConsumida", 0)) { return false; }
@@ -843,10 +843,10 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
     const QString field = modelEstoque.record().fieldName(column);
     const int index = modelConsumo.fieldIndex(field);
 
-    if (index == -1) continue;
+    if (index == -1) { continue; }
 
-    if (modelEstoque.fieldIndex("created") == column) continue;
-    if (modelEstoque.fieldIndex("lastUpdated") == column) continue;
+    if (modelEstoque.fieldIndex("created") == column) { continue; }
+    if (modelEstoque.fieldIndex("lastUpdated") == column) { continue; }
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
@@ -951,7 +951,7 @@ bool ImportarXML::parear() {
 
     // fazer busca por quantidades iguais
     for (int rowCompra = 0, totalCompra = modelCompra.rowCount(); rowCompra < totalCompra; ++rowCompra) {
-      if (not produtoCompativel(rowCompra, codComercialEstoque)) continue;
+      if (not produtoCompativel(rowCompra, codComercialEstoque)) { continue; }
 
       const double quantCompra = modelCompra.data(rowCompra, "quant").toDouble();
 
@@ -962,10 +962,10 @@ bool ImportarXML::parear() {
     }
 
     // se o estoque foi associado passar para o proximo produto
-    if (qFuzzyCompare(quantConsumida, quantEstoque)) continue;
+    if (qFuzzyCompare(quantConsumida, quantEstoque)) { continue; }
 
     for (int rowCompra = 0, totalCompra = modelCompra.rowCount(); rowCompra < totalCompra; ++rowCompra) {
-      if (not produtoCompativel(rowCompra, codComercialEstoque)) continue;
+      if (not produtoCompativel(rowCompra, codComercialEstoque)) { continue; }
 
       associarItens(rowCompra, rowEstoque, quantConsumida);
     }

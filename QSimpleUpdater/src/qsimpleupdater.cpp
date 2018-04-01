@@ -263,9 +263,7 @@ void QSimpleUpdater::setApplicationVersion(const QString &version) {
 void QSimpleUpdater::setSilent(bool silent) {
   m_silent = silent;
 
-  if (m_silent) {
-    setShowNewestVersionMessage(false);
-  }
+  if (m_silent) { setShowNewestVersionMessage(false); }
 }
 
 /*!
@@ -325,9 +323,7 @@ void QSimpleUpdater::onCheckingFinished() {
   QPixmap _icon = qApp->windowIcon().pixmap(qApp->windowIcon().actualSize(QSize(96, 96)));
 
   // If the icon is invalid, use default icon
-  if (_icon.isNull()) {
-    _icon = QPixmap(":/icons/update.png");
-  }
+  if (_icon.isNull()) { _icon = QPixmap(":/icons/update.png"); }
 
   QMessageBox _message;
   _message.setIconPixmap(_icon);
@@ -341,9 +337,7 @@ void QSimpleUpdater::onCheckingFinished() {
     _message.setButtonText(QMessageBox::Yes, "Baixar");
     _message.setButtonText(QMessageBox::No, "Pular");
 
-    if (_message.exec() == QMessageBox::Yes) {
-      downloadLatestVersion();
-    }
+    if (_message.exec() == QMessageBox::Yes) { downloadLatestVersion(); }
   }
 
   // Tell user that he/she is up to date (only if necessary)
@@ -382,7 +376,7 @@ void QSimpleUpdater::checkDownloadedVersion(QNetworkReply *reply) {
     QStringList _installed = m_installed_version.split(".");
 
     for (int i = 0, size = qMin(_installed.size(), _download.size()); i < size; ++i) {
-      if (_download.at(i).toInt() == _installed.at(i).toInt()) continue;
+      if (_download.at(i).toInt() == _installed.at(i).toInt()) { continue; }
       if (_download.at(i).toInt() > _installed.at(i).toInt()) _new_update = true;
       if (_download.at(i).toInt() < _installed.at(i).toInt()) break;
     }
@@ -411,9 +405,7 @@ void QSimpleUpdater::checkDownloadedVersion(QNetworkReply *reply) {
 void QSimpleUpdater::processDownloadedChangelog(QNetworkReply *reply) {
   QString _reply = QString::fromUtf8(reply->readAll());
 
-  if (not _reply.isEmpty()) {
-    m_changelog = _reply;
-  }
+  if (not _reply.isEmpty()) { m_changelog = _reply; }
 
   emit checkingFinished();
 }

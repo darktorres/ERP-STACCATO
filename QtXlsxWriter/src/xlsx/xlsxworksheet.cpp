@@ -1184,9 +1184,7 @@ void WorksheetPrivate::saveXmlSheetData(QXmlStreamWriter &writer) const {
     // Write cell data if row contains filled cells
     if (cellTable.contains(row_num)) {
       for (int col_num = dimension.firstColumn(); col_num <= dimension.lastColumn(); col_num++) {
-        if (cellTable[row_num].contains(col_num)) {
-          saveXmlCellData(writer, row_num, col_num, cellTable[row_num][col_num]);
-        }
+        if (cellTable[row_num].contains(col_num)) { saveXmlCellData(writer, row_num, col_num, cellTable[row_num][col_num]); }
       }
     }
     writer.writeEndElement(); // row
@@ -1762,9 +1760,7 @@ void WorksheetPrivate::loadXmlSheetData(QXmlStreamReader &reader) {
           if (attributes.hasAttribute(QLatin1String("customHeight"))) {
             info->customHeight = attributes.value(QLatin1String("customHeight")) == QLatin1String("1");
             // Row height is only specified when customHeight is set
-            if (attributes.hasAttribute(QLatin1String("ht"))) {
-              info->height = attributes.value(QLatin1String("ht")).toString().toDouble();
-            }
+            if (attributes.hasAttribute(QLatin1String("ht"))) { info->height = attributes.value(QLatin1String("ht")).toString().toDouble(); }
           }
 
           // both "hidden" and "collapsed" default are false
@@ -1818,9 +1814,7 @@ void WorksheetPrivate::loadXmlSheetData(QXmlStreamReader &reader) {
             if (reader.name() == QLatin1String("f")) {
               CellFormula &formula = cell->d_func()->formula;
               formula.loadFromXml(reader);
-              if (formula.formulaType() == CellFormula::SharedType and not formula.formulaText().isEmpty()) {
-                sharedFormulaMap[formula.sharedIndex()] = formula;
-              }
+              if (formula.formulaType() == CellFormula::SharedType and not formula.formulaText().isEmpty()) { sharedFormulaMap[formula.sharedIndex()] = formula; }
             } else if (reader.name() == QLatin1String("v")) {
               QString value = reader.readElementText();
               if (cellType == Cell::SharedStringType) {
@@ -1840,16 +1834,12 @@ void WorksheetPrivate::loadXmlSheetData(QXmlStreamReader &reader) {
               while (not reader.atEnd() and not(reader.name() == QLatin1String("is") and reader.tokenType() == QXmlStreamReader::EndElement)) {
                 if (reader.readNextStartElement()) {
                   //:Todo, add rich text read support
-                  if (reader.name() == QLatin1String("t")) {
-                    cell->d_func()->value = reader.readElementText();
-                  }
+                  if (reader.name() == QLatin1String("t")) { cell->d_func()->value = reader.readElementText(); }
                 }
               }
             } else if (reader.name() == QLatin1String("extLst")) {
               // skip extLst element
-              while (not reader.atEnd() and not(reader.name() == QLatin1String("extLst") and reader.tokenType() == QXmlStreamReader::EndElement)) {
-                reader.readNextStartElement();
-              }
+              while (not reader.atEnd() and not(reader.name() == QLatin1String("extLst") and reader.tokenType() == QXmlStreamReader::EndElement)) { reader.readNextStartElement(); }
             }
           }
         }
@@ -1876,9 +1866,7 @@ void WorksheetPrivate::loadXmlColumnsInfo(QXmlStreamReader &reader) {
 
         // Flag indicating that the column width for the affected column(s) is different from the
         // default or has been manually set
-        if (colAttrs.hasAttribute(QLatin1String("customWidth"))) {
-          info->customWidth = colAttrs.value(QLatin1String("customWidth")) == QLatin1String("1");
-        }
+        if (colAttrs.hasAttribute(QLatin1String("customWidth"))) { info->customWidth = colAttrs.value(QLatin1String("customWidth")) == QLatin1String("1"); }
         // Note, node may have "width" without "customWidth"
         if (colAttrs.hasAttribute(QLatin1String("width"))) {
           double width = colAttrs.value(QLatin1String("width")).toString().toDouble();
@@ -1928,9 +1916,7 @@ void WorksheetPrivate::loadXmlDataValidations(QXmlStreamReader &reader) {
 
   while (not reader.atEnd() and not(reader.name() == QLatin1String("dataValidations") and reader.tokenType() == QXmlStreamReader::EndElement)) {
     reader.readNextStartElement();
-    if (reader.tokenType() == QXmlStreamReader::StartElement and reader.name() == QLatin1String("dataValidation")) {
-      dataValidationsList.append(DataValidation::loadFromXml(reader));
-    }
+    if (reader.tokenType() == QXmlStreamReader::StartElement and reader.name() == QLatin1String("dataValidation")) { dataValidationsList.append(DataValidation::loadFromXml(reader)); }
   }
 
   if (dataValidationsList.size() != count) qDebug("read data validation error");
@@ -2054,12 +2040,10 @@ QList<QSharedPointer<XlsxRowInfo>> WorksheetPrivate::getRowInfoList(int rowFirst
   int min_col = dimension.firstColumn() < 1 ? 1 : dimension.firstColumn();
 
   for (int row = rowFirst; row <= rowLast; ++row) {
-    if (checkDimensions(row, min_col, false, true)) continue;
+    if (checkDimensions(row, min_col, false, true)) { continue; }
 
     QSharedPointer<XlsxRowInfo> rowInfo;
-    if ((rowsInfo[row]).isNull()) {
-      rowsInfo[row] = QSharedPointer<XlsxRowInfo>(new XlsxRowInfo());
-    }
+    if ((rowsInfo[row]).isNull()) { rowsInfo[row] = QSharedPointer<XlsxRowInfo>(new XlsxRowInfo()); }
     rowInfoList.append(rowsInfo[row]);
   }
 
@@ -2103,9 +2087,7 @@ bool Worksheet::loadFromXmlFile(QIODevice *device) {
         d->drawing->setFilePath(path);
       } else if (reader.name() == QLatin1String("extLst")) {
         // Todo: add extLst support
-        while (not reader.atEnd() and not(reader.name() == QLatin1String("extLst") and reader.tokenType() == QXmlStreamReader::EndElement)) {
-          reader.readNextStartElement();
-        }
+        while (not reader.atEnd() and not(reader.name() == QLatin1String("extLst") and reader.tokenType() == QXmlStreamReader::EndElement)) { reader.readNextStartElement(); }
       }
     }
   }

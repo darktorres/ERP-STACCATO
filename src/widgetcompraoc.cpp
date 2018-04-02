@@ -187,6 +187,11 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
 
   const int idVendaProduto = modelProduto.data(row, "idVendaProduto").toInt();
 
+  if (idVendaProduto == 0) {
+    emit errorSignal("A linha não possui consumo associado!");
+    return false;
+  }
+
   QSqlQuery query1;
   query1.prepare("SELECT status FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
   query1.bindValue(":idVendaProduto", idVendaProduto);

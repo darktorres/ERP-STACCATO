@@ -1,7 +1,5 @@
-  TEMPLATE = subdirs
+TEMPLATE = subdirs
 
-  SUBDIRS = \
-            app \
-            tests
+SUBDIRS = lib app tests
 
-  test.depends = app
+CONFIG += ordered

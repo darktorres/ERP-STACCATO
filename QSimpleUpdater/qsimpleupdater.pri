@@ -31,8 +31,8 @@ INCLUDEPATH += $$PWD/src
 #}
 
 win32* {
-    gcc:LIBS += -L$$_PRO_FILE_PWD_/../OpenSSL-Win32 -llibeay32
-    msvc:LIBS += -L$$_PRO_FILE_PWD_/../OpenSSL-Win64/lib -llibeay32
+    gcc:LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-Win32 -llibeay32
+    msvc:LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-Win64/lib -llibeay32
 }
 
 RESOURCES += $$PWD/res/qsu_resources.qrc

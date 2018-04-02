@@ -19,6 +19,8 @@ bool Sql::updateVendaStatus(const QString &idVenda) {
 
   QSqlQuery query;
 
+  // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem
+
   if (not query.exec("UPDATE venda v, venda_has_produto vp SET v.status = vp.status "
                      "WHERE v.idVenda = vp.idVenda AND vp.status = 'DEVOLVIDO' AND v.status != 'CANCELADO' AND v.devolucao = false AND v.idVenda IN (" +
                      idVenda2 + ")")) {

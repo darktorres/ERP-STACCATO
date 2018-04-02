@@ -40,6 +40,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelVendaProduto.setHeaderData("status", "Status");
+  modelVendaProduto.setHeaderData("statusOriginal", "Status Original");
   modelVendaProduto.setHeaderData("fornecedor", "Fornecedor");
   modelVendaProduto.setHeaderData("idVenda", "Venda");
   modelVendaProduto.setHeaderData("produto", "Produto");

@@ -78,6 +78,7 @@ void Devolucao::setupTables() {
   if (not modelProdutos.select()) emit errorSignal("Erro lendo tabela venda_has_produto: " + modelProdutos.lastError().text());
 
   ui->tableProdutos->setModel(&modelProdutos);
+  ui->tableProdutos->hideColumn("statusOriginal");
   ui->tableProdutos->hideColumn("mostrarDesconto");
   ui->tableProdutos->hideColumn("reposicao");
   ui->tableProdutos->hideColumn("recebeu");
@@ -120,6 +121,7 @@ void Devolucao::setupTables() {
 
   modelDevolvidos.setHeaderData("selecionado", "");
   modelDevolvidos.setHeaderData("status", "Status");
+  modelDevolvidos.setHeaderData("statusOriginal", "Status Original");
   modelDevolvidos.setHeaderData("fornecedor", "Fornecedor");
   modelDevolvidos.setHeaderData("produto", "Produto");
   modelDevolvidos.setHeaderData("obs", "Obs.");

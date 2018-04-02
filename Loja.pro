@@ -21,6 +21,8 @@ QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
 CONFIG += c++1z
 
+message($$QMAKESPEC)
+
 win32-g++{
 QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
 QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
@@ -33,8 +35,6 @@ QMAKE_LFLAGS_RELEASE += -O0
 #QMAKE_CXXFLAGS_RELEASE  = -Ofast
 #QMAKE_LFLAGS_RELEASE += -O3
 }
-
-message($$QMAKESPEC)
 
 linux-g++{
     QMAKE_CC = ccache gcc

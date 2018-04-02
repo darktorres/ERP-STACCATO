@@ -1,21 +1,13 @@
 CONFIG += build_translations
 CONFIG += no_zint
 
-!contains(CONFIG, no_zint){
-    CONFIG += zint
-}
+!contains(CONFIG, no_zint): CONFIG += zint
 
 ZINT_PATH = $$PWD/3rdparty/zint-2.4.4
-contains(CONFIG,zint){
-    DEFINES += HAVE_ZINT
-}
+contains(CONFIG,zint): DEFINES += HAVE_ZINT
 
-greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += uitools
-}
-lessThan(QT_MAJOR_VERSION, 5){
-    CONFIG += uitools
-}
+greaterThan(QT_MAJOR_VERSION, 4): QT += uitools
+lessThan(QT_MAJOR_VERSION, 5): CONFIG += uitools
 
 CONFIG(release, debug|release){
     message(Release)

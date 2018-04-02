@@ -1,5 +1,7 @@
-TEMPLATE = subdirs
+  TEMPLATE = subdirs
 
-SUBDIRS = lib app tests
+  SUBDIRS = \
+            app \
+            tests
 
-CONFIG += ordered
+  test.depends = app

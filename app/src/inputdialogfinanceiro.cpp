@@ -363,7 +363,7 @@ void InputDialogFinanceiro::calcularTotal() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
+  for (const auto &item : list) total += modelPedidoFornecedor.data(item.row(), "preco").toDouble();
 
   ui->doubleSpinBoxTotal->setValue(total);
 
@@ -409,8 +409,8 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
     return false;
   }
 
-  if (tipo == Tipo::ConfirmarCompra) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra + " AND status = 'EM COMPRA'"); }
-  if (tipo == Tipo::Financeiro) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra); }
+  if (tipo == Tipo::ConfirmarCompra) modelPedidoFornecedor.setFilter("idCompra = " + idCompra + " AND status = 'EM COMPRA'");
+  if (tipo == Tipo::Financeiro) modelPedidoFornecedor.setFilter("idCompra = " + idCompra);
 
   if (not modelPedidoFornecedor.select()) {
     emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelPedidoFornecedor.lastError().text());
@@ -450,13 +450,13 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   representacao = query.value("representacao").toBool();
 
-  if (representacao) { ui->framePagamentos->hide(); }
+  if (representacao) ui->framePagamentos->hide();
 
   setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
 
   //
 
-  if (tipo == Tipo::ConfirmarCompra) { calcularTotal(); }
+  calcularTotal();
 
   return true;
 }

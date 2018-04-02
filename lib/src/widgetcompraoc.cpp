@@ -187,6 +187,11 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
 
   const int idVendaProduto = modelProduto.data(row, "idVendaProduto").toInt();
 
+  if (idVendaProduto == 0) {
+    emit errorSignal("Linha não possui venda associada!");
+    return false;
+  }
+
   QSqlQuery query1;
   query1.prepare("SELECT status FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
   query1.bindValue(":idVendaProduto", idVendaProduto);
@@ -215,7 +220,7 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
   }
 
   // TODO: juntar linhas sem consumo do mesmo tipo?
-
+  // TODO: se pedido_fornecedor estiver com status depois de 'estoque' voltar para estoque
   QSqlQuery query3;
   query3.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto");
   query3.bindValue(":idVendaProduto", idVendaProduto);

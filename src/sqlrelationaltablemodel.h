@@ -13,6 +13,7 @@ public:
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto data(const int row, const int column) const -> QVariant;
   auto data(const int row, const QString &column) const -> QVariant;
+  auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto supportedDropActions() const -> Qt::DropActions final;
   auto flags(const QModelIndex &index) const -> Qt::ItemFlags final;
 
@@ -21,6 +22,7 @@ signals:
 
 private:
   using QSqlRelationalTableModel::data;
+  using QSqlRelationalTableModel::match;
   using QSqlRelationalTableModel::setData;
   using QSqlRelationalTableModel::setHeaderData;
 

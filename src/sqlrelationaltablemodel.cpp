@@ -51,16 +51,10 @@ bool SqlRelationalTableModel::setData(const int row, const QString &column, cons
 
 bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(QSqlTableModel::fieldIndex(column), Qt::Horizontal, value); }
 
-Qt::ItemFlags SqlRelationalTableModel::flags(const QModelIndex &index) const { return QSqlRelationalTableModel::flags(index); }
-
 Qt::DropActions SqlRelationalTableModel::supportedDropActions() const { return Qt::MoveAction; }
 
-QString SqlRelationalTableModel::selectStatement() const {
-  QString stmt = QSqlRelationalTableModel::selectStatement();
+QString SqlRelationalTableModel::selectStatement() const { return QSqlRelationalTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
 
-  if (limit != 0) stmt.append(" LIMIT " + QString::number(50));
-
-  return stmt;
 QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
   return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, QSqlRelationalTableModel::fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
 }

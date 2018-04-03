@@ -54,11 +54,9 @@ void WidgetCompraDevolucao::setupTables() {
 
   modelVendaProduto.setFilter("0");
 
-  if (not modelVendaProduto.select()) emit errorSignal("Erro lendo tabela produtos pendentes: " + modelVendaProduto.lastError().text());
+  if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela produtos pendentes: " + modelVendaProduto.lastError().text()); }
 
   ui->table->setModel(&modelVendaProduto);
-
-  ui->table->sortByColumn("idVenda");
   ui->table->hideColumn("recebeu");
   ui->table->hideColumn("entregou");
   ui->table->hideColumn("selecionado");
@@ -90,6 +88,8 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+
+  ui->table->sortByColumn("idVenda");
   ui->table->resizeColumnsToContents();
 }
 
@@ -233,18 +233,18 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   emit transactionEnded();
 
-  if (not modelVendaProduto.select()) emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text());
+  if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text()); }
 
   emit informationSignal("Retornado para estoque!");
 }
 
-void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(bool checked) {
+void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool checked) {
   ui->pushButtonDevolucaoFornecedor->setEnabled(checked);
   ui->pushButtonRetornarEstoque->setEnabled(checked);
 
   modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status != 'DEVOLVIDO ESTOQUE' AND status != 'DEVOLVIDO FORN.'" : "(status = 'DEVOLVIDO ESTOQUE' OR status = 'DEVOLVIDO FORN.')"));
 
-  if (not modelVendaProduto.select()) emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text());
+  if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text()); }
 }
 
 void WidgetCompraDevolucao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

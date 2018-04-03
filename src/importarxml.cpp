@@ -64,6 +64,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
+  ui->tableEstoque->hideColumn("observacao");
   ui->tableEstoque->hideColumn("recebidoPor");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("idNFe");

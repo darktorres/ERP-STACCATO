@@ -46,12 +46,13 @@ void Devolucao::determinarIdDevolucao() {
   if (query.first()) {
     idDevolucao = query.value("id").toString();
   } else {
-    query.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
-    query.bindValue(":idVenda", idVenda + "D%");
+    QSqlQuery query2;
+    query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
+    query2.bindValue(":idVenda", idVenda + "D%");
 
-    if (not query.exec() or not query.first()) emit errorSignal("Erro determinando próximo id: " + query.lastError().text());
+    if (not query2.exec() or not query2.first()) { emit errorSignal("Erro determinando próximo id: " + query2.lastError().text()); }
 
-    idDevolucao = idVenda + "D" + query.value("number").toString();
+    idDevolucao = idVenda + "D" + query2.value("number").toString();
     createNewId = true;
   }
 }
@@ -226,7 +227,7 @@ void Devolucao::setupTables() {
 
   modelCliente.setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString());
 
-  if (not modelCliente.select()) emit errorSignal("Erro lendo tabela cliente: " + modelCliente.lastError().text());
+  if (not modelCliente.select()) { emit errorSignal("Erro lendo tabela cliente: " + modelCliente.lastError().text()); }
 
   // mapper
   mapperItem.setModel(&modelProdutos);
@@ -259,7 +260,7 @@ void Devolucao::calcPrecoItemTotal() { ui->doubleSpinBoxTotalItem->setValue(ui->
 void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
   const double quant = caixas * ui->doubleSpinBoxQuant->singleStep();
 
-  if (not qFuzzyCompare(ui->doubleSpinBoxQuant->value(), quant)) ui->doubleSpinBoxQuant->setValue(quant);
+  if (not qFuzzyCompare(ui->doubleSpinBoxQuant->value(), quant)) { ui->doubleSpinBoxQuant->setValue(quant); }
 
   calcPrecoItemTotal();
 }
@@ -267,7 +268,7 @@ void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 void Devolucao::on_doubleSpinBoxQuant_valueChanged(double) {
   const double caixas = qRound(ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep() * 100) / 100.;
 
-  if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) ui->doubleSpinBoxCaixas->setValue(caixas);
+  if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
 }
 
 void Devolucao::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant->setValue(ui->doubleSpinBoxCaixas->value() * ui->doubleSpinBoxQuant->singleStep()); }
@@ -542,12 +543,14 @@ bool Devolucao::devolverItem(const int currentRow) {
 }
 
 void Devolucao::limparCampos() {
-  ui->doubleSpinBoxPrecoUn->clear();
   ui->doubleSpinBoxCaixas->clear();
-  ui->doubleSpinBoxQuant->clear();
-  ui->lineEditUn->clear();
-  ui->doubleSpinBoxTotalItem->clear();
   ui->doubleSpinBoxCredito->clear();
+  ui->doubleSpinBoxPrecoUn->clear();
+  ui->doubleSpinBoxQuant->clear();
+  ui->doubleSpinBoxTotalItem->clear();
+  ui->lineEditUn->clear();
+
+  ui->tableProdutos->clearSelection();
 }
 
 void Devolucao::on_pushButtonDevolverItem_clicked() {

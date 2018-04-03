@@ -61,4 +61,6 @@ QString SqlRelationalTableModel::selectStatement() const {
   if (limit != 0) stmt.append(" LIMIT " + QString::number(50));
 
   return stmt;
+QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
+  return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, QSqlRelationalTableModel::fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
 }

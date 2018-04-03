@@ -614,7 +614,7 @@ bool ImportarXML::verificaExiste(const XML &xml) {
     return true;
   }
 
-  const auto list = modelNFe.match(modelNFe.index(0, modelNFe.fieldIndex("chaveAcesso")), Qt::DisplayRole, xml.chaveAcesso);
+  const auto list = modelNFe.match("chaveAcesso", xml.chaveAcesso);
 
   if (list.size() > 0) {
     emit errorSignal("Nota já cadastrada!");
@@ -702,7 +702,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
 }
 
 bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too big/complex
-  const auto list = modelEstoque.match(modelEstoque.index(0, modelEstoque.fieldIndex("codComercial")), Qt::DisplayRole, xml.codProd, -1, Qt::MatchFlags(Qt::MatchFixedString | Qt::MatchWrap));
+  const auto list = modelEstoque.match("codComercial", xml.codProd, -1, Qt::MatchFlags(Qt::MatchFixedString));
 
   for (const auto &item : list) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Produto é do mesmo lote da linha " + QString::number(item.row() + 1) + "?", QMessageBox::Yes | QMessageBox::No, nullptr);

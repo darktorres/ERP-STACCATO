@@ -442,10 +442,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) emit warningSignal("Peso maior que capacidade do veículo!");
 
   for (const auto &item : list) {
-    const int idVendaProduto = modelViewProdutos.data(item.row(), "idVendaProduto").toInt();
-
-    // REFAC: verificar se nao precisa usar 'matchExact'
-    const auto listMatch = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
+    const auto listMatch = modelTransp.match("idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"), Qt::MatchExactly);
 
     if (listMatch.size() > 0) {
       emit errorSignal("Item já inserido!");
@@ -569,9 +566,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   const int row = list.first().row();
 
-  const int idVendaProduto = modelViewProdutos.data(row, "idVendaProduto").toInt();
-
-  const auto list2 = modelTransp.match(modelTransp.index(0, modelTransp.fieldIndex("idVendaProduto")), Qt::DisplayRole, idVendaProduto);
+  const auto list2 = modelTransp.match("idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"), -1, Qt::MatchExactly);
 
   if (list2.size() > 0) {
     emit errorSignal("Item já inserido!");

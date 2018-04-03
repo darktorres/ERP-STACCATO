@@ -94,8 +94,7 @@ void Contas::preencher(const QModelIndex &index) {
 
     //
 
-    const QModelIndexList list =
-        modelPendentes.match(modelPendentes.index(0, modelPendentes.fieldIndex("tipo")), Qt::DisplayRole, modelPendentes.data(index.row(), "tipo").toString().left(1) + ". Taxa Cartão", -1);
+    const QModelIndexList list = modelPendentes.match("tipo", modelPendentes.data(index.row(), "tipo").toString().left(1) + ". Taxa Cartão", -1);
 
     for (const auto &indexMatch : list) {
       if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) { continue; }

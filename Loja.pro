@@ -4,36 +4,45 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network xml charts
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
 TARGET = Loja
 TEMPLATE = app
-
-DEFINES += QT_DEPRECATED_WARNINGS
-
 VERSION = 0.6
-QMAKE_TARGET_COMPANY = Staccato Revestimentos
-QMAKE_TARGET_PRODUCT = ERP
-QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
-QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
-CONFIG += c++1z
+include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
+include(QSimpleUpdater/qsimpleupdater.pri)
+include(LimeReport-1.4.51/limereport/limereport.pri)
+include(QDecimal/qdecimal.pri)
+
+QT *= core gui sql network xml charts
+
+greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
+
+DEFINES *= QT_DEPRECATED_WARNINGS
+
+CONFIG *= c++1z
 
 message($$QMAKESPEC)
 
+win32{
+    QMAKE_TARGET_COMPANY = Staccato Revestimentos
+    QMAKE_TARGET_PRODUCT = ERP
+    QMAKE_TARGET_DESCRIPTION = ERP da Staccato Revestimentos
+    QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
+
+    RC_ICONS = Staccato.ico
+}
+
 win32-g++{
-QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
-QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
+    QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
+    QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
 
-QMAKE_CXXFLAGS_DEBUG += -O0
-QMAKE_CXXFLAGS_RELEASE  = -O0
-QMAKE_LFLAGS_DEBUG += -O0
-QMAKE_LFLAGS_RELEASE += -O0
+    QMAKE_CXXFLAGS_DEBUG += -O0
+    QMAKE_CXXFLAGS_RELEASE  = -O0
+    QMAKE_LFLAGS_DEBUG += -O0
+    QMAKE_LFLAGS_RELEASE += -O0
 
-#QMAKE_CXXFLAGS_RELEASE  = -Ofast
-#QMAKE_LFLAGS_RELEASE += -O3
+    #QMAKE_CXXFLAGS_RELEASE  = -Ofast
+    #QMAKE_LFLAGS_RELEASE += -O3
 }
 
 linux-g++{
@@ -64,15 +73,6 @@ linux-clang{
 
 RESOURCES += \
     qrs/resources.qrc
-
-RC_ICONS = Staccato.ico
-
-CONFIG -= console
-
-include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
-include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.4.51/limereport/limereport.pri)
-include(QDecimal/qdecimal.pri)
 
 SOURCES += \
     src/acbr.cpp \

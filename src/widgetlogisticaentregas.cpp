@@ -92,7 +92,7 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setHeaderData("kg", "Kg.");
   modelCalendario.setHeaderData("idVenda", "Venda");
 
-  if (not modelCalendario.select()) emit errorSignal("Erro lendo tabela calendario: " + modelCalendario.lastError().text());
+  if (not modelCalendario.select()) { emit errorSignal("Erro lendo tabela calendario: " + modelCalendario.lastError().text()); }
 
   ui->tableCalendario->setModel(&modelCalendario);
   ui->tableCalendario->hideColumn("idVeiculo");
@@ -112,7 +112,7 @@ void WidgetLogisticaEntregas::setupTables() {
 
   modelCarga.setFilter("0");
 
-  if (not modelCarga.select()) emit errorSignal("Erro lendo tabela cargas: " + modelCarga.lastError().text());
+  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela cargas: " + modelCarga.lastError().text()); }
 
   ui->tableCarga->setModel(&modelCarga);
   ui->tableCarga->hideColumn("idEvento");
@@ -139,7 +139,7 @@ void WidgetLogisticaEntregas::setupTables() {
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
+  if (not modelProdutos.select()) { emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
 
   ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("idEvento");

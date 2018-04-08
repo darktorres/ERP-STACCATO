@@ -51,9 +51,7 @@ QScriptValue constructColor(QScriptContext *context, QScriptEngine *engine) {
 namespace LimeReport {
 
 ScriptEngineNode::~ScriptEngineNode() {
-  for (int i = 0; i < m_childs.count(); ++i) {
-    delete m_childs[i];
-  }
+  for (int i = 0; i < m_childs.count(); ++i) { delete m_childs[i]; }
 }
 
 ScriptEngineNode *ScriptEngineNode::addChild(const QString &name, const QString &description, ScriptEngineNode::NodeType type, const QIcon &icon) {
@@ -63,16 +61,12 @@ ScriptEngineNode *ScriptEngineNode::addChild(const QString &name, const QString 
 }
 
 int ScriptEngineNode::row() {
-  if (m_parent) {
-    return m_parent->m_childs.indexOf(const_cast<ScriptEngineNode *>(this));
-  }
+  if (m_parent) { return m_parent->m_childs.indexOf(const_cast<ScriptEngineNode *>(this)); }
   return 0;
 }
 
 void ScriptEngineNode::clear() {
-  for (int i = 0; i < m_childs.count(); ++i) {
-    delete m_childs[i];
-  }
+  for (int i = 0; i < m_childs.count(); ++i) { delete m_childs[i]; }
   m_childs.clear();
 }
 
@@ -314,9 +308,7 @@ ScriptEngineManager::~ScriptEngineManager() {
 
 bool ScriptEngineManager::isFunctionExists(const QString &functionName) const {
   for (ScriptFunctionDesc desc : m_functions) {
-    if (desc.name.compare(functionName, Qt::CaseInsensitive) == 0) {
-      return true;
-    }
+    if (desc.name.compare(functionName, Qt::CaseInsensitive) == 0) { return true; }
   }
   return false;
 }
@@ -324,17 +316,13 @@ bool ScriptEngineManager::isFunctionExists(const QString &functionName) const {
 void ScriptEngineManager::deleteFunction(const QString &functionsName) {
   QMutableListIterator<ScriptFunctionDesc> it(m_functions);
   while (it.hasNext()) {
-    if (it.next().name.compare(functionsName, Qt::CaseInsensitive) == 0) {
-      it.remove();
-    }
+    if (it.next().name.compare(functionsName, Qt::CaseInsensitive) == 0) { it.remove(); }
   }
 }
 
 bool ScriptEngineManager::containsFunction(const QString &functionName) {
   for (ScriptFunctionDesc funct : m_functions) {
-    if (funct.name.compare(functionName) == 0) {
-      return true;
-    }
+    if (funct.name.compare(functionName) == 0) { return true; }
   }
   return false;
 }
@@ -550,9 +538,7 @@ QVariant ScriptEngineManager::evaluateScript(const QString &script) {
       QString scriptBody = expandDataFields(scriptExtractor.bodyAt(0), EscapeSymbols, varValue, nullptr);
       scriptBody = expandUserVariables(scriptBody, FirstPass, EscapeSymbols, varValue);
       QScriptValue value = se->evaluate(scriptBody);
-      if (!se->hasUncaughtException()) {
-        return value.toVariant();
-      }
+      if (!se->hasUncaughtException()) { return value.toVariant(); }
     }
   }
   return QVariant();
@@ -767,9 +753,7 @@ QObject *ScriptEngineContext::createElement(const QString &collectionName, const
 
 int ScriptEngineContext::elementsCount(const QString &collectionName) {
 #ifdef HAVE_UI_LOADER
-  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) {
-    return m_dialogs.count();
-  };
+  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.count(); };
 #else
   Q_UNUSED(collectionName)
 #endif
@@ -778,9 +762,7 @@ int ScriptEngineContext::elementsCount(const QString &collectionName) {
 
 QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index) {
 #ifdef HAVE_UI_LOADER
-  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) {
-    return m_dialogs.at(index).data();
-  };
+  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.at(index).data(); };
 #else
   Q_UNUSED(collectionName)
   Q_UNUSED(index)
@@ -810,9 +792,7 @@ QDialog *ScriptEngineContext::findDialog(const QString &dialogName) {
 
 DialogDescriber *ScriptEngineContext::findDialogContainer(const QString &dialogName) {
   for (DialogDescriber::Ptr dialogCont : m_dialogs) {
-    if (dialogCont->name().compare(dialogName, Qt::CaseInsensitive) == 0) {
-      return dialogCont.data();
-    }
+    if (dialogCont->name().compare(dialogName, Qt::CaseInsensitive) == 0) { return dialogCont.data(); }
   }
   return nullptr;
 }

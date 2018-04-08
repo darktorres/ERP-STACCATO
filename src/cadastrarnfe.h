@@ -4,6 +4,7 @@
 #include <QDataWidgetMapper>
 #include <QSqlQuery>
 #include <QTextStream>
+#include <optional>
 
 #include "dialog.h"
 #include "sqlrelationaltablemodel.h"

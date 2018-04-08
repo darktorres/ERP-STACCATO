@@ -251,21 +251,21 @@ QScriptValue currencyUSBasedFormat(QScriptContext *pcontext, QScriptEngine *peng
 #endif
 QScriptValue dateFormat(QScriptContext *pcontext, QScriptEngine *pengine) {
   QVariant value = pcontext->argument(0).toVariant();
-  QString format = (pcontext->argumentCount() > 1) ? pcontext->argument(1).toString().toLatin1() : "dd.MM.yyyy";
+  QString format = (pcontext->argumentCount() > 1) ? pcontext->argument(1).toString() : "dd.MM.yyyy";
   QScriptValue res = pengine->newVariant(QLocale().toString(value.toDate(), format));
   return res;
 }
 
 QScriptValue timeFormat(QScriptContext *pcontext, QScriptEngine *pengine) {
   QVariant value = pcontext->argument(0).toVariant();
-  QString format = (pcontext->argumentCount() > 1) ? pcontext->argument(1).toString().toLatin1() : "hh:mm";
+  QString format = (pcontext->argumentCount() > 1) ? pcontext->argument(1).toString() : "hh:mm";
   QScriptValue res = pengine->newVariant(QLocale().toString(value.toTime(), format));
   return res;
 }
 
 QScriptValue dateTimeFormat(QScriptContext *pcontext, QScriptEngine *pengine) {
   QVariant value = pcontext->argument(0).toVariant();
-  QString format = (pcontext->argumentCount() > 1) ? pcontext->argument(1).toString().toLatin1() : "dd.MM.yyyy hh:mm";
+  QString format = (pcontext->argumentCount() > 1) ? pcontext->argument(1).toString() : "dd.MM.yyyy hh:mm";
   QScriptValue res = pengine->newVariant(QLocale().toString(value.toDateTime(), format));
   return res;
 }

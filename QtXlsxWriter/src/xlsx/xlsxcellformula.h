@@ -26,6 +26,7 @@
 #define QXLSX_XLSXCELLFORMULA_H
 
 #include "xlsxglobal.h"
+
 #include <QExplicitlySharedDataPointer>
 
 class QXmlStreamWriter;

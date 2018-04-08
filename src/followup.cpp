@@ -102,5 +102,5 @@ void FollowUp::setupTables() {
 }
 
 void FollowUp::on_dateFollowup_dateChanged(const QDate &date) {
-  if (ui->dateProxFollowup->date() < date) ui->dateProxFollowup->setDate(date);
+  if (ui->dateProxFollowup->date() < date) { ui->dateProxFollowup->setDate(date); }
 }

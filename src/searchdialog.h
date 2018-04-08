@@ -1,8 +1,6 @@
 #ifndef SEARCHDIALOG_H
 #define SEARCHDIALOG_H
 
-#include <QDataWidgetMapper>
-
 #include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 

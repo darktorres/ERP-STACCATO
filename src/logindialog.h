@@ -3,8 +3,6 @@
 
 #include "dialog.h"
 
-#include <QMap>
-
 namespace Ui {
 class LoginDialog;
 }

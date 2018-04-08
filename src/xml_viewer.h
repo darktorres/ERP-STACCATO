@@ -1,9 +1,9 @@
 #ifndef XML_VIEWER_H
 #define XML_VIEWER_H
 
-#include "dialog.h"
-
 #include <QStandardItemModel>
+
+#include "dialog.h"
 
 namespace Ui {
 class XML_Viewer;

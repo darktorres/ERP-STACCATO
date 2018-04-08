@@ -29,6 +29,7 @@
  ****************************************************************************/
 #include "lrbuttonlineeditor.h"
 #include "lrtextitempropertyeditor.h"
+
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QEvent>
@@ -78,16 +79,10 @@ bool ButtonLineEditor::eventFilter(QObject *target, QEvent *event) {
 
   if (target == m_buttonEdit) {
 
-    if (event->type() == QEvent::HoverEnter) {
-      m_overButton = true;
-    }
-    if (event->type() == QEvent::HoverLeave) {
-      m_overButton = false;
-    }
+    if (event->type() == QEvent::HoverEnter) { m_overButton = true; }
+    if (event->type() == QEvent::HoverLeave) { m_overButton = false; }
     if (event->type() == QEvent::FocusOut) {
-      if (static_cast<QFocusEvent *>(event)->reason() != Qt::MouseFocusReason) {
-        m_lineEdit->setFocus();
-      }
+      if (static_cast<QFocusEvent *>(event)->reason() != Qt::MouseFocusReason) { m_lineEdit->setFocus(); }
     }
     QSet<int> enterKeys;
     enterKeys.insert(Qt::Key_Enter);

@@ -70,6 +70,9 @@ linux-clang{
     #QMAKE_LFLAGS += -flto=thin
 }
 
+PRECOMPILED_HEADER = pch.h
+
+CONFIG   += precompile_header
 
 RESOURCES += \
     qrs/resources.qrc

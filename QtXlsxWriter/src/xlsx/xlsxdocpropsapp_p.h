@@ -38,6 +38,7 @@
 
 #include "xlsxabstractooxmlfile.h"
 #include "xlsxglobal.h"
+
 #include <QList>
 #include <QMap>
 #include <QPair>
@@ -66,5 +67,5 @@ private:
   QList<QPair<QString, int>> m_headingPairsList;
   QMap<QString, QString> m_properties;
 };
-}
+} // namespace QXlsx
 #endif // XLSXDOCPROPSAPP_H

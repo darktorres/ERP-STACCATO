@@ -3,7 +3,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <utility>
 
 #include "doubledelegate.h"
 #include "estoque.h"

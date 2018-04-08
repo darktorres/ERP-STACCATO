@@ -111,8 +111,8 @@ void ItemBox::setSearchDialog(SearchDialog *value) {
 void ItemBox::changeItem(const QVariant &value) {
   setValue(value);
 
-  if (registerDialog) registerDialog->close();
-  if (searchDialog) searchDialog->close();
+  if (registerDialog) { registerDialog->close(); }
+  if (searchDialog) { searchDialog->close(); }
 }
 
 void ItemBox::mouseDoubleClickEvent(QMouseEvent *event) {

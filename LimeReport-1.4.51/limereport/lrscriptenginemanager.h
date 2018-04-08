@@ -34,10 +34,10 @@
 #include <QDebug>
 #include <QFont>
 #include <QIcon>
+#include <QScriptEngine>
 #include <QScriptable>
 #include <QVector>
 #include <QtGlobal>
-#include <QtScript/QScriptEngine>
 
 #ifdef HAVE_UI_LOADER
 #include <QDialog>

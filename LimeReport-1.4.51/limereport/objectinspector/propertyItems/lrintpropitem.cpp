@@ -28,6 +28,7 @@
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
 #include "lrintpropitem.h"
+
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
 #include <limits>
@@ -65,9 +66,7 @@ void IntPropItem::setModelData(QWidget *propertyEditor, QAbstractItemModel *mode
   object()->setProperty(propertyName().toLatin1(), propertyValue());
   if (objects()) {
     for (QObject *item : *objects()) {
-      if (item->metaObject()->indexOfProperty(propertyName().toLatin1()) != -1) {
-        item->setProperty(propertyName().toLatin1(), propertyValue());
-      }
+      if (item->metaObject()->indexOfProperty(propertyName().toLatin1()) != -1) { item->setProperty(propertyName().toLatin1(), propertyValue()); }
     }
   }
 }

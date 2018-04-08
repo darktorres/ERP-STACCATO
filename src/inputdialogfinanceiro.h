@@ -1,11 +1,6 @@
 #ifndef INPUTDIALOGFINANCEIRO_H
 #define INPUTDIALOGFINANCEIRO_H
 
-#include <QComboBox>
-#include <QDateEdit>
-#include <QDoubleSpinBox>
-#include <QLineEdit>
-
 #include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 

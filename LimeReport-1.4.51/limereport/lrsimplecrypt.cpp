@@ -30,9 +30,9 @@
 #include "lrsimplecrypt.h"
 
 #if defined(LP64) || defined(_LP64) || defined(__LP64__)
-typedef unsigned int WORD; /* Should be 32-bit = 4 bytes        */
+typedef unsigned int LRWORD; /* Should be 32-bit = 4 bytes        */
 #else
-typedef unsigned long int WORD; /* Should be 32-bit = 4 bytes        */
+typedef unsigned long int LRWORD; /* Should be 32-bit = 4 bytes        */
 #endif
 
 const int w = 32; /* word size in bits                 */
@@ -43,13 +43,13 @@ const int t = 26; /* size of table S = 2*(r+1) words   */
 
 const char *passPhrase = "HjccbzHjlbyfCkjy";
 
-WORD P = 0xb7e15163, Q = 0x9e3779b9;
+LRWORD P = 0xb7e15163, Q = 0x9e3779b9;
 
 #define ROTL(x, y) (((x) << (y & (w - 1))) | ((x) >> (w - (y & (w - 1)))))
 #define ROTR(x, y) (((x) >> (y & (w - 1))) | ((x) << (w - (y & (w - 1)))))
 
 union WTB {
-  WORD word[2];
+  LRWORD word[2];
   char bytes[8];
 };
 
@@ -74,14 +74,14 @@ public:
 
 private:
   void RC5_SETUP(const char *K);
-  void RC5_ENCRYPT(WORD *pt, WORD *ct);
-  void RC5_DECRYPT(WORD *ct, WORD *pt);
-  WORD S[26];
+  void RC5_ENCRYPT(LRWORD *pt, LRWORD *ct);
+  void RC5_DECRYPT(LRWORD *ct, LRWORD *pt);
+  LRWORD S[26];
   bool m_prepared;
 };
 
 void ChipperPrivate::RC5_SETUP(const char *K) {
-  WORD i, j, k, u = w / 8, A, B, L[c];
+  LRWORD i, j, k, u = w / 8, A, B, L[c];
   for (i = b, L[c - 1] = 0; i != 0; i--) L[(i - 1) / u] = (L[(i - 1) / u] << 8) + K[i - 1];
   for (S[0] = P, i = 1; i < t; i++) S[i] = S[i - 1] + Q;
   for (A = B = i = j = k = 0; k < 3 * t; k++, i = (i + 1) % t, j = (j + 1) % c) { /* 3*t > 3*c */
@@ -91,8 +91,8 @@ void ChipperPrivate::RC5_SETUP(const char *K) {
   m_prepared = true;
 }
 
-void ChipperPrivate::RC5_ENCRYPT(WORD *pt, WORD *ct) {
-  WORD i, A = pt[0] + S[0], B = pt[1] + S[1];
+void ChipperPrivate::RC5_ENCRYPT(LRWORD *pt, LRWORD *ct) {
+  LRWORD i, A = pt[0] + S[0], B = pt[1] + S[1];
   for (i = 1; i <= r; i++) {
     A = ROTL(A ^ B, B) + S[2 * i];
     B = ROTL(B ^ A, A) + S[2 * i + 1];
@@ -101,8 +101,8 @@ void ChipperPrivate::RC5_ENCRYPT(WORD *pt, WORD *ct) {
   ct[1] = B;
 }
 
-void ChipperPrivate::RC5_DECRYPT(WORD *ct, WORD *pt) {
-  WORD i, B = ct[1], A = ct[0];
+void ChipperPrivate::RC5_DECRYPT(LRWORD *ct, LRWORD *pt) {
+  LRWORD i, B = ct[1], A = ct[0];
   for (i = r; i > 0; i--) {
     B = ROTR(B - S[2 * i + 1], A) ^ A;
     A = ROTR(A - S[2 * i], B) ^ B;
@@ -138,9 +138,7 @@ QByteArray Chipper::cryptString(QString value) {
     prior.word[0] = pt.word[0];
     prior.word[1] = pt.word[1];
 
-    for (int i = 0; i < 8; i++) {
-      result += ct.bytes[i];
-    }
+    for (int i = 0; i < 8; i++) { result += ct.bytes[i]; }
   }
   return result;
 }
@@ -169,9 +167,7 @@ QString Chipper::decryptByteArray(QByteArray value) {
     prior.word[0] = ct.word[0];
     prior.word[1] = ct.word[1];
 
-    for (int i = 0; i < 8; i++) {
-      result += ct.bytes[i];
-    }
+    for (int i = 0; i < 8; i++) { result += ct.bytes[i]; }
   }
   return QString(result);
 }

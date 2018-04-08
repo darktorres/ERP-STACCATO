@@ -36,11 +36,11 @@
 #include "qgraphicsitem.h"
 #include "serializators/lrstorageintf.h"
 #include "serializators/lrxmlreader.h"
-#include <QFrame>
 
 #include <QApplication>
 #include <QClipboard>
 #include <QDialog>
+#include <QFrame>
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
 #include <QMetaObject>
@@ -197,9 +197,7 @@ QString BaseDesignIntf::expandScripts(QString context, DataSourceManager *dataMa
 }
 
 void BaseDesignIntf::setupPainter(QPainter *painter) const {
-  if (!painter) {
-    return;
-  }
+  if (!painter) { return; }
   painter->setFont(m_font);
   painter->setPen(m_fontColor);
 }
@@ -266,9 +264,7 @@ void BaseDesignIntf::paint(QPainter *ppainter, const QStyleOptionGraphicsItem *o
   Q_UNUSED(widget);
   setupPainter(ppainter);
   drawBorder(ppainter, rect());
-  if (isSelected()) {
-    drawSelection(ppainter, rect());
-  }
+  if (isSelected()) { drawSelection(ppainter, rect()); }
   drawResizeZone(ppainter);
 }
 
@@ -425,21 +421,13 @@ int BaseDesignIntf::resizeHandleSize() const { return m_resizeHandleSize; }
 int BaseDesignIntf::resizeDirectionFlags(QPointF position) {
   int flags = Fixed;
 
-  if (possibleResizeDirectionFlags() & ResizeTop && m_topRect.contains(position)) {
-    flags |= ResizeTop;
-  }
+  if (possibleResizeDirectionFlags() & ResizeTop && m_topRect.contains(position)) { flags |= ResizeTop; }
 
-  if (possibleResizeDirectionFlags() & ResizeLeft && m_leftRect.contains(position)) {
-    flags |= ResizeLeft;
-  }
+  if (possibleResizeDirectionFlags() & ResizeLeft && m_leftRect.contains(position)) { flags |= ResizeLeft; }
 
-  if (possibleResizeDirectionFlags() & ResizeBottom && m_bottomRect.contains(position)) {
-    flags |= ResizeBottom;
-  }
+  if (possibleResizeDirectionFlags() & ResizeBottom && m_bottomRect.contains(position)) { flags |= ResizeBottom; }
 
-  if (possibleResizeDirectionFlags() & ResizeRight && m_rightRect.contains(position)) {
-    flags |= ResizeRight;
-  }
+  if (possibleResizeDirectionFlags() & ResizeRight && m_rightRect.contains(position)) { flags |= ResizeRight; }
 
   return flags;
 }
@@ -448,18 +436,10 @@ Qt::CursorShape BaseDesignIntf::getPossibleCursor(int cursorFlags) {
 
   if ((cursorFlags == Fixed) || (scene()->selectedItems().count() > 1)) return Qt::ArrowCursor;
 
-  if (((cursorFlags & ResizeRight) && (cursorFlags & ResizeTop)) || ((cursorFlags & ResizeLeft) && (cursorFlags & ResizeBottom))) {
-    return Qt::SizeBDiagCursor;
-  }
-  if (((cursorFlags & ResizeLeft) && (cursorFlags & ResizeTop)) || ((cursorFlags & ResizeRight) && (cursorFlags & ResizeBottom))) {
-    return Qt::SizeFDiagCursor;
-  }
-  if ((cursorFlags & ResizeLeft) || (cursorFlags & ResizeRight)) {
-    return Qt::SizeHorCursor;
-  }
-  if ((cursorFlags & ResizeBottom) || (cursorFlags & ResizeTop)) {
-    return Qt::SizeVerCursor;
-  }
+  if (((cursorFlags & ResizeRight) && (cursorFlags & ResizeTop)) || ((cursorFlags & ResizeLeft) && (cursorFlags & ResizeBottom))) { return Qt::SizeBDiagCursor; }
+  if (((cursorFlags & ResizeLeft) && (cursorFlags & ResizeTop)) || ((cursorFlags & ResizeRight) && (cursorFlags & ResizeBottom))) { return Qt::SizeFDiagCursor; }
+  if ((cursorFlags & ResizeLeft) || (cursorFlags & ResizeRight)) { return Qt::SizeHorCursor; }
+  if ((cursorFlags & ResizeBottom) || (cursorFlags & ResizeTop)) { return Qt::SizeVerCursor; }
 
   return Qt::ArrowCursor;
 }
@@ -568,9 +548,7 @@ ReportSettings *BaseDesignIntf::reportSettings() const { return m_reportSettings
 
 void BaseDesignIntf::setReportSettings(ReportSettings *reportSettings) {
   m_reportSettings = reportSettings;
-  for (BaseDesignIntf *child : childBaseItems()) {
-    child->setReportSettings(reportSettings);
-  }
+  for (BaseDesignIntf *child : childBaseItems()) { child->setReportSettings(reportSettings); }
 }
 
 QColor BaseDesignIntf::borderColor() const { return m_borderColor; }
@@ -634,27 +612,19 @@ void BaseDesignIntf::moveUp() {
 }
 
 void BaseDesignIntf::sizeRight() {
-  if ((m_possibleResizeDirectionFlags & ResizeLeft) || (m_possibleResizeDirectionFlags & ResizeRight)) {
-    setWidth(width() + page()->horizontalGridStep());
-  }
+  if ((m_possibleResizeDirectionFlags & ResizeLeft) || (m_possibleResizeDirectionFlags & ResizeRight)) { setWidth(width() + page()->horizontalGridStep()); }
 }
 
 void BaseDesignIntf::sizeLeft() {
-  if ((m_possibleResizeDirectionFlags & ResizeLeft) || (m_possibleResizeDirectionFlags & ResizeRight)) {
-    setWidth(width() - page()->horizontalGridStep());
-  }
+  if ((m_possibleResizeDirectionFlags & ResizeLeft) || (m_possibleResizeDirectionFlags & ResizeRight)) { setWidth(width() - page()->horizontalGridStep()); }
 }
 
 void BaseDesignIntf::sizeUp() {
-  if ((m_possibleResizeDirectionFlags & ResizeTop) || (m_possibleResizeDirectionFlags & ResizeBottom)) {
-    setHeight(height() - page()->verticalGridStep());
-  }
+  if ((m_possibleResizeDirectionFlags & ResizeTop) || (m_possibleResizeDirectionFlags & ResizeBottom)) { setHeight(height() - page()->verticalGridStep()); }
 }
 
 void BaseDesignIntf::sizeDown() {
-  if ((m_possibleResizeDirectionFlags & ResizeTop) || (m_possibleResizeDirectionFlags & ResizeBottom)) {
-    setHeight(height() + page()->verticalGridStep());
-  }
+  if ((m_possibleResizeDirectionFlags & ResizeTop) || (m_possibleResizeDirectionFlags & ResizeBottom)) { setHeight(height() + page()->verticalGridStep()); }
 }
 
 void BaseDesignIntf::setBorderLinesFlags(BorderLines flags) {
@@ -782,16 +752,12 @@ void BaseDesignIntf::initFlags() {
 void BaseDesignIntf::initMode(ItemMode mode) { Q_UNUSED(mode); }
 
 QVariant BaseDesignIntf::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
-  if (change == QGraphicsItem::ItemPositionHasChanged) {
-    updateSelectionMarker();
-  }
+  if (change == QGraphicsItem::ItemPositionHasChanged) { updateSelectionMarker(); }
   if (change == QGraphicsItem::ItemSelectedChange) {
     turnOnSelectionMarker(value.toBool());
     emit itemSelectedHasBeenChanged(this, value.toBool());
   }
-  if (change == QGraphicsItem::ItemParentHasChanged) {
-    parentChangedEvent(dynamic_cast<BaseDesignIntf *>(value.value<QGraphicsItem *>()));
-  }
+  if (change == QGraphicsItem::ItemParentHasChanged) { parentChangedEvent(dynamic_cast<BaseDesignIntf *>(value.value<QGraphicsItem *>())); }
 
   return QGraphicsItem::itemChange(change, value);
 }
@@ -807,9 +773,7 @@ void BaseDesignIntf::restoreLinks() {
   for (QObject *child : QObject::children()) {
 #endif
     BaseDesignIntf *childItem = dynamic_cast<BaseDesignIntf *>(child);
-    if (childItem) {
-      childItem->restoreLinks();
-    }
+    if (childItem) { childItem->restoreLinks(); }
   }
   restoreLinksEvent();
 }
@@ -906,9 +870,7 @@ void BaseDesignIntf::showEditorDialog() {
 }
 
 void BaseDesignIntf::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
-  if (event->button() == Qt::LeftButton && ((itemMode() & EditMode) || (itemMode() & DesignMode))) {
-    showEditorDialog();
-  }
+  if (event->button() == Qt::LeftButton && ((itemMode() & EditMode) || (itemMode() & DesignMode))) { showEditorDialog(); }
   QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
@@ -928,9 +890,7 @@ void BaseDesignIntf::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
   pasteAction->setEnabled(false);
   QClipboard *clipboard = QApplication::clipboard();
   ItemsReaderIntf::Ptr reader = StringXMLreader::create(clipboard->text());
-  if (reader->first() && reader->itemType() == "Object") {
-    pasteAction->setEnabled(true);
-  }
+  if (reader->first() && reader->itemType() == "Object") { pasteAction->setEnabled(true); }
   menu.addSeparator();
   QAction *brinToTopAction = menu.addAction(QIcon(":/report//images/bringToTop"), tr("Bring to top"));
   QAction *sendToBackAction = menu.addAction(QIcon(":/report//images/sendToBack"), tr("Send to back"));
@@ -1029,9 +989,7 @@ QObject *BaseDesignIntf::createElement(const QString & /*collectionName*/, const
       obj = LimeReport::DesignElementsFactory::instance().objectCreator(elementType)(this, this);
       connect(obj, SIGNAL(propertyChanged(QString, QVariant, QVariant)), page(), SLOT(slotItemPropertyChanged(QString, QVariant, QVariant)));
     }
-  } catch (ReportError error) {
-    qDebug() << error.what();
-  }
+  } catch (ReportError error) { qDebug() << error.what(); }
   return obj;
 }
 
@@ -1048,9 +1006,7 @@ void BaseDesignIntf::collectionLoadFinished(const QString &collectionName) {
       for (QObject *obj : QObject::children()) {
 #endif
         BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(obj);
-        if (item) {
-          page()->registerItem(item);
-        }
+        if (item) { page()->registerItem(item); }
       }
     }
   }
@@ -1066,9 +1022,7 @@ BaseDesignIntf *BaseDesignIntf::cloneItem(ItemMode mode, QObject *owner, QGraphi
   for (QObject *child : QObject::children()) {
 #endif
     BaseDesignIntf *childItem = dynamic_cast<BaseDesignIntf *>(child);
-    if (childItem) {
-      clone->childAddedEvent(childItem->cloneItem(mode, clone, clone));
-    }
+    if (childItem) { clone->childAddedEvent(childItem->cloneItem(mode, clone, clone)); }
   }
   return clone;
 }

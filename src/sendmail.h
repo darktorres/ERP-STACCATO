@@ -1,9 +1,9 @@
 #ifndef SENDMAIL_H
 #define SENDMAIL_H
 
-#include "dialog.h"
-
 #include <QProgressDialog>
+
+#include "dialog.h"
 
 namespace Ui {
 class SendMail;

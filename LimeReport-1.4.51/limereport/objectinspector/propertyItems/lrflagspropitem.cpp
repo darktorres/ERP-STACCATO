@@ -32,6 +32,7 @@
 #include "lrboolpropitem.h"
 #include "lrenumpropitem.h"
 #include "lrobjectitemmodel.h"
+
 #include <QApplication>
 #include <QIcon>
 #include <QImage>

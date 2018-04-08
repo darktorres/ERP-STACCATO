@@ -36,8 +36,8 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QSortFilterProxyModel>
+#include <QSqlQuery>
 #include <QVariant>
-#include <QtSql/QSqlQuery>
 
 #include "lrcallbackdatasourceintf.h"
 #include "lrcollection.h"

@@ -24,6 +24,7 @@
 ****************************************************************************/
 #include "xlsxcellrange.h"
 #include "xlsxcellreference.h"
+
 #include <QPoint>
 #include <QString>
 #include <QStringList>
@@ -53,8 +54,7 @@ CellRange::CellRange() : top(-1), left(-1), bottom(-2), right(-2) {}
 */
 CellRange::CellRange(int top, int left, int bottom, int right) : top(top), left(left), bottom(bottom), right(right) {}
 
-CellRange::CellRange(const CellReference &topLeft, const CellReference &bottomRight)
-    : top(topLeft.row()), left(topLeft.column()), bottom(bottomRight.row()), right(bottomRight.column()) {}
+CellRange::CellRange(const CellReference &topLeft, const CellReference &bottomRight) : top(topLeft.row()), left(topLeft.column()), bottom(bottomRight.row()), right(bottomRight.column()) {}
 
 /*!
     \overload

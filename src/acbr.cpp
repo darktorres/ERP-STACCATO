@@ -113,7 +113,7 @@ bool ACBr::abrirPdf(const QString &resposta) {
 }
 
 std::optional<QString> ACBr::enviarComando(const QString &comando) {
-  if (socket->state() != QTcpSocket::ConnectedState) {
+  if (socket.state() != QTcpSocket::ConnectedState) {
     const auto servidor = UserSession::getSetting("User/servidorACBr");
     const auto ip = UserSession::getSetting("User/portaACBr");
 
@@ -122,20 +122,20 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
       return {};
     }
 
-    socket->connectToHost(servidor.value().toString(), ip.value().toByteArray().toUShort());
+    socket.connectToHost(servidor.value().toString(), ip.value().toByteArray().toUShort());
 
-    if (not socket->waitForConnected(5000)) {
-      QMessageBox::critical(nullptr, "Erro!", "Não foi possível conectar ao ACBr: " + socket->errorString());
+    if (not socket.waitForConnected(5000)) {
+      QMessageBox::critical(nullptr, "Erro!", "Não foi possível conectar ao ACBr: " + socket.errorString());
       return {};
     }
 
-    socket->waitForReadyRead();
+    socket.waitForReadyRead();
 
-    socket->readAll(); // lendo mensagem de boas vindas
+    socket.readAll(); // lendo mensagem de boas vindas
   }
 
-  socket->write(comando.toUtf8() + "\r\n.\r\n");
-  socket->waitForBytesWritten();
+  socket.write(comando.toUtf8() + "\r\n.\r\n");
+  socket.waitForBytesWritten();
 
   auto *progressDialog = new QProgressDialog(nullptr);
   progressDialog->reset();
@@ -147,11 +147,11 @@ std::optional<QString> ACBr::enviarComando(const QString &comando) {
   progressDialog->setMinimum(0);
   progressDialog->show();
 
-  connect(socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
+  connect(&socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
 
   while (not progressDialog->wasCanceled()) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
 
-  const QString resposta = QString(socket->readAll()).remove("\u0003");
+  const QString resposta = QString(socket.readAll()).remove("\u0003");
 
   if (resposta.isEmpty()) {
     QMessageBox::critical(nullptr, "Erro!", "Não obteve resposta do ACBr!");

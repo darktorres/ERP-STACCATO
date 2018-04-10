@@ -227,7 +227,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   [=]() {
     if (representacao) { return; }
 
-    if (not modelFluxoCaixa.select()) emit errorSignal("Erro lendo tabela: " + modelFluxoCaixa.lastError().text());
+    if (not modelFluxoCaixa.select()) { emit errorSignal("Erro lendo tabela: " + modelFluxoCaixa.lastError().text()); }
 
     if (tipo == Tipo::Financeiro) {
       for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
@@ -364,7 +364,7 @@ void InputDialogFinanceiro::calcularTotal() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &item : list) total += modelPedidoFornecedor.data(item.row(), "preco").toDouble();
+  for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
 
   ui->doubleSpinBoxTotal->setValue(total);
 

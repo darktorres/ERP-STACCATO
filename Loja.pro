@@ -32,48 +32,50 @@ win32{
     RC_ICONS = Staccato.ico
 }
 
+QMAKE_CXXFLAGS_DEBUG *= -O0
+QMAKE_CXXFLAGS_RELEASE  *= -O0
+QMAKE_LFLAGS_DEBUG *= -O0
+QMAKE_LFLAGS_RELEASE *= -O0
+
+#QMAKE_CXXFLAGS_RELEASE  = -Ofast
+#QMAKE_LFLAGS_RELEASE *= -O3
+
 win32-g++{
-    QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
-    QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
+    PRECOMPILED_HEADER = pch.h
 
-    QMAKE_CXXFLAGS_DEBUG += -O0
-    QMAKE_CXXFLAGS_RELEASE  += -O0
-    QMAKE_LFLAGS_DEBUG += -O0
-    QMAKE_LFLAGS_RELEASE += -O0
+    CONFIG   *= precompile_header
+}
 
-    #QMAKE_CXXFLAGS_RELEASE  = -Ofast
-    #QMAKE_LFLAGS_RELEASE += -O3
+*-g++{
+    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
+    QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
+}
+
+*-clang{
+    QMAKE_CXXFLAGS *= -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
+    QMAKE_CXXFLAGS *= -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
+    QMAKE_CXXFLAGS *= -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
+    QMAKE_CXXFLAGS *= -Wno-shadow -Wno-shadow-field
 }
 
 linux-g++{
-    QMAKE_CC = ccache gcc
-    QMAKE_CXX = ccache g++
+    QMAKE_CC = ccache gcc-7
+    QMAKE_CXX = ccache g++-7
 
-    QMAKE_LFLAGS += -fuse-ld=gold
+    QMAKE_LFLAGS *= -fuse-ld=gold
 
-    #QMAKE_CXXFLAGS += -flto
-    #QMAKE_LFLAGS += -flto -fuse-linker-plugin
+    #QMAKE_CXXFLAGS *= -flto
+    #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
     QMAKE_CC = ccache clang-7
     QMAKE_CXX = ccache clang++-7
 
-    QMAKE_LFLAGS += -fuse-ld=lld-7
+    QMAKE_LFLAGS *= -fuse-ld=lld-7
 
-    QMAKE_CXXFLAGS += -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
-    QMAKE_CXXFLAGS += -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
-    QMAKE_CXXFLAGS += -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
-    QMAKE_CXXFLAGS += -Wno-shadow -Wno-shadow-field
-
-    #QMAKE_CXXFLAGS += -flto=thin
-    #QMAKE_LFLAGS += -flto=thin
-}
-
-*-g++{
-    PRECOMPILED_HEADER = pch.h
-
-    CONFIG   += precompile_header
+    #QMAKE_CXXFLAGS *= -flto=thin
+    #QMAKE_LFLAGS *= -flto=thin
 }
 
 RESOURCES += \

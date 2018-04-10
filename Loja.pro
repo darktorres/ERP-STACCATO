@@ -32,6 +32,10 @@ QMAKE_LFLAGS_RELEASE += -O0
 #QMAKE_LFLAGS_RELEASE += -O3
 
 *-g++{
+    PRECOMPILED_HEADER = pch.h
+
+    CONFIG   += precompile_header
+
     QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
     QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
 }

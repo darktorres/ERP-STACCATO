@@ -25,6 +25,3 @@ script:
   
 before_cache:
   - ccache --show-stats
-  
-after_cache:
-  - ccache --show-stats

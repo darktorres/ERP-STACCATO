@@ -3,7 +3,6 @@ compiler: gcc
 sudo: false
 dist: trusty
 cache: ccache
-# FIX: even though cache is being saved it's not used during compilation
 
 addons:
   apt:

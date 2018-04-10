@@ -1,19 +1,17 @@
-CONFIG += build_translations
-CONFIG += no_zint
+CONFIG *= build_translations
+CONFIG *= no_zint
 
-!contains(CONFIG, no_zint): CONFIG += zint
+!contains(CONFIG, no_zint): CONFIG *= zint
 
 ZINT_PATH = $$PWD/3rdparty/zint-2.4.4
-contains(CONFIG,zint): DEFINES += HAVE_ZINT
+contains(CONFIG,zint): DEFINES *= HAVE_ZINT
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += uitools
-lessThan(QT_MAJOR_VERSION, 5): CONFIG += uitools
+greaterThan(QT_MAJOR_VERSION, 4): QT *= uitools
+lessThan(QT_MAJOR_VERSION, 5): CONFIG *= uitools
 
 CONFIG(release, debug|release){
-    #message(Release)
     BUILD_TYPE = release
 }else{
-    #message(Debug)
     BUILD_TYPE = debug
 }
 
@@ -28,11 +26,9 @@ unix{
     }
     linux{
         !contains(QT_ARCH, x86_64){
-            #message("Compiling for 32bit system")
             ARCH_DIR       = $${OUT_PWD}/linux32
             ARCH_TYPE      = linux32
         }else{
-            #message("Compiling for 64bit system")
             ARCH_DIR       = $${OUT_PWD}/linux64
             ARCH_TYPE      = linux64
         }
@@ -57,28 +53,25 @@ LIMEREPORT_VERSION_MAJOR = 1
 LIMEREPORT_VERSION_MINOR = 4
 LIMEREPORT_VERSION_RELEASE = 51
 
-LIMEREPORT_VERSION = '\\"$${LIMEREPORT_VERSION_MAJOR}.$${LIMEREPORT_VERSION_MINOR}.$${LIMEREPORT_VERSION_RELEASE}\\"'
-DEFINES += LIMEREPORT_VERSION_STR=\"$${LIMEREPORT_VERSION}\"
-DEFINES += LIMEREPORT_VERSION=$${LIMEREPORT_VERSION}
+LIMEREPORT_VERSION = '$${LIMEREPORT_VERSION_MAJOR}.$${LIMEREPORT_VERSION_MINOR}.$${LIMEREPORT_VERSION_RELEASE}'
+DEFINES *= LIMEREPORT_VERSION_STR=\\\"$${LIMEREPORT_VERSION}\\\"
 
-QT += script xml sql
+QT *= script xml sql
 REPORT_PATH = $$PWD/limereport
 TRANSLATIONS_PATH = $$PWD/translations
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-    DEFINES+=HAVE_QT5
-    QT+= printsupport widgets
+    DEFINES *= HAVE_QT5
+    QT *= printsupport widgets
     contains(QT,uitools){
-        #message(uitools)
-        DEFINES += HAVE_UI_LOADER
+        DEFINES *= HAVE_UI_LOADER
     }
 }
 
 lessThan(QT_MAJOR_VERSION, 5){
-    DEFINES+=HAVE_QT4
+    DEFINES *= HAVE_QT4
     CONFIG(uitools){
-        #message(uitools)
-        DEFINES += HAVE_UI_LOADER
+        DEFINES *= HAVE_UI_LOADER
     }
 }
 

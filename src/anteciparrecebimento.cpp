@@ -128,7 +128,7 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("contraParte", "Contraparte");
   modelContaReceber.setHeaderData("statusFinanceiro", "Financeiro");
 
-  modelContaReceber.setFilter("(status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE AND dataPagamento > NOW()");
+  modelContaReceber.setFilter("(status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
 
   if (not modelContaReceber.select()) {
     emit errorSignal("Erro lendo tabela: " + modelContaReceber.lastError().text());
@@ -160,11 +160,11 @@ void AnteciparRecebimento::on_table_entered(const QModelIndex) { ui->table->resi
 
 void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &text) {
   modelContaReceber.setFilter("tipo LIKE '%" + ui->comboBox->currentText() + "%' AND idVenda LIKE '" + ui->comboBoxLoja->currentText() +
-                              "%' AND (status = 'PENDENTE' or status = 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE and dataPagamento > NOW()");
+                              "%' AND (status = 'PENDENTE' or status = 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
 
   if (text == "Cartão de crédito" or ui->comboBox->currentText() == "Cartão de débito") {
     modelContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Cartão de débito%' OR tipo LIKE '%Taxa Cartão%') AND representacao = FALSE AND idVenda LIKE '" +
-                                ui->comboBoxLoja->currentText() + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND desativado = FALSE and dataPagamento > NOW()");
+                                ui->comboBoxLoja->currentText() + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND desativado = FALSE");
   }
 
   if (not modelContaReceber.select()) {

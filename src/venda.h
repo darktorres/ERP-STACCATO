@@ -1,11 +1,6 @@
 #ifndef VENDA_H
 #define VENDA_H
 
-#include <QCheckBox>
-#include <QComboBox>
-#include <QDateEdit>
-#include <QDoubleSpinBox>
-
 #include "registerdialog.h"
 
 namespace Ui {

@@ -150,6 +150,7 @@ void Venda::setupTables() {
   }
 
   ui->tableProdutos->setModel(new SearchDialogProxyModel(&modelItem, this));
+  ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("statusOriginal");
   ui->tableProdutos->hideColumn("recebeu");
   ui->tableProdutos->hideColumn("entregou");

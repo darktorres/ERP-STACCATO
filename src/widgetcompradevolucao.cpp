@@ -57,6 +57,7 @@ void WidgetCompraDevolucao::setupTables() {
   if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela produtos pendentes: " + modelVendaProduto.lastError().text()); }
 
   ui->table->setModel(&modelVendaProduto);
+  ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("recebeu");
   ui->table->hideColumn("entregou");
   ui->table->hideColumn("selecionado");
@@ -242,7 +243,9 @@ void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool chec
   ui->pushButtonDevolucaoFornecedor->setEnabled(checked);
   ui->pushButtonRetornarEstoque->setEnabled(checked);
 
-  modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status != 'DEVOLVIDO ESTOQUE' AND status != 'DEVOLVIDO FORN.'" : "(status = 'DEVOLVIDO ESTOQUE' OR status = 'DEVOLVIDO FORN.')"));
+  //  modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status != 'DEVOLVIDO ESTOQUE' AND status != 'DEVOLVIDO FORN.'" : "(status = 'DEVOLVIDO ESTOQUE' OR status = 'DEVOLVIDO
+  //  FORN.')"));
+  modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
 
   if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text()); }
 }

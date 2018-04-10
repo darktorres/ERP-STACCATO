@@ -1,12 +1,7 @@
-#include <QDate>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QSqlError>
-#include <QStyleFactory>
-#include <QUrl>
-#include <cmath>
 
 #include "application.h"
 #include "cadastrocliente.h"

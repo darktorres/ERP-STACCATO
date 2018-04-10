@@ -21,7 +21,7 @@ void WidgetLogisticaCaminhao::setupTables() {
   modelCaminhao.setTable("view_caminhao");
   modelCaminhao.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelCaminhao.select()) emit errorSignal("Erro lendo tabela caminhâo: " + modelCaminhao.lastError().text());
+  if (not modelCaminhao.select()) { emit errorSignal("Erro lendo tabela caminhâo: " + modelCaminhao.lastError().text()); }
 
   ui->table->setModel(&modelCaminhao);
   ui->table->hideColumn("idVeiculo");
@@ -33,7 +33,7 @@ void WidgetLogisticaCaminhao::setupTables() {
 
   modelCarga.setFilter("0");
 
-  if (not modelCarga.select()) emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text());
+  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text()); }
 
   ui->tableCarga->setModel(&modelCarga);
   ui->tableCarga->hideColumn("idVeiculo");
@@ -41,7 +41,7 @@ void WidgetLogisticaCaminhao::setupTables() {
 }
 
 bool WidgetLogisticaCaminhao::updateTables() {
-  if (modelCaminhao.tableName().isEmpty()) setupTables();
+  if (modelCaminhao.tableName().isEmpty()) { setupTables(); }
 
   if (not modelCaminhao.select()) {
     emit errorSignal("Erro lendo tabela caminhão: " + modelCaminhao.lastError().text());
@@ -58,5 +58,5 @@ void WidgetLogisticaCaminhao::on_table_entered(const QModelIndex &) { ui->table-
 void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
   modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
 
-  if (not modelCarga.select()) emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text());
+  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text()); }
 }

@@ -521,13 +521,13 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
   }
 }
 
-void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled(bool checked) {
-  if (checked) ui->checkBoxSul->setChecked(false);
+void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled(const bool checked) {
+  if (checked) { ui->checkBoxSul->setChecked(false); }
   montaFiltro();
 }
 
-void WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled(bool checked) {
-  if (checked) ui->checkBoxEstoque->setChecked(false);
+void WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled(const bool checked) {
+  if (checked) { ui->checkBoxEstoque->setChecked(false); }
   montaFiltro();
 }
 
@@ -547,7 +547,7 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
 
   modelEstoque.setFilter(filtro);
 
-  if (not modelEstoque.select()) emit errorSignal("Erro: " + modelEstoque.lastError().text());
+  if (not modelEstoque.select()) { emit errorSignal("Erro: " + modelEstoque.lastError().text()); }
 }
 
 // TODO: 1poder marcar nota de entrada como cancelada (talvez direto na tela de nfe's e retirar dos fluxos os estoques?)

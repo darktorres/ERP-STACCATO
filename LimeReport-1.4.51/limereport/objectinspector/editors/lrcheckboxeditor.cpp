@@ -28,6 +28,7 @@
  *   GNU General Public License for more details.                          *
  ****************************************************************************/
 #include "lrcheckboxeditor.h"
+
 #include <QApplication>
 #include <QDebug>
 #include <QKeyEvent>
@@ -77,9 +78,7 @@ void CheckBoxEditor::mousePressEvent(QMouseEvent *) {
 
 void CheckBoxEditor::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Space) m_checkBox->setChecked(!m_checkBox->isChecked());
-  if ((event->key() == Qt::Key_Up) || (event->key() == Qt::Key_Down)) {
-    emit editingFinished();
-  }
+  if ((event->key() == Qt::Key_Up) || (event->key() == Qt::Key_Down)) { emit editingFinished(); }
   QWidget::keyPressEvent(event);
 }
 

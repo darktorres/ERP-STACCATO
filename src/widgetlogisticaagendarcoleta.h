@@ -1,8 +1,6 @@
 #ifndef WIDGETLOGISTICAAGENDARCOLETA_H
 #define WIDGETLOGISTICAAGENDARCOLETA_H
 
-#include <QStandardItemModel>
-
 #include "sqlrelationaltablemodel.h"
 #include "widget.h"
 
@@ -30,8 +28,8 @@ private:
   auto adicionarProduto(const QModelIndexList &list) -> bool;
   auto calcularPeso() -> void;
   auto montaFiltro() -> void;
-  auto on_checkBoxEstoque_toggled(bool checked) -> void;
-  auto on_checkBoxSul_toggled(bool checked) -> void;
+  auto on_checkBoxEstoque_toggled(const bool checked) -> void;
+  auto on_checkBoxSul_toggled(const bool checked) -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;
   auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;

@@ -23,6 +23,7 @@
 **
 ****************************************************************************/
 #include "xlsxcellreference.h"
+
 #include <QMap>
 #include <QRegularExpression>
 #include <QStringList>

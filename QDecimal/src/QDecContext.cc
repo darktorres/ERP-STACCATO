@@ -12,6 +12,7 @@
 #include "QDecContext.hh"
 // include <sstream>
 #include "QDecFwd.hh"
+
 #include <QByteArray>
 #include <QTextStream>
 #include <QtGlobal>

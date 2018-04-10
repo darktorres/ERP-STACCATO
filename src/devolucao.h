@@ -44,7 +44,6 @@ private:
   auto on_doubleSpinBoxTotalItem_valueChanged(double value) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
-  auto removerVinculoCompra(const int currentRow) -> bool;
   auto salvarCredito() -> bool;
   auto setupTables() -> void;
 };

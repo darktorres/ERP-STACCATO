@@ -20,14 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define SMTP_H
 
 #include <QAbstractSocket>
-#include <QByteArray>
-#include <QDebug>
-#include <QFile>
-#include <QFileInfo>
-#include <QMessageBox>
 #include <QSslSocket>
 #include <QString>
-#include <QTextStream>
 
 class Smtp final : public QObject {
   Q_OBJECT

@@ -1,7 +1,6 @@
 #ifndef HORIZONTALPROXYMODEL_H
 #define HORIZONTALPROXYMODEL_H
 
-#include <QAbstractProxyModel>
 #include <QIdentityProxyModel>
 
 #include "sqlrelationaltablemodel.h"

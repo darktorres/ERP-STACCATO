@@ -37,6 +37,7 @@
 //
 
 #include "xlsxformat.h"
+
 #include <QMap>
 #include <QSet>
 #include <QSharedData>
@@ -145,6 +146,6 @@ public:
 
   QMap<int, QVariant> properties;
 };
-}
+} // namespace QXlsx
 
 #endif // XLSXFORMAT_P_H

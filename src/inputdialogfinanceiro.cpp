@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QLineEdit>
 #include <QSqlError>
 #include <QSqlQuery>
 

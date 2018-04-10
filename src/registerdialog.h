@@ -12,7 +12,7 @@ class RegisterDialog : public Dialog {
 
 public:
   explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
-  ~RegisterDialog() = default;
+  ~RegisterDialog() override = default;
 
   auto marcarDirty() -> void;
   auto saveSlot() -> void;

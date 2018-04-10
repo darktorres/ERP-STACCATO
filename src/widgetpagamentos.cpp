@@ -154,7 +154,7 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   }());
 
   comboBoxPgt->insertItems(0, list);
-  if (creditoTotal > 0) comboBoxPgt->addItem("Conta Cliente");
+  if (creditoTotal > 0) { comboBoxPgt->addItem("Conta Cliente"); }
   frame->layout()->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listComboPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText(), creditoTotal); });
   listComboPgt << comboBoxPgt;
@@ -220,7 +220,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
   listComboParc.at(index)->clear();
 
-  for (int i = 0; i < parcelas; ++i) listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
+  for (int i = 0; i < parcelas; ++i) { listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
 
   listComboParc.at(index)->setEnabled(true);
 
@@ -246,7 +246,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   listComboParc.at(index)->clear();
 
   // NOTE: this emits montarFluxoCaixa
-  for (int i = 0; i < parcelas; ++i) listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
+  for (int i = 0; i < parcelas; ++i) { listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
 
   listComboParc.at(index)->setEnabled(true);
 
@@ -257,7 +257,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
 void WidgetPagamentos::resetarPagamentos() {
   for (auto item : widget()->children()) {
-    if (qobject_cast<QFrame *>(item)) delete item;
+    if (qobject_cast<QFrame *>(item)) { delete item; }
   }
 
   listCheckBoxRep.clear();

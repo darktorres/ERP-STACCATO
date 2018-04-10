@@ -29,6 +29,7 @@
  ****************************************************************************/
 #include "lrboolpropitem.h"
 #include "lrobjectpropitem.h"
+
 #include <QApplication>
 #include <QBitmap>
 #include <QPainter>

@@ -23,6 +23,7 @@
 **
 ****************************************************************************/
 #include "xlsxsimpleooxmlfile_p.h"
+
 #include <QIODevice>
 
 namespace QXlsx {
@@ -41,4 +42,4 @@ bool SimpleOOXmlFile::loadFromXmlFile(QIODevice *device) {
   xmlData = device->readAll();
   return true;
 }
-}
+} // namespace QXlsx

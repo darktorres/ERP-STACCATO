@@ -39,6 +39,7 @@
 #include "xlsxabstractooxmlfile.h"
 #include "xlsxglobal.h"
 #include "xlsxrichstring.h"
+
 #include <QHash>
 #include <QSharedPointer>
 #include <QStringList>
@@ -88,5 +89,5 @@ private:
   QList<RichString> m_stringList;
   int m_stringCount;
 };
-}
+} // namespace QXlsx
 #endif // XLSXSHAREDSTRINGS_H

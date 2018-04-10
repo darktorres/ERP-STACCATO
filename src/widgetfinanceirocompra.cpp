@@ -33,7 +33,7 @@ void WidgetFinanceiroCompra::setupTables() {
   modelViewComprasFinanceiro.setTable("view_compras_financeiro");
   modelViewComprasFinanceiro.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelViewComprasFinanceiro.select()) emit errorSignal("Erro lendo tabela de compras: " + modelViewComprasFinanceiro.lastError().text());
+  if (not modelViewComprasFinanceiro.select()) { emit errorSignal("Erro lendo tabela de compras: " + modelViewComprasFinanceiro.lastError().text()); }
 
   ui->table->setModel(&modelViewComprasFinanceiro);
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
@@ -54,7 +54,7 @@ void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &text) {
 
   modelViewComprasFinanceiro.setFilter(filtroBusca);
 
-  if (not modelViewComprasFinanceiro.select()) emit errorSignal("Erro lendo tabela: " + modelViewComprasFinanceiro.lastError().text());
+  if (not modelViewComprasFinanceiro.select()) { emit errorSignal("Erro lendo tabela: " + modelViewComprasFinanceiro.lastError().text()); }
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

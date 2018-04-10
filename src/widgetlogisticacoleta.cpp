@@ -132,7 +132,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
   QSqlQuery query3;
   // salvar status na venda
   query3.prepare("UPDATE venda_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM "
-                 "estoque_has_consumo WHERE idEstoque = :idEstoque)");
+                 "estoque_has_consumo WHERE idEstoque = :idEstoque) AND status = 'EM COLETA'");
 
   QSqlQuery query4;
   query4.prepare("UPDATE veiculo_has_produto SET status = 'COLETADO' WHERE idEstoque = :idEstoque AND status = 'EM COLETA'");

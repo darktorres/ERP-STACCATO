@@ -522,7 +522,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraGerar::on_checkBoxMostrarSul_toggled(bool checked) {
   modelResumo.setFilter(checked ? "(idVenda LIKE '%CAMB%')" : "(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
 
-  if (not modelResumo.select()) emit errorSignal("Erro ao ler tabela: " + modelResumo.lastError().text());
+  if (not modelResumo.select()) { emit errorSignal("Erro ao ler tabela: " + modelResumo.lastError().text()); }
 }
 
 // TODO: avulso

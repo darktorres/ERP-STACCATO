@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  inline static QTcpSocket *socket = new QTcpSocket(nullptr);
+  inline static QTcpSocket socket{};
   // methods
   static auto abrirPdf(const QString &resposta) -> bool;
 };

@@ -37,7 +37,7 @@ win32-g++{
     QMAKE_CXXFLAGS += -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
 
     QMAKE_CXXFLAGS_DEBUG += -O0
-    QMAKE_CXXFLAGS_RELEASE  = -O0
+    QMAKE_CXXFLAGS_RELEASE  += -O0
     QMAKE_LFLAGS_DEBUG += -O0
     QMAKE_LFLAGS_RELEASE += -O0
 

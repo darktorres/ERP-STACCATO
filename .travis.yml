@@ -2,7 +2,10 @@ language: cpp
 compiler: gcc
 sudo: false
 dist: trusty
-cache: ccache
+
+cache:
+  - ccache
+  apt: true
 
 addons:
   apt:

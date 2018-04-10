@@ -48,8 +48,8 @@ QMAKE_LFLAGS_RELEASE += -O0
 }
 
 linux-g++{
-    QMAKE_CC = ccache gcc
-    QMAKE_CXX = ccache g++
+    QMAKE_CC = ccache gcc-7
+    QMAKE_CXX = ccache g++-7
 
     QMAKE_LFLAGS += -fuse-ld=gold
 

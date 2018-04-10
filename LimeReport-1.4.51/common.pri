@@ -10,10 +10,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += uitools
 lessThan(QT_MAJOR_VERSION, 5): CONFIG += uitools
 
 CONFIG(release, debug|release){
-    message(Release)
+    #message(Release)
     BUILD_TYPE = release
 }else{
-    message(Debug)
+    #message(Debug)
     BUILD_TYPE = debug
 }
 
@@ -28,11 +28,11 @@ unix{
     }
     linux{
         !contains(QT_ARCH, x86_64){
-            message("Compiling for 32bit system")
+            #message("Compiling for 32bit system")
             ARCH_DIR       = $${OUT_PWD}/linux32
             ARCH_TYPE      = linux32
         }else{
-            message("Compiling for 64bit system")
+            #message("Compiling for 64bit system")
             ARCH_DIR       = $${OUT_PWD}/linux64
             ARCH_TYPE      = linux64
         }
@@ -69,7 +69,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     DEFINES+=HAVE_QT5
     QT+= printsupport widgets
     contains(QT,uitools){
-        message(uitools)
+        #message(uitools)
         DEFINES += HAVE_UI_LOADER
     }
 }
@@ -77,7 +77,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 lessThan(QT_MAJOR_VERSION, 5){
     DEFINES+=HAVE_QT4
     CONFIG(uitools){
-        message(uitools)
+        #message(uitools)
         DEFINES += HAVE_UI_LOADER
     }
 }

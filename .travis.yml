@@ -1,6 +1,6 @@
 language: cpp
 compiler: gcc
-sudo: required
+sudo: false
 dist: trusty
 cache: ccache
 

@@ -2,9 +2,8 @@ language: cpp
 compiler: gcc
 sudo: false
 dist: trusty
-
-cache:
-  apt: true
+cache: ccache
+# FIX: even though cache is being saved it's not used during compilation
 
 addons:
   apt:
@@ -23,3 +22,9 @@ script:
   - source /opt/qt510/bin/qt510-env.sh
   - /opt/qt510/bin/qmake Loja.pro
   - make -j4
+  
+before_cache:
+  - ccache --show-stats
+  
+after_cache:
+  - ccache --show-stats

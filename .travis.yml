@@ -4,7 +4,6 @@ sudo: false
 dist: trusty
 
 cache:
-  - ccache
   apt: true
 
 addons:

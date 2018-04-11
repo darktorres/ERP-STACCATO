@@ -11,7 +11,7 @@
 #include "ui_cadastrarnfe.h"
 #include "usersession.h"
 
-CadastrarNFe::CadastrarNFe(const QString &idVenda, QWidget *parent) : Dialog(parent), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
+CadastrarNFe::CadastrarNFe(const QString &idVenda, const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -348,37 +348,55 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
     return false;
   }
 
-  QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
+  if (tipo == Tipo::Futura) {
+    QSqlQuery query;
+    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto");
 
-  QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      query.bindValue(":idNFeFutura", idNFe);
+      query.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
 
-  QSqlQuery query3;
-  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
-
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
-
-    if (not query1.exec()) {
-      emit errorSignal("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text());
-      return false;
+      if (not query.exec()) {
+        emit errorSignal("Erro salvando NFe nos produtos: " + query.lastError().text());
+        return false;
+      }
     }
+  }
 
-    query2.bindValue(":idNFeSaida", idNFe);
-    query2.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+  if (tipo == Tipo::Normal) {
+    // REFAC: use 'idVendaProduto IN'?
+    QSqlQuery query1;
+    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando NFe nos produtos: " + query2.lastError().text());
-      return false;
-    }
+    QSqlQuery query2;
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
 
-    query3.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
-    query3.bindValue(":idNFeSaida", idNFe);
+    QSqlQuery query3;
+    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro atualizando carga veiculo: " + query3.lastError().text());
-      return false;
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+
+      if (not query1.exec()) {
+        emit errorSignal("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text());
+        return false;
+      }
+
+      query2.bindValue(":idNFeSaida", idNFe);
+      query2.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+
+      if (not query2.exec()) {
+        emit errorSignal("Erro salvando NFe nos produtos: " + query2.lastError().text());
+        return false;
+      }
+
+      query3.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query3.bindValue(":idNFeSaida", idNFe);
+
+      if (not query3.exec()) {
+        emit errorSignal("Erro atualizando carga veiculo: " + query3.lastError().text());
+        return false;
+      }
     }
   }
 
@@ -471,10 +489,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   modelViewProdutoEstoque.setFilter(filter);
 
-  if (not modelViewProdutoEstoque.select()) {
-    emit errorSignal("Erro lendo tabela de itens da venda: " + modelViewProdutoEstoque.lastError().text());
-    return;
-  }
+  if (not modelViewProdutoEstoque.select()) { return; }
 
   ui->tableItens->resizeColumnsToContents();
 
@@ -588,7 +603,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   double valorProdutos = 0;
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble();
+  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) { valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble(); }
 
   const double frete = modelVenda.data(0, "frete").toDouble();
   const double totalVenda = modelVenda.data(0, "total").toDouble() - frete;
@@ -639,55 +654,59 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   //
 
-  QSqlQuery queryTransp;
-  queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
-                      "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
-                      "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE idVendaProduto = :idVendaProduto");
-  queryTransp.bindValue(":idVendaProduto", items.first());
+  // TODO: verificar na nota futura qual transportadora preencher
+  if (tipo == Tipo::Normal) {
+    QSqlQuery queryTransp;
+    queryTransp.prepare(
+        "SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
+        "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
+        "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE idVendaProduto = :idVendaProduto");
+    queryTransp.bindValue(":idVendaProduto", items.first());
 
-  if (not queryTransp.exec() or not queryTransp.first()) {
-    emit errorSignal("Erro buscando dados da transportadora: " + queryTransp.lastError().text());
-    return;
-  }
-
-  const QString endereco = queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " + queryTransp.value("complemento").toString() + " - " +
-                           queryTransp.value("bairro").toString();
-
-  ui->lineEditTransportadorCpfCnpj->setText(queryTransp.value("cnpj").toString());
-  ui->lineEditTransportadorRazaoSocial->setText(queryTransp.value("razaoSocial").toString());
-  ui->lineEditTransportadorInscEst->setText(queryTransp.value("inscEstadual").toString());
-  ui->lineEditTransportadorEndereco->setText(endereco);
-  ui->lineEditTransportadorUf->setText(queryTransp.value("uf").toString());
-  ui->lineEditTransportadorMunicipio->setText(queryTransp.value("cidade").toString());
-
-  ui->lineEditTransportadorPlaca->setText(queryTransp.value("placa").toString());
-  ui->lineEditTransportadorRntc->setText(queryTransp.value("antt").toString());
-  ui->lineEditTransportadorUfPlaca->setText(queryTransp.value("ufPlaca").toString());
-
-  // somar pesos para os campos do transporte
-  double caixas = 0;
-  double peso = 0;
-
-  QSqlQuery queryProduto;
-  queryProduto.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    caixas += modelViewProdutoEstoque.data(row, "caixas").toDouble();
-
-    queryProduto.bindValue(":idProduto", modelViewProdutoEstoque.data(row, "idProduto"));
-
-    if (not queryProduto.exec() or not queryProduto.first()) {
-      emit errorSignal("Erro buscando peso do produto: " + queryProduto.lastError().text());
+    if (not queryTransp.exec() or not queryTransp.first()) {
+      emit errorSignal("Erro buscando dados da transportadora: " + queryTransp.lastError().text());
       return;
     }
 
-    peso += queryProduto.value("kgcx").toDouble() * modelViewProdutoEstoque.data(row, "caixas").toInt();
-  }
+    const QString endereco = queryTransp.value("logradouro").toString() + " - " + queryTransp.value("numero").toString() + " - " + queryTransp.value("complemento").toString() + " - " +
+                             queryTransp.value("bairro").toString();
 
-  ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));
-  ui->lineEditVolumesEspecie->setText("Caixas");
-  ui->doubleSpinBoxVolumesPesoBruto->setValue(peso);
-  ui->doubleSpinBoxVolumesPesoLiq->setValue(peso);
+    ui->lineEditTransportadorCpfCnpj->setText(queryTransp.value("cnpj").toString());
+    ui->lineEditTransportadorRazaoSocial->setText(queryTransp.value("razaoSocial").toString());
+    ui->lineEditTransportadorInscEst->setText(queryTransp.value("inscEstadual").toString());
+    ui->lineEditTransportadorEndereco->setText(endereco);
+    ui->lineEditTransportadorUf->setText(queryTransp.value("uf").toString());
+    ui->lineEditTransportadorMunicipio->setText(queryTransp.value("cidade").toString());
+
+    ui->lineEditTransportadorPlaca->setText(queryTransp.value("placa").toString());
+    ui->lineEditTransportadorRntc->setText(queryTransp.value("antt").toString());
+    ui->lineEditTransportadorUfPlaca->setText(queryTransp.value("ufPlaca").toString());
+
+    // somar pesos para os campos do transporte
+    double caixas = 0;
+    double peso = 0;
+
+    QSqlQuery queryProduto;
+    queryProduto.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      caixas += modelViewProdutoEstoque.data(row, "caixas").toDouble();
+
+      queryProduto.bindValue(":idProduto", modelViewProdutoEstoque.data(row, "idProduto"));
+
+      if (not queryProduto.exec() or not queryProduto.first()) {
+        emit errorSignal("Erro buscando peso do produto: " + queryProduto.lastError().text());
+        return;
+      }
+
+      peso += queryProduto.value("kgcx").toDouble() * modelViewProdutoEstoque.data(row, "caixas").toInt();
+    }
+
+    ui->spinBoxVolumesQuant->setValue(static_cast<int>(caixas));
+    ui->lineEditVolumesEspecie->setText("Caixas");
+    ui->doubleSpinBoxVolumesPesoBruto->setValue(peso);
+    ui->doubleSpinBoxVolumesPesoLiq->setValue(peso);
+  }
 
   // CFOP
 

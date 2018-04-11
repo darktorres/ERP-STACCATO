@@ -90,7 +90,7 @@
      </property>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout_8">
-       <item row="6" column="0">
+       <item row="7" column="0">
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="0">
           <widget class="QLabel" name="label_2">
@@ -280,13 +280,6 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="pushButtonReagendarPedido">
-         <property name="text">
-          <string>Reagendar</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0">
         <widget class="QLineEdit" name="lineEditAviso">
          <property name="enabled">
@@ -418,6 +411,20 @@
          </property>
          <property name="readOnly">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="pushButtonReagendarPedido">
+         <property name="text">
+          <string>Reagendar</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QPushButton" name="pushButtonGerarNFeFutura">
+         <property name="text">
+          <string>Gerar NFe Futura</string>
          </property>
         </widget>
        </item>

@@ -6,6 +6,7 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+#include "cadastrarnfe.h"
 #include "doubledelegate.h"
 #include "financeiroproxymodel.h"
 #include "followup.h"
@@ -34,6 +35,7 @@ WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : 
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked);
   connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked);
   connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
+  connect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked);
   connect(ui->tableProdutos, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_entered);
   connect(ui->tableTransp2, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableTransp2_entered);
@@ -213,13 +215,16 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_entered(const QModelIndex &) 
 void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &index) {
   modelViewProdutos.setQuery(
       "SELECT `vp`.`idVendaProduto` AS `idVendaProduto`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` AS `status`, "
-      "`vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`produto` AS `produto`, e.idEstoque, e.lote, e.local, e.bloco, `vp`.`caixas` AS `caixas`, `vp`.`quant` AS `quant`, "
-      "`vp`.`un` AS `un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial`  AS `formComercial`, `ehc`.`idConsumo` AS `idConsumo` FROM "
-      "`mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON `vp`.`idVendaProduto` = `ehc`.`idVendaProduto` LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque WHERE "
-      "vp.idVenda = '" +
+      "`vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`idNFeFutura` AS `NFe Fut.`, `vp`.`produto` AS `produto`, e.idEstoque, e.lote, e.local, e.bloco, `vp`.`caixas` AS "
+      "`caixas`, `vp`.`quant` AS `quant`, `vp`.`un` AS `un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial`  AS `formComercial`, `ehc`.`idConsumo` AS "
+      "`idConsumo` FROM `mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON `vp`.`idVendaProduto` = `ehc`.`idVendaProduto` LEFT JOIN estoque e ON ehc.idEstoque = "
+      "e.idEstoque WHERE vp.idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`");
 
-  if (modelViewProdutos.lastError().isValid()) emit errorSignal("Erro buscando produtos: " + modelViewProdutos.lastError().text());
+  if (modelViewProdutos.lastError().isValid()) {
+    emit errorSignal("Erro buscando produtos: " + modelViewProdutos.lastError().text());
+    return;
+  }
 
   modelViewProdutos.setHeaderData("status", "Status");
   modelViewProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -797,6 +802,8 @@ bool WidgetLogisticaAgendarEntrega::quebrarConsumo(const int row, const double p
   if (not modelConsumo.setData(rowConsumo, "vCOFINS", vCOFINS2)) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
+
+  return true;
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?
@@ -884,3 +891,43 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
 }
 
 // TODO: 5refazer filtros do estoque (casos 'devolvido', 'cancelado', 'em entrega')
+
+void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
+  if (not ui->tableProdutos->model()) { return; }
+
+  const auto list = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) {
+    emit errorSignal("Nenhum item selecionado!");
+    return;
+  }
+
+  for (const auto &item : list) {
+    if (not modelViewProdutos.data(item.row(), "idNFeFutura").isNull()) {
+      emit errorSignal("Produto já possui nota futura!");
+      return;
+    }
+
+    if (modelViewProdutos.data(item.row(), "status").toString() != "ESTOQUE") {
+      emit errorSignal("Produto com status diferente de 'ESTOQUE'!");
+      return;
+    }
+  }
+
+  const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
+
+  if (idVenda.isEmpty()) {
+    emit errorSignal("Erro buscando 'Venda'!");
+    return;
+  }
+
+  QList<int> lista;
+
+  for (const auto &item : list) { lista << modelViewProdutos.data(item.row(), "idVendaProduto").toInt(); }
+
+  auto *nfe = new CadastrarNFe(idVenda, CadastrarNFe::Tipo::Futura, this);
+  nfe->setAttribute(Qt::WA_DeleteOnClose);
+  nfe->prepararNFe(lista);
+
+  nfe->show();
+}

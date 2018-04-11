@@ -17,12 +17,14 @@ class CadastrarNFe final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit CadastrarNFe(const QString &idVenda, QWidget *parent = nullptr);
+  enum class Tipo { Futura, Normal };
+  explicit CadastrarNFe(const QString &idVenda, const Tipo tipo, QWidget *parent = nullptr);
   ~CadastrarNFe();
   auto prepararNFe(const QList<int> &items) -> void;
 
 private:
   // attributes
+  const Tipo tipo;
   const QString idVenda;
   QDataWidgetMapper mapper;
   QSqlQuery queryCliente;

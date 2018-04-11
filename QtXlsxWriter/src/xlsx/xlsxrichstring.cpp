@@ -95,7 +95,7 @@ bool RichString::isNull() const { return d->fragmentTexts.size() == 0; }
  */
 bool RichString::isEmtpy() const {
   for (const auto &str : d->fragmentTexts) {
-    if (not str.isEmpty()) return false;
+    if (not str.isEmpty()) { return false; }
   }
 
   return true;
@@ -202,7 +202,7 @@ QByteArray RichStringPrivate::idKey() const {
     otherwise returns false.
  */
 bool operator==(const RichString &rs1, const RichString &rs2) {
-  if (rs1.fragmentCount() != rs2.fragmentCount()) return false;
+  if (rs1.fragmentCount() != rs2.fragmentCount()) { return false; }
 
   return rs1.d->idKey() == rs2.d->idKey();
 }
@@ -212,7 +212,7 @@ bool operator==(const RichString &rs1, const RichString &rs2) {
     otherwise returns false.
  */
 bool operator!=(const RichString &rs1, const RichString &rs2) {
-  if (rs1.fragmentCount() != rs2.fragmentCount()) return true;
+  if (rs1.fragmentCount() != rs2.fragmentCount()) { return true; }
 
   return rs1.d->idKey() != rs2.d->idKey();
 }

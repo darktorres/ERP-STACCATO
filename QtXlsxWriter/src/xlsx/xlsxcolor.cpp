@@ -18,7 +18,8 @@ XlsxColor::XlsxColor(const QString &theme, const QString &tint) : val(QStringLis
 XlsxColor::XlsxColor(int index) : val(index) {}
 
 bool XlsxColor::isRgbColor() const {
-  if (val.userType() == qMetaTypeId<QColor>() and val.value<QColor>().isValid()) return true;
+  if (val.userType() == qMetaTypeId<QColor>() and val.value<QColor>().isValid()) { return true; }
+
   return false;
 }
 

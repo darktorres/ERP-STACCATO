@@ -649,7 +649,7 @@ bool ScriptExtractor::isStartLexem(int &curPos, QChar value) {
       if (m_context[pos] == value) {
         ls = SignFound;
       } else {
-        if (m_context[pos] != ' ') return false;
+        if (m_context[pos] != ' ') { return false; }
       }
       break;
     case SignFound:
@@ -699,7 +699,7 @@ bool ScriptEngineContext::previewDialog(const QString &dialogName) {
 
 bool ScriptEngineContext::containsDialog(const QString &dialogName) {
   for (DialogDescriber::Ptr dialog : m_dialogs) {
-    if (dialog->name() == dialogName) return true;
+    if (dialog->name() == dialogName) { return true; }
   }
   return false;
 }

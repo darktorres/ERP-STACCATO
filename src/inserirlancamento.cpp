@@ -100,10 +100,7 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
 void InserirLancamento::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not modelContaPagamento.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados: " + modelContaPagamento.lastError().text());
-    return;
-  }
+  if (not modelContaPagamento.submitAll()) { return; }
 
   emit informationSignal("Lançamento salvo com sucesso!");
   close();

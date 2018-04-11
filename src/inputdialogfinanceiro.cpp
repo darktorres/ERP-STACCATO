@@ -41,7 +41,7 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
     ui->frameDataPreco->show();
-    ui->frameAdicionais->show();
+    ui->frameFrete->show();
     ui->checkBoxMarcarTodos->show();
     ui->framePgtTotal->show();
 
@@ -55,6 +55,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
   if (tipo == Tipo::Financeiro) {
     ui->frameDataPreco->show();
     ui->groupBoxFinanceiro->show();
+
+    ui->frameAdicionais->hide();
   }
 
   setConnections();
@@ -227,14 +229,11 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   [=]() {
     if (representacao) { return; }
 
-    if (not modelFluxoCaixa.select()) { emit errorSignal("Erro lendo tabela: " + modelFluxoCaixa.lastError().text()); }
+    if (not modelFluxoCaixa.select()) { return; }
 
     if (tipo == Tipo::Financeiro) {
       for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-        if (not modelFluxoCaixa.setData(row, "status", "SUBSTITUIDO")) {
-          emit errorSignal("Erro mudando status para 'SUBSTITUIDO'!");
-          return;
-        }
+        if (not modelFluxoCaixa.setData(row, "status", "SUBSTITUIDO")) { return; }
       }
     }
 
@@ -360,19 +359,17 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 void InputDialogFinanceiro::calcularTotal() {
   unsetConnections();
 
-  double total = 0;
+  [=] {
+    double total = 0;
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
+    for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
 
-  ui->doubleSpinBoxTotal->setValue(total);
+    ui->doubleSpinBoxTotal->setValue(total);
+  }();
 
   setConnections();
-
-  resetarPagamentos();
-
-  montarFluxoCaixa();
 }
 
 void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
@@ -390,11 +387,10 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   }
 
   calcularTotal();
+  resetarPagamentos();
 }
 
 void InputDialogFinanceiro::resetarPagamentos() {
-  // REFAC: redo this (clear lists)
-
   ui->doubleSpinBoxTotalPag->setValue(0);
   ui->doubleSpinBoxTotalPag->setMaximum(ui->doubleSpinBoxTotal->value());
 
@@ -417,8 +413,6 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
     emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelPedidoFornecedor.lastError().text());
     return false;
   }
-
-  //  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) ui->table->openPersistentEditor(row, "st");
 
   ui->table->resizeColumnsToContents();
 
@@ -457,37 +451,45 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   //
 
-  if (tipo == Tipo::ConfirmarCompra) { calcularTotal(); }
+  calcularTotal();
 
   return true;
 }
 
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  unsetConnections();
 
-  emit transactionStarted();
+  [=] {
+    if (not verifyFields()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+    emit transactionStarted();
 
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+
+    if (not cadastrar()) {
+      QSqlQuery("ROLLBACK").exec();
+      emit transactionEnded();
+      return;
+    }
+
+    if (not QSqlQuery("COMMIT").exec()) { return; }
+
     emit transactionEnded();
-    return;
-  }
 
-  if (not QSqlQuery("COMMIT").exec()) { return; }
+    emit informationSignal("Dados salvos com sucesso!");
 
-  emit transactionEnded();
+    QDialog::accept();
+    close();
+  }();
 
-  emit informationSignal("Dados salvos com sucesso!");
-
-  QDialog::accept();
-  close();
+  setConnections();
 }
 
 bool InputDialogFinanceiro::verifyFields() {
   // TODO: implementar outras verificacoes necessarias
+
+  if (ui->widgetPgts->isHidden()) { return true; }
 
   if (ui->table->selectionModel()->selectedRows().isEmpty()) {
     emit errorSignal("Nenhum item selecionado!");
@@ -519,36 +521,30 @@ bool InputDialogFinanceiro::verifyFields() {
 }
 
 bool InputDialogFinanceiro::cadastrar() {
-  if (tipo == Tipo::ConfirmarCompra) {
-    const auto list = ui->table->selectionModel()->selectedRows();
+  const auto list = ui->table->selectionModel()->selectedRows();
 
+  if (tipo == Tipo::ConfirmarCompra) {
     for (const auto &item : list) {
+      // REFAC: setData already emit errorSignal internally, just set a return false everywhere
       if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) { return false; }
     }
   }
 
   if (tipo == Tipo::Financeiro) {
-    if (not modelPedidoFornecedor.setData(0, "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) {
-      emit errorSignal("Erro salvando status na tabela: " + modelPedidoFornecedor.lastError().text());
-      return false;
+    for (const auto &item : list) {
+      if (not modelPedidoFornecedor.setData(item.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
     }
   }
 
-  if (not modelPedidoFornecedor.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela: " + modelPedidoFornecedor.lastError().text());
-    return false;
-  }
+  if (not modelPedidoFornecedor.submitAll()) { return false; }
 
-  if (not modelFluxoCaixa.submitAll()) {
-    emit errorSignal("Erro salvando dados do pagamento: " + modelFluxoCaixa.lastError().text());
-    return false;
-  }
+  if (not modelFluxoCaixa.submitAll()) { return false; }
 
   return true;
 }
 
 void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate &date) {
-  if (ui->dateEditProximo->date() < date) ui->dateEditProximo->setDate(date);
+  if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
 void InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled(const bool checked) { checked ? ui->table->selectAll() : ui->table->clearSelection(); }
@@ -564,6 +560,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxPgt_valueChanged() {
 }
 
 void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
+  ui->frameAdicionais->show();
   ui->framePgtTotal->show();
   ui->pushButtonAdicionarPagamento->show();
   ui->widgetPgts->show();
@@ -579,7 +576,7 @@ void InputDialogFinanceiro::on_pushButtonLimparPag_clicked() { resetarPagamentos
 
 void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(double) {
   calcularTotal();
-  montarFluxoCaixa();
+  resetarPagamentos();
 }
 
 void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
@@ -598,7 +595,7 @@ void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, c
 
   ui->widgetPgts->listComboParc.at(index)->clear();
 
-  for (int i = 0; i < parcelas; ++i) ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
+  for (int i = 0; i < parcelas; ++i) { ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
 
   ui->widgetPgts->listComboParc.at(index)->setEnabled(true);
   ui->widgetPgts->listDatePgt.at(index)->setEnabled(true);
@@ -640,7 +637,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &item : list) total += modelPedidoFornecedor.data(item.row(), "preco").toDouble();
+    for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
 
     const double aliquota = valueSt * 100 / total;
 
@@ -682,11 +679,11 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
       ui->dateEditPgtSt->show();
     }
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      if (not modelPedidoFornecedor.data(row, "selecionado").toBool()) { continue; }
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-      if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
-      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
+    for (const auto &item : list) {
+      if (not modelPedidoFornecedor.setData(item.row(), "st", text)) { return; }
+      if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
     }
   }();
 
@@ -701,6 +698,5 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 // TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo
 // que vem do fornecedor)
 // TODO: 3quando for representacao mostrar fluxo de comissao
-// TODO: ?colocar formas de pagamento 4 e 5
 // TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
 // TODO: gerar lancamentos da st por produto

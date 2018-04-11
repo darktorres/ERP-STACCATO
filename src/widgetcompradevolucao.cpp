@@ -107,16 +107,10 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
   }
 
   for (const auto &item : list) {
-    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) {
-      emit errorSignal("Erro marcando status: " + modelVendaProduto.lastError().text());
-      return;
-    }
+    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) { return; }
   }
 
-  if (not modelVendaProduto.submitAll()) {
-    emit errorSignal("Erro salvando status processado: " + modelVendaProduto.lastError().text());
-    return;
-  }
+  if (not modelVendaProduto.submitAll()) { return; }
 
   emit informationSignal("Retornado para fornecedor!");
 }
@@ -164,10 +158,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       modelConsumo.setTable("estoque_has_consumo");
       modelConsumo.setFilter("idVendaProduto = " + idVendaProduto);
 
-      if (not modelConsumo.select()) {
-        emit errorSignal("Erro buscando consumo estoque: " + modelConsumo.lastError().text());
-        return false;
-      }
+      if (not modelConsumo.select()) { return false; }
 
       if (modelConsumo.rowCount() == 0) {
         emit errorSignal("Não encontrou estoque!");
@@ -183,10 +174,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
         if (modelConsumo.fieldIndex("created") == column) { continue; }
         if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 
-        if (not modelConsumo.setData(newRow, column, modelConsumo.data(0, column))) {
-          emit errorSignal("Erro copiando dados do consumo: " + modelConsumo.lastError().text());
-          return false;
-        }
+        if (not modelConsumo.setData(newRow, column, modelConsumo.data(0, column))) { return false; }
       }
 
       // TODO: update other fields
@@ -196,17 +184,11 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) { return false; }
       if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
 
-      if (not modelConsumo.submitAll()) {
-        emit errorSignal("Erro salvando devolução de estoque: " + modelConsumo.lastError().text());
-        return false;
-      }
+      if (not modelConsumo.submitAll()) { return false; }
     }
   }
 
-  if (not modelVendaProduto.submitAll()) {
-    emit errorSignal("Erro salvando status processado: " + modelVendaProduto.lastError().text());
-    return false;
-  }
+  if (not modelVendaProduto.submitAll()) { return false; }
 
   return true;
 }

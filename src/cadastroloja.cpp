@@ -278,15 +278,9 @@ void CadastroLoja::on_pushButtonRemoverEnd_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    if (not setDataEnd("desativado", true)) {
-      emit errorSignal("Erro marcando desativado!");
-      return;
-    }
+    if (not setDataEnd("desativado", true)) { return; }
 
-    if (not modelEnd.submitAll()) {
-      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
-      return;
-    }
+    if (not modelEnd.submitAll()) { return; }
 
     novoEndereco();
   }
@@ -453,10 +447,7 @@ bool CadastroLoja::cadastrar() {
     }
   }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro: " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
@@ -478,10 +469,7 @@ bool CadastroLoja::cadastrar() {
     }
   }
 
-  if (not modelEnd.submitAll()) {
-    emit errorSignal("Erro: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.submitAll()) { return false; }
 
   //
 
@@ -489,10 +477,7 @@ bool CadastroLoja::cadastrar() {
     if (not modelConta.setData(row, primaryKey, primaryId)) { return false; }
   }
 
-  if (not modelConta.submitAll()) {
-    emit errorSignal("Erro: " + modelConta.lastError().text());
-    return false;
-  }
+  if (not modelConta.submitAll()) { return false; }
 
   //
 
@@ -510,10 +495,7 @@ bool CadastroLoja::newRegister() {
 
   modelConta.setFilter("0");
 
-  if (not modelConta.select()) {
-    emit errorSignal("Erro lendo tabela conta: " + modelConta.lastError().text());
-    return false;
-  }
+  if (not modelConta.select()) { return false; }
 
   return true;
 }
@@ -577,15 +559,9 @@ void CadastroLoja::on_pushButtonRemoverConta_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    if (not modelConta.setData(mapperConta.currentIndex(), "desativado", true)) {
-      emit errorSignal("Erro marcando desativado!");
-      return;
-    }
+    if (not modelConta.setData(mapperConta.currentIndex(), "desativado", true)) { return; }
 
-    if (not modelConta.submitAll()) {
-      emit errorSignal("Não foi possível remover este item: " + modelConta.lastError().text());
-      return;
-    }
+    if (not modelConta.submitAll()) { return; }
 
     novaConta();
   }
@@ -594,7 +570,7 @@ void CadastroLoja::on_pushButtonRemoverConta_clicked() {
 void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
   modelConta.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelConta.select()) emit errorSignal("Erro lendo tabela contas: " + modelConta.lastError().text());
+  if (not modelConta.select()) { emit errorSignal("Erro lendo tabela contas: " + modelConta.lastError().text()); }
 
   ui->tableEndereco->resizeColumnsToContents();
 }
@@ -609,10 +585,7 @@ bool CadastroLoja::adicionarPagamento() {
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
 
-  if (not modelPagamentos.submitAll()) {
-    emit errorSignal("Erro salvando dados pagamentos: " + modelPagamentos.lastError().text());
-    return false;
-  }
+  if (not modelPagamentos.submitAll()) { return false; }
 
   const int id = getLastInsertId().toInt();
 
@@ -628,17 +601,11 @@ bool CadastroLoja::adicionarPagamento() {
     if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
   }
 
-  if (not modelTaxas.submitAll()) {
-    emit errorSignal("Erro salvando dados taxas: " + modelTaxas.lastError().text());
-    return false;
-  }
+  if (not modelTaxas.submitAll()) { return false; }
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  if (not modelTaxas.select()) {
-    emit errorSignal("Erro lendo tabela taxas: " + modelTaxas.lastError().text());
-    return false;
-  }
+  if (not modelTaxas.select()) { return false; }
 
   return true;
 }
@@ -727,22 +694,13 @@ bool CadastroLoja::atualizarPagamento() {
     if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
   }
 
-  if (not modelPagamentos.submitAll()) {
-    emit errorSignal("Erro atualizando dados: " + modelPagamentos.lastError().text());
-    return false;
-  }
+  if (not modelPagamentos.submitAll()) { return false; }
 
-  if (not modelTaxas.submitAll()) {
-    emit errorSignal("Erro atualizando taxas: " + modelTaxas.lastError().text());
-    return false;
-  }
+  if (not modelTaxas.submitAll()) { return false; }
 
   modelTaxas.setFilter("0");
 
-  if (not modelTaxas.select()) {
-    emit errorSignal("Erro lendo tabela taxas: " + modelTaxas.lastError().text());
-    return false;
-  }
+  if (not modelTaxas.select()) { return false; }
 
   ui->lineEditPagamento->clear();
   ui->spinBoxParcelas->clear();
@@ -771,7 +729,7 @@ void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
 }
 
 void CadastroLoja::on_pushButtonAtualizarTaxas_clicked() {
-  if (not modelTaxas.submitAll()) emit errorSignal("Erro atualizando taxas: " + modelTaxas.lastError().text());
+  if (not modelTaxas.submitAll()) { return; }
 
   emit informationSignal("Taxas atualizadas!");
 }

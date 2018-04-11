@@ -71,17 +71,11 @@ QString InputDialogConfirmacao::getEntregou() const { return ui->lineEditEntrego
 
 bool InputDialogConfirmacao::cadastrar() {
   if (tipo == Tipo::Recebimento) {
-    if (not modelEstoque.submitAll()) {
-      emit errorSignal("Erro salvando dados na tabela: " + modelEstoque.lastError().text());
-      return false;
-    }
+    if (not modelEstoque.submitAll()) { return false; }
   }
 
   if (tipo == Tipo::Entrega) {
-    if (not modelVeiculo.submitAll()) {
-      emit errorSignal("Erro salvando dados na tabela: " + modelVeiculo.lastError().text());
-      return false;
-    }
+    if (not modelVeiculo.submitAll()) { return false; }
   }
 
   return true;
@@ -89,12 +83,12 @@ bool InputDialogConfirmacao::cadastrar() {
 
 void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
   if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega) and ui->lineEditRecebeu->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Faltou preencher quem recebeu!");
+    emit errorSignal("Faltou preencher quem recebeu!");
     return;
   }
 
   if (tipo == Tipo::Entrega and ui->lineEditEntregou->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Faltou preencher quem entregou!");
+    emit errorSignal("Faltou preencher quem entregou!");
     return;
   }
 
@@ -513,10 +507,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   choice == QMessageBox::Yes ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, unCaixa) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, unCaixa);
 
-  if (not modelVendaProduto.submitAll()) {
-    emit errorSignal("Erro salvando produto venda: " + modelVendaProduto.lastError().text());
-    return false;
-  }
+  if (not modelVendaProduto.submitAll()) { return false; }
 
   return true;
 }
@@ -544,19 +535,13 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 
   modelCliente.setFilter("idCliente = " + query.value("idCliente").toString());
 
-  if (not modelCliente.select()) {
-    emit errorSignal("Erro lendo tabela cliente: " + modelCliente.lastError().text());
-    return false;
-  }
+  if (not modelCliente.select()) { return false; }
 
   const double creditoAntigo = modelCliente.data(0, "credito").toDouble();
 
   if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) { return false; }
 
-  if (not modelCliente.submitAll()) {
-    emit errorSignal("Erro salvando crédito: " + modelCliente.lastError().text());
-    return false;
-  }
+  if (not modelCliente.submitAll()) { return false; }
 
   return true;
 }
@@ -635,10 +620,7 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
   if (not modelEstoque.setData(rowQuebrado, "status", "QUEBRADO")) { return false; }
   // TODO: recalcular proporcional dos valores
 
-  if (not modelEstoque.submitAll()) {
-    emit errorSignal("Erro dividindo linhas: " + modelEstoque.lastError().text());
-    return false;
-  }
+  if (not modelEstoque.submitAll()) { return false; }
 
   return true;
 }

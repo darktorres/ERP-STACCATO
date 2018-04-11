@@ -173,7 +173,7 @@ bool Chart::loadFromXmlFile(QIODevice *device) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("chart")) {
-        if (not d->loadXmlChart(reader)) return false;
+        if (not d->loadXmlChart(reader)) { return false; }
       }
     }
   }
@@ -187,7 +187,7 @@ bool ChartPrivate::loadXmlChart(QXmlStreamReader &reader) {
     reader.readNextStartElement();
     if (reader.tokenType() == QXmlStreamReader::StartElement) {
       if (reader.name() == QLatin1String("plotArea")) {
-        if (not loadXmlPlotArea(reader)) return false;
+        if (not loadXmlPlotArea(reader)) { return false; }
       } else if (reader.name() == QLatin1String("legend")) {
         //! Todo
       }
@@ -282,9 +282,7 @@ bool ChartPrivate::loadXmlSer(QXmlStreamReader &reader) {
           }
         }
       } else if (name == QLatin1String("extLst")) {
-        while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == name)) {
-          reader.readNextStartElement();
-        }
+        while (not reader.atEnd() and not(reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == name)) { reader.readNextStartElement(); }
       }
     }
   }
@@ -374,7 +372,7 @@ void ChartPrivate::saveXmlBarChart(QXmlStreamWriter &writer) const {
   // Note: Bar3D have 2~3 axes
   Q_ASSERT(axisList.size() == 2 or (axisList.size() == 3 and chartType == Chart::CT_Bar3D));
 
-  for (const auto & i : axisList) {
+  for (const auto &i : axisList) {
     writer.writeEmptyElement(QStringLiteral("c:axId"));
     writer.writeAttribute(QStringLiteral("val"), QString::number(i->axisId));
   }
@@ -399,7 +397,7 @@ void ChartPrivate::saveXmlLineChart(QXmlStreamWriter &writer) const {
 
   Q_ASSERT((axisList.size() == 2 or chartType == Chart::CT_Line) or (axisList.size() == 3 and chartType == Chart::CT_Line3D));
 
-  for (const auto & i : axisList) {
+  for (const auto &i : axisList) {
     writer.writeEmptyElement(QStringLiteral("c:axId"));
     writer.writeAttribute(QStringLiteral("val"), QString::number(i->axisId));
   }
@@ -423,7 +421,7 @@ void ChartPrivate::saveXmlScatterChart(QXmlStreamWriter &writer) const {
 
   Q_ASSERT(axisList.size() == 2);
 
-  for (const auto & i : axisList) {
+  for (const auto &i : axisList) {
     writer.writeEmptyElement(QStringLiteral("c:axId"));
     writer.writeAttribute(QStringLiteral("val"), QString::number(i->axisId));
   }
@@ -448,7 +446,7 @@ void ChartPrivate::saveXmlAreaChart(QXmlStreamWriter &writer) const {
   // Note: Area3D have 2~3 axes
   Q_ASSERT(axisList.size() == 2 or (axisList.size() == 3 and chartType == Chart::CT_Area3D));
 
-  for (const auto & i : axisList) {
+  for (const auto &i : axisList) {
     writer.writeEmptyElement(QStringLiteral("c:axId"));
     writer.writeAttribute(QStringLiteral("val"), QString::number(i->axisId));
   }
@@ -548,7 +546,7 @@ bool ChartPrivate::loadXmlAxis(QXmlStreamReader &reader) {
 }
 
 void ChartPrivate::saveXmlAxes(QXmlStreamWriter &writer) const {
-  for (const auto & i : axisList) {
+  for (const auto &i : axisList) {
     XlsxAxis *axis = i.data();
     QString name;
     switch (axis->type) {

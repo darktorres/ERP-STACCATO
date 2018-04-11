@@ -77,9 +77,9 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
 }
 
 bool RegisterDialog::setData(const QString &key, const QVariant &value) {
-  if (value.isNull() or (value.type() == QVariant::String and value.toString().isEmpty())) return true;
-  if (value.type() == QVariant::String and value.toString().remove(".").remove("/").remove("-").isEmpty()) return true;
-  if (value.type() == QVariant::Date and value.toString() == "1900-01-01") return true;
+  if (value.isNull() or (value.type() == QVariant::String and value.toString().isEmpty())) { return true; }
+  if (value.type() == QVariant::String and value.toString().remove(".").remove("/").remove("-").isEmpty()) { return true; }
+  if (value.type() == QVariant::Date and value.toString() == "1900-01-01") { return true; }
 
   const int row = currentRow != -1 ? currentRow : mapper.currentIndex();
 
@@ -125,8 +125,8 @@ void RegisterDialog::show() {
 }
 
 bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
-  if (not line->styleSheet().contains(requiredStyle())) return true;
-  if (not line->isVisible()) return true;
+  if (not line->styleSheet().contains(requiredStyle())) { return true; }
+  if (not line->isVisible()) { return true; }
 
   if ((line->text().isEmpty()) or (line->text() == "0,00") or (line->text() == "../-") or (line->text().size() < line->inputMask().remove(";").remove(">").remove("_").size()) or
       (line->text().size() < line->placeholderText().size() - 1)) {
@@ -150,7 +150,7 @@ bool RegisterDialog::confirmationMessage() {
   // NOTE: implement the better way
   // if isDirty
 
-  //  if (not isDirty) return true;
+  //  if (not isDirty) { return true; }
 
   //  QMessageBox msgBox;
   //  msgBox.setParent(this);
@@ -166,8 +166,8 @@ bool RegisterDialog::confirmationMessage() {
 
   //  const int escolha = msgBox.exec();
 
-  //  if (escolha == QMessageBox::Save) return save();
-  //  if (escolha == QMessageBox::Discard) return true;
+  //  if (escolha == QMessageBox::Save) { return save(); }
+  //  if (escolha == QMessageBox::Discard) { return true; }
   //  if (escolha == QMessageBox::Cancel) { return false; }
 
   return true;
@@ -235,10 +235,7 @@ void RegisterDialog::remove() {
   if (msgBox.exec() == QMessageBox::Yes) {
     if (not setData("desativado", true)) { return; }
 
-    if (not model.submitAll()) {
-      emit errorSignal("Não foi possível remover este item: " + model.lastError().text());
-      return;
-    }
+    if (not model.submitAll()) { return; }
 
     newRegister();
   }

@@ -393,10 +393,7 @@ void Orcamento::removeItem() {
   calcPrecoGlobalTotal();
 
   if (ui->lineEditOrcamento->text() != "Auto gerado") {
-    if (not modelItem.submitAll()) {
-      emit errorSignal("Erro salvando remoção: " + modelItem.lastError().text());
-      return;
-    }
+    if (not modelItem.submitAll()) { return; }
 
     save();
   }
@@ -974,10 +971,7 @@ bool Orcamento::cadastrar() {
 
   if (not savingProcedures()) { return false; }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro ao cadastrar: " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = ui->lineEditOrcamento->text();
 
@@ -986,10 +980,7 @@ bool Orcamento::cadastrar() {
     return false;
   }
 
-  if (not modelItem.submitAll()) {
-    emit errorSignal("Erro ao adicionar um item ao orçamento: " + modelItem.lastError().text());
-    return false;
-  }
+  if (not modelItem.submitAll()) { return false; }
 
   return true;
 }

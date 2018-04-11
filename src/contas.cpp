@@ -287,10 +287,7 @@ bool Contas::verifyFields() {
 void Contas::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not modelPendentes.submitAll()) {
-    emit errorSignal("Erro salvando dados: " + modelPendentes.lastError().text());
-    return;
-  }
+  if (not modelPendentes.submitAll()) { return; }
 
   close();
 }

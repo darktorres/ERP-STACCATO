@@ -270,10 +270,7 @@ bool CadastroProduto::cadastrar() {
     }
   }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 

@@ -46,10 +46,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
   if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) { return; }
   if (not modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) { return; }
 
-  if (not modelOrcamento.submitAll()) {
-    emit errorSignal("Erro cancelando orçamento: " + modelOrcamento.lastError().text());
-    return;
-  }
+  if (not modelOrcamento.submitAll()) { return; }
 
   // TODO: exibir mensagem de confirmacao
 

@@ -37,24 +37,24 @@
 namespace QXlsx {
 
 bool parseXsdBoolean(const QString &value, bool defaultValue) {
-  if (value == QLatin1String("1") or value == QLatin1String("true")) return true;
-  if (value == QLatin1String("0") or value == QLatin1String("false")) return false;
+  if (value == QLatin1String("1") or value == QLatin1String("true")) { return true; }
+  if (value == QLatin1String("0") or value == QLatin1String("false")) { return false; }
   return defaultValue;
 }
 
 QStringList splitPath(const QString &path) {
   int idx = path.lastIndexOf(QLatin1Char('/'));
-  if (idx == -1) return QStringList() << QStringLiteral(".") << path;
+  if (idx == -1) { return QStringList() << QStringLiteral(".") << path; }
 
   return QStringList() << path.left(idx) << path.mid(idx + 1);
 }
 
 /*
-*Return the .rel file path based on filePath
-*/
+ *Return the .rel file path based on filePath
+ */
 QString getRelFilePath(const QString &filePath) {
   int idx = filePath.lastIndexOf(QLatin1Char('/'));
-  if (idx == -1) return QString();
+  if (idx == -1) { return QString(); }
 
   return QString(filePath.left(idx) + QLatin1String("/_rels/") + filePath.mid(idx + 1) + QLatin1String(".rels"));
 }
@@ -122,8 +122,8 @@ QString createSafeSheetName(const QString &nameProposal) {
 }
 
 /*
-*When sheetName contains space or apostrophe, escaped is needed by cellFormula/definedName/chartSerials.
-*/
+ *When sheetName contains space or apostrophe, escaped is needed by cellFormula/definedName/chartSerials.
+ */
 QString escapeSheetName(const QString &sheetName) {
   // Already escaped.
   Q_ASSERT(not sheetName.startsWith(QLatin1Char('\'')) and not sheetName.endsWith(QLatin1Char('\'')));
@@ -138,7 +138,7 @@ QString escapeSheetName(const QString &sheetName) {
 }
 
 /*
-*/
+ */
 QString unescapeSheetName(const QString &sheetName) {
   Q_ASSERT(sheetName.length() > 2 and sheetName.startsWith(QLatin1Char('\'')) and sheetName.endsWith(QLatin1Char('\'')));
 
@@ -148,24 +148,24 @@ QString unescapeSheetName(const QString &sheetName) {
 }
 
 /*
-*whether the string s starts or ends with space
-*/
+ *whether the string s starts or ends with space
+ */
 bool isSpaceReserveNeeded(const QString &s) {
   QString spaces(QStringLiteral(" \t\n\r"));
   return not s.isEmpty() and (spaces.contains(s.at(0)) or spaces.contains(s.at(s.length() - 1)));
 }
 
 /*
-* Convert shared formula for non-root cells.
-*
-* For example, if "B1:B10" have shared formula "=A1*A1", this function will return "=A2*A2"
-* for "B2" cell, "=A3*A3" for "B3" cell, etc.
-*
-* Note, the formula "=A1*A1" for B1 can also be written as "=RC[-1]*RC[-1]", which is the same
-* for all other cells. In other words, this formula is shared.
-*
-* For long run, we need a formula parser.
-*/
+ * Convert shared formula for non-root cells.
+ *
+ * For example, if "B1:B10" have shared formula "=A1*A1", this function will return "=A2*A2"
+ * for "B2" cell, "=A3*A3" for "B3" cell, etc.
+ *
+ * Note, the formula "=A1*A1" for B1 can also be written as "=RC[-1]*RC[-1]", which is the same
+ * for all other cells. In other words, this formula is shared.
+ *
+ * For long run, we need a formula parser.
+ */
 QString convertSharedFormula(const QString &rootFormula, const CellReference &rootCell, const CellReference &cell) {
   // Find all the "$?[A-Z]+$?[0-9]+" patterns in the rootFormula.
   QList<QPair<QString, int>> segments;

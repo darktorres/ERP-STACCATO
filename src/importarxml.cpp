@@ -607,8 +607,17 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   return false;
 }
 
+bool ImportarXML::verificaValido(const XML &xml) {
+  if (not xml.fileContent.contains("nProt")) {
+    emit errorSignal("NFe não está autorizada pela SEFAZ!");
+    return false;
+  }
+
+  return true;
+}
+
 bool ImportarXML::cadastrarNFe(XML &xml) {
-  if (not verificaCNPJ(xml) or verificaExiste(xml)) { return false; }
+  if (not verificaCNPJ(xml) or verificaExiste(xml) or not verificaValido(xml)) { return false; }
 
   QFile file(xml.fileName);
 

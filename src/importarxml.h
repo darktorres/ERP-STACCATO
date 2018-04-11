@@ -65,6 +65,7 @@ private:
   auto setupTables(const QStringList &idsCompra) -> void;
   auto verificaCNPJ(const XML &xml) -> bool;
   auto verificaExiste(const XML &xml) -> bool;
+  auto verificaValido(const XML &xml) -> bool;
   auto verifyFields() -> bool;
   auto wrapParear() -> void; // REFAC: simplify this
 };

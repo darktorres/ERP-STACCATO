@@ -273,16 +273,14 @@ QString BandDesignIntf::parentBandName() {
 
 bool BandDesignIntf::isConnectedToBand(BandDesignIntf::BandsType bandType) const {
   for (BandDesignIntf *band : childBands())
-    if (band->bandType() == bandType) return true;
+    if (band->bandType() == bandType) { return true; }
   return false;
 }
 
 int BandDesignIntf::maxChildIndex(BandDesignIntf::BandsType bandType) const {
   int curIndex = bandIndex();
   for (BandDesignIntf *childBand : childBands()) {
-    if ((childBand->bandIndex() > bandIndex()) && (childBand->bandType() < bandType)) {
-      curIndex = std::max(curIndex, childBand->maxChildIndex());
-    }
+    if ((childBand->bandIndex() > bandIndex()) && (childBand->bandType() < bandType)) { curIndex = std::max(curIndex, childBand->maxChildIndex()); }
   }
   return curIndex;
 }
@@ -290,9 +288,7 @@ int BandDesignIntf::maxChildIndex(BandDesignIntf::BandsType bandType) const {
 int BandDesignIntf::maxChildIndex(QSet<BandDesignIntf::BandsType> ignoredBands) const {
   int curIndex = bandIndex();
   for (BandDesignIntf *childBand : childBands()) {
-    if (!ignoredBands.contains(childBand->bandType()) && childBand->bandIndex() > bandIndex()) {
-      curIndex = std::max(curIndex, childBand->maxChildIndex(ignoredBands));
-    }
+    if (!ignoredBands.contains(childBand->bandType()) && childBand->bandIndex() > bandIndex()) { curIndex = std::max(curIndex, childBand->maxChildIndex(ignoredBands)); }
   }
   return curIndex;
 }
@@ -300,9 +296,7 @@ int BandDesignIntf::maxChildIndex(QSet<BandDesignIntf::BandsType> ignoredBands) 
 int BandDesignIntf::minChildIndex(BandDesignIntf::BandsType bandType) {
   int curIndex = bandIndex();
   for (BandDesignIntf *childBand : childBands()) {
-    if (curIndex > childBand->bandIndex() && (childBand->bandType() > bandType)) {
-      curIndex = childBand->bandIndex();
-    }
+    if (curIndex > childBand->bandIndex() && (childBand->bandType() > bandType)) { curIndex = childBand->bandIndex(); }
   }
   return curIndex;
 }
@@ -321,17 +315,17 @@ bool BandDesignIntf::canBeSplitted(int height) const {
     for (QGraphicsItem *qgItem : childItems()) {
       BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
       if (item)
-        if ((item->minHeight() > height) && (item->minHeight() > (this->height() - height))) return false;
+        if ((item->minHeight() > height) && (item->minHeight() > (this->height() - height))) { return false; }
     }
   }
   return isSplittable();
 }
 
 bool BandDesignIntf::isEmpty() const {
-  if (!isVisible()) return true;
+  if (!isVisible()) { return true; }
   for (QGraphicsItem *qgItem : childItems()) {
     BaseDesignIntf *item = dynamic_cast<BaseDesignIntf *>(qgItem);
-    if ((item) && (!item->isEmpty())) return false;
+    if ((item) && (!item->isEmpty())) { return false; }
   }
   return true;
 }
@@ -571,17 +565,13 @@ void BandDesignIntf::geometryChangedEvent(QRectF, QRectF) {
     }
   }
   for (BaseDesignIntf *item : childBaseItems()) {
-    if (item->itemAlign() != DesignedItemAlign) {
-      item->updateItemAlign();
-    }
+    if (item->itemAlign() != DesignedItemAlign) { item->updateItemAlign(); }
   }
 }
 
 QVariant BandDesignIntf::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
   if ((change == ItemPositionChange) && ((itemMode() & DesignMode) || (itemMode() & EditMode))) {
-    if (m_bandMarker) {
-      m_bandMarker->setPos((value.toPointF().x() - m_bandMarker->boundingRect().width()), value.toPointF().y());
-    }
+    if (m_bandMarker) { m_bandMarker->setPos((value.toPointF().x() - m_bandMarker->boundingRect().width()), value.toPointF().y()); }
   }
   if (change == ItemSelectedChange) {
     if (m_bandMarker) {
@@ -590,9 +580,7 @@ QVariant BandDesignIntf::itemChange(QGraphicsItem::GraphicsItemChange change, co
       m_bandNameLabel->setVisible(value.toBool());
     }
   }
-  if (change == ItemChildAddedChange || change == ItemChildRemovedChange) {
-    update(rect());
-  }
+  if (change == ItemChildAddedChange || change == ItemChildRemovedChange) { update(rect()); }
   return BaseDesignIntf::itemChange(change, value);
 }
 
@@ -714,9 +702,7 @@ void BandDesignIntf::setKeepFooterTogether(bool value) {
 void BandDesignIntf::updateItemSize(DataSourceManager *dataManager, RenderPass pass, int maxHeight) {
   qreal spaceBorder = 0;
   if (keepBottomSpaceOption()) spaceBorder = bottomSpace();
-  if (borderLines() != 0) {
-    spaceBorder += borderLineSize();
-  }
+  if (borderLines() != 0) { spaceBorder += borderLineSize(); }
   restoreLinks();
   snapshotItemsLayout();
   arrangeSubItems(pass, dataManager);

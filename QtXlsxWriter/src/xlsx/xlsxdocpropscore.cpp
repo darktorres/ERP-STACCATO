@@ -44,7 +44,7 @@ bool DocPropsCore::setProperty(const QString &name, const QString &value) {
               << QStringLiteral("created") << QStringLiteral("creator");
   }
 
-  if (not validKeys.contains(name)) return false;
+  if (not validKeys.contains(name)) { return false; }
 
   if (value.isEmpty())
     m_properties.remove(name);
@@ -138,11 +138,9 @@ bool DocPropsCore::loadFromXmlFile(QIODevice *device) {
       }
     }
 
-    if (reader.hasError()) {
-      qDebug() << "Error when read doc props core file." << reader.errorString();
-    }
+    if (reader.hasError()) { qDebug() << "Error when read doc props core file." << reader.errorString(); }
   }
   return true;
 }
 
-} // namespace
+} // namespace QXlsx

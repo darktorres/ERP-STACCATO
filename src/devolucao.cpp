@@ -309,10 +309,7 @@ bool Devolucao::criarDevolucao() {
   if (not modelVenda.setData(newRow, "devolucao", true)) { return false; }
   if (not modelVenda.setData(newRow, "status", "DEVOLVIDO")) { return false; }
 
-  if (not modelVenda.submitAll()) {
-    emit errorSignal("Erro salvando dados do pedido de devolução: " + modelVenda.lastError().text());
-    return false;
-  }
+  if (not modelVenda.submitAll()) { return false; }
 
   return true;
 }
@@ -348,10 +345,7 @@ bool Devolucao::inserirItens(const int currentRow) {
   if (not modelDevolvidos.setData(rowDevolucao, "descGlobal", 0)) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "total", ui->doubleSpinBoxTotalItem->value() * -1)) { return false; }
 
-  if (not modelDevolvidos.submitAll()) {
-    emit errorSignal("Erro salvando produtos da devolução: " + modelDevolvidos.lastError().text());
-    return false;
-  }
+  if (not modelDevolvidos.submitAll()) { return false; }
 
   return true;
 }
@@ -421,10 +415,7 @@ bool Devolucao::criarContas() {
 
   //
 
-  if (not modelPagamentos.submitAll()) {
-    emit errorSignal("Erro salvando pagamentos: " + modelPagamentos.lastError().text());
-    return false;
-  }
+  if (not modelPagamentos.submitAll()) { return false; }
 
   return true;
 }
@@ -434,10 +425,7 @@ bool Devolucao::salvarCredito() {
 
   if (not modelCliente.setData(0, "credito", credito)) { return false; }
 
-  if (not modelCliente.submitAll()) {
-    emit errorSignal("Erro salvando crédito do cliente: " + modelCliente.lastError().text());
-    return false;
-  }
+  if (not modelCliente.submitAll()) { return false; }
 
   return true;
 }

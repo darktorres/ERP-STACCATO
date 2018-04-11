@@ -209,10 +209,7 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
 }
 
 bool InputDialogProduto::cadastrar() {
-  if (not modelPedidoFornecedor.submitAll()) {
-    QMessageBox::critical(this, "Erro!", "Erro salvando dados na tabela: " + modelPedidoFornecedor.lastError().text());
-    return false;
-  }
+  if (not modelPedidoFornecedor.submitAll()) { return false; }
 
   return true;
 }

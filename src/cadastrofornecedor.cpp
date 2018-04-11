@@ -187,10 +187,7 @@ bool CadastroFornecedor::cadastrar() {
     }
   }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
@@ -306,15 +303,9 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    if (not setDataEnd("desativado", true)) {
-      emit errorSignal("Erro marcando desativado!");
-      return;
-    }
+    if (not setDataEnd("desativado", true)) { return; }
 
-    if (not modelEnd.submitAll()) {
-      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
-      return;
-    }
+    if (not modelEnd.submitAll()) { return; }
 
     novoEndereco();
   }

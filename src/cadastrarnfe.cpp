@@ -425,7 +425,7 @@ void CadastrarNFe::updateImpostos() {
 }
 
 bool CadastrarNFe::preencherNumeroNFe() {
-  if (ui->itemBoxLoja->text().isEmpty()) return true;
+  if (ui->itemBoxLoja->text().isEmpty()) { return true; }
 
   QSqlQuery queryCnpj;
   queryCnpj.prepare("SELECT cnpj FROM loja WHERE idLoja = :idLoja");

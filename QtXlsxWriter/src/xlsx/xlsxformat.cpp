@@ -116,7 +116,7 @@ FormatPrivate::FormatPrivate(const FormatPrivate &other)
  * \value BorderDashDotDot
  * \value BorderMediumDashDotDot
  * \value BorderSlantDashDot
-*/
+ */
 
 /*!
  * \enum Format::DiagonalBorderType
@@ -226,7 +226,7 @@ bool Format::isDateTimeFormat() const {
     int idx = numberFormatIndex();
 
     // Is built-in date time number id?
-    if ((idx >= 14 and idx <= 22) or (idx >= 45 and idx <= 47)) return true;
+    if ((idx >= 14 and idx <= 22) or (idx >= 45 and idx <= 47)) { return true; }
 
     if ((idx >= 27 and idx <= 36) or (idx >= 50 and idx <= 58)) // Used in CHS\CHT\JPN\KOR
       return true;
@@ -258,11 +258,9 @@ void Format::fixNumberFormat(int id, const QString &format) {
     Return true if the format has number format.
  */
 bool Format::hasNumFmtData() const {
-  if (not d) return false;
+  if (not d) { return false; }
 
-  if (hasProperty(FormatPrivate::P_NumFmt_Id) or hasProperty(FormatPrivate::P_NumFmt_FormatCode)) {
-    return true;
-  }
+  if (hasProperty(FormatPrivate::P_NumFmt_Id) or hasProperty(FormatPrivate::P_NumFmt_FormatCode)) { return true; }
   return false;
 }
 
@@ -391,7 +389,7 @@ void Format::setFont(const QFont &font) {
  * The index value is depend on the order <fonts > in styles.xml
  */
 bool Format::fontIndexValid() const {
-  if (not hasFontData()) return false;
+  if (not hasFontData()) { return false; }
   return d->font_index_valid;
 }
 
@@ -437,10 +435,10 @@ QByteArray Format::fontKey() const {
     Return true if the format has font format, otherwise return false.
  */
 bool Format::hasFontData() const {
-  if (not d) return false;
+  if (not d) { return false; }
 
   for (int i = FormatPrivate::P_Font_STARTID; i < FormatPrivate::P_Font_ENDID; ++i) {
-    if (hasProperty(i)) return true;
+    if (hasProperty(i)) { return true; }
   }
   return false;
 }
@@ -458,9 +456,7 @@ void Format::setHorizontalAlignment(HorizontalAlignment align) {
     clearProperty(FormatPrivate::P_Alignment_Indent);
   }
 
-  if (hasProperty(FormatPrivate::P_Alignment_ShinkToFit) and (align == AlignHFill or align == AlignHJustify or align == AlignHDistributed)) {
-    clearProperty(FormatPrivate::P_Alignment_ShinkToFit);
-  }
+  if (hasProperty(FormatPrivate::P_Alignment_ShinkToFit) and (align == AlignHFill or align == AlignHJustify or align == AlignHDistributed)) { clearProperty(FormatPrivate::P_Alignment_ShinkToFit); }
 
   setProperty(FormatPrivate::P_Alignment_AlignH, align, AlignHGeneral);
 }
@@ -511,9 +507,7 @@ void Format::setIndent(int indent) {
   if (indent and hasProperty(FormatPrivate::P_Alignment_AlignH)) {
     HorizontalAlignment hl = horizontalAlignment();
 
-    if (hl != AlignHGeneral and hl != AlignLeft and hl != AlignRight and hl != AlignHJustify) {
-      setHorizontalAlignment(AlignLeft);
-    }
+    if (hl != AlignHGeneral and hl != AlignLeft and hl != AlignRight and hl != AlignHJustify) { setHorizontalAlignment(AlignLeft); }
   }
 
   setProperty(FormatPrivate::P_Alignment_Indent, indent, 0);
@@ -542,10 +536,10 @@ void Format::setShrinkToFit(bool shink) {
  * \internal
  */
 bool Format::hasAlignmentData() const {
-  if (not d) return false;
+  if (not d) { return false; }
 
   for (int i = FormatPrivate::P_Alignment_STARTID; i < FormatPrivate::P_Alignment_ENDID; ++i) {
-    if (hasProperty(i)) return true;
+    if (hasProperty(i)) { return true; }
   }
   return false;
 }
@@ -685,7 +679,7 @@ void Format::setDiagonalBorderColor(const QColor &color) { setProperty(FormatPri
     Returns whether this format has been set valid border index.
 */
 bool Format::borderIndexValid() const {
-  if (not hasBorderData()) return false;
+  if (not hasBorderData()) { return false; }
   return d->border_index_valid;
 }
 
@@ -730,10 +724,10 @@ QByteArray Format::borderKey() const {
     Return true if the format has border format, otherwise return false.
  */
 bool Format::hasBorderData() const {
-  if (not d) return false;
+  if (not d) { return false; }
 
   for (int i = FormatPrivate::P_Border_STARTID; i < FormatPrivate::P_Border_ENDID; ++i) {
-    if (hasProperty(i)) return true;
+    if (hasProperty(i)) { return true; }
   }
   return false;
 }
@@ -778,7 +772,7 @@ void Format::setPatternBackgroundColor(const QColor &color) {
  * \internal
  */
 bool Format::fillIndexValid() const {
-  if (not hasFillData()) return false;
+  if (not hasFillData()) { return false; }
   return d->fill_index_valid;
 }
 
@@ -823,10 +817,10 @@ QByteArray Format::fillKey() const {
     Return true if the format has fill format, otherwise return false.
  */
 bool Format::hasFillData() const {
-  if (not d) return false;
+  if (not d) { return false; }
 
   for (int i = FormatPrivate::P_Fill_STARTID; i < FormatPrivate::P_Fill_ENDID; ++i) {
-    if (hasProperty(i)) return true;
+    if (hasProperty(i)) { return true; }
   }
   return false;
 }
@@ -856,9 +850,9 @@ void Format::setLocked(bool locked) { setProperty(FormatPrivate::P_Protection_Lo
     Return true if the format has protection data, otherwise return false.
  */
 bool Format::hasProtectionData() const {
-  if (not d) return false;
+  if (not d) { return false; }
 
-  if (hasProperty(FormatPrivate::P_Protection_Hidden) or hasProperty(FormatPrivate::P_Protection_Locked)) return true;
+  if (hasProperty(FormatPrivate::P_Protection_Hidden) or hasProperty(FormatPrivate::P_Protection_Locked)) { return true; }
 
   return false;
 }
@@ -885,7 +879,7 @@ void Format::mergeFormat(const Format &modifier) {
     Returns true if the format is valid; otherwise returns false.
  */
 bool Format::isValid() const {
-  if (d) return true;
+  if (d) { return true; }
   return false;
 }
 
@@ -893,7 +887,7 @@ bool Format::isValid() const {
     Returns true if the format is empty; otherwise returns false.
  */
 bool Format::isEmpty() const {
-  if (not d) return true;
+  if (not d) { return true; }
   return d->properties.isEmpty();
 }
 
@@ -942,7 +936,7 @@ int Format::xfIndex() const {
  * \internal
  */
 bool Format::xfIndexValid() const {
-  if (not d) return false;
+  if (not d) { return false; }
   return d->xf_indexValid;
 }
 
@@ -970,7 +964,7 @@ int Format::dxfIndex() const {
  * Returns whether the dxf index is valid or not.
  */
 bool Format::dxfIndexValid() const {
-  if (not d) return false;
+  if (not d) { return false; }
   return d->dxf_indexValid;
 }
 
@@ -1035,7 +1029,7 @@ void Format::clearProperty(int propertyId) { setProperty(propertyId, QVariant())
  * \internal
  */
 bool Format::hasProperty(int propertyId) const {
-  if (not d) return false;
+  if (not d) { return false; }
   return d->properties.contains(propertyId);
 }
 

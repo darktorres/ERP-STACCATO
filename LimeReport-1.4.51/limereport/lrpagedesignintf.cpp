@@ -79,9 +79,7 @@ PageDesignIntf::~PageDesignIntf() {
     removeItem(m_pageItem.data());
     m_pageItem.clear();
   }
-  for (PageItemDesignIntf::Ptr pageItem : m_reportPages) {
-    removeItem(pageItem.data());
-  }
+  for (PageItemDesignIntf::Ptr pageItem : m_reportPages) { removeItem(pageItem.data()); }
   m_commandsList.clear();
 }
 
@@ -177,13 +175,9 @@ void PageDesignIntf::keyPressEvent(QKeyEvent *event) {
 }
 
 void PageDesignIntf::keyReleaseEvent(QKeyEvent *event) {
-  if ((event->key() == Qt::Key_Control) && m_changePosMode) {
-    checkSizeOrPosChanges();
-  }
+  if ((event->key() == Qt::Key_Control) && m_changePosMode) { checkSizeOrPosChanges(); }
 
-  if ((event->key() == Qt::Key_Shift) && m_changeSizeMode) {
-    checkSizeOrPosChanges();
-  }
+  if ((event->key() == Qt::Key_Shift) && m_changeSizeMode) { checkSizeOrPosChanges(); }
 
   QGraphicsScene::keyReleaseEvent(event);
 }
@@ -371,16 +365,12 @@ template <typename T> BaseDesignIntf *PageDesignIntf::internalAddBand(T bandType
   band->setItemTypeName("Band");
 
   BandDesignIntf *pb = nullptr;
-  if (selectedItems().count() > 0) {
-    pb = dynamic_cast<BandDesignIntf *>(selectedItems().at(0));
-  }
+  if (selectedItems().count() > 0) { pb = dynamic_cast<BandDesignIntf *>(selectedItems().at(0)); }
 
   bool increaseBandIndex = false;
   int bandIndex = pageItem()->calcBandIndex(band->bandType(), pb, increaseBandIndex);
   band->setBandIndex(bandIndex);
-  if (needParentBands.contains(band->bandType())) {
-    band->setParentBand(pb);
-  }
+  if (needParentBands.contains(band->bandType())) { band->setParentBand(pb); }
   if (increaseBandIndex) pageItem()->increaseBandIndex(bandIndex);
 
   registerItem(band);
@@ -510,7 +500,7 @@ void PageDesignIntf::removeReportItem(BaseDesignIntf *item, bool createComand) {
 }
 
 bool PageDesignIntf::saveCommand(CommandIf::Ptr command, bool runCommand) {
-  if (m_executingCommand || m_isLoading) return false;
+  if (m_executingCommand || m_isLoading) { return false; }
   if (runCommand) {
     m_executingCommand = true;
     if (!command->doIt()) {
@@ -563,7 +553,7 @@ bool PageDesignIntf::isExistsObjectName(const QString &objectName, QList<QGraphi
   for (int i = 0; i < itemsList.count(); i++) {
     item = dynamic_cast<QObject *>(itemsList[i]);
     if (item)
-      if (item->objectName() == objectName) return true;
+      if (item->objectName() == objectName) { return true; }
   }
 
   return false;
@@ -624,9 +614,7 @@ void PageDesignIntf::dropEvent(QGraphicsSceneDragDropEvent *event) {
       BandDesignIntf *parentBand = dynamic_cast<BandDesignIntf *>(ti->parentItem());
       if (parentBand && parentBand->datasourceName().isEmpty()) {
         QRegExp dataSource("(?:\\$D\\{\\s*(.*)\\..*\\})");
-        if (dataSource.indexIn(data) != -1) {
-          parentBand->setProperty("datasource", dataSource.cap(1));
-        }
+        if (dataSource.indexIn(data) != -1) { parentBand->setProperty("datasource", dataSource.cap(1)); }
       }
     }
   }
@@ -643,9 +631,7 @@ QStringList PageDesignIntf::possibleParentItems() {
   for (QGraphicsItem *item : items()) {
     BandDesignIntf *band = dynamic_cast<BandDesignIntf *>(item);
 
-    if (band) {
-      itemsList.append(band->objectName());
-    }
+    if (band) { itemsList.append(band->objectName()); }
   }
   return itemsList;
 }
@@ -681,9 +667,7 @@ void PageDesignIntf::bandDeleted(QObject *band) {
 void PageDesignIntf::slotPageItemLoaded(QObject *) { setItemMode(m_itemMode); }
 
 void PageDesignIntf::slotSelectionChanged() {
-  if (selectedItems().count() == 1) {
-    m_firstSelectedItem = dynamic_cast<BaseDesignIntf *>(selectedItems().at(0));
-  }
+  if (selectedItems().count() == 1) { m_firstSelectedItem = dynamic_cast<BaseDesignIntf *>(selectedItems().at(0)); }
 }
 
 void PageDesignIntf::slotAnimationStoped(QObject *animation) { m_animationList.removeOne(animation); }
@@ -731,18 +715,14 @@ void PageDesignIntf::checkSizeOrPosChanges() {
 
   CommandIf::Ptr posCommand;
   if ((selectedItems().count() > 0) && (m_positionStamp.count() > 0)) {
-    if (m_positionStamp[0].pos != selectedItems().at(0)->pos()) {
-      posCommand = createChangePosCommand();
-    }
+    if (m_positionStamp[0].pos != selectedItems().at(0)->pos()) { posCommand = createChangePosCommand(); }
     m_positionStamp.clear();
   }
 
   CommandIf::Ptr sizeCommand;
   if ((selectedItems().count() > 0) && (m_geometryStamp.count() > 0)) {
     BaseDesignIntf *reportItem = dynamic_cast<BaseDesignIntf *>(selectedItems()[0]);
-    if (reportItem && (m_geometryStamp[0].size != reportItem->size())) {
-      sizeCommand = createChangeSizeCommand();
-    }
+    if (reportItem && (m_geometryStamp[0].size != reportItem->size())) { sizeCommand = createChangeSizeCommand(); }
     m_geometryStamp.clear();
   }
 
@@ -1040,9 +1020,7 @@ void PageDesignIntf::copy() {
       }
     }
 
-    if (shouldWrite) {
-      clipboard->setText(writer->saveToString());
-    }
+    if (shouldWrite) { clipboard->setText(writer->saveToString()); }
 
     delete writer;
   }
@@ -1051,9 +1029,7 @@ void PageDesignIntf::copy() {
 BaseDesignIntf *PageDesignIntf::findDestObject(BaseDesignIntf *item) {
   if (item && item->canContainChildren()) return item;
   BaseDesignIntf *curItem = item;
-  while (curItem && !curItem->canContainChildren()) {
-    curItem = dynamic_cast<BaseDesignIntf *>(curItem->parentItem());
-  }
+  while (curItem && !curItem->canContainChildren()) { curItem = dynamic_cast<BaseDesignIntf *>(curItem->parentItem()); }
   return curItem;
 }
 
@@ -1096,9 +1072,7 @@ void PageDesignIntf::deleteSelected() {
     }
 
     for (BandDesignIntf *band : bands) {
-      for (QGraphicsItem *bandItem : band->childItems()) {
-        itemsToDelete.removeOne(bandItem);
-      }
+      for (QGraphicsItem *bandItem : band->childItems()) { itemsToDelete.removeOne(bandItem); }
     }
 
     if (!itemsToDelete.isEmpty()) {
@@ -1108,9 +1082,7 @@ void PageDesignIntf::deleteSelected() {
     }
 
     if (!bands.isEmpty()) {
-      for (BandDesignIntf *band : bands) {
-        commandGroup->addCommand(removeReportItemCommand(band), false);
-      }
+      for (BandDesignIntf *band : bands) { commandGroup->addCommand(removeReportItemCommand(band), false); }
     }
 
     saveCommand(commandGroup);
@@ -1383,9 +1355,7 @@ void PageDesignIntf::setItemMode(BaseDesignIntf::ItemMode state) {
   for (QGraphicsItem *item : items()) {
     BaseDesignIntf *reportItem = dynamic_cast<BaseDesignIntf *>(item);
 
-    if (reportItem) {
-      reportItem->setItemMode(itemMode());
-    }
+    if (reportItem) { reportItem->setItemMode(itemMode()); }
   }
 }
 
@@ -1427,9 +1397,7 @@ bool InsertItemCommand::doIt() {
 
 void InsertItemCommand::undoIt() {
   BaseDesignIntf *item = page()->reportItemByName(m_itemName);
-  if (item) {
-    page()->removeReportItem(item, false);
-  }
+  if (item) { page()->removeReportItem(item, false); }
   //    page()->removeItem(item);
   //    delete item;
 }
@@ -1463,16 +1431,12 @@ void DeleteItemCommand::undoIt() {
   ItemsReaderIntf::Ptr reader = StringXMLreader::create(m_itemXML);
   if (reader->first()) reader->readItem(item);
   BandDesignIntf *band = dynamic_cast<BandDesignIntf *>(item);
-  if (band) {
-    page()->pageItem()->increaseBandIndex(band->bandIndex());
-  }
+  if (band) { page()->pageItem()->increaseBandIndex(band->bandIndex()); }
   page()->registerItem(item);
 
   if (!m_layoutName.isEmpty()) {
     LayoutDesignIntf *layout = dynamic_cast<LayoutDesignIntf *>(page()->reportItemByName(m_layoutName));
-    if (layout) {
-      layout->restoreChild(item);
-    }
+    if (layout) { layout->restoreChild(item); }
     page()->emitRegisterdItem(item);
   }
 }
@@ -1514,9 +1478,7 @@ void DeleteLayoutCommand::undoIt() {
   if (reader->first()) reader->readItem(item);
   for (QString ci : m_childItems) {
     BaseDesignIntf *ri = page()->reportItemByName(ci);
-    if (ri) {
-      dynamic_cast<LayoutDesignIntf *>(item)->addChild(ri);
-    }
+    if (ri) { dynamic_cast<LayoutDesignIntf *>(item)->addChild(ri); }
     page()->emitRegisterdItem(item);
   }
 }
@@ -1543,9 +1505,7 @@ bool PasteCommand::doIt() {
     page()->beginUpdate();
     insertItem(reader);
 
-    while (reader->next()) {
-      insertItem(reader);
-    }
+    while (reader->next()) { insertItem(reader); }
     page()->endUpdate();
   } else
     return false;
@@ -1575,9 +1535,7 @@ bool PasteCommand::insertItem(ItemsReaderIntf::Ptr reader) {
       reader->readItem(item);
       item->setParent(parentItem);
       item->setParentItem(parentItem);
-      if (page()->reportItemsByName(item->objectName()).size() > 1) {
-        item->setObjectName(objectName);
-      }
+      if (page()->reportItemsByName(item->objectName()).size() > 1) { item->setObjectName(objectName); }
       m_itemNames.push_back(item->objectName());
     }
     return true;
@@ -1700,9 +1658,7 @@ CommandIf::Ptr PropertyChangedCommand::create(PageDesignIntf *page, const QStrin
 bool PropertyChangedCommand::doIt() {
   BaseDesignIntf *reportItem = page()->reportItemByName(m_objectName);
 
-  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_newValue)) {
-    reportItem->setProperty(m_propertyName.toLatin1(), m_newValue);
-  }
+  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_newValue)) { reportItem->setProperty(m_propertyName.toLatin1(), m_newValue); }
 
   return true;
 }
@@ -1710,9 +1666,7 @@ bool PropertyChangedCommand::doIt() {
 void PropertyChangedCommand::undoIt() {
   BaseDesignIntf *reportItem = page()->reportItemByName(m_objectName);
 
-  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_oldValue)) {
-    reportItem->setProperty(m_propertyName.toLatin1(), m_oldValue);
-  }
+  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_oldValue)) { reportItem->setProperty(m_propertyName.toLatin1(), m_oldValue); }
 }
 
 CommandIf::Ptr InsertBandCommand::create(PageDesignIntf *page, const QString &bandName) {
@@ -1740,16 +1694,14 @@ bool InsertBandCommand::doIt() {
 void InsertBandCommand::undoIt() {
   BaseDesignIntf *item = page()->reportItemByName(m_bandName);
 
-  if (item) {
-    page()->removeReportItem(item, false);
-  }
+  if (item) { page()->removeReportItem(item, false); }
 }
 
 CommandIf::Ptr CommandGroup::create() { return CommandIf::Ptr(new CommandGroup); }
 
 bool CommandGroup::doIt() {
   for (CommandIf::Ptr command : m_commands) {
-    if (!command->doIt()) return false;
+    if (!command->doIt()) { return false; }
   }
   return true;
 }
@@ -1850,9 +1802,7 @@ CommandIf::Ptr PropertyItemAlignChangedCommand::create(PageDesignIntf *page, con
   command->m_newValue = newValue;
 
   BaseDesignIntf *reportItem = page->reportItemByName(objectName);
-  if (oldValue == BaseDesignIntf::DesignedItemAlign) {
-    command->m_savedPos = reportItem->pos();
-  }
+  if (oldValue == BaseDesignIntf::DesignedItemAlign) { command->m_savedPos = reportItem->pos(); }
 
   return CommandIf::Ptr(command);
 }
@@ -1860,9 +1810,7 @@ CommandIf::Ptr PropertyItemAlignChangedCommand::create(PageDesignIntf *page, con
 bool PropertyItemAlignChangedCommand::doIt() {
   BaseDesignIntf *reportItem = page()->reportItemByName(m_objectName);
 
-  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_newValue)) {
-    reportItem->setProperty(m_propertyName.toLatin1(), m_newValue);
-  }
+  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_newValue)) { reportItem->setProperty(m_propertyName.toLatin1(), m_newValue); }
 
   return true;
 }
@@ -1870,12 +1818,8 @@ bool PropertyItemAlignChangedCommand::doIt() {
 void PropertyItemAlignChangedCommand::undoIt() {
   BaseDesignIntf *reportItem = page()->reportItemByName(m_objectName);
 
-  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_oldValue)) {
-    reportItem->setProperty(m_propertyName.toLatin1(), m_oldValue);
-  }
-  if (reportItem && (m_oldValue == BaseDesignIntf::DesignedItemAlign)) {
-    reportItem->setPos(m_savedPos);
-  }
+  if (reportItem && (reportItem->property(m_propertyName.toLatin1()) != m_oldValue)) { reportItem->setProperty(m_propertyName.toLatin1(), m_oldValue); }
+  if (reportItem && (m_oldValue == BaseDesignIntf::DesignedItemAlign)) { reportItem->setPos(m_savedPos); }
 }
 
 bool Projection::intersect(Projection projection) {
@@ -1891,7 +1835,7 @@ qreal Projection::end() const { return m_end; }
 bool ItemProjections::intersect(QRectF rect) {
   Projection xProjection(rect.x(), rect.x() + rect.width());
   Projection yProjection(rect.y(), rect.y() + rect.height());
-  if (m_xProjection.intersect(xProjection) && m_yProjection.intersect(yProjection)) return true;
+  if (m_xProjection.intersect(xProjection) && m_yProjection.intersect(yProjection)) { return true; }
   return false;
 }
 

@@ -106,7 +106,7 @@ QString GroupBandHeader::calcCondition(DataSourceManager *dataManager) {
 }
 
 bool GroupBandHeader::isNeedToClose(DataSourceManager *dataManager) {
-  if (!m_groupStarted) return false;
+  if (!m_groupStarted) { return false; }
   if ((m_groupFiledName.isNull() || m_groupFiledName.isEmpty()) && condition().isEmpty()) {
     dataManager->putError(tr("Group field not found"));
     return false;
@@ -119,8 +119,8 @@ bool GroupBandHeader::isNeedToClose(DataSourceManager *dataManager) {
     if (dataManager->containsDatasource(datasourceName)) {
       IDataSource *ds = dataManager->dataSource(datasourceName);
       if (ds) {
-        if (ds->data(m_groupFiledName).isNull() && m_groupFieldValue.isNull()) return false;
-        if (!ds->data(m_groupFiledName).isValid()) return false;
+        if (ds->data(m_groupFiledName).isNull() && m_groupFieldValue.isNull()) { return false; }
+        if (!ds->data(m_groupFiledName).isValid()) { return false; }
         return ds->data(m_groupFiledName) != m_groupFieldValue;
       }
     } else {

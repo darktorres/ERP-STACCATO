@@ -66,7 +66,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   ui->tableVendas->hideColumn("data");
 
-  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") ui->tableVendas->hideColumn("Indicou");
+  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") { ui->tableVendas->hideColumn("Indicou"); }
 
   modelTransp.setTable("veiculo_has_produto");
   modelTransp.setEditStrategy(QSqlTableModel::OnManualSubmit);

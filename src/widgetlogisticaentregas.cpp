@@ -45,7 +45,7 @@ WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : Widget(paren
 WidgetLogisticaEntregas::~WidgetLogisticaEntregas() { delete ui; }
 
 bool WidgetLogisticaEntregas::updateTables() {
-  if (modelCarga.tableName().isEmpty()) setupTables();
+  if (modelCarga.tableName().isEmpty()) { setupTables(); }
 
   if (not modelCarga.select()) {
     emit errorSignal("Erro lendo tabela de entregas: " + modelCarga.lastError().text());
@@ -232,7 +232,7 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   QList<int> lista;
 
-  for (int row = 0; row < modelProdutos.rowCount(); ++row) lista.append(modelProdutos.data(row, "idVendaProduto").toInt());
+  for (int row = 0; row < modelProdutos.rowCount(); ++row) { lista.append(modelProdutos.data(row, "idVendaProduto").toInt()); }
 
   auto *nfe = new CadastrarNFe(idVenda, CadastrarNFe::Tipo::Normal, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
@@ -247,13 +247,13 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   modelCarga.setFilter("DATE_FORMAT(dataPrevEnt, '%d-%m-%Y') = '" + data + "' AND idVeiculo = " + veiculo);
 
-  if (not modelCarga.select()) emit errorSignal("Erro lendo tabela entregas: " + modelCarga.lastError().text());
+  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela entregas: " + modelCarga.lastError().text()); }
 
   ui->tableCarga->resizeColumnsToContents();
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
+  if (not modelProdutos.select()) { emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
 
   ui->pushButtonReagendar->setDisabled(true);
   ui->pushButtonConfirmarEntrega->setDisabled(true);
@@ -265,7 +265,7 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
 
-  if (not modelProdutos.select()) emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
+  if (not modelProdutos.select()) { emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
 
   ui->tableProdutos->resizeColumnsToContents();
 

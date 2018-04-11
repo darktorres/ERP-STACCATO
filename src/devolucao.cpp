@@ -139,7 +139,7 @@ void Devolucao::setupTables() {
 
   modelDevolvidos.setFilter("idVenda = '" + idDevolucao + "'");
 
-  if (not modelDevolvidos.select()) emit errorSignal("Erro lendo tabela venda_has_produto: " + modelDevolvidos.lastError().text());
+  if (not modelDevolvidos.select()) { emit errorSignal("Erro lendo tabela venda_has_produto: " + modelDevolvidos.lastError().text()); }
 
   ui->tableDevolvidos->setModel(&modelDevolvidos);
   ui->tableDevolvidos->hideColumn("idRelacionado");

@@ -63,13 +63,13 @@
        </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="3">
-          <widget class="QPushButton" name="pushButtonConfirmarEntrega">
+         <item row="0" column="4">
+          <widget class="QPushButton" name="pushButtonImprimirDanfe">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Confirmar Entrega</string>
+            <string>Imprimir DANFE</string>
            </property>
           </widget>
          </item>
@@ -83,23 +83,13 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="4">
-          <widget class="QPushButton" name="pushButtonImprimirDanfe">
+         <item row="0" column="3">
+          <widget class="QPushButton" name="pushButtonConfirmarEntrega">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Imprimir DANFE</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="pushButtonGerarNFeEntregar">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Gerar NFe</string>
+            <string>Confirmar Entrega</string>
            </property>
           </widget>
          </item>
@@ -120,6 +110,16 @@
            </property>
            <property name="text">
             <string>Cancelar entrega</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pushButtonGerarNFeEntregar">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Gerar NFe</string>
            </property>
           </widget>
          </item>

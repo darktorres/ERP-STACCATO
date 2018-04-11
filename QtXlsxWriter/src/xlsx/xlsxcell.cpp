@@ -35,9 +35,7 @@ QT_BEGIN_NAMESPACE_XLSX
 
 CellPrivate::CellPrivate(Cell *p) : q_ptr(p) {}
 
-CellPrivate::CellPrivate(const CellPrivate *const cp)
-    : value(cp->value), formula(cp->formula), cellType(cp->cellType), format(cp->format), richString(cp->richString),
-      parent(cp->parent) {}
+CellPrivate::CellPrivate(const CellPrivate *const cp) : value(cp->value), formula(cp->formula), cellType(cp->cellType), format(cp->format), richString(cp->richString), parent(cp->parent) {}
 
 /*!
   \class Cell
@@ -60,8 +58,7 @@ CellPrivate::CellPrivate(const CellPrivate *const cp)
  * \internal
  * Created by Worksheet only.
  */
-Cell::Cell(const QVariant &data, CellType type, const Format &format, Worksheet *parent)
-    : d_ptr(new CellPrivate(this)) {
+Cell::Cell(const QVariant &data, CellType type, const Format &format, Worksheet *parent) : d_ptr(new CellPrivate(this)) {
   d_ptr->value = data;
   d_ptr->cellType = type;
   d_ptr->format = format;
@@ -123,9 +120,7 @@ CellFormula Cell::formula() const {
  */
 bool Cell::isDateTime() const {
   Q_D(const Cell);
-  if (d->cellType == NumberType and d->value.toDouble() >= 0 and d->format.isValid() and d->format.isDateTimeFormat()) {
-    return true;
-  }
+  if (d->cellType == NumberType and d->value.toDouble() >= 0 and d->format.isValid() and d->format.isDateTimeFormat()) { return true; }
   return false;
 }
 
@@ -143,7 +138,7 @@ QDateTime Cell::dateTime() const {
  */
 bool Cell::isRichString() const {
   Q_D(const Cell);
-  if (d->cellType != SharedStringType and d->cellType != InlineStringType and d->cellType != StringType) return false;
+  if (d->cellType != SharedStringType and d->cellType != InlineStringType and d->cellType != StringType) { return false; }
 
   return d->richString.isRichString();
 }

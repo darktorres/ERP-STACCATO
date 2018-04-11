@@ -186,15 +186,9 @@ void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    if (not setDataEnd("desativado", true)) {
-      emit errorSignal("Erro marcando desativado!");
-      return;
-    }
+    if (not setDataEnd("desativado", true)) { return; }
 
-    if (not modelEnd.submitAll()) {
-      emit errorSignal("Não foi possível remover este item: " + modelEnd.lastError().text());
-      return;
-    }
+    if (not modelEnd.submitAll()) { return; }
 
     novoEndereco();
   }
@@ -383,15 +377,9 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::Yes) {
-    if (not setDataEnd("desativado", true)) {
-      emit errorSignal("Erro marcando desativado!");
-      return;
-    }
+    if (not setDataEnd("desativado", true)) { return; }
 
-    if (not modelVeiculo.submitAll()) {
-      emit errorSignal("Não foi possível remover este item: " + modelVeiculo.lastError().text());
-      return;
-    }
+    if (not modelVeiculo.submitAll()) { return; }
 
     novoVeiculo();
   }
@@ -419,10 +407,7 @@ bool CadastroTransportadora::cadastrar() {
     }
   }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro: " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
@@ -442,10 +427,7 @@ bool CadastroTransportadora::cadastrar() {
     }
   }
 
-  if (not modelEnd.submitAll()) {
-    emit errorSignal("Erro: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.submitAll()) { return false; }
 
   for (int row = 0, rowCount = modelVeiculo.rowCount(); row < rowCount; ++row) {
     if (not modelVeiculo.setData(row, primaryKey, primaryId)) { return false; }
@@ -458,10 +440,7 @@ bool CadastroTransportadora::cadastrar() {
     }
   }
 
-  if (not modelVeiculo.submitAll()) {
-    emit errorSignal("Erro: " + modelVeiculo.lastError().text());
-    return false;
-  }
+  if (not modelVeiculo.submitAll()) { return false; }
 
   return true;
 }

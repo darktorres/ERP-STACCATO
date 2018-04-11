@@ -86,10 +86,7 @@ void PrecoEstoque::setupTables() {
 }
 
 void PrecoEstoque::on_pushButtonSalvar_clicked() {
-  if (not modelProduto.submitAll()) {
-    emit errorSignal("Erro salvando dados: " + modelProduto.lastError().text());
-    return;
-  }
+  if (not modelProduto.submitAll()) { return; }
 
   emit informationSignal("Dados atualizados!");
   close();

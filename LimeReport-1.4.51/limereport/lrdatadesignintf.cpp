@@ -72,7 +72,7 @@ bool QueryHolder::runQuery(IDataSource::DatasourceMode mode) {
 
   if (!m_prepared) {
     extractParams();
-    if (!m_prepared) return false;
+    if (!m_prepared) { return false; }
   }
 
   query->prepare(m_preparedSQL);
@@ -198,7 +198,7 @@ ModelToDataSource::~ModelToDataSource() {
 }
 
 bool ModelToDataSource::next() {
-  if (isInvalid()) return false;
+  if (isInvalid()) { return false; }
   if (m_curRow < (m_model->rowCount())) {
     if (bof()) m_curRow++;
     m_curRow++;
@@ -208,12 +208,12 @@ bool ModelToDataSource::next() {
 }
 
 bool ModelToDataSource::hasNext() {
-  if (isInvalid()) return false;
+  if (isInvalid()) { return false; }
   return m_curRow < m_model->rowCount() - 1;
 }
 
 bool ModelToDataSource::prior() {
-  if (isInvalid()) return false;
+  if (isInvalid()) { return false; }
   if (m_curRow > -1) {
     if (eof()) m_curRow--;
     m_curRow--;
@@ -232,12 +232,12 @@ void ModelToDataSource::last() {
 }
 
 bool ModelToDataSource::eof() {
-  if (isInvalid()) return true;
+  if (isInvalid()) { return true; }
   return (m_curRow == m_model->rowCount()) || (m_model->rowCount() == 0);
 }
 
 bool ModelToDataSource::bof() {
-  if (isInvalid()) return true;
+  if (isInvalid()) { return true; }
   return (m_curRow == -1) || (m_model->rowCount() == 0);
 }
 
@@ -323,9 +323,7 @@ SubQueryHolder::SubQueryHolder(QString queryText, QString connectionName, QStrin
 }
 
 void SubQueryHolder::setMasterDatasource(const QString &value) {
-  if (dataManager()->dataSource(value)) {
-    m_masterDatasource = value;
-  }
+  if (dataManager()->dataSource(value)) { m_masterDatasource = value; }
 }
 
 void SubQueryHolder::extractParams() {
@@ -339,9 +337,7 @@ void SubQueryHolder::extractParams() {
 }
 
 QString SubQueryHolder::extractField(QString source) {
-  if (source.contains('.')) {
-    return source.right(source.length() - (source.indexOf('.') + 1));
-  }
+  if (source.contains('.')) { return source.right(source.length() - (source.indexOf('.') + 1)); }
   return source;
 }
 
@@ -420,9 +416,7 @@ void ProxyHolder::filterModel() {
         try {
           m_model->rowCount();
           m_datasource = IDataSource::Ptr(new ModelToDataSource(m_model, true));
-        } catch (ReportError &exception) {
-          m_lastError = exception.what();
-        }
+        } catch (ReportError &exception) { m_lastError = exception.what(); }
         m_invalid = false;
         m_lastError.clear();
       } else {
@@ -469,10 +463,10 @@ void ProxyDesc::addFieldsCorrelation(const FieldsCorrelation &fieldsCorrelation)
 void MasterDetailProxyModel::setMaster(QString name) { m_masterName = name; }
 
 bool MasterDetailProxyModel::isInvalid() const {
-  if (m_masterName.isEmpty() || m_childName.isEmpty()) return true;
+  if (m_masterName.isEmpty() || m_childName.isEmpty()) { return true; }
   IDataSource *masterData = dataManager()->dataSource(m_masterName);
   IDataSource *childData = dataManager()->dataSource(m_childName);
-  if (!masterData || !childData) return true;
+  if (!masterData || !childData) { return true; }
   return masterData->isInvalid() || childData->isInvalid();
 }
 
@@ -481,7 +475,7 @@ bool MasterDetailProxyModel::filterAcceptsRow(int source_row, const QModelIndex 
   for (FieldMapDesc *fieldCorrelation : *m_maps) {
     QVariant master = masterData(fieldCorrelation->master());
     QVariant detail = sourceData(fieldCorrelation->detail(), source_row);
-    if (master == detail) return true;
+    if (master == detail) { return true; }
   }
   return false;
 }
@@ -490,9 +484,7 @@ int MasterDetailProxyModel::fieldIndexByName(QString fieldName) const {
   for (int i = 0; i < sourceModel()->columnCount(); ++i) {
     QString sourceFieldName = sourceModel()->headerData(i, Qt::Horizontal, Qt::UserRole).isValid() ? sourceModel()->headerData(i, Qt::Horizontal, Qt::UserRole).toString()
                                                                                                    : sourceModel()->headerData(i, Qt::Horizontal).toString();
-    if (sourceFieldName.compare(fieldName, Qt::CaseInsensitive) == 0) {
-      return i;
-    }
+    if (sourceFieldName.compare(fieldName, Qt::CaseInsensitive) == 0) { return i; }
   }
   return -1;
 }
@@ -521,9 +513,7 @@ bool CallbackDatasource::next() {
     bool nextRowExists = checkNextRecord(m_currentRow);
     if (m_currentRow > -1) {
       if (!m_getDataFromCache && nextRowExists) {
-        for (int i = 0; i < m_columnCount; ++i) {
-          m_valuesCache[columnNameByIndex(i)] = data(columnNameByIndex(i));
-        }
+        for (int i = 0; i < m_columnCount; ++i) { m_valuesCache[columnNameByIndex(i)] = data(columnNameByIndex(i)); }
       }
     }
     if (!nextRowExists) {
@@ -604,9 +594,7 @@ int CallbackDatasource::columnCount() {
     QVariant columnCount;
     info.dataType = CallbackInfo::ColumnCount;
     emit getCallbackData(info, columnCount);
-    if (columnCount.isValid()) {
-      m_columnCount = columnCount.toInt();
-    }
+    if (columnCount.isValid()) { m_columnCount = columnCount.toInt(); }
     if (m_columnCount != -1) {
       for (int i = 0; i < m_columnCount; ++i) {
         QVariant columnName;

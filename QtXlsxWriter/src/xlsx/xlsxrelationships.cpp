@@ -116,7 +116,7 @@ bool Relationships::loadFromXmlFile(QIODevice *device) {
       }
     }
 
-    if (reader.hasError()) return false;
+    if (reader.hasError()) { return false; }
   }
   return true;
 }
@@ -141,4 +141,4 @@ int Relationships::count() const { return m_relationships.count(); }
 
 bool Relationships::isEmpty() const { return m_relationships.isEmpty(); }
 
-} // namespace
+} // namespace QXlsx

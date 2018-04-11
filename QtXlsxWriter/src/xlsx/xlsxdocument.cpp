@@ -99,12 +99,12 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
   QStringList filePaths = zipReader.filePaths();
 
   // Load the Content_Types file
-  if (not filePaths.contains(QLatin1String("[Content_Types].xml"))) return false;
+  if (not filePaths.contains(QLatin1String("[Content_Types].xml"))) { return false; }
   contentTypes = QSharedPointer<ContentTypes>(new ContentTypes(ContentTypes::F_LoadFromExists));
   contentTypes->loadFromXmlData(zipReader.fileData(QStringLiteral("[Content_Types].xml")));
 
   // Load root rels file
-  if (not filePaths.contains(QLatin1String("_rels/.rels"))) return false;
+  if (not filePaths.contains(QLatin1String("_rels/.rels"))) { return false; }
   Relationships rootRels;
   rootRels.loadFromXmlData(zipReader.fileData(QStringLiteral("_rels/.rels")));
 
@@ -136,7 +136,7 @@ bool DocumentPrivate::loadPackage(QIODevice *device) {
   // In normal case, this should be "xl/workbook.xml"
   workbook = QSharedPointer<Workbook>(new Workbook(Workbook::F_LoadFromExists));
   QList<XlsxRelationship> rels_xl = rootRels.documentRelationships(QStringLiteral("/officeDocument"));
-  if (rels_xl.isEmpty()) return false;
+  if (rels_xl.isEmpty()) { return false; }
   QString xlworkbook_Path = rels_xl[0].target;
   QString xlworkbook_Dir = splitPath(xlworkbook_Path)[0];
   workbook->relationships()->loadFromXmlData(zipReader.fileData(getRelFilePath(xlworkbook_Path)));
@@ -800,7 +800,7 @@ bool Document::insertSheet(int index, const QString &name, AbstractSheet::SheetT
  */
 bool Document::renameSheet(const QString &oldName, const QString &newName) {
   Q_D(Document);
-  if (oldName == newName) return false;
+  if (oldName == newName) { return false; }
   return d->workbook->renameSheet(sheetNames().indexOf(oldName), newName);
 }
 
@@ -810,7 +810,7 @@ bool Document::renameSheet(const QString &oldName, const QString &newName) {
  */
 bool Document::copySheet(const QString &srcName, const QString &distName) {
   Q_D(Document);
-  if (srcName == distName) return false;
+  if (srcName == distName) { return false; }
   return d->workbook->copySheet(sheetNames().indexOf(srcName), distName);
 }
 

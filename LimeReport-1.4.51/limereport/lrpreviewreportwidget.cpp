@@ -16,7 +16,7 @@ namespace LimeReport {
 
 bool PreviewReportWidgetPrivate::pageIsVisible() {
   QGraphicsView *view = q_ptr->ui->graphicsView;
-  if (m_currentPage - 1 >= m_reportPages.size() || m_currentPage <= 0) return false;
+  if (m_currentPage - 1 >= m_reportPages.size() || m_currentPage <= 0) { return false; }
   PageItemDesignIntf::Ptr page = m_reportPages.at(m_currentPage - 1);
   return page->mapToScene(page->rect()).boundingRect().intersects(view->mapToScene(view->viewport()->geometry()).boundingRect());
 }
@@ -136,9 +136,7 @@ void PreviewReportWidget::print() {
   QPrintDialog dialog(&printer, QApplication::activeWindow());
   if (dialog.exec() == QDialog::Accepted) {
     if (!d_ptr->m_reportPages.isEmpty()) ReportEnginePrivate::printReport(d_ptr->m_reportPages, printer);
-    for (PageItemDesignIntf::Ptr pageItem : d_ptr->m_reportPages) {
-      d_ptr->m_previewPage->reactivatePageItem(pageItem);
-    }
+    for (PageItemDesignIntf::Ptr pageItem : d_ptr->m_reportPages) { d_ptr->m_previewPage->reactivatePageItem(pageItem); }
   }
 }
 
@@ -210,9 +208,7 @@ void PreviewReportWidget::refreshPages() {
       d_ptr->m_report->dataManager()->setDesignTime(false);
       ReportPages pages = d_ptr->m_report->renderToPages();
       d_ptr->m_report->dataManager()->setDesignTime(true);
-      if (pages.count() > 0) {
-        d_ptr->setPages(pages);
-      }
+      if (pages.count() > 0) { d_ptr->setPages(pages); }
     } catch (ReportError &exception) {
       d_ptr->m_report->saveError(exception.what());
       d_ptr->m_report->showError(exception.what());
@@ -243,9 +239,7 @@ void PreviewReportWidget::slotSliderMoved(int value) {
 }
 
 void PreviewReportWidget::reportEngineDestroyed(QObject *object) {
-  if (object == d_ptr->m_report) {
-    d_ptr->m_report = nullptr;
-  }
+  if (object == d_ptr->m_report) { d_ptr->m_report = nullptr; }
 }
 
 void PreviewReportWidget::slotZoomed(double) {

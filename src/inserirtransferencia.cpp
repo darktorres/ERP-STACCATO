@@ -86,15 +86,9 @@ bool InserirTransferencia::cadastrar() {
   if (not modelPara.setData(rowPara, "grupo", "Transferência")) { return false; }
   if (not modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text())) { return false; }
 
-  if (not modelDe.submitAll()) {
-    emit errorSignal("Erro salvando 'De': " + modelDe.lastError().text());
-    return false;
-  }
+  if (not modelDe.submitAll()) { return false; }
 
-  if (not modelPara.submitAll()) {
-    emit errorSignal("Erro salvando 'Para': " + modelPara.lastError().text());
-    return false;
-  }
+  if (not modelPara.submitAll()) { return false; }
 
   return true;
 }
@@ -131,14 +125,14 @@ void InserirTransferencia::setupTables() {
 
   modelDe.setFilter("0");
 
-  if (not modelDe.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'De': " + modelDe.lastError().text());
+  if (not modelDe.select()) { QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'De': " + modelDe.lastError().text()); }
 
   modelPara.setTable("conta_a_receber_has_pagamento");
   modelPara.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelPara.setFilter("0");
 
-  if (not modelPara.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'Para': " + modelPara.lastError().text());
+  if (not modelPara.select()) { QMessageBox::critical(this, "Erro!", "Erro lendo tabela 'Para': " + modelPara.lastError().text()); }
 }
 
 // TODO: 5colocar campo para observacao (na tabela já tem campo observacao, apenas preencher)

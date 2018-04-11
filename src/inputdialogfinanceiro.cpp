@@ -229,14 +229,11 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   [=]() {
     if (representacao) { return; }
 
-    if (not modelFluxoCaixa.select()) emit errorSignal("Erro lendo tabela: " + modelFluxoCaixa.lastError().text());
+    if (not modelFluxoCaixa.select()) { return; }
 
     if (tipo == Tipo::Financeiro) {
       for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-        if (not modelFluxoCaixa.setData(row, "status", "SUBSTITUIDO")) {
-          emit errorSignal("Erro mudando status para 'SUBSTITUIDO'!");
-          return;
-        }
+        if (not modelFluxoCaixa.setData(row, "status", "SUBSTITUIDO")) { return; }
       }
     }
 
@@ -529,31 +526,19 @@ bool InputDialogFinanceiro::cadastrar() {
   if (tipo == Tipo::ConfirmarCompra) {
     for (const auto &item : list) {
       // REFAC: setData already emit errorSignal internally, just set a return false everywhere
-      if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) {
-        emit errorSignal("Erro salvando linhas selecionadas: " + modelPedidoFornecedor.lastError().text());
-        return false;
-      }
+      if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) { return false; }
     }
   }
 
   if (tipo == Tipo::Financeiro) {
     for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) {
-        emit errorSignal("Erro salvando status na tabela: " + modelPedidoFornecedor.lastError().text());
-        return false;
-      }
+      if (not modelPedidoFornecedor.setData(item.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
     }
   }
 
-  if (not modelPedidoFornecedor.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela: " + modelPedidoFornecedor.lastError().text());
-    return false;
-  }
+  if (not modelPedidoFornecedor.submitAll()) { return false; }
 
-  if (not modelFluxoCaixa.submitAll()) {
-    emit errorSignal("Erro salvando dados do pagamento: " + modelFluxoCaixa.lastError().text());
-    return false;
-  }
+  if (not modelFluxoCaixa.submitAll()) { return false; }
 
   return true;
 }
@@ -610,7 +595,7 @@ void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, c
 
   ui->widgetPgts->listComboParc.at(index)->clear();
 
-  for (int i = 0; i < parcelas; ++i) ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
+  for (int i = 0; i < parcelas; ++i) { ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
 
   ui->widgetPgts->listComboParc.at(index)->setEnabled(true);
   ui->widgetPgts->listDatePgt.at(index)->setEnabled(true);
@@ -652,7 +637,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &item : list) total += modelPedidoFornecedor.data(item.row(), "preco").toDouble();
+    for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
 
     const double aliquota = valueSt * 100 / total;
 

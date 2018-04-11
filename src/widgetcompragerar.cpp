@@ -190,10 +190,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
     }
   }
 
-  if (not modelProdutos.submitAll()) {
-    emit errorSignal("Erro salvando dados da tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text());
-    return false;
-  }
+  if (not modelProdutos.submitAll()) { return false; }
 
   return true;
 }
@@ -469,10 +466,7 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
     }
   }
 
-  if (not modelProdutos.submitAll()) {
-    emit errorSignal("Erro salvando dados: " + modelProdutos.lastError().text());
-    return false;
-  }
+  if (not modelProdutos.submitAll()) { return false; }
 
   return true;
 }

@@ -357,10 +357,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     }
   }
 
-  if (not modelTransp.submitAll()) {
-    emit errorSignal("Erro salvando carga veiculo: " + modelTransp.lastError().text());
-    return false;
-  }
+  if (not modelTransp.submitAll()) { return false; }
 
   return true;
 }
@@ -423,6 +420,8 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
+  // TODO: nao deixar adicionar o mesmo item mais de uma vez
+
   if (ui->itemBoxVeiculo->getValue().isNull()) {
     emit errorSignal("Deve escolher uma transportadora antes!");
     return;
@@ -440,7 +439,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
     return;
   }
 
-  if (not adicionarProduto(list)) modelTransp.select();
+  if (not adicionarProduto(list) and not modelTransp.select()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
@@ -451,12 +450,9 @@ void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
     return;
   }
 
-  for (const auto &item : list) modelTransp.removeRow(item.row());
+  for (const auto &item : list) { modelTransp.removeRow(item.row()); }
 
-  if (not modelTransp.submitAll()) {
-    emit errorSignal("Erro comunicando com banco de dados: " + modelTransp.lastError().text());
-    return;
-  }
+  if (not modelTransp.submitAll()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
@@ -470,7 +466,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
   ui->pushButtonAgendarColeta->show();
   ui->pushButtonCancelarCarga->hide();
 
-  if (not modelTransp.select()) emit errorSignal("Erro lendo tabela: " + modelTransp.lastError().text());
+  if (not modelTransp.select()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {

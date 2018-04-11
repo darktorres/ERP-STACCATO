@@ -305,35 +305,17 @@ bool ImportarXML::importar() {
 
   //--------------
 
-  if (not modelEstoque.submitAll()) {
-    emit errorSignal("Erro salvando dados da tabela estoque: " + modelEstoque.lastError().text());
-    return false;
-  }
+  if (not modelEstoque.submitAll()) { return false; }
 
-  if (not modelCompra.submitAll()) {
-    emit errorSignal("Erro salvando dados da tabela compra: " + modelCompra.lastError().text());
-    return false;
-  }
+  if (not modelCompra.submitAll()) { return false; }
 
-  if (not modelConsumo.submitAll()) {
-    emit errorSignal("Erro salvando dados do consumo: " + modelConsumo.lastError().text());
-    return false;
-  }
+  if (not modelConsumo.submitAll()) { return false; }
 
-  if (not modelEstoque_compra.submitAll()) {
-    emit errorSignal("Erro salvando modelEstoque_compra: " + modelEstoque_compra.lastError().text());
-    return false;
-  }
+  if (not modelEstoque_compra.submitAll()) { return false; }
 
-  if (not modelNFe.submitAll()) {
-    emit errorSignal("Erro salvando modelNFe: " + modelNFe.lastError().text());
-    return false;
-  }
+  if (not modelNFe.submitAll()) { return false; }
 
-  if (not modelEstoque_nfe.submitAll()) {
-    emit errorSignal("Erro salvando modelEstoque_nfe: " + modelEstoque_nfe.lastError().text());
-    return false;
-  }
+  if (not modelEstoque_nfe.submitAll()) { return false; }
 
   //------------------------------
   QSqlQuery query;
@@ -529,8 +511,8 @@ std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
 }
 
 bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) {
-  if (static_cast<FieldColors>(modelEstoque.data(rowEstoque, "quantUpd").toInt()) == FieldColors::Green) return true;
-  if (static_cast<FieldColors>(modelCompra.data(rowCompra, "quantUpd").toInt()) == FieldColors::Green) return true;
+  if (static_cast<FieldColors>(modelEstoque.data(rowEstoque, "quantUpd").toInt()) == FieldColors::Green) { return true; }
+  if (static_cast<FieldColors>(modelCompra.data(rowCompra, "quantUpd").toInt()) == FieldColors::Green) { return true; }
 
   //-------------------------------
 
@@ -834,8 +816,8 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   const QString codCompra = modelCompra.data(rowCompra, "codComercial").toString();
   const QString codEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
 
-  if (idVendaProduto == 0) return true;
-  if (codCompra != codEstoque) return true;
+  if (idVendaProduto == 0) { return true; }
+  if (codCompra != codEstoque) { return true; }
 
   const int rowConsumo = modelConsumo.rowCount();
   modelConsumo.insertRow(rowConsumo);

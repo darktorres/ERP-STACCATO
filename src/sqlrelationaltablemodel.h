@@ -8,8 +8,10 @@ class SqlRelationalTableModel final : public QSqlRelationalTableModel {
 
 public:
   explicit SqlRelationalTableModel(const int limit = 0, QObject *parent = nullptr);
-  [[nodiscard]] auto setData(const int row, const int column, const QVariant &value) -> bool;
+  [[nodiscard]] auto select() -> bool final;
   [[nodiscard]] auto setData(const int row, const QString &column, const QVariant &value) -> bool;
+  [[nodiscard]] auto setData(const int row, const int column, const QVariant &value) -> bool;
+  [[nodiscard]] auto submitAll() -> bool;
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
@@ -22,8 +24,10 @@ signals:
 private:
   using QSqlRelationalTableModel::data;
   using QSqlRelationalTableModel::match;
+  using QSqlRelationalTableModel::select;
   using QSqlRelationalTableModel::setData;
   using QSqlRelationalTableModel::setHeaderData;
+  using QSqlRelationalTableModel::submitAll;
 
 protected:
   // attributes

@@ -51,8 +51,8 @@ void ReportRender::initColumns() {
 }
 
 bool ReportRender::isNeedToRearrangeColumnsItems() {
-  if (m_columnedBandItems.size() <= 1) return false;
-  if (m_columnedBandItems[0]->columnsFillDirection() != BandDesignIntf::VerticalUniform) return false;
+  if (m_columnedBandItems.size() <= 1) { return false; }
+  if (m_columnedBandItems[0]->columnsFillDirection() != BandDesignIntf::VerticalUniform) { return false; }
 
   int avg = m_columnedBandItems.size() / m_columnedBandItems[0]->columnsCount();
 
@@ -63,9 +63,7 @@ bool ReportRender::isNeedToRearrangeColumnsItems() {
       maxHeight = m_maxHeightByColumn[i];
       maxHeightColumn = i;
     }
-    if (maxHeightColumn > 0 && columnItemsCount(maxHeightColumn) < avg && maxHeight > lastColumnItem(maxHeightColumn - 1)->height()) {
-      return true;
-    }
+    if (maxHeightColumn > 0 && columnItemsCount(maxHeightColumn) < avg && maxHeight > lastColumnItem(maxHeightColumn - 1)->height()) { return true; }
   }
   return false;
 }
@@ -182,9 +180,7 @@ void ReportRender::renderPage(PageDesignIntf *patternPage) {
   m_curentNameIndex = 0;
   m_patternPageItem = patternPage->pageItem();
 
-  if (m_patternPageItem->resetPageNumber() && m_pageCount > 0) {
-    resetPageNumber(PageReset);
-  }
+  if (m_patternPageItem->resetPageNumber() && m_pageCount > 0) { resetPageNumber(PageReset); }
   m_renderCanceled = false;
   BandDesignIntf *reportFooter = m_patternPageItem->bandByType(BandDesignIntf::ReportFooter);
   m_reportFooterHeight = 0;
@@ -299,9 +295,7 @@ void ReportRender::extractGroupFuntionsFromItem(ContentItemDesignIntf *contentIt
             BandDesignIntf *dataBand = m_patternPageItem->bandByName(captures.at(dsIndex));
             if (dataBand) {
               GroupFunction *gf = datasources()->addGroupFunction(functionName, captures.at(Const::VALUE_INDEX), band->objectName(), dataBand->objectName());
-              if (gf) {
-                connect(dataBand, SIGNAL(bandRendered(BandDesignIntf *)), gf, SLOT(slotBandRendered(BandDesignIntf *)));
-              }
+              if (gf) { connect(dataBand, SIGNAL(bandRendered(BandDesignIntf *)), gf, SLOT(slotBandRendered(BandDesignIntf *))); }
             } else {
               GroupFunction *gf = datasources()->addGroupFunction(functionName, captures.at(Const::VALUE_INDEX), band->objectName(), captures.at(dsIndex));
               gf->setInvalid(tr("Databand \"%1\" not found").arg(captures.at(dsIndex)));
@@ -572,9 +566,7 @@ qreal ReportRender::calcPageFooterHeight(PageItemDesignIntf *patternPage) {
 void ReportRender::renderChildHeader(BandDesignIntf *parent, BandPrintMode printMode) {
   for (BandDesignIntf *band : parent->childrenByType(BandDesignIntf::SubDetailHeader)) {
     bool printAlways = false;
-    if (band->metaObject()->indexOfProperty("printAlways") > 0) {
-      printAlways = band->property("printAlways").toBool();
-    }
+    if (band->metaObject()->indexOfProperty("printAlways") > 0) { printAlways = band->property("printAlways").toBool(); }
     if (printAlways == (printMode == PrintAlwaysPrintable)) renderBand(band, nullptr, StartNewPageAsNeeded);
   }
 }
@@ -582,9 +574,7 @@ void ReportRender::renderChildHeader(BandDesignIntf *parent, BandPrintMode print
 void ReportRender::renderChildFooter(BandDesignIntf *parent, BandPrintMode printMode) {
   for (BandDesignIntf *band : parent->childrenByType(BandDesignIntf::SubDetailFooter)) {
     bool printAlways = false;
-    if (band->metaObject()->indexOfProperty("printAlways") > 0) {
-      printAlways = band->property("printAlways").toBool();
-    }
+    if (band->metaObject()->indexOfProperty("printAlways") > 0) { printAlways = band->property("printAlways").toBool(); }
 
     if ((band != m_lastRenderedFooter) && (printAlways == (printMode == PrintAlwaysPrintable))) renderBand(band, nullptr, StartNewPageAsNeeded);
   }
@@ -617,9 +607,7 @@ void ReportRender::renderGroupHeader(BandDesignIntf *parentBand, IDataSource *da
 
         for (BandDesignIntf *footer : band->childrenByType(BandDesignIntf::GroupFooter)) renderBand(footer, nullptr, StartNewPageAsNeeded);
 
-        if (didGoBack) {
-          dataSource->next();
-        }
+        if (didGoBack) { dataSource->next(); }
       }
       closeDataGroup(band);
       //            if (gb->isNeedToStartNewPage()){
@@ -812,9 +800,7 @@ bool ReportRender::registerBand(BandDesignIntf *band, bool registerInChildren) {
         band->setColumnIndex(m_currentColumn);
       }
 
-      if (band->columnsCount() > 1) {
-        m_columnedBandItems.append(band);
-      }
+      if (band->columnsCount() > 1) { m_columnedBandItems.append(band); }
 
       m_renderPageItem->registerBand(band);
     }
@@ -840,9 +826,7 @@ BandDesignIntf *ReportRender::sliceBand(BandDesignIntf *band, BandDesignIntf *pa
     band = saveUppperPartReturnBottom(band, m_maxHeightByColumn[m_currentColumn], patternBand);
     if (!band->isEmpty()) {
       if (band->autoHeight()) {
-        if (band->isNeedUpdateSize(FirstPass)) {
-          band->setHeight(0);
-        }
+        if (band->isNeedUpdateSize(FirstPass)) { band->setHeight(0); }
         band->updateItemSize(m_datasources);
       }
       DataBandDesignIntf *data = dynamic_cast<DataBandDesignIntf *>(band);
@@ -907,9 +891,7 @@ BandDesignIntf *ReportRender::renderData(BandDesignIntf *patternBand) {
   baseDesignIntfToScript(bandClone);
   emit(patternBand->beforeRender());
 
-  if (patternBand->isFooter()) {
-    replaceGroupsFunction(bandClone);
-  }
+  if (patternBand->isFooter()) { replaceGroupsFunction(bandClone); }
   bandClone->updateItemSize(m_datasources);
 
   baseDesignIntfToScript(bandClone);
@@ -997,9 +979,7 @@ void ReportRender::checkFooterGroup(BandDesignIntf *groupBand) {
     GroupBandsHolder *holder = m_childBands.value(groupBand);
     for (BandDesignIntf *band : *holder) {
       qreal percent = band->height() * 100 / m_dataAreaSize;
-      if (m_renderedDataBandCount <= 1 || percent > 20) {
-        holder->removeAll(band);
-      }
+      if (m_renderedDataBandCount <= 1 || percent > 20) { holder->removeAll(band); }
     }
   }
 }
@@ -1113,9 +1093,7 @@ void ReportRender::savePage(bool isLast) {
 
   if (isLast) {
     BandDesignIntf *ph = m_renderPageItem->bandByType(BandDesignIntf::PageHeader);
-    if (ph && !ph->property("printOnLastPage").toBool()) {
-      delete ph;
-    }
+    if (ph && !ph->property("printOnLastPage").toBool()) { delete ph; }
   }
 
   moveTearOffBand();

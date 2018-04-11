@@ -38,7 +38,7 @@ bool NumFormatParser::isDateTime(const QString &formatCode) {
       // [h], [m], [s] are valid format for time
       if (i < formatCode.length() - 2 and formatCode[i + 2] == QLatin1Char(']')) {
         const QChar cc = formatCode[i + 1].toLower();
-        if (cc == QLatin1Char('h') or cc == QLatin1Char('m') or cc == QLatin1Char('s')) return true;
+        if (cc == QLatin1Char('h') or cc == QLatin1Char('m') or cc == QLatin1Char('s')) { return true; }
         i += 2;
         break;
       } else {

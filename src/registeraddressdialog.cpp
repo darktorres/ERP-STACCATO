@@ -34,7 +34,7 @@ void RegisterAddressDialog::setupTables(const QString &table) {
 }
 
 bool RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) {
-  if (value.isNull() or (value.type() == QVariant::String and value.toString().isEmpty())) return true;
+  if (value.isNull() or (value.type() == QVariant::String and value.toString().isEmpty())) { return true; }
 
   const int rowEnd = currentRowEnd != -1 ? currentRowEnd : mapperEnd.currentIndex();
 

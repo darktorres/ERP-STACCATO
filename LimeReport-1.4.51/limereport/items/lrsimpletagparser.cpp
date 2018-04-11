@@ -158,9 +158,9 @@ QVector<TagDiff> HtmlContext::tagVectDiff(QVector<Tag *> source, QVector<Tag *> 
 }
 
 bool HtmlContext::isVectorEqual(QVector<Tag *> source, QVector<Tag *> dest) {
-  if (source.count() != dest.count()) return false;
+  if (source.count() != dest.count()) { return false; }
   for (Tag *tag : source) {
-    if (!dest.contains(tag)) return false;
+    if (!dest.contains(tag)) { return false; }
   }
   return true;
 }
@@ -168,9 +168,7 @@ bool HtmlContext::isVectorEqual(QVector<Tag *> source, QVector<Tag *> dest) {
 QString HtmlContext::extendTextByTags(QString text, int pos) {
   QString curText = "";
   QVector<Tag *> curTags = tagsAt(pos);
-  for (int i = 0; i < curTags.count(); i++) {
-    curText += '<' + curTags.at(i)->tagText() + '>';
-  }
+  for (int i = 0; i < curTags.count(); i++) { curText += '<' + curTags.at(i)->tagText() + '>'; }
 
   for (int i = 0; i < text.length(); i++, pos++) {
     QVector<Tag *> tagsAtPos = tagsAt(pos);
@@ -197,9 +195,7 @@ QString HtmlContext::extendTextByTags(QString text, int pos) {
   }
 
   curTags = tagsAt(pos);
-  for (int i = 0; i < curTags.count(); i++) {
-    curText += "</" + HtmlContext::extractWord(curTags.at(i)->tagText(), 1) + '>';
-  }
+  for (int i = 0; i < curTags.count(); i++) { curText += "</" + HtmlContext::extractWord(curTags.at(i)->tagText(), 1) + '>'; }
 
   return curText;
 }

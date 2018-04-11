@@ -419,7 +419,7 @@ bool Venda::verifyFields() {
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
 
-  if (ui->framePagamentos_2->isHidden()) return true;
+  if (ui->framePagamentos_2->isHidden()) { return true; }
 
   if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) {
     emit errorSignal("Total dos pagamentos difere do total do pedido!");
@@ -725,7 +725,7 @@ bool Venda::viewRegister() {
     ui->checkBoxRT->setChecked(false);
     ui->checkBoxRT->setHidden(true);
 
-    if (data("devolucao").toBool()) ui->pushButtonDevolucao->hide();
+    if (data("devolucao").toBool()) { ui->pushButtonDevolucao->hide(); }
   }();
 
   setupConnections();
@@ -769,17 +769,11 @@ void Venda::montarFluxoCaixa() {
 
   if (financeiro) {
     for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-      if (not modelFluxoCaixa.setData(row, "status", "SUBSTITUIDO")) {
-        emit errorSignal("Erro mudando status para 'SUBSTITUIDO'!");
-        return;
-      }
+      if (not modelFluxoCaixa.setData(row, "status", "SUBSTITUIDO")) { return; }
     }
 
     for (int row = 0; row < modelFluxoCaixa2.rowCount(); ++row) {
-      if (not modelFluxoCaixa2.setData(row, "status", "SUBSTITUIDO")) {
-        emit errorSignal("Erro mudando status para 'SUBSTITUIDO'!");
-        return;
-      }
+      if (not modelFluxoCaixa2.setData(row, "status", "SUBSTITUIDO")) { return; }
     }
   }
 
@@ -1064,10 +1058,7 @@ bool Venda::cadastrar() {
   }
   //
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro ao cadastrar: " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = ui->lineEditVenda->text();
 
@@ -1080,28 +1071,19 @@ bool Venda::cadastrar() {
     if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
   }
 
-  if (not modelFluxoCaixa.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-    return false;
-  }
+  if (not modelFluxoCaixa.submitAll()) { return false; }
 
   for (int row = 0; row < modelFluxoCaixa2.rowCount(); ++row) {
     if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
   }
 
-  if (not modelFluxoCaixa2.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa2.lastError().text());
-    return false;
-  }
+  if (not modelFluxoCaixa2.submitAll()) { return false; }
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (not modelItem.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
   }
 
-  if (not modelItem.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela venda_has_produto: " + modelItem.lastError().text());
-    return false;
-  }
+  if (not modelItem.submitAll()) { return false; }
 
   query.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p on p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1114,10 +1096,7 @@ bool Venda::cadastrar() {
   while (query.next()) {
     auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
 
-    if (not estoque->criarConsumo(query.value("idVendaProduto").toInt(), query.value("quant").toDouble())) {
-      emit errorSignal("Erro criando consumo!");
-      return false;
-    }
+    if (not estoque->criarConsumo(query.value("idVendaProduto").toInt(), query.value("quant").toDouble())) { return false; }
   }
 
   if (not atualizaQuantEstoque()) { return false; }
@@ -1367,7 +1346,7 @@ void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
   ui->tableFluxoCaixa2->show();
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE DEPARTAMENTO") ui->pushButtonCorrigirFluxo->hide();
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
 
   ui->frameButtons->hide();
   financeiro = true;
@@ -1377,30 +1356,15 @@ bool Venda::financeiroSalvar() {
   // REFAC: if false return
   atualizarCredito();
 
-  if (not model.setData(mapper.currentIndex(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) {
-    emit errorSignal("Erro salvando status financeiro: " + model.lastError().text());
-    return false;
-  }
+  if (not model.setData(mapper.currentIndex(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
 
-  if (not model.setData(mapper.currentIndex(), "dataFinanceiro", QDateTime::currentDateTime())) {
-    emit errorSignal("Erro salvando status financeiro: " + model.lastError().text());
-    return false;
-  }
+  if (not model.setData(mapper.currentIndex(), "dataFinanceiro", QDateTime::currentDateTime())) { return false; }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro salvando dados: " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
-  if (not modelFluxoCaixa.submitAll()) {
-    emit errorSignal("Erro salvando pagamentos: " + modelFluxoCaixa.lastError().text());
-    return false;
-  }
+  if (not modelFluxoCaixa.submitAll()) { return false; }
 
-  if (not modelFluxoCaixa2.submitAll()) {
-    emit errorSignal("Erro salvando taxa/comissão: " + modelFluxoCaixa2.lastError().text());
-    return false;
-  }
+  if (not modelFluxoCaixa2.submitAll()) { return false; }
 
   return true;
 }
@@ -1490,7 +1454,7 @@ void Venda::on_checkBoxPontuacaoIsento_toggled(bool checked) {
 }
 
 void Venda::on_checkBoxRT_toggled(bool checked) {
-  for (auto &item : ui->frameRT->findChildren<QWidget *>()) item->setVisible(checked);
+  for (auto &item : ui->frameRT->findChildren<QWidget *>()) { item->setVisible(checked); }
 
   ui->checkBoxRT->setText(checked ? "Pontuação" : "");
 }

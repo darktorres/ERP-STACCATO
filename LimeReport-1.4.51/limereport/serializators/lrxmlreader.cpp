@@ -120,7 +120,7 @@ void XMLReader::setPassPhrase(const QString &passPhrase) { m_passPhrase = passPh
 bool XMLReader::extractFirstNode() {
   if (m_firstNode.isNull()) {
     if (m_doc->childNodes().count() == 0) {
-      if (!prepareReader(m_doc.data())) return false;
+      if (!prepareReader(m_doc.data())) { return false; }
     }
     m_firstNode = m_doc->documentElement();
     if (!m_firstNode.hasAttributes()) m_firstNode = m_firstNode.firstChildElement();
@@ -134,16 +134,12 @@ QVariant XMLReader::getValue(QDomElement *node) {
   CreateSerializator creator = nullptr;
   try {
     creator = XMLAbstractSerializatorFactory::instance().objectCreator(node->attribute("Type"));
-  } catch (ReportError &e) {
-    qDebug() << node->attribute("Type") << e.what();
-  }
+  } catch (ReportError &e) { qDebug() << node->attribute("Type") << e.what(); }
 
   if (creator) {
     QScopedPointer<SerializatorIntf> serializator(creator(m_doc.data(), node));
     CryptedSerializator *cs = dynamic_cast<CryptedSerializator *>(serializator.data());
-    if (cs) {
-      cs->setPassPhrase(m_passPhrase);
-    }
+    if (cs) { cs->setPassPhrase(m_passPhrase); }
     return serializator->loadValue();
   }
   return QVariant();

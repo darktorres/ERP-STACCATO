@@ -159,10 +159,7 @@ bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
     if (not enviarExcedenteParaCompra(row, dataPrevista)) { return false; }
   }
 
-  if (not modelProdutos.submitAll()) {
-    emit errorSignal("Erro salvando tabela venda_produto: " + modelProdutos.lastError().text());
-    return false;
-  }
+  if (not modelProdutos.submitAll()) { return false; }
 
   return true;
 }
@@ -278,10 +275,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   // TODO: 0fazer vinculo no pedido_fornecedor (quebrar as linhas)
 
   // model submit
-  if (not modelProdutos.submitAll()) {
-    emit errorSignal("Erro salvando tabela venda_produto: " + modelProdutos.lastError().text());
-    return false;
-  }
+  if (not modelProdutos.submitAll()) { return false; }
 
   return true;
 }

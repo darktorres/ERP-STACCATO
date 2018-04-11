@@ -636,18 +636,18 @@ bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
 
 bool ImportaProdutos::camposForaDoPadrao() {
   // Errados
-  if (variantMap.value("colecao").toString() == "REPETIDO") return true;
+  if (variantMap.value("colecao").toString() == "REPETIDO") { return true; }
 
   const QString un = variantMap.value("un").toString();
-  if ((un == "M2" or un == "M²" or un == "ML") and variantMap.value("m2cx") <= 0.) return true;
-  if (un != "M2" and un != "M²" and un != "ML" and variantMap.value("pccx") < 1) return true;
+  if ((un == "M2" or un == "M²" or un == "ML") and variantMap.value("m2cx") <= 0.) { return true; }
+  if (un != "M2" and un != "M²" and un != "ML" and variantMap.value("pccx") < 1) { return true; }
 
   const QString codComercial = variantMap.value("codComercial").toString();
-  if (codComercial == "0" or codComercial.isEmpty()) return true;
+  if (codComercial == "0" or codComercial.isEmpty()) { return true; }
 
-  if (variantMap.value("custo") <= 0.) return true;
-  if (variantMap.value("precoVenda") <= 0.) return true;
-  if (variantMap.value("precoVenda") < variantMap.value("custo")) return true;
+  if (variantMap.value("custo") <= 0.) { return true; }
+  if (variantMap.value("precoVenda") <= 0.) { return true; }
+  if (variantMap.value("precoVenda") < variantMap.value("custo")) { return true; }
 
   return false;
 }
@@ -781,7 +781,6 @@ bool ImportaProdutos::buscarCadastrarFornecedor(const QString &fornecedor, int &
 
 void ImportaProdutos::salvar() {
   if (not modelProduto.submitAll()) {
-    emit errorSignal("Ocorreu um erro ao salvar os dados: " + modelProduto.lastError().text());
     // TODO: 5refactor this because after this runs the transaction is no more
     // REFAC: wrap in a lambda
     QSqlQuery("ROLLBACK").exec();
@@ -857,7 +856,7 @@ void ImportaProdutos::closeEvent(QCloseEvent *event) {
 
 void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
   for (int row = 0, rowCount = modelProduto.rowCount(); row < rowCount; ++row) {
-    if (not modelProduto.setData(row, "representacao", checked)) emit errorSignal("Erro guardando 'Representacao' em Produto: " + modelProduto.lastError().text());
+    if (not modelProduto.setData(row, "representacao", checked)) { return; }
   }
 
   QSqlQuery query;

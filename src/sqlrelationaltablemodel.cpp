@@ -53,8 +53,26 @@ bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVarian
 
 Qt::DropActions SqlRelationalTableModel::supportedDropActions() const { return Qt::MoveAction; }
 
+bool SqlRelationalTableModel::submitAll() {
+  if (not QSqlTableModel::submitAll()) {
+    emit errorSignal("Erro salvando tabela: " + QSqlTableModel::lastError().text());
+    return false;
+  }
+
+  return true;
+}
+
 QString SqlRelationalTableModel::selectStatement() const { return QSqlRelationalTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
 
 QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
   return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, QSqlRelationalTableModel::fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
+}
+
+bool SqlRelationalTableModel::select() {
+  if (not QSqlRelationalTableModel::select()) {
+    emit errorSignal("Erro lendo tabela: " + QSqlTableModel::lastError().text());
+    return false;
+  }
+
+  return true;
 }

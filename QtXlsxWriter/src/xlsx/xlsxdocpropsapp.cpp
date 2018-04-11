@@ -45,7 +45,7 @@ bool DocPropsApp::setProperty(const QString &name, const QString &value) {
   static QStringList validKeys;
   if (validKeys.isEmpty()) { validKeys << QStringLiteral("manager") << QStringLiteral("company"); }
 
-  if (not validKeys.contains(name)) return false;
+  if (not validKeys.contains(name)) { return false; }
 
   if (value.isEmpty())
     m_properties.remove(name);

@@ -321,10 +321,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS)) { return false; }
   if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS)) { return false; }
 
-  if (not modelConsumo.submitAll()) {
-    emit errorSignal("Erro salvando dados: " + modelConsumo.lastError().text());
-    return false;
-  }
+  if (not modelConsumo.submitAll()) { return false; }
 
   if (not atualizaQuantEstoque()) { return false; }
 
@@ -385,10 +382,7 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
     if (not modelCompra.setData(0, "idVendaProduto", idVendaProduto)) { return false; }
   }
 
-  if (not modelCompra.submitAll()) {
-    emit errorSignal("Erro salvando dados da compra: " + modelCompra.lastError().text());
-    return false;
-  }
+  if (not modelCompra.submitAll()) { return false; }
 
   return true;
 }

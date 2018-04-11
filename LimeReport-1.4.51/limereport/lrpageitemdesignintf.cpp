@@ -138,14 +138,14 @@ BandDesignIntf *PageItemDesignIntf::bandByType(BandDesignIntf::BandsType bandTyp
 
 bool PageItemDesignIntf::isBandExists(BandDesignIntf::BandsType bandType) {
   for (BandDesignIntf *band : childBands()) {
-    if (band->bandType() == bandType) return true;
+    if (band->bandType() == bandType) { return true; }
   }
   return false;
 }
 
 bool PageItemDesignIntf::isBandExists(const QString &bandType) {
   for (BandDesignIntf *band : m_bands) {
-    if (band->bandTitle() == bandType) return true;
+    if (band->bandTitle() == bandType) { return true; }
   }
   return false;
 }
@@ -159,9 +159,7 @@ BandDesignIntf *PageItemDesignIntf::bandByIndex(int index) {
 
 BandDesignIntf *PageItemDesignIntf::bandByName(QString bandObjectName) {
   for (BandDesignIntf *band : childBands()) {
-    if (band->objectName().compare(bandObjectName, Qt::CaseInsensitive) == 0) {
-      return band;
-    }
+    if (band->objectName().compare(bandObjectName, Qt::CaseInsensitive) == 0) { return band; }
   }
   return nullptr;
 }
@@ -199,9 +197,7 @@ int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDe
   if (parentBand) {
 
     BandDesignIntf *dataBand = parentBand;
-    while (dataBand->parentBand() && dataBand->bandType() == BandDesignIntf::GroupHeader) {
-      dataBand = dataBand->parentBand();
-    }
+    while (dataBand->parentBand() && dataBand->bandType() == BandDesignIntf::GroupHeader) { dataBand = dataBand->parentBand(); }
 
     switch (bandType) {
     case BandDesignIntf::SubDetailBand:
@@ -244,16 +240,14 @@ int PageItemDesignIntf::calcBandIndex(BandDesignIntf::BandsType bandType, BandDe
 void PageItemDesignIntf::increaseBandIndex(int startIndex) {
   if (bandByIndex(startIndex)) {
     for (BandDesignIntf *band : m_bands) {
-      if (band->bandIndex() >= startIndex) {
-        band->setBandIndex(band->bandIndex() + 1);
-      }
+      if (band->bandIndex() >= startIndex) { band->setBandIndex(band->bandIndex() + 1); }
     }
   }
 }
 
 bool PageItemDesignIntf::isBandRegistred(BandDesignIntf *band) {
   for (BandDesignIntf *cBand : childBands()) {
-    if (band == cBand) return true;
+    if (band == cBand) { return true; }
   }
   return false;
 }
@@ -275,9 +269,7 @@ void PageItemDesignIntf::registerBand(BandDesignIntf *band) {
 
 void PageItemDesignIntf::initColumnsPos(QVector<qreal> &posByColumns, qreal pos, int columnCount) {
   posByColumns.clear();
-  for (int i = 0; i < columnCount; ++i) {
-    posByColumns.append(pos);
-  }
+  for (int i = 0; i < columnCount; ++i) { posByColumns.append(pos); }
 }
 
 bool PageItemDesignIntf::resetPageNumber() const { return m_resetPageNumber; }
@@ -285,9 +277,7 @@ bool PageItemDesignIntf::resetPageNumber() const { return m_resetPageNumber; }
 void PageItemDesignIntf::setResetPageNumber(bool resetPageNumber) {
   if (m_resetPageNumber != resetPageNumber) {
     m_resetPageNumber = resetPageNumber;
-    if (!isLoading()) {
-      notify("resetPageNumber", !m_resetPageNumber, m_resetPageNumber);
-    }
+    if (!isLoading()) { notify("resetPageNumber", !m_resetPageNumber, m_resetPageNumber); }
   }
 }
 
@@ -358,9 +348,7 @@ void PageItemDesignIntf::relocateBands() {
 }
 
 void PageItemDesignIntf::removeBand(BandDesignIntf *band) {
-  if (!m_bands.isEmpty()) {
-    m_bands.removeOne(band);
-  }
+  if (!m_bands.isEmpty()) { m_bands.removeOne(band); }
 }
 
 int PageItemDesignIntf::dataBandCount() {
@@ -537,9 +525,7 @@ void PageItemDesignIntf::collectionLoadFinished(const QString &collectionName) {
     for (QObject *obj : QObject::children()) {
 #endif
       BandDesignIntf *item = dynamic_cast<BandDesignIntf *>(obj);
-      if (item) {
-        registerBand(item);
-      }
+      if (item) { registerBand(item); }
     }
   }
   BaseDesignIntf::collectionLoadFinished(collectionName);
@@ -553,9 +539,7 @@ void PageItemDesignIntf::updateMarginRect() {
     relocateBands();
   }
   for (BaseDesignIntf *item : childBaseItems()) {
-    if (item->itemAlign() != DesignedItemAlign) {
-      item->updateItemAlign();
-    }
+    if (item->itemAlign() != DesignedItemAlign) { item->updateItemAlign(); }
   }
   update();
 }
@@ -564,21 +548,13 @@ void PageItemDesignIntf::paintGrid(QPainter *ppainter) {
   ppainter->save();
   ppainter->setPen(QPen(gridColor()));
   ppainter->setOpacity(0.5);
-  for (int i = 0; i <= (pageRect().height() - 50) / 100; i++) {
-    ppainter->drawLine(pageRect().x(), (i * 100) + pageRect().y() + 50, pageRect().right(), i * 100 + pageRect().y() + 50);
-  };
-  for (int i = 0; i <= ((pageRect().width() - 50) / 100); i++) {
-    ppainter->drawLine(i * 100 + pageRect().x() + 50, pageRect().y(), i * 100 + pageRect().x() + 50, pageRect().bottom());
-  };
+  for (int i = 0; i <= (pageRect().height() - 50) / 100; i++) { ppainter->drawLine(pageRect().x(), (i * 100) + pageRect().y() + 50, pageRect().right(), i * 100 + pageRect().y() + 50); };
+  for (int i = 0; i <= ((pageRect().width() - 50) / 100); i++) { ppainter->drawLine(i * 100 + pageRect().x() + 50, pageRect().y(), i * 100 + pageRect().x() + 50, pageRect().bottom()); };
 
   ppainter->setPen(QPen(gridColor()));
   ppainter->setOpacity(1);
-  for (int i = 0; i <= (pageRect().width() / 100); i++) {
-    ppainter->drawLine(i * 100 + pageRect().x(), pageRect().y(), i * 100 + pageRect().x(), pageRect().bottom());
-  };
-  for (int i = 0; i <= pageRect().height() / 100; i++) {
-    ppainter->drawLine(pageRect().x(), i * 100 + pageRect().y(), pageRect().right(), i * 100 + pageRect().y());
-  };
+  for (int i = 0; i <= (pageRect().width() / 100); i++) { ppainter->drawLine(i * 100 + pageRect().x(), pageRect().y(), i * 100 + pageRect().x(), pageRect().bottom()); };
+  for (int i = 0; i <= pageRect().height() / 100; i++) { ppainter->drawLine(pageRect().x(), i * 100 + pageRect().y(), pageRect().right(), i * 100 + pageRect().y()); };
   ppainter->drawRect(pageRect());
   ppainter->restore();
 }

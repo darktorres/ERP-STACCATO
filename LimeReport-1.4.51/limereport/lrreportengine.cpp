@@ -134,9 +134,7 @@ void ReportEnginePrivate::showError(QString message) { QMessageBox::critical(nul
 void ReportEnginePrivate::slotDataSourceCollectionLoaded(const QString &collectionName) { emit datasourceCollectionLoadFinished(collectionName); }
 
 void ReportEnginePrivate::slotPreviewWindowDestroyed(QObject *window) {
-  if (m_activePreview == window) {
-    m_activePreview = nullptr;
-  }
+  if (m_activePreview == window) { m_activePreview = nullptr; }
 }
 
 void ReportEnginePrivate::clearReport() {
@@ -234,7 +232,7 @@ bool ReportEnginePrivate::printReport(QPrinter *printer) {
     QPrintDialog dialog(m_printer.data(), QApplication::activeWindow());
     m_printerSelected = dialog.exec() != QDialog::Rejected;
   }
-  if (!printer && !m_printerSelected) return false;
+  if (!printer && !m_printerSelected) { return false; }
 
   printer = (printer) ? printer : m_printer.data();
   if (printer && printer->isValid()) {
@@ -242,12 +240,8 @@ bool ReportEnginePrivate::printReport(QPrinter *printer) {
       dataManager()->setDesignTime(false);
       ReportPages pages = renderToPages();
       dataManager()->setDesignTime(true);
-      if (pages.count() > 0) {
-        printReport(pages, *printer);
-      }
-    } catch (ReportError &exception) {
-      saveError(exception.what());
-    }
+      if (pages.count() > 0) { printReport(pages, *printer); }
+    } catch (ReportError &exception) { saveError(exception.what()); }
     return true;
   } else
     return false;
@@ -259,17 +253,13 @@ bool ReportEnginePrivate::printPages(ReportPages pages, QPrinter *printer) {
     QPrintDialog dialog(m_printer.data(), QApplication::activeWindow());
     m_printerSelected = dialog.exec() != QDialog::Rejected;
   }
-  if (!printer && !m_printerSelected) return false;
+  if (!printer && !m_printerSelected) { return false; }
 
   printer = (printer) ? printer : m_printer.data();
   if (printer && printer->isValid()) {
     try {
-      if (pages.count() > 0) {
-        printReport(pages, *printer);
-      }
-    } catch (ReportError &exception) {
-      saveError(exception.what());
-    }
+      if (pages.count() > 0) { printReport(pages, *printer); }
+    } catch (ReportError &exception) { saveError(exception.what()); }
     return true;
   } else
     return false;
@@ -284,9 +274,7 @@ void ReportEnginePrivate::printToFile(const QString &fileName) {
         dataManager()->setDesignTime(false);
         out << renderToString();
         dataManager()->setDesignTime(true);
-      } catch (ReportError &exception) {
-        saveError(exception.what());
-      }
+      } catch (ReportError &exception) { saveError(exception.what()); }
     }
     file.close();
   }
@@ -321,9 +309,7 @@ void ReportEnginePrivate::previewReport(PreviewHints hints) {
       w->setWindowTitle(m_previewWindowTitle);
       w->setSettings(settings());
       w->setPages(pages);
-      if (!dataManager()->errorsList().isEmpty()) {
-        w->setErrorMessages(dataManager()->errorsList());
-      }
+      if (!dataManager()->errorsList().isEmpty()) { w->setErrorMessages(dataManager()->errorsList()); }
 
       if (!hints.testFlag(PreviewBarsUserSetting)) {
         w->setMenuVisible(!hints.testFlag(HidePreviewMenuBar));
@@ -383,7 +369,7 @@ void ReportEnginePrivate::emitSaveFinished() { emit saveFinished(); }
 
 bool ReportEnginePrivate::isSaved() {
   for (PageDesignIntf *page : m_pages) {
-    if (!page->isSaved()) return false;
+    if (!page->isSaved()) { return false; }
   }
   return true;
 }
@@ -432,9 +418,7 @@ bool ReportEnginePrivate::slotLoadFromFile(const QString &fileName) {
 
       dataManager()->connectAutoConnections();
 
-      if (hasActivePreview()) {
-        currentPreview->reloadPreview();
-      }
+      if (hasActivePreview()) { currentPreview->reloadPreview(); }
       return true;
     };
   }
@@ -491,13 +475,9 @@ QSettings *ReportEnginePrivate::settings() {
 
 bool ReportEnginePrivate::loadFromFile(const QString &fileName, bool autoLoadPreviewOnChange) {
   // only watch one file at a time
-  if (!m_fileWatcher->files().isEmpty()) {
-    m_fileWatcher->removePaths(m_fileWatcher->files());
-  }
+  if (!m_fileWatcher->files().isEmpty()) { m_fileWatcher->removePaths(m_fileWatcher->files()); }
 
-  if (autoLoadPreviewOnChange) {
-    m_fileWatcher->addPath(fileName);
-  }
+  if (autoLoadPreviewOnChange) { m_fileWatcher->addPath(fileName); }
 
   return slotLoadFromFile(fileName);
 }
@@ -533,7 +513,7 @@ bool ReportEnginePrivate::loadFromString(const QString &report, const QString &n
 }
 
 bool ReportEnginePrivate::saveToFile(const QString &fileName) {
-  if (fileName.isEmpty()) return false;
+  if (fileName.isEmpty()) { return false; }
   QFileInfo fi(fileName);
   QString fn = fileName;
   if (fi.suffix().isEmpty()) fn += ".lrxml";
@@ -597,13 +577,13 @@ QString ReportEnginePrivate::saveToString() {
 
 bool ReportEnginePrivate::isNeedToSave() {
   for (PageDesignIntf *page : m_pages) {
-    if (page->isHasChanges()) return true;
+    if (page->isHasChanges()) { return true; }
   }
   return false;
 }
 
 bool ReportEnginePrivate::saveToFile() {
-  if (m_fileName.isEmpty()) return false;
+  if (m_fileName.isEmpty()) { return false; }
   return saveToFile(m_fileName);
 }
 
@@ -623,16 +603,12 @@ void ReportEnginePrivate::setPassPhrase(const QString &passPhrase) { m_passPhras
 
 void ReportEnginePrivate::reorderPages(const QList<PageDesignIntf *> &reorderedPages) {
   m_pages.clear();
-  for (PageDesignIntf *page : reorderedPages) {
-    m_pages.append(page);
-  }
+  for (PageDesignIntf *page : reorderedPages) { m_pages.append(page); }
 }
 
 void ReportEnginePrivate::clearSelection() {
   for (PageDesignIntf *page : m_pages) {
-    for (QGraphicsItem *item : page->selectedItems()) {
-      item->setSelected(false);
-    }
+    for (QGraphicsItem *item : page->selectedItems()) { item->setSelected(false); }
   }
 }
 

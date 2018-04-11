@@ -162,7 +162,7 @@ ConditionalFormatting::~ConditionalFormatting() {}
  * Return false if failed.
  */
 bool ConditionalFormatting::addHighlightCellsRule(HighlightRuleType type, const QString &formula1, const QString &formula2, const Format &format, bool stopIfTrue) {
-  if (format.isEmpty()) return false;
+  if (format.isEmpty()) { return false; }
 
   bool skipFormula = false;
 
@@ -295,7 +295,7 @@ bool ConditionalFormatting::addHighlightCellsRule(HighlightRuleType type, const 
  * Return false if failed.
  */
 bool ConditionalFormatting::addHighlightCellsRule(HighlightRuleType type, const QString &formula, const Format &format, bool stopIfTrue) {
-  if (type == Highlight_Between or type == Highlight_NotBetween) return false;
+  if (type == Highlight_Between or type == Highlight_NotBetween) { return false; }
 
   return addHighlightCellsRule(type, formula, QString(), format, stopIfTrue);
 }
@@ -476,9 +476,7 @@ bool ConditionalFormattingPrivate::readCfRule(QXmlStreamReader &reader, XlsxCfRu
         readCfColorScale(reader, rule);
       }
     }
-    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("conditionalFormatting")) {
-      break;
-    }
+    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("conditionalFormatting")) { break; }
   }
   return true;
 }
@@ -504,9 +502,7 @@ bool ConditionalFormattingPrivate::readCfDataBar(QXmlStreamReader &reader, XlsxC
         rule->attrs[XlsxCfRuleData::A_color1] = color;
       }
     }
-    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("dataBar")) {
-      break;
-    }
+    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("dataBar")) { break; }
   }
 
   return true;
@@ -538,9 +534,7 @@ bool ConditionalFormattingPrivate::readCfColorScale(QXmlStreamReader &reader, Xl
           rule->attrs[XlsxCfRuleData::A_color3] = color;
       }
     }
-    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("colorScale")) {
-      break;
-    }
+    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("colorScale")) { break; }
   }
 
   return true;
@@ -593,9 +587,7 @@ bool ConditionalFormatting::loadFromXml(QXmlStreamReader &reader, Styles *styles
         d->cfRules.append(cfRule);
       }
     }
-    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("conditionalFormatting")) {
-      break;
-    }
+    if (reader.tokenType() == QXmlStreamReader::EndElement and reader.name() == QStringLiteral("conditionalFormatting")) { break; }
   }
 
   return true;

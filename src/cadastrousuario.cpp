@@ -133,7 +133,7 @@ bool CadastroUsuario::viewRegister() {
 
   modelPermissoes.setFilter("idUsuario = " + data("idUsuario").toString());
 
-  modelPermissoes.select();
+  if (not modelPermissoes.select()) { return false; }
 
   for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
 
@@ -180,10 +180,7 @@ bool CadastroUsuario::cadastrar() {
     }
   }
 
-  if (not model.submitAll()) {
-    emit errorSignal("Erro salvando dados na tabela " + model.tableName() + ": " + model.lastError().text());
-    return false;
-  }
+  if (not model.submitAll()) { return false; }
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
 
@@ -222,17 +219,11 @@ bool CadastroUsuario::cadastrar() {
     if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
     if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
 
-    if (not modelPermissoes.submitAll()) {
-      emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());
-      return false;
-    }
+    if (not modelPermissoes.submitAll()) { return false; }
   }
 
   if (tipo == Tipo::Atualizar) {
-    if (not modelPermissoes.submitAll()) {
-      emit errorSignal("Erro salvando permissões: " + modelPermissoes.lastError().text());
-      return false;
-    }
+    if (not modelPermissoes.submitAll()) { return false; }
   }
 
   return true;

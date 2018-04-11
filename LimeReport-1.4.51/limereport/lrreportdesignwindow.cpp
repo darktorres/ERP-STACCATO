@@ -622,13 +622,9 @@ void ReportDesignWindow::restoreSetting() {
     move(x, y);
   }
   v = settings()->value("State");
-  if (v.isValid()) {
-    restoreState(v.toByteArray());
-  }
+  if (v.isValid()) { restoreState(v.toByteArray()); }
   v = settings()->value("InspectorFirsColumnWidth");
-  if (v.isValid()) {
-    m_objectInspector->setColumnWidth(0, v.toInt());
-  }
+  if (v.isValid()) { m_objectInspector->setColumnWidth(0, v.toInt()); }
 
   settings()->endGroup();
 
@@ -708,15 +704,11 @@ void ReportDesignWindow::slotNewReport() {
 }
 
 void ReportDesignWindow::slotNewPage() {
-  if (m_reportDesignWidget) {
-    m_reportDesignWidget->addPage();
-  }
+  if (m_reportDesignWidget) { m_reportDesignWidget->addPage(); }
 }
 
 void ReportDesignWindow::slotDeletePage() {
-  if (m_reportDesignWidget && m_reportDesignWidget->report()->pageCount() > 1) {
-    m_reportDesignWidget->deleteCurrentPage();
-  }
+  if (m_reportDesignWidget && m_reportDesignWidget->report()->pageCount() > 1) { m_reportDesignWidget->deleteCurrentPage(); }
 }
 
 void ReportDesignWindow::slotNewTextItem() {
@@ -759,12 +751,8 @@ void ReportDesignWindow::slotItemSelected(LimeReport::BaseDesignIntf *item) {
     bs << BandDesignIntf::Data << BandDesignIntf::SubDetailBand;
     BandDesignIntf *band = dynamic_cast<BandDesignIntf *>(item);
     if (band) {
-      if (bs.contains(band->bandType())) {
-        m_newSubDetail->setEnabled(true);
-      }
-      if ((band->bandType() == BandDesignIntf::Data) || (band->bandType() == BandDesignIntf::SubDetailBand)) {
-        m_newGroupHeader->setEnabled(true);
-      }
+      if (bs.contains(band->bandType())) { m_newSubDetail->setEnabled(true); }
+      if ((band->bandType() == BandDesignIntf::Data) || (band->bandType() == BandDesignIntf::SubDetailBand)) { m_newGroupHeader->setEnabled(true); }
       if (band->bandType() == BandDesignIntf::GroupHeader) {
         m_newGroupFooter->setEnabled(!band->isConnectedToBand(BandDesignIntf::GroupFooter));
         m_newGroupHeader->setEnabled(!band->isConnectedToBand(BandDesignIntf::GroupHeader));
@@ -792,9 +780,7 @@ void ReportDesignWindow::slotItemPropertyChanged(const QString &objectName, cons
   Q_UNUSED(oldValue)
   Q_UNUSED(newValue)
 
-  if (m_propertyModel->currentObject() && (m_propertyModel->currentObject()->objectName() == objectName)) {
-    m_propertyModel->updateProperty(propertyName);
-  }
+  if (m_propertyModel->currentObject() && (m_propertyModel->currentObject()->objectName() == objectName)) { m_propertyModel->updateProperty(propertyName); }
 }
 
 void ReportDesignWindow::slotMultiItemSelected() {
@@ -1058,7 +1044,7 @@ void ReportDesignWindow::slotShowAbout() {
 bool ReportDesignWindow::isDockAreaVisible(Qt::DockWidgetArea area) {
   QList<QDockWidget *> dockWidgets = findChildren<QDockWidget *>();
   for (QDockWidget *dw : dockWidgets) {
-    if ((dockWidgetArea(dw) == area) && !dw->isHidden()) return true;
+    if ((dockWidgetArea(dw) == area) && !dw->isHidden()) { return true; }
   }
   return false;
 }

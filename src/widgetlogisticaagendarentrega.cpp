@@ -375,10 +375,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
     }
   }
 
-  if (not modelTransp.submitAll()) {
-    emit errorSignal("Erro salvando carga veiculo: " + modelTransp.lastError().text());
-    return false;
-  }
+  if (not modelTransp.submitAll()) { return false; }
 
   return true;
 }
@@ -465,7 +462,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
     }
   }
 
-  if (not adicionarProduto(list)) modelTransp.select();
+  if (not adicionarProduto(list)) { modelTransp.select(); }
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
@@ -476,12 +473,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
     return;
   }
 
-  for (const auto &item : list) modelTransp.removeRow(item.row());
+  for (const auto &item : list) { modelTransp.removeRow(item.row()); }
 
-  if (not modelTransp.submitAll()) {
-    emit errorSignal("Erro comunicando com banco de dados: " + modelTransp.lastError().text());
-    return;
-  }
+  if (not modelTransp.submitAll()) { return; }
 }
 
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {
@@ -712,10 +706,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
   if (not modelProdutos.setData(newRow, "total", totalNovo)) { return false; }
 
-  if (not modelProdutos.submitAll()) {
-    emit errorSignal("Erro salvando dados venda_produto: " + modelProdutos.lastError().text());
-    return false;
-  }
+  if (not modelProdutos.submitAll()) { return false; }
 
   const QVariant lastId = RegisterDialog::getLastInsertId();
 
@@ -778,10 +769,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   if (not modelConsumo.setData(rowConsumo, "valor", valorConsumo2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", lastId)) { return false; }
 
-  if (not modelConsumo.submitAll()) {
-    emit errorSignal("Erro quebrando consumo em duas linhas: " + modelConsumo.lastError().text());
-    return false;
-  }
+  if (not modelConsumo.submitAll()) { return false; }
 
   return true;
 }

@@ -234,7 +234,7 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) lista.append(modelProdutos.data(row, "idVendaProduto").toInt());
 
-  auto *nfe = new CadastrarNFe(idVenda, this);
+  auto *nfe = new CadastrarNFe(idVenda, CadastrarNFe::Tipo::Normal, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
   nfe->prepararNFe(lista);
 

@@ -159,6 +159,7 @@ void Venda::setupTables() {
   ui->tableProdutos->hideColumn("promocao");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->hideColumn("idNFeSaida");
+  ui->tableProdutos->hideColumn("idNFeFutura");
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("idVenda");

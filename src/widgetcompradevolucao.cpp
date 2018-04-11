@@ -64,6 +64,7 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idNFeSaida");
+  ui->table->hideColumn("idNFeFutura");
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("prcUnitario");

@@ -96,6 +96,7 @@ void Devolucao::setupTables() {
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idNFeSaida");
+  ui->tableProdutos->hideColumn("idNFeFutura");
   ui->tableProdutos->hideColumn("idLoja");
   ui->tableProdutos->hideColumn("idVenda");
   ui->tableProdutos->hideColumn("item");
@@ -150,6 +151,7 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->hideColumn("selecionado");
   ui->tableDevolvidos->hideColumn("idVendaProduto");
   ui->tableDevolvidos->hideColumn("idNFeSaida");
+  ui->tableDevolvidos->hideColumn("idNFeFutura");
   ui->tableDevolvidos->hideColumn("idLoja");
   ui->tableDevolvidos->hideColumn("idVenda");
   ui->tableDevolvidos->hideColumn("item");

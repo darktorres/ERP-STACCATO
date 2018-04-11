@@ -615,7 +615,6 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 }
 
 bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int quantAgendar, const int quantTotal) {
-  // quebrar se necessario
   if (quantAgendar < quantTotal) {
     if (not quebrarProduto(row, quantAgendar, quantTotal)) { return false; }
   }
@@ -708,20 +707,12 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
   if (not modelProdutos.submitAll()) { return false; }
 
-  const QVariant lastId = RegisterDialog::getLastInsertId();
+  if (not quebrarConsumo(row, proporcao, proporcaoNovo)) { return false; }
 
-  //  if (not modelViewProdutos.select()) {
-  //    error = "Erro lendo tabela: " + modelViewProdutos.lastError().text();
-  //    return false;
-  //  }
+  return true;
+}
 
-  // refactor below into another function
-
-  // get idVendaProduto lastInsertId
-
-  //  qDebug() << "lastInsert: " << lastId;
-  // break consumo into two lines
-
+bool WidgetLogisticaAgendarEntrega::quebrarConsumo(const int row, const double proporcao, const double proporcaoNovo) {
   SqlRelationalTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -750,28 +741,62 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   // alterar quant, caixas, valor
 
   const double quantConsumo = modelConsumo.data(0, "quant").toDouble() * proporcao;
-  // REFAC: redo those to double
-  const int caixasConsumo = modelConsumo.data(0, "caixas").toInt() * proporcao;
+  const double caixasConsumo = modelConsumo.data(0, "caixas").toDouble() * proporcao;
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble() * proporcao;
+
+  const double desconto = modelConsumo.data(0, "desconto").toDouble() * proporcao;
+  const double vBC = modelConsumo.data(0, "vBC").toDouble() * proporcao;
+  const double vICMS = modelConsumo.data(0, "vICMS").toDouble() * proporcao;
+  const double vBCST = modelConsumo.data(0, "vBCST").toDouble() * proporcao;
+  const double vICMSST = modelConsumo.data(0, "vICMSST").toDouble() * proporcao;
+  const double vBCPIS = modelConsumo.data(0, "vBCPIS").toDouble() * proporcao;
+  const double vPIS = modelConsumo.data(0, "vPIS").toDouble() * proporcao;
+  const double vBCCOFINS = modelConsumo.data(0, "vBCCOFINS").toDouble() * proporcao;
+  const double vCOFINS = modelConsumo.data(0, "vCOFINS").toDouble() * proporcao;
 
   if (not modelConsumo.setData(0, "quant", quantConsumo)) { return false; }
   if (not modelConsumo.setData(0, "caixas", caixasConsumo)) { return false; }
   if (not modelConsumo.setData(0, "valor", valorConsumo)) { return false; }
+  if (not modelConsumo.setData(0, "desconto", desconto)) { return false; }
+  if (not modelConsumo.setData(0, "vBC", vBC)) { return false; }
+  if (not modelConsumo.setData(0, "vICMS", vICMS)) { return false; }
+  if (not modelConsumo.setData(0, "vBCST", vBCST)) { return false; }
+  if (not modelConsumo.setData(0, "vICMSST", vICMSST)) { return false; }
+  if (not modelConsumo.setData(0, "vBCPIS", vBCPIS)) { return false; }
+  if (not modelConsumo.setData(0, "vPIS", vPIS)) { return false; }
+  if (not modelConsumo.setData(0, "vBCCOFINS", vBCCOFINS)) { return false; }
+  if (not modelConsumo.setData(0, "vCOFINS", vCOFINS)) { return false; }
 
   // alterar linha nova
   const double quantConsumo2 = modelConsumo.data(rowConsumo, "quant").toDouble() * proporcaoNovo;
-  // REFAC: redo those to double
-  const int caixasConsumo2 = modelConsumo.data(rowConsumo, "caixas").toInt() * proporcaoNovo;
+  const double caixasConsumo2 = modelConsumo.data(rowConsumo, "caixas").toDouble() * proporcaoNovo;
   const double valorConsumo2 = modelConsumo.data(rowConsumo, "valor").toDouble() * proporcaoNovo;
 
+  const double desconto2 = modelConsumo.data(rowConsumo, "desconto").toDouble() * proporcaoNovo;
+  const double vBC2 = modelConsumo.data(rowConsumo, "vBC").toDouble() * proporcaoNovo;
+  const double vICMS2 = modelConsumo.data(rowConsumo, "vICMS").toDouble() * proporcaoNovo;
+  const double vBCST2 = modelConsumo.data(rowConsumo, "vBCST").toDouble() * proporcaoNovo;
+  const double vICMSST2 = modelConsumo.data(rowConsumo, "vICMSST").toDouble() * proporcaoNovo;
+  const double vBCPIS2 = modelConsumo.data(rowConsumo, "vBCPIS").toDouble() * proporcaoNovo;
+  const double vPIS2 = modelConsumo.data(rowConsumo, "vPIS").toDouble() * proporcaoNovo;
+  const double vBCCOFINS2 = modelConsumo.data(rowConsumo, "vBCCOFINS").toDouble() * proporcaoNovo;
+  const double vCOFINS2 = modelConsumo.data(rowConsumo, "vCOFINS").toDouble() * proporcaoNovo;
+
+  if (not modelConsumo.setData(rowConsumo, "idVendaProduto", RegisterDialog::getLastInsertId())) { return false; }
   if (not modelConsumo.setData(rowConsumo, "quant", quantConsumo2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "caixas", caixasConsumo2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "valor", valorConsumo2)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idVendaProduto", lastId)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "desconto", desconto2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vBC", vBC2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vICMS", vICMS2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vBCST", vBCST2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vICMSST", vICMSST2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vBCPIS", vBCPIS2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vPIS", vPIS2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vBCCOFINS", vBCCOFINS2)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "vCOFINS", vCOFINS2)) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
-
-  return true;
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?

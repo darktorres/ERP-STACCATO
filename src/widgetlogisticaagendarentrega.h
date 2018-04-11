@@ -45,6 +45,7 @@ private:
   auto on_tableVendas_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableVendas_entered(const QModelIndex &) -> void;
   auto processRows() -> bool;
+  auto quebrarConsumo(const int row, const double proporcao, const double proporcaoNovo) -> bool;
   auto quebrarProduto(const int row, const int quantAgendar, const int quantTotal) -> bool;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) -> bool;
   auto setupTables() -> void;

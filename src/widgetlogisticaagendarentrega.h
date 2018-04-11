@@ -19,7 +19,6 @@ public:
 
 private:
   // attributes
-  //  SqlTableModel modelConsumo;
   SqlRelationalTableModel modelProdutos;
   SqlRelationalTableModel modelTransp;
   SqlRelationalTableModel modelTransp2;

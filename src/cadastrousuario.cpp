@@ -51,7 +51,7 @@ void CadastroUsuario::setupTables() {
 
   modelPermissoes.setFilter("0");
 
-  if (not modelPermissoes.select()) { emit errorSignal("Erro lendo tabela permissões: " + modelPermissoes.lastError().text()); }
+  if (not modelPermissoes.select()) { return; }
 
   auto *proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
   ui->table->setModel(proxyModel);

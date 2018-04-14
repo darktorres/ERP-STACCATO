@@ -153,24 +153,15 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   modelEstoque.setFilter("idEstoque = " + idEstoque);
 
-  if (not modelEstoque.select()) {
-    emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
-    return false;
-  }
+  if (not modelEstoque.select()) { return false; }
 
   ui->tableEstoque->resizeColumnsToContents();
 
-  if (not modelConsumo.select()) {
-    emit errorSignal("Erro lendo tabela estoque consumo: " + modelConsumo.lastError().text());
-    return false;
-  }
+  if (not modelConsumo.select()) { return false; }
 
   modelViewConsumo.setFilter("idEstoque = " + idEstoque);
 
-  if (not modelViewConsumo.select()) {
-    emit errorSignal("Erro lendo tabela view consumo: " + modelViewConsumo.lastError().text());
-    return false;
-  }
+  if (not modelViewConsumo.select()) { return false; }
 
   ui->tableConsumo->resizeColumnsToContents();
 
@@ -189,10 +180,7 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   modelCompra.setFilter("idCompra = " + idCompra + " AND codComercial = '" + codComercial + "'");
 
-  if (not modelCompra.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor: " + modelCompra.lastError().text());
-    return false;
-  }
+  if (not modelCompra.select()) { return false; }
 
   calcularRestante();
 

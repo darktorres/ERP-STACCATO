@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  bool financeiro = false;
+  bool financeiro = false; // REFAC: change this to ctor enum
   bool correcao = false;
   double minimoFrete;
   double porcFrete;
@@ -67,7 +67,7 @@ private:
   auto registerMode() -> void final;
   auto resetarPagamentos() -> void;
   auto savingProcedures() -> bool final;
-  auto setupConnections() -> void;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;

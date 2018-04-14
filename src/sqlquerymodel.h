@@ -15,6 +15,9 @@ public:
 private:
   using QSqlQueryModel::data;
   using QSqlQueryModel::setHeaderData;
+
+  // REFAC: overload 'setQuery' to verify if it errored and emit the error, and use a bool to indicate failure/success
+  // bool setQuery(...);
 };
 
 #endif // SQLQUERYMODEL_H

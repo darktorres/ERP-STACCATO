@@ -27,7 +27,7 @@ void RegisterAddressDialog::setupTables(const QString &table) {
 
   modelEnd.setFilter("0");
 
-  if (not modelEnd.select()) emit errorSignal("Ocorreu um erro ao acessar a tabela de endereço: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) { return; }
 
   mapperEnd.setModel(&modelEnd);
   mapperEnd.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
@@ -46,10 +46,7 @@ bool RegisterAddressDialog::newRegister() {
 
   modelEnd.setFilter("0");
 
-  if (not modelEnd.select()) {
-    emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.select()) { return false; }
 
   return true;
 }
@@ -93,10 +90,7 @@ bool RegisterAddressDialog::viewRegisterById(const QVariant &id) {
 
   modelEnd.setFilter(primaryKey + " = " + data(primaryKey).toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) {
-    emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.select()) { return false; }
 
   return true;
 }

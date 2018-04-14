@@ -130,10 +130,7 @@ void AnteciparRecebimento::setupTables() {
 
   modelContaReceber.setFilter("(status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
 
-  if (not modelContaReceber.select()) {
-    emit errorSignal("Erro lendo tabela: " + modelContaReceber.lastError().text());
-    return;
-  }
+  if (not modelContaReceber.select()) { return; }
 
   ui->table->setModel(&modelContaReceber);
   ui->table->hideColumn("representacao");
@@ -167,10 +164,7 @@ void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &text) {
                                 ui->comboBoxLoja->currentText() + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND desativado = FALSE");
   }
 
-  if (not modelContaReceber.select()) {
-    emit errorSignal("Erro lendo tabela: " + modelContaReceber.lastError().text());
-    return;
-  }
+  if (not modelContaReceber.select()) { return; }
 }
 
 void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {

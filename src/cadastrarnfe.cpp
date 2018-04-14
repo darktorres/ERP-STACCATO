@@ -73,7 +73,7 @@ void CadastrarNFe::setupTables() {
   modelVenda.setEditStrategy(QSqlTableModel::OnManualSubmit);
   modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
-  if (not modelVenda.select()) emit errorSignal("Erro lendo tabela de vendas: " + modelVenda.lastError().text());
+  if (not modelVenda.select()) { return; }
 
   modelLoja.setTable("loja");
   modelLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -87,7 +87,7 @@ void CadastrarNFe::setupTables() {
 
   modelLoja.setFilter("idLoja = " + lojaACBr.value().toString());
 
-  if (not modelLoja.select()) emit errorSignal("Erro lendo tabela de lojas: " + modelLoja.lastError().text());
+  if (not modelLoja.select()) { return; }
 
   modelViewProdutoEstoque.setTable("view_produto_estoque");
   modelViewProdutoEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -338,13 +338,13 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 }
 
 bool CadastrarNFe::cadastrar(const int &idNFe) {
-  QSqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
-  query.bindValue(":xml", xml);
-  query.bindValue(":idNFe", idNFe);
+  QSqlQuery queryNFe;
+  queryNFe.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  queryNFe.bindValue(":xml", xml);
+  queryNFe.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text());
+  if (not queryNFe.exec()) {
+    emit errorSignal("Erro marcando nota como 'AUTORIZADO': " + queryNFe.lastError().text());
     return false;
   }
 
@@ -1046,7 +1046,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 }
 
 void CadastrarNFe::on_tabWidget_currentChanged(const int index) {
-  if (index == 4) updateImpostos();
+  if (index == 4) { updateImpostos(); }
 }
 
 void CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged(const double) {

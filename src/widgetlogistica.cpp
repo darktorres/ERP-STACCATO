@@ -116,10 +116,10 @@ void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {
 
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
-  if (currentText == "Agendar Coleta") ui->widgetAgendarColeta->tableFornLogistica_activated(fornecedor);
-  if (currentText == "Coleta") ui->widgetColeta->tableFornLogistica_activated(fornecedor);
-  if (currentText == "Recebimento") ui->widgetRecebimento->tableFornLogistica_activated(fornecedor);
-  if (currentText == "Representação") ui->widgetRepresentacao->tableFornLogistica_activated(fornecedor);
+  if (currentText == "Agendar Coleta") { ui->widgetAgendarColeta->tableFornLogistica_activated(fornecedor); }
+  if (currentText == "Coleta") { ui->widgetColeta->tableFornLogistica_activated(fornecedor); }
+  if (currentText == "Recebimento") { ui->widgetRecebimento->tableFornLogistica_activated(fornecedor); }
+  if (currentText == "Representação") { ui->widgetRepresentacao->tableFornLogistica_activated(fornecedor); }
 }
 
 void WidgetLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }

@@ -310,7 +310,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE"
                                                : "idVenda LIKE '" + idVenda + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
 
-    if (not modelPendentes.select()) { emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text()); }
+    if (not modelPendentes.select()) { return; }
 
     ui->tablePendentes->resizeColumnsToContents();
 
@@ -325,7 +325,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE"
                                                  : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE");
 
-    if (not modelProcessados.select()) { emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text()); }
+    if (not modelProcessados.select()) { return; }
 
     for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");
@@ -353,7 +353,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO')"
                                              : "idCompra = '" + idCompra + "' AND (status = 'PENDENTE' OR status = 'CONFERIDO')");
 
-    if (not modelPendentes.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelPendentes.lastError().text());
+    if (not modelPendentes.select()) { return; }
 
     ui->tablePendentes->resizeColumnsToContents();
 
@@ -368,7 +368,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'"
                                                : "idCompra = '" + idCompra + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'");
 
-    if (not modelProcessados.select()) emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelProcessados.lastError().text());
+    if (not modelProcessados.select()) { return; }
 
     for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");

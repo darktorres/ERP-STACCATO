@@ -62,10 +62,14 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
 void WidgetNfeEntrada::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &text) {
+void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+
+void WidgetNfeEntrada::montaFiltro() {
+  const QString text = ui->lineEditBusca->text();
+
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
 
-  if (not modelViewNFeEntrada.select()) emit errorSignal("Erro lendo tabela: " + modelViewNFeEntrada.lastError().text());
+  if (not modelViewNFeEntrada.select()) { return; }
 }
 
 void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
@@ -107,6 +111,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   // FIXME: ao cancelar nota nao voltar o pedido de compra inteiro, apenas o item da nota cancelada
 
   // marcar nota como cancelada
+
   QSqlQuery query1;
   query1.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE idNFe = :idNFe");
   query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));

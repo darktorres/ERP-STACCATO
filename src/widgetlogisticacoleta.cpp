@@ -45,10 +45,7 @@ void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &forneced
 
   modelViewColeta.setFilter("fornecedor = '" + fornecedor + "'");
 
-  if (not modelViewColeta.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewColeta.lastError().text());
-    return;
-  }
+  if (not modelViewColeta.select()) { return; }
 
   ui->checkBoxMarcarTodos->setChecked(false);
 
@@ -94,7 +91,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) idVendas << modelViewColeta.data(index.row(), "idVenda").toString();
+  for (const auto &index : list) { idVendas << modelViewColeta.data(index.row(), "idVenda").toString(); }
 
   InputDialog input(InputDialog::Tipo::Coleta);
 
@@ -181,12 +178,14 @@ void WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked(const bool) { ui->tab
 
 void WidgetLogisticaColeta::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-void WidgetLogisticaColeta::on_lineEditBusca_textChanged(const QString &) {
+void WidgetLogisticaColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+
+void WidgetLogisticaColeta::montaFiltro() {
   const QString textoBusca = ui->lineEditBusca->text();
 
   modelViewColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
 
-  if (not modelViewColeta.select()) emit errorSignal("Erro lendo tabela: " + modelViewColeta.lastError().text());
+  if (not modelViewColeta.select()) { return; }
 }
 
 void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {

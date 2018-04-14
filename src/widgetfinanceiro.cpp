@@ -18,11 +18,11 @@ WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
 bool WidgetFinanceiro::updateTables() {
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Fluxo de Caixa") return ui->widgetFluxoCaixa->updateTables();
-  if (currentText == "Contas a Pagar") return ui->widgetPagar->updateTables();
-  if (currentText == "Contas a Receber") return ui->widgetReceber->updateTables();
-  if (currentText == "Vendas") return ui->widgetVenda->updateTables();
-  if (currentText == "Compras") return ui->widgetCompra->updateTables();
+  if (currentText == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
+  if (currentText == "Contas a Pagar") { ui->widgetPagar->updateTables(); }
+  if (currentText == "Contas a Receber") { ui->widgetReceber->updateTables(); }
+  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
 
   return true;
 }

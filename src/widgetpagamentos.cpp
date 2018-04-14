@@ -51,7 +51,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
-    while (queryPag.next()) temp << queryPag.value("pagamento").toString();
+    while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());
 
@@ -149,7 +149,7 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
-    while (queryPag.next()) temp << queryPag.value("pagamento").toString();
+    while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());
 

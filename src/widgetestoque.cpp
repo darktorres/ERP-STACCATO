@@ -130,7 +130,7 @@ void WidgetEstoque::montaFiltro() {
 
   //  qDebug() << "query: " << view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante;
 
-  if (model.lastError().isValid()) emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
+  if (model.lastError().isValid()) { emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text()); }
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
@@ -193,29 +193,35 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   file.close();
 
+  if (not gerarExcel(arquivoModelo, fileName, modelContabil)) { return; }
+
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  emit informationSignal("Arquivo salvo como " + fileName);
+}
+
+bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) {
   QXlsx::Document xlsx(arquivoModelo);
 
   xlsx.selectSheet("Sheet1");
 
   char column = 'A';
 
-  for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) xlsx.write(column + QString::number(1), modelContabil.headerData(col, Qt::Horizontal).toString());
+  for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(1), modelContabil.headerData(col, Qt::Horizontal).toString()); }
 
   column = 'A';
 
   for (int row = 0; row < modelContabil.rowCount(); ++row) {
-    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) xlsx.write(column + QString::number(row + 2), modelContabil.data(modelContabil.index(row, col)));
+    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(row + 2), modelContabil.data(modelContabil.index(row, col))); }
 
     column = 'A';
   }
 
   if (not xlsx.saveAs(fileName)) {
     emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return;
+    return false;
   }
 
-  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  return true;
 }
 
 // NOTE: gerenciar lugares de estoque (cadastro/permissoes)

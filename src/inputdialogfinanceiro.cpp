@@ -290,7 +290,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       for (int row = 1; row < modelFluxoCaixa.rowCount(); ++row) {
         const QDate current = modelFluxoCaixa.data(row, "dataPagamento").toDate();
 
-        if (current < date) date = current;
+        if (current < date) { date = current; }
       }
 
       ui->dateEditPgtSt->setDate(date);
@@ -312,8 +312,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       const double preco = modelPedidoFornecedor.data(item.row(), "preco").toDouble();
       const double valorSt = preco * (aliquotaSt / 100);
 
-      if (tipoSt == "ST Fornecedor") stForn += valorSt;
-      if (tipoSt == "ST Loja") stLoja += valorSt;
+      if (tipoSt == "ST Fornecedor") { stForn += valorSt; }
+      if (tipoSt == "ST Loja") { stLoja += valorSt; }
     }
 
     // TODO: 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos
@@ -409,20 +409,14 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (tipo == Tipo::ConfirmarCompra) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra + " AND status = 'EM COMPRA'"); }
   if (tipo == Tipo::Financeiro) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra); }
 
-  if (not modelPedidoFornecedor.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelPedidoFornecedor.lastError().text());
-    return false;
-  }
+  if (not modelPedidoFornecedor.select()) { return false; }
 
   ui->table->resizeColumnsToContents();
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
 
-    if (not modelFluxoCaixa.select()) {
-      emit errorSignal("Erro lendo tabela conta_a_pagar_has_pagamento: " + modelFluxoCaixa.lastError().text());
-      return false;
-    }
+    if (not modelFluxoCaixa.select()) { return false; }
 
     ui->checkBoxMarcarTodos->setChecked(true);
 

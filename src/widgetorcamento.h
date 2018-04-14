@@ -29,7 +29,7 @@ private:
   auto on_table_activated(const QModelIndex &index) -> void;
   auto on_table_entered(const QModelIndex &) -> void;
   auto setPermissions() -> void;
-  auto setupConnections() -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

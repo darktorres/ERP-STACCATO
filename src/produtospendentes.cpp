@@ -49,21 +49,15 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
 
-  if (not modelProdutos.select()) {
-    emit errorSignal("Erro lendo tabela venda_has_produto: " + modelProdutos.lastError().text());
-    return;
-  }
+  if (not modelProdutos.select()) { return; }
 
   modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
 
-  if (not modelViewProdutos.select()) {
-    emit errorSignal("Erro lendo tabela view_produto_pendente: " + modelViewProdutos.lastError().text());
-    return;
-  }
+  if (not modelViewProdutos.select()) { return; }
 
   double quant = 0;
 
-  for (int row = 0; row < modelViewProdutos.rowCount(); ++row) quant += modelViewProdutos.data(row, "quant").toDouble();
+  for (int row = 0; row < modelViewProdutos.rowCount(); ++row) { quant += modelViewProdutos.data(row, "quant").toDouble(); }
 
   ui->doubleSpinBoxQuantTotal->setValue(quant);
   ui->doubleSpinBoxComprar->setValue(quant);
@@ -165,29 +159,32 @@ bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
 }
 
 void ProdutosPendentes::recarregarTabelas() {
-  if (not modelProdutos.select()) emit errorSignal("Erro recarregando modelProdutos: " + modelProdutos.lastError().text());
-  if (not modelViewProdutos.select()) emit errorSignal("Erro recarregando modelViewProdutos: " + modelViewProdutos.lastError().text());
+  if (not modelProdutos.select()) { return; }
+  if (not modelViewProdutos.select()) { return; }
 
   modelEstoque.setQuery(modelEstoque.query().executedQuery());
 
-  if (modelEstoque.lastError().isValid()) emit errorSignal("Erro recarregando modelEstoque: " + modelEstoque.lastError().text());
+  if (modelEstoque.lastError().isValid()) {
+    emit errorSignal("Erro recarregando modelEstoque: " + modelEstoque.lastError().text());
+    return;
+  }
 
   double quant = 0;
 
-  for (int row = 0; row < modelViewProdutos.rowCount(); ++row) quant += modelViewProdutos.data(row, "quant").toDouble();
+  for (int row = 0; row < modelViewProdutos.rowCount(); ++row) { quant += modelViewProdutos.data(row, "quant").toDouble(); }
 
   ui->doubleSpinBoxComprar->setMinimum(quant);
 
   ui->doubleSpinBoxQuantTotal->setValue(quant);
   ui->doubleSpinBoxComprar->setValue(quant);
 
-  if (modelViewProdutos.rowCount() == 0) close();
+  if (modelViewProdutos.rowCount() == 0) { close(); }
 }
 
 void ProdutosPendentes::on_pushButtonComprar_clicked() {
   auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty() and modelViewProdutos.rowCount() == 1) list << modelViewProdutos.index(0, 0);
+  if (list.isEmpty() and modelViewProdutos.rowCount() == 1) { list << modelViewProdutos.index(0, 0); }
 
   if (list.isEmpty()) {
     emit errorSignal("Nenhum produto selecionado!");

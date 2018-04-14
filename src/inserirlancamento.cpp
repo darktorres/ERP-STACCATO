@@ -44,7 +44,7 @@ void InserirLancamento::setupTables() {
 
   modelContaPagamento.setFilter("0");
 
-  if (not modelContaPagamento.select()) QMessageBox::critical(this, "Erro!", "Erro lendo tabela conta_a_receber_has_pagamento: " + modelContaPagamento.lastError().text());
+  if (not modelContaPagamento.select()) { return; }
 
   ui->table->setModel(&modelContaPagamento);
   ui->table->setItemDelegate(new DoubleDelegate(this));

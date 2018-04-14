@@ -33,7 +33,7 @@ void WidgetLogisticaCaminhao::setupTables() {
 
   modelCarga.setFilter("0");
 
-  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text()); }
+  if (not modelCarga.select()) { return; }
 
   ui->tableCarga->setModel(&modelCarga);
   ui->tableCarga->hideColumn("idVeiculo");
@@ -43,12 +43,10 @@ void WidgetLogisticaCaminhao::setupTables() {
 bool WidgetLogisticaCaminhao::updateTables() {
   if (modelCaminhao.tableName().isEmpty()) { setupTables(); }
 
-  if (not modelCaminhao.select()) {
-    emit errorSignal("Erro lendo tabela caminhão: " + modelCaminhao.lastError().text());
-    return false;
   }
 
   ui->table->resizeColumnsToContents();
+  if (not modelCaminhao.select()) { return; }
 
   return true;
 }
@@ -58,5 +56,5 @@ void WidgetLogisticaCaminhao::on_table_entered(const QModelIndex &) { ui->table-
 void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
   modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
 
-  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text()); }
+  if (not modelCarga.select()) { return; }
 }

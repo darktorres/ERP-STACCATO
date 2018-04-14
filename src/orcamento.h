@@ -68,7 +68,7 @@ private:
   auto registerMode() -> void final;
   auto removeItem() -> void;
   auto savingProcedures() -> bool final;
-  auto setupConnections() -> void;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;

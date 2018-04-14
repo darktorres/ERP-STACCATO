@@ -95,8 +95,8 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
   if (tipo != Tipo::Representacao) {
     emit transactionStarted();
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-    if (not QSqlQuery("START TRANSACTION").exec()) return;
+    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
     if (not cadastrar()) {
       QSqlQuery("ROLLBACK").exec();
@@ -104,7 +104,7 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
       return;
     }
 
-    if (not QSqlQuery("COMMIT").exec()) return;
+    if (not QSqlQuery("COMMIT").exec()) { return; }
 
     emit transactionEnded();
   }
@@ -114,7 +114,7 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
 }
 
 void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate &date) {
-  if (ui->dateEditProximo->date() < date) ui->dateEditProximo->setDate(date);
+  if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
 void InputDialogConfirmacao::setupTables() {
@@ -134,10 +134,7 @@ void InputDialogConfirmacao::setupTables() {
 
     modelEstoque.setFilter("0");
 
-    if (not modelEstoque.select()) {
-      emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
-      return;
-    }
+    if (not modelEstoque.select()) { return; }
 
     ui->tableLogistica->setModel(&modelEstoque);
     ui->tableLogistica->hideColumn("idEstoque");
@@ -199,10 +196,7 @@ void InputDialogConfirmacao::setupTables() {
 
     modelVeiculo.setFilter("0");
 
-    if (not modelVeiculo.select()) {
-      emit errorSignal("Erro lendo tabela veiculo: " + modelVeiculo.lastError().text());
-      return;
-    }
+    if (not modelVeiculo.select()) { return; }
 
     ui->tableLogistica->setModel(&modelVeiculo);
     ui->tableLogistica->hideColumn("id");
@@ -229,10 +223,7 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 
   modelVeiculo.setFilter(filter);
 
-  if (not modelVeiculo.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelVeiculo.lastError().text());
-    return false;
-  }
+  if (not modelVeiculo.select()) { return false; }
 
   ui->tableLogistica->resizeColumnsToContents();
 
@@ -252,10 +243,7 @@ bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebi
 
   modelEstoque.setFilter(filter);
 
-  if (not modelEstoque.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelEstoque.lastError().text());
-    return false;
-  }
+  if (not modelEstoque.select()) { return false; }
 
   ui->tableLogistica->resizeColumnsToContents();
 
@@ -325,13 +313,13 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
   bool ok;
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 
-  if (not ok or qFuzzyIsNull(caixasDefeito)) return;
+  if (not ok or qFuzzyIsNull(caixasDefeito)) { return; }
   //
 
   emit transactionStarted();
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) return;
-  if (not QSqlQuery("START TRANSACTION").exec()) return;
+  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
+  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
 
   if (not processarQuebra(row, choice, caixasDefeito, unCaixa)) {
     QSqlQuery("ROLLBACK").exec();
@@ -339,7 +327,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
     return;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) return;
+  if (not QSqlQuery("COMMIT").exec()) { return; }
 
   emit transactionEnded();
 
@@ -465,10 +453,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   modelVendaProduto.setFilter("idVendaProduto = " + modelVeiculo.data(row, "idVendaProduto").toString());
 
-  if (not modelVendaProduto.select()) {
-    emit errorSignal("Erro lendo tabela produto venda: " + modelVendaProduto.lastError().text());
-    return false;
-  }
+  if (not modelVendaProduto.select()) { return false; }
 
   if (not modelVendaProduto.setData(0, "caixas", caixas - caixasDefeito)) { return false; }
   if (not modelVendaProduto.setData(0, "quant", (caixas - caixasDefeito) * unCaixa)) { return false; }
@@ -681,7 +666,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
       }
 
       sobra += caixas;
-      if (sobra >= 0) break;
+      if (sobra >= 0) { break; }
     }
   }
 

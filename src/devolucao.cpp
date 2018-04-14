@@ -76,7 +76,7 @@ void Devolucao::setupTables() {
 
   modelProdutos.setFilter("idVenda = '" + idVenda + "' AND status != 'DEVOLVIDO'");
 
-  if (not modelProdutos.select()) emit errorSignal("Erro lendo tabela venda_has_produto: " + modelProdutos.lastError().text());
+  if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("idRelacionado");
@@ -139,7 +139,7 @@ void Devolucao::setupTables() {
 
   modelDevolvidos.setFilter("idVenda = '" + idDevolucao + "'");
 
-  if (not modelDevolvidos.select()) { emit errorSignal("Erro lendo tabela venda_has_produto: " + modelDevolvidos.lastError().text()); }
+  if (not modelDevolvidos.select()) { return; }
 
   ui->tableDevolvidos->setModel(&modelDevolvidos);
   ui->tableDevolvidos->hideColumn("idRelacionado");
@@ -191,7 +191,7 @@ void Devolucao::setupTables() {
 
   modelPagamentos.setFilter("idVenda = '" + idDevolucao + "'");
 
-  if (not modelPagamentos.select()) emit errorSignal("Erro lendo tabela pagamentos: " + modelPagamentos.lastError().text());
+  if (not modelPagamentos.select()) { return; }
 
   ui->tablePagamentos->setModel(&modelPagamentos);
   ui->tablePagamentos->hideColumn("nfe");
@@ -215,7 +215,7 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("valor"), new ReaisDelegate(this));
   ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("representacao"), new CheckBoxDelegate(this, true));
 
-  for (int row = 0; row < modelPagamentos.rowCount(); ++row) ui->tablePagamentos->openPersistentEditor(row, "representacao");
+  for (int row = 0; row < modelPagamentos.rowCount(); ++row) { ui->tablePagamentos->openPersistentEditor(row, "representacao"); }
 
   ui->tablePagamentos->resizeColumnsToContents();
 
@@ -224,14 +224,14 @@ void Devolucao::setupTables() {
 
   modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
-  if (not modelVenda.select()) emit errorSignal("Erro lendo tabela venda: " + modelVenda.lastError().text());
+  if (not modelVenda.select()) { return; }
 
   modelCliente.setTable("cliente");
   modelCliente.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelCliente.setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString());
 
-  if (not modelCliente.select()) { emit errorSignal("Erro lendo tabela cliente: " + modelCliente.lastError().text()); }
+  if (not modelCliente.select()) { return; }
 
   // mapper
   mapperItem.setModel(&modelProdutos);

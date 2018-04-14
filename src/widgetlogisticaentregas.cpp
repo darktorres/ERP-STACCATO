@@ -112,7 +112,7 @@ void WidgetLogisticaEntregas::setupTables() {
 
   modelCarga.setFilter("0");
 
-  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela cargas: " + modelCarga.lastError().text()); }
+  if (not modelCarga.select()) { return; }
 
   ui->tableCarga->setModel(&modelCarga);
   ui->tableCarga->hideColumn("idEvento");
@@ -139,7 +139,7 @@ void WidgetLogisticaEntregas::setupTables() {
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) { emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
+  if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("idEvento");
@@ -247,13 +247,13 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   modelCarga.setFilter("DATE_FORMAT(dataPrevEnt, '%d-%m-%Y') = '" + data + "' AND idVeiculo = " + veiculo);
 
-  if (not modelCarga.select()) { emit errorSignal("Erro lendo tabela entregas: " + modelCarga.lastError().text()); }
+  if (not modelCarga.select()) { return; }
 
   ui->tableCarga->resizeColumnsToContents();
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) { emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
+  if (not modelProdutos.select()) { return; }
 
   ui->pushButtonReagendar->setDisabled(true);
   ui->pushButtonConfirmarEntrega->setDisabled(true);
@@ -265,7 +265,7 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
 
-  if (not modelProdutos.select()) { emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
+  if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->resizeColumnsToContents();
 
@@ -350,7 +350,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) idVendas << modelCarga.data(index.row(), "idVenda").toString();
+  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());
@@ -393,13 +393,14 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
   if (not ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
-void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &text) {
+void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &) { montaFiltro(); }
+
+void WidgetLogisticaEntregas::montaFiltro() {
+  const QString text = ui->lineEditBuscar->text();
+
   modelCarga.setFilter(text.isEmpty() ? "0" : "idVenda LIKE '%" + text + "%'");
 
-  if (not modelCarga.select()) {
-    emit errorSignal("Erro lendo tabela carga: " + modelCarga.lastError().text());
-    return;
-  }
+  if (not modelCarga.select()) { return; }
 }
 
 void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
@@ -519,6 +520,7 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
     return false;
   }
 
+  // REFAC: refactor this to use 'IN', add a '?' for each idVendaProduto then bind each one with 'addBindValue'
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
 

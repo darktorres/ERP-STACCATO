@@ -23,10 +23,7 @@ bool WidgetCompraDevolucao::updateTables() {
     ui->radioButtonFiltroPendente->setChecked(true);
   }
 
-  if (not modelVendaProduto.select()) {
-    emit errorSignal("Erro lendo tabela faturamento: " + modelVendaProduto.lastError().text());
-    return false;
-  }
+  if (not modelVendaProduto.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 
@@ -217,7 +214,7 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   emit transactionEnded();
 
-  if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text()); }
+  if (not modelVendaProduto.select()) { return; }
 
   emit informationSignal("Retornado para estoque!");
 }

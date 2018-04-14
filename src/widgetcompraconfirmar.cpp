@@ -55,10 +55,7 @@ bool WidgetCompraConfirmar::updateTables() {
 
   ui->tableResumo->resizeColumnsToContents();
 
-  if (not modelViewCompras.select()) {
-    emit errorSignal("Erro lendo tabela compras: " + modelViewCompras.lastError().text());
-    return false;
-  }
+  if (not modelViewCompras.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 
@@ -233,7 +230,7 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled(bool checked) {
   modelViewCompras.setFilter(checked ? "(Venda LIKE '%CAMB%')" : "(Venda NOT LIKE '%CAMB%' OR Venda IS NULL)");
 
-  if (not modelViewCompras.select()) emit errorSignal("Erro lendo tabela: " + modelViewCompras.lastError().text());
+  if (not modelViewCompras.select()) { return; }
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)

@@ -49,7 +49,9 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   modelViewRelatorioVendedor.setFilter(filter);
 
-  if (not modelViewRelatorioVendedor.select()) { emit errorSignal("Erro lendo tabela relatorio_vendedor: " + modelViewRelatorioVendedor.lastError().text()); }
+  if (not modelViewRelatorioVendedor.select()) { return; }
+
+  ui->tableTotalVendedor->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
@@ -65,8 +67,7 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   modelViewRelatorioLoja.setFilter(filter);
 
-  if (not modelViewRelatorioLoja.select()) { emit errorSignal("Erro lendo tabela relatorio_loja: " + modelViewRelatorioLoja.lastError().text()); }
-}
+  if (not modelViewRelatorioLoja.select()) { return; }
 
 bool WidgetRelatorio::setupTables() {
   // REFAC: refactor this to not select in here
@@ -167,7 +168,9 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   modelViewRelatorio.setFilter(filter);
 
-  if (not modelViewRelatorio.select()) { emit errorSignal("Erro lendo tabela relatorio: " + modelViewRelatorio.lastError().text()); }
+  if (not modelViewRelatorio.select()) { return; }
+
+  ui->tableRelatorio->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
@@ -198,15 +201,10 @@ bool WidgetRelatorio::updateTables() {
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    const auto descricaoLoja = UserSession::fromLoja("descricao");
-
-    if (descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor"); }
+    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor"); }
   }
 
-  if (not modelOrcamento.select()) {
-    emit errorSignal("Erro lendo view_resumo_relatorio: " + modelOrcamento.lastError().text());
-    return false;
-  }
+  if (not modelOrcamento.select()) { return; }
 
   ui->tableResumoOrcamento->setModel(&modelOrcamento);
   ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Anteriores", new ReaisDelegate(this));
@@ -256,6 +254,13 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   file.close();
 
+  if (not gerarExcel(arquivoModelo, fileName)) { return; }
+
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+  emit informationSignal("Arquivo salvo como " + fileName);
+}
+
+bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fileName) {
   QXlsx::Document xlsx(arquivoModelo);
 
   //  xlsx.currentWorksheet()->setFitToPage(true);
@@ -302,9 +307,8 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   if (not xlsx.saveAs(fileName)) {
     emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return;
+    return false;
   }
 
-  QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  return true;
 }

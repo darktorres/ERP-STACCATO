@@ -139,10 +139,7 @@ bool CadastroProfissional::viewRegister() {
 
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) {
-    emit errorSignal("Erro lendo tabela endereço profissional: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.select()) { return false; }
 
   ui->checkBoxPoupanca->setChecked(data("poupanca").toBool());
 
@@ -301,7 +298,7 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (not isUpdate) modelEnd.insertRow(currentRowEnd);
+  if (not isUpdate) { modelEnd.insertRow(currentRowEnd); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -359,7 +356,7 @@ void CadastroProfissional::on_lineEditContatoCPF_textEdited(const QString &text)
 void CadastroProfissional::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) { return; }
 }
 
 void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {

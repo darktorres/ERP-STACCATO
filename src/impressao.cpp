@@ -23,7 +23,7 @@ Impressao::Impressao(const QString &id) : id(id), report(new LimeReport::ReportE
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
-  if (not modelItem.select()) emit errorSignal("Erro lendo tabela: " + modelItem.lastError().text());
+  if (not modelItem.select()) { return; }
 }
 
 void Impressao::verificaTipo() {

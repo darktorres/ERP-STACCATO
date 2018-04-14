@@ -12,9 +12,11 @@
 #include "venda.h"
 #include "widgetlogisticarecebimento.h"
 
-WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRecebimento) {
-  ui->setupUi(this);
+WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
 
+WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
+
+void WidgetLogisticaRecebimento::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked);
@@ -24,8 +26,6 @@ WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : Widget
   connect(ui->table, &TableView::entered, this, &WidgetLogisticaRecebimento::on_table_entered);
 }
 
-WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
-
 bool WidgetLogisticaRecebimento::updateTables() {
   if (modelViewRecebimento.tableName().isEmpty()) setupTables();
 
@@ -34,9 +34,9 @@ bool WidgetLogisticaRecebimento::updateTables() {
     return false;
   }
 
-  for (int row = 0; row < modelViewRecebimento.rowCount(); ++row) ui->table->openPersistentEditor(row, "selecionado");
 
   ui->table->resizeColumnsToContents();
+  for (int row = 0; row < modelViewRecebimento.rowCount(); ++row) { ui->table->openPersistentEditor(row, "selecionado"); }
 
   return true;
 }
@@ -48,10 +48,7 @@ void WidgetLogisticaRecebimento::tableFornLogistica_activated(const QString &for
 
   modelViewRecebimento.setFilter("fornecedor = '" + fornecedor + "'");
 
-  if (not modelViewRecebimento.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewRecebimento.lastError().text());
-    return;
-  }
+  if (not modelViewRecebimento.select()) { return; }
 
   ui->checkBoxMarcarTodos->setChecked(false);
 
@@ -191,10 +188,14 @@ void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool) { ui
 
 void WidgetLogisticaRecebimento::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged(const QString &text) {
+void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+
+void WidgetLogisticaRecebimento::montaFiltro() {
+  const QString text = ui->lineEditBusca->text();
+
   modelViewRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
 
-  if (not modelViewRecebimento.select()) emit errorSignal("Erro lendo tabela: " + modelViewRecebimento.lastError().text());
+  if (not modelViewRecebimento.select()) { return; }
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
@@ -295,7 +296,7 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) idVendas << modelViewRecebimento.data(index.row(), "idVenda").toString();
+  for (const auto &index : list) { idVendas << modelViewRecebimento.data(index.row(), "idVenda").toString(); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");

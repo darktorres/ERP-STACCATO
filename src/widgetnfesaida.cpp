@@ -18,19 +18,18 @@
 #include "widgetnfesaida.h"
 #include "xml_viewer.h"
 
-WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeSaida) {
-  ui->setupUi(this);
+WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeSaida) { ui->setupUi(this); }
 
-  ui->dateEdit->setDate(QDate::currentDate());
+WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::montaFiltro);
-  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro);
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
+void WidgetNfeSaida::setConnections() {
   connect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
-  connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
-
+  connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::montaFiltro);
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked);
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
@@ -85,7 +84,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   viewer->exibirXML(query.value("xml").toByteArray());
 }
 
-bool WidgetNfeSaida::montaFiltro() {
+void WidgetNfeSaida::montaFiltro() {
   // TODO: 5ordenar por 'data criado'
 
   const QString text = ui->lineEditBusca->text();
@@ -97,21 +96,16 @@ bool WidgetNfeSaida::montaFiltro() {
   QString filtroCheck;
 
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'";
+    if (child->isChecked()) { filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'"; }
   }
 
   filtroCheck = filtroCheck.isEmpty() ? "" : " AND (" + filtroCheck + ")";
 
   modelViewNFeSaida.setFilter(filtroBusca + filtroData + filtroCheck);
 
-  if (not modelViewNFeSaida.select()) {
-    emit errorSignal("Erro lendo tabela: " + modelViewNFeSaida.lastError().text());
-    return false;
-  }
+  if (not modelViewNFeSaida.select()) { return; }
 
   ui->table->resizeColumnsToContents();
-
-  return true;
 }
 
 void WidgetNfeSaida::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
@@ -213,10 +207,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   view.setTable("view_relatorio_nfe");
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
-  if (not view.select()) {
-    emit errorSignal("Erro comunicando com banco de dados: " + view.lastError().text());
-    return;
-  }
+  if (not view.select()) { return; }
 
   dataManager->addModel("view", &view, true);
 
@@ -342,7 +333,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     QFile filePdf(pdfDestino);
 
-    if (filePdf.exists()) filePdf.remove();
+    if (filePdf.exists()) { filePdf.remove(); }
 
     if (not QFile::copy(*pdfOrigem, pdfDestino)) {
       emit errorSignal("Erro copiando pdf!");

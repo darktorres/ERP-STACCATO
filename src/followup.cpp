@@ -22,7 +22,7 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : Dialog
   ui->dateFollowup->setDateTime(QDateTime::currentDateTime());
   ui->dateProxFollowup->setDateTime(QDateTime::currentDateTime().addDays(1));
 
-  if (tipo == Tipo::Venda) ui->frameOrcamento->hide();
+  if (tipo == Tipo::Venda) { ui->frameOrcamento->hide(); }
 }
 
 FollowUp::~FollowUp() { delete ui; }
@@ -90,10 +90,7 @@ void FollowUp::setupTables() {
 
   modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
-  if (not modelViewFollowup.select()) {
-    emit errorSignal("Erro lendo tabela followup: " + modelViewFollowup.lastError().text());
-    return;
-  }
+  if (not modelViewFollowup.select()) { return; }
 
   ui->table->setModel(new FollowUpProxyModel(&modelViewFollowup, this));
   ui->table->hideColumn("semaforo");

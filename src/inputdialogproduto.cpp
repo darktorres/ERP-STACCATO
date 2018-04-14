@@ -122,7 +122,7 @@ void InputDialogProduto::setupTables() {
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
 
-  if (tipo == Tipo::GerarCompra) ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
+  if (tipo == Tipo::GerarCompra) { ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this)); }
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {
@@ -134,8 +134,8 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   QString filter;
 
-  if (tipo == Tipo::GerarCompra) filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'";
-  if (tipo == Tipo::Faturamento) filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'";
+  if (tipo == Tipo::GerarCompra) { filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'"; }
+  if (tipo == Tipo::Faturamento) { filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'"; }
 
   if (filter.isEmpty()) {
     QMessageBox::critical(this, "Erro!", "Filtro vazio!");
@@ -144,10 +144,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   modelPedidoFornecedor.setFilter(filter);
 
-  if (not modelPedidoFornecedor.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela pedido_fornecedor_has_produto: " + modelPedidoFornecedor.lastError().text());
-    return false;
-  }
+  if (not modelPedidoFornecedor.select()) { return false; }
 
   ui->table->resizeColumnsToContents();
 
@@ -165,7 +162,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
 
-  if (tipo == Tipo::GerarCompra) emit informationSignal("Ajustar preço e quantidade se necessário.");
+  if (tipo == Tipo::GerarCompra) { emit informationSignal("Ajustar preço e quantidade se necessário."); }
 
   return true;
 }
@@ -194,7 +191,7 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
 void InputDialogProduto::calcularTotal() {
   double total = 0;
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) total += modelPedidoFornecedor.data(row, "preco").toDouble();
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
   ui->doubleSpinBoxTotal->setValue(total + ui->doubleSpinBoxST->value());
 
@@ -215,7 +212,7 @@ bool InputDialogProduto::cadastrar() {
 }
 
 void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
-  if (ui->dateEditProximo->date() < date) ui->dateEditProximo->setDate(date);
+  if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
 void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
@@ -223,7 +220,7 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
 
   double total = 0;
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) total += modelPedidoFornecedor.data(row, "preco").toDouble();
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
   const double valueSt = total * aliquota / 100;
 
@@ -243,7 +240,7 @@ void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
 
   double total = 0;
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) total += modelPedidoFornecedor.data(row, "preco").toDouble();
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
   const double aliquota = valueSt * 100 / total;
 

@@ -16,7 +16,7 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
   model.setFilter("0");
 
-  if (not model.select()) emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+  if (not model.select()) { return; }
 
   mapper.setModel(&model);
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
@@ -35,10 +35,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
-  if (not model.select()) {
-    emit errorSignal("Erro ao acessar a tabela " + model.tableName() + ": " + model.lastError().text());
-    return false;
-  }
+  if (not model.select()) { return false; }
 
   if (model.rowCount() == 0) {
     emit errorSignal("Item não encontrado.");
@@ -60,7 +57,7 @@ bool RegisterDialog::viewRegister() {
   if (not primaryId.isEmpty()) {
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
-    if (not model.select()) emit errorSignal("Erro lendo tabela: " + model.lastError().text());
+    if (not model.select()) { return false; }
   }
 
   mapper.setCurrentIndex(0);
@@ -178,10 +175,7 @@ bool RegisterDialog::newRegister() {
 
   model.setFilter("0");
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela: " + model.lastError().text());
-    return false;
-  }
+  if (not model.select()) { return false; }
 
   tipo = Tipo::Cadastrar;
 
@@ -216,14 +210,14 @@ bool RegisterDialog::save(const bool silent) {
 
   viewRegisterById(primaryId);
 
-  if (not silent) successMessage();
+  if (not silent) { successMessage(); }
 
   return true;
 }
 
 void RegisterDialog::clearFields() {
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) {
-    if (not line->isReadOnly()) line->clear();
+    if (not line->isReadOnly()) { line->clear(); }
   }
 }
 
@@ -248,13 +242,13 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   QVector<int> sub2;
 
-  for (const auto &i : sub) sub2.push_back(i.digitValue());
+  for (const auto &i : sub) { sub2.push_back(i.digitValue()); }
 
   const QVector<int> multiplicadores = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
 
   int soma = 0;
 
-  for (int i = 0; i < 12; ++i) soma += sub2.at(i) * multiplicadores.at(i);
+  for (int i = 0; i < 12; ++i) { soma += sub2.at(i) * multiplicadores.at(i); }
 
   const int resto = soma % 11;
 
@@ -266,7 +260,7 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   int soma2 = 0;
 
-  for (int i = 0; i < 13; ++i) soma2 += sub2.at(i) * multiplicadores2.at(i);
+  for (int i = 0; i < 13; ++i) { soma2 += sub2.at(i) * multiplicadores2.at(i); }
 
   const int resto2 = soma2 % 11;
 
@@ -293,13 +287,13 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   QVector<int> sub2;
 
-  for (const auto &i : sub) sub2.push_back(i.digitValue());
+  for (const auto &i : sub) { sub2.push_back(i.digitValue()); }
 
   const QVector<int> multiplicadores = {10, 9, 8, 7, 6, 5, 4, 3, 2};
 
   int soma = 0;
 
-  for (int i = 0; i < 9; ++i) soma += sub2.at(i) * multiplicadores.at(i);
+  for (int i = 0; i < 9; ++i) { soma += sub2.at(i) * multiplicadores.at(i); }
 
   const int resto = soma % 11;
 
@@ -311,7 +305,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   int soma2 = 0;
 
-  for (int i = 0; i < 10; ++i) soma2 += sub2.at(i) * multiplicadores2.at(i);
+  for (int i = 0; i < 10; ++i) { soma2 += sub2.at(i) * multiplicadores2.at(i); }
 
   const int resto2 = soma2 % 11;
 

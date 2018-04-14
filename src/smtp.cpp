@@ -127,13 +127,13 @@ void Smtp::stateChanged(QAbstractSocket::SocketState socketState) {
   Q_UNUSED(socketState);
   //  qDebug() << "stateChanged " << socketState;
 
-  //  if (socketState == QAbstractSocket::UnconnectedState) emit status("Não conseguiu conectar ao servidor SMTP!");
+  //  if (socketState == QAbstractSocket::UnconnectedState) { emit status("Não conseguiu conectar ao servidor SMTP!"); }
 }
 
 void Smtp::errorReceived(QAbstractSocket::SocketError socketError) {
   if (socketError == QAbstractSocket::RemoteHostClosedError) { return; }
   //  qDebug() << "error: " << socketError;
-  if (socketError == QAbstractSocket::HostNotFoundError) emit status("Não encontrou o servidor SMTP!");
+  if (socketError == QAbstractSocket::HostNotFoundError) { emit status("Não encontrou o servidor SMTP!"); }
 }
 
 void Smtp::disconnected() {

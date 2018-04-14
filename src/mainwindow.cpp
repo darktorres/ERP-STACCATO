@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
   query.bindValue(":idUsuario", UserSession::idUsuario());
 
-  if (not query.exec() or not query.first()) QMessageBox::critical(this, "Erro!", "Erro lendo permissões: " + query.lastError().text());
+  if (not query.exec() or not query.first()) { QMessageBox::critical(this, "Erro!", "Erro lendo permissões: " + query.lastError().text()); }
 
   // REFAC: dont harcode numbers
   ui->tabWidget->setTabEnabled(0, query.value("view_tab_orcamento").toBool());
@@ -325,14 +325,14 @@ void MainWindow::updateTables() {
 
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Orçamentos") ui->widgetOrcamento->updateTables();
-  if (currentText == "Vendas") ui->widgetVenda->updateTables();
-  if (currentText == "Compras") ui->widgetCompra->updateTables();
-  if (currentText == "Logística") ui->widgetLogistica->updateTables();
-  if (currentText == "NFe") ui->widgetNfe->updateTables();
-  if (currentText == "Estoque") ui->widgetEstoque->updateTables();
-  if (currentText == "Financeiro") ui->widgetFinanceiro->updateTables();
-  if (currentText == "Relatórios") ui->widgetRelatorio->updateTables();
+  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
+  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
+  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
+  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
 
   qApp->setUpdating(false);
 }

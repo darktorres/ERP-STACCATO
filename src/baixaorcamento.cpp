@@ -20,7 +20,7 @@ void BaixaOrcamento::setupTables(const QString &idOrcamento) {
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
   modelOrcamento.setFilter("idOrcamento = '" + idOrcamento + "'");
 
-  if (not modelOrcamento.select()) { emit errorSignal("Erro lendo tabela orcamento: " + modelOrcamento.lastError().text()); }
+  if (not modelOrcamento.select()) { return; }
 }
 
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }

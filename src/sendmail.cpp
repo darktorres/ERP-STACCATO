@@ -28,7 +28,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) emit errorSignal("Erro buscando email do fornecedor: " + query.lastError().text());
+    if (not query.exec()) { emit errorSignal("Erro buscando email do fornecedor: " + query.lastError().text()); }
 
     QString representante;
 
@@ -58,11 +58,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    if (const auto key = UserSession::getSetting("User/emailCompra"); key) ui->lineEditEmail->setText(key.value().toString());
-    if (const auto key = UserSession::getSetting("User/emailCopia"); key) ui->lineEditCopia->setText(key.value().toString());
-    if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) ui->lineEditServidor->setText(key.value().toString());
-    if (const auto key = UserSession::getSetting("User/portaSMTP"); key) ui->lineEditPorta->setText(key.value().toString());
-    if (const auto key = UserSession::getSetting("User/emailSenha"); key) ui->lineEditPasswd->setText(key.value().toString());
+    if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key.value().toString()); }
+    if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditCopia->setText(key.value().toString()); }
+    if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidor->setText(key.value().toString()); }
+    if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPorta->setText(key.value().toString()); }
+    if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditPasswd->setText(key.value().toString()); }
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);

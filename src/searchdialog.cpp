@@ -68,7 +68,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
   QStringList strings = text.split(" ", QString::SkipEmptyParts);
 
-  for (auto &string : strings) string.prepend("+").append("*");
+  for (auto &string : strings) { string.prepend("+").append("*"); }
 
   QString searchFilter = "MATCH(" + indexes.join(", ") + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 
@@ -77,11 +77,11 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
     return;
   }
 
-  if (not filter.isEmpty()) searchFilter.append(" AND (" + filter + ")");
+  if (not filter.isEmpty()) { searchFilter.append(" AND (" + filter + ")"); }
 
   model.setFilter(searchFilter);
 
-  if (not model.select()) QMessageBox::critical(this, "Erro!", "Erro buscando dados: " + model.lastError().text());
+  if (not model.select()) { return; }
 }
 
 void SearchDialog::sendUpdateMessage() {
@@ -95,10 +95,7 @@ void SearchDialog::sendUpdateMessage() {
 void SearchDialog::show() {
   model.setFilter(filter);
 
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela " + model.tableName() + ": " + model.lastError().text());
-    return;
-  }
+  if (not model.select()) { return; }
 
   ui->lineEditBusca->setFocus();
   ui->lineEditBusca->clear();
@@ -113,10 +110,7 @@ void SearchDialog::show() {
 }
 
 void SearchDialog::showMaximized() {
-  if (not model.select()) {
-    QMessageBox::critical(this, "Erro!", "Erro lendo tabela " + model.tableName() + ": " + model.lastError().text());
-    return;
-  }
+  if (not model.select()) { return; }
 
   ui->lineEditBusca->setFocus();
 
@@ -132,7 +126,7 @@ void SearchDialog::setFilter(const QString &value) {
 }
 
 void SearchDialog::hideColumns(const QStringList &columns) {
-  for (const auto &column : columns) ui->table->hideColumn(column);
+  for (const auto &column : columns) { ui->table->hideColumn(column); }
 }
 
 void SearchDialog::on_pushButtonSelecionar_clicked() {
@@ -144,7 +138,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
 
-    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) emit warningSignal("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!");
+    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) { emit warningSignal("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!"); }
   }
 
   sendUpdateMessage();
@@ -156,8 +150,8 @@ void SearchDialog::setTextKeys(const QStringList &value) { textKeys = value; }
 void SearchDialog::setPrimaryKey(const QString &value) { primaryKey = value; }
 
 QString SearchDialog::getText(const QVariant &value) {
-  if (model.tableName().contains("endereco") and value == 1) return "Não há/Retira";
-  if (value == 0) return QString();
+  if (model.tableName().contains("endereco") and value == 1) { return "Não há/Retira"; }
+  if (value == 0) { return QString(); }
 
   QString queryText;
 
@@ -251,7 +245,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, QWidget *
        "idProduto", "idProdutoRelacionado", "ipi",  "markup",    "ncm",      "ncmEx", "observacoes", "origem",     "qtdPallet",     "representacao", "st",       "temLote"});
 
   for (int column = 0, columnCount = sdProd->model.columnCount(); column < columnCount; ++column) {
-    if (sdProd->model.record().fieldName(column).endsWith("Upd")) sdProd->ui->table->setColumnHidden(column, true);
+    if (sdProd->model.record().fieldName(column).endsWith("Upd")) { sdProd->ui->table->setColumnHidden(column, true); }
   }
 
   sdProd->setHeaderData("fornecedor", "Fornecedor");

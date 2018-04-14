@@ -13,7 +13,7 @@ class WidgetNfe final : public Widget {
 public:
   explicit WidgetNfe(QWidget *parent = nullptr);
   ~WidgetNfe();
-  auto updateTables() -> bool;
+  auto updateTables() -> void;
 
 private:
   // attributes

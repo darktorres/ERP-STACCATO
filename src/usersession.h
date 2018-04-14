@@ -22,7 +22,7 @@ public:
 
 private:
   // attributes
-  inline static QSqlQuery *query = nullptr;
+  inline static QSqlQuery *query = nullptr; // defer creating query until database is set
   inline static QSettings *settings = new QSettings("Staccato", "ERP");
   // methods
   static auto initializeQuery() -> void;

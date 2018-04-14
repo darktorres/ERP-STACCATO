@@ -51,7 +51,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelEstoque.setFilter("status = 'TEMP'");
 
-  if (not modelEstoque.select()) emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
+  if (not modelEstoque.select()) { return; }
 
   ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
@@ -123,7 +123,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelConsumo.setFilter("status = 'TEMP'");
 
-  if (not modelConsumo.select()) emit errorSignal("Erro lendo tabela estoque_has_consumo: " + modelConsumo.lastError().text());
+  if (not modelConsumo.select()) { return; }
 
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelConsumo, this));
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
@@ -195,7 +195,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelCompra.setFilter("idCompra = " + idsCompra.join(" OR idCompra = "));
 
-  if (not modelCompra.select()) emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelCompra.lastError().text());
+  if (not modelCompra.select()) { return; }
 
   ui->tableCompra->setModel(new EstoqueProxyModel(&modelCompra, this));
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
@@ -236,21 +236,21 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   modelNFe.setFilter("0");
 
-  if (not modelNFe.select()) emit errorSignal("Erro lendo tabela nfe: " + modelNFe.lastError().text());
+  if (not modelNFe.select()) { return; }
 
   modelEstoque_nfe.setTable("estoque_has_nfe");
   modelEstoque_nfe.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque_nfe.setFilter("0");
 
-  if (not modelEstoque_nfe.select()) emit errorSignal("Erro lendo tabela estoque_has_nfe: " + modelEstoque_nfe.lastError().text());
+  if (not modelEstoque_nfe.select()) { return; }
 
   modelEstoque_compra.setTable("estoque_has_compra");
   modelEstoque_compra.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque_compra.setFilter("0");
 
-  if (not modelEstoque_compra.select()) emit errorSignal("Erro lendo tabela estoque_has_compra: " + modelEstoque_compra.lastError().text());
+  if (not modelEstoque_compra.select()) { return; }
 }
 
 bool ImportarXML::cadastrarProdutoEstoque() {
@@ -477,7 +477,7 @@ void ImportarXML::procurar() {
     }
   }
 
-  if (ok) ui->pushButtonProcurar->setDisabled(true);
+  if (ok) { ui->pushButtonProcurar->setDisabled(true); }
 
   ui->tableEstoque->resizeColumnsToContents();
   ui->tableConsumo->resizeColumnsToContents();
@@ -546,7 +546,7 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
     const int idEstoque_temp = modelEstoque_compra.data(row, "idEstoque").toInt();
     const int idCompra_temp = modelEstoque_compra.data(row, "idCompra").toInt();
 
-    if (idEstoque_temp == idEstoque and idCompra_temp == idCompra) exists = true;
+    if (idEstoque_temp == idEstoque and idCompra_temp == idCompra) { exists = true; }
   }
 
   if (not exists) {
@@ -637,7 +637,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   for (int row = 0; row < modelNFe.rowCount(); ++row) {
     const int id = modelNFe.data(row, "idNFe").toInt();
-    if (id > xml.idNFe) xml.idNFe = id;
+    if (id > xml.idNFe) { xml.idNFe = id; }
   }
 
   xml.idNFe++;
@@ -676,7 +676,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
 
   QStringList lojas{"CD"};
 
-  while (query.next()) lojas << query.value("descricao").toString();
+  while (query.next()) { lojas << query.value("descricao").toString(); }
 
   QInputDialog input;
   input.setInputMode(QInputDialog::TextInput);
@@ -730,7 +730,7 @@ bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too bi
   }
 
   // remove 'A'
-  if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A." and xml.codProd.endsWith("A")) xml.codProd = xml.codProd.left(xml.codProd.size() - 1);
+  if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A." and xml.codProd.endsWith("A")) { xml.codProd = xml.codProd.left(xml.codProd.size() - 1); }
 
   QSqlQuery query;
 
@@ -743,7 +743,7 @@ bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too bi
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     const int id = modelEstoque.data(row, "idEstoque").toInt();
-    if (id > idEstoque) idEstoque = id;
+    if (id > idEstoque) { idEstoque = id; }
   }
 
   idEstoque++;
@@ -812,7 +812,7 @@ bool ImportarXML::inserirNoSqlModel(XML &xml, const QStandardItem *item) {
         if (not inserirItemSql(xml)) { return false; }
       }
 
-      if (child->hasChildren()) inserirNoSqlModel(xml, child);
+      if (child->hasChildren()) { inserirNoSqlModel(xml, child); }
     }
   }
 

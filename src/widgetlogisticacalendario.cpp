@@ -49,7 +49,7 @@ void WidgetLogisticaCalendario::updateFilter() {
   updateCalendar(date.addDays(date.dayOfWeek() * -1));
 }
 
-bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
+void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   ui->tableWidget->clearContents();
 
   int veiculos = 0;
@@ -82,7 +82,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     const auto item = ui->tableWidget->horizontalHeaderItem(col);
     item->setText(QString::number(dia) + " " + item->text());
     dia++;
-    if (dia > diasMes) dia = 1;
+    if (dia > diasMes) { dia = 1; }
   }
 
   QSqlQuery query;
@@ -92,7 +92,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
   if (not query.exec()) {
     emit errorSignal("Erro query: " + query.lastError().text());
-    return false;
+    return;
   }
 
   while (query.next()) {
@@ -119,9 +119,9 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     text += query.value("data").toTime().toString("hh:mm") + "  Kg: " + query.value("kg").toString() + ", Cx.: " + query.value("caixas").toString();
 
-    if (not query.value("idVenda").toString().isEmpty()) text += "\n           " + query.value("idVenda").toString();
+    if (not query.value("idVenda").toString().isEmpty()) { text += "\n           " + query.value("idVenda").toString(); }
 
-    if (not query.value("bairro").toString().isEmpty()) text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString();
+    if (not query.value("bairro").toString().isEmpty()) { text += " - " + query.value("bairro").toString() + " - " + query.value("cidade").toString(); }
 
     // TODO: 0dont show this to compact screen? or show this only on doubleclick
     text += "\n" + query.value("text").toString();
@@ -130,7 +130,7 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     item->setText(text);
 
-    if (not ui->tableWidget->item(row, diaSemana)) ui->tableWidget->setItem(row, diaSemana, item);
+    if (not ui->tableWidget->item(row, diaSemana)) { ui->tableWidget->setItem(row, diaSemana, item); }
   }
 
   ui->tableWidget->resizeColumnsToContents();
@@ -139,8 +139,6 @@ bool WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   const QString range = startDate.toString("dd-MM-yyyy") + " - " + startDate.addDays(6).toString("dd-MM-yyyy");
 
   ui->lineEditRange->setText(range);
-
-  return true;
 }
 
 void WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled(bool checked) {

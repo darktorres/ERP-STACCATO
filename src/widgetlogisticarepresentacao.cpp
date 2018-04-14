@@ -39,10 +39,7 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
 
   modelViewLogisticaRepresentacao.setFilter("fornecedor = '" + fornecedor + "'");
 
-  if (not modelViewLogisticaRepresentacao.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewLogisticaRepresentacao.lastError().text());
-    return;
-  }
+  if (not modelViewLogisticaRepresentacao.select()) { return; }
 
   ui->table->sortByColumn("prazoEntrega", Qt::AscendingOrder);
 
@@ -68,7 +65,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
 
   modelViewLogisticaRepresentacao.setFilter("0");
 
-  if (not modelViewLogisticaRepresentacao.select()) emit errorSignal("Erro lendo tabela: " + modelViewLogisticaRepresentacao.lastError().text());
+  if (not modelViewLogisticaRepresentacao.select()) { return; }
 
   ui->table->setModel(new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this));
   ui->table->hideColumn("idPedido");
@@ -142,7 +139,7 @@ void WidgetLogisticaRepresentacao::on_table_entered(const QModelIndex &) { ui->t
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) {
   modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
 
-  if (not modelViewLogisticaRepresentacao.select()) emit errorSignal("Erro lendo tabela: " + modelViewLogisticaRepresentacao.lastError().text());
+  if (not modelViewLogisticaRepresentacao.select()) { return; }
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

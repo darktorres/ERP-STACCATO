@@ -37,7 +37,7 @@ void WidgetCompraGerar::calcularPreco() {
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  for (const auto &item : list) preco += modelProdutos.data(item.row(), "preco").toDouble();
+  for (const auto &item : list) { preco += modelProdutos.data(item.row(), "preco").toDouble(); }
 
   ui->doubleSpinBox->setValue(preco);
 }
@@ -111,6 +111,7 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->hideColumn("aliquotaSt");
   ui->tableProdutos->hideColumn("st");
 
+  // REFAC: move this connection elsewhere
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraGerar::calcularPreco);
 }
 
@@ -119,10 +120,6 @@ bool WidgetCompraGerar::updateTables() {
 
   const QString filter = modelResumo.filter();
 
-  if (not modelResumo.select()) {
-    emit errorSignal("Erro lendo tabela fornecedores: " + modelResumo.lastError().text());
-    return false;
-  }
 
   modelResumo.setFilter(filter);
 
@@ -130,10 +127,6 @@ bool WidgetCompraGerar::updateTables() {
 
   const QString filter2 = modelProdutos.filter();
 
-  if (not modelProdutos.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text());
-    return false;
-  }
 
   modelProdutos.setFilter(filter2);
 

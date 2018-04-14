@@ -61,7 +61,7 @@ void CadastroTransportadora::setupTables() {
 
   modelVeiculo.setFilter("idVeiculo = 0");
 
-  if (not modelVeiculo.select()) emit errorSignal("Ocorreu um erro ao acessar a tabela de veículo: " + modelVeiculo.lastError().text());
+  if (not modelVeiculo.select()) { return; }
 
   ui->tableVeiculo->setModel(&modelVeiculo);
   ui->tableVeiculo->hideColumn("idVeiculo");
@@ -145,10 +145,7 @@ void CadastroTransportadora::on_pushButtonNovoCad_clicked() {
   newRegister();
   modelVeiculo.setFilter("0");
 
-  if (not modelVeiculo.select()) {
-    emit errorSignal("Erro lendo tabela veiculo: " + modelVeiculo.lastError().text());
-    return;
-  }
+  if (not modelVeiculo.select()) { return; }
 }
 
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
@@ -211,7 +208,7 @@ bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (not isUpdate) modelEnd.insertRow(currentRowEnd);
+  if (not isUpdate) { modelEnd.insertRow(currentRowEnd); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -289,19 +286,13 @@ bool CadastroTransportadora::viewRegister() {
 
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) {
-    emit errorSignal("Erro lendo tabela endereço transportadora: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.select()) { return false; }
 
   ui->tableEndereco->resizeColumnsToContents();
 
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + " AND desativado = FALSE");
 
-  if (not modelVeiculo.select()) {
-    emit errorSignal("Erro lendo tabela veículo: " + modelVeiculo.lastError().text());
-    return false;
-  }
+  if (not modelVeiculo.select()) { return false; }
 
   ui->tableVeiculo->resizeColumnsToContents();
 
@@ -319,7 +310,7 @@ bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
 
   const int row = isUpdate ? mapperVeiculo.currentIndex() : modelVeiculo.rowCount();
 
-  if (not isUpdate) modelVeiculo.insertRow(row);
+  if (not isUpdate) { modelVeiculo.insertRow(row); }
 
   if (not modelVeiculo.setData(row, "modelo", ui->lineEditModelo->text())) { return false; }
   if (not modelVeiculo.setData(row, "capacidade", ui->lineEditCarga->text().toInt())) { return false; }

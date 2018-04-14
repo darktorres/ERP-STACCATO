@@ -25,7 +25,7 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : Dialog(parent), tip
     ui->lineEditPass->setFocus();
   }
 
-  if (const auto key = UserSession::getSetting("Login/hostname"); key) ui->lineEditHostname->setText(key.value().toString());
+  if (const auto key = UserSession::getSetting("Login/hostname"); key) { ui->lineEditHostname->setText(key.value().toString()); }
 
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();
@@ -69,7 +69,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
   accept();
 
-  if (tipo == Tipo::Login) UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+  if (tipo == Tipo::Login) { UserSession::setSetting("User/lastuser", ui->lineEditUser->text()); }
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(qApp->getMapLojas().value(loja)); }

@@ -53,7 +53,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
 Venda::~Venda() { delete ui; }
 
-void Venda::setupConnections() {
+void Venda::setConnections() {
   connect(ui->checkBoxFreteManual, &QCheckBox::clicked, this, &Venda::on_checkBoxFreteManual_clicked);
   connect(ui->checkBoxPontuacaoIsento, &QCheckBox::toggled, this, &Venda::on_checkBoxPontuacaoIsento_toggled);
   connect(ui->checkBoxPontuacaoPadrao, &QCheckBox::toggled, this, &Venda::on_checkBoxPontuacaoPadrao_toggled);
@@ -144,10 +144,7 @@ void Venda::setupTables() {
 
   modelItem.setFilter("0");
 
-  if (not modelItem.select()) {
-    emit errorSignal("Erro lendo tabela venda_has_produto: " + modelItem.lastError().text());
-    return;
-  }
+  if (not modelItem.select()) { return; }
 
   ui->tableProdutos->setModel(new SearchDialogProxyModel(&modelItem, this));
   ui->tableProdutos->hideColumn("idRelacionado");
@@ -191,10 +188,7 @@ void Venda::setupTables() {
 
   modelFluxoCaixa.setFilter("0");
 
-  if (not modelFluxoCaixa.select()) {
-    emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-    return;
-  }
+  if (not modelFluxoCaixa.select()) { return; }
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
   ui->tableFluxoCaixa->hideColumn("nfe");
@@ -233,10 +227,7 @@ void Venda::setupTables() {
 
   modelFluxoCaixa2.setFilter("0");
 
-  if (not modelFluxoCaixa2.select()) {
-    emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa2.lastError().text());
-    return;
-  }
+  if (not modelFluxoCaixa2.select()) { return; }
 
   ui->tableFluxoCaixa2->setModel(&modelFluxoCaixa2);
   ui->tableFluxoCaixa2->hideColumn("idPagamento");
@@ -298,7 +289,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
-    while (queryPag.next()) temp << queryPag.value("pagamento").toString();
+    while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());
 
@@ -411,7 +402,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   ui->widgetPgts->setMinimumWidth(550);
 
-  setupConnections();
+  setConnections();
 }
 
 bool Venda::verifyFields() {
@@ -553,7 +544,7 @@ void Venda::on_comboBoxPgt_currentTextChanged(const int index, const QString &te
 
   ui->widgetPgts->listComboParc.at(index)->clear();
 
-  for (int i = 0; i < parcelas; ++i) ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x");
+  for (int i = 0; i < parcelas; ++i) { ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
 
   ui->widgetPgts->listComboParc.at(index)->setEnabled(true);
 
@@ -652,10 +643,7 @@ bool Venda::viewRegister() {
 
     modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
 
-    if (not modelItem.select()) {
-      emit errorSignal("Erro lendo tabela venda_has_produto: " + modelItem.lastError().text());
-      return;
-    }
+    if (not modelItem.select()) { return; }
 
     if (not RegisterDialog::viewRegister()) { return; }
 
@@ -668,21 +656,15 @@ bool Venda::viewRegister() {
 
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND comissao = FALSE AND taxa = FALSE");
 
-    if (not modelFluxoCaixa.select()) {
-      emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-      return;
-    }
+    if (not modelFluxoCaixa.select()) { return; }
 
-    for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) ui->tableFluxoCaixa->openPersistentEditor(row, "representacao");
+    for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) { ui->tableFluxoCaixa->openPersistentEditor(row, "representacao"); }
 
     if (financeiro) {
       // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
       modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND (comissao = TRUE OR taxa = TRUE)");
 
-      if (not modelFluxoCaixa2.select()) {
-        emit errorSignal("Erro lendo tabela conta_a_receber_has_pagamento: " + modelFluxoCaixa.lastError().text());
-        return;
-      }
+      if (not modelFluxoCaixa2.select()) { return; }
 
       ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
     }
@@ -729,7 +711,7 @@ bool Venda::viewRegister() {
     if (data("devolucao").toBool()) { ui->pushButtonDevolucao->hide(); }
   }();
 
-  setupConnections();
+  setConnections();
 
   return true;
 }
@@ -742,10 +724,7 @@ void Venda::on_pushButtonVoltar_clicked() {
 
   isDirty = false;
 
-  if (not model.select()) {
-    emit errorSignal("Erro lendo tabela: " + model.lastError().text());
-    return;
-  }
+  if (not model.select()) { return; }
 
   close();
 }
@@ -758,15 +737,9 @@ void Venda::montarFluxoCaixa() {
 
   if (ui->framePagamentos_2->isHidden()) { return; }
 
-  if (not modelFluxoCaixa.select()) {
-    emit errorSignal("Erro comunicando com banco de dados: " + modelFluxoCaixa.lastError().text());
-    return;
-  }
+  if (not modelFluxoCaixa.select()) { return; }
 
-  if (not modelFluxoCaixa2.select()) {
-    emit errorSignal("Erro comunicando com banco de dados: " + modelFluxoCaixa2.lastError().text());
-    return;
-  }
+  if (not modelFluxoCaixa2.select()) { return; }
 
   if (financeiro) {
     for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
@@ -830,7 +803,7 @@ void Venda::montarFluxoCaixa() {
         const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
         double valorAjustado = taxaComissao * (valorComissao - (valorComissao / data("total").toDouble() * data("frete").toDouble()));
 
-        if (modelFluxoCaixa.data(0, "observacao").toString() == "FRETE") valorAjustado = valorComissao * taxaComissao;
+        if (modelFluxoCaixa.data(0, "observacao").toString() == "FRETE") { valorAjustado = valorComissao * taxaComissao; }
 
         const int row = modelFluxoCaixa2.rowCount();
         modelFluxoCaixa2.insertRow(row);
@@ -887,7 +860,7 @@ void Venda::montarFluxoCaixa() {
     }
   }
 
-  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) ui->tableFluxoCaixa->openPersistentEditor(row, "representacao");
+  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) { ui->tableFluxoCaixa->openPersistentEditor(row, "representacao"); }
 
   ui->tableFluxoCaixa->resizeColumnsToContents();
   ui->tableFluxoCaixa2->resizeColumnsToContents();
@@ -906,7 +879,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
   resetarPagamentos();
 
-  setupConnections();
+  setConnections();
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
@@ -925,7 +898,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
 
-  setupConnections();
+  setConnections();
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
@@ -950,7 +923,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
     resetarPagamentos();
   }();
 
-  setupConnections();
+  setConnections();
 }
 
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) {
@@ -977,7 +950,7 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
     resetarPagamentos();
   }();
 
-  setupConnections();
+  setConnections();
 }
 
 void Venda::on_pushButtonImprimir_clicked() {
@@ -1405,7 +1378,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   double credito = queryPag.value("credito").toDouble();
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-    if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) credito += modelFluxoCaixa.data(row, "valor").toDouble();
+    if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) { credito += modelFluxoCaixa.data(row, "valor").toDouble(); }
   }
 
   ui->doubleSpinBoxCreditoTotal->setValue(credito);

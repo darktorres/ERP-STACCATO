@@ -22,7 +22,7 @@ private:
   Ui::WidgetCompraPendentes *ui;
   // methods
   auto insere(const QDate &dataPrevista) -> bool;
-  auto makeConnections() -> void;
+  auto setConnections() -> void;
   auto montaFiltro() -> void;
   auto on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) -> void;
   auto on_doubleSpinBoxQuantAvulso_valueChanged(const double value) -> void;

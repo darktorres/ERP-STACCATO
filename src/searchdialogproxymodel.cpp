@@ -15,21 +15,19 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
   if (role == Qt::BackgroundRole) {
     const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 
-    if (descontinuado == true) return QBrush(Qt::red); // descontinuado
+    if (descontinuado == true) { return QBrush(Qt::red); } // descontinuado
 
-    //    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
     const int estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toInt();
     const bool promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toBool();
 
-    //    if (estoque == true) return QBrush(Qt::blue);   // estoque
-    if (estoque == 1) return QBrush(Qt::yellow);
-    if (estoque == 2) return QBrush(Qt::blue);
-    if (promocao == true) return QBrush(Qt::green); // promocao
+    if (estoque == 1) { return QBrush(Qt::yellow); }
+    if (estoque == 2) { return QBrush(Qt::blue); }
+    if (promocao == true) { return QBrush(Qt::green); } // promocao
 
     if (proxyIndex.column() == this->validade) {
       const QDate validade = QIdentityProxyModel::data(index(proxyIndex.row(), this->validade), Qt::DisplayRole).toDate();
 
-      if (validade < QDate::currentDate()) return QBrush(Qt::red);
+      if (validade < QDate::currentDate()) { return QBrush(Qt::red); }
     }
   }
 
@@ -39,21 +37,19 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
 
     const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 
-    if (descontinuado == true) return QBrush(Qt::black);
+    if (descontinuado == true) { return QBrush(Qt::black); }
 
-    //    const bool estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toBool();
     const int estoque = QIdentityProxyModel::data(index(proxyIndex.row(), this->estoque), Qt::DisplayRole).toInt();
     const bool promocao = QIdentityProxyModel::data(index(proxyIndex.row(), this->promocao), Qt::DisplayRole).toBool();
 
-    //    if (estoque == true) return QBrush(Qt::white);
-    if (estoque == 1) return QBrush(Qt::black);
-    if (estoque == 2) return QBrush(Qt::white);
-    if (promocao == true) return QBrush(Qt::black);
+    if (estoque == 1) { return QBrush(Qt::black); }
+    if (estoque == 2) { return QBrush(Qt::white); }
+    if (promocao == true) { return QBrush(Qt::black); }
 
     if (proxyIndex.column() == this->validade) {
       const QDate validade = QIdentityProxyModel::data(index(proxyIndex.row(), this->validade), Qt::DisplayRole).toDate();
 
-      if (validade < QDate::currentDate()) return QBrush(Qt::black);
+      if (validade < QDate::currentDate()) { return QBrush(Qt::black); }
     }
 
     //

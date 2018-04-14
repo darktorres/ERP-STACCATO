@@ -66,7 +66,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   ui->doubleSpinBoxQuantAvulso->setSuffix(" " + un);
 }
 
-void WidgetCompraPendentes::makeConnections() {
+void WidgetCompraPendentes::setConnections() {
   connect(ui->checkBoxFiltroPendentes, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroIniciados, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -87,13 +87,10 @@ bool WidgetCompraPendentes::updateTables() {
   if (modelViewVendaProduto.tableName().isEmpty()) {
     setupTables();
     montaFiltro();
-    makeConnections();
+    setConnections(); // REFAC: move this to constructor?
   }
 
-  if (not modelViewVendaProduto.select()) {
-    emit errorSignal("Erro lendo tabela produtos pendentes: " + modelViewVendaProduto.lastError().text());
-    return false;
-  }
+  if (not modelViewVendaProduto.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 
@@ -162,7 +159,7 @@ void WidgetCompraPendentes::montaFiltro() {
   QString filtroCheck;
 
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'";
+    if (child->isChecked()) { filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'"; }
   }
 
   filtroCheck = filtroCheck.isEmpty() ? "" : "(" + filtroCheck + ")";
@@ -179,7 +176,7 @@ void WidgetCompraPendentes::montaFiltro() {
 
   modelViewVendaProduto.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0" + textoSul);
 
-  if (not modelViewVendaProduto.select()) emit errorSignal("Erro na busca: " + modelViewVendaProduto.lastError().text());
+  if (not modelViewVendaProduto.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

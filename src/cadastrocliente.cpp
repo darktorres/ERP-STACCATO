@@ -207,7 +207,7 @@ bool CadastroCliente::viewRegister() {
 
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço do cliente: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) { return false; }
 
   ui->itemBoxCliente->getSearchDialog()->setFilter("idCliente NOT IN (" + data("idCliente").toString() + ")");
 
@@ -291,7 +291,7 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 
   currentRowEnd = tipo == Tipo::Atualizar ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (tipo == Tipo::Cadastrar) modelEnd.insertRow(currentRowEnd);
+  if (tipo == Tipo::Cadastrar) { modelEnd.insertRow(currentRowEnd); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -459,7 +459,7 @@ void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) { ui
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) { return; }
 }
 
 void CadastroCliente::on_pushButtonRemoverEnd_clicked() {

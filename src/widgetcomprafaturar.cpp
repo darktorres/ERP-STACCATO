@@ -65,10 +65,7 @@ bool WidgetCompraFaturar::updateTables() {
 
   ui->tableResumo->resizeColumnsToContents();
 
-  if (not modelViewFaturamento.select()) {
-    emit errorSignal("Erro lendo tabela faturamento: " + modelViewFaturamento.lastError().text());
-    return false;
-  }
+  if (not modelViewFaturamento.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 
@@ -176,7 +173,7 @@ void WidgetCompraFaturar::montaFiltro() {
   modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "1" : "0") + " AND " +
                                  QString(sul ? "(Código LIKE 'CAMB%' OR Código IS NULL)" : "(Código NOT LIKE 'CAMB%' OR Código IS NULL)"));
 
-  if (not modelViewFaturamento.select()) emit errorSignal("Erro lendo tabela: " + modelViewFaturamento.lastError().text());
+  if (not modelViewFaturamento.select()) { return; }
 }
 
 bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
@@ -221,7 +218,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &item : list) idVendas << modelViewFaturamento.data(item.row(), "Código").toString();
+  for (const auto &item : list) { idVendas << modelViewFaturamento.data(item.row(), "Código").toString(); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Essa operação ira cancelar todos os itens desta OC, mesmo os já confirmados/faturados! Deseja continuar?", QMessageBox::Yes | QMessageBox::No,
                      this);

@@ -15,11 +15,12 @@ WidgetNfe::~WidgetNfe() { delete ui; }
 
 void WidgetNfe::setConnections() { connect(ui->tabWidgetNfe, &QTabWidget::currentChanged, this, &WidgetNfe::on_tabWidgetNfe_currentChanged); }
 
-bool WidgetNfe::updateTables() {
+void WidgetNfe::updateTables() {
   const QString currentText = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());
 
-  if (currentText == "Entrada" and not ui->widgetEntrada->updateTables()) { return false; }
-  if (currentText == "Saída" and not ui->widgetSaida->updateTables()) { return false; }
+  if (currentText == "Entrada") { ui->widgetEntrada->updateTables(); }
+  if (currentText == "Saída") { ui->widgetSaida->updateTables(); }
+}
 
   return true;
 }

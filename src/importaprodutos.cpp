@@ -93,7 +93,7 @@ bool ImportaProdutos::verificaSeRepresentacao() {
     return false;
   }
 
-  if (queryFornecedor.first()) ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool());
+  if (queryFornecedor.first()) { ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool()); }
 
   return true;
 }
@@ -135,17 +135,14 @@ bool ImportaProdutos::importar() {
 
   modelProduto.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));
 
-  if (not modelProduto.select()) {
-    emit errorSignal("Erro lendo tabela produto: " + modelProduto.lastError().text());
-    return false;
-  }
+  if (not modelProduto.select()) { return false; }
 
   const QString red = QString::number(static_cast<int>(FieldColors::Red));
 
   modelErro.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)) + " AND (m2cxUpd = " + red +
                       " OR pccxUpd = " + red + " OR codComercialUpd = " + red + " OR custoUpd = " + red + " OR precoVendaUpd = " + red + ")");
 
-  if (not modelErro.select()) emit errorSignal("Erro lendo tabela erro: " + modelErro.lastError().text());
+  if (not modelErro.select()) { return false; }
 
   itensExpired = modelProduto.rowCount();
 
@@ -284,7 +281,7 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->setModel(new ImportaProdutosProxyModel(&modelProduto, this));
 
   for (int column = 0; column < modelProduto.columnCount(); ++column) {
-    if (modelProduto.record().fieldName(column).endsWith("Upd")) ui->tableProdutos->setColumnHidden(column, true);
+    if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->tableProdutos->setColumnHidden(column, true); }
   }
 
   ui->tableProdutos->hideColumn("idProduto");
@@ -363,7 +360,7 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->setModel(new ImportaProdutosProxyModel(&modelErro, this));
 
   for (int column = 0; column < modelErro.columnCount(); ++column) {
-    if (modelErro.record().fieldName(column).endsWith("Upd")) ui->tableErro->setColumnHidden(column, true);
+    if (modelErro.record().fieldName(column).endsWith("Upd")) { ui->tableErro->setColumnHidden(column, true); }
   }
 
   ui->tableErro->hideColumn("idProduto");
@@ -477,10 +474,10 @@ void ImportaProdutos::contaProdutos() {
 
 void ImportaProdutos::consistenciaDados() {
   Q_FOREACH (const auto &key, variantMap.keys()) {
-    if (variantMap.value(key).toString().contains("*")) variantMap.insert(key, variantMap.value(key).toString().remove("*"));
+    if (variantMap.value(key).toString().contains("*")) { variantMap.insert(key, variantMap.value(key).toString().remove("*")); }
   }
 
-  if (variantMap.value("ui").isNull()) variantMap.insert("ui", 0);
+  if (variantMap.value("ui").isNull()) { variantMap.insert("ui", 0); }
 
   if (variantMap.value("ncm").toString().length() == 10) {
     variantMap.insert("ncmEx", variantMap.value("ncm").toString().right(2));
@@ -489,7 +486,7 @@ void ImportaProdutos::consistenciaDados() {
 
   const QString un = variantMap.value("un").toString().toUpper();
 
-  (un == "M2" or un == "M²") ? variantMap.insert("un", "M²") : variantMap.insert("un", un);
+  variantMap.insert("un", (un == "M2" or un == "M²") ? "M²" : un);
 
   variantMap.insert("ncm", variantMap.value("ncm").toString().remove(".").remove(",").remove("-").remove(" "));
   variantMap.insert("codBarras", variantMap.value("codBarras").toString().remove(".").remove(","));
@@ -497,8 +494,8 @@ void ImportaProdutos::consistenciaDados() {
 
   variantMap.insert("minimo", variantMap.value("minimo").toDouble());
 
-  if (qFuzzyIsNull(variantMap.value("minimo").toDouble())) variantMap.insert("minimo", QVariant());
-  if (qFuzzyIsNull(variantMap.value("multiplo").toDouble())) variantMap.insert("multiplo", QVariant());
+  if (qFuzzyIsNull(variantMap.value("minimo").toDouble())) { variantMap.insert("minimo", QVariant()); }
+  if (qFuzzyIsNull(variantMap.value("multiplo").toDouble())) { variantMap.insert("multiplo", QVariant()); }
 
   // NOTE: cast other fields to the correct type?
 }
@@ -510,7 +507,7 @@ void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &r
 
     QVariant value = query.value(record.indexOf(key));
 
-    if (value.type() == QVariant::Double) value = QString::number(value.toDouble(), 'f', 4).toDouble();
+    if (value.type() == QVariant::Double) { value = QString::number(value.toDouble(), 'f', 4).toDouble(); }
 
     variantMap.insert(key, value);
   }
@@ -843,8 +840,8 @@ void ImportaProdutos::on_tableProdutos_entered(const QModelIndex &) { ui->tableP
 void ImportaProdutos::on_tableErro_entered(const QModelIndex &) { ui->tableErro->resizeColumnsToContents(); }
 
 void ImportaProdutos::on_tabWidget_currentChanged(const int index) {
-  if (index == 0) ui->tableProdutos->resizeColumnsToContents();
-  if (index == 1) ui->tableErro->resizeColumnsToContents();
+  if (index == 0) { ui->tableProdutos->resizeColumnsToContents(); }
+  if (index == 1) { ui->tableErro->resizeColumnsToContents(); }
 }
 
 void ImportaProdutos::closeEvent(QCloseEvent *event) {

@@ -30,10 +30,7 @@ bool WidgetLogisticaEntregues::updateTables() {
     connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaEntregues::montaFiltro);
   }
 
-  if (not modelVendas.select()) {
-    emit errorSignal("Erro lendo tabela vendas: " + modelVendas.lastError().text());
-    return false;
-  }
+  if (not modelVendas.select()) { return; }
 
   ui->tableVendas->sortByColumn("prazoEntrega");
 
@@ -54,16 +51,16 @@ bool WidgetLogisticaEntregues::updateTables() {
 void WidgetLogisticaEntregues::montaFiltro() {
   QString filtroCheck;
 
-  if (ui->radioButtonEntregaLimpar->isChecked()) filtroCheck = "";
-  if (ui->radioButtonTotalEntrega->isChecked()) filtroCheck = "Entregue > 0 AND Estoque = 0 AND Outros = 0";
-  if (ui->radioButtonParcialEntrega->isChecked()) filtroCheck = "Entregue > 0 AND (Estoque > 0 OR Outros > 0)";
-  if (ui->radioButtonSemEntrega->isChecked()) filtroCheck = "Entregue = 0";
+  if (ui->radioButtonEntregaLimpar->isChecked()) { filtroCheck = ""; }
+  if (ui->radioButtonTotalEntrega->isChecked()) { filtroCheck = "Entregue > 0 AND Estoque = 0 AND Outros = 0"; }
+  if (ui->radioButtonParcialEntrega->isChecked()) { filtroCheck = "Entregue > 0 AND (Estoque > 0 OR Outros > 0)"; }
+  if (ui->radioButtonSemEntrega->isChecked()) { filtroCheck = "Entregue = 0"; }
 
   const QString textoBusca = ui->lineEditBusca->text();
 
   QString filtroBusca = textoBusca.isEmpty() ? "" : "idVenda LIKE '%" + textoBusca + "%'";
 
-  if (not filtroCheck.isEmpty() and not filtroBusca.isEmpty()) filtroBusca.prepend(" AND ");
+  if (not filtroCheck.isEmpty() and not filtroBusca.isEmpty()) { filtroBusca.prepend(" AND "); }
 
   modelVendas.setFilter(filtroCheck + filtroBusca);
 
@@ -80,7 +77,7 @@ void WidgetLogisticaEntregues::setupTables() {
   ui->tableVendas->setModel(new VendaProxyModel(&modelVendas, this));
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 
-  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") ui->tableVendas->hideColumn("Indicou");
+  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") { ui->tableVendas->hideColumn("Indicou"); }
 }
 
 void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {
@@ -116,7 +113,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataPrevEnt");
 
-  for (int row = 0; row < modelProdutos.rowCount(); ++row) ui->tableProdutos->openPersistentEditor(row, "selecionado");
+  for (int row = 0; row < modelProdutos.rowCount(); ++row) { ui->tableProdutos->openPersistentEditor(row, "selecionado"); }
 
   ui->tableProdutos->resizeColumnsToContents();
 }
@@ -131,7 +128,7 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) idVendas << modelProdutos.data(index.row(), "idVenda").toString();
+  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");

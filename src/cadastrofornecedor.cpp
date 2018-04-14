@@ -233,7 +233,7 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (not isUpdate) modelEnd.insertRow(currentRowEnd);
+  if (not isUpdate) { modelEnd.insertRow(currentRowEnd); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -285,10 +285,7 @@ bool CadastroFornecedor::viewRegister() {
 
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) {
-    emit errorSignal("Erro lendo tabela endereço do fornecedor: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.select()) { return false; }
 
   ui->tableEndereco->resizeColumnsToContents();
 

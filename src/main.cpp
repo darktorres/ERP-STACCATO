@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 
   LoginDialog dialog;
 
-  if (dialog.exec() == QDialog::Rejected) exit(1);
+  if (dialog.exec() == QDialog::Rejected) { exit(1); }
 
   MainWindow window;
   window.showMaximized();

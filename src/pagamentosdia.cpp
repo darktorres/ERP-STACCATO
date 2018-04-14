@@ -39,10 +39,7 @@ bool PagamentosDia::setFilter(const QDate &date, const QString &idConta) {
 
   modelViewFluxoCaixa.setFilter("`Data` = '" + date.toString("yyyy-MM-dd") + "' AND (status = 'PAGO' OR status = 'RECEBIDO') " + filtroConta);
 
-  if (not modelViewFluxoCaixa.select()) {
-    emit errorSignal("Erro lendo tabela: " + modelViewFluxoCaixa.lastError().text());
-    return false;
-  }
+  if (not modelViewFluxoCaixa.select()) { return false; }
 
   setWindowTitle(date.toString("dd/MM/yyyy"));
 

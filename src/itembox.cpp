@@ -26,29 +26,8 @@ ItemBox::ItemBox(QWidget *parent) : QLineEdit(parent) {
 }
 
 void ItemBox::resizeEvent(QResizeEvent *event) {
+  setIcons();
   QLineEdit::resizeEvent(event);
-
-  const QSize size = searchButton->minimumSizeHint();
-  int x = rect().right();
-  int y = (rect().height() - size.height()) / 2;
-
-  if (searchDialog) {
-    x -= size.width();
-    searchButton->setGeometry(QRect(QPoint(x, y), size));
-  } else {
-    searchButton->hide();
-  }
-
-  if (registerDialog) {
-    x -= size.width();
-    plusButton->setGeometry(QRect(QPoint(x, y), size));
-  } else {
-    plusButton->hide();
-  }
-
-  int left, top, bottom;
-  getTextMargins(&left, &top, nullptr, &bottom);
-  setTextMargins(left, top, 2 + rect().right() - x + 2, bottom);
 }
 
 void ItemBox::search() {
@@ -120,4 +99,28 @@ void ItemBox::mouseDoubleClickEvent(QMouseEvent *event) {
 
   search();
   event->accept();
+}
+
+void ItemBox::setIcons() {
+  const QSize size = searchButton->minimumSizeHint();
+  int x = rect().right();
+  int y = (rect().height() - size.height()) / 2;
+
+  if (searchDialog) {
+    x -= size.width();
+    searchButton->setGeometry(QRect(QPoint(x, y), size));
+  } else {
+    searchButton->hide();
+  }
+
+  if (registerDialog) {
+    x -= size.width();
+    plusButton->setGeometry(QRect(QPoint(x, y), size));
+  } else {
+    plusButton->hide();
+  }
+
+  int left, top, bottom;
+  getTextMargins(&left, &top, nullptr, &bottom);
+  setTextMargins(left, top, rect().right() - x + 4, bottom);
 }

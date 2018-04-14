@@ -25,6 +25,7 @@ private:
   // methods
   auto cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) -> bool;
   auto cancelar(const QModelIndexList &list) -> bool;
+  auto montaFiltro() -> void;
   auto on_checkBoxMarcarTodos_clicked(const bool) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonCancelar_clicked() -> void;

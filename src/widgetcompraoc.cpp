@@ -245,5 +245,5 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
 void WidgetCompraOC::on_lineEditBusca_textChanged(const QString &text) {
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
 
-  if (not modelPedido.select()) { emit errorSignal("Erro lendo tabela pedidos: " + modelPedido.lastError().text()); }
+  if (not modelPedido.select()) { return; }
 }

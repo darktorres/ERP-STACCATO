@@ -46,7 +46,7 @@ void PrecoEstoque::setupTables() {
 
   modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
 
-  if (not modelProduto.select()) emit errorSignal("Erro lendo tabela produto: " + modelProduto.lastError().text());
+  if (not modelProduto.select()) { return; }
 
   ui->table->setModel(&modelProduto);
   ui->table->hideColumn("idEstoque");
@@ -78,7 +78,7 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("temLote");
 
   for (int column = 0, columnCount = modelProduto.columnCount(); column < columnCount; ++column) {
-    if (modelProduto.record().fieldName(column).endsWith("Upd")) ui->table->setColumnHidden(column, true);
+    if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->table->setColumnHidden(column, true); }
   }
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
@@ -98,7 +98,7 @@ void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
   modelProduto.setFilter(text.isEmpty() ? "estoque = TRUE AND estoqueRestante > 0"
                                         : "MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('+" + text + "*' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
 
-  if (not modelProduto.select()) emit errorSignal("Erro lendo tabela produto: " + modelProduto.lastError().text());
+  if (not modelProduto.select()) { return; }
 }
 
 void PrecoEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

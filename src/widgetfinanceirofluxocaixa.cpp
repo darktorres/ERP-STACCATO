@@ -86,7 +86,7 @@ bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
     return false;
   }
 
-  if (query.first()) ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble());
+  if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
 
   // ----------------------------------------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
     return false;
   }
 
-  if (query.first()) ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble());
+  if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
 
   // ----------------------------------------------------------------------------------------------------------
 

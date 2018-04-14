@@ -131,14 +131,14 @@ void WidgetFinanceiroContas::montaFiltro() {
     QString status;
 
     Q_FOREACH (const auto &child, ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
-      if (child->text() == "Todos") break;
+      if (child->text() == "Todos") { break; }
 
       if (child->isChecked() and child->text() == "Pendente/Conferido") {
         status = "(cp.status = 'PENDENTE' OR cp.status = 'CONFERIDO')";
         break;
       }
 
-      if (child->isChecked()) status = child->text();
+      if (child->isChecked()) { status = child->text(); }
     }
 
     if (not status.isEmpty() and status != "(cp.status = 'PENDENTE' OR cp.status = 'CONFERIDO')") status = "cp.status = '" + status + "'";
@@ -174,17 +174,17 @@ void WidgetFinanceiroContas::montaFiltro() {
     QString status;
 
     Q_FOREACH (const auto &child, ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
-      if (child->text() == "Todos") break;
+      if (child->text() == "Todos") { break; }
 
       if (child->isChecked() and child->text() == "Pendente/Conferido") {
         status = "(cr.status = 'PENDENTE' OR cr.status = 'CONFERIDO')";
         break;
       }
 
-      if (child->isChecked()) status = child->text();
+      if (child->isChecked()) { status = child->text(); }
     }
 
-    if (not status.isEmpty() and status != "(cr.status = 'PENDENTE' OR cr.status = 'CONFERIDO')") status = "cr.status = '" + status + "'";
+    if (not status.isEmpty() and status != "(cr.status = 'PENDENTE' OR cr.status = 'CONFERIDO')") { status = "cr.status = '" + status + "'"; }
 
     const QString valor =
         not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())

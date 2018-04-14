@@ -23,7 +23,8 @@ private:
   // methods
   auto cancelar(const int row) -> bool;
   auto setupTables() -> void;
-  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto montaFiltro() -> void;
+  auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonCancelarNFe_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto on_table_entered(const QModelIndex &) -> void;

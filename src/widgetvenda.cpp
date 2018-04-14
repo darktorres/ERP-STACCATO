@@ -30,7 +30,7 @@ void WidgetVenda::setupTables() {
   ui->table->hideColumn("idUsuario");
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
 
-  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") ui->table->hideColumn("Indicou");
+  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") { ui->table->hideColumn("Indicou"); }
 }
 
 void WidgetVenda::montaFiltro() {
@@ -95,7 +95,7 @@ void WidgetVenda::setPermissions() {
   if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "DIRETOR") {
     QSqlQuery query("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE");
 
-    while (query.next()) ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja"));
+    while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
     ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
   }
@@ -107,13 +107,13 @@ void WidgetVenda::setPermissions() {
 
     ui->comboBoxVendedores->addItem("");
 
-    while (query.next()) ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario"));
+    while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
   }
 
   if (UserSession::tipoUsuario() == "VENDEDOR") {
     QSqlQuery query("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE");
 
-    while (query.next()) ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja"));
+    while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
     ui->radioButtonProprios->click();
 
@@ -173,14 +173,14 @@ bool WidgetVenda::updateTables() {
 void WidgetVenda::on_table_activated(const QModelIndex index) {
   auto *vendas = new Venda(this);
   vendas->setAttribute(Qt::WA_DeleteOnClose);
-  if (financeiro) vendas->setFinanceiro();
+  if (financeiro) { vendas->setFinanceiro(); }
   vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
 }
 
 void WidgetVenda::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
-  if (UserSession::tipoUsuario() == "VENDEDOR") checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide();
+  if (UserSession::tipoUsuario() == "VENDEDOR") { checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide(); }
 }
 
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged(const int) {
@@ -191,7 +191,7 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged(const int) {
 
   ui->comboBoxVendedores->addItem("");
 
-  while (query2.next()) ui->comboBoxVendedores->addItem(query2.value("user").toString(), query2.value("idUsuario"));
+  while (query2.next()) { ui->comboBoxVendedores->addItem(query2.value("user").toString(), query2.value("idUsuario")); }
 }
 
 void WidgetVenda::setFinanceiro() {

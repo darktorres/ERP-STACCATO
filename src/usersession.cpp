@@ -58,7 +58,7 @@ std::optional<QVariant> UserSession::fromLoja(const QString &parameter, const QS
 }
 
 std::optional<QVariant> UserSession::getSetting(const QString &key) {
-  if (settings->value(key).isNull()) return {};
+  if (settings->value(key).isNull()) { return {}; }
 
   return settings->value(key);
 }
@@ -66,5 +66,5 @@ std::optional<QVariant> UserSession::getSetting(const QString &key) {
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
 void UserSession::initializeQuery() {
-  if (not query) query = new QSqlQuery();
+  if (not query) { query = new QSqlQuery(); }
 }

@@ -77,7 +77,7 @@ void CadastroLoja::setupTables() {
   modelAssocia1.setHeaderData("pagamento", "Pagamento");
   modelAssocia1.setHeaderData("parcelas", "Parcelas");
 
-  if (not modelAssocia1.select()) emit errorSignal("Erro lendo tabela forma_pagamento: " + modelAssocia1.lastError().text());
+  if (not modelAssocia1.select()) { return; }
 
   ui->tableAssocia1->setModel(&modelAssocia1);
   ui->tableAssocia1->hideColumn("idPagamento");
@@ -89,7 +89,7 @@ void CadastroLoja::setupTables() {
 
   modelAssocia2.setHeaderData("pagamento", "Pagamento");
 
-  if (not modelAssocia2.select()) emit errorSignal("Erro lendo tabela view_pagamento_loja: " + modelAssocia2.lastError().text());
+  if (not modelAssocia2.select()) { return; }
 
   ui->tableAssocia2->setModel(&modelAssocia2);
   ui->tableAssocia2->hideColumn("idLoja");
@@ -99,10 +99,7 @@ void CadastroLoja::setupTables() {
   modelPermissoes.setTable("usuario_has_permissao");
   modelPermissoes.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelPermissoes.select()) {
-    emit errorSignal("Erro lendo tabela de permissões: " + modelPermissoes.lastError().text());
-    return;
-  }
+  if (not modelPermissoes.select()) { return; }
 
   //
 
@@ -289,7 +286,7 @@ void CadastroLoja::on_pushButtonRemoverEnd_clicked() {
 void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) emit errorSignal("Erro lendo tabela endereço: " + modelEnd.lastError().text());
+  if (not modelEnd.select()) { return; }
 
   ui->tableEndereco->resizeColumnsToContents();
 }
@@ -307,7 +304,7 @@ bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
-  if (not isUpdate) modelEnd.insertRow(currentRowEnd);
+  if (not isUpdate) { modelEnd.insertRow(currentRowEnd); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -374,10 +371,7 @@ bool CadastroLoja::viewRegister() {
 
   modelEnd.setFilter("idLoja = " + primaryId + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) {
-    emit errorSignal("Erro lendo tabela endereço da loja: " + modelEnd.lastError().text());
-    return false;
-  }
+  if (not modelEnd.select()) { return false; }
 
   ui->tableEndereco->resizeColumnsToContents();
 
@@ -385,26 +379,17 @@ bool CadastroLoja::viewRegister() {
 
   modelConta.setFilter("idLoja = " + primaryId + " AND desativado = FALSE");
 
-  if (not modelConta.select()) {
-    emit errorSignal("Erro lendo tabela conta: " + modelConta.lastError().text());
-    return false;
-  }
+  if (not modelConta.select()) { return false; }
 
   ui->tableConta->resizeColumnsToContents();
 
   //  modelPagamentos.setFilter("idLoja = " + primaryId);
 
-  if (not modelPagamentos.select()) {
-    emit errorSignal("Erro lendo tabela pagamento: " + modelPagamentos.lastError().text());
-    return false;
-  }
+  if (not modelPagamentos.select()) { return false; }
 
   modelTaxas.setFilter("0");
 
-  if (not modelTaxas.select()) {
-    emit errorSignal("Erro lendo tabela taxas: " + modelTaxas.lastError().text());
-    return false;
-  }
+  if (not modelTaxas.select()) { return false; }
 
   ui->tabWidget->setTabEnabled(1, true);
   ui->tabWidget->setTabEnabled(2, true);
@@ -414,7 +399,7 @@ bool CadastroLoja::viewRegister() {
 
   modelAssocia2.setFilter("idLoja = " + data("idLoja").toString());
 
-  if (not modelAssocia2.select()) emit errorSignal("Erro lendo tabela view_pagamento_loja: " + modelAssocia2.lastError().text());
+  if (not modelAssocia2.select()) { return false; }
 
   //
 
@@ -507,7 +492,7 @@ bool CadastroLoja::cadastrarConta(const bool isUpdate) {
 
   const int rowConta = isUpdate ? mapperConta.currentIndex() : modelConta.rowCount();
 
-  if (not isUpdate) modelConta.insertRow(rowConta);
+  if (not isUpdate) { modelConta.insertRow(rowConta); }
 
   if (not modelConta.setData(rowConta, "banco", ui->lineEditBanco->text())) { return false; }
   if (not modelConta.setData(rowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
@@ -570,7 +555,7 @@ void CadastroLoja::on_pushButtonRemoverConta_clicked() {
 void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
   modelConta.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelConta.select()) { emit errorSignal("Erro lendo tabela contas: " + modelConta.lastError().text()); }
+  if (not modelConta.select()) { return; }
 
   ui->tableEndereco->resizeColumnsToContents();
 }
@@ -632,7 +617,7 @@ void CadastroLoja::on_tablePagamentos_clicked(const QModelIndex &index) {
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  if (not modelTaxas.select()) emit errorSignal("Erro lendo tabela taxas: " + modelTaxas.lastError().text());
+  if (not modelTaxas.select()) { return; }
 
   mapperPagamento.setCurrentModelIndex(index);
 
@@ -660,7 +645,7 @@ void CadastroLoja::on_pushButtonRemoverPagamento_clicked() {
     return;
   }
 
-  if (not modelPagamentos.select()) emit errorSignal("Erro lendo tabela pagamentos: " + modelPagamentos.lastError().text());
+  if (not modelPagamentos.select()) { return; }
 
   modelTaxas.setFilter("0");
 
@@ -747,12 +732,12 @@ void CadastroLoja::on_pushButtonAdicionaAssociacao_clicked() {
 
   for (const auto &index : list) {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
-    query.bindValue(":idLoja", data("idLoja").toInt());
+    query.bindValue(":idLoja", data("idLoja"));
 
-    if (not query.exec()) emit errorSignal("Erro cadastrando associacao: " + query.lastError().text());
+    if (not query.exec()) { emit errorSignal("Erro cadastrando associacao: " + query.lastError().text()); }
   }
 
-  if (not modelAssocia2.select()) emit errorSignal("Erro lendo tabela view_pagamento_loja: " + modelAssocia2.lastError().text());
+  if (not modelAssocia2.select()) { return; }
 }
 
 void CadastroLoja::on_pushButtonRemoveAssociacao_clicked() {
@@ -770,19 +755,16 @@ void CadastroLoja::on_pushButtonRemoveAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 
-    if (not query.exec()) emit errorSignal("Erro removendo associacao: " + query.lastError().text());
+    if (not query.exec()) { emit errorSignal("Erro removendo associacao: " + query.lastError().text()); }
   }
 
-  if (not modelAssocia2.select()) emit errorSignal("Erro lendo tabela view_pagamento_loja: " + modelAssocia2.lastError().text());
+  if (not modelAssocia2.select()) { return; }
 }
 
 void CadastroLoja::on_pushButtonLimparSelecao_clicked() {
   modelTaxas.setFilter("0");
 
-  if (not modelTaxas.select()) {
-    emit errorSignal("Erro lendo tabela taxas: " + modelTaxas.lastError().text());
-    return;
-  }
+  if (not modelTaxas.select()) { return; }
 
   ui->lineEditPagamento->clear();
   ui->spinBoxParcelas->clear();

@@ -14,7 +14,7 @@ QVariant SqlRelationalTableModel::data(const int row, const int column) const { 
 
 QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
   if (QSqlTableModel::fieldIndex(column) == -1) {
-    emit errorSignal("Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName());
+    emit errorSignal("Chave '" + column + "' não encontrada na tabela " + QSqlTableModel::tableName());
     return QVariant();
   }
 
@@ -42,7 +42,7 @@ bool SqlRelationalTableModel::setData(const int row, const QString &column, cons
   }
 
   if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)), value)) {
-    emit errorSignal("Erro inserindo " + column + " na tabela " + tableName() + ": " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) + " - valor: " + value.toString());
+    emit errorSignal("Erro inserindo '" + column + "' na tabela '" + tableName() + "': " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) + " - valor: " + value.toString());
     return false;
   }
 
@@ -55,7 +55,7 @@ Qt::DropActions SqlRelationalTableModel::supportedDropActions() const { return Q
 
 bool SqlRelationalTableModel::submitAll() {
   if (not QSqlTableModel::submitAll()) {
-    emit errorSignal("Erro salvando tabela: " + QSqlTableModel::lastError().text());
+    emit errorSignal("Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text());
     return false;
   }
 
@@ -70,7 +70,7 @@ QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVar
 
 bool SqlRelationalTableModel::select() {
   if (not QSqlRelationalTableModel::select()) {
-    emit errorSignal("Erro lendo tabela: " + QSqlTableModel::lastError().text());
+    emit errorSignal("Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text());
     return false;
   }
 

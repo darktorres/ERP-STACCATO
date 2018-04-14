@@ -106,7 +106,7 @@ QDate InputDialog::getNextDate() const { return ui->dateEditProximo->date(); }
 QString InputDialog::getObservacao() const { return ui->lineEditObservacao->text(); }
 
 void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
-  if (ui->dateEditProximo->date() < date) ui->dateEditProximo->setDate(date);
+  if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }
 }
 
 void InputDialog::on_pushButtonSalvar_clicked() {

@@ -40,6 +40,7 @@ private:
   auto resetCursor() -> void;
   auto resizeEvent(QResizeEvent *event) -> void final;
   auto search() -> void;
+  void setIcons();
 };
 
 #endif // ITEMBOX_H

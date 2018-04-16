@@ -153,11 +153,11 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   }
 
   QSqlQuery query5;
-  query2.prepare("UPDATE estoque_has_consumo SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
+  query5.prepare("UPDATE estoque_has_consumo SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
 
-  QSqlQuery query6;
   // voltar status para pendente
-  query3.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = "
+  QSqlQuery query6;
+  query6.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = "
                  "NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
 
   while (query4.next()) {

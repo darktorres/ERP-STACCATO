@@ -415,7 +415,7 @@ bool Devolucao::criarContas() {
   //    modelPagamentos.setData(row, "comissao", 1);
   //  }
 
-  //
+  // -------------------------------------------------------------------------
 
   if (not modelPagamentos.submitAll()) { return false; }
 

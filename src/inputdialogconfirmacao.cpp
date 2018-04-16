@@ -269,7 +269,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 
   const int row = list.first().row();
 
-  //
+  // -------------------------------------------------------------------------
 
   QString produto;
   double unCaixa = 0;
@@ -314,7 +314,6 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 
   if (not ok or qFuzzyIsNull(caixasDefeito)) { return; }
-  //
 
   emit transactionStarted();
 
@@ -488,7 +487,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   if (not modelVendaProduto.setData(rowQuebrado2, "quant", caixasDefeito * unCaixa)) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
 
-  //
+  // -------------------------------------------------------------------------
 
   choice == QMessageBox::Yes ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, unCaixa) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, unCaixa);
 

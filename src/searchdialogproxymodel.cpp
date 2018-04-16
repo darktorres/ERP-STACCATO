@@ -52,7 +52,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
       if (validade < QDate::currentDate()) { return QBrush(Qt::black); }
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

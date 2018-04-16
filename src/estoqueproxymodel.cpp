@@ -29,7 +29,7 @@ QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) 
     if (quantUpd == Status::Consumo) { return QBrush(Qt::black); }
     if (quantUpd == Status::Devolucao) { return QBrush(Qt::black); }
 
-    //
+    // -------------------------------------------------------------------------
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

@@ -103,7 +103,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
 
-  //
+  // -------------------------------------------------------------------------
 
   modelConsumo.setTable("estoque_has_consumo");
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -169,7 +169,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
   ui->tableConsumo->hideColumn("pCOFINS");
   ui->tableConsumo->hideColumn("vCOFINS");
 
-  //
+  // -------------------------------------------------------------------------
 
   modelCompra.setTable("pedido_fornecedor_has_produto");
   modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -229,7 +229,7 @@ void ImportarXML::setupTables(const QStringList &idsCompra) {
 
   ui->tableCompra->resizeColumnsToContents();
 
-  //
+  // -------------------------------------------------------------------------
 
   modelNFe.setTable("nfe");
   modelNFe.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -708,7 +708,7 @@ bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too bi
 
       if (not modelEstoque.setData(row, "quant", newQuant)) { return false; }
 
-      //
+      // -------------------------------------------------------------------------
 
       const int rowNFe = modelEstoque_nfe.rowCount();
       modelEstoque_nfe.insertRow(rowNFe);
@@ -716,7 +716,7 @@ bool ImportarXML::inserirItemSql(XML &xml) { // REFAC: extract functions, too bi
       if (not modelEstoque_nfe.setData(rowNFe, "idEstoque", modelEstoque.data(row, "idEstoque"))) { return false; }
       if (not modelEstoque_nfe.setData(rowNFe, "idNFe", xml.idNFe)) { return false; }
 
-      //
+      // -------------------------------------------------------------------------
 
       return true;
     }

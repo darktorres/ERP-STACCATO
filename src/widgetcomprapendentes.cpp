@@ -31,9 +31,6 @@ WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : Widget(parent), 
 
   connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
 
-  ui->checkBoxFiltroPendentes->setChecked(true);
-  ui->checkBoxFiltroRepoEntrega->setChecked(true);
-  ui->checkBoxFiltroRepoReceb->setChecked(true);
 }
 
 WidgetCompraPendentes::~WidgetCompraPendentes() { delete ui; }

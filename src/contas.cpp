@@ -92,7 +92,7 @@ void Contas::preencher(const QModelIndex &index) {
     if (not modelPendentes.setData(index.row(), "contaDestino", 3)) { return; }
     if (not modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"))) { return; }
 
-    //
+    // -------------------------------------------------------------------------
 
     const QModelIndexList list = modelPendentes.match("tipo", modelPendentes.data(index.row(), "tipo").toString().left(1) + ". Taxa Cartão", -1);
 
@@ -197,7 +197,7 @@ void Contas::setupTables() {
 
   ui->tablePendentes->resizeColumnsToContents();
 
-  //
+  // -------------------------------------------------------------------------
 
   modelProcessados.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
   modelProcessados.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -320,7 +320,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
       ui->tablePendentes->openPersistentEditor(row, "centroCusto");
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE"
                                                  : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE");
@@ -363,7 +363,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
       ui->tablePendentes->openPersistentEditor(row, "centroCusto");
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'"
                                                : "idCompra = '" + idCompra + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'");

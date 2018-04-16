@@ -26,7 +26,7 @@ QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int r
       if (prazo < QDate::currentDate() and not prazo.isNull()) { return QBrush(Qt::black); }
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

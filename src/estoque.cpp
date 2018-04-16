@@ -238,11 +238,11 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
     return false;
   }
 
-  //
+  // -------------------------------------------------------------------------
 
   if (not quebrarCompra(idVendaProduto, quant)) { return false; }
 
-  //
+  // -------------------------------------------------------------------------
 
   const int row = 0;
   const int newRow = modelConsumo.rowCount();

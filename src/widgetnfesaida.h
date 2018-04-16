@@ -14,10 +14,13 @@ class WidgetNfeSaida final : public Widget {
 public:
   explicit WidgetNfeSaida(QWidget *parent = nullptr);
   ~WidgetNfeSaida();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelViewNFeSaida;
   Ui::WidgetNfeSaida *ui;
   // methods

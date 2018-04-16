@@ -14,10 +14,13 @@ class WidgetCompraFaturar final : public Widget {
 public:
   explicit WidgetCompraFaturar(QWidget *parent = nullptr);
   ~WidgetCompraFaturar();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelViewFaturamento;
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
@@ -30,6 +33,7 @@ private:
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_table_entered(const QModelIndex &) -> void;
   auto setupTables() -> void;
+  auto setConnections() -> void;
 };
 
 #endif // WIDGETCOMPRAFATURAR_H

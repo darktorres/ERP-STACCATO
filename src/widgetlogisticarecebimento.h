@@ -14,11 +14,14 @@ class WidgetLogisticaRecebimento final : public Widget {
 public:
   explicit WidgetLogisticaRecebimento(QWidget *parent = nullptr);
   ~WidgetLogisticaRecebimento();
+  auto resetTables() -> void;
   auto tableFornLogistica_activated(const QString &fornecedor) -> void;
-  auto updateTables() -> bool;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   QString fornecedor;
   SqlRelationalTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
@@ -34,6 +37,7 @@ private:
   auto on_table_entered(const QModelIndex &) -> void;
   auto processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) -> bool;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

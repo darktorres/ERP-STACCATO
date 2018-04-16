@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->actionGerenciar_preco_estoque->setDisabled(true);
   }
 
-  //
+  // -------------------------------------------------------------------------
 
   QSqlQuery query;
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
@@ -91,11 +91,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->tabWidget->setTabEnabled(6, query.value("view_tab_financeiro").toBool());
   ui->tabWidget->setTabEnabled(7, query.value("view_tab_relatorio").toBool());
 
-  //
+  // -------------------------------------------------------------------------
 
   ui->tabWidget->setTabEnabled(8, false);
 
-  //
+  // -------------------------------------------------------------------------
 
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
@@ -149,12 +149,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::verifyDb() {
-  const bool conectado = qApp->dbConnect();
+  const bool conectado = qApp->dbReconnect();
 
   pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 255, 0);" : "color: rgb(255, 0, 0);");
 
-  if (conectado) updateTables();
+  if (conectado) { resetTables(); }
 }
 
 // REFAC: put this in a class
@@ -176,7 +176,7 @@ void MainWindow::gerarEnviarRelatorio() {
     const QString relatorioPagar = "C:/temp/pagar.xlsx";     // guardar direto no servidor?
     const QString relatorioReceber = "C:/temp/receber.xlsx"; // e se o computador nao tiver o servidor mapeado?
 
-    //
+    // -------------------------------------------------------------------------
 
     QXlsx::Document xlsxPagar(relatorioPagar);
 
@@ -215,7 +215,7 @@ void MainWindow::gerarEnviarRelatorio() {
       ++row;
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     QXlsx::Document xlsxReceber(relatorioReceber);
 
@@ -252,7 +252,7 @@ void MainWindow::gerarEnviarRelatorio() {
       ++row;
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     QSqlQuery query2;
     query2.prepare("INSERT INTO jobs (dataEnviado, dataReferente, status) VALUES (:dataEnviado, :dataReferente, 'ENVIADO')");
@@ -314,6 +314,19 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
   auto *cad = new CadastroLoja(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
   cad->show();
+}
+
+void MainWindow::resetTables() {
+  ui->widgetOrcamento->resetTables();
+  ui->widgetVenda->resetTables();
+  ui->widgetCompra->resetTables();
+  ui->widgetLogistica->resetTables();
+  ui->widgetNfe->resetTables();
+  ui->widgetEstoque->resetTables();
+  ui->widgetFinanceiro->resetTables();
+  ui->widgetRelatorio->resetTables();
+
+  updateTables();
 }
 
 void MainWindow::updateTables() {

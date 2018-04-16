@@ -137,7 +137,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_6">
          <item row="0" column="0">
-          <widget class="TableView" name="tableTransp2">
+          <widget class="TableView" name="tableTranspAgend">
            <property name="palette">
             <palette>
              <active>
@@ -216,7 +216,7 @@
           </widget>
          </item>
          <item row="0" column="0" colspan="2">
-          <widget class="TableView" name="tableTransp">
+          <widget class="TableView" name="tableTranspAtual">
            <property name="palette">
             <palette>
              <active>

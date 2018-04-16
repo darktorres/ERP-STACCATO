@@ -10,12 +10,7 @@
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
 
-WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) {
-  ui->setupUi(this);
-
-  setPermissions();
-  setConnections();
-}
+WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -80,6 +75,8 @@ void WidgetVenda::montaFiltro() {
                            : " AND (Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
   modelViewVenda.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
+
+  if (not modelViewVenda.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }
@@ -156,18 +153,22 @@ void WidgetVenda::setConnections() {
   connect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
 }
 
-bool WidgetVenda::updateTables() {
-  setupTables();
-  montaFiltro();
-
-  if (not modelViewVenda.select()) {
-    emit errorSignal("Erro lendo tabela vendas: " + modelViewVenda.lastError().text());
-    return false;
+void WidgetVenda::updateTables() {
+  if (not isSet) {
+    setPermissions();
+    setConnections();
+    isSet = true;
   }
 
-  ui->table->resizeColumnsToContents();
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
 
-  return true;
+  if (not modelViewVenda.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetVenda::on_table_activated(const QModelIndex index) {
@@ -203,6 +204,8 @@ void WidgetVenda::setFinanceiro() {
   connect(ui->checkBoxLiberado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
 }
+
+void WidgetVenda::resetTables() { modelIsSet = false; }
 
 void WidgetVenda::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

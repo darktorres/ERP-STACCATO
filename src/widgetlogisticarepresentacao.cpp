@@ -9,27 +9,30 @@
 #include "ui_widgetlogisticarepresentacao.h"
 #include "widgetlogisticarepresentacao.h"
 
-WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRepresentacao) {
-  ui->setupUi(this);
+WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
 
+WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
+
+void WidgetLogisticaRepresentacao::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked);
   connect(ui->table, &TableView::entered, this, &WidgetLogisticaRepresentacao::on_table_entered);
 }
 
-WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
-
-bool WidgetLogisticaRepresentacao::updateTables() {
-  if (modelViewLogisticaRepresentacao.tableName().isEmpty()) setupTables();
-
-  if (not modelViewLogisticaRepresentacao.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewLogisticaRepresentacao.lastError().text());
-    return false;
+void WidgetLogisticaRepresentacao::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
-  ui->table->resizeColumnsToContents();
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
+  }
 
-  return true;
+  if (not modelViewLogisticaRepresentacao.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &fornecedor) {
@@ -46,9 +49,9 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
   ui->table->resizeColumnsToContents();
 }
 
-void WidgetLogisticaRepresentacao::setupTables() {
-  // REFAC: refactor this to not select in here
+void WidgetLogisticaRepresentacao::resetTables() { modelIsSet = false; }
 
+void WidgetLogisticaRepresentacao::setupTables() {
   modelViewLogisticaRepresentacao.setTable("view_logistica_representacao");
   modelViewLogisticaRepresentacao.setEditStrategy(QSqlTableModel::OnManualSubmit);
 

@@ -14,10 +14,13 @@ class WidgetRelatorio final : public Widget {
 public:
   explicit WidgetRelatorio(QWidget *parent = nullptr);
   ~WidgetRelatorio();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelOrcamento;
   SqlRelationalTableModel modelViewRelatorio;
   SqlRelationalTableModel modelViewRelatorioLoja;
@@ -31,10 +34,12 @@ private:
   auto on_tableRelatorio_entered(const QModelIndex &) -> void;
   auto on_tableTotalLoja_entered(const QModelIndex &) -> void;
   auto on_tableTotalVendedor_entered(const QModelIndex &) -> void;
+  auto setConnections() -> void;
   auto setFilterRelatorio() -> void;
   auto setFilterTotaisLoja() -> void;
   auto setFilterTotaisVendedor() -> void;
-  auto setupTables() -> bool;
+  auto setResumoOrcamento() -> void;
+  auto setupTables() -> void;
 };
 
 #endif // WIDGETRELATORIO_H

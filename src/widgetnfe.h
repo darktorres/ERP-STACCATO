@@ -13,6 +13,7 @@ class WidgetNfe final : public Widget {
 public:
   explicit WidgetNfe(QWidget *parent = nullptr);
   ~WidgetNfe();
+  auto resetTables() -> void;
   auto updateTables() -> void;
 
 private:

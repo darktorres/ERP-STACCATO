@@ -14,10 +14,13 @@ class WidgetCompraPendentes final : public Widget {
 public:
   explicit WidgetCompraPendentes(QWidget *parent = nullptr);
   ~WidgetCompraPendentes();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods

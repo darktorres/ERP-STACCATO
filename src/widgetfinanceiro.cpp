@@ -15,7 +15,7 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : Widget(parent), ui(new Ui:
 
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
 
-bool WidgetFinanceiro::updateTables() {
+void WidgetFinanceiro::updateTables() {
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentText == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
@@ -23,8 +23,14 @@ bool WidgetFinanceiro::updateTables() {
   if (currentText == "Contas a Receber") { ui->widgetReceber->updateTables(); }
   if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
   if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
+}
 
-  return true;
+void WidgetFinanceiro::resetTables() {
+  ui->widgetFluxoCaixa->resetTables();
+  ui->widgetPagar->resetTables();
+  ui->widgetReceber->resetTables();
+  ui->widgetVenda->resetTables();
+  ui->widgetCompra->resetTables();
 }
 
 void WidgetFinanceiro::setConnections() { connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables); }

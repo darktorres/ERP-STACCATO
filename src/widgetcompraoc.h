@@ -14,23 +14,28 @@ class WidgetCompraOC final : public Widget {
 public:
   explicit WidgetCompraOC(QWidget *parent = nullptr);
   ~WidgetCompraOC();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelNFe;
   SqlRelationalTableModel modelPedido;
   SqlRelationalTableModel modelProduto;
   Ui::WidgetCompraOC *ui;
   // methods
   auto desfazerConsumo(const int row) -> bool;
-  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto montaFiltro() -> void;
+  auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;
   auto on_tableNFe_entered(const QModelIndex &) -> void;
   auto on_tablePedido_clicked(const QModelIndex &index) -> void;
   auto on_tablePedido_entered(const QModelIndex &) -> void;
   auto on_tableProduto_entered(const QModelIndex &) -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

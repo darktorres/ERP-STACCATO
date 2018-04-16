@@ -22,7 +22,9 @@ void WidgetNfe::updateTables() {
   if (currentText == "Saída") { ui->widgetSaida->updateTables(); }
 }
 
-  return true;
+void WidgetNfe::resetTables() {
+  ui->widgetEntrada->resetTables();
+  ui->widgetSaida->resetTables();
 }
 
 void WidgetNfe::on_tabWidgetNfe_currentChanged(const int) { updateTables(); }

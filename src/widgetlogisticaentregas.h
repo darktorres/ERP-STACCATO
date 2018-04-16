@@ -14,10 +14,13 @@ class WidgetLogisticaEntregas final : public Widget {
 public:
   explicit WidgetLogisticaEntregas(QWidget *parent = nullptr);
   ~WidgetLogisticaEntregas();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelCalendario;
   SqlRelationalTableModel modelCarga;
   SqlRelationalTableModel modelProdutos;
@@ -39,6 +42,7 @@ private:
   auto on_tableCarga_clicked(const QModelIndex &index) -> void;
   auto on_tableCarga_entered(const QModelIndex &) -> void;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

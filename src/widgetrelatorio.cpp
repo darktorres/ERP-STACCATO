@@ -10,27 +10,17 @@
 #include "widgetrelatorio.h"
 #include "xlsxdocument.h"
 
-WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::WidgetRelatorio) {
-  ui->setupUi(this);
+WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 
-  if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
-    ui->labelTotalLoja->hide();
-    ui->tableTotalLoja->hide();
-    ui->labelGeral->hide();
-    ui->doubleSpinBoxGeral->hide();
-    ui->groupBoxResumoOrcamento->hide();
-  }
+WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
-  ui->dateEditMes->setDate(QDate::currentDate());
-
+void WidgetRelatorio::setConnections() {
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetRelatorio::dateEditMes_dateChanged);
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetRelatorio::on_pushButtonExcel_clicked);
   connect(ui->tableRelatorio, &TableView::entered, this, &WidgetRelatorio::on_tableRelatorio_entered);
   connect(ui->tableTotalLoja, &TableView::entered, this, &WidgetRelatorio::on_tableTotalLoja_entered);
   connect(ui->tableTotalVendedor, &TableView::entered, this, &WidgetRelatorio::on_tableTotalVendedor_entered);
 }
-
-WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
 void WidgetRelatorio::setFilterTotaisVendedor() {
   QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
@@ -69,20 +59,14 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   if (not modelViewRelatorioLoja.select()) { return; }
 
-bool WidgetRelatorio::setupTables() {
-  // REFAC: refactor this to not select in here
+  ui->tableTotalLoja->resizeColumnsToContents();
+}
 
+void WidgetRelatorio::setupTables() {
   modelViewRelatorio.setTable("view_relatorio");
   modelViewRelatorio.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewRelatorio.setHeaderData("idVenda", "Venda");
-
-  modelViewRelatorio.setFilter("0");
-
-  if (not modelViewRelatorio.select()) {
-    emit errorSignal("Erro lendo tabela relatorio: " + modelViewRelatorio.lastError().text());
-    return false;
-  }
 
   ui->tableRelatorio->setModel(&modelViewRelatorio);
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
@@ -92,17 +76,10 @@ bool WidgetRelatorio::setupTables() {
   ui->tableRelatorio->hideColumn("idUsuario");
   ui->tableRelatorio->resizeColumnsToContents();
 
-  //------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   modelViewRelatorioVendedor.setTable("view_relatorio_vendedor");
   modelViewRelatorioVendedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelViewRelatorioVendedor.setFilter("0");
-
-  if (not modelViewRelatorioVendedor.select()) {
-    emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelViewRelatorioVendedor.lastError().text());
-    return false;
-  }
 
   ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
@@ -112,17 +89,10 @@ bool WidgetRelatorio::setupTables() {
   ui->tableTotalVendedor->hideColumn("Mês");
   ui->tableTotalVendedor->resizeColumnsToContents();
 
-  //--------------------------------------------------
+  // -------------------------------------------------------------------------
 
   modelViewRelatorioLoja.setTable("view_relatorio_loja");
   modelViewRelatorioLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelViewRelatorioLoja.setFilter("0");
-
-  if (not modelViewRelatorioLoja.select()) {
-    emit errorSignal("Erro lendo view_relatorio_vendedor: " + modelViewRelatorioLoja.lastError().text());
-    return false;
-  }
 
   ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
@@ -131,8 +101,6 @@ bool WidgetRelatorio::setupTables() {
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
   ui->tableTotalLoja->hideColumn("Mês");
   ui->tableTotalLoja->resizeColumnsToContents();
-
-  return true;
 }
 
 void WidgetRelatorio::calcularTotalGeral() {
@@ -177,24 +145,41 @@ void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 
 void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
-bool WidgetRelatorio::updateTables() {
-  if (modelViewRelatorio.tableName().isEmpty() and not setupTables()) { return false; }
+void WidgetRelatorio::updateTables() {
+  if (not isSet) {
+    if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
+      ui->labelTotalLoja->hide();
+      ui->tableTotalLoja->hide();
+      ui->labelGeral->hide();
+      ui->doubleSpinBoxGeral->hide();
+      ui->groupBoxResumoOrcamento->hide();
+    }
+
+    ui->dateEditMes->setDate(QDate::currentDate());
+    setConnections();
+    isSet = true;
+  }
+
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
+  }
 
   setFilterRelatorio();
   setFilterTotaisVendedor();
   setFilterTotaisLoja();
 
-  ui->tableRelatorio->resizeColumnsToContents();
-  ui->tableTotalVendedor->resizeColumnsToContents();
-  ui->tableTotalLoja->resizeColumnsToContents();
-
   calcularTotalGeral();
 
+  setResumoOrcamento();
+}
+
+void WidgetRelatorio::setResumoOrcamento() {
   QSqlQuery query;
 
   if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) {
     emit errorSignal("Erro comunicando com o banco de dados: " + query.lastError().text());
-    return false;
+    return;
   }
 
   modelOrcamento.setTable("view_resumo_relatorio");
@@ -216,13 +201,9 @@ bool WidgetRelatorio::updateTables() {
   ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(this));
   ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(this));
   ui->tableResumoOrcamento->resizeColumnsToContents();
-
-  ui->tableRelatorio->resizeColumnsToContents();
-  ui->tableTotalVendedor->resizeColumnsToContents();
-  ui->tableTotalLoja->resizeColumnsToContents();
-
-  return true;
 }
+
+void WidgetRelatorio::resetTables() { modelIsSet = false; }
 
 void WidgetRelatorio::on_tableTotalLoja_entered(const QModelIndex &) { ui->tableTotalLoja->resizeColumnsToContents(); }
 

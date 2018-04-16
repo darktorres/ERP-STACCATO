@@ -14,15 +14,18 @@ class WidgetLogisticaAgendarColeta final : public Widget {
 public:
   explicit WidgetLogisticaAgendarColeta(QWidget *parent = nullptr);
   ~WidgetLogisticaAgendarColeta();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
   auto tableFornLogistica_activated(const QString &fornecedor) -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   QString fornecedor; // REFAC: make this not class member
   SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelTransp;
-  SqlRelationalTableModel modelTransp2;
+  SqlRelationalTableModel modelTranspAtual;
+  SqlRelationalTableModel modelTranspAgend;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> bool;
@@ -42,6 +45,7 @@ private:
   auto on_pushButtonVenda_clicked() -> void;
   auto on_tableEstoque_entered(const QModelIndex &) -> void;
   auto processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga = false) -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

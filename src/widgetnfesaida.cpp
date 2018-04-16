@@ -38,22 +38,25 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->table, &TableView::entered, this, &WidgetNfeSaida::on_table_entered);
 }
 
-WidgetNfeSaida::~WidgetNfeSaida() { delete ui; }
+void WidgetNfeSaida::updateTables() {
+  if (not isSet) {
+    ui->dateEdit->setDate(QDate::currentDate());
+    setConnections();
+    isSet = true;
+  }
 
-bool WidgetNfeSaida::updateTables() {
-  if (modelViewNFeSaida.tableName().isEmpty()) setupTables();
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
 
-  // REFAC: 1refatorar
-  //  if (not model.select()) {
-  //    emit errorSignal("Erro lendo tabela NFe: " + model.lastError().text());
-  //    return false;
-  //  }
-  if (not montaFiltro()) { return false; }
+  if (not modelViewNFeSaida.select()) { return; }
 
   ui->table->resizeColumnsToContents();
-
-  return true;
 }
+
+void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 
 void WidgetNfeSaida::setupTables() {
   modelViewNFeSaida.setTable("view_nfe_saida");
@@ -166,7 +169,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString anexoPath = QDir::currentPath() + "/cancelamento.xml";
 
-  //
+  // -------------------------------------------------------------------------
 
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
 

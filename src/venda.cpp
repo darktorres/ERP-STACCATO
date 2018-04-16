@@ -276,7 +276,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     return;
   }
 
-  //
+  // -------------------------------------------------------------------------
 
   QSqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
@@ -293,7 +293,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     return temp;
   }());
 
-  //
+  // -------------------------------------------------------------------------
 
   ui->itemBoxVendedor->setValue(queryOrc.value("idUsuario"));
 
@@ -350,9 +350,9 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   if (not model.setData(row, "novoPrazoEntrega", queryOrc.value("prazoEntrega"))) { return; }
   if (not model.setData(row, "representacao", queryOrc.value("representacao"))) { return; }
 
-  ui->itemBoxEndereco->getSearchDialog()->setFilter("idCliente = " + queryOrc.value("idCliente").toString() + " AND desativado = FALSE");
+  ui->itemBoxEndereco->setFilter("idCliente = " + queryOrc.value("idCliente").toString() + " AND desativado = FALSE");
 
-  ui->itemBoxEnderecoFat->getSearchDialog()->setFilter("idCliente = " + queryOrc.value("idCliente").toString() + " AND desativado = FALSE");
+  ui->itemBoxEnderecoFat->setFilter("idCliente = " + queryOrc.value("idCliente").toString() + " AND desativado = FALSE");
 
   ui->itemBoxCliente->setValue(queryOrc.value("idCliente"));
   ui->itemBoxProfissional->setValue(queryOrc.value("idProfissional"));
@@ -651,8 +651,8 @@ bool Venda::viewRegister() {
 
     const QString idCliente = ui->itemBoxCliente->getValue().toString();
 
-    ui->itemBoxEndereco->getSearchDialog()->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-    ui->itemBoxEnderecoFat->getSearchDialog()->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
+    ui->itemBoxEndereco->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
+    ui->itemBoxEnderecoFat->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
 
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO' AND comissao = FALSE AND taxa = FALSE");
 
@@ -820,7 +820,6 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa2.setData(row, "centroCusto", data("idLoja"))) { return; }
         if (not modelFluxoCaixa2.setData(row, "grupo", "Comissão Representação")) { return; }
       }
-      //
 
       // calculo taxas cartao
       for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
@@ -1030,7 +1029,7 @@ bool Venda::cadastrar() {
       return false;
     }
   }
-  //
+  // -------------------------------------------------------------------------
 
   if (not model.submitAll()) { return false; }
 
@@ -1119,7 +1118,7 @@ bool Venda::cancelamento() {
     }
   }
 
-  //---------------------------
+  // -------------------------------------------------------------------------
 
   query.prepare("UPDATE venda SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1129,7 +1128,7 @@ bool Venda::cancelamento() {
     return false;
   }
 
-  //---------------------------
+  // -------------------------------------------------------------------------
 
   query.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto IN (SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda)");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1139,7 +1138,7 @@ bool Venda::cancelamento() {
     return false;
   }
 
-  //---------------------------
+  // -------------------------------------------------------------------------
 
   query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1149,7 +1148,6 @@ bool Venda::cancelamento() {
     return false;
   }
 
-  //---------------------------
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) {
       if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
@@ -1175,8 +1173,6 @@ bool Venda::cancelamento() {
     emit errorSignal("Erro marcando contas como canceladas: " + query.lastError().text());
     return false;
   }
-
-  //---------------------------
 
   return true;
 }
@@ -1383,7 +1379,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
 
   ui->doubleSpinBoxCreditoTotal->setValue(credito);
 
-  //
+  // -------------------------------------------------------------------------
 
   if (not data("representacao").toBool()) {
     ui->pushButtonFreteLoja->hide();

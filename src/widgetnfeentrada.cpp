@@ -8,37 +8,39 @@
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
 
-WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeEntrada) {
-  ui->setupUi(this);
+WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
+WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
+
+void WidgetNfeEntrada::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
   connect(ui->table, &TableView::entered, this, &WidgetNfeEntrada::on_table_entered);
 }
 
-WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
-
-bool WidgetNfeEntrada::updateTables() {
-  if (modelViewNFeEntrada.tableName().isEmpty()) setupTables();
-
-  if (not modelViewNFeEntrada.select()) {
-    emit errorSignal("Erro lendo tabela NFe: " + modelViewNFeEntrada.lastError().text());
-    return false;
+void WidgetNfeEntrada::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
-  ui->table->resizeColumnsToContents();
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
 
-  return true;
+  if (not modelViewNFeEntrada.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
-void WidgetNfeEntrada::setupTables() {
-  // REFAC: refactor this to not select in here
+void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 
+void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
   modelViewNFeEntrada.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  if (not modelViewNFeEntrada.select()) emit errorSignal("Erro lendo tabela: " + modelViewNFeEntrada.lastError().text());
 
   ui->table->setModel(&modelViewNFeEntrada);
   ui->table->hideColumn("idNFe");

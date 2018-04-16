@@ -13,7 +13,8 @@ class WidgetCompra final : public Widget {
 public:
   explicit WidgetCompra(QWidget *parent = nullptr);
   ~WidgetCompra();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes

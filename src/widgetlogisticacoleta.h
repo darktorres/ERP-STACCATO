@@ -14,11 +14,14 @@ class WidgetLogisticaColeta final : public Widget {
 public:
   explicit WidgetLogisticaColeta(QWidget *parent = nullptr);
   ~WidgetLogisticaColeta();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
   auto tableFornLogistica_activated(const QString &fornecedor) -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   QString fornecedor;
   SqlRelationalTableModel modelViewColeta;
   Ui::WidgetLogisticaColeta *ui;
@@ -34,6 +37,7 @@ private:
   auto on_pushButtonVenda_clicked() -> void;
   auto on_table_entered(const QModelIndex &) -> void;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

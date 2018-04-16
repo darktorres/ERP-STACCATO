@@ -14,10 +14,13 @@ class WidgetCompraConfirmar final : public Widget {
 public:
   explicit WidgetCompraConfirmar(QWidget *parent = nullptr);
   ~WidgetCompraConfirmar();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelViewCompras;
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
@@ -29,6 +32,7 @@ private:
   auto on_pushButtonConfirmarCompra_clicked() -> void;
   auto on_table_entered(const QModelIndex &) -> void;
   auto setupTables() -> void;
+  auto setConnections() -> void;
 };
 
 #endif // WIDGETCOMPRACONFIRMAR_H

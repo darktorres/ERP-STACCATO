@@ -18,7 +18,7 @@ public:
   auto getText(const QVariant &value) -> QString;
   auto setFilter(const QString &value) -> void;
   auto setFornecedorRep(const QString &value) -> void;
-  auto setRepresentacao(const QString &value) -> void;
+  auto setRepresentacao(const bool isRepresentacao) -> void;
   auto show() -> void;
   auto showMaximized() -> void;
 

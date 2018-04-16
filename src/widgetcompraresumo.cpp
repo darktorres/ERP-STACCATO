@@ -3,11 +3,7 @@
 #include "ui_widgetcompraresumo.h"
 #include "widgetcompraresumo.h"
 
-WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraResumo) {
-  ui->setupUi(this);
-
-  setupTables();
-}
+WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraResumo) { ui->setupUi(this); }
 
 WidgetCompraResumo::~WidgetCompraResumo() { delete ui; }
 
@@ -18,19 +14,19 @@ void WidgetCompraResumo::setupTables() {
 
   modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
 
-  //  if (not modelResumo.select()) emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
-
   ui->tableResumo->setModel(&modelResumo);
   ui->tableResumo->hideColumn("idVenda");
 }
 
-bool WidgetCompraResumo::updateTables() {
-  if (not modelResumo.select()) {
-    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
-    return false;
+void WidgetCompraResumo::updateTables() {
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
   }
 
-  ui->tableResumo->resizeColumnsToContents();
+  if (not modelResumo.select()) { return; }
 
-  return true;
+  ui->tableResumo->resizeColumnsToContents();
 }
+
+void WidgetCompraResumo::resetTables() { modelIsSet = false; }

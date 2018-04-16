@@ -6,33 +6,38 @@
 #include "ui_widgetcompradevolucao.h"
 #include "widgetcompradevolucao.h"
 
-WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraDevolucao) {
-  ui->setupUi(this);
-
-  connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked);
-  connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked);
-  connect(ui->radioButtonFiltroPendente, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraDevolucao::on_table_entered);
-}
+WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraDevolucao) { ui->setupUi(this); }
 
 WidgetCompraDevolucao::~WidgetCompraDevolucao() { delete ui; }
 
-bool WidgetCompraDevolucao::updateTables() {
-  if (modelVendaProduto.tableName().isEmpty()) {
+void WidgetCompraDevolucao::resetTables() { modelIsSet = false; }
+
+void WidgetCompraDevolucao::setConnections() {
+  connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked);
+  connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked);
+  connect(ui->radioButtonFiltroPendente, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled);
+  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_toggled);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraDevolucao::on_table_entered);
+}
+
+void WidgetCompraDevolucao::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
+  }
+
+  if (not modelIsSet) {
     setupTables();
-    ui->radioButtonFiltroPendente->setChecked(true);
+    montaFiltro();
+    modelIsSet = true;
   }
 
   if (not modelVendaProduto.select()) { return; }
 
   ui->table->resizeColumnsToContents();
-
-  return true;
 }
 
 void WidgetCompraDevolucao::setupTables() {
-  // REFAC: refactor this to not select in here
-
   modelVendaProduto.setTable("venda_has_produto");
   modelVendaProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -48,10 +53,6 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("unCaixa", "Un./Cx.");
   modelVendaProduto.setHeaderData("codComercial", "Cód. Com.");
   modelVendaProduto.setHeaderData("formComercial", "Form. Com.");
-
-  modelVendaProduto.setFilter("0");
-
-  if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela produtos pendentes: " + modelVendaProduto.lastError().text()); }
 
   ui->table->setModel(&modelVendaProduto);
   ui->table->hideColumn("idRelacionado");
@@ -219,15 +220,19 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   emit informationSignal("Retornado para estoque!");
 }
 
-void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool checked) {
-  ui->pushButtonDevolucaoFornecedor->setEnabled(checked);
-  ui->pushButtonRetornarEstoque->setEnabled(checked);
+void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool) { montaFiltro(); }
 
-  //  modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status != 'DEVOLVIDO ESTOQUE' AND status != 'DEVOLVIDO FORN.'" : "(status = 'DEVOLVIDO ESTOQUE' OR status = 'DEVOLVIDO
-  //  FORN.')"));
-  modelVendaProduto.setFilter("quant < 0 AND " + QString(checked ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
-
-  if (not modelVendaProduto.select()) { emit errorSignal("Erro lendo tabela: " + modelVendaProduto.lastError().text()); }
-}
+void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_toggled(const bool) { montaFiltro(); }
 
 void WidgetCompraDevolucao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
+
+void WidgetCompraDevolucao::montaFiltro() {
+  const bool isPendente = ui->radioButtonFiltroPendente->isChecked();
+
+  ui->pushButtonDevolucaoFornecedor->setEnabled(isPendente);
+  ui->pushButtonRetornarEstoque->setEnabled(isPendente);
+
+  modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
+
+  if (not modelVendaProduto.select()) { return; }
+}

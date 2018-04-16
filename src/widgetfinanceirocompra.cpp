@@ -6,34 +6,36 @@
 #include "ui_widgetfinanceirocompra.h"
 #include "widgetfinanceirocompra.h"
 
-WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroCompra) {
-  ui->setupUi(this);
+WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 
+WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
+
+void WidgetFinanceiroCompra::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated);
   connect(ui->table, &TableView::entered, this, &WidgetFinanceiroCompra::on_table_entered);
 }
 
-WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
-
-bool WidgetFinanceiroCompra::updateTables() {
-  if (modelViewComprasFinanceiro.tableName().isEmpty()) setupTables();
-
-  if (not modelViewComprasFinanceiro.select()) {
-    emit errorSignal("Erro lendo tabela de compras: " + modelViewComprasFinanceiro.lastError().text());
-    return false;
+void WidgetFinanceiroCompra::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
-  return true;
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
+
+  if (not modelViewComprasFinanceiro.select()) { return; }
 }
 
-void WidgetFinanceiroCompra::setupTables() {
-  // REFAC: refactor this to not select in here
+void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
 
+void WidgetFinanceiroCompra::setupTables() {
   modelViewComprasFinanceiro.setTable("view_compras_financeiro");
   modelViewComprasFinanceiro.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  if (not modelViewComprasFinanceiro.select()) { emit errorSignal("Erro lendo tabela de compras: " + modelViewComprasFinanceiro.lastError().text()); }
 
   ui->table->setModel(&modelViewComprasFinanceiro);
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
@@ -49,7 +51,10 @@ void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
 
 void WidgetFinanceiroCompra::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &text) {
+void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+
+void WidgetFinanceiroCompra::montaFiltro() {
+  const QString text = ui->lineEditBusca->text();
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
   modelViewComprasFinanceiro.setFilter(filtroBusca);

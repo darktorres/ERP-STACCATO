@@ -558,7 +558,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   // endereco faturamento
 
-  ui->itemBoxEnderecoFaturamento->getSearchDialog()->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
   ui->itemBoxEnderecoFaturamento->setValue(modelVenda.data(0, "idEnderecoFaturamento"));
 
   QSqlQuery queryDestinatarioEndereco;
@@ -580,7 +580,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   // endereco entrega
 
-  ui->itemBoxEnderecoEntrega->getSearchDialog()->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
   ui->itemBoxEnderecoEntrega->setValue(modelVenda.data(0, "idEnderecoEntrega"));
 
   queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
@@ -1018,7 +1018,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
       return;
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     // ICMS Inter
 
@@ -1037,7 +1037,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
       ui->doubleSpinBoxFcpDestino->setValue(modelViewProdutoEstoque.data(index.row(), "vBCPIS").toDouble() * 0.02);
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     mapper.setCurrentModelIndex(index);
   }();
@@ -1261,7 +1261,7 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
   if (not modelViewProdutoEstoque.setData(list.first().row(), "tipoICMS", tribNormal ? "ICMS" + text.left(2) : "ICMSSN" + text.left(3))) { return; }
   if (not modelViewProdutoEstoque.setData(list.first().row(), "cstICMS", text.left(tribNormal ? 2 : 3))) { return; }
 
-  //
+  // -------------------------------------------------------------------------
 
   if (text == "00 - Tributada integralmente") {
     ui->frame->show();
@@ -1519,10 +1519,10 @@ void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
   ui->lineEditDestinatarioTel1->setText(query.value("tel").toString());
   ui->lineEditDestinatarioTel2->setText(query.value("telCel").toString());
 
-  ui->itemBoxEnderecoFaturamento->getSearchDialog()->setFilter("idCliente = " + ui->itemBoxCliente->getValue().toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + ui->itemBoxCliente->getValue().toString() + " AND desativado = FALSE OR idEndereco = 1");
   ui->itemBoxEnderecoFaturamento->setValue(1);
 
-  ui->itemBoxEnderecoEntrega->getSearchDialog()->setFilter("idCliente = " + ui->itemBoxCliente->getValue().toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + ui->itemBoxCliente->getValue().toString() + " AND desativado = FALSE OR idEndereco = 1");
 
   ui->itemBoxEnderecoEntrega->setValue(1);
 }
@@ -1534,7 +1534,7 @@ bool CadastrarNFe::validar() {
 
   // TODO: 5recalcular todos os valores dos itens para verificar se os dados batem (usar o 174058 de referencia)
 
-  //
+  // -------------------------------------------------------------------------
 
   if (ui->itemBoxLoja->text().isEmpty()) {
     // assume no certificate in acbr

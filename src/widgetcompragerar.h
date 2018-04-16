@@ -14,11 +14,14 @@ class WidgetCompraGerar final : public Widget {
 public:
   explicit WidgetCompraGerar(QWidget *parent = nullptr);
   ~WidgetCompraGerar();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
-  int oc = 0;
+  bool isSet = false;
+  bool modelIsSet = false;
+  int oc = 0; // REFAC: turn into a local variable
   SqlRelationalTableModel modelResumo;
   SqlRelationalTableModel modelProdutos;
   Ui::WidgetCompraGerar *ui;
@@ -34,6 +37,7 @@ private:
   auto on_tableProdutos_entered(const QModelIndex &) -> void;
   auto on_tableResumo_activated(const QModelIndex &index) -> void;
   auto setupTables() -> void;
+  auto setConnections() -> void;
 };
 
 #endif // WIDGETCOMPRAGERAR_H

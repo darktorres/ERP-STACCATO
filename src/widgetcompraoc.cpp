@@ -9,48 +9,41 @@
 #include "ui_widgetcompraoc.h"
 #include "widgetcompraoc.h"
 
-WidgetCompraOC::WidgetCompraOC(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraOC) {
-  ui->setupUi(this);
-
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraOC::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDanfe_clicked);
-  connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked);
-  connect(ui->tableNFe, &TableView::entered, this, &WidgetCompraOC::on_tableNFe_entered);
-  connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraOC::on_tablePedido_clicked);
-  connect(ui->tablePedido, &TableView::entered, this, &WidgetCompraOC::on_tablePedido_entered);
-  connect(ui->tableProduto, &TableView::entered, this, &WidgetCompraOC::on_tableProduto_entered);
-}
+WidgetCompraOC::WidgetCompraOC(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
 
 WidgetCompraOC::~WidgetCompraOC() { delete ui; }
 
-bool WidgetCompraOC::updateTables() {
-  if (modelPedido.tableName().isEmpty()) setupTables();
-
-  if (not modelPedido.select()) {
-    emit errorSignal("Erro lendo tabela pedidos: " + modelPedido.lastError().text());
-    return false;
+void WidgetCompraOC::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
-  if (not modelProduto.select()) {
-    emit errorSignal("Erro lendo tabela produtos pedido: " + modelProduto.lastError().text());
-    return false;
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
   }
 
-  return true;
+  if (not modelPedido.select()) { return; }
+  if (not modelProduto.select()) { return; }
+  if (not modelNFe.select()) { return; }
 }
 
-void WidgetCompraOC::setupTables() {
-  // REFAC: refactor this to not select in here
+void WidgetCompraOC::resetTables() { modelIsSet = false; }
 
+void WidgetCompraOC::setupTables() {
   modelPedido.setTable("view_ordemcompra");
   modelPedido.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  if (not modelPedido.select()) emit errorSignal("Erro lendo tabela pedidos: " + modelPedido.lastError().text());
-
   ui->tablePedido->setModel(&modelPedido);
+
+  //------------------------------------------------------
 
   modelProduto.setTable("pedido_fornecedor_has_produto");
   modelProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelProduto.setFilter("0");
 
   modelProduto.setHeaderData("status", "Status");
   modelProduto.setHeaderData("idVenda", "Venda");
@@ -68,10 +61,6 @@ void WidgetCompraOC::setupTables() {
   modelProduto.setHeaderData("formComercial", "Form. Com.");
   modelProduto.setHeaderData("codBarras", "Cód. Barras");
   modelProduto.setHeaderData("obs", "Obs.");
-
-  modelProduto.setFilter("0");
-
-  if (not modelProduto.select()) emit errorSignal("Erro lendo tabela produtos pedido: " + modelProduto.lastError().text());
 
   ui->tableProduto->setModel(&modelProduto);
   ui->tableProduto->setItemDelegateForColumn("quant", new DoubleDelegate(this));
@@ -102,17 +91,28 @@ void WidgetCompraOC::setupTables() {
   ui->tableProduto->hideColumn("dataPrevEnt");
   ui->tableProduto->hideColumn("dataRealEnt");
 
+  //------------------------------------------------------
+
   modelNFe.setTable("view_ordemcompra_nfe");
   modelNFe.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  modelNFe.setHeaderData("numeroNFe", "NFe");
 
   modelNFe.setFilter("0");
 
-  if (not modelNFe.select()) emit errorSignal("Erro lendo tabela nfe: " + modelNFe.lastError().text());
+  modelNFe.setHeaderData("numeroNFe", "NFe");
 
   ui->tableNFe->setModel(&modelNFe);
   ui->tableNFe->hideColumn("ordemCompra");
   ui->tableNFe->hideColumn("idNFe");
+}
+
+void WidgetCompraOC::setConnections() {
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraOC::on_lineEditBusca_textChanged);
+  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDanfe_clicked);
+  connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked);
+  connect(ui->tableNFe, &TableView::entered, this, &WidgetCompraOC::on_tableNFe_entered);
+  connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraOC::on_tablePedido_clicked);
+  connect(ui->tablePedido, &TableView::entered, this, &WidgetCompraOC::on_tablePedido_entered);
+  connect(ui->tableProduto, &TableView::entered, this, &WidgetCompraOC::on_tableProduto_entered);
 }
 
 void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
@@ -120,7 +120,15 @@ void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
 
   modelProduto.setFilter("ordemCompra = " + oc);
 
+  if (not modelProduto.select()) { return; }
+
+  ui->tableProduto->resizeColumnsToContents();
+
   modelNFe.setFilter("ordemCompra = " + oc);
+
+  if (not modelNFe.select()) { return; }
+
+  ui->tableNFe->resizeColumnsToContents();
 }
 
 void WidgetCompraOC::on_pushButtonDanfe_clicked() {
@@ -242,7 +250,11 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
   return true;
 }
 
-void WidgetCompraOC::on_lineEditBusca_textChanged(const QString &text) {
+void WidgetCompraOC::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+
+void WidgetCompraOC::montaFiltro() {
+  const QString text = ui->lineEditBusca->text();
+
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
 
   if (not modelPedido.select()) { return; }

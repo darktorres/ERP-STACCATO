@@ -11,9 +11,11 @@
 #include "venda.h"
 #include "widgetlogisticacoleta.h"
 
-WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaColeta) {
-  ui->setupUi(this);
+WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaColeta) { ui->setupUi(this); }
 
+WidgetLogisticaColeta::~WidgetLogisticaColeta() { delete ui; }
+
+void WidgetLogisticaColeta::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaColeta::on_lineEditBusca_textChanged);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonCancelar_clicked);
@@ -23,19 +25,21 @@ WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : Widget(parent), 
   connect(ui->table, &TableView::entered, this, &WidgetLogisticaColeta::on_table_entered);
 }
 
-WidgetLogisticaColeta::~WidgetLogisticaColeta() { delete ui; }
-
-bool WidgetLogisticaColeta::updateTables() {
-  if (modelViewColeta.tableName().isEmpty()) setupTables();
-
-  if (not modelViewColeta.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewColeta.lastError().text());
-    return false;
+void WidgetLogisticaColeta::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
-  ui->table->resizeColumnsToContents();
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
 
-  return true;
+  if (not modelViewColeta.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &fornecedor) {
@@ -51,6 +55,8 @@ void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &forneced
 
   ui->table->resizeColumnsToContents();
 }
+
+void WidgetLogisticaColeta::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setTable("view_coleta");
@@ -161,7 +167,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
       return false;
     }
 
-    //
+    // -------------------------------------------------------------------------
 
     query4.bindValue(":idEstoque", modelViewColeta.data(item.row(), "idEstoque"));
 

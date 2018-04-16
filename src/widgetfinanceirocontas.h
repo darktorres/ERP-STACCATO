@@ -16,11 +16,14 @@ public:
   enum class Tipo { Nulo, Receber, Pagar };
   explicit WidgetFinanceiroContas(QWidget *parent = nullptr);
   ~WidgetFinanceiroContas();
+  auto resetTables() -> void;
   auto setTipo(const Tipo &value) -> void;
-  auto updateTables() -> bool;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlQueryModel model;
   SqlQueryModel modelVencidos;
   SqlQueryModel modelVencer;

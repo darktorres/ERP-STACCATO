@@ -10,24 +10,30 @@
 #include "vendaproxymodel.h"
 #include "widgetlogisticaentregues.h"
 
-WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregues) {
-  ui->setupUi(this);
-
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaEntregues::on_pushButtonCancelar_clicked);
-  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaEntregues::on_tableVendas_clicked);
-}
+WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
 
 WidgetLogisticaEntregues::~WidgetLogisticaEntregues() { delete ui; }
 
-bool WidgetLogisticaEntregues::updateTables() {
-  if (modelVendas.tableName().isEmpty()) {
-    setupTables();
+void WidgetLogisticaEntregues::setConnections() {
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaEntregues::montaFiltro);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaEntregues::on_pushButtonCancelar_clicked);
+  connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
+  connect(ui->radioButtonParcialEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
+  connect(ui->radioButtonSemEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
+  connect(ui->radioButtonTotalEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
+  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaEntregues::on_tableVendas_clicked);
+}
 
-    connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
-    connect(ui->radioButtonParcialEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
-    connect(ui->radioButtonSemEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
-    connect(ui->radioButtonTotalEntrega, &QRadioButton::clicked, this, &WidgetLogisticaEntregues::montaFiltro);
-    connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaEntregues::montaFiltro);
+void WidgetLogisticaEntregues::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
+  }
+
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
   }
 
   if (not modelVendas.select()) { return; }
@@ -36,17 +42,19 @@ bool WidgetLogisticaEntregues::updateTables() {
 
   ui->tableVendas->resizeColumnsToContents();
 
+  // -----------------------------------------------------------------
+
   modelProdutos.setQuery(modelProdutos.query().executedQuery());
 
   if (modelProdutos.lastError().isValid()) {
     emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
-    return false;
+    return;
   }
 
   ui->tableProdutos->resizeColumnsToContents();
-
-  return true;
 }
+
+void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaEntregues::montaFiltro() {
   QString filtroCheck;
@@ -63,6 +71,8 @@ void WidgetLogisticaEntregues::montaFiltro() {
   if (not filtroCheck.isEmpty() and not filtroBusca.isEmpty()) { filtroBusca.prepend(" AND "); }
 
   modelVendas.setFilter(filtroCheck + filtroBusca);
+
+  if (not modelVendas.select()) { return; }
 
   ui->tableVendas->resizeColumnsToContents();
 }

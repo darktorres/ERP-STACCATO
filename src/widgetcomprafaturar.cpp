@@ -15,11 +15,6 @@
 WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraFaturar) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
-  connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
-  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraFaturar::on_table_entered);
-
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
 }
@@ -27,8 +22,6 @@ WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : Widget(parent), ui(n
 WidgetCompraFaturar::~WidgetCompraFaturar() { delete ui; }
 
 void WidgetCompraFaturar::setupTables() {
-  // REFAC: refactor this to not select in here
-
   modelResumo.setTable("view_fornecedor_compra_faturar");
 
   modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
@@ -40,37 +33,45 @@ void WidgetCompraFaturar::setupTables() {
 
   modelViewFaturamento.setTable("view_faturamento");
 
-  montaFiltro();
-
-  //  model.setFilter("representacao = " + QString(ui->checkBoxRepresentacao->isChecked() ? "1" : "0"));
-
   modelViewFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
 
   ui->table->setModel(&modelViewFaturamento);
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("representacao");
-
-  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
-  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
 }
 
-bool WidgetCompraFaturar::updateTables() {
-  if (modelViewFaturamento.tableName().isEmpty()) setupTables();
+void WidgetCompraFaturar::setConnections() {
+  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
+  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
+  connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraFaturar::on_table_entered);
+}
 
-  if (not modelResumo.select()) {
-    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
-    return false;
+void WidgetCompraFaturar::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
+
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
+
+  if (not modelResumo.select()) { return; }
 
   ui->tableResumo->resizeColumnsToContents();
 
   if (not modelViewFaturamento.select()) { return; }
 
   ui->table->resizeColumnsToContents();
-
-  return true;
 }
+
+void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
 bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) {
   QSqlQuery query1;
@@ -169,11 +170,12 @@ void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();
   const bool sul = ui->checkBoxMostrarSul->isChecked();
 
-  // REFAC: refactor 1/0 to true/false
-  modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "1" : "0") + " AND " +
+  modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE") + " AND " +
                                  QString(sul ? "(Código LIKE 'CAMB%' OR Código IS NULL)" : "(Código NOT LIKE 'CAMB%' OR Código IS NULL)"));
 
   if (not modelViewFaturamento.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {

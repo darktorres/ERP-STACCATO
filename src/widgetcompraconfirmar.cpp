@@ -13,11 +13,6 @@
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraConfirmar) {
   ui->setupUi(this);
 
-  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled);
-  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked);
-  connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraConfirmar::on_table_entered);
-
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
 }
@@ -45,22 +40,34 @@ void WidgetCompraConfirmar::setupTables() {
   ui->table->hideColumn("Compra");
 }
 
-bool WidgetCompraConfirmar::updateTables() {
-  if (modelViewCompras.tableName().isEmpty()) setupTables();
+void WidgetCompraConfirmar::setConnections() {
+  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraConfirmar::on_checkBoxMostrarSul_toggled);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked);
+  connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked);
+  connect(ui->table, &TableView::entered, this, &WidgetCompraConfirmar::on_table_entered);
+}
 
-  if (not modelResumo.select()) {
-    emit errorSignal("Erro lendo tabela resumo: " + modelResumo.lastError().text());
-    return false;
+void WidgetCompraConfirmar::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
+
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
+  }
+
+  if (not modelResumo.select()) { return; }
 
   ui->tableResumo->resizeColumnsToContents();
 
   if (not modelViewCompras.select()) { return; }
 
   ui->table->resizeColumnsToContents();
-
-  return true;
 }
+
+void WidgetCompraConfirmar::resetTables() { modelIsSet = false; }
 
 void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   // TODO: ao preencher na tabela de compras colocar o grupo como 'produto/venda'

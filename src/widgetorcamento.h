@@ -14,10 +14,13 @@ class WidgetOrcamento final : public Widget {
 public:
   explicit WidgetOrcamento(QWidget *parent = nullptr);
   ~WidgetOrcamento();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlRelationalTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods

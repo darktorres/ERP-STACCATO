@@ -43,6 +43,7 @@ private:
   auto on_actionSobre_triggered() -> void;
   auto on_tabWidget_currentChanged(const int) -> void;
   auto verifyDb() -> void;
+  void resetTables();
 };
 
 #endif // MAINWINDOW_H

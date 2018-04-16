@@ -14,10 +14,12 @@ class WidgetCompraResumo : public Widget {
 public:
   explicit WidgetCompraResumo(QWidget *parent = nullptr);
   ~WidgetCompraResumo();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool modelIsSet = false;
   Ui::WidgetCompraResumo *ui;
   SqlRelationalTableModel modelResumo;
   // methods

@@ -209,7 +209,7 @@ bool CadastroCliente::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  ui->itemBoxCliente->getSearchDialog()->setFilter("idCliente NOT IN (" + data("idCliente").toString() + ")");
+  ui->itemBoxCliente->setFilter("idCliente NOT IN (" + data("idCliente").toString() + ")");
 
   tipoPFPJ = data("pfpj").toString();
 

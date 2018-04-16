@@ -15,13 +15,15 @@ class WidgetLogisticaAgendarEntrega final : public Widget {
 public:
   explicit WidgetLogisticaAgendarEntrega(QWidget *parent = nullptr);
   ~WidgetLogisticaAgendarEntrega();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
-  SqlRelationalTableModel modelProdutos;
-  SqlRelationalTableModel modelTransp;
-  SqlRelationalTableModel modelTransp2;
+  bool isSet = false;
+  bool modelIsSet = false;
+  SqlRelationalTableModel modelTranspAtual;
+  SqlRelationalTableModel modelTranspAgend;
   SqlRelationalTableModel modelVendas;
   SqlQueryModel modelViewProdutos;
   Ui::WidgetLogisticaAgendarEntrega *ui;
@@ -49,6 +51,7 @@ private:
   auto quebrarProduto(const int row, const int quantAgendar, const int quantTotal) -> bool;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) -> bool;
   auto setupTables() -> void;
+  auto setConnections() -> void;
 };
 
 #endif // WIDGETLOGISTICAAGENDARENTREGA_H

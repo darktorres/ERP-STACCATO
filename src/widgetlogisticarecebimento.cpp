@@ -26,20 +26,26 @@ void WidgetLogisticaRecebimento::setConnections() {
   connect(ui->table, &TableView::entered, this, &WidgetLogisticaRecebimento::on_table_entered);
 }
 
-bool WidgetLogisticaRecebimento::updateTables() {
-  if (modelViewRecebimento.tableName().isEmpty()) setupTables();
-
-  if (not modelViewRecebimento.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelViewRecebimento.lastError().text());
-    return false;
+void WidgetLogisticaRecebimento::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
+  }
 
-  ui->table->resizeColumnsToContents();
+  if (not modelViewRecebimento.select()) { return; }
+
   for (int row = 0; row < modelViewRecebimento.rowCount(); ++row) { ui->table->openPersistentEditor(row, "selecionado"); }
 
-  return true;
+  ui->table->resizeColumnsToContents();
 }
+
+void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaRecebimento::tableFornLogistica_activated(const QString &fornecedor) {
   this->fornecedor = fornecedor;

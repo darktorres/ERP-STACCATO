@@ -15,10 +15,13 @@ class WidgetLogisticaEntregues final : public Widget {
 public:
   explicit WidgetLogisticaEntregues(QWidget *parent = nullptr);
   ~WidgetLogisticaEntregues();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   SqlQueryModel modelProdutos;
   SqlRelationalTableModel modelVendas;
   Ui::WidgetLogisticaEntregues *ui;
@@ -27,6 +30,7 @@ private:
   auto montaFiltro() -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_tableVendas_clicked(const QModelIndex &index) -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
 };
 

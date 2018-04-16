@@ -14,11 +14,14 @@ class WidgetVenda final : public Widget {
 public:
   explicit WidgetVenda(QWidget *parent = nullptr);
   ~WidgetVenda() final;
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
   auto setFinanceiro() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
+  bool isSet = false;
+  bool modelIsSet = false;
   // REFAC: convert this to constructor enum/bool?
   bool financeiro = false;
   SqlRelationalTableModel modelViewVenda;

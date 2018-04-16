@@ -38,15 +38,11 @@ void Application::readSettingsFile() {
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
 
-bool Application::dbConnect() {
+bool Application::setDatabase() {
   if (not QSqlDatabase::drivers().contains("QMYSQL")) {
     QMessageBox::critical(nullptr, "Não foi possível carregar o banco de dados.", "Este aplicativo requer o driver QMYSQL.");
     exit(1);
   }
-
-  QSqlDatabase db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
-
-  if (db.isOpen()) { return true; }
 
   const auto hostname = UserSession::getSetting("Login/hostname");
 
@@ -59,46 +55,56 @@ bool Application::dbConnect() {
 
   if (not lastuser) { return false; }
 
+  db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
+
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
   db.setPassword("12345");
   db.setDatabaseName("mydb");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1");
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
 
-  QSqlQuery query;
+  return true;
+}
+
+bool Application::dbReconnect() {
+  db.close();
+
+  if (not db.open()) {
+    isConnected = false;
+    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
+    return false;
+  }
+
+  return db.isOpen();
+}
+
+bool Application::dbConnect() {
+  if (not setDatabase()) { return false; }
 
   if (not db.open()) {
     // TODO: caso o servidor selecionado nao esteja disponivel tente os outros
     // TODO: try local ip's first
 
-    //    db.setHostName("201.6.117.16");
-    //    UserSession::setSetting("Login/hostname", "201.6.117.16");
-
-    //    if (not db.open()) {
-    //      db.setHostName("187.122.102.193");
-    //      UserSession::setSetting("Login/hostname", "187.122.102.193");
-
-    //      if (not db.open()) {
-    //        QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
-    //        isConnected = false;
-    //        return false;
-    //      }
-    //    }
-
-    //      //    QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
-    //      //    return false;
-    //    }
+    isConnected = false;
 
     QMessageBox::critical(nullptr, "Erro", "Erro conectando no banco de dados: " + db.lastError().text());
-
-    isConnected = false;
 
     return false;
   }
 
   isConnected = true;
+
+  if (not runSqlJobs()) { return false; }
+
+  startSqlPing();
+
+  return true;
+}
+
+bool Application::runSqlJobs() {
+  QSqlQuery query;
 
   if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
     QMessageBox::critical(nullptr, "Erro", "Erro verificando lastInvalidated: " + query.lastError().text());
@@ -125,8 +131,6 @@ bool Application::dbConnect() {
     }
   }
 
-  startSqlPing();
-
   return true;
 }
 
@@ -134,6 +138,8 @@ void Application::startSqlPing() {
   auto *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] { QSqlQuery("DO 0").exec(); });
   timer->start(60000);
+
+  // TODO: se ping falhar marcar 'desconectado'?
 
   // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
 }

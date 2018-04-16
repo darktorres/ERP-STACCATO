@@ -9,49 +9,52 @@
 #include "ui_widgetfinanceirofluxocaixa.h"
 #include "widgetfinanceirofluxocaixa.h"
 
-WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) {
-  ui->setupUi(this);
+WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
 
+WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
+
+void WidgetFinanceiroFluxoCaixa::setConnections() {
+  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
   connect(ui->groupBoxCaixa1, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled);
   connect(ui->groupBoxCaixa2, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
+  connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
+  connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
   connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated);
   connect(ui->tableCaixa, &TableView::entered, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered);
   connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated);
   connect(ui->tableCaixa2, &TableView::entered, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_entered);
 }
 
-WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
-
-bool WidgetFinanceiroFluxoCaixa::updateTables() {
-  if (not ui->tableCaixa->model()) {
+void WidgetFinanceiroFluxoCaixa::updateTables() {
+  if (not isSet) {
     ui->dateEdit->setDate(QDate::currentDate());
-
-    connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-    connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-    connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-    connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
 
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
 
     // REFAC: 0dont hardcode magic numbers
-    ui->itemBoxCaixa1->setValue(3);
-    ui->itemBoxCaixa2->setValue(8);
+    const int contaSantander = 3;
+    const int contaCaixa = 8;
+
+    ui->itemBoxCaixa1->setValue(contaSantander);
+    ui->itemBoxCaixa2->setValue(contaCaixa);
 
     ui->groupBoxCaixa1->setChecked(true);
     ui->groupBoxCaixa2->setChecked(true);
 
-    isReady = true;
+    setConnections();
+    isSet = true;
   }
 
-  if (not montaFiltro()) { return false; }
+  if (not modelIsSet) { modelIsSet = true; }
 
-  return true;
+  montaFiltro();
 }
 
-bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
-  if (not isReady) { return false; } // REFAC: testar
+void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }
 
+void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   const QString filtroData = ui->groupBoxMes->isChecked() ? "`Data` IS NOT NULL AND DATE_FORMAT(`Data`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`Data` IS NOT NULL";
 
   const QString filtroConta = ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getValue().isValid() ? "idConta = " + ui->itemBoxCaixa1->getValue().toString() : "";
@@ -83,7 +86,7 @@ bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
     emit errorSignal("Erro buscando saldo: " + query.lastError().text());
-    return false;
+    return;
   }
 
   if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
@@ -117,7 +120,7 @@ bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
     emit errorSignal("Erro buscando saldo: " + query.lastError().text());
-    return false;
+    return;
   }
 
   if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
@@ -134,8 +137,6 @@ bool WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
   ui->tableFuturo->hideColumn("idConta");
-
-  return true;
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCaixa->resizeColumnsToContents(); }

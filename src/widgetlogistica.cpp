@@ -24,91 +24,47 @@ void WidgetLogistica::setConnections() {
   connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged);
 }
 
-bool WidgetLogistica::updateTables() {
+void WidgetLogistica::resetTables() {
+  ui->widgetAgendarColeta->resetTables();
+  ui->widgetColeta->resetTables();
+  ui->widgetRecebimento->resetTables();
+  ui->widgetAgendaEntrega->resetTables();
+  ui->widgetCalendarioEntrega->resetTables();
+  ui->widgetCaminhao->resetTables();
+  ui->widgetRepresentacao->resetTables();
+  ui->widgetEntregues->resetTables();
+  ui->widgetCalendario->resetTables();
+}
+
+void WidgetLogistica::updateTables() {
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
-  if (currentText == "Agendar Coleta") {
+  ui->frameForn->hide();
+
+  if (currentText == "Agendar Coleta") { modelViewLogistica.setTable("view_fornecedor_logistica_agendar_coleta"); }
+  if (currentText == "Coleta") { modelViewLogistica.setTable("view_fornecedor_logistica_coleta"); }
+  if (currentText == "Recebimento") { modelViewLogistica.setTable("view_fornecedor_logistica_recebimento"); }
+  if (currentText == "Representação") { modelViewLogistica.setTable("view_fornecedor_logistica_representacao"); }
+
+  if (currentText == "Agendar Coleta" or currentText == "Coleta" or currentText == "Recebimento" or currentText == "Representação") {
     ui->frameForn->show();
 
-    modelViewLogistica.setTable("view_fornecedor_logistica_agendar_coleta");
-
-    if (not modelViewLogistica.select()) {
-      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
-      return false;
-    }
+    if (not modelViewLogistica.select()) { return; }
 
     ui->tableForn->resizeColumnsToContents();
-    return ui->widgetAgendarColeta->updateTables();
   }
 
-  if (currentText == "Coleta") {
-    ui->frameForn->show();
+  //--------------------------------------------------------
 
-    modelViewLogistica.setTable("view_fornecedor_logistica_coleta");
-
-    if (not modelViewLogistica.select()) {
-      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
-      return false;
-    }
-
-    ui->tableForn->resizeColumnsToContents();
-    return ui->widgetColeta->updateTables();
-  }
-
-  if (currentText == "Recebimento") {
-    ui->frameForn->show();
-
-    modelViewLogistica.setTable("view_fornecedor_logistica_recebimento");
-
-    if (not modelViewLogistica.select()) {
-      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
-      return false;
-    }
-
-    ui->tableForn->resizeColumnsToContents();
-    return ui->widgetRecebimento->updateTables();
-  }
-
-  if (currentText == "Agendar Entrega") {
-    ui->frameForn->hide();
-    return ui->widgetAgendaEntrega->updateTables();
-  }
-
-  if (currentText == "Entregas") {
-    ui->frameForn->hide();
-    return ui->widgetCalendarioEntrega->updateTables();
-  }
-
-  if (currentText == "Caminhões") {
-    ui->frameForn->hide();
-    return ui->widgetCaminhao->updateTables();
-  }
-
-  if (currentText == "Representação") {
-    ui->frameForn->show();
-
-    modelViewLogistica.setTable("view_fornecedor_logistica_representacao");
-
-    if (not modelViewLogistica.select()) {
-      emit errorSignal("Erro lendo tabela: " + modelViewLogistica.lastError().text());
-      return false;
-    }
-
-    ui->tableForn->resizeColumnsToContents();
-    return ui->widgetRepresentacao->updateTables();
-  }
-
-  if (currentText == "Entregues") {
-    ui->frameForn->hide();
-    return ui->widgetEntregues->updateTables();
-  }
-
-  if (currentText == "Calendário") {
-    ui->frameForn->hide();
-    return ui->widgetCalendario->updateTables();
-  }
-
-  return true;
+  if (currentText == "Agendar Coleta") { ui->widgetAgendarColeta->updateTables(); }
+  if (currentText == "Coleta") { ui->widgetColeta->updateTables(); }
+  if (currentText == "Recebimento") { ui->widgetRecebimento->updateTables(); }
+  if (currentText == "Agendar Entrega") { ui->widgetAgendaEntrega->updateTables(); }
+  if (currentText == "Entregas") { ui->widgetCalendarioEntrega->updateTables(); }
+  if (currentText == "Caminhões") { ui->widgetCaminhao->updateTables(); }
+  if (currentText == "Representação") { ui->widgetRepresentacao->updateTables(); }
+  if (currentText == "Entregues") { ui->widgetEntregues->updateTables(); }
+  if (currentText == "Calendário") { ui->widgetCalendario->updateTables(); }
 }
 
 void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {

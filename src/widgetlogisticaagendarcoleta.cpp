@@ -18,9 +18,11 @@
 #include "venda.h"
 #include "widgetlogisticaagendarcoleta.h"
 
-WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) {
-  ui->setupUi(this);
+WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) { ui->setupUi(this); }
 
+WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
+
+void WidgetLogisticaAgendarColeta::setConnections() {
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled);
   connect(ui->checkBoxSul, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged);
@@ -34,27 +36,11 @@ WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : Wi
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked);
   connect(ui->tableEstoque, &TableView::entered, this, &WidgetLogisticaAgendarColeta::on_tableEstoque_entered);
-
-  ui->frameCaminhao->hide();
-  ui->pushButtonCancelarCarga->hide();
-
-  ui->dateTimeEdit->setDate(QDate::currentDate());
 }
 
-WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
-
 void WidgetLogisticaAgendarColeta::setupTables() {
-  // REFAC: refactor this to not select in here
-
   modelEstoque.setTable("view_agendar_coleta");
   modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelEstoque.setFilter("0");
-
-  if (not modelEstoque.select()) {
-    emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
-    return;
-  }
 
   modelEstoque.setHeaderData("dataRealFat", "Data Faturado");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
@@ -84,77 +70,73 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("ordemCompra");
 
-  //
+  connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::calcularPeso);
 
-  modelTransp.setTable("veiculo_has_produto");
-  modelTransp.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  // -------------------------------------------------------------------------
 
-  modelTransp.setHeaderData("idEstoque", "Estoque");
-  modelTransp.setHeaderData("status", "Status");
-  modelTransp.setHeaderData("produto", "Produto");
-  modelTransp.setHeaderData("caixas", "Cx.");
-  modelTransp.setHeaderData("quant", "Quant.");
-  modelTransp.setHeaderData("un", "Un.");
-  modelTransp.setHeaderData("codComercial", "Cód. Com.");
+  modelTranspAtual.setTable("veiculo_has_produto");
+  modelTranspAtual.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelTransp.setFilter("0");
+  modelTranspAtual.setHeaderData("idEstoque", "Estoque");
+  modelTranspAtual.setHeaderData("status", "Status");
+  modelTranspAtual.setHeaderData("produto", "Produto");
+  modelTranspAtual.setHeaderData("caixas", "Cx.");
+  modelTranspAtual.setHeaderData("quant", "Quant.");
+  modelTranspAtual.setHeaderData("un", "Un.");
+  modelTranspAtual.setHeaderData("codComercial", "Cód. Com.");
 
-  if (not modelTransp.select()) {
-    emit errorSignal("Erro lendo tabela transportadora: " + modelTransp.lastError().text());
-    return;
-  }
+  modelTranspAtual.setFilter("0");
 
-  ui->tableTransp->setModel(&modelTransp);
-  ui->tableTransp->hideColumn("id");
-  ui->tableTransp->hideColumn("idEvento");
-  ui->tableTransp->hideColumn("idVeiculo");
-  ui->tableTransp->hideColumn("idVendaProduto");
-  ui->tableTransp->hideColumn("idCompra");
-  ui->tableTransp->hideColumn("idNFeSaida");
-  ui->tableTransp->hideColumn("fornecedor");
-  ui->tableTransp->hideColumn("idVenda");
-  ui->tableTransp->hideColumn("idLoja");
-  ui->tableTransp->hideColumn("idProduto");
-  ui->tableTransp->hideColumn("obs");
-  ui->tableTransp->hideColumn("unCaixa");
-  ui->tableTransp->hideColumn("formComercial");
-  ui->tableTransp->hideColumn("data");
+  if (not modelTranspAtual.select()) { return; }
 
-  //
+  ui->tableTranspAtual->setModel(&modelTranspAtual);
+  ui->tableTranspAtual->hideColumn("id");
+  ui->tableTranspAtual->hideColumn("idEvento");
+  ui->tableTranspAtual->hideColumn("idVeiculo");
+  ui->tableTranspAtual->hideColumn("idVendaProduto");
+  ui->tableTranspAtual->hideColumn("idCompra");
+  ui->tableTranspAtual->hideColumn("idNFeSaida");
+  ui->tableTranspAtual->hideColumn("fornecedor");
+  ui->tableTranspAtual->hideColumn("idVenda");
+  ui->tableTranspAtual->hideColumn("idLoja");
+  ui->tableTranspAtual->hideColumn("idProduto");
+  ui->tableTranspAtual->hideColumn("obs");
+  ui->tableTranspAtual->hideColumn("unCaixa");
+  ui->tableTranspAtual->hideColumn("formComercial");
+  ui->tableTranspAtual->hideColumn("data");
 
-  modelTransp2.setTable("veiculo_has_produto");
-  modelTransp2.setEditStrategy(QSqlTableModel::OnManualSubmit);
+  // -------------------------------------------------------------------------
 
-  modelTransp2.setHeaderData("idEstoque", "Estoque");
-  modelTransp2.setHeaderData("data", "Agendado");
-  modelTransp2.setHeaderData("status", "Status");
-  modelTransp2.setHeaderData("produto", "Produto");
-  modelTransp2.setHeaderData("caixas", "Cx.");
-  modelTransp2.setHeaderData("quant", "Quant.");
-  modelTransp2.setHeaderData("un", "Un.");
-  modelTransp2.setHeaderData("codComercial", "Cód. Com.");
+  modelTranspAgend.setTable("veiculo_has_produto");
+  modelTranspAgend.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelTransp2.setFilter("0");
+  modelTranspAgend.setHeaderData("idEstoque", "Estoque");
+  modelTranspAgend.setHeaderData("data", "Agendado");
+  modelTranspAgend.setHeaderData("status", "Status");
+  modelTranspAgend.setHeaderData("produto", "Produto");
+  modelTranspAgend.setHeaderData("caixas", "Cx.");
+  modelTranspAgend.setHeaderData("quant", "Quant.");
+  modelTranspAgend.setHeaderData("un", "Un.");
+  modelTranspAgend.setHeaderData("codComercial", "Cód. Com.");
 
-  if (not modelTransp2.select()) {
-    emit errorSignal("Erro lendo tabela transportadora: " + modelTransp2.lastError().text());
-    return;
-  }
+  modelTranspAgend.setFilter("0");
 
-  ui->tableTransp2->setModel(&modelTransp2);
-  ui->tableTransp2->hideColumn("id");
-  ui->tableTransp2->hideColumn("idEvento");
-  ui->tableTransp2->hideColumn("idVeiculo");
-  ui->tableTransp2->hideColumn("idVendaProduto");
-  ui->tableTransp2->hideColumn("idCompra");
-  ui->tableTransp2->hideColumn("idNFeSaida");
-  ui->tableTransp2->hideColumn("fornecedor");
-  ui->tableTransp2->hideColumn("idVenda");
-  ui->tableTransp2->hideColumn("idLoja");
-  ui->tableTransp2->hideColumn("idProduto");
-  ui->tableTransp2->hideColumn("unCaixa");
-  ui->tableTransp2->hideColumn("obs");
-  ui->tableTransp2->hideColumn("formComercial");
+  if (not modelTranspAgend.select()) { return; }
+
+  ui->tableTranspAgend->setModel(&modelTranspAgend);
+  ui->tableTranspAgend->hideColumn("id");
+  ui->tableTranspAgend->hideColumn("idEvento");
+  ui->tableTranspAgend->hideColumn("idVeiculo");
+  ui->tableTranspAgend->hideColumn("idVendaProduto");
+  ui->tableTranspAgend->hideColumn("idCompra");
+  ui->tableTranspAgend->hideColumn("idNFeSaida");
+  ui->tableTranspAgend->hideColumn("fornecedor");
+  ui->tableTranspAgend->hideColumn("idVenda");
+  ui->tableTranspAgend->hideColumn("idLoja");
+  ui->tableTranspAgend->hideColumn("idProduto");
+  ui->tableTranspAgend->hideColumn("unCaixa");
+  ui->tableTranspAgend->hideColumn("obs");
+  ui->tableTranspAgend->hideColumn("formComercial");
 }
 
 void WidgetLogisticaAgendarColeta::calcularPeso() {
@@ -174,32 +156,29 @@ void WidgetLogisticaAgendarColeta::calcularPeso() {
   ui->doubleSpinBoxPeso->setSuffix(" Kg (" + QString::number(caixas) + " Cx.)");
 }
 
-bool WidgetLogisticaAgendarColeta::updateTables() {
-  if (modelEstoque.tableName().isEmpty()) {
-    setupTables();
-
+void WidgetLogisticaAgendarColeta::updateTables() {
+  if (not isSet) {
+    ui->frameCaminhao->hide();
+    ui->pushButtonCancelarCarga->hide();
+    ui->dateTimeEdit->setDate(QDate::currentDate());
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
-
-    connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::calcularPeso);
+    setConnections();
+    isSet = true;
   }
 
-  montaFiltro();
-
-  if (not modelEstoque.select()) {
-    emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
-    return false;
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
   }
+
+  if (not modelEstoque.select()) { return; }
 
   ui->tableEstoque->resizeColumnsToContents();
 
-  if (not modelTransp2.select()) {
-    emit errorSignal("Erro lendo tabela veiculo: " + modelTransp2.lastError().text());
-    return false;
-  }
+  if (not modelTranspAgend.select()) { return; }
 
-  ui->tableTransp2->resizeColumnsToContents();
-
-  return true;
+  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &fornecedor) {
@@ -209,15 +188,14 @@ void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &f
 
   montaFiltro();
 
-  if (not modelEstoque.select()) {
-    emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
-    return;
-  }
+  if (not modelEstoque.select()) { return; }
 
   ui->tableEstoque->sortByColumn("prazoEntrega");
 
   ui->tableEstoque->resizeColumnsToContents();
 }
+
+void WidgetLogisticaAgendarColeta::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
   if (not ui->frameCaminhao->isVisible()) {
@@ -227,14 +205,14 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
     return;
   }
 
-  if (modelTransp.rowCount() == 0) {
+  if (modelTranspAtual.rowCount() == 0) {
     emit errorSignal("Nenhum item no veículo!");
     return;
   }
 
   QModelIndexList list;
 
-  for (int row = 0; row < modelTransp.rowCount(); ++row) list << modelTransp.index(row, 0);
+  for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { list << modelTranspAtual.index(row, 0); }
 
   emit transactionStarted();
 
@@ -314,10 +292,10 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       const int idEvento = query.value(0).toInt();
 
-      if (not modelTransp.setData(item.row(), "data", dataPrevColeta)) { return false; }
-      if (not modelTransp.setData(item.row(), "idEvento", idEvento)) { return false; }
+      if (not modelTranspAtual.setData(item.row(), "data", dataPrevColeta)) { return false; }
+      if (not modelTranspAtual.setData(item.row(), "idEvento", idEvento)) { return false; }
 
-      idEstoque = modelTransp.data(item.row(), "idEstoque").toInt();
+      idEstoque = modelTranspAtual.data(item.row(), "idEstoque").toInt();
 
       queryTemp.bindValue(":idEstoque", idEstoque);
 
@@ -357,7 +335,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     }
   }
 
-  if (not modelTransp.submitAll()) { return false; }
+  if (not modelTranspAtual.submitAll()) { return false; }
 
   return true;
 }
@@ -374,47 +352,40 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
     return;
   }
 
-  modelTransp2.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
+  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
-  if (not modelTransp2.select()) {
-    emit errorSignal("Erro lendo tabela veiculo: " + modelTransp2.lastError().text());
-    return;
-  }
+  if (not modelTranspAgend.select()) { return; }
 
-  ui->tableTransp2->resizeColumnsToContents();
+  ui->tableTranspAgend->resizeColumnsToContents();
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 }
 
 bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list) {
   for (const auto &item : list) {
-    const int row = modelTransp.rowCount();
-    modelTransp.insertRow(row);
-
-    //
-
     const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
     const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
     const double peso = kg * caixa;
 
-    //
+    const int row = modelTranspAtual.rowCount();
+    modelTranspAtual.insertRow(row);
 
-    if (not modelTransp.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) { return false; }
-    if (not modelTransp.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) { return false; }
-    if (not modelTransp.setData(row, "formComercial", modelEstoque.data(item.row(), "formComercial"))) { return false; }
-    if (not modelTransp.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
-    if (not modelTransp.setData(row, "idEstoque", modelEstoque.data(item.row(), "idEstoque"))) { return false; }
-    if (not modelTransp.setData(row, "idProduto", modelEstoque.data(item.row(), "idProduto"))) { return false; }
-    if (not modelTransp.setData(row, "produto", modelEstoque.data(item.row(), "produto"))) { return false; }
-    if (not modelTransp.setData(row, "codComercial", modelEstoque.data(item.row(), "codComercial"))) { return false; }
-    if (not modelTransp.setData(row, "un", modelEstoque.data(item.row(), "un"))) { return false; }
-    if (not modelTransp.setData(row, "caixas", modelEstoque.data(item.row(), "caixas"))) { return false; }
-    if (not modelTransp.setData(row, "kg", peso)) { return false; }
-    if (not modelTransp.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) { return false; }
-    if (not modelTransp.setData(row, "status", "EM COLETA")) { return false; }
+    if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) { return false; }
+    if (not modelTranspAtual.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) { return false; }
+    if (not modelTranspAtual.setData(row, "formComercial", modelEstoque.data(item.row(), "formComercial"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
+    if (not modelTranspAtual.setData(row, "idEstoque", modelEstoque.data(item.row(), "idEstoque"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idProduto", modelEstoque.data(item.row(), "idProduto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "produto", modelEstoque.data(item.row(), "produto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "codComercial", modelEstoque.data(item.row(), "codComercial"))) { return false; }
+    if (not modelTranspAtual.setData(row, "un", modelEstoque.data(item.row(), "un"))) { return false; }
+    if (not modelTranspAtual.setData(row, "caixas", modelEstoque.data(item.row(), "caixas"))) { return false; }
+    if (not modelTranspAtual.setData(row, "kg", peso)) { return false; }
+    if (not modelTranspAtual.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) { return false; }
+    if (not modelTranspAtual.setData(row, "status", "EM COLETA")) { return false; }
   }
 
-  ui->tableTransp->resizeColumnsToContents();
+  ui->tableTranspAtual->resizeColumnsToContents();
 
   return true;
 }
@@ -439,20 +410,20 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
     return;
   }
 
-  if (not adicionarProduto(list) and not modelTransp.select()) { return; }
+  if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
-  const auto list = ui->tableTransp->selectionModel()->selectedRows();
+  const auto list = ui->tableTranspAtual->selectionModel()->selectedRows();
 
   if (list.isEmpty()) {
     emit errorSignal("Nenhum item selecionado!");
     return;
   }
 
-  for (const auto &item : list) { modelTransp.removeRow(item.row()); }
+  for (const auto &item : list) { modelTranspAtual.removeRow(item.row()); }
 
-  if (not modelTransp.submitAll()) { return; }
+  if (not modelTranspAtual.submitAll()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
@@ -466,7 +437,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
   ui->pushButtonAgendarColeta->show();
   ui->pushButtonCancelarCarga->hide();
 
-  if (not modelTransp.select()) { return; }
+  if (not modelTranspAtual.select()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
@@ -485,14 +456,11 @@ void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &)
 void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
-  modelTransp2.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
+  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
 
-  if (not modelTransp2.select()) {
-    emit errorSignal("Erro lendo tabela veiculo: " + modelTransp2.lastError().text());
-    return;
-  }
+  if (not modelTranspAgend.select()) { return; }
 
-  ui->tableTransp2->resizeColumnsToContents();
+  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
@@ -543,7 +511,7 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
 
   modelEstoque.setFilter(filtro);
 
-  if (not modelEstoque.select()) { emit errorSignal("Erro: " + modelEstoque.lastError().text()); }
+  if (not modelEstoque.select()) { return; }
 }
 
 // TODO: 1poder marcar nota de entrada como cancelada (talvez direto na tela de nfe's e retirar dos fluxos os estoques?)

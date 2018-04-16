@@ -48,9 +48,8 @@ void ItemBox::resetCursor() { setCursorPosition(0); }
 void ItemBox::setRegisterDialog(RegisterDialog *value) {
   registerDialog = value;
   connect(value, &RegisterDialog::registerUpdated, this, &ItemBox::changeItem);
+  setIcons();
 }
-
-SearchDialog *ItemBox::getSearchDialog() { return searchDialog; }
 
 QVariant ItemBox::getValue() const { return value; }
 
@@ -85,6 +84,7 @@ void ItemBox::clear() {
 void ItemBox::setSearchDialog(SearchDialog *value) {
   searchDialog = value;
   connect(searchDialog, &SearchDialog::itemSelected, this, &ItemBox::changeItem);
+  setIcons();
 }
 
 void ItemBox::changeItem(const QVariant &value) {
@@ -109,6 +109,7 @@ void ItemBox::setIcons() {
   if (searchDialog) {
     x -= size.width();
     searchButton->setGeometry(QRect(QPoint(x, y), size));
+    searchButton->show();
   } else {
     searchButton->hide();
   }
@@ -116,6 +117,7 @@ void ItemBox::setIcons() {
   if (registerDialog) {
     x -= size.width();
     plusButton->setGeometry(QRect(QPoint(x, y), size));
+    plusButton->show();
   } else {
     plusButton->hide();
   }
@@ -124,3 +126,9 @@ void ItemBox::setIcons() {
   getTextMargins(&left, &top, nullptr, &bottom);
   setTextMargins(left, top, rect().right() - x + 4, bottom);
 }
+
+void ItemBox::setRepresentacao(const bool isRepresentacao) { searchDialog->setRepresentacao(isRepresentacao); }
+
+void ItemBox::setFilter(const QString &filter) { searchDialog->setFilter(filter); }
+
+void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFornecedorRep(fornecedor); }

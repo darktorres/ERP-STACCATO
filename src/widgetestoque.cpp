@@ -15,32 +15,22 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : Widget(parent), ui(new Ui::WidgetEstoque) {
-  ui->setupUi(this);
-
-  connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked);
-  connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetEstoque::on_table_entered);
-
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro);
-  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-
-  ui->dateEditMes->setDate(QDate::currentDate());
-}
+WidgetEstoque::WidgetEstoque(QWidget *parent) : Widget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
-bool WidgetEstoque::setupTables() {
-  // REFAC: merge this setquery with the one in montaFiltro
+void WidgetEstoque::setConnections() {
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro);
+  connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked);
+  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
+  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
+  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
+  connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated);
+  connect(ui->table, &TableView::entered, this, &WidgetEstoque::on_table_entered);
+}
 
-  model.setQuery(view_estoque2 + " GROUP BY e.idEstoque HAVING restante > 0");
-
-  if (model.lastError().isValid()) {
-    emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
-    return false;
-  }
+void WidgetEstoque::setupTables() {
+  montaFiltro();
 
   model.setHeaderData("cnpjDest", "CNPJ");
   model.setHeaderData("status", "Status");
@@ -73,24 +63,31 @@ bool WidgetEstoque::setupTables() {
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("restante est");
   ui->table->setItemDelegate(new DoubleDelegate(this));
-
-  return true;
 }
 
-bool WidgetEstoque::updateTables() {
-  if (model.query().executedQuery().isEmpty() and not setupTables()) { return false; }
+void WidgetEstoque::updateTables() {
+  if (not isSet) {
+    ui->dateEditMes->setDate(QDate::currentDate());
+    setConnections();
+    isSet = true;
+  }
+
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
+  }
 
   model.setQuery(model.query().executedQuery());
 
   if (model.lastError().isValid()) {
     emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
-    return false;
+    return;
   }
 
   ui->table->resizeColumnsToContents();
-
-  return true;
 }
+
+void WidgetEstoque::resetTables() { modelIsSet = false; }
 
 void WidgetEstoque::on_table_activated(const QModelIndex &index) {
   auto *estoque = new Estoque(ui->table->model()->data(ui->table->model()->index(index.row(), model.record().indexOf("idEstoque"))).toString(), true, this);

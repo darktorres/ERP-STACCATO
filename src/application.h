@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QPalette>
+#include <QSqlDatabase>
 
 #if defined(qApp)
 #undef qApp
@@ -16,6 +17,7 @@ public:
   Application(int &argc, char **argv, int = ApplicationFlags);
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
+  auto dbReconnect() -> bool;
   auto endTransaction() -> void;
   auto enqueueError(const QString &error) -> void;
   auto enqueueInformation(const QString &information) -> void;
@@ -35,6 +37,7 @@ public:
 private:
   // attributes
   QMap<QString, QString> mapLojas;
+  QSqlDatabase db;
   QStringList errorQueue;
   QStringList informationQueue;
   QStringList warningQueue;
@@ -44,9 +47,11 @@ private:
   bool updating = false;
   const QPalette defaultPalette = palette();
   // methods
-  auto storeSelection() -> void;
   auto readSettingsFile() -> void;
+  auto runSqlJobs() -> bool;
+  auto setDatabase() -> bool;
   auto startSqlPing() -> void;
+  auto storeSelection() -> void;
 };
 
 #endif // APPLICATION_H

@@ -13,7 +13,8 @@ class WidgetFinanceiro final : public Widget {
 public:
   explicit WidgetFinanceiro(QWidget *parent = nullptr);
   ~WidgetFinanceiro();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes

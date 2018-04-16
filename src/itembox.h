@@ -15,10 +15,12 @@ public:
   ~ItemBox() = default;
   auto changeItem(const QVariant &value) -> void;
   auto clear() -> void;
-  auto getSearchDialog() -> SearchDialog *;
   auto getValue() const -> QVariant;
+  auto setFilter(const QString &filter) -> void;
+  auto setFornecedorRep(const QString &fornecedor) -> void;
   auto setReadOnlyItemBox(const bool isReadOnly) -> void;
   auto setRegisterDialog(RegisterDialog *value) -> void;
+  auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setSearchDialog(SearchDialog *value) -> void;
   auto setValue(const QVariant &value) -> void;
 
@@ -40,7 +42,7 @@ private:
   auto resetCursor() -> void;
   auto resizeEvent(QResizeEvent *event) -> void final;
   auto search() -> void;
-  void setIcons();
+  auto setIcons() -> void;
 };
 
 #endif // ITEMBOX_H

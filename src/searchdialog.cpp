@@ -459,7 +459,7 @@ void SearchDialog::setFornecedorRep(const QString &value) { fornecedorRep = valu
 
 QString SearchDialog::getFilter() const { return filter; }
 
-void SearchDialog::setRepresentacao(const QString &value) { representacao = value; }
+void SearchDialog::setRepresentacao(const bool isRepresentacao) { representacao = isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE"; }
 
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 

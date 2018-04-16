@@ -19,13 +19,6 @@
 WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);
 
-  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
-  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraGerar::on_checkBoxMostrarSul_toggled);
-  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
-  connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
-  connect(ui->tableProdutos, &TableView::entered, this, &WidgetCompraGerar::on_tableProdutos_entered);
-  connect(ui->tableResumo, &TableView::activated, this, &WidgetCompraGerar::on_tableResumo_activated);
-
   ui->splitter->setStretchFactor(0, 0);
   ui->splitter->setStretchFactor(1, 1);
 }
@@ -111,34 +104,43 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->hideColumn("aliquotaSt");
   ui->tableProdutos->hideColumn("st");
 
-  // REFAC: move this connection elsewhere
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraGerar::calcularPreco);
 }
 
-bool WidgetCompraGerar::updateTables() {
-  if (modelResumo.tableName().isEmpty()) setupTables();
+void WidgetCompraGerar::setConnections() {
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
+  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraGerar::on_checkBoxMostrarSul_toggled);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
+  connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
+  connect(ui->tableProdutos, &TableView::entered, this, &WidgetCompraGerar::on_tableProdutos_entered);
+  connect(ui->tableResumo, &TableView::activated, this, &WidgetCompraGerar::on_tableResumo_activated);
+}
 
-  const QString filter = modelResumo.filter();
+void WidgetCompraGerar::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
+  }
 
-
-  modelResumo.setFilter(filter);
-
-  ui->tableResumo->resizeColumnsToContents();
-
-  const QString filter2 = modelProdutos.filter();
-
-
-  modelProdutos.setFilter(filter2);
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
+  }
 
   const auto selection = ui->tableResumo->selectionModel()->selectedRows();
 
-  if (selection.size() > 0) {
-    on_tableResumo_activated(selection.first());
-    ui->tableResumo->selectRow(selection.first().row());
-  }
+  if (not modelResumo.select()) { return; }
 
-  return true;
+  if (selection.size() > 0) { ui->tableResumo->selectRow(selection.first().row()); }
+
+  ui->tableResumo->resizeColumnsToContents();
+
+  if (not modelProdutos.select()) { return; }
+
+  ui->tableProdutos->resizeColumnsToContents();
 }
+
+void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 
 bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &dataCompra, const QDateTime &dataPrevista) {
   QStringList produtos;
@@ -247,7 +249,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
       return;
     }
 
-    if (not query2.first()) break;
+    if (not query2.first()) { break; }
 
     if (query2.first()) {
       QMessageBox msgBox(QMessageBox::Question, "Atenção!", "OC já existe! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
@@ -256,7 +258,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
       const int choice = msgBox.exec();
 
-      if (choice == QMessageBox::Yes) break;
+      if (choice == QMessageBox::Yes) { break; }
 
       if (choice != QMessageBox::Yes) {
         bool ok2;
@@ -296,7 +298,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
     mail->exec();
   }
 
-  //
+  // -------------------------------------------------------------------------
 
   emit transactionStarted();
 
@@ -412,7 +414,7 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
     xlsx.write("H200", total * modelProdutos.data(lista.first(), "aliquotaSt").toDouble() / 100);
   }
 
-  for (int row = lista.size() + 13; row < 200; ++row) xlsx.setRowHidden(row, true);
+  for (int row = lista.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
   if (not xlsx.saveAs(fileName)) {
     emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
@@ -434,10 +436,7 @@ void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
   modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE' AND " +
                           QString(checked ? "(idVenda LIKE 'CAMB%' OR idVenda IS NULL)" : "(idVenda NOT LIKE 'CAMB%' OR idVenda IS NULL)"));
 
-  if (not modelProdutos.select()) {
-    emit errorSignal("Erro lendo tabela pedido_fornecedor_has_produto: " + modelProdutos.lastError().text());
-    return;
-  }
+  if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->resizeColumnsToContents();
 }
@@ -474,7 +473,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   QStringList idVendas;
 
-  for (const auto &index : list) idVendas << modelProdutos.data(index.row(), "idVenda").toString();
+  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
@@ -509,7 +508,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraGerar::on_checkBoxMostrarSul_toggled(bool checked) {
   modelResumo.setFilter(checked ? "(idVenda LIKE '%CAMB%')" : "(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
 
-  if (not modelResumo.select()) { emit errorSignal("Erro ao ler tabela: " + modelResumo.lastError().text()); }
+  if (not modelResumo.select()) { return; }
 }
 
 // TODO: avulso

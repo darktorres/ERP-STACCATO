@@ -14,7 +14,8 @@ class WidgetLogistica final : public Widget {
 public:
   explicit WidgetLogistica(QWidget *parent = nullptr);
   ~WidgetLogistica();
-  auto updateTables() -> bool;
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes

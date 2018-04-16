@@ -26,6 +26,13 @@
 WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
 
+  ui->splitter->setStretchFactor(0, 0);
+  ui->splitter->setStretchFactor(1, 1);
+}
+
+WidgetLogisticaEntregas::~WidgetLogisticaEntregas() { delete ui; }
+
+void WidgetLogisticaEntregas::setConnections() {
   connect(ui->lineEditBuscar, &QLineEdit::textChanged, this, &WidgetLogisticaEntregas::on_lineEditBuscar_textChanged);
   connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked);
   connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked);
@@ -37,52 +44,42 @@ WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : Widget(paren
   connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked);
   connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked);
   connect(ui->tableCarga, &TableView::entered, this, &WidgetLogisticaEntregas::on_tableCarga_entered);
-
-  ui->splitter->setStretchFactor(0, 0);
-  ui->splitter->setStretchFactor(1, 1);
 }
 
-WidgetLogisticaEntregas::~WidgetLogisticaEntregas() { delete ui; }
-
-bool WidgetLogisticaEntregas::updateTables() {
-  if (modelCarga.tableName().isEmpty()) { setupTables(); }
-
-  if (not modelCarga.select()) {
-    emit errorSignal("Erro lendo tabela de entregas: " + modelCarga.lastError().text());
-    return false;
+void WidgetLogisticaEntregas::updateTables() {
+  if (not isSet) {
+    setConnections();
+    isSet = true;
   }
 
-  ui->tableCarga->resizeColumnsToContents();
-
-  if (not modelCalendario.select()) {
-    emit errorSignal("Erro lendo tabela calendario: " + modelCalendario.lastError().text());
-    return false;
+  if (not modelIsSet) {
+    setupTables();
+    montaFiltro();
+    modelIsSet = true;
   }
+
+  if (not modelCalendario.select()) { return; }
 
   ui->tableCalendario->resizeColumnsToContents();
 
-  if (not modelCarga.select()) {
-    emit errorSignal("Erro lendo tabela calendario: " + modelCalendario.lastError().text());
-    return false;
-  }
+  // -----------------------------------------------------------------
+
+  if (not modelCarga.select()) { return; }
 
   ui->tableCarga->resizeColumnsToContents();
 
-  if (modelCarga.rowCount() == 0) modelProdutos.setFilter("0");
+  // -----------------------------------------------------------------
 
-  if (not modelProdutos.select()) {
-    emit errorSignal("Erro lendo tabela calendario: " + modelCalendario.lastError().text());
-    return false;
-  }
+  if (modelCarga.rowCount() == 0) { modelProdutos.setFilter("0"); }
+
+  if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->resizeColumnsToContents();
-
-  return true;
 }
 
-void WidgetLogisticaEntregas::setupTables() {
-  // REFAC: refactor this to not select in here
+void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }
 
+void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setTable("view_calendario_entrega");
   modelCalendario.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -92,13 +89,11 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setHeaderData("kg", "Kg.");
   modelCalendario.setHeaderData("idVenda", "Venda");
 
-  if (not modelCalendario.select()) { emit errorSignal("Erro lendo tabela calendario: " + modelCalendario.lastError().text()); }
-
   ui->tableCalendario->setModel(&modelCalendario);
   ui->tableCalendario->hideColumn("idVeiculo");
   ui->tableCalendario->setItemDelegateForColumn("kg", new DoubleDelegate(this));
 
-  //
+  // -----------------------------------------------------------------
 
   modelCarga.setTable("view_calendario_carga");
   modelCarga.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -120,7 +115,7 @@ void WidgetLogisticaEntregas::setupTables() {
   ui->tableCarga->hideColumn("idVeiculo");
   ui->tableCarga->setItemDelegateForColumn("kg", new DoubleDelegate(this));
 
-  //
+  // -----------------------------------------------------------------
 
   modelProdutos.setTable("view_calendario_produto");
   modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -581,14 +576,14 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     return;
   }
 
-  //-------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   if (modelProdutosAgrupado.rowCount() > 20) {
     emit errorSignal("Mais produtos do que cabe no modelo do Excel!");
     return;
   }
 
-  //-------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   const auto folderKey = UserSession::getSetting("User/EntregasPdfFolder");
 

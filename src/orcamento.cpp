@@ -254,7 +254,7 @@ bool Orcamento::viewRegister() {
 
     ui->doubleSpinBoxDescontoGlobalReais->setMaximum(ui->doubleSpinBoxSubTotalLiq->value());
 
-    if (ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->getSearchDialog()->setRepresentacao(" AND representacao = TRUE"); }
+    if (ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setRepresentacao(true); }
 
     if (not data("replicadoDe").toString().isEmpty()) {
       ui->labelReplicaDe->show();
@@ -397,7 +397,7 @@ void Orcamento::removeItem() {
 
   if (modelItem.rowCount() == 0) {
     if (ui->lineEditOrcamento->text() == "Auto gerado") { ui->checkBoxRepresentacao->setEnabled(true); }
-    ui->itemBoxProduto->getSearchDialog()->setFornecedorRep("");
+    ui->itemBoxProduto->setFornecedorRep("");
   }
 
   novoItem();
@@ -740,7 +740,7 @@ void Orcamento::adicionarItem(const bool isUpdate) {
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }
 
-    if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->getSearchDialog()->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
+    if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
 
     isDirty = true;
 
@@ -807,7 +807,7 @@ void Orcamento::on_pushButtonApagarOrc_clicked() {
 void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
   if (ui->itemBoxProduto->text().isEmpty()) { return; }
 
-  //
+  // -------------------------------------------------------------------------
 
   ui->doubleSpinBoxCaixas->clear();
   ui->doubleSpinBoxDesconto->clear();
@@ -823,7 +823,7 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
   ui->spinBoxMinimo->clear();
   ui->spinBoxUnCx->clear();
 
-  //
+  // -------------------------------------------------------------------------
 
   QSqlQuery query;
   query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, m2cx, pccx, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
@@ -894,7 +894,7 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
 }
 
 void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
-  ui->itemBoxEndereco->getSearchDialog()->setFilter("idCliente = " + QString::number(ui->itemBoxCliente->getValue().toInt()) + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEndereco->setFilter("idCliente = " + QString::number(ui->itemBoxCliente->getValue().toInt()) + " AND desativado = FALSE OR idEndereco = 1");
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT idProfissionalRel FROM cliente WHERE idCliente = :idCliente");
@@ -1045,7 +1045,7 @@ void Orcamento::on_pushButtonGerarExcel_clicked() {
   excel.gerarExcel();
 }
 
-void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) { ui->itemBoxProduto->getSearchDialog()->setRepresentacao(" AND representacao = " + QString(checked ? "TRUE" : "FALSE")); }
+void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) { ui->itemBoxProduto->setRepresentacao(checked); }
 
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   const double caixas = ui->doubleSpinBoxCaixas->value();
@@ -1192,7 +1192,7 @@ void Orcamento::successMessage() { emit informationSignal(tipo == Tipo::Atualiza
 
 void Orcamento::on_comboBoxLoja_currentTextChanged(const QString &) {
   ui->itemBoxVendedorIndicou->clear();
-  ui->itemBoxVendedorIndicou->getSearchDialog()->setFilter("idLoja = " + ui->comboBoxLoja->getCurrentValue().toString() + " AND tipo = 'VENDEDOR'");
+  ui->itemBoxVendedorIndicou->setFilter("idLoja = " + ui->comboBoxLoja->getCurrentValue().toString() + " AND tipo = 'VENDEDOR'");
 }
 
 void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }

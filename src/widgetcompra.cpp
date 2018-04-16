@@ -9,18 +9,26 @@ WidgetCompra::WidgetCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetC
 
 WidgetCompra::~WidgetCompra() { delete ui; }
 
-bool WidgetCompra::updateTables() {
+void WidgetCompra::resetTables() {
+  ui->widgetDevolucao->resetTables();
+  ui->widgetResumo->resetTables();
+  ui->widgetPendentes->resetTables();
+  ui->widgetGerar->resetTables();
+  ui->widgetConfirmar->resetTables();
+  ui->widgetFaturar->resetTables();
+  ui->widgetOC->resetTables();
+}
+
+void WidgetCompra::updateTables() {
   const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Devoluções" and not ui->widgetDevolucao->updateTables()) { return false; }
-  if (currentText == "Resumo" and not ui->widgetResumo->updateTables()) { return false; }
-  if (currentText == "Pendentes" and not ui->widgetPendentes->updateTables()) { return false; }
-  if (currentText == "Gerar Compra" and not ui->widgetGerar->updateTables()) { return false; }
-  if (currentText == "Confirmar Compra" and not ui->widgetConfirmar->updateTables()) { return false; }
-  if (currentText == "Faturamento" and not ui->widgetFaturar->updateTables()) { return false; }
-  if (currentText == "Compras" and not ui->widgetOC->updateTables()) { return false; }
-
-  return true;
+  if (currentText == "Devoluções") { ui->widgetDevolucao->updateTables(); }
+  if (currentText == "Resumo") { ui->widgetResumo->updateTables(); }
+  if (currentText == "Pendentes") { ui->widgetPendentes->updateTables(); }
+  if (currentText == "Gerar Compra") { ui->widgetGerar->updateTables(); }
+  if (currentText == "Confirmar Compra") { ui->widgetConfirmar->updateTables(); }
+  if (currentText == "Faturamento") { ui->widgetFaturar->updateTables(); }
+  if (currentText == "Compras") { ui->widgetOC->updateTables(); }
 }
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }

@@ -7,42 +7,50 @@
 #include "ui_widgetlogisticacalendario.h"
 #include "widgetlogisticacalendario.h"
 
-WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCalendario) {
-  ui->setupUi(this);
+WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
 
+WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
+
+void WidgetLogisticaCalendario::setConnections() {
   connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
   connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
   connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked);
   connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked);
 }
 
-WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
+void WidgetLogisticaCalendario::listarVeiculos() {
+  QSqlQuery query;
 
-bool WidgetLogisticaCalendario::updateTables() {
-  if (not setup) {
-    QSqlQuery query;
-
-    if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
-      emit errorSignal("Erro buscando veiculos: " + query.lastError().text());
-      return false;
-    }
-
-    while (query.next()) {
-      auto *checkbox = new QCheckBox(this);
-      checkbox->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
-      checkbox->setChecked(true);
-      connect(checkbox, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);
-      ui->groupBoxVeiculos->layout()->addWidget(checkbox);
-    }
-
-    ui->groupBoxVeiculos->layout()->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
-
-    setup = true;
+  if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
+    emit errorSignal("Erro buscando veiculos: " + query.lastError().text());
+    return;
   }
 
-  const QDate date = ui->calendarWidget->selectedDate();
-  return updateCalendar(date.addDays(date.dayOfWeek() * -1));
+  while (query.next()) {
+    auto *checkbox = new QCheckBox(this);
+    checkbox->setText(query.value("razaoSocial").toString() + " / " + query.value("modelo").toString());
+    checkbox->setChecked(true);
+    connect(checkbox, &QAbstractButton::toggled, this, &WidgetLogisticaCalendario::updateFilter);
+    ui->groupBoxVeiculos->layout()->addWidget(checkbox);
+  }
+
+  ui->groupBoxVeiculos->layout()->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
+
+void WidgetLogisticaCalendario::updateTables() {
+  if (not isSet) {
+    listarVeiculos();
+    setConnections();
+    isSet = true;
+  }
+
+  if (not modelIsSet) { modelIsSet = true; }
+
+  const QDate date = ui->calendarWidget->selectedDate();
+  updateCalendar(date.addDays(date.dayOfWeek() * -1));
+}
+
+void WidgetLogisticaCalendario::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaCalendario::updateFilter() {
   const QDate date = ui->calendarWidget->selectedDate();

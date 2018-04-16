@@ -209,7 +209,7 @@ bool CadastroUsuario::cadastrar() {
 
     if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
 
-    //
+    // -------------------------------------------------------------------------
 
     const int row2 = modelPermissoes.rowCount();
     modelPermissoes.insertRow(row2);

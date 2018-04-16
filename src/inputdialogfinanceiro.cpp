@@ -443,7 +443,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
 
-  //
+  // -------------------------------------------------------------------------
 
   calcularTotal();
 

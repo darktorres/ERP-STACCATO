@@ -61,7 +61,7 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
     if (status == "CANCELADO") { return QBrush(Qt::black); }
     if (status == "PERDIDO") { return QBrush(Qt::black); }
 
-    //
+    // -------------------------------------------------------------------------
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

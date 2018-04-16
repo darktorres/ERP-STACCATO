@@ -85,7 +85,7 @@ QVariant VendaProxyModel::data(const QModelIndex &proxyIndex, const int role) co
     if (status == "CANCELADO" or status == "DEVOLVIDO" or status == "PROCESSADO") { return QBrush(Qt::black); }
     if (status == "PERDIDO") { return QBrush(Qt::black); }
 
-    //
+    // -------------------------------------------------------------------------
 
     return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
   }

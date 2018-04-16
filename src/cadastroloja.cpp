@@ -82,7 +82,7 @@ void CadastroLoja::setupTables() {
   ui->tableAssocia1->setModel(&modelAssocia1);
   ui->tableAssocia1->hideColumn("idPagamento");
 
-  //
+  // -------------------------------------------------------------------------
 
   modelAssocia2.setTable("view_pagamento_loja");
   modelAssocia2.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -94,14 +94,15 @@ void CadastroLoja::setupTables() {
   ui->tableAssocia2->setModel(&modelAssocia2);
   ui->tableAssocia2->hideColumn("idLoja");
   ui->tableAssocia2->hideColumn("idPagamento");
-  //
+
+  // -------------------------------------------------------------------------
 
   modelPermissoes.setTable("usuario_has_permissao");
   modelPermissoes.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   if (not modelPermissoes.select()) { return; }
 
-  //
+  // -------------------------------------------------------------------------
 
   ui->tableEndereco->setModel(&modelEnd);
   ui->tableEndereco->hideColumn("idEndereco");
@@ -109,7 +110,7 @@ void CadastroLoja::setupTables() {
   ui->tableEndereco->hideColumn("idLoja");
   ui->tableEndereco->hideColumn("codUF");
 
-  //
+  // -------------------------------------------------------------------------
 
   modelConta.setTable("loja_has_conta");
   modelConta.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -124,7 +125,8 @@ void CadastroLoja::setupTables() {
   ui->tableConta->hideColumn("idLoja");
   ui->tableConta->hideColumn("desativado");
 
-  //
+  // -------------------------------------------------------------------------
+
   modelPagamentos.setTable("forma_pagamento");
   modelPagamentos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
@@ -144,7 +146,6 @@ void CadastroLoja::setupTables() {
   ui->tableTaxas->hideColumn("idTaxa");
   ui->tableTaxas->hideColumn("idPagamento");
   ui->tableTaxas->setItemDelegateForColumn("taxa", new PorcentagemDelegate(this));
-  //
 }
 
 void CadastroLoja::clearFields() {
@@ -375,7 +376,7 @@ bool CadastroLoja::viewRegister() {
 
   ui->tableEndereco->resizeColumnsToContents();
 
-  //
+  // -------------------------------------------------------------------------
 
   modelConta.setFilter("idLoja = " + primaryId + " AND desativado = FALSE");
 
@@ -395,13 +396,11 @@ bool CadastroLoja::viewRegister() {
   ui->tabWidget->setTabEnabled(2, true);
   ui->tabWidget->setTabEnabled(3, true);
 
-  //
+  // -------------------------------------------------------------------------
 
   modelAssocia2.setFilter("idLoja = " + data("idLoja").toString());
 
   if (not modelAssocia2.select()) { return false; }
-
-  //
 
   return true;
 }
@@ -441,7 +440,7 @@ bool CadastroLoja::cadastrar() {
     return false;
   }
 
-  //
+  // -------------------------------------------------------------------------
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
     if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }
@@ -456,7 +455,7 @@ bool CadastroLoja::cadastrar() {
 
   if (not modelEnd.submitAll()) { return false; }
 
-  //
+  // -------------------------------------------------------------------------
 
   for (int row = 0; row < modelConta.rowCount(); ++row) {
     if (not modelConta.setData(row, primaryKey, primaryId)) { return false; }
@@ -464,7 +463,7 @@ bool CadastroLoja::cadastrar() {
 
   if (not modelConta.submitAll()) { return false; }
 
-  //
+  // -------------------------------------------------------------------------
 
   return true;
 }

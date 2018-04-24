@@ -17,7 +17,7 @@ class CadastrarNFe final : public Dialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Futura, Normal };
+  enum class Tipo { Futura, Normal, NormalAposFutura };
   explicit CadastrarNFe(const QString &idVenda, const Tipo tipo, QWidget *parent = nullptr);
   ~CadastrarNFe();
   auto prepararNFe(const QList<int> &items) -> void;

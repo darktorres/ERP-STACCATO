@@ -129,7 +129,8 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
   queryUpdate1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE idPedido = :idPedido");
 
   QSqlQuery queryUpdate2;
-  queryUpdate2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE idVendaProduto = :idVendaProduto");
+  queryUpdate2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE idVendaProduto = :idVendaProduto "
+                       "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   while (query1.next()) {
     queryUpdate1.bindValue(":dataRealConf", dataConf);
@@ -169,7 +170,8 @@ bool WidgetCompraConfirmar::cancelar(const int row) {
   }
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM COMPRA'");
+  query2.prepare(
+      "UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM COMPRA' AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   while (query1.next()) {
     query2.bindValue(":idVendaProduto", query1.value("idVendaProduto"));

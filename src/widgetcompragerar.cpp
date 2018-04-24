@@ -151,7 +151,8 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
   }
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto");
+  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto "
+                     "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &row : lista) {
     if (not modelProdutos.setData(row, "status", "EM COMPRA")) { return false; }
@@ -445,7 +446,7 @@ void WidgetCompraGerar::on_tableProdutos_entered(const QModelIndex &) { ui->tabl
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'INICIADO'");
+  query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'INICIADO' AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &index : list) {
     if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) { return false; }

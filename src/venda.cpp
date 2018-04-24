@@ -1140,7 +1140,7 @@ bool Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) {

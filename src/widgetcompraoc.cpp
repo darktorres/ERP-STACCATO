@@ -239,7 +239,7 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
   }
 
   QSqlQuery query4;
-  query4.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto");
+  query4.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
   query4.bindValue(":idVendaProduto", idVendaProduto);
 
   if (not query4.exec()) {

@@ -877,8 +877,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
       return;
     }
 
-    if (modelViewProdutos.data(item.row(), "status").toString() != "ESTOQUE") {
-      emit errorSignal("Produto com status diferente de 'ESTOQUE'!");
+    if (modelViewProdutos.data(item.row(), "idConsumo").toInt() == 0) {
+      emit errorSignal("Nem todos os produtos selecionados possuem nota de entrada!");
       return;
     }
   }

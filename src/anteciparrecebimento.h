@@ -22,7 +22,9 @@ private:
   // methods
   auto cadastrar(const QModelIndexList &list) -> bool;
   auto calcularTotais() -> void;
-  auto on_comboBox_currentTextChanged(const QString &text) -> void;
+  auto montaFiltro() -> void;
+  auto on_comboBoxLoja_currentTextChanged(const QString &) -> void;
+  auto on_comboBox_currentTextChanged(const QString &) -> void;
   auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
   auto on_pushButtonGerar_clicked() -> void;
   auto on_table_entered(const QModelIndex) -> void;

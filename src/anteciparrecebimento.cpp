@@ -128,7 +128,7 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("contraParte", "Contraparte");
   modelContaReceber.setHeaderData("statusFinanceiro", "Financeiro");
 
-  modelContaReceber.setFilter("(status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
+  modelContaReceber.setFilter("(status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
 
   if (not modelContaReceber.select()) { return; }
 
@@ -155,17 +155,24 @@ void AnteciparRecebimento::setupTables() {
 
 void AnteciparRecebimento::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
-void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &text) {
-  modelContaReceber.setFilter("tipo LIKE '%" + ui->comboBox->currentText() + "%' AND idVenda LIKE '" + ui->comboBoxLoja->currentText() +
-                              "%' AND (status = 'PENDENTE' or status = 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+void AnteciparRecebimento::montaFiltro() {
+  const QString textTipo = ui->comboBox->currentText();
+  const QString textLoja = ui->comboBoxLoja->currentText();
 
-  if (text == "Cartão de crédito" or ui->comboBox->currentText() == "Cartão de débito") {
-    modelContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Cartão de débito%' OR tipo LIKE '%Taxa Cartão%') AND representacao = FALSE AND idVenda LIKE '" +
-                                ui->comboBoxLoja->currentText() + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND desativado = FALSE");
+  if (textTipo == "Cartão de crédito" or textTipo == "Cartão de débito") {
+    modelContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Cartão de débito%' OR tipo LIKE '%Taxa Cartão%') AND representacao = FALSE AND idVenda LIKE '" + textLoja +
+                                "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND desativado = FALSE ORDER BY dataPagamento");
+  } else {
+    modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%' AND idVenda LIKE '" + textLoja +
+                                "%' AND (status = 'PENDENTE' or status = 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
   }
 
   if (not modelContaReceber.select()) { return; }
 }
+
+void AnteciparRecebimento::on_comboBoxLoja_currentTextChanged(const QString &) { montaFiltro(); }
+
+void AnteciparRecebimento::on_comboBox_currentTextChanged(const QString &) { montaFiltro(); }
 
 void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
   const double presente = ui->doubleSpinBoxValorPresente->value();

@@ -281,6 +281,8 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 void WidgetLogisticaAgendarEntrega::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
+  // TODO: não deixar agendar carga com mistura de produtos com e sem nfe futura
+
   if (modelTranspAtual.rowCount() == 0) {
     emit errorSignal("Carga vazia!");
     return;

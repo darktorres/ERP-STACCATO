@@ -89,6 +89,8 @@ void CadastrarNFe::setupTables() {
 
   if (not modelLoja.select()) { return; }
 
+  //----------------------------------------------------------
+
   modelViewProdutoEstoque.setTable("view_produto_estoque");
   modelViewProdutoEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -630,33 +632,33 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     return;
   }
 
-  for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-    for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-      if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
-    }
-
-    if (not modelViewProdutoEstoque.setData(row, "cfop", "5403")) { return; }
-
-    if (not modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60")) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "cstICMS", "60")) { return; }
-
-    const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
-    const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto)) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "cstPIS", "01")) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS.value().toDouble())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vPIS", modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * modelViewProdutoEstoque.data(row, "pPIS").toDouble() / 100)) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto)) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "cstCOFINS", "01")) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS.value().toDouble())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vCOFINS", modelViewProdutoEstoque.data(row, "vBCCOFINS").toDouble() * modelViewProdutoEstoque.data(row, "pCOFINS").toDouble() / 100)) { return; }
-  }
-
   //
 
   // TODO: verificar na nota futura qual transportadora preencher
   if (tipo == Tipo::Normal) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
+        if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
+      }
+
+      if (not modelViewProdutoEstoque.setData(row, "cfop", "5403")) { return; }
+
+      if (not modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstICMS", "60")) { return; }
+
+      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      if (not modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstPIS", "01")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS.value().toDouble())) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vPIS", modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * modelViewProdutoEstoque.data(row, "pPIS").toDouble() / 100)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstCOFINS", "01")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS.value().toDouble())) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vCOFINS", modelViewProdutoEstoque.data(row, "vBCCOFINS").toDouble() * modelViewProdutoEstoque.data(row, "pCOFINS").toDouble() / 100)) { return; }
+    }
+
     QSqlQuery queryTransp;
     queryTransp.prepare(
         "SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
@@ -707,6 +709,57 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     ui->lineEditVolumesEspecie->setText("Caixas");
     ui->doubleSpinBoxVolumesPesoBruto->setValue(peso);
     ui->doubleSpinBoxVolumesPesoLiq->setValue(peso);
+  }
+
+  if (tipo == Tipo::Futura) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
+        if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
+      }
+
+      if (not modelViewProdutoEstoque.setData(row, "cfop", "5922")) { return; }
+
+      if (not modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstICMS", "60")) { return; }
+
+      const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
+      const double freteProduto = qFuzzyIsNull(total) ? 0 : total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
+
+      if (not modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstPIS", "01")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS.value().toDouble())) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vPIS", modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * modelViewProdutoEstoque.data(row, "pPIS").toDouble() / 100)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstCOFINS", "01")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS.value().toDouble())) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vCOFINS", modelViewProdutoEstoque.data(row, "vBCCOFINS").toDouble() * modelViewProdutoEstoque.data(row, "pCOFINS").toDouble() / 100)) { return; }
+    }
+
+    ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");
+  }
+
+  if (tipo == Tipo::NormalAposFutura) {
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
+        if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
+      }
+
+      if (not modelViewProdutoEstoque.setData(row, "cfop", "5117")) { return; }
+
+      if (not modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS90")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstICMS", "90")) { return; }
+
+      if (not modelViewProdutoEstoque.setData(row, "vBCPIS", 0)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstPIS", "49")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "pPIS", 0)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vPIS", 0)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", 0)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cstCOFINS", "49")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "pCOFINS", 0)) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "vCOFINS", 0)) { return; }
+    }
+
+    ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");
   }
 
   // CFOP
@@ -1922,3 +1975,15 @@ void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &
 // TODO: 5bloquear edicao direto na tabela
 // TODO: os produtos de reposicao devem sair na nota com o valor que foram vendidos originalmente
 // TODO: quando mudar a finalidade operacao para devolucao mudar as tabelas de cfop
+
+// NOTE: para notas futuras
+
+// nota futura:
+// natureza - "VENDA COM PROMESSA DE ENTREGA FUTURA"
+// cfop 5922
+
+// nota real:
+// natureza - "VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA"
+// cfop 5117
+// icms 90
+// pis cofins '49 - Outros' e valores zerados

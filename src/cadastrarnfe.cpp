@@ -1975,15 +1975,3 @@ void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &
 // TODO: 5bloquear edicao direto na tabela
 // TODO: os produtos de reposicao devem sair na nota com o valor que foram vendidos originalmente
 // TODO: quando mudar a finalidade operacao para devolucao mudar as tabelas de cfop
-
-// NOTE: para notas futuras
-
-// nota futura:
-// natureza - "VENDA COM PROMESSA DE ENTREGA FUTURA"
-// cfop 5922
-
-// nota real:
-// natureza - "VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA"
-// cfop 5117
-// icms 90
-// pis cofins '49 - Outros' e valores zerados

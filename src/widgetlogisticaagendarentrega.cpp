@@ -330,7 +330,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
+  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) {
     if (not modelTranspAtual.setData(row, "data", dataPrevEnt)) { return false; }

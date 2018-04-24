@@ -174,7 +174,8 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
+  query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto "
+                 "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &item : list) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));

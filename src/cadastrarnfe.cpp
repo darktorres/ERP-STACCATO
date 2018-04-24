@@ -350,7 +350,7 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
 
   if (tipo == Tipo::Futura) {
     QSqlQuery query;
-    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto");
+    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query.bindValue(":idNFeFutura", idNFe);
@@ -369,7 +369,8 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
     query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
 
     QSqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status = 'ENTREGA AGEND.' AND status != 'CANCELADO' "
+                   "AND status != 'DEVOLVIDO'");
 
     QSqlQuery query3;
     query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");

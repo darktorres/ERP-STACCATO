@@ -113,7 +113,8 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE idVendaProduto = :idVendaProduto");
+  query2.prepare(
+      "UPDATE venda_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &item : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);

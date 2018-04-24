@@ -103,8 +103,8 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
 
   QSqlQuery query4;
   // salvar status na venda
-  query4.prepare(
-      "UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+  query4.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo "
+                 "WHERE idEstoque = :idEstoque) AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &item : list) {
     query1.bindValue(":recebidoPor", recebidoPor);
@@ -241,8 +241,8 @@ bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
                  ":codComercial");
 
   QSqlQuery query2;
-  query2.prepare(
-      "UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+  query2.prepare("UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
+                 "AND codComercial = :codComercial AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &item : list) {
     const int idEstoque = modelViewRecebimento.data(item.row(), "idEstoque").toInt();
@@ -340,8 +340,8 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
                  "idEstoque = :idEstoque) AND codComercial = :codComercial");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = "
-                 ":idEstoque) AND codComercial = :codComercial");
+  query3.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra "
+                 "WHERE idEstoque = :idEstoque) AND codComercial = :codComercial AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
 
   for (const auto &item : list) {
     const int idEstoque = modelViewRecebimento.data(item.row(), "idEstoque").toInt();

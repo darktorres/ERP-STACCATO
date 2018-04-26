@@ -317,9 +317,12 @@ bool Devolucao::criarDevolucao() {
 }
 
 bool Devolucao::inserirItens(const int currentRow) {
+  const QDecDouble quant = modelProdutos.data(mapperItem.currentIndex(), "quant").toDouble();
   const QDecDouble quantDevolvida = ui->doubleSpinBoxQuant->value();
+  const QDecDouble restante = quant - quantDevolvida;
   const QDecDouble step = ui->doubleSpinBoxQuant->singleStep();
 
+  // copiar linha para devolucao
   const int rowDevolucao = modelDevolvidos.rowCount();
   if (not modelDevolvidos.insertRow(rowDevolucao)) { return false; }
 
@@ -348,6 +351,70 @@ bool Devolucao::inserirItens(const int currentRow) {
   if (not modelDevolvidos.setData(rowDevolucao, "total", ui->doubleSpinBoxTotalItem->value() * -1)) { return false; }
 
   if (not modelDevolvidos.submitAll()) { return false; }
+
+  //------------------------------------
+
+  if (restante > 0) {
+    const int newRowRestante = modelProdutos.rowCount();
+    // NOTE: *quebralinha venda_produto/pedido_fornecedor
+    if (not modelProdutos.insertRow(newRowRestante)) { return false; }
+
+    for (int column = 0; column < modelProdutos.columnCount(); ++column) {
+      if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
+      if (modelProdutos.fieldIndex("created") == column) { continue; }
+      if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
+
+      if (not modelProdutos.setData(newRowRestante, column, modelProdutos.data(currentRow, column))) { return false; }
+    }
+
+    if (not modelProdutos.setData(newRowRestante, "caixas", (restante / step).toDouble())) { return false; }
+    if (not modelProdutos.setData(newRowRestante, "quant", restante.toDouble())) { return false; }
+
+    const QDecDouble prcUnitario = modelProdutos.data(newRowRestante, "prcUnitario").toDouble();
+    const QDecDouble parcial = restante * prcUnitario;
+
+    if (not modelProdutos.setData(newRowRestante, "parcial", parcial.toDouble())) { return false; }
+
+    const QDecDouble desconto = modelProdutos.data(newRowRestante, "desconto").toDouble();
+    const QDecDouble parcialDesc = parcial * (1 - (desconto / 100).toDouble());
+
+    if (not modelProdutos.setData(newRowRestante, "parcialDesc", parcialDesc.toDouble())) { return false; }
+
+    const QDecDouble descGlobal = modelProdutos.data(newRowRestante, "descGlobal").toDouble();
+    const QDecDouble total = parcialDesc * (1 - (descGlobal / 100).toDouble());
+
+    if (not modelProdutos.setData(newRowRestante, "total", total.toDouble())) { return false; }
+  }
+
+  // ------------------------------------
+
+  const QDecDouble prcUnitario = modelProdutos.data(currentRow, "prcUnitario").toDouble();
+  const QDecDouble desconto = modelProdutos.data(currentRow, "desconto").toDouble();
+  const QDecDouble descGlobal = modelProdutos.data(currentRow, "descGlobal").toDouble();
+
+  // linha original
+
+  const QDecDouble caixas = quantDevolvida / step;
+
+  if (not modelProdutos.setData(currentRow, "caixas", caixas.toDouble())) { return false; }
+  if (not modelProdutos.setData(currentRow, "quant", quantDevolvida.toDouble())) { return false; }
+
+  const QDecDouble parcialRestante = quantDevolvida * prcUnitario;
+
+  if (not modelProdutos.setData(currentRow, "parcial", parcialRestante.toDouble())) { return false; }
+
+  const QDecDouble parcialDescRestante = parcialRestante * (1 - (desconto / 100).toDouble());
+
+  if (not modelProdutos.setData(currentRow, "parcialDesc", parcialDescRestante.toDouble())) { return false; }
+
+  const QDecDouble totalRestante = parcialDescRestante * (1 - (descGlobal / 100).toDouble());
+
+  if (not modelProdutos.setData(currentRow, "total", totalRestante.toDouble())) { return false; }
+  if (not modelProdutos.setData(currentRow, "status", "DEVOLVIDO")) { return false; }
+
+  //----------------------------------------------
+
+  if (not modelProdutos.submitAll()) { return false; }
 
   return true;
 }

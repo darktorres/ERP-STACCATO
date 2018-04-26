@@ -842,6 +842,20 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
   stream << "indFinal = 1" << endl;
   // TODO: fix
   //  stream << "cMunFG = 3505708" << endl;
+
+  if (tipo == Tipo::NormalAposFutura) {
+    QSqlQuery query;
+    query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto)");
+    query.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(0, "idVendaProduto"));
+
+    if (not query.exec() or not query.first()) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro buscando NFe referenciada!");
+      return;
+    }
+
+    stream << "[NFRef001]" << endl;
+    stream << "refNFe = " + query.value("chaveAcesso").toString() << endl;
+  }
 }
 
 void CadastrarNFe::writeEmitente(QTextStream &stream) const {

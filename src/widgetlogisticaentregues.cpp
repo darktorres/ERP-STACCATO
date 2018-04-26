@@ -136,6 +136,15 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
     return;
   }
 
+  for (const auto &index : list) {
+    const QString status = modelProdutos.data(index.row(), "status").toString();
+
+    if (status != "ENTREGUE") {
+      emit errorSignal("Produto não marcado como 'ENTREGUE'!");
+      return;
+    }
+  }
+
   QStringList idVendas;
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }

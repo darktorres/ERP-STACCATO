@@ -145,8 +145,7 @@ QString CadastrarNFe::gravarNota() {
   writeProduto(stream);
   writeTotal(stream);
   writeTransportadora(stream);
-  // TODO: adicionar pagamentos para NFe 4.0
-  //  writePagamento(stream);
+  writePagamento(stream);
   writeVolume(stream);
 
   const QString infUsuario = ui->infCompUsuario->toPlainText().isEmpty() ? "" : ui->infCompUsuario->toPlainText();
@@ -840,8 +839,6 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
   stream << "idDest = " + ui->comboBoxDestinoOperacao->currentText().left(1) << endl;
   stream << "indPres = 1" << endl;
   stream << "indFinal = 1" << endl;
-  // TODO: fix
-  //  stream << "cMunFG = 3505708" << endl;
 
   if (tipo == Tipo::NormalAposFutura) {
     QSqlQuery query;
@@ -871,15 +868,15 @@ void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "Numero = " + queryLojaEnd.value("numero").toString() << endl;
   stream << "Complemento = " + queryLojaEnd.value("complemento").toString() << endl;
   stream << "Bairro = " + queryLojaEnd.value("bairro").toString() << endl;
-  // TODO: fix
-  //  stream << "cMun = 3505708" << endl;
+  stream << "cMun = " + queryIBGEEmit.value("codigo").toString() << endl;
   stream << "Cidade = " + queryLojaEnd.value("cidade").toString() << endl;
   stream << "UF = " + queryLojaEnd.value("uf").toString() << endl;
 }
 
 void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "[Destinatario]" << endl;
-  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString() << endl;
+
+  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString().replace("Ç", "C").replace("Ã", "A").left(60) << endl;
 
   if (queryCliente.value("pfpj").toString() == "PF") {
     stream << "CPF = " + clearStr(queryCliente.value("cpf").toString()) << endl;
@@ -900,7 +897,7 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
   stream << "Numero = " + queryEndereco.value("numero").toString() << endl;
   stream << "Complemento = " + queryEndereco.value("complemento").toString().left(60) << endl;
   stream << "Bairro = " + queryEndereco.value("bairro").toString() << endl;
-  stream << "cMun = " + queryIBGE.value("codigo").toString() << endl;
+  stream << "cMun = " + queryIBGEDest.value("codigo").toString() << endl;
   stream << "Cidade = " + queryEndereco.value("cidade").toString() << endl;
   stream << "UF = " + queryEndereco.value("uf").toString() << endl;
 }
@@ -914,7 +911,8 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() << endl;
     stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() << endl;
     const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();
-    stream << "EAN = " + (codBarras.isEmpty() ? "" : codBarras) << endl;
+    stream << "cEAN = " + (codBarras.isEmpty() ? "" : codBarras) << endl;
+    stream << "cEANTrib = " + (codBarras.isEmpty() ? "" : codBarras) << endl;
     const QString produto = modelViewProdutoEstoque.data(row, "produto").toString();
     QString formato = modelViewProdutoEstoque.data(row, "formComercial").toString();
     formato = formato.isEmpty() ? "" : " - " + formato;
@@ -1632,6 +1630,8 @@ bool CadastrarNFe::validar() {
     return false;
   }
 
+  // -------------------------------------------------------------------------
+
   queryLojaEnd.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", modelLoja.data(0, "idLoja"));
 
@@ -1677,6 +1677,8 @@ bool CadastrarNFe::validar() {
     return false;
   }
 
+  // -------------------------------------------------------------------------
+
   queryCliente.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
 
@@ -1703,6 +1705,8 @@ bool CadastrarNFe::validar() {
       return false;
     }
   }
+
+  // -------------------------------------------------------------------------
 
   queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getValue());
@@ -1732,14 +1736,29 @@ bool CadastrarNFe::validar() {
     return false;
   }
 
-  queryIBGE.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
-  queryIBGE.bindValue(":cidade", queryEndereco.value("cidade"));
-  queryIBGE.bindValue(":uf", queryEndereco.value("uf"));
+  // -------------------------------------------------------------------------
 
-  if (not queryIBGE.exec() or not queryIBGE.first()) {
+  queryIBGEEmit.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
+  queryIBGEEmit.bindValue(":cidade", queryLojaEnd.value("cidade"));
+  queryIBGEEmit.bindValue(":uf", queryLojaEnd.value("uf"));
+
+  if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) {
     emit errorSignal("Erro buscando código do munícipio, verifique se a cidade/estado estão cadastrados corretamente!");
     return false;
   }
+
+  // -------------------------------------------------------------------------
+
+  queryIBGEDest.prepare("SELECT codigo FROM cidade WHERE nome = :cidade AND uf = :uf");
+  queryIBGEDest.bindValue(":cidade", queryEndereco.value("cidade"));
+  queryIBGEDest.bindValue(":uf", queryEndereco.value("uf"));
+
+  if (not queryIBGEDest.exec() or not queryIBGEDest.first()) {
+    emit errorSignal("Erro buscando código do munícipio, verifique se a cidade/estado estão cadastrados corretamente!");
+    return false;
+  }
+
+  // -------------------------------------------------------------------------
 
   if (queryEndereco.value("cidade").toString().isEmpty()) {
     emit errorSignal("Cidade cliente vazio!");
@@ -1751,6 +1770,8 @@ bool CadastrarNFe::validar() {
     return false;
   }
 
+  // -------------------------------------------------------------------------
+
   queryPartilhaInter.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
   queryPartilhaInter.bindValue(":origem", queryLojaEnd.value("uf"));
   queryPartilhaInter.bindValue(":destino", queryEndereco.value("uf"));
@@ -1759,6 +1780,8 @@ bool CadastrarNFe::validar() {
     emit errorSignal("Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text());
     return false;
   }
+
+  // -------------------------------------------------------------------------
 
   queryPartilhaIntra.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
   queryPartilhaIntra.bindValue(":origem", queryEndereco.value("uf"));

@@ -29,7 +29,8 @@ private:
   QDataWidgetMapper mapper;
   QSqlQuery queryCliente;
   QSqlQuery queryEndereco;
-  QSqlQuery queryIBGE;
+  QSqlQuery queryIBGEDest;
+  QSqlQuery queryIBGEEmit;
   QSqlQuery queryLojaEnd;
   QSqlQuery queryPartilhaInter;
   QSqlQuery queryPartilhaIntra;

@@ -294,6 +294,11 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not resposta) { return; }
 
+  if (resposta->contains("Alertas:")) {
+    emit errorSignal(*resposta);
+    return;
+  }
+
   if (not resposta->contains("OK")) {
     emit errorSignal(*resposta);
     return;
@@ -1013,6 +1018,7 @@ void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
   stream << "[Transportador]" << endl;
   stream << "FretePorConta = " << ui->comboBoxFreteConta->currentText().left(1) << endl;
 
+  // TODO: se for 'CARRO EXTRA' não preencher CNPJ/Insc.
   if (ui->lineEditTransportadorRazaoSocial->text() != "RETIRA") {
     stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() << endl;
     stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() << endl;

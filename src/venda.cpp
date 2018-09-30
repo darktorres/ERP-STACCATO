@@ -784,7 +784,7 @@ void Venda::montarFluxoCaixa() {
 
       // calculo comissao
       for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
-        if (modelFluxoCaixa.data(z, "representacao").toBool() == false) { continue; }
+        if (not modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
         if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
         if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
 

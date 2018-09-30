@@ -13,7 +13,7 @@
 #include "ui_devolucao.h"
 #include "usersession.h"
 
-Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : Dialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(QString idVenda, QWidget *parent) : Dialog(parent), idVenda(std::move(idVenda)), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   connect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);

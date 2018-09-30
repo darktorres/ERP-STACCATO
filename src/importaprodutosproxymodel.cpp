@@ -13,7 +13,7 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
     // verifica se está descontinuado
     const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 
-    if (descontinuado == true) { return QBrush(Qt::cyan); }
+    if (descontinuado) { return QBrush(Qt::cyan); }
 
     // verifica cada campo
     for (int column = 0, columns = columnCount(); column < columns; ++column) {
@@ -34,7 +34,7 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
 
     const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
 
-    if (descontinuado == true) { return QBrush(Qt::black); }
+    if (descontinuado) { return QBrush(Qt::black); }
 
     for (int column = 0, columns = columnCount(); column < columns; ++column) {
       if (proxyIndex.column() == column) {

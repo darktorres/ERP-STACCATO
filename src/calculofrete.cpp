@@ -19,7 +19,7 @@ CalculoFrete::CalculoFrete(QWidget *parent) : Dialog(parent), ui(new Ui::Calculo
 
 CalculoFrete::~CalculoFrete() { delete ui; }
 
-void CalculoFrete::setCliente(const QVariant idCliente) {
+void CalculoFrete::setCliente(const QVariant &idCliente) {
   ui->itemBoxCliente->setValue(idCliente);
   //  on_itemBoxCliente_textChanged("");
 }

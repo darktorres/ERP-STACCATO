@@ -187,9 +187,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
     }
   }
 
-  if (not modelVendaProduto.submitAll()) { return false; }
-
-  return true;
+  return modelVendaProduto.submitAll();
 }
 
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {

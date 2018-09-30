@@ -205,11 +205,7 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
   close();
 }
 
-bool InputDialogProduto::cadastrar() {
-  if (not modelPedidoFornecedor.submitAll()) { return false; }
-
-  return true;
-}
+bool InputDialogProduto::cadastrar() { return modelPedidoFornecedor.submitAll(); }
 
 void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }

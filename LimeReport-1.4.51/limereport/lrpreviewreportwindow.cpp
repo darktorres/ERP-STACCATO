@@ -97,21 +97,19 @@ void PreviewReportWindow::restoreSetting() {
   if (v.isValid()) {
     restoreGeometry(v.toByteArray());
   } else {
-    QDesktopWidget *desktop = QApplication::desktop();
+    QScreen *screen = QGuiApplication::screens().first();
 
-    int screenWidth = desktop->screenGeometry().width();
-    int screenHeight = desktop->screenGeometry().height();
+    int screenWidth = screen->availableGeometry().width();
+    int screenHeight = screen->availableGeometry().height();
 
-    int x = screenWidth * 0.1;
-    int y = screenHeight * 0.1;
+    int x = static_cast<int>(screenWidth * 0.1);
+    int y = static_cast<int>(screenHeight * 0.1);
 
-    resize(screenWidth * 0.8, screenHeight * 0.8);
+    resize(static_cast<int>(screenWidth * 0.8), static_cast<int>(screenHeight * 0.8));
     move(x, y);
   }
   v = settings()->value("State");
-  if (v.isValid()) {
-    restoreState(v.toByteArray());
-  }
+  if (v.isValid()) { restoreState(v.toByteArray()); }
   settings()->endGroup();
 }
 
@@ -175,9 +173,7 @@ void PreviewReportWindow::setReportReader(ItemsReaderIntf::Ptr /*reader*/) {
 
 void PreviewReportWindow::setPages(ReportPages pages) {
   m_previewReportWidget->d_ptr->setPages(pages);
-  if (!pages.isEmpty()) {
-    initPreview(pages.count());
-  }
+  if (!pages.isEmpty()) { initPreview(pages.count()); }
 }
 
 void PreviewReportWindow::exec() {
@@ -201,9 +197,7 @@ void PreviewReportWindow::closeEvent(QCloseEvent *) {
 
 void PreviewReportWindow::resizeEvent(QResizeEvent *e) {
 #ifdef Q_OS_UNIX
-  if (e->oldSize() != e->size()) {
-    writeSetting();
-  }
+  if (e->oldSize() != e->size()) { writeSetting(); }
 #else
   Q_UNUSED(e)
 #endif
@@ -211,9 +205,7 @@ void PreviewReportWindow::resizeEvent(QResizeEvent *e) {
 
 void PreviewReportWindow::moveEvent(QMoveEvent *e) {
 #ifdef Q_OS_UNIX
-  if (e->oldPos() != e->pos()) {
-    writeSetting();
-  }
+  if (e->oldPos() != e->pos()) { writeSetting(); }
 #else
   Q_UNUSED(e)
 #endif
@@ -268,9 +260,7 @@ void PreviewReportWindow::slotSelectionChanged() {
 ItemsReaderIntf *PreviewReportWindow::reader() { return m_reader.data(); }
 
 void PreviewReportWindow::initPercentCombobox() {
-  for (int i = 10; i < 310; i += 10) {
-    m_scalePercent->addItem(QString("%1%").arg(i));
-  }
+  for (int i = 10; i < 310; i += 10) { m_scalePercent->addItem(QString("%1%").arg(i)); }
   m_scalePercent->setCurrentIndex(4);
 }
 

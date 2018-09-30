@@ -131,7 +131,7 @@ void WidgetCompraGerar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
-  if (selection.size() > 0) { ui->tableResumo->selectRow(selection.first().row()); }
+  if (not selection.isEmpty()) { ui->tableResumo->selectRow(selection.first().row()); }
 
   ui->tableResumo->resizeColumnsToContents();
 
@@ -186,9 +186,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
     }
   }
 
-  if (not modelProdutos.submitAll()) { return false; }
-
-  return true;
+  return modelProdutos.submitAll();
 }
 
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
@@ -459,9 +457,7 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
     }
   }
 
-  if (not modelProdutos.submitAll()) { return false; }
-
-  return true;
+  return modelProdutos.submitAll();
 }
 
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {

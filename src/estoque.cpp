@@ -370,9 +370,7 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
     if (not modelCompra.setData(0, "idVendaProduto", idVendaProduto)) { return false; }
   }
 
-  if (not modelCompra.submitAll()) { return false; }
-
-  return true;
+  return modelCompra.submitAll();
 }
 
 void Estoque::on_tableEstoque_entered(const QModelIndex) { ui->tableEstoque->resizeColumnsToContents(); }

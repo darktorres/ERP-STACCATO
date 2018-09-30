@@ -1,7 +1,7 @@
 #include "xml.h"
 #include "application.h"
 
-XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) {
+XML::XML(QByteArray fileContent, QString fileName) : fileContent(std::move(fileContent)), fileName(std::move(fileName)) {
   connect(this, &XML::informationSignal, qApp, &Application::enqueueInformation);
   connect(this, &XML::warningSignal, qApp, &Application::enqueueWarning);
   connect(this, &XML::errorSignal, qApp, &Application::enqueueError);

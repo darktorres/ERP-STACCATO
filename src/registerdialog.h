@@ -11,7 +11,7 @@ class RegisterDialog : public Dialog {
   Q_OBJECT
 
 public:
-  explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
+  explicit RegisterDialog(const QString &table, QString primaryKey, QWidget *parent);
   ~RegisterDialog() override = default;
 
   auto marcarDirty() -> void;

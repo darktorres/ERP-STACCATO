@@ -37,8 +37,9 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   }
 
   const QString un = query.value("un").toString();
+  const QString un2 = un == "M2" or un == "M²" or un == "ML" ? "m2cx" : "pccx";
 
-  ui->doubleSpinBoxQuantAvulso->setSingleStep(query.value(un == "M2" or un == "M²" or un == "ML" ? "m2cx" : "pccx").toDouble());
+  ui->doubleSpinBoxQuantAvulso->setSingleStep(query.value(un2).toDouble());
 
   ui->doubleSpinBoxQuantAvulso->setValue(0);
   ui->doubleSpinBoxQuantAvulsoCaixas->setValue(0);

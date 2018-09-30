@@ -353,9 +353,7 @@ bool CadastroCliente::cadastrar() {
     }
   }
 
-  if (not modelEnd.submitAll()) { return false; }
-
-  return true;
+  return modelEnd.submitAll();
 }
 
 void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {

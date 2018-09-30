@@ -51,13 +51,8 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
 CadastroProduto::~CadastroProduto() { delete ui; }
 
-bool CadastroProduto::viewRegister() {
-  if (not RegisterDialog::viewRegister()) { return false; }
-
-  // TODO: implement necessary stuff here
-
-  return true;
-}
+// TODO: implement necessary stuff here
+bool CadastroProduto::viewRegister() { return RegisterDialog::viewRegister(); }
 
 void CadastroProduto::clearFields() {
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { line->clear(); }

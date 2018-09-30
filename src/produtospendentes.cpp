@@ -153,9 +153,7 @@ bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
     if (not enviarExcedenteParaCompra(row, dataPrevista)) { return false; }
   }
 
-  if (not modelProdutos.submitAll()) { return false; }
-
-  return true;
+  return modelProdutos.submitAll();
 }
 
 void ProdutosPendentes::recarregarTabelas() {
@@ -399,11 +397,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   return true;
 }
 
-bool ProdutosPendentes::atualizarVenda(const int row) {
-  if (not modelProdutos.setData(row, "status", "INICIADO")) { return false; }
-
-  return true;
-}
+bool ProdutosPendentes::atualizarVenda(const int row) { return modelProdutos.setData(row, "status", "INICIADO"); }
 
 bool ProdutosPendentes::quebrarVenda(const double quantConsumir, const double quantVenda, const int rowProduto) {
   // NOTE: quebrar linha de cima em dois para poder comprar a outra parte?

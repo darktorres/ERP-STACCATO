@@ -12,7 +12,7 @@
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : Dialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime dataReal, QWidget *parent) : Dialog(parent), dataReal(std::move(dataReal)), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
@@ -435,9 +435,7 @@ bool ImportarXML::limparAssociacoes() {
     if (not modelConsumo.removeRow(0)) { return false; }
   }
 
-  if (not modelConsumo.submitAll()) { return false; }
-
-  return true;
+  return modelConsumo.submitAll();
 }
 
 void ImportarXML::on_pushButtonProcurar_clicked() {
@@ -558,9 +556,7 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
     if (not modelEstoque_compra.setData(rowEstoque_compra, "idCompra", idCompra)) { return false; }
   }
 
-  if (not criarConsumo(rowCompra, rowEstoque)) { return false; }
-
-  return true;
+  return criarConsumo(rowCompra, rowEstoque);
 }
 
 bool ImportarXML::verificaCNPJ(const XML &xml) {
@@ -600,7 +596,7 @@ bool ImportarXML::verificaExiste(const XML &xml) {
 
   const auto list = modelNFe.match("chaveAcesso", xml.chaveAcesso);
 
-  if (list.size() > 0) {
+  if (not list.isEmpty()) {
     emit errorSignal("Nota já cadastrada!");
     return true;
   }

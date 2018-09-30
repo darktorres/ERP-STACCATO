@@ -364,9 +364,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
     }
   }
 
-  if (not modelTranspAtual.submitAll()) { return false; }
-
-  return true;
+  return modelTranspAtual.submitAll();
 }
 
 bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list) {
@@ -429,7 +427,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   for (const auto &item : list) {
     const auto listMatch = modelTranspAtual.match("idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"), Qt::MatchExactly);
 
-    if (listMatch.size() > 0) {
+    if (not listMatch.isEmpty()) {
       emit errorSignal("Item já inserido!");
       return;
     }
@@ -541,7 +539,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   const auto list2 = modelTranspAtual.match("idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"), -1, Qt::MatchExactly);
 
-  if (list2.size() > 0) {
+  if (not list2.isEmpty()) {
     emit errorSignal("Item já inserido!");
     return;
   }

@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "smtp.h"
 
-Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
+Smtp::Smtp(QString user, QString pass, QString host, const quint16 port, const int timeout) : timeout(timeout), host(std::move(host)), pass(std::move(pass)), user(std::move(user)), port(port) {
   socket = new QSslSocket(this);
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
@@ -242,7 +242,7 @@ void Smtp::readyRead() {
     rcpt.removeFirst();
     t->flush();
     //    qDebug() << "size: " << rcpt.size();
-    state = rcpt.size() > 0 ? States::Rcpt : States::Data;
+    state = not rcpt.isEmpty() ? States::Rcpt : States::Data;
   } else if (state == States::Data and responseLine == "250") {
 
     *t << "DATA\r\n";

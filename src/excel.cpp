@@ -10,7 +10,7 @@
 #include "excel.h"
 #include "usersession.h"
 
-Excel::Excel(const QString &id, QWidget *parent) : id(id), parent(parent) {
+Excel::Excel(QString id, QWidget *parent) : id(std::move(id)), parent(parent) {
   connect(this, &Excel::informationSignal, qApp, &Application::enqueueInformation);
   connect(this, &Excel::warningSignal, qApp, &Application::enqueueWarning);
   connect(this, &Excel::errorSignal, qApp, &Application::enqueueError);

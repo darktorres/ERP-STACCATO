@@ -82,9 +82,7 @@ Format Styles::dxfFormat(int idx) const {
 void Styles::fixNumFmt(const Format &format) {
   if (not format.hasNumFmtData()) return;
 
-  if (format.hasProperty(FormatPrivate::P_NumFmt_Id) and not format.stringProperty(FormatPrivate::P_NumFmt_FormatCode).isEmpty()) {
-    return;
-  }
+  if (format.hasProperty(FormatPrivate::P_NumFmt_Id) and not format.stringProperty(FormatPrivate::P_NumFmt_FormatCode).isEmpty()) { return; }
 
   if (m_builtinNumFmtsHash.isEmpty()) {
     m_builtinNumFmtsHash.insert(QStringLiteral("General"), 0);
@@ -1182,9 +1180,7 @@ bool Styles::loadFromXmlFile(QIODevice *device) {
       }
     }
 
-    if (reader.hasError()) {
-      qDebug() << "Error when read style file: " << reader.errorString();
-    }
+    if (reader.hasError()) { qDebug() << "Error when read style file: " << reader.errorString(); }
   }
   return true;
 }

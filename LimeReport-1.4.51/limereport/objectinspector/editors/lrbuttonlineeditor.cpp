@@ -36,6 +36,7 @@
 #include <QFocusEvent>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QScreen>
 #include <QStyle>
 
 namespace LimeReport {
@@ -64,7 +65,7 @@ ButtonLineEditor::~ButtonLineEditor() {}
 void ButtonLineEditor::editButtonClicked() {
   TextItemPropertyEditor *editor = new TextItemPropertyEditor(QApplication::activeWindow());
   editor->setAttribute(Qt::WA_DeleteOnClose);
-  editor->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, editor->size(), QApplication::desktop()->availableGeometry()));
+  editor->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, editor->size(), QGuiApplication::screens().first()->availableGeometry()));
   editor->setWindowTitle(m_propertyName);
   editor->setText(m_lineEdit->text());
   connect(editor, SIGNAL(accepted()), this, SLOT(editingByEditorFinished()));

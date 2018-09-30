@@ -407,10 +407,6 @@ color: rgb(0, 0, 0);</string>
             <property name="accessibleName">
              <string>Nome Fantasia</string>
             </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
            </widget>
           </item>
           <item row="0" column="5">
@@ -461,10 +457,6 @@ color: rgb(0, 0, 0);</string>
             <property name="accessibleName">
              <string>CNPJ</string>
             </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-            </property>
            </widget>
           </item>
           <item row="1" column="3" colspan="2">
@@ -483,10 +475,6 @@ color: rgb(0, 0, 0);</string>
             </property>
             <property name="accessibleName">
              <string>Insc. Estadual</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
             </property>
            </widget>
           </item>
@@ -513,10 +501,6 @@ color: rgb(0, 0, 0);</string>
             </property>
             <property name="accessibleName">
              <string>Telefone</string>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
             </property>
            </widget>
           </item>

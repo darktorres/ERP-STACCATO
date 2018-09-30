@@ -330,6 +330,7 @@ bool Devolucao::inserirItens(const int currentRow) {
     if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
     if (modelProdutos.fieldIndex("created") == column) { continue; }
     if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
+    if (modelProdutos.fieldIndex("idNFeSaida") == column) { continue; }
 
     if (not modelDevolvidos.setData(rowDevolucao, column, modelProdutos.data(currentRow, column))) { return false; }
   }

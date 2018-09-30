@@ -134,6 +134,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
 
   // voltar compra para faturamento
   QSqlQuery query3;
+  // FIXME: restringir seleção para pegar apenas as linhas daquela NFe
   query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
                  "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
                  "FROM estoque_has_nfe WHERE idNFe = :idNFe))");

@@ -336,9 +336,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     }
   }
 
-  if (not modelTranspAtual.submitAll()) { return false; }
-
-  return true;
+  return modelTranspAtual.submitAll();
 }
 
 void WidgetLogisticaAgendarColeta::on_tableEstoque_entered(const QModelIndex &) { ui->tableEstoque->resizeColumnsToContents(); }

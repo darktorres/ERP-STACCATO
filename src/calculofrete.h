@@ -15,7 +15,7 @@ class CalculoFrete : public Dialog {
 public:
   explicit CalculoFrete(QWidget *parent = nullptr);
   ~CalculoFrete();
-  auto setCliente(const QVariant idCliente) -> void;
+  auto setCliente(const QVariant &idCliente) -> void;
   auto getDistancia() -> double;
 
 private:

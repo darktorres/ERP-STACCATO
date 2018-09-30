@@ -491,9 +491,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   choice == QMessageBox::Yes ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, unCaixa) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, unCaixa);
 
-  if (not modelVendaProduto.submitAll()) { return false; }
-
-  return true;
+  return modelVendaProduto.submitAll();
 }
 
 bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
@@ -570,9 +568,8 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
 
   // REFAC: this blocks the transaction
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");
-  if (not modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs)) { return false; }
 
-  return true;
+  return modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
 }
 
 bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int caixas, const double caixasDefeito, const double unCaixa) {

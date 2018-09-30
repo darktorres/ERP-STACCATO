@@ -278,9 +278,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaPagar.setData(rowPagar2, "subGrupo", "IOF")) { return false; }
   }
 
-  if (not modelContaPagar.submitAll()) { return false; }
-
-  return true;
+  return modelContaPagar.submitAll();
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {

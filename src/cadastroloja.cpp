@@ -400,9 +400,7 @@ bool CadastroLoja::viewRegister() {
 
   modelAssocia2.setFilter("idLoja = " + data("idLoja").toString());
 
-  if (not modelAssocia2.select()) { return false; }
-
-  return true;
+  return modelAssocia2.select();
 }
 
 void CadastroLoja::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
@@ -461,11 +459,7 @@ bool CadastroLoja::cadastrar() {
     if (not modelConta.setData(row, primaryKey, primaryId)) { return false; }
   }
 
-  if (not modelConta.submitAll()) { return false; }
-
-  // -------------------------------------------------------------------------
-
-  return true;
+  return modelConta.submitAll();
 }
 
 void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
@@ -479,9 +473,7 @@ bool CadastroLoja::newRegister() {
 
   modelConta.setFilter("0");
 
-  if (not modelConta.select()) { return false; }
-
-  return true;
+  return modelConta.select();
 }
 
 bool CadastroLoja::cadastrarConta(const bool isUpdate) {
@@ -589,9 +581,7 @@ bool CadastroLoja::adicionarPagamento() {
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  if (not modelTaxas.select()) { return false; }
-
-  return true;
+  return modelTaxas.select();
 }
 
 void CadastroLoja::on_pushButtonAdicionarPagamento_clicked() {

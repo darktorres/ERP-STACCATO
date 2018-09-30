@@ -8,7 +8,7 @@ class XML final : public QObject {
   Q_OBJECT
 
 public:
-  XML(const QByteArray &fileContent, const QString &fileName = QString());
+  XML(QByteArray fileContent, QString fileName = QString());
   auto montarArvore(QStandardItemModel &model) -> void;
   auto lerValores(const QStandardItem *item) -> void;
 

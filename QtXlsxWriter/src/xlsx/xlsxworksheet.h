@@ -149,7 +149,7 @@ public:
   bool isWhiteSpaceVisible() const;
   void setWhiteSpaceVisible(bool visible);
 
-  ~Worksheet();
+  ~Worksheet() = default;
 
 private:
   friend class DocumentPrivate;

@@ -126,7 +126,7 @@ public:
   void validateDimension();
 
   void saveXmlSheetData(QXmlStreamWriter &writer) const;
-  void saveXmlCellData(QXmlStreamWriter &writer, int row, int col, QSharedPointer<Cell> cell) const;
+  void saveXmlCellData(QXmlStreamWriter &writer, int row, int col, const QSharedPointer<Cell> &cell) const;
   void saveXmlMergeCells(QXmlStreamWriter &writer) const;
   void saveXmlHyperlinks(QXmlStreamWriter &writer) const;
   void saveXmlDrawings(QXmlStreamWriter &writer) const;

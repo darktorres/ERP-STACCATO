@@ -18,7 +18,7 @@ class ImportarXML final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent = nullptr);
+  explicit ImportarXML(const QStringList &idsCompra, const QDateTime dataReal, QWidget *parent = nullptr);
   ~ImportarXML();
 
 private:

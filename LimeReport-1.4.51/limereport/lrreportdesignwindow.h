@@ -208,9 +208,6 @@ private:
   QAction *m_hideRightPanel;
   QMenu *m_recentFilesMenu;
 
-  QSignalMapper *m_bandsAddSignalsMap;
-  QSignalMapper *m_recentFilesSignalMap;
-
   ObjectInspectorWidget *m_objectInspector;
   QObjectPropertyModel *m_propertyModel;
 

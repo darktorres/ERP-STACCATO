@@ -307,7 +307,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     QFile fileXml(xmlFolder + "/" + chaveAcesso + ".xml");
 
-    qDebug() << "xml: " << xmlFolder + "/" + chaveAcesso + ".xml";
+    qDebug() << "xml: " + xmlFolder + "/" + chaveAcesso + ".xml";
 
     if (not fileXml.open(QFile::WriteOnly)) {
       emit errorSignal("Erro abrindo arquivo para escrita xml: " + fileXml.errorString());

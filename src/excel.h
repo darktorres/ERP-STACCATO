@@ -10,7 +10,7 @@ class Excel final : public QObject {
   Q_OBJECT
 
 public:
-  Excel(const QString &id, QWidget *parent = nullptr);
+  Excel(QString id, QWidget *parent = nullptr);
   auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> bool;
   auto getFileName() const -> QString;
 

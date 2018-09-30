@@ -107,9 +107,10 @@ void WidgetEstoque::montaFiltro() {
 
   const QString match1 = text.isEmpty() ? "" : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  const QString match2 = text.isEmpty() ? ""
-                                        : "(MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
-                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  // TODO: remove
+  //  const QString match2 = text.isEmpty() ? ""
+  //                                        : "(MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
+  //                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
   const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "consumo <= 0" : "consumo > 0";
 

@@ -133,7 +133,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   // TODO: 0quando a sigla CAMB pular
 
-  const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER" ? true : false;
+  const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {
     emit transactionStarted();

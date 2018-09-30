@@ -431,9 +431,7 @@ bool CadastroTransportadora::cadastrar() {
     }
   }
 
-  if (not modelVeiculo.submitAll()) { return false; }
-
-  return true;
+  return modelVeiculo.submitAll();
 }
 
 void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool checked) {

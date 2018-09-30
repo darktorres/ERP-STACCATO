@@ -204,11 +204,6 @@ Worksheet *Worksheet::copy(const QString &distName, int distId) const {
 }
 
 /*!
- * Destroys this workssheet.
- */
-Worksheet::~Worksheet() {}
-
-/*!
  * Returns whether sheet is protected.
  */
 Worksheet::Orientation Worksheet::orientation() const {
@@ -1191,7 +1186,7 @@ void WorksheetPrivate::saveXmlSheetData(QXmlStreamWriter &writer) const {
   }
 }
 
-void WorksheetPrivate::saveXmlCellData(QXmlStreamWriter &writer, int row, int col, QSharedPointer<Cell> cell) const {
+void WorksheetPrivate::saveXmlCellData(QXmlStreamWriter &writer, int row, int col, const QSharedPointer<Cell> &cell) const {
   // This is the innermost loop so efficiency is important.
   QString cell_pos = CellReference(row, col).toString();
 
@@ -2107,7 +2102,7 @@ void WorksheetPrivate::validateDimension() {
   int firstColumn = -1;
   int lastColumn = -1;
 
-  for (QMap<int, QMap<int, QSharedPointer<Cell>>>::const_iterator it = cellTable.begin(); it != cellTable.end(); ++it) {
+  for (QMap<int, QMap<int, QSharedPointer<Cell>>>::const_iterator it = cellTable.cbegin(); it != cellTable.cend(); ++it) {
     Q_ASSERT(not it.value().isEmpty());
 
     if (firstColumn == -1 or it.value().constBegin().key() < firstColumn) firstColumn = it.value().constBegin().key();

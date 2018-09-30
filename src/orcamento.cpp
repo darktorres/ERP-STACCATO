@@ -560,9 +560,7 @@ bool Orcamento::savingProcedures() {
     if (not modelItem.setData(row, "descUnitario", prcUnitario - (prcUnitario * desconto))) { return false; }
   }
 
-  if (not atualizaReplica()) { return false; }
-
-  return true;
+  return atualizaReplica();
 }
 
 bool Orcamento::atualizaReplica() {
@@ -974,9 +972,7 @@ bool Orcamento::cadastrar() {
     return false;
   }
 
-  if (not modelItem.submitAll()) { return false; }
-
-  return true;
+  return modelItem.submitAll();
 }
 
 bool Orcamento::verificaCadastroCliente() {

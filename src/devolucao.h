@@ -14,7 +14,7 @@ class Devolucao final : public Dialog {
   Q_OBJECT
 
 public:
-  explicit Devolucao(const QString &idVenda, QWidget *parent = nullptr);
+  explicit Devolucao(QString idVenda, QWidget *parent = nullptr);
   ~Devolucao();
 
 private:

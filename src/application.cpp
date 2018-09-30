@@ -234,7 +234,7 @@ void Application::setInTransaction(const bool value) { inTransaction = value; }
 void Application::setUpdating(const bool value) {
   updating = value;
 
-  if (value == false) { showMessages(); }
+  if (not value) { showMessages(); }
 }
 
 bool Application::getUpdating() const { return updating; }

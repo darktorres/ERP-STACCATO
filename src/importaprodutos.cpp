@@ -54,7 +54,6 @@ void ImportaProdutos::importarProduto() {
 
 void ImportaProdutos::importarEstoque() {
   emit errorSignal("Temporariamente desativado!");
-  return;
 
   // NOTE: ao inves de cadastrar uma tabela de estoque, quando o estoque for gerado (importacao de xml) criar uma linha
   // correspondente na tabela produto com flag estoque, esse produto vai ser listado junto dos outros porem com cor
@@ -101,7 +100,7 @@ bool ImportaProdutos::verificaSeRepresentacao() {
 bool ImportaProdutos::atualizaProduto() {
   row = hash.value(variantMap.value("fornecedor").toString() + variantMap.value("codComercial").toString() + variantMap.value("ui").toString() + QString::number(static_cast<int>(tipo)));
 
-  if (hashAtualizado.value(row) == true) {
+  if (hashAtualizado.value(row)) {
     variantMap.insert("colecao", "REPETIDO");
     return insereEmErro();
   }

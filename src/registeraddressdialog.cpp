@@ -46,9 +46,7 @@ bool RegisterAddressDialog::newRegister() {
 
   modelEnd.setFilter("0");
 
-  if (not modelEnd.select()) { return false; }
-
-  return true;
+  return modelEnd.select();
 }
 
 int RegisterAddressDialog::getCodigoUF(QString uf) const {
@@ -90,7 +88,5 @@ bool RegisterAddressDialog::viewRegisterById(const QVariant &id) {
 
   modelEnd.setFilter(primaryKey + " = " + data(primaryKey).toString() + " AND desativado = FALSE");
 
-  if (not modelEnd.select()) { return false; }
-
-  return true;
+  return modelEnd.select();
 }

@@ -4,10 +4,11 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "ui_widgetlogisticacalendario.h"
 #include "widgetlogisticacalendario.h"
 
-WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
+WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
 
 WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 
@@ -22,8 +23,7 @@ void WidgetLogisticaCalendario::listarVeiculos() {
   QSqlQuery query;
 
   if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
-    emit errorSignal("Erro buscando veiculos: " + query.lastError().text());
-    return;
+    return qApp->enqueueError("Erro buscando veiculos: " + query.lastError().text());
   }
 
   while (query.next()) {
@@ -98,10 +98,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
 
-  if (not query.exec()) {
-    emit errorSignal("Erro query: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro query: " + query.lastError().text()); }
 
   while (query.next()) {
     const QString transportadora = query.value("razaoSocial").toString() + "\n" + query.value("modelo").toString();

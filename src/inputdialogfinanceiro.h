@@ -1,14 +1,15 @@
 #ifndef INPUTDIALOGFINANCEIRO_H
 #define INPUTDIALOGFINANCEIRO_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogFinanceiro;
 }
 
-class InputDialogFinanceiro final : public Dialog {
+class InputDialogFinanceiro final : public QDialog {
   Q_OBJECT
 
 public:

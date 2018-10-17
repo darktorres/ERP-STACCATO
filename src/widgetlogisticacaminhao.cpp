@@ -6,7 +6,7 @@
 #include "ui_widgetlogisticacaminhao.h"
 #include "widgetlogisticacaminhao.h"
 
-WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
+WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
 
 WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }
 
@@ -59,7 +59,7 @@ void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }
 void WidgetLogisticaCaminhao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
-  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
+  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString() + " ORDER BY data DESC");
 
   if (not modelCarga.select()) { return; }
 }

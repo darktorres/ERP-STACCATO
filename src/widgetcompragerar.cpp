@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "excel.h"
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
@@ -16,7 +17,7 @@
 #include "widgetcompragerar.h"
 #include "xlsxdocument.h"
 
-WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraGerar) {
+WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);
 
   ui->splitter->setStretchFactor(0, 0);
@@ -38,13 +39,9 @@ void WidgetCompraGerar::calcularPreco() {
 void WidgetCompraGerar::setupTables() {
   modelResumo.setTable("view_fornecedor_compra_gerar");
 
-  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
-
-  modelResumo.setHeaderData("fornecedor", "Fornecedor");
-  modelResumo.setHeaderData("COUNT(fornecedor)", "Itens");
-
   ui->tableResumo->setModel(&modelResumo);
-  ui->tableResumo->hideColumn("idVenda");
+
+  //---------------------------------------------------------------------------------------
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
   modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -109,7 +106,6 @@ void WidgetCompraGerar::setupTables() {
 
 void WidgetCompraGerar::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
-  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraGerar::on_checkBoxMostrarSul_toggled);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
   connect(ui->tableProdutos, &TableView::entered, this, &WidgetCompraGerar::on_tableProdutos_entered);
@@ -160,8 +156,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
     QSqlQuery queryId;
 
     if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
-      emit errorSignal("Erro buscando idCompra: " + queryId.lastError().text());
-      return false;
+      return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text());
     }
 
     const QString id = queryId.value("idCompra").toString();
@@ -179,10 +174,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &da
       queryVenda.bindValue(":dataPrevConf", dataPrevista);
       queryVenda.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-      if (not queryVenda.exec()) {
-        emit errorSignal("Erro atualizando status da venda: " + queryVenda.lastError().text());
-        return false;
-      }
+      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text()); }
     }
   }
 
@@ -194,17 +186,11 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
-  if (not folderKey or folderKey.value().toString().isEmpty()) {
-    emit errorSignal("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!");
-    return;
-  }
+  if (not folderKey) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!"); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   QList<int> lista;
   QStringList ids;
@@ -229,8 +215,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   QSqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
-    emit errorSignal("Erro buscando próximo O.C.!");
-    return;
+    return qApp->enqueueError("Erro buscando próximo O.C.!");
   }
 
   bool ok;
@@ -243,10 +228,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   while (true) {
     query2.bindValue(":ordemCompra", oc);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro buscando O.C.!");
-      return;
-    }
+    if (not query2.exec()) { return qApp->enqueueError("Erro buscando O.C.!"); }
 
     if (not query2.first()) { break; }
 
@@ -273,10 +255,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", modelProdutos.data(0, "fornecedor").toString());
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando dados do fornecedor: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text()); }
 
   QString anexo;
 
@@ -299,33 +278,21 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   // -------------------------------------------------------------------------
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not gerarCompra(lista, dataCompra, dataPrevista)) { return qApp->rollbackTransaction(); }
 
-  if (not gerarCompra(lista, dataCompra, dataPrevista)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Compra gerada com sucesso!");
+  qApp->enqueueInformation("Compra gerada com sucesso!");
 }
 
 bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, const bool isRepresentacao) {
   if (isRepresentacao) {
-    if (modelProdutos.data(lista.first(), "idVenda").toString().isEmpty()) {
-      emit errorSignal("'Venda' vazio!");
-      return false;
-    }
+    if (modelProdutos.data(lista.first(), "idVenda").toString().isEmpty()) { return qApp->enqueueError(false, "'Venda' vazio!"); }
 
     Excel excel(modelProdutos.data(lista.at(0), "idVenda").toString());
     const QString representacao = "OC " + QString::number(oc) + " " + modelProdutos.data(lista.first(), "idVenda").toString() + " " + modelProdutos.data(lista.first(), "fornecedor").toString();
@@ -341,14 +308,11 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) {
-    emit errorSignal("Não encontrou o modelo do Excel!");
-    return false;
-  }
+  if (not modelo.exists()) { return qApp->enqueueError(false, "Não encontrou o modelo do Excel!"); }
 
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
-  if (not folderKey or folderKey.value().toString().isEmpty()) { return false; }
+  if (not folderKey) { return false; }
 
   const QString fileName = folderKey.value().toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
@@ -356,11 +320,7 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) {
-    emit errorSignal("Não foi possível abrir o arquivo para escrita: " + fileName);
-    emit errorSignal("Erro: " + file.errorString());
-    return false;
-  }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
@@ -368,10 +328,7 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
   queryFornecedor.prepare("SELECT contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-  if (not queryFornecedor.exec()) {
-    emit errorSignal("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text());
-    return false;
-  }
+  if (not queryFornecedor.exec()) { return qApp->enqueueError(false, "Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text()); }
 
   QXlsx::Document xlsx(arquivoModelo);
 
@@ -415,13 +372,10 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
 
   for (int row = lista.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) {
-    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return false;
-  }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName);
 
   return true;
 }
@@ -430,10 +384,8 @@ void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { che
 
 void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
   const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
-  const bool checked = ui->checkBoxMostrarSul->isChecked();
 
-  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE' AND " +
-                          QString(checked ? "(idVenda LIKE 'CAMB%' OR idVenda IS NULL)" : "(idVenda NOT LIKE 'CAMB%' OR idVenda IS NULL)"));
+  modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
 
   if (not modelProdutos.select()) { return; }
 
@@ -451,10 +403,7 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
 
     query.bindValue(":idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"));
 
-    if (not query.exec()) {
-      emit errorSignal("Erro voltando status do produto: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query.lastError().text()); }
   }
 
   return modelProdutos.submitAll();
@@ -463,10 +412,7 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   QStringList idVendas;
 
@@ -478,36 +424,20 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not cancelar(list)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Itens cancelados!");
+  qApp->enqueueInformation("Itens cancelados!");
 }
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes
 // TODO: 5colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas
-
-void WidgetCompraGerar::on_checkBoxMostrarSul_toggled(bool checked) {
-  modelResumo.setFilter(checked ? "(idVenda LIKE '%CAMB%')" : "(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
-
-  if (not modelResumo.select()) { return; }
-}
-
 // TODO: avulso
 // TODO: no caso da quartzobras se for mais de um pedido deixar o campo 'PEDIDO DE VENDA NR.' vazio
 // TODO: no caso da quartzobras ordenar por cod. produto em vez de por pedido

@@ -1,14 +1,15 @@
 #ifndef FOLLOWUP_H
 #define FOLLOWUP_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class FollowUp;
 }
 
-class FollowUp final : public Dialog {
+class FollowUp final : public QDialog {
   Q_OBJECT
 
 public:

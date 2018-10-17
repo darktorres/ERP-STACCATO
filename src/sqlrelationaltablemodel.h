@@ -18,9 +18,6 @@ public:
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto supportedDropActions() const -> Qt::DropActions final;
 
-signals:
-  void errorSignal(const QString &error) const;
-
 private:
   using QSqlRelationalTableModel::data;
   using QSqlRelationalTableModel::match;

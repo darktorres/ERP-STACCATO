@@ -1,14 +1,15 @@
 #ifndef WIDGETNFESAIDA_H
 #define WIDGETNFESAIDA_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetNfeSaida;
 }
 
-class WidgetNfeSaida final : public Widget {
+class WidgetNfeSaida final : public QWidget {
   Q_OBJECT
 
 public:

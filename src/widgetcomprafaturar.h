@@ -1,14 +1,15 @@
 #ifndef WIDGETCOMPRAFATURAR_H
 #define WIDGETCOMPRAFATURAR_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetCompraFaturar;
 }
 
-class WidgetCompraFaturar final : public Widget {
+class WidgetCompraFaturar final : public QWidget {
   Q_OBJECT
 
 public:

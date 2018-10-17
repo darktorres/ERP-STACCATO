@@ -7,7 +7,7 @@
 #include "reaisdelegate.h"
 #include "ui_pagamentosdia.h"
 
-PagamentosDia::PagamentosDia(QWidget *parent) : Dialog(parent), ui(new Ui::PagamentosDia) {
+PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::PagamentosDia) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);

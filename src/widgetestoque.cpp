@@ -7,6 +7,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "importarxml.h"
@@ -15,7 +16,11 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : Widget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
+WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
+  ui->setupUi(this);
+  // FIXME: fix query
+  //  ui->pushButtonRelatorio->setDisabled(true);
+}
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
@@ -79,10 +84,7 @@ void WidgetEstoque::updateTables() {
 
   model.setQuery(model.query().executedQuery());
 
-  if (model.lastError().isValid()) {
-    emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text());
-    return;
-  }
+  if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
 
   ui->table->resizeColumnsToContents();
 }
@@ -114,21 +116,22 @@ void WidgetEstoque::montaFiltro() {
 
   const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "consumo <= 0" : "consumo > 0";
 
-  model.setQuery("SELECT group_concat(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, e.idEstoque, pf.fornecedor, e.descricao, e.consumo AS restante, e.un AS `unEst`, "
-                 "if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
-                 "(consumo / `p`.`m2cx`), (consumo / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, group_concat(DISTINCT `n`.`numeroNFe` "
-                 "SEPARATOR ', ') AS `nfe`, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, "
-                 "e.descricao, e.codComercial, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS consumo FROM estoque e LEFT JOIN "
-                 "estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status != 'CANCELADO' AND e.status != 'QUEBRADO' " +
-                 match1 + " GROUP BY e.idEstoque HAVING " + restante +
-                 ") e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial "
-                 "LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque");
+  model.setQuery(
+      "SELECT `n`.`cnpjDest` AS `cnpjDest`, e.status, e.idEstoque, pf.fornecedor, e.descricao, e.consumo AS restante, e.un AS `unEst`, "
+      "if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
+      "(consumo / `p`.`m2cx`), (consumo / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, `n`.`numeroNFe` AS `nfe`, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, "
+      "pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + "
+      "coalesce(sum(consumo.quant), 0) AS consumo FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status != 'CANCELADO' AND e.status != 'QUEBRADO' " +
+      match1 + " GROUP BY e.idEstoque HAVING " + restante +
+      ") e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial "
+      "LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque , n.cnpjDest , "
+      "pf.fornecedor , pf.idCompra , pf.dataPrevColeta , pf.dataRealColeta , pf.dataPrevReceb , pf.dataRealReceb , n.numeroNFe");
 
   //  model.setQuery(view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante);
 
   //  qDebug() << "query: " << view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante;
 
-  if (model.lastError().isValid()) { emit errorSignal("Erro lendo tabela estoque: " + model.lastError().text()); }
+  if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
@@ -153,7 +156,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' "
       "AND e.created < '" +
       data +
-      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, sum(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, vp.dataRealEnt FROM "
+      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, vp.dataRealEnt FROM "
       "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
       data +
       "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
@@ -161,10 +164,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto "
       " GROUP BY e.idEstoque HAVING contabil > 0");
 
-  if (modelContabil.lastError().isValid()) {
-    emit errorSignal("Erro lendo tabela: " + modelContabil.lastError().text());
-    return;
-  }
+  if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text()); }
 
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
 
@@ -174,27 +174,20 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) {
-    emit errorSignal("Não encontrou o modelo do Excel!");
-    return;
-  }
+  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!"); }
 
   const QString fileName = dir + "/relatorio_contabil.xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) {
-    emit errorSignal("Não foi possível abrir o arquivo para escrita: " + fileName);
-    emit errorSignal("Erro: " + file.errorString());
-    return;
-  }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
   if (not gerarExcel(arquivoModelo, fileName, modelContabil)) { return; }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName);
 }
 
 bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) {
@@ -214,10 +207,7 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) {
-    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return false;
-  }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
 
   return true;
 }

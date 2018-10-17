@@ -6,6 +6,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "inputdialog.h"
@@ -15,7 +16,7 @@
 #include "sql.h"
 #include "ui_produtospendentes.h"
 
-ProdutosPendentes::ProdutosPendentes(QWidget *parent) : Dialog(parent), ui(new Ui::ProdutosPendentes) {
+ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -69,10 +70,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   query.prepare("SELECT unCaixa FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
   query.bindValue(":idVendaProduto", modelViewProdutos.data(0, "idVendaProduto"));
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando unCaixa: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando unCaixa: " + query.lastError().text()); }
 
   const double step = query.value("unCaixa").toDouble();
 
@@ -91,10 +89,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
                         "`venda_has_produto` `vp` ON `ec`.`idVendaProduto` = `vp`.`idVendaProduto` WHERE ((`e`.`status` <> 'CANCELADO') AND (`e`.`status` <> 'QUEBRADO')) AND p.fornecedor = '" +
                         fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
-  if (modelEstoque.lastError().isValid()) {
-    emit errorSignal("Erro lendo tabela estoque: " + modelEstoque.lastError().text());
-    return;
-  }
+  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + modelEstoque.lastError().text()); }
 
   modelEstoque.setHeaderData("status", "Status");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
@@ -162,10 +157,7 @@ void ProdutosPendentes::recarregarTabelas() {
 
   modelEstoque.setQuery(modelEstoque.query().executedQuery());
 
-  if (modelEstoque.lastError().isValid()) {
-    emit errorSignal("Erro recarregando modelEstoque: " + modelEstoque.lastError().text());
-    return;
-  }
+  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro recarregando modelEstoque: " + modelEstoque.lastError().text()); }
 
   double quant = 0;
 
@@ -184,34 +176,22 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   if (list.isEmpty() and modelViewProdutos.rowCount() == 1) { list << modelViewProdutos.index(0, 0); }
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum produto selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!"); }
 
   const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not comprar(list, inputDlg.getNextDate())) { return qApp->rollbackTransaction(); }
 
-  if (not comprar(list, inputDlg.getNextDate())) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
 
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
+  if (not qApp->endTransaction()) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
-
-  emit informationSignal("Produto enviado para carrinho!");
+  qApp->enqueueInformation("Produto enviado para carrinho!");
 
   recarregarTabelas();
 }
@@ -239,10 +219,7 @@ bool ProdutosPendentes::insere(const QDateTime &dataPrevista) {
   query.bindValue(":codBarras", modelViewProdutos.data(0, "codBarras"));
   query.bindValue(":dataPrevCompra", dataPrevista);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
 
   return true;
 }
@@ -278,22 +255,13 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (listProduto.size() > 1) {
-    emit errorSignal("Selecione apenas um item na tabela de produtos!");
-    return;
-  }
+  if (listProduto.size() > 1) { return qApp->enqueueError("Selecione apenas um item na tabela de produtos!"); }
 
-  if (listProduto.isEmpty()) {
-    emit errorSignal("Nenhum produto selecionado!");
-    return;
-  }
+  if (listProduto.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!"); }
 
   const auto listEstoque = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if ((modelEstoque.rowCount() == 0 or modelEstoque.rowCount() > 1) and listEstoque.isEmpty()) {
-    emit errorSignal("Nenhum estoque selecionado!");
-    return;
-  }
+  if ((modelEstoque.rowCount() == 0 or modelEstoque.rowCount() > 1) and listEstoque.isEmpty()) { return qApp->enqueueError("Nenhum estoque selecionado!"); }
 
   const int rowProduto = listProduto.isEmpty() ? 0 : listProduto.first().row();
   const int rowEstoque = listEstoque.isEmpty() ? 0 : listEstoque.first().row();
@@ -307,24 +275,15 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) { return qApp->rollbackTransaction(); }
 
-  if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
 
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
+  if (not qApp->endTransaction()) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
-
-  emit informationSignal("Consumo criado com sucesso!");
+  qApp->enqueueInformation("Consumo criado com sucesso!");
 
   recarregarTabelas();
 }
@@ -354,10 +313,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
     query.bindValue(":dataPrevCompra", dataPrevista);
 
-    if (not query.exec()) {
-      emit errorSignal("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
   }
 
   return true;
@@ -389,10 +345,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
   query.bindValue(":dataPrevCompra", dataPrevista);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
 
   return true;
 }

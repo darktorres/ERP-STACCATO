@@ -1,14 +1,15 @@
 #ifndef WIDGETORCAMENTO_H
 #define WIDGETORCAMENTO_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetOrcamento;
 }
 
-class WidgetOrcamento final : public Widget {
+class WidgetOrcamento final : public QWidget {
   Q_OBJECT
 
 public:

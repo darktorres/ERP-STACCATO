@@ -1,10 +1,8 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QtMath>
 
+#include "application.h"
 #include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
 #include "contas.h"
@@ -16,7 +14,7 @@
 #include "reaisdelegate.h"
 #include "ui_contas.h"
 
-Contas::Contas(const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::Contas) {
+Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -42,23 +40,21 @@ void Contas::validarData(const QModelIndex &index) {
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) {
-      emit errorSignal("Erro buscando dataPagamento: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dataPagamento: " + query.lastError().text()); }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
     const QDate newDate = modelPendentes.data(index.row(), "dataPagamento").toDate();
 
     if (oldDate.isNull()) { return; }
 
+    // TODO: verificar se essa funcao nao precisa retornar um bool e porque ela nao retorna nos erros
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
-      emit errorSignal("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
+      qApp->enqueueError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!");
       if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) { return; }
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
-      emit errorSignal("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
+      qApp->enqueueError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!");
       if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) { return; }
     }
   }
@@ -70,16 +66,13 @@ void Contas::preencher(const QModelIndex &index) {
     query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", modelPendentes.data(index.row(), "idPagamento"));
 
-    if (not query.exec() or not query.first()) {
-      emit errorSignal("Erro buscando valor: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando valor: " + query.lastError().text()); }
 
     const double oldValor = query.value("valor").toDouble();
     const double newValor = modelPendentes.data(index.row(), "valor").toDouble();
 
     if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
-      emit errorSignal("Limite de alteração de valor excedido! Use a função de corrigir fluxo!");
+      qApp->enqueueError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!");
       if (not modelPendentes.setData(index.row(), "valor", oldValor)) { return; }
     }
   }
@@ -154,27 +147,20 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(this));
 
   if (tipo == Tipo::Receber) {
-    //    ui->tablePendentes->setItemDelegateForColumn("contraParte",
-    //                                                 new LineEditDelegate(LineEditDelegate::ContraParteReceber,
-    //                                                 this));
+    //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraParteReceber, this));
     ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("contaDestino",
-    //                                                 new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
+    //    ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
     //    ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-    //    ui->tablePendentes->setItemDelegateForColumn("centroCusto",
-    //                                                 new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
+    //    ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
     //    ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Grupo, this));
   }
 
   if (tipo == Tipo::Pagar) {
-    //    ui->tablePendentes->setItemDelegateForColumn("contraParte",
-    //                                                 new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
+    //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
     ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusPagar, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("contaDestino",
-    //                                                 new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
+    //    ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
     //    ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-    //    ui->tablePendentes->setItemDelegateForColumn("centroCusto",
-    //                                                 new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
+    //    ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
     //    ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Grupo, this));
   }
 
@@ -244,40 +230,13 @@ void Contas::setupTables() {
 bool Contas::verifyFields() {
   for (int row = 0; row < modelPendentes.rowCount(); ++row) {
     if ((tipo == Tipo::Pagar and modelPendentes.data(row, "status").toString() == "PAGO") or (tipo == Tipo::Receber and modelPendentes.data(row, "status").toString() == "RECEBIDO")) {
-      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) {
-        emit errorSignal("'Data Realizado' vazio!");
-        return false;
-      }
-
-      if (modelPendentes.data(row, "valorReal").toString().isEmpty()) {
-        emit errorSignal("'R$ Real' vazio!");
-        return false;
-      }
-
-      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) {
-        emit errorSignal("'Tipo Real' vazio!");
-        return false;
-      }
-
-      if (modelPendentes.data(row, "parcelaReal").toString().isEmpty()) {
-        emit errorSignal("'Parcela Real' vazio!");
-        return false;
-      }
-
-      if (modelPendentes.data(row, "contaDestino").toString().isEmpty()) {
-        emit errorSignal("'Conta Dest.' vazio!");
-        return false;
-      }
-
-      if (modelPendentes.data(row, "centroCusto").toString().isEmpty()) {
-        emit errorSignal("'Centro Custo' vazio!");
-        return false;
-      }
-
-      if (modelPendentes.data(row, "grupo").toString().isEmpty()) {
-        emit errorSignal("'Grupo' vazio!");
-        return false;
-      }
+      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!"); }
+      if (modelPendentes.data(row, "valorReal").toString().isEmpty()) { return qApp->enqueueError(false, "'R$ Real' vazio!"); }
+      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!"); }
+      if (modelPendentes.data(row, "parcelaReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Parcela Real' vazio!"); }
+      if (modelPendentes.data(row, "contaDestino").toString().isEmpty()) { return qApp->enqueueError(false, "'Conta Dest.' vazio!"); }
+      if (modelPendentes.data(row, "centroCusto").toString().isEmpty()) { return qApp->enqueueError(false, "'Centro Custo' vazio!"); }
+      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!"); }
     }
   }
 
@@ -298,10 +257,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) {
-      emit errorSignal("Erro buscando dados: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text()); }
 
     const QString idVenda = query.value("idVenda").toString();
 
@@ -340,10 +296,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
     query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN pedido_fornecedor_has_produto pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) {
-      emit errorSignal("Erro buscando dados: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text()); }
 
     const QString idCompra = query.value("idCompra").toString();
     const QString ordemCompra = query.value("ordemCompra").toString();

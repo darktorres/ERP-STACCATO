@@ -1,14 +1,15 @@
 #ifndef PAGAMENTOSDIA_H
 #define PAGAMENTOSDIA_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class PagamentosDia;
 }
 
-class PagamentosDia final : public Dialog {
+class PagamentosDia final : public QDialog {
   Q_OBJECT
 
 public:

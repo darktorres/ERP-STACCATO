@@ -1,13 +1,13 @@
 #ifndef USERCONFIG_H
 #define USERCONFIG_H
 
-#include "dialog.h"
+#include <QDialog>
 
 namespace Ui {
 class UserConfig;
 }
 
-class UserConfig final : public Dialog {
+class UserConfig final : public QDialog {
   Q_OBJECT
 
 public:

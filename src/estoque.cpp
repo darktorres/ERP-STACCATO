@@ -4,13 +4,14 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "estoqueproxymodel.h"
 #include "ui_estoque.h"
 #include "xml_viewer.h"
 
-Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : Dialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
+Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -146,10 +147,7 @@ void Estoque::calcularRestante() {
 }
 
 bool Estoque::viewRegisterById(const bool showWindow) {
-  if (idEstoque.isEmpty()) {
-    emit errorSignal("Estoque não encontrado!");
-    return false;
-  }
+  if (idEstoque.isEmpty()) { return qApp->enqueueError(false, "Estoque não encontrado!"); }
 
   modelEstoque.setFilter("idEstoque = " + idEstoque);
 
@@ -170,10 +168,7 @@ bool Estoque::viewRegisterById(const bool showWindow) {
                 "ehc.idCompra AND pf.codComercial = e.codComercial WHERE e.idEstoque = :idEstoque");
   query.bindValue(":idEstoque", idEstoque);
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando compra relacionada ao estoque: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando compra relacionada ao estoque: " + query.lastError().text()); }
 
   const QString idCompra = query.value("idCompra").toString();
   const QString codComercial = query.value("codComercial").toString();
@@ -196,15 +191,9 @@ void Estoque::exibirNota() {
   query.prepare("SELECT xml FROM estoque e LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = n.idNFe WHERE e.idEstoque = :idEstoque AND xml IS NOT NULL");
   query.bindValue(":idEstoque", modelEstoque.data(0, "idEstoque"));
 
-  if (not query.exec()) {
-    emit errorSignal("Erro buscando nfe: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro buscando nfe: " + query.lastError().text()); }
 
-  if (query.size() == 0) {
-    emit warningSignal("Não encontrou NFe associada!");
-    return;
-  }
+  if (query.size() == 0) { return qApp->enqueueWarning("Não encontrou NFe associada!"); }
 
   while (query.next()) {
     auto *viewer = new XML_Viewer(this);
@@ -217,10 +206,7 @@ bool Estoque::atualizaQuantEstoque() {
   query.prepare("UPDATE produto p, view_estoque2 v SET p.estoqueRestante = v.restante, descontinuado = IF(v.restante = 0, TRUE, FALSE) WHERE p.idEstoque = v.idEstoque AND v.idEstoque = :idEstoque");
   query.bindValue(":idEstoque", modelEstoque.data(0, "idEstoque"));
 
-  if (not query.exec()) {
-    emit errorSignal("Erro atualizando quant. estoque: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando quant. estoque: " + query.lastError().text()); }
 
   return true;
 }
@@ -228,15 +214,9 @@ bool Estoque::atualizaQuantEstoque() {
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   // TODO: [*** Conrado/Anderson] relacionar o consumo quebrando a linha em pedido_fornecedor_has_produto e setar o idVenda/idVendaProduto
 
-  if (modelEstoque.filter().isEmpty()) {
-    emit errorSignal("Não setou idEstoque!");
-    return false;
-  }
+  if (modelEstoque.filter().isEmpty()) { return qApp->enqueueError(false, "Não setou idEstoque!"); }
 
-  if (quant > ui->doubleSpinBoxRestante->value()) {
-    emit errorSignal("Quantidade insuficiente!");
-    return false;
-  }
+  if (quant > ui->doubleSpinBoxRestante->value()) { return qApp->enqueueError(false, "Quantidade insuficiente!"); }
 
   // -------------------------------------------------------------------------
 
@@ -264,10 +244,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
 
   const QString un = query.value("un").toString();
   const double m2cx = query.value("m2cx").toDouble();
@@ -326,10 +303,7 @@ bool Estoque::quebrarCompra(const int idVendaProduto, const double quant) {
   query.prepare("SELECT idVenda FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
   query.bindValue(":idVendaProduto", idVendaProduto);
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando idVenda: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVenda: " + query.lastError().text()); }
 
   if (quant < modelCompra.data(0, "quant").toDouble()) {
     const int newRow = modelCompra.rowCount();

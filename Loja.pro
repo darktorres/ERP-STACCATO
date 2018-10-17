@@ -52,10 +52,10 @@ win32-g++{
 }
 
 *-clang{
-    QMAKE_CXXFLAGS *= -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
-    QMAKE_CXXFLAGS *= -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
-    QMAKE_CXXFLAGS *= -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
-    QMAKE_CXXFLAGS *= -Wno-shadow -Wno-shadow-field
+#    QMAKE_CXXFLAGS *= -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
+#    QMAKE_CXXFLAGS *= -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
+#    QMAKE_CXXFLAGS *= -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
+#    QMAKE_CXXFLAGS *= -Wno-shadow -Wno-shadow-field
 }
 
 linux-g++{
@@ -102,7 +102,6 @@ SOURCES += \
     src/contas.cpp \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
-    src/dialog.cpp \
     src/doubledelegate.cpp \
     src/estoque.cpp \
     src/estoqueprazoproxymodel.cpp \
@@ -156,7 +155,6 @@ SOURCES += \
     src/validadedialog.cpp \
     src/venda.cpp \
     src/vendaproxymodel.cpp \
-    src/widget.cpp \
     src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
     src/widgetcompradevolucao.cpp \
@@ -211,7 +209,6 @@ HEADERS  += \
     src/contas.h \
     src/dateformatdelegate.h \
     src/devolucao.h \
-    src/dialog.h \
     src/doubledelegate.h \
     src/estoque.h \
     src/estoqueprazoproxymodel.h \
@@ -264,7 +261,6 @@ HEADERS  += \
     src/validadedialog.h \
     src/venda.h \
     src/vendaproxymodel.h \
-    src/widget.h \
     src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
     src/widgetcompradevolucao.h \

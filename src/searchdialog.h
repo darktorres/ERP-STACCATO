@@ -1,14 +1,15 @@
 #ifndef SEARCHDIALOG_H
 #define SEARCHDIALOG_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class SearchDialog;
 }
 
-class SearchDialog final : public Dialog {
+class SearchDialog final : public QDialog {
   Q_OBJECT
 
 public:

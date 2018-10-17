@@ -18,8 +18,8 @@ public:
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
   auto dbReconnect() -> bool;
-  auto endTransaction() -> void;
   auto enqueueError(const QString &error) -> void;
+  auto enqueueError(const bool boolean, const QString &error) -> bool;
   auto enqueueInformation(const QString &information) -> void;
   auto enqueueWarning(const QString &warning) -> void;
   auto getInTransaction() const -> bool;
@@ -31,7 +31,9 @@ public:
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto showMessages() -> void;
-  auto startTransaction() -> void;
+  auto startTransaction() -> bool;
+  auto endTransaction() -> bool;
+  auto rollbackTransaction() -> void;
   auto updater() -> void;
 
 private:

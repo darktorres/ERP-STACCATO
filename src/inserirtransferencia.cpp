@@ -2,10 +2,11 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "inserirtransferencia.h"
 #include "ui_inserirtransferencia.h"
 
-InserirTransferencia::InserirTransferencia(QWidget *parent) : Dialog(parent), ui(new Ui::InserirTransferencia) {
+InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);
 
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &InserirTransferencia::on_pushButtonCancelar_clicked);
@@ -24,22 +25,13 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cadastrar()) { return qApp->rollbackTransaction(); }
 
-  if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (not qApp->endTransaction()) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
-
-  emit informationSignal("Transferência registrada com sucesso!");
+  qApp->enqueueInformation("Transferência registrada com sucesso!");
   close();
 }
 
@@ -96,25 +88,13 @@ bool InserirTransferencia::cadastrar() {
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
 
 bool InserirTransferencia::verifyFields() {
-  if (ui->itemBoxDe->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Conta 'De' não preenchido!");
-    return false;
-  }
+  if (ui->itemBoxDe->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'De' não preenchido!"); }
 
-  if (ui->itemBoxPara->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Conta 'Para' não preenchido!");
-    return false;
-  }
+  if (ui->itemBoxPara->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'Para' não preenchido!"); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) {
-    QMessageBox::critical(this, "Erro!", "Valor não preenchido!");
-    return false;
-  }
+  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { return qApp->enqueueError(false, "Valor não preenchido!"); }
 
-  if (ui->lineEditObservacao->text().isEmpty()) {
-    QMessageBox::critical(this, "Erro!", "Preencha a observação!");
-    return false;
-  }
+  if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError(false, "Preencha a observação!"); }
 
   return true;
 }

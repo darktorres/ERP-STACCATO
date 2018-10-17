@@ -11,6 +11,8 @@ namespace Ui {
 class WidgetPagamentos;
 }
 
+// TODO: refactor this to Widget and implement stuff directly in ui?
+
 class WidgetPagamentos final : public QScrollArea {
   Q_OBJECT
 
@@ -33,9 +35,6 @@ public:
 signals:
   void montarFluxoCaixa();
   void valueChanged();
-  void errorSignal(const QString &error);
-  void warningSignal(const QString &warning);
-  void informationSignal(const QString &information);
 
 private:
   // attributes

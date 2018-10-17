@@ -2,12 +2,12 @@
 #define REGISTERDIALOG_H
 
 #include <QDataWidgetMapper>
+#include <QDialog>
 #include <QLineEdit>
 
-#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
-class RegisterDialog : public Dialog {
+class RegisterDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -17,7 +17,6 @@ public:
   auto marcarDirty() -> void;
   auto saveSlot() -> void;
   auto show() -> void;
-  static auto getLastInsertId() -> QVariant;
   virtual auto viewRegister() -> bool;
   virtual auto viewRegisterById(const QVariant &id) -> bool;
 
@@ -26,7 +25,7 @@ signals:
 
 protected:
   // attributes
-  bool isDirty = false; // TODO: o LimeReport tem isso, olhar lá como fizeram
+  bool isDirty = false;
   enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
   int currentRow = -1;
   QDataWidgetMapper mapper;
@@ -36,12 +35,12 @@ protected:
   SqlRelationalTableModel model;
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
-  auto closeEvent(QCloseEvent *event) -> void override;
+  auto closeEvent(QCloseEvent *event) -> void final;
   auto confirmationMessage() -> bool;
   auto data(const QString &key) -> QVariant;
   auto data(const int row, const QString &key) -> QVariant;
   auto getTextKeys() const -> QStringList;
-  auto keyPressEvent(QKeyEvent *event) -> void override;
+  auto keyPressEvent(QKeyEvent *event) -> void final;
   auto remove() -> void;
   auto requiredStyle() -> QString;
   auto setData(const QString &key, const QVariant &value) -> bool;

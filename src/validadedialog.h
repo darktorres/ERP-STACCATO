@@ -1,13 +1,13 @@
 #ifndef VALIDADEDIALOG_H
 #define VALIDADEDIALOG_H
 
-#include "dialog.h"
+#include <QDialog>
 
 namespace Ui {
 class ValidadeDialog;
 }
 
-class ValidadeDialog final : public Dialog {
+class ValidadeDialog final : public QDialog {
   Q_OBJECT
 
 public:

@@ -4,10 +4,11 @@
 #include <QSqlQuery>
 #include <QXmlStreamReader>
 
+#include "application.h"
 #include "calculofrete.h"
 #include "ui_calculofrete.h"
 
-CalculoFrete::CalculoFrete(QWidget *parent) : Dialog(parent), ui(new Ui::CalculoFrete) {
+CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::CalculoFrete) {
   ui->setupUi(this);
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
@@ -93,14 +94,12 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   query.prepare("SELECT logradouro, numero, cidade, uf FROM cliente_has_endereco WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getValue());
 
-  if (not query.exec()) {
-    emit errorSignal("Erro buscando endereço do cliente: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro buscando endereço do cliente: " + query.lastError().text()); }
 
   while (query.next()) {
     ui->comboBoxDestino->addItem(query.value("logradouro").toString() + ", " + query.value("numero").toString() + ", " + query.value("cidade").toString() + ", " + query.value("uf").toString());
   }
 
+  // TODO: don't hardcode this
   ui->comboBoxOrigem->addItem("Rua Salesópolis, 27, Barueri, SP");
 }

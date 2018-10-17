@@ -1,5 +1,4 @@
 #include <QCloseEvent>
-#include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QSqlError>
@@ -8,7 +7,7 @@
 #include "application.h"
 #include "registerdialog.h"
 
-RegisterDialog::RegisterDialog(const QString &table, QString primaryKey, QWidget *parent = nullptr) : Dialog(parent), primaryKey(std::move(primaryKey)) {
+RegisterDialog::RegisterDialog(const QString &table, QString primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(std::move(primaryKey)) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
@@ -28,20 +27,18 @@ RegisterDialog::RegisterDialog(const QString &table, QString primaryKey, QWidget
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
   primaryId = id.toString();
 
-  if (primaryId.isEmpty()) {
-    emit errorSignal("primaryId vazio!");
-    return false;
-  }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "primaryId vazio!"); }
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
   if (not model.select()) { return false; }
 
   if (model.rowCount() == 0) {
-    emit errorSignal("Item não encontrado.");
     close();
-    return false;
+    return qApp->enqueueError(false, "Item não encontrado.");
   }
+
+  isDirty = false;
 
   return viewRegister();
 }
@@ -88,10 +85,7 @@ QVariant RegisterDialog::data(const QString &key) { return model.data(mapper.cur
 QVariant RegisterDialog::data(const int row, const QString &key) { return model.data(row, key); }
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
-  if (model.fieldIndex(key) == -1) {
-    emit errorSignal("Chave " + key + " não encontrada na tabela " + model.tableName());
-    return;
-  }
+  if (model.fieldIndex(key) == -1) { return qApp->enqueueError("Chave " + key + " não encontrada na tabela " + model.tableName()); }
 
   propertyName.isNull() ? mapper.addMapping(widget, model.fieldIndex(key)) : mapper.addMapping(widget, model.fieldIndex(key), propertyName);
 }
@@ -128,8 +122,8 @@ bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
   if ((line->text().isEmpty()) or (line->text() == "0,00") or (line->text() == "../-") or (line->text().size() < line->inputMask().remove(";").remove(">").remove("_").size()) or
       (line->text().size() < line->placeholderText().size() - 1)) {
     if (not silent) {
-      emit errorSignal("Você não preencheu um campo obrigatório: " + line->accessibleName());
       line->setFocus();
+      qApp->enqueueError("Você não preencheu um campo obrigatório: " + line->accessibleName());
     }
 
     return false;
@@ -139,33 +133,18 @@ bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
 }
 
 bool RegisterDialog::confirmationMessage() {
-  // when the user press a 'add' or 'update' button to insert a address or item set a bool isDirty to true, when the
-  // user register or update the base model set the bool to false (verify only if there are unsaved rows but not if they
-  // are edited)
-  // and connect widgets edited signals too, just dont use model.isDirty
+  if (isDirty) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Deseja salvar as alterações?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Salvar");
+    msgBox.setButtonText(QMessageBox::No, "Sair");
+    msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
 
-  // NOTE: implement the better way
-  // if isDirty
+    const int escolha = msgBox.exec();
 
-  //  if (not isDirty) { return true; }
-
-  //  QMessageBox msgBox;
-  //  msgBox.setParent(this);
-  //  msgBox.setLocale(QLocale::Portuguese);
-  //  msgBox.setText("<strong>O cadastro foi alterado!</strong>");
-  //  msgBox.setInformativeText("Se não tinha intenção de fechar, clique em cancelar.");
-  //  msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-  //  msgBox.setWindowModality(Qt::WindowModal);
-  //  msgBox.setButtonText(QMessageBox::Save, "Salvar");
-  //  msgBox.setButtonText(QMessageBox::Discard, "Fechar sem salvar");
-  //  msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
-  //  msgBox.setDefaultButton(QMessageBox::Save);
-
-  //  const int escolha = msgBox.exec();
-
-  //  if (escolha == QMessageBox::Save) { return save(); }
-  //  if (escolha == QMessageBox::Discard) { return true; }
-  //  if (escolha == QMessageBox::Cancel) { return false; }
+    if (escolha == QMessageBox::Yes) { return save(); }
+    if (escolha == QMessageBox::No) { return true; }
+    if (escolha == QMessageBox::Cancel) { return false; }
+  }
 
   return true;
 }
@@ -188,25 +167,16 @@ bool RegisterDialog::newRegister() {
 bool RegisterDialog::save(const bool silent) {
   if (not verifyFields()) { return false; }
 
-  emit transactionStarted();
-
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return false; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return false; }
+  if (not qApp->startTransaction()) { return false; }
 
   if (not cadastrar()) {
-    QSqlQuery("ROLLBACK").exec();
-    model.select();
+    qApp->rollbackTransaction();
+    void(model.select());
     mapper.toLast();
-    emit transactionEnded();
     return false;
   }
 
-  if (not QSqlQuery("COMMIT").exec()) { return false; }
-
-  emit transactionEnded();
-
-  // REFAC: set this inside RegisterDialog::viewRegister or viewRegisterById
-  isDirty = false;
+  if (not qApp->endTransaction()) { return false; }
 
   viewRegisterById(primaryId);
 
@@ -266,10 +236,7 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) {
-    emit errorSignal("CNPJ inválido!");
-    return false;
-  }
+  if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) { return qApp->enqueueError(false, "CNPJ inválido!"); }
 
   return true;
 }
@@ -279,8 +246,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   if (text == "00000000000" or text == "11111111111" or text == "22222222222" or text == "33333333333" or text == "44444444444" or text == "55555555555" or text == "66666666666" or
       text == "77777777777" or text == "88888888888" or text == "99999999999") {
-    emit errorSignal("CPF inválido!");
-    return false;
+    return qApp->enqueueError(false, "CPF inválido!");
   }
 
   const QString sub = text.left(9);
@@ -311,24 +277,10 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) {
-    emit errorSignal("CPF inválido!");
-    return false;
-  }
+  if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) { return qApp->enqueueError(false, "CPF inválido!"); }
 
   return true;
 }
 
 // TODO: no lugar de qualquer alteracao em lineEdit sair marcando dirty fazer uma analise tela por tela do que pode ser considerado edicao
 void RegisterDialog::marcarDirty() { isDirty = true; }
-
-QVariant RegisterDialog::getLastInsertId() {
-  QSqlQuery query;
-
-  if (not query.exec("SELECT LAST_INSERT_ID() AS id") or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando último id: " + query.lastError().text());
-    return QVariant();
-  }
-
-  return query.value("id");
-}

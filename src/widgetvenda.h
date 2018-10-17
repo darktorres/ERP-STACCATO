@@ -1,14 +1,15 @@
 #ifndef WIDGETVENDA_H
 #define WIDGETVENDA_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetVenda;
 }
 
-class WidgetVenda final : public Widget {
+class WidgetVenda final : public QWidget {
   Q_OBJECT
 
 public:

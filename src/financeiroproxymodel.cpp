@@ -1,10 +1,8 @@
-#include <QApplication>
 #include <QBrush>
 #include <QDate>
-#include <QDebug>
-#include <QStyle>
 
 #include "financeiroproxymodel.h"
+#include "usersession.h"
 
 FinanceiroProxyModel::FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), statusFinanceiro(model->fieldIndex("statusFinanceiro")), prazoEntrega(model->fieldIndex("prazoEntrega")), novoPrazoEntrega(model->fieldIndex("novoPrazoEntrega")) {
@@ -68,7 +66,11 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     // those paint the text as black if the background is colored
 
-    return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
+    const auto tema = UserSession::getSetting("User/tema");
+
+    if (not tema) { return QBrush(Qt::black); }
+
+    return tema->toString() == "claro" ? QBrush(Qt::black) : QBrush(Qt::white);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

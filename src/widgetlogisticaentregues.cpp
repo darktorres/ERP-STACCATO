@@ -3,6 +3,7 @@
 #include <QSortFilterProxyModel>
 #include <QSqlError>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "sql.h"
 #include "ui_widgetlogisticaentregues.h"
@@ -10,7 +11,7 @@
 #include "vendaproxymodel.h"
 #include "widgetlogisticaentregues.h"
 
-WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
+WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
 
 WidgetLogisticaEntregues::~WidgetLogisticaEntregues() { delete ui; }
 
@@ -46,10 +47,7 @@ void WidgetLogisticaEntregues::updateTables() {
 
   modelProdutos.setQuery(modelProdutos.query().executedQuery());
 
-  if (modelProdutos.lastError().isValid()) {
-    emit errorSignal("Erro lendo tabela produtos: " + modelProdutos.lastError().text());
-    return;
-  }
+  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
 
   ui->tableProdutos->resizeColumnsToContents();
 }
@@ -97,10 +95,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
                          "FROM (`mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON ((`vp`.`idVendaProduto` = `ehc`.`idVendaProduto`))) WHERE idVenda = '" +
                          modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`");
 
-  if (modelProdutos.lastError().isValid()) {
-    emit errorSignal("Erro: " + modelProdutos.lastError().text());
-    return;
-  }
+  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro: " + modelProdutos.lastError().text()); }
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -131,18 +126,12 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhuma linha selecionada!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
 
   for (const auto &index : list) {
     const QString status = modelProdutos.data(index.row(), "status").toString();
 
-    if (status != "ENTREGUE") {
-      emit errorSignal("Produto não marcado como 'ENTREGUE'!");
-      return;
-    }
+    if (status != "ENTREGUE") { return qApp->enqueueError("Produto não marcado como 'ENTREGUE'!"); }
   }
 
   QStringList idVendas;
@@ -157,25 +146,16 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   // desfazer passos da confirmacao de entrega (volta para tela de confirmar entrega)
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not cancelar(list)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Entrega cancelada!");
+  qApp->enqueueInformation("Entrega cancelada!");
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
@@ -189,17 +169,11 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   for (const auto &item : list) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro atualizando veiculo_produto: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando veiculo_produto: " + query1.lastError().text()); }
 
     query2.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro atualizando venda_produto: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text()); }
   }
 
   return true;

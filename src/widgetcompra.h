@@ -1,13 +1,13 @@
 #ifndef WIDGETCOMPRA_H
 #define WIDGETCOMPRA_H
 
-#include "widget.h"
+#include <QWidget>
 
 namespace Ui {
 class WidgetCompra;
 }
 
-class WidgetCompra final : public Widget {
+class WidgetCompra final : public QWidget {
   Q_OBJECT
 
 public:

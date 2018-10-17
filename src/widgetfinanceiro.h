@@ -1,13 +1,13 @@
 #ifndef WIDGETFINANCEIRO_H
 #define WIDGETFINANCEIRO_H
 
-#include "widget.h"
+#include <QWidget>
 
 namespace Ui {
 class WidgetFinanceiro;
 }
 
-class WidgetFinanceiro final : public Widget {
+class WidgetFinanceiro final : public QWidget {
   Q_OBJECT
 
 public:

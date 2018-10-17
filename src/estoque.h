@@ -1,14 +1,15 @@
 #ifndef ESTOQUE_H
 #define ESTOQUE_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Estoque;
 }
 
-class Estoque final : public Dialog {
+class Estoque final : public QDialog {
   Q_OBJECT
 
 public:

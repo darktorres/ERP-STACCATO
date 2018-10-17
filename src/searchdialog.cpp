@@ -4,6 +4,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
@@ -13,7 +14,7 @@
 #include "usersession.h"
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
-    : Dialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
+    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
@@ -130,15 +131,12 @@ void SearchDialog::hideColumns(const QStringList &columns) {
 }
 
 void SearchDialog::on_pushButtonSelecionar_clicked() {
-  if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) {
-    QMessageBox::critical(this, "Erro!", "Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!");
-    return;
-  }
+  if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) { return qApp->enqueueError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!"); }
 
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
 
-    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) { emit warningSignal("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!"); }
+    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!"); }
   }
 
   sendUpdateMessage();
@@ -150,6 +148,8 @@ void SearchDialog::setTextKeys(const QStringList &value) { textKeys = value; }
 void SearchDialog::setPrimaryKey(const QString &value) { primaryKey = value; }
 
 QString SearchDialog::getText(const QVariant &value) {
+  // TODO: refactor this to optional?
+
   if (model.tableName().contains("endereco") and value == 1) { return "Não há/Retira"; }
   if (value == 0) { return QString(); }
 
@@ -162,7 +162,7 @@ QString SearchDialog::getText(const QVariant &value) {
   QSqlQuery query(queryText);
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(this, "Erro!", "Erro na query getText: " + query.lastError().text());
+    qApp->enqueueError("Erro na query getText: " + query.lastError().text());
     return QString();
   }
 

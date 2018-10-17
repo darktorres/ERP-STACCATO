@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "cadastrocliente.h"
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
@@ -85,15 +86,9 @@ bool CadastroCliente::verifyFields() {
     if (not verifyRequiredField(line)) { return false; }
   }
 
-  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    emit errorSignal("CPF inválido!");
-    return false;
-  }
+  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!"); }
 
-  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
-    emit errorSignal("CNPJ inválido!");
-    return false;
-  }
+  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!"); }
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
@@ -101,15 +96,9 @@ bool CadastroCliente::verifyFields() {
     query.bindValue(":cpf", ui->lineEditCPF->text());
     query.bindValue(":cnpj", ui->lineEditCNPJ->text());
 
-    if (not query.exec()) {
-      emit errorSignal("Erro verificando se CPF/CNPJ já cadastrado!");
-      return false;
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se CPF/CNPJ já cadastrado!"); }
 
-    if (query.first()) {
-      emit errorSignal("CPF/CNPJ já cadastrado!");
-      return false;
-    }
+    if (query.first()) { return qApp->enqueueError(false, "CPF/CNPJ já cadastrado!"); }
   }
 
   return true;
@@ -200,10 +189,7 @@ void CadastroCliente::updateMode() {
 bool CadastroCliente::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
-  if (data("idCliente").toString().isEmpty()) {
-    emit errorSignal("idCliente vazio!");
-    return false;
-  }
+  if (data("idCliente").toString().isEmpty()) { return qApp->enqueueError(false, "idCliente vazio!"); }
 
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + " AND desativado = FALSE");
 
@@ -233,40 +219,34 @@ void CadastroCliente::on_pushButtonNovoCad_clicked() { newRegister(); }
 void CadastroCliente::on_pushButtonBuscar_clicked() { sdCliente->show(); }
 
 void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
-  ui->lineEditCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "" : "color: rgb(255, 0, 0)");
+  ui->lineEditCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 
   if (not ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) {
     QSqlQuery query;
     query.prepare("SELECT idCliente FROM cliente WHERE cpf = :cpf");
     query.bindValue(":cpf", text);
 
-    if (not query.exec()) {
-      emit errorSignal("Erro buscando CPF: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec()) { return qApp->enqueueError("Erro buscando CPF: " + query.lastError().text()); }
 
     if (query.first()) {
-      emit errorSignal("CPF já cadastrado!");
+      qApp->enqueueError("CPF já cadastrado!");
       viewRegisterById(query.value("idCliente"));
     }
   }
 }
 
 void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
-  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "" : "color: rgb(255, 0, 0)");
+  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 
   if (not ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) {
     QSqlQuery query;
     query.prepare("SELECT idCliente FROM cliente WHERE cnpj = :cnpj");
     query.bindValue(":cnpj", text);
 
-    if (not query.exec()) {
-      emit errorSignal("Erro buscando CNPJ: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec()) { return qApp->enqueueError("Erro buscando CNPJ: " + query.lastError().text()); }
 
     if (query.first()) {
-      emit errorSignal("CNPJ já cadastrado!");
+      qApp->enqueueError("CNPJ já cadastrado!");
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -279,14 +259,12 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    emit errorSignal("CEP inválido!");
-    return false;
+    return qApp->enqueueError(false, "CEP inválido!");
   }
 
   if (ui->lineEditNro->text().isEmpty()) {
     ui->lineEditNro->setFocus();
-    emit errorSignal("Número vazio!");
-    return false;
+    return qApp->enqueueError(false, "Número vazio!");
   }
 
   currentRowEnd = tipo == Tipo::Atualizar ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -314,15 +292,9 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 bool CadastroCliente::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) {
-    emit errorSignal("Erro linha -1");
-    return false;
-  }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
-    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
-    return false;
-  }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
 
   if (not savingProcedures()) { return false; }
 
@@ -335,12 +307,9 @@ bool CadastroCliente::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
+  primaryId = tipo == Tipo::Atualizar ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) {
-    emit errorSignal("Id vazio!");
-    return false;
-  }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
     if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }
@@ -357,19 +326,13 @@ bool CadastroCliente::cadastrar() {
 }
 
 void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco()) {
-    emit errorSignal("Não foi possível cadastrar este endereço!");
-    return;
-  }
+  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!"); }
 
   novoEndereco();
 }
 
 void CadastroCliente::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(Tipo::Atualizar)) {
-    emit errorSignal("Não foi possível atualizar este endereço!");
-    return;
-  }
+  if (not cadastrarEndereco(Tipo::Atualizar)) { return qApp->enqueueError("Não foi possível atualizar este endereço!"); }
 
   novoEndereco();
 }
@@ -380,17 +343,12 @@ void CadastroCliente::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
 
-  CepCompleter cc;
-
-  if (not cc.buscaCEP(cep)) {
-    emit warningSignal("CEP não encontrado!");
-    return;
+  if (CepCompleter cc; cc.buscaCEP(cep)) {
+    ui->lineEditUF->setText(cc.getUf());
+    ui->lineEditCidade->setText(cc.getCidade());
+    ui->lineEditLogradouro->setText(cc.getEndereco());
+    ui->lineEditBairro->setText(cc.getBairro());
   }
-
-  ui->lineEditUF->setText(cc.getUf());
-  ui->lineEditCidade->setText(cc.getCidade());
-  ui->lineEditLogradouro->setText(cc.getEndereco());
-  ui->lineEditBairro->setText(cc.getBairro());
 }
 
 void CadastroCliente::clearEndereco() {
@@ -452,7 +410,9 @@ void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
   adjustSize();
 }
 
-void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) { ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "" : "color: rgb(255, 0, 0)"); }
+void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) {
+  ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
+}
 
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));
@@ -474,7 +434,7 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroCliente::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
+void CadastroCliente::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
 
 void CadastroCliente::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

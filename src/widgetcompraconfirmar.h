@@ -1,14 +1,15 @@
 #ifndef WIDGETCOMPRACONFIRMAR_H
 #define WIDGETCOMPRACONFIRMAR_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetCompraConfirmar;
 }
 
-class WidgetCompraConfirmar final : public Widget {
+class WidgetCompraConfirmar final : public QWidget {
   Q_OBJECT
 
 public:
@@ -27,7 +28,6 @@ private:
   // methods
   auto cancelar(const int row) -> bool;
   auto confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) -> bool;
-  auto on_checkBoxMostrarSul_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonConfirmarCompra_clicked() -> void;
   auto on_table_entered(const QModelIndex &) -> void;

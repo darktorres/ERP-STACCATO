@@ -73,14 +73,14 @@
        <enum>QFrame::Plain</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0" colspan="2">
-        <widget class="QCheckBox" name="checkBoxMostrarSul">
+       <item row="1" column="0">
+        <widget class="QPushButton" name="pushButtonConfirmarCompra">
          <property name="text">
-          <string>SUL</string>
+          <string>Confirmar compra</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="0" column="0" colspan="2">
         <widget class="TableView" name="table">
          <property name="mouseTracking">
           <bool>true</bool>
@@ -108,14 +108,7 @@
          </attribute>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="pushButtonConfirmarCompra">
-         <property name="text">
-          <string>Confirmar compra</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
+       <item row="1" column="1">
         <widget class="QPushButton" name="pushButtonCancelarCompra">
          <property name="enabled">
           <bool>true</bool>

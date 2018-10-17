@@ -3,7 +3,7 @@
 #include "ui_widgetcompraresumo.h"
 #include "widgetcompraresumo.h"
 
-WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraResumo) { ui->setupUi(this); }
+WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraResumo) { ui->setupUi(this); }
 
 WidgetCompraResumo::~WidgetCompraResumo() { delete ui; }
 
@@ -12,10 +12,7 @@ void WidgetCompraResumo::setupTables() {
 
   modelResumo.setHeaderData("fornecedor", "Forn.");
 
-  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
-
   ui->tableResumo->setModel(&modelResumo);
-  ui->tableResumo->hideColumn("idVenda");
 }
 
 void WidgetCompraResumo::updateTables() {

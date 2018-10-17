@@ -3,13 +3,11 @@
 
 #include <QProgressDialog>
 
-#include "dialog.h"
-
 namespace Ui {
 class SendMail;
 }
 
-class SendMail final : public Dialog {
+class SendMail final : public QDialog {
   Q_OBJECT
 
 public:

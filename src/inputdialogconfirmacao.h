@@ -1,14 +1,15 @@
 #ifndef INPUTDIALOGCONFIRMACAO_H
 #define INPUTDIALOGCONFIRMACAO_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogConfirmacao;
 }
 
-class InputDialogConfirmacao final : public Dialog {
+class InputDialogConfirmacao final : public QDialog {
   Q_OBJECT
 
 public:

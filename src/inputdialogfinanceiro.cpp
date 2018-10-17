@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
 #include "doubledelegate.h"
@@ -13,7 +14,7 @@
 #include "singleeditdelegate.h"
 #include "ui_inputdialogfinanceiro.h"
 
-InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
+InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -402,8 +403,7 @@ void InputDialogFinanceiro::resetarPagamentos() {
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (idCompra.isEmpty()) {
     modelPedidoFornecedor.setFilter("0");
-    emit errorSignal("IdCompra vazio!");
-    return false;
+    return qApp->enqueueError(false, "IdCompra vazio!");
   }
 
   if (tipo == Tipo::ConfirmarCompra) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra + " AND status = 'EM COMPRA'"); }
@@ -432,10 +432,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando se é representacao: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando se é representacao: " + query.lastError().text()); }
 
   representacao = query.value("representacao").toBool();
 
@@ -456,22 +453,13 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   [=] {
     if (not verifyFields()) { return; }
 
-    emit transactionStarted();
+    if (not qApp->startTransaction()) { return; }
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+    if (not cadastrar()) { return qApp->rollbackTransaction(); }
 
-    if (not cadastrar()) {
-      QSqlQuery("ROLLBACK").exec();
-      emit transactionEnded();
-      return;
-    }
+    if (not qApp->endTransaction()) { return; }
 
-    if (not QSqlQuery("COMMIT").exec()) { return; }
-
-    emit transactionEnded();
-
-    emit informationSignal("Dados salvos com sucesso!");
+    qApp->enqueueInformation("Dados salvos com sucesso!");
 
     QDialog::accept();
     close();
@@ -485,28 +473,20 @@ bool InputDialogFinanceiro::verifyFields() {
 
   if (ui->widgetPgts->isHidden()) { return true; }
 
-  if (ui->table->selectionModel()->selectedRows().isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return false;
-  }
+  if (ui->table->selectionModel()->selectedRows().isEmpty()) { return qApp->enqueueError(false, "Nenhum item selecionado!"); }
 
   if (not representacao) {
-    if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) {
-      emit errorSignal("Soma dos pagamentos difere do total! Favor verificar!");
-      return false;
-    }
+    if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Soma dos pagamentos difere do total! Favor verificar!"); }
 
     for (int i = 0; i < ui->widgetPgts->listComboPgt.size(); ++i) {
       if (ui->widgetPgts->listDoubleSpinPgt.at(i)->value() > 0 and ui->widgetPgts->listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
-        emit errorSignal("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!");
         ui->widgetPgts->listComboPgt.at(i)->setFocus();
-        return false;
+        return qApp->enqueueError(false, "Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!");
       }
 
       if (qFuzzyIsNull(ui->widgetPgts->listDoubleSpinPgt.at(i)->value()) and ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
-        emit errorSignal("Pagamento " + QString::number(i + 1) + " está com valor 0!");
         ui->widgetPgts->listDoubleSpinPgt.at(i)->setFocus();
-        return false;
+        return qApp->enqueueError(false, "Pagamento " + QString::number(i + 1) + " está com valor 0!");
       }
     }
   }
@@ -519,7 +499,7 @@ bool InputDialogFinanceiro::cadastrar() {
 
   if (tipo == Tipo::ConfirmarCompra) {
     for (const auto &item : list) {
-      // REFAC: setData already emit errorSignal internally, just set a return false everywhere
+      // REFAC: setData already qApp->enqueueError internally, just set a return false everywhere
       if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) { return false; }
     }
   }
@@ -580,10 +560,7 @@ void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, c
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", ui->widgetPgts->listComboPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro lendo formas de pagamentos: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text()); }
 
   const int parcelas = query.value("parcelas").toInt();
 

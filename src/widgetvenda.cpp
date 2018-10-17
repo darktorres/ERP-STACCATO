@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QSqlError>
 
+#include "application.h"
 #include "followup.h"
 #include "reaisdelegate.h"
 #include "ui_widgetvenda.h"
@@ -10,7 +11,7 @@
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
 
-WidgetVenda::WidgetVenda(QWidget *parent) : Widget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
+WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -18,7 +19,7 @@ void WidgetVenda::setupTables() {
   modelViewVenda.setTable("view_venda");
 
   modelViewVenda.setHeaderData("statusFinanceiro", "Financeiro");
-  modelViewVenda.setHeaderData("dataFinanceiro", "Data Fin.");
+  modelViewVenda.setHeaderData("dataFinanceiro", "Data Financ.");
 
   ui->table->setModel(new VendaProxyModel(&modelViewVenda, this));
   ui->table->hideColumn("idLoja");
@@ -38,10 +39,7 @@ void WidgetVenda::montaFiltro() {
     query.prepare("SELECT sigla FROM loja WHERE descricao = :descricao");
     query.bindValue(":descricao", ui->comboBoxLojas->currentText());
 
-    if (not query.exec() or not query.first()) {
-      emit errorSignal("Erro buscando sigla da loja: " + query.lastError().text());
-      return;
-    }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando sigla da loja: " + query.lastError().text()); }
 
     sigla = query.value("sigla").toString();
   }
@@ -210,10 +208,7 @@ void WidgetVenda::resetTables() { modelIsSet = false; }
 void WidgetVenda::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhuma linha selecionada!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
 
   FollowUp *followup = new FollowUp(modelViewVenda.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -228,3 +223,4 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
 }
 
 // TODO: verificar os pedidos de devolucao que estao com o status errado (update_venda_status)
+// TODO: sempre que fechar um pedido rodar update_venda_status/update_produto_estoque_quant

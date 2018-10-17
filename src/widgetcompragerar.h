@@ -1,14 +1,15 @@
 #ifndef WIDGETCOMPRAGERAR_H
 #define WIDGETCOMPRAGERAR_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetCompraGerar;
 }
 
-class WidgetCompraGerar final : public Widget {
+class WidgetCompraGerar final : public QWidget {
   Q_OBJECT
 
 public:
@@ -31,7 +32,6 @@ private:
   auto gerarCompra(const QList<int> &lista, const QDateTime &dataCompra, const QDateTime &dataPrevista) -> bool;
   auto gerarExcel(const QList<int> &lista, QString &anexo, const bool isRepresentacao) -> bool;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
-  auto on_checkBoxMostrarSul_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonGerarCompra_clicked() -> void;
   auto on_tableProdutos_entered(const QModelIndex &) -> void;

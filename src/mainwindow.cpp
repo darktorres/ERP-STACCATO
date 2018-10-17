@@ -52,16 +52,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  const auto hostname = UserSession::getSetting("Login/hostname");
+  if (const auto hostname = UserSession::getSetting("Login/hostname"); hostname) {
+    const QString hostnameText = qApp->getMapLojas().key(hostname.value().toString());
 
-  if (not hostname) {
-    QMessageBox::critical(nullptr, "Erro!", "A chave 'hostname' não está configurada!");
-    return;
+    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
+  } else {
+    qApp->enqueueError("A chave 'hostname' não está configurada!");
   }
-
-  const QString hostnameText = qApp->getMapLojas().key(hostname.value().toString());
-
-  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE LOJA") {
     ui->actionGerenciar_Lojas->setDisabled(true);
@@ -79,17 +76,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
   query.bindValue(":idUsuario", UserSession::idUsuario());
 
-  if (not query.exec() or not query.first()) { QMessageBox::critical(this, "Erro!", "Erro lendo permissões: " + query.lastError().text()); }
-
-  // REFAC: dont harcode numbers
-  ui->tabWidget->setTabEnabled(0, query.value("view_tab_orcamento").toBool());
-  ui->tabWidget->setTabEnabled(1, query.value("view_tab_venda").toBool());
-  ui->tabWidget->setTabEnabled(2, query.value("view_tab_compra").toBool());
-  ui->tabWidget->setTabEnabled(3, query.value("view_tab_logistica").toBool());
-  ui->tabWidget->setTabEnabled(4, query.value("view_tab_nfe").toBool());
-  ui->tabWidget->setTabEnabled(5, query.value("view_tab_estoque").toBool());
-  ui->tabWidget->setTabEnabled(6, query.value("view_tab_financeiro").toBool());
-  ui->tabWidget->setTabEnabled(7, query.value("view_tab_relatorio").toBool());
+  if (query.exec() and query.first()) {
+    // REFAC: dont harcode numbers
+    ui->tabWidget->setTabEnabled(0, query.value("view_tab_orcamento").toBool());
+    ui->tabWidget->setTabEnabled(1, query.value("view_tab_venda").toBool());
+    ui->tabWidget->setTabEnabled(2, query.value("view_tab_compra").toBool());
+    ui->tabWidget->setTabEnabled(3, query.value("view_tab_logistica").toBool());
+    ui->tabWidget->setTabEnabled(4, query.value("view_tab_nfe").toBool());
+    ui->tabWidget->setTabEnabled(5, query.value("view_tab_estoque").toBool());
+    ui->tabWidget->setTabEnabled(6, query.value("view_tab_financeiro").toBool());
+    ui->tabWidget->setTabEnabled(7, query.value("view_tab_relatorio").toBool());
+  } else {
+    qApp->enqueueError("Erro lendo permissões: " + query.lastError().text());
+  }
 
   // -------------------------------------------------------------------------
 
@@ -100,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
   pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").value().toString());
-  pushButtonStatus->setStyleSheet("color: rgb(0, 255, 0);");
+  pushButtonStatus->setStyleSheet("color: rgb(0, 190, 0);");
 
   ui->statusBar->addWidget(pushButtonStatus);
 
@@ -158,121 +157,109 @@ void MainWindow::verifyDb() {
 }
 
 // REFAC: put this in a class
-void MainWindow::gerarEnviarRelatorio() {
-  // REFAC: 0finish
-  // verificar em que etapa eu guardo a linha do dia seguinte no BD
+// void MainWindow::gerarEnviarRelatorio() {
+//  // REFAC: 0finish
+//  // verificar em que etapa eu guardo a linha do dia seguinte no BD
 
-  QSqlQuery query;
-  // TODO: replace *
-  query.prepare("SELECT * FROM jobs WHERE dataReferente = :dataReferente AND status = 'PENDENTE'");
-  query.bindValue(":dataAgendado", QDate::currentDate());
+//  QSqlQuery query;
+//  // TODO: replace *
+//  query.prepare("SELECT * FROM jobs WHERE dataReferente = :dataReferente AND status = 'PENDENTE'");
+//  query.bindValue(":dataAgendado", QDate::currentDate());
 
-  if (not query.exec()) {
-    QMessageBox::critical(this, "Erro!", "Erro buscando relatórios agendados: " + query.lastError().text());
-    return;
-  }
+//  if (not query.exec()) { return qApp->enqueueError("Erro buscando relatórios agendados: " + query.lastError().text()); }
 
-  while (query.next()) {
-    const QString relatorioPagar = "C:/temp/pagar.xlsx";     // guardar direto no servidor?
-    const QString relatorioReceber = "C:/temp/receber.xlsx"; // e se o computador nao tiver o servidor mapeado?
+//  while (query.next()) {
+//    const QString relatorioPagar = "C:/temp/pagar.xlsx";     // guardar direto no servidor?
+//    const QString relatorioReceber = "C:/temp/receber.xlsx"; // e se o computador nao tiver o servidor mapeado?
 
-    // -------------------------------------------------------------------------
+//    // -------------------------------------------------------------------------
 
-    QXlsx::Document xlsxPagar(relatorioPagar);
+//    QXlsx::Document xlsxPagar(relatorioPagar);
 
-    //    xlsx.currentWorksheet()->setFitToPage(true);
-    //    xlsx.currentWorksheet()->setFitToHeight(true);
-    //    xlsx.currentWorksheet()->setOrientationVertical(false);
+//    //    xlsx.currentWorksheet()->setFitToPage(true);
+//    //    xlsx.currentWorksheet()->setFitToHeight(true);
+//    //    xlsx.currentWorksheet()->setOrientationVertical(false);
 
-    QSqlQuery queryView;
+//    QSqlQuery queryView;
 
-    if (not queryView.exec("SELECT * FROM view_relatorio_pagar")) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo relatorio pagar: " + queryView.lastError().text());
-      return;
-    }
+//    if (not queryView.exec("SELECT * FROM view_relatorio_pagar")) { return qApp->enqueueError("Erro lendo relatorio pagar: " + queryView.lastError().text()); }
 
-    xlsxPagar.write("A1", "Data Emissão");
-    xlsxPagar.write("B1", "Data Realizado");
-    xlsxPagar.write("C1", "Valor R$");
-    xlsxPagar.write("D1", "Conta");
-    xlsxPagar.write("E1", "Obs.");
-    xlsxPagar.write("F1", "Contraparte");
-    xlsxPagar.write("G1", "Grupo");
-    xlsxPagar.write("H1", "Subgrupo");
+//    xlsxPagar.write("A1", "Data Emissão");
+//    xlsxPagar.write("B1", "Data Realizado");
+//    xlsxPagar.write("C1", "Valor R$");
+//    xlsxPagar.write("D1", "Conta");
+//    xlsxPagar.write("E1", "Obs.");
+//    xlsxPagar.write("F1", "Contraparte");
+//    xlsxPagar.write("G1", "Grupo");
+//    xlsxPagar.write("H1", "Subgrupo");
 
-    int row = 1;
+//    int row = 1;
 
-    while (queryView.next()) {
-      xlsxPagar.write("A" + QString::number(row), queryView.value("dataEmissao"));
-      xlsxPagar.write("B" + QString::number(row), queryView.value("dataRealizado"));
-      xlsxPagar.write("C" + QString::number(row), queryView.value("valorReal"));
-      xlsxPagar.write("D" + QString::number(row), queryView.value("Conta"));
-      xlsxPagar.write("E" + QString::number(row), queryView.value("observacao"));
-      xlsxPagar.write("F" + QString::number(row), queryView.value("contraParte"));
-      xlsxPagar.write("G" + QString::number(row), queryView.value("grupo"));
-      xlsxPagar.write("H" + QString::number(row), queryView.value("subGrupo"));
+//    while (queryView.next()) {
+//      xlsxPagar.write("A" + QString::number(row), queryView.value("dataEmissao"));
+//      xlsxPagar.write("B" + QString::number(row), queryView.value("dataRealizado"));
+//      xlsxPagar.write("C" + QString::number(row), queryView.value("valorReal"));
+//      xlsxPagar.write("D" + QString::number(row), queryView.value("Conta"));
+//      xlsxPagar.write("E" + QString::number(row), queryView.value("observacao"));
+//      xlsxPagar.write("F" + QString::number(row), queryView.value("contraParte"));
+//      xlsxPagar.write("G" + QString::number(row), queryView.value("grupo"));
+//      xlsxPagar.write("H" + QString::number(row), queryView.value("subGrupo"));
 
-      ++row;
-    }
+//      ++row;
+//    }
 
-    // -------------------------------------------------------------------------
+//    // -------------------------------------------------------------------------
 
-    QXlsx::Document xlsxReceber(relatorioReceber);
+//    QXlsx::Document xlsxReceber(relatorioReceber);
 
-    //    xlsx.currentWorksheet()->setFitToPage(true);
-    //    xlsx.currentWorksheet()->setFitToHeight(true);
-    //    xlsx.currentWorksheet()->setOrientationVertical(false);
+//    //    xlsx.currentWorksheet()->setFitToPage(true);
+//    //    xlsx.currentWorksheet()->setFitToHeight(true);
+//    //    xlsx.currentWorksheet()->setOrientationVertical(false);
 
-    if (not queryView.exec("SELECT * FROM view_relatorio_receber")) {
-      QMessageBox::critical(this, "Erro!", "Erro lendo relatorio receber: " + queryView.lastError().text());
-      return;
-    }
+//    if (not queryView.exec("SELECT * FROM view_relatorio_receber")) { return qApp->enqueueError("Erro lendo relatorio receber: " + queryView.lastError().text()); }
 
-    xlsxReceber.write("A1", "dataEmissao");
-    xlsxReceber.write("B1", "dataRealizado");
-    xlsxReceber.write("C1", "valorReal");
-    xlsxReceber.write("D1", "Conta");
-    xlsxReceber.write("E1", "observacao");
-    xlsxReceber.write("F1", "contraParte");
-    xlsxReceber.write("G1", "grupo");
-    xlsxReceber.write("H1", "subGrupo");
+//    xlsxReceber.write("A1", "dataEmissao");
+//    xlsxReceber.write("B1", "dataRealizado");
+//    xlsxReceber.write("C1", "valorReal");
+//    xlsxReceber.write("D1", "Conta");
+//    xlsxReceber.write("E1", "observacao");
+//    xlsxReceber.write("F1", "contraParte");
+//    xlsxReceber.write("G1", "grupo");
+//    xlsxReceber.write("H1", "subGrupo");
 
-    row = 1;
+//    row = 1;
 
-    while (queryView.next()) {
-      xlsxReceber.write("A" + QString::number(row), queryView.value("dataEmissao"));
-      xlsxReceber.write("B" + QString::number(row), queryView.value("dataRealizado"));
-      xlsxReceber.write("C" + QString::number(row), queryView.value("valorReal"));
-      xlsxReceber.write("D" + QString::number(row), queryView.value("Conta"));
-      xlsxReceber.write("E" + QString::number(row), queryView.value("observacao"));
-      xlsxReceber.write("F" + QString::number(row), queryView.value("contraParte"));
-      xlsxReceber.write("G" + QString::number(row), queryView.value("grupo"));
-      xlsxReceber.write("H" + QString::number(row), queryView.value("subGrupo"));
+//    while (queryView.next()) {
+//      xlsxReceber.write("A" + QString::number(row), queryView.value("dataEmissao"));
+//      xlsxReceber.write("B" + QString::number(row), queryView.value("dataRealizado"));
+//      xlsxReceber.write("C" + QString::number(row), queryView.value("valorReal"));
+//      xlsxReceber.write("D" + QString::number(row), queryView.value("Conta"));
+//      xlsxReceber.write("E" + QString::number(row), queryView.value("observacao"));
+//      xlsxReceber.write("F" + QString::number(row), queryView.value("contraParte"));
+//      xlsxReceber.write("G" + QString::number(row), queryView.value("grupo"));
+//      xlsxReceber.write("H" + QString::number(row), queryView.value("subGrupo"));
 
-      ++row;
-    }
+//      ++row;
+//    }
 
-    // -------------------------------------------------------------------------
+//    // -------------------------------------------------------------------------
 
-    QSqlQuery query2;
-    query2.prepare("INSERT INTO jobs (dataEnviado, dataReferente, status) VALUES (:dataEnviado, :dataReferente, 'ENVIADO')");
+//    QSqlQuery query2;
+//    query2.prepare("INSERT INTO jobs (dataEnviado, dataReferente, status) VALUES (:dataEnviado, :dataReferente, 'ENVIADO')");
 
-    const int diaSemana = QDate::currentDate().dayOfWeek();
+//    const int diaSemana = QDate::currentDate().dayOfWeek();
 
-    query2.bindValue(":dataReferente", QDate::currentDate().addDays(diaSemana < 4 ? 5 : diaSemana - 3));
-    query2.bindValue(":dataEnviado", QDate::currentDate());
+//    query2.bindValue(":dataReferente", QDate::currentDate().addDays(diaSemana < 4 ? 5 : diaSemana - 3));
+//    query2.bindValue(":dataEnviado", QDate::currentDate());
 
-    if (not query2.exec()) {
-      QMessageBox::critical(this, "Erro!", "Erro guardando relatórios financeiro: " + query2.lastError().text());
-      return;
-    }
+//    if (not query2.exec()) { return qApp->enqueueError("Erro guardando relatórios financeiro: " + query2.lastError().text()); }
 
-    //    SendMail *mail = new SendMail(this, anexo, fornecedor);
-    //    mail->setAttribute(Qt::WA_DeleteOnClose);
+//    //    SendMail *mail = new SendMail(this, anexo, fornecedor);
+//    //    mail->setAttribute(Qt::WA_DeleteOnClose);
 
-    //    mail->exec();
-  }
-}
+//    //    mail->exec();
+//  }
+//}
 
 void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);
@@ -405,12 +392,6 @@ void MainWindow::on_actionPromocao_triggered() {
   importa->importarPromocao();
 }
 
-// TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
-// NOTE: colocar logo da staccato na mainwindow
-
-// NOTE: prioridades atuais:
-// TODO: logistica da devolucao
-
 void MainWindow::on_actionGerenciar_preco_estoque_triggered() {
   auto *estoque = new PrecoEstoque(this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
@@ -422,6 +403,12 @@ void MainWindow::on_actionCalcular_frete_triggered() {
   frete->setAttribute(Qt::WA_DeleteOnClose);
   frete->show();
 }
+
+// TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
+// NOTE: colocar logo da staccato na mainwindow
+
+// NOTE: prioridades atuais:
+// TODO: logistica da devolucao
 
 // TASK: cancelamento de nfe: terminar de arrumar formato do email
 // TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na tela de consultarNFe (depois disso só vai precisar atualizar a nota com a

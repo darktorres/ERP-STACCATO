@@ -3,14 +3,13 @@
 
 #include <QProgressDialog>
 
-#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class ImportaProdutos;
 }
 
-class ImportaProdutos final : public Dialog {
+class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:

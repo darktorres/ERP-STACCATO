@@ -88,13 +88,6 @@
        <item row="0" column="0" colspan="2">
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QCheckBox" name="checkBoxMostrarSul">
-           <property name="text">
-            <string>SUL</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QCheckBox" name="checkBoxMarcarTodos">
            <property name="text">
             <string>Marcar todos</string>

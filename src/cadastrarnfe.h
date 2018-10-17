@@ -2,25 +2,24 @@
 #define CADASTRARNFE_H
 
 #include <QDataWidgetMapper>
+#include <QDialog>
 #include <QSqlQuery>
 #include <QTextStream>
-#include <optional>
 
-#include "dialog.h"
+#include "acbr.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class CadastrarNFe;
 }
 
-class CadastrarNFe final : public Dialog {
+class CadastrarNFe final : public QDialog {
   Q_OBJECT
 
 public:
   enum class Tipo { Futura, Normal, NormalAposFutura };
-  explicit CadastrarNFe(const QString &idVenda, const Tipo tipo, QWidget *parent = nullptr);
+  explicit CadastrarNFe(const QString &idVenda, const QList<int> &items, const Tipo tipo, QWidget *parent = nullptr);
   ~CadastrarNFe();
-  auto prepararNFe(const QList<int> &items) -> void;
 
 private:
   // attributes
@@ -81,15 +80,15 @@ private:
   auto on_tabWidget_currentChanged(const int index) -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_tableItens_entered(const QModelIndex &) -> void;
-  auto preCadastrarNota(const QString &fileName) -> std::optional<int>;
+  auto on_tableItens_dataChanged(const QModelIndex index) -> void;
+  auto preCadastrarNota() -> std::optional<int>;
   auto preencherNumeroNFe() -> bool;
-  auto processarResposta(const QString &resposta, const QString &fileName, const int &idNFe) -> bool;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbr) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateImpostos() -> void;
   auto validar() -> bool;
-  auto verificarConfiguracaoEmail() -> bool;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;
   auto writeIdentificacao(QTextStream &stream) const -> void;
@@ -98,6 +97,7 @@ private:
   auto writeTotal(QTextStream &stream) const -> void;
   auto writeTransportadora(QTextStream &stream) const -> void;
   auto writeVolume(QTextStream &stream) const -> void;
+  auto prepararNFe(const QList<int> &items) -> void;
 };
 
 #endif // CADASTRARNFE_H

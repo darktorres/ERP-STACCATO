@@ -1,14 +1,15 @@
 #ifndef WIDGETLOGISTICA_H
 #define WIDGETLOGISTICA_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetLogistica;
 }
 
-class WidgetLogistica final : public Widget {
+class WidgetLogistica final : public QWidget {
   Q_OBJECT
 
 public:

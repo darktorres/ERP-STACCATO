@@ -1,14 +1,15 @@
 #ifndef CONTAS_H
 #define CONTAS_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Contas;
 }
 
-class Contas final : public Dialog {
+class Contas final : public QDialog {
   Q_OBJECT
 
 public:

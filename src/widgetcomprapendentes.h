@@ -1,14 +1,15 @@
 #ifndef WIDGETCOMPRAPENDENTES_H
 #define WIDGETCOMPRAPENDENTES_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetCompraPendentes;
 }
 
-class WidgetCompraPendentes final : public Widget {
+class WidgetCompraPendentes final : public QWidget {
   Q_OBJECT
 
 public:

@@ -1,14 +1,15 @@
 #ifndef PRECOESTOQUE_H
 #define PRECOESTOQUE_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class PrecoEstoque;
 }
 
-class PrecoEstoque final : public Dialog {
+class PrecoEstoque final : public QDialog {
   Q_OBJECT
 
 public:

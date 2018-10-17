@@ -1,12 +1,13 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "followup.h"
 #include "followupproxymodel.h"
 #include "ui_followup.h"
 #include "usersession.h"
 
-FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : Dialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
+FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
   ui->setupUi(this);
 
   connect(ui->dateFollowup, &QDateTimeEdit::dateChanged, this, &FollowUp::on_dateFollowup_dateChanged);
@@ -54,25 +55,18 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
-  if (not query.exec()) {
-    emit errorSignal("Erro salvando followup: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro salvando followup: " + query.lastError().text()); }
 
-  emit informationSignal("Followup salvo com sucesso!");
+  qApp->enqueueInformation("Followup salvo com sucesso!");
   close();
 }
 
 bool FollowUp::verifyFields() {
   if (tipo == Tipo::Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
-    emit errorSignal("Deve selecionar uma temperatura!");
-    return false;
+    return qApp->enqueueError(false, "Deve selecionar uma temperatura!");
   }
 
-  if (ui->plainTextEdit->toPlainText().isEmpty()) {
-    emit errorSignal("Deve escrever uma observação!");
-    return false;
-  }
+  if (ui->plainTextEdit->toPlainText().isEmpty()) { return qApp->enqueueError(false, "Deve escrever uma observação!"); }
 
   return true;
 }

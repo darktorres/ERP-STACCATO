@@ -1,52 +1,102 @@
-#include <QCoreApplication>
 #include <QDesktopServices>
 #include <QDir>
-#include <QEventLoop>
 #include <QFile>
-#include <QMessageBox>
-#include <QProgressDialog>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
 
 #include "acbr.h"
+#include "application.h"
 #include "usersession.h"
 
-bool ACBr::gerarDanfe(const int idNFe) {
-  if (idNFe == 0) {
-    QMessageBox::critical(nullptr, "Erro!", "Produto não possui nota!");
-    return false;
+ACBr::ACBr(QObject *parent) : QObject(parent) {
+  connect(&socket, QOverload<QTcpSocket::SocketError>::of(&QAbstractSocket::error), this, &ACBr::error);
+  connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
+  connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
+  connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket);
+  connect(&socket, &QTcpSocket::bytesWritten, this, &ACBr::write);
+
+  progressDialog->reset();
+  progressDialog->setCancelButton(nullptr);
+  progressDialog->setLabelText("Esperando ACBr...");
+  progressDialog->setWindowTitle("ERP Staccato");
+  progressDialog->setWindowModality(Qt::WindowModal);
+  progressDialog->setMaximum(0);
+  progressDialog->setMinimum(0);
+}
+
+void ACBr::error() {
+  qDebug() << "error";
+  qApp->enqueueError("Erro socket: " + socket.errorString());
+  progressDialog->cancel();
+}
+
+void ACBr::write() {
+  qDebug() << "writen";
+  enviado = true;
+}
+
+void ACBr::setConnected() {
+  qDebug() << "conectado";
+  conectado = true;
+}
+
+void ACBr::setDisconnected() {
+  qDebug() << "desconectado";
+  pronto = false;
+  conectado = false;
+  recebido = false;
+  enviado = false;
+}
+
+void ACBr::readSocket() {
+  auto stream = socket.readAll();
+  resposta += stream;
+
+  qDebug() << "answer: " << stream;
+
+  if (resposta.endsWith(welcome)) {
+    qDebug() << "pronto";
+    pronto = true;
+    resposta.clear();
+    return;
   }
+
+  if (resposta.endsWith("\u0003")) {
+    qDebug() << "recebido";
+    resposta.remove("\u0003");
+    recebido = true;
+  }
+}
+
+bool ACBr::gerarDanfe(const int idNFe) {
+  if (idNFe == 0) { return qApp->enqueueError(false, "Produto não possui nota!"); }
 
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec() or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando chaveAcesso: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando chaveAcesso: " + query.lastError().text()); }
 
   return gerarDanfe(query.value("xml").toByteArray(), true).has_value();
 }
 
 std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  const auto respostaSaveXml = enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")");
+  const auto respostaSaveXml = enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")", true);
 
   if (not respostaSaveXml) { return {}; }
 
   if (not respostaSaveXml->contains("OK")) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro salvando XML: " + *respostaSaveXml);
+    qApp->enqueueError("Erro salvando XML: " + *respostaSaveXml);
     return {};
   }
 
-  auto respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(xml.xml)");
+  auto respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(xml.xml)", true);
 
   if (not respostaSavePdf) { return {}; }
 
   if (not respostaSavePdf->contains("Arquivo criado em:")) {
-    QMessageBox::critical(nullptr, "Erro!", *respostaSavePdf);
-    QMessageBox::critical(nullptr, "Erro!", "Verifique se o arquivo não está aberto!");
+    qApp->enqueueError(*respostaSavePdf + " - Verifique se o arquivo não está aberto!");
     return {};
   }
 
@@ -65,114 +115,86 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec() or not query.first()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro buscando XML: " + query.lastError().text());
+    qApp->enqueueError("Erro buscando XML: " + query.lastError().text());
     return {};
   }
 
-  QFile file(QDir::currentPath() + "/temp.xml");
+  const auto resposta1 = enviarComando("NFE.SaveToFile(C:\\ACBrMonitorPLUS\\temp\\nfe.xml, \"" + query.value("xml").toString() + "\")");
 
-  if (not file.open(QFile::WriteOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo para escrita: " + file.errorString());
+  if (not resposta1) { return {}; }
+
+  const auto resposta2 = enviarComando("NFE.ConsultarNFe(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
+
+  if (not resposta2) { return {}; }
+
+  if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e")) {
+    qApp->enqueueError(*resposta2);
     return {};
   }
 
-  QTextStream stream(&file);
+  auto resposta3 = enviarComando("NFe.LoadfromFile(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
 
-  stream << query.value("xml").toString();
+  if (not resposta3) { return {}; }
 
-  file.close();
+  const QString xml = resposta3->remove("OK: ");
 
-  auto resposta = ACBr::enviarComando("NFE.ConsultarNFe(" + file.fileName() + ")");
-
-  if (not resposta) { return {}; }
-
-  if (not resposta->contains("XMotivo=Autorizado o uso da NF-e")) {
-    QMessageBox::critical(nullptr, "Resposta ConsultarNFe: ", *resposta);
-    return {};
-  }
-
-  QFile newFile(QDir::currentPath() + "/temp.xml");
-
-  if (not newFile.open(QFile::ReadOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo para leitura: " + newFile.errorString());
-    return {};
-  }
-
-  const QString xml = newFile.readAll();
-
-  return std::make_tuple<>(xml, *resposta);
+  return std::make_tuple<>(xml, *resposta2);
 }
 
 bool ACBr::abrirPdf(const QString &resposta) {
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(resposta))) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro abrindo PDF!");
-    return false;
-  }
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(resposta))) { return qApp->enqueueError(false, "Erro abrindo PDF!"); }
 
   return true;
 }
 
-std::optional<QString> ACBr::enviarComando(const QString &comando) {
-  if (socket.state() != QTcpSocket::ConnectedState) {
-    const auto servidor = UserSession::getSetting("User/servidorACBr");
-    const auto ip = UserSession::getSetting("User/portaACBr");
-
-    if (not servidor or not ip) {
-      QMessageBox::critical(nullptr, "Erro!", "Preencher IP e porta do ACBr nas configurações!");
-      return {};
-    }
-
-    socket.connectToHost(servidor.value().toString(), ip.value().toByteArray().toUShort());
-
-    if (not socket.waitForConnected(5000)) {
-      QMessageBox::critical(nullptr, "Erro!", "Não foi possível conectar ao ACBr: " + socket.errorString());
-      return {};
-    }
-
-    socket.waitForReadyRead();
-
-    socket.readAll(); // lendo mensagem de boas vindas
-  }
-
-  socket.write(comando.toUtf8() + "\r\n.\r\n");
-  socket.waitForBytesWritten();
-
-  auto *progressDialog = new QProgressDialog(nullptr);
-  progressDialog->reset();
-  progressDialog->setCancelButton(nullptr);
-  progressDialog->setLabelText("Esperando ACBr...");
-  progressDialog->setWindowTitle("ERP Staccato");
-  progressDialog->setWindowModality(Qt::WindowModal);
-  progressDialog->setMaximum(0);
-  progressDialog->setMinimum(0);
+std::optional<QString> ACBr::enviarComando(const QString &comando, const bool local) {
+  recebido = false;
+  enviado = false;
+  resposta.clear();
   progressDialog->show();
 
-  connect(&socket, &QTcpSocket::readyRead, progressDialog, &QProgressDialog::cancel);
+  if (socket.state() != QTcpSocket::ConnectedState) {
+    conectado = false;
+    pronto = false;
+    qDebug() << "conectando";
 
-  while (not progressDialog->wasCanceled()) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+    const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
+    const auto porta = UserSession::getSetting("User/portaACBr");
 
-  const QString resposta = QString(socket.readAll()).remove("\u0003");
+    if (not servidor or not porta) {
+      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
+      return {};
+    }
 
-  if (resposta.isEmpty()) {
-    QMessageBox::critical(nullptr, "Erro!", "Não obteve resposta do ACBr!");
-    return {};
+    socket.connectToHost(servidor.value().toString(), porta.value().toByteArray().toUShort());
   }
+
+  while (not pronto) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+
+  socket.write(comando.toUtf8() + "\r\n.\r\n");
+
+  while (not enviado and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+
+  while (not recebido and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+
+  qDebug() << "resposta: " << resposta;
+
+  progressDialog->cancel();
 
   return resposta;
 }
 
-bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &anexo) {
-  const auto resposta = ACBr::enviarComando("NFE.EnviarEmail(" + emailDestino + "," + anexo + ",1,'" + assunto + "', " + emailCopia + ")");
+bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &filePath) {
+  const auto resposta = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
 
   if (not resposta) { return false; }
 
   // TODO: perguntar se deseja tentar enviar novamente?
-  if (not resposta->contains("OK: Email enviado com sucesso")) {
-    QMessageBox::critical(nullptr, "Erro!", *resposta);
-    return false;
-  }
+  if (not resposta->contains("OK: Email enviado com sucesso")) { return qApp->enqueueError(false, *resposta); }
 
-  QMessageBox::information(nullptr, "Aviso!", *resposta);
+  qApp->enqueueInformation(*resposta);
 
   return true;
 }
+
+// NOTE: notas versão 3.1 ou menor não podem ser acessadas pelo servidor 4.0

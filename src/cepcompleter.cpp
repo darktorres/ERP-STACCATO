@@ -1,8 +1,7 @@
-#include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "cepcompleter.h"
 
 bool CepCompleter::buscaCEP(const QString &cep) {
@@ -12,12 +11,9 @@ bool CepCompleter::buscaCEP(const QString &cep) {
                 "log_logradouro.bai_nu_sequencial_ini = log_bairro.bai_nu_sequencial AND log_logradouro.cep = :cep");
   query.bindValue(":cep", QString(cep).remove("-"));
 
-  if (not query.exec()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro na busca pelo cep: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro na busca pelo cep: " + query.lastError().text()); }
 
-  if (not query.first()) { return false; }
+  if (not query.first()) { return qApp->enqueueError(false, "CEP não encontrado!"); }
 
   cidade = query.value("cidade").toString();
   endereco = query.value("log_tipo_logradouro").toString() + " " + query.value("logradouro").toString();

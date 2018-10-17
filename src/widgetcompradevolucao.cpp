@@ -3,10 +3,11 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "ui_widgetcompradevolucao.h"
 #include "widgetcompradevolucao.h"
 
-WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraDevolucao) { ui->setupUi(this); }
+WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraDevolucao) { ui->setupUi(this); }
 
 WidgetCompraDevolucao::~WidgetCompraDevolucao() { delete ui; }
 
@@ -100,10 +101,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Não selecionou nenhuma linha!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!"); }
 
   for (const auto &item : list) {
     if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) { return; }
@@ -111,7 +109,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (not modelVendaProduto.submitAll()) { return; }
 
-  emit informationSignal("Retornado para fornecedor!");
+  qApp->enqueueInformation("Retornado para fornecedor!");
 }
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
@@ -146,10 +144,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       query.bindValue(":idVenda", modelVendaProduto.data(item.row(), "idVenda").toString().left(11));
       query.bindValue(":idProduto", modelVendaProduto.data(item.row(), "idProduto"));
 
-      if (not query.exec() or not query.first()) {
-        emit errorSignal("Erro buscando idVendaProduto: " + query.lastError().text());
-        return false;
-      }
+      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto: " + query.lastError().text()); }
 
       const QString idVendaProduto = query.value("idVendaProduto").toString();
 
@@ -159,10 +154,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       if (not modelConsumo.select()) { return false; }
 
-      if (modelConsumo.rowCount() == 0) {
-        emit errorSignal("Não encontrou estoque!");
-        return false;
-      }
+      if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!"); }
 
       const int newRow = modelConsumo.rowCount();
       modelConsumo.insertRow(newRow);
@@ -193,29 +185,17 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Não selecionou nenhuma linha!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!"); }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not retornarEstoque(list)) { return qApp->rollbackTransaction(); }
 
-  if (not retornarEstoque(list)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   if (not modelVendaProduto.select()) { return; }
 
-  emit informationSignal("Retornado para estoque!");
+  qApp->enqueueInformation("Retornado para estoque!");
 }
 
 void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool) { montaFiltro(); }

@@ -1,14 +1,15 @@
 #ifndef INSERIRLANCAMENTO_H
 #define INSERIRLANCAMENTO_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InserirLancamento;
 }
 
-class InserirLancamento final : public Dialog {
+class InserirLancamento final : public QDialog {
   Q_OBJECT
 
 public:

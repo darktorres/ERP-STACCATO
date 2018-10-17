@@ -1,15 +1,15 @@
 #include <QDate>
 #include <QDebug>
-#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialogconfirmacao.h"
 #include "ui_widgetlogisticarepresentacao.h"
 #include "widgetlogisticarepresentacao.h"
 
-WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
+WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
 
 WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 
@@ -80,32 +80,20 @@ void WidgetLogisticaRepresentacao::setupTables() {
 void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao);
 
   if (input.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not processRows(list, input.getDateTime(), input.getRecebeu())) { return qApp->rollbackTransaction(); }
 
-  if (not processRows(list, input.getDateTime(), input.getRecebeu())) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Atualizado!");
+  qApp->enqueueInformation("Atualizado!");
 }
 
 bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) {
@@ -120,19 +108,13 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     query1.bindValue(":dataRealEnt", dataEntrega);
     query1.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
     query2.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
     query2.bindValue(":recebeu", recebeu);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando status na venda_produto: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text()); }
   }
 
   return true;

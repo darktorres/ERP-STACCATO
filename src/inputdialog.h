@@ -1,14 +1,15 @@
 #ifndef INPUTDIALOG_H
 #define INPUTDIALOG_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialog;
 }
 
-class InputDialog final : public Dialog {
+class InputDialog final : public QDialog {
   Q_OBJECT
 
 public:

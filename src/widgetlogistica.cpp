@@ -6,7 +6,7 @@
 #include "ui_widgetlogistica.h"
 #include "widgetlogistica.h"
 
-WidgetLogistica::WidgetLogistica(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogistica) {
+WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {
   ui->setupUi(this);
 
   ui->splitter_6->setStretchFactor(0, 0);

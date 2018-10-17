@@ -2,6 +2,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "log.h"
 #include "usersession.h"
 
@@ -11,10 +12,7 @@ bool Log::createLog(const QString &message) {
   query.bindValue(":idUsuario", UserSession::idUsuario());
   query.bindValue(":message", message);
 
-  if (not query.exec()) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro salvando log: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro salvando log: " + query.lastError().text()); }
 
   return true;
 }

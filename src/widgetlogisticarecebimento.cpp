@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
@@ -12,7 +13,7 @@
 #include "venda.h"
 #include "widgetlogisticarecebimento.h"
 
-WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
+WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
 
 WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
 
@@ -110,34 +111,22 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     query1.bindValue(":recebidoPor", recebidoPor);
     query1.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro atualizando status do estoque: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do estoque: " + query1.lastError().text()); }
 
     query2.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro atualizando status da venda: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + query2.lastError().text()); }
 
     query3.bindValue(":dataRealReceb", dataReceb);
     query3.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
     query3.bindValue(":codComercial", modelViewRecebimento.data(item.row(), "codComercial"));
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro atualizando status da compra: " + query3.lastError().text());
-      return false;
-    }
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query3.lastError().text()); }
 
     query4.bindValue(":dataRealReceb", dataReceb);
     query4.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
 
-    if (not query4.exec()) {
-      emit errorSignal("Erro atualizando produtos venda: " + query4.lastError().text());
-      return false;
-    }
+    if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando produtos venda: " + query4.lastError().text()); }
   }
 
   return true;
@@ -148,10 +137,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   QStringList ids;
   QStringList idVendas;
@@ -169,25 +155,16 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   const QDateTime dataReceb = inputDlg.getDateTime();
   const QString recebidoPor = inputDlg.getRecebeu();
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not processRows(list, dataReceb, recebidoPor)) { return qApp->rollbackTransaction(); }
 
-  if (not processRows(list, dataReceb, recebidoPor)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Confirmado recebimento!");
+  qApp->enqueueInformation("Confirmado recebimento!");
 }
 
 void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool) { ui->table->selectAll(); }
@@ -207,32 +184,20 @@ void WidgetLogisticaRecebimento::montaFiltro() {
 void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   InputDialog input(InputDialog::Tipo::AgendarRecebimento);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
-  if (not reagendar(list, input.getNextDate())) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Reagendado com sucesso!");
+  qApp->enqueueInformation("Reagendado com sucesso!");
 }
 
 bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) {
@@ -252,19 +217,13 @@ bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":dataPrevReceb", dataPrevReceb);
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando status na venda_produto: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text()); }
   }
 
   return true;
@@ -273,10 +232,7 @@ bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
 void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   for (const auto &item : list) {
     const QString idVenda = modelViewRecebimento.data(item.row(), "idVenda").toString();
@@ -295,10 +251,7 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
 void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   QStringList idVendas;
 
@@ -310,25 +263,16 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not cancelar(list)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Cancelado com sucesso!");
+  qApp->enqueueInformation("Cancelado com sucesso!");
 }
 
 bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
@@ -349,26 +293,17 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
 
     query1.bindValue(":idEstoque", idEstoque);
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro salvando status no estoque: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no estoque: " + query1.lastError().text()); }
 
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text()); }
 
     query3.bindValue(":idEstoque", idEstoque);
     query3.bindValue(":codComercial", codComercial);
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro salvando status na venda_produto: " + query3.lastError().text());
-      return false;
-    }
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query3.lastError().text()); }
   }
 
   return true;

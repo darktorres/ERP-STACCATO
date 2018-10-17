@@ -1,14 +1,15 @@
 #ifndef WIDGETRELATORIO_H
 #define WIDGETRELATORIO_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetRelatorio;
 }
 
-class WidgetRelatorio final : public Widget {
+class WidgetRelatorio final : public QWidget {
   Q_OBJECT
 
 public:

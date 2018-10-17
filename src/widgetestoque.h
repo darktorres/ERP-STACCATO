@@ -1,15 +1,16 @@
 #ifndef WIDGETESTOQUE_H
 #define WIDGETESTOQUE_H
 
+#include <QWidget>
+
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetEstoque;
 }
 
-class WidgetEstoque final : public Widget {
+class WidgetEstoque final : public QWidget {
   Q_OBJECT
 
 public:

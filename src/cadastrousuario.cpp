@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "cadastrousuario.h"
 #include "checkboxdelegate.h"
 #include "horizontalproxymodel.h"
@@ -79,8 +80,7 @@ bool CadastroUsuario::verifyFields() {
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
     ui->lineEditPasswd->setFocus();
-    emit errorSignal("As senhas não batem!");
-    return false;
+    return qApp->enqueueError(false, "As senhas não batem!");
   }
 
   return true;
@@ -161,15 +161,9 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() { sdUsuario->show(); }
 bool CadastroUsuario::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) {
-    emit errorSignal("Erro linha -1");
-    return false;
-  }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
-    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
-    return false;
-  }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
 
   if (not savingProcedures()) { return false; }
 
@@ -182,30 +176,21 @@ bool CadastroUsuario::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
+  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) {
-    emit errorSignal("Id vazio!");
-    return false;
-  }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
     query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-    if (not query.exec()) {
-      emit errorSignal("Erro criando usuário do banco de dados: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text()); }
 
     query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-    if (not query.exec()) {
-      emit errorSignal("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text()); }
 
     if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
 
@@ -229,22 +214,16 @@ bool CadastroUsuario::cadastrar() {
   return true;
 }
 
-void CadastroUsuario::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
+void CadastroUsuario::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   QSqlQuery query;
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro buscando usuário: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro buscando usuário: " + query.lastError().text()); }
 
-  if (query.first()) {
-    emit errorSignal("Nome de usuário já existe!");
-    return;
-  }
+  if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!"); }
 }
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario

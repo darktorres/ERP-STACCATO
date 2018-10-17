@@ -6,7 +6,6 @@
 #include <QFileDialog>
 #include <optional>
 
-#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 #include "xml.h"
 
@@ -14,7 +13,7 @@ namespace Ui {
 class ImportarXML;
 }
 
-class ImportarXML final : public Dialog {
+class ImportarXML final : public QDialog {
   Q_OBJECT
 
 public:
@@ -67,7 +66,6 @@ private:
   auto verificaExiste(const XML &xml) -> bool;
   auto verificaValido(const XML &xml) -> bool;
   auto verifyFields() -> bool;
-  auto wrapParear() -> void; // REFAC: simplify this
 };
 
 #endif // IMPORTARXML_H

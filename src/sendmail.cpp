@@ -1,12 +1,13 @@
 #include <QFileDialog>
 #include <QSqlError>
 
+#include "application.h"
 #include "sendmail.h"
 #include "smtp.h"
 #include "ui_sendmail.h"
 #include "usersession.h"
 
-SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &fornecedor, QWidget *parent) : Dialog(parent), fornecedor(fornecedor), tipo(tipo), ui(new Ui::SendMail) {
+SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &fornecedor, QWidget *parent) : QDialog(parent), fornecedor(fornecedor), tipo(tipo), ui(new Ui::SendMail) {
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos
   ui->setupUi(this);
 
@@ -28,7 +29,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) { emit errorSignal("Erro buscando email do fornecedor: " + query.lastError().text()); }
+    if (not query.exec()) { qApp->enqueueError("Erro buscando email do fornecedor: " + query.lastError().text()); }
 
     QString representante;
 
@@ -105,9 +106,9 @@ void SendMail::mailSent(const QString &status) {
 }
 
 void SendMail::successStatus() {
-  emit informationSignal(tr("Mensagem enviada!"));
+  qApp->enqueueInformation(tr("Mensagem enviada!"));
 
   QDialog::accept();
 }
 
-void SendMail::failureStatus(const QString &status) { emit errorSignal("Ocorreu erro: " + status); }
+void SendMail::failureStatus(const QString &status) { qApp->enqueueError("Ocorreu erro: " + status); }

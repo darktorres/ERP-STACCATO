@@ -1,14 +1,15 @@
 #ifndef WIDGETFINANCEIROCOMPRA_H
 #define WIDGETFINANCEIROCOMPRA_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetFinanceiroCompra;
 }
 
-class WidgetFinanceiroCompra final : public Widget {
+class WidgetFinanceiroCompra final : public QWidget {
   Q_OBJECT
 
 public:

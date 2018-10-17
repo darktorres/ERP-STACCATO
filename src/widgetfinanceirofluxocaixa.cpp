@@ -4,12 +4,13 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "pagamentosdia.h"
 #include "reaisdelegate.h"
 #include "ui_widgetfinanceirofluxocaixa.h"
 #include "widgetfinanceirofluxocaixa.h"
 
-WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
+WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
 
 WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
 
@@ -84,10 +85,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   QSqlQuery query;
 
-  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
-    emit errorSignal("Erro buscando saldo: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text()); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
 
@@ -118,10 +116,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) {
-    emit errorSignal("Erro buscando saldo: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text()); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
 

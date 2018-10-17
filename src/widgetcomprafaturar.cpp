@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
@@ -12,7 +13,7 @@
 #include "ui_widgetcomprafaturar.h"
 #include "widgetcomprafaturar.h"
 
-WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : Widget(parent), ui(new Ui::WidgetCompraFaturar) {
+WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {
   ui->setupUi(this);
 
   ui->splitter->setStretchFactor(0, 0);
@@ -24,12 +25,9 @@ WidgetCompraFaturar::~WidgetCompraFaturar() { delete ui; }
 void WidgetCompraFaturar::setupTables() {
   modelResumo.setTable("view_fornecedor_compra_faturar");
 
-  modelResumo.setFilter("(idVenda NOT LIKE '%CAMB%' OR idVenda IS NULL)");
-
-  modelResumo.setHeaderData("fornecedor", "Forn.");
-
   ui->tableResumo->setModel(&modelResumo);
-  ui->tableResumo->hideColumn("idVenda");
+
+  //---------------------------------------------------------------------------
 
   modelViewFaturamento.setTable("view_faturamento");
 
@@ -42,7 +40,6 @@ void WidgetCompraFaturar::setupTables() {
 }
 
 void WidgetCompraFaturar::setConnections() {
-  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
   connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
@@ -84,17 +81,11 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const 
     query1.bindValue(":dataRealFat", dataReal);
     query1.bindValue(":idCompra", idCompra);
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro atualizando status da compra: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query1.lastError().text()); }
 
     query2.bindValue(":idCompra", idCompra);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro atualizando status do produto da venda: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query2.lastError().text()); }
   }
 
   return true;
@@ -103,10 +94,7 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const 
 void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Não selecionou nenhuma compra!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma compra!"); }
 
   QStringList idsCompra;
   QStringList fornecedores;
@@ -120,10 +108,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const int size = fornecedores.size();
 
-  if (fornecedores.removeDuplicates() != size - 1) {
-    emit errorSignal("Fornecedores diferentes!");
-    return;
-  }
+  if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!"); }
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento);
   if (not inputDlg.setFilter(idsCompra)) { return; }
@@ -136,20 +121,11 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {
-    emit transactionStarted();
+    if (not qApp->startTransaction()) { return; }
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+    if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
 
-    if (not faturarRepresentacao(dataReal, idsCompra)) {
-      QSqlQuery("ROLLBACK").exec();
-      emit transactionEnded();
-      return;
-    }
-
-    if (not QSqlQuery("COMMIT").exec()) { return; }
-
-    emit transactionEnded();
+    if (not qApp->endTransaction()) { return; }
   } else {
     auto *import = new ImportarXML(idsCompra, dataReal, this);
     import->setAttribute(Qt::WA_DeleteOnClose);
@@ -158,20 +134,18 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
   updateTables();
-  emit informationSignal("Confirmado faturamento!");
+  qApp->enqueueInformation("Confirmado faturamento!");
 }
 
 void WidgetCompraFaturar::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();
-  const bool sul = ui->checkBoxMostrarSul->isChecked();
 
-  modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE") + " AND " +
-                                 QString(sul ? "(Código LIKE 'CAMB%' OR Código IS NULL)" : "(Código NOT LIKE 'CAMB%' OR Código IS NULL)"));
+  modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE"));
 
   if (not modelViewFaturamento.select()) { return; }
 
@@ -194,17 +168,11 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
   for (const auto &item : list) {
     query1.bindValue(":ordemCompra", modelViewFaturamento.data(item.row(), "OC"));
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro buscando dados: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro buscando dados: " + query1.lastError().text()); }
 
     query2.bindValue(":ordemCompra", modelViewFaturamento.data(item.row(), "OC"));
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando dados: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando dados: " + query2.lastError().text()); }
   }
 
   return true;
@@ -213,10 +181,7 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   QStringList idVendas;
 
@@ -229,34 +194,22 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not cancelar(list)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Itens cancelados!");
+  qApp->enqueueInformation("Itens cancelados!");
 }
 
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   InputDialog input(InputDialog::Tipo::Faturamento);
   if (input.exec() != InputDialog::Accepted) { return; }
@@ -275,23 +228,17 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     query1.bindValue(":dataPrevFat", dataPrevista);
     query1.bindValue(":idCompra", idCompra);
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro query pedido_fornecedor: " + query1.lastError().text());
-      return;
-    }
+    if (not query1.exec()) { return qApp->enqueueError("Erro query pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":dataPrevFat", dataPrevista);
     query2.bindValue(":idCompra", idCompra);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro query venda_has_produto: " + query2.lastError().text());
-      return;
-    }
+    if (not query2.exec()) { return qApp->enqueueError("Erro query venda_has_produto: " + query2.lastError().text()); }
   }
 
   updateTables();
 
-  emit informationSignal("Operação realizada com sucesso!");
+  qApp->enqueueInformation("Operação realizada com sucesso!");
 }
 
 // TODO: 4quando importar nota vincular com as contas_pagar

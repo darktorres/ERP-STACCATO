@@ -5,7 +5,7 @@
 #include "ui_logindialog.h"
 #include "usersession.h"
 
-LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
+LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
 
   connect(ui->comboBoxLoja, &QComboBox::currentTextChanged, this, &LoginDialog::on_comboBoxLoja_currentTextChanged);
@@ -62,9 +62,8 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   if (not qApp->dbConnect()) { return; }
 
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
-    emit errorSignal("Login inválido!");
     ui->lineEditPass->setFocus();
-    return;
+    return qApp->enqueueError("Login inválido!");
   }
 
   accept();

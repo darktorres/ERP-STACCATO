@@ -2,6 +2,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "inputdialog.h"
 #include "noeditdelegate.h"
@@ -10,7 +11,7 @@
 #include "ui_inputdialog.h"
 #include "usersession.h"
 
-InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : Dialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
+InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
 
   connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialog::on_dateEditEvento_dateChanged);
@@ -111,10 +112,7 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
 
 void InputDialog::on_pushButtonSalvar_clicked() {
   if (tipo == Tipo::ReagendarPedido) {
-    if (ui->lineEditObservacao->text().isEmpty()) {
-      emit errorSignal("Observação não pode estar vazio!");
-      return;
-    }
+    if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError("Observação não pode estar vazio!"); }
   }
 
   QDialog::accept();

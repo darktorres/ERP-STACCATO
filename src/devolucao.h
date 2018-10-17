@@ -2,15 +2,15 @@
 #define DEVOLUCAO_H
 
 #include <QDataWidgetMapper>
+#include <QDialog>
 
-#include "dialog.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Devolucao;
 }
 
-class Devolucao final : public Dialog {
+class Devolucao final : public QDialog {
   Q_OBJECT
 
 public:

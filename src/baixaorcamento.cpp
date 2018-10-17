@@ -1,10 +1,10 @@
-#include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "baixaorcamento.h"
 #include "ui_baixaorcamento.h"
 
-BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : Dialog(parent), ui(new Ui::BaixaOrcamento) {
+BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QDialog(parent), ui(new Ui::BaixaOrcamento) {
   ui->setupUi(this);
 
   setupTables(idOrcamento);
@@ -26,10 +26,7 @@ void BaixaOrcamento::setupTables(const QString &idOrcamento) {
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
-  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) {
-    emit errorSignal("Deve preencher a observação!");
-    return;
-  }
+  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { return qApp->enqueueError("Deve preencher a observação!"); }
 
   QString motivo;
 
@@ -37,10 +34,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     if (child->isChecked()) { motivo = child->text(); }
   }
 
-  if (motivo.isEmpty()) {
-    emit errorSignal("Deve escolher um motivo!");
-    return;
-  }
+  if (motivo.isEmpty()) { return qApp->enqueueError("Deve escolher um motivo!"); }
 
   if (not modelOrcamento.setData(0, "status", "PERDIDO")) { return; }
   if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) { return; }

@@ -1,14 +1,15 @@
 #ifndef WIDGETLOGISTICAAGENDARCOLETA_H
 #define WIDGETLOGISTICAAGENDARCOLETA_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetLogisticaAgendarColeta;
 }
 
-class WidgetLogisticaAgendarColeta final : public Widget {
+class WidgetLogisticaAgendarColeta final : public QWidget {
   Q_OBJECT
 
 public:

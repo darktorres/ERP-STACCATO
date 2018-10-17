@@ -6,7 +6,7 @@
 #include "userconfig.h"
 #include "usersession.h"
 
-UserConfig::UserConfig(QWidget *parent) : Dialog(parent), ui(new Ui::UserConfig) {
+UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));

@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "cadastrofornecedor.h"
 #include "cadastroproduto.h"
 #include "ui_cadastroproduto.h"
@@ -86,44 +87,37 @@ bool CadastroProduto::verifyFields() {
 
   if (ui->comboBoxUn->currentText().isEmpty()) {
     ui->comboBoxUn->setFocus();
-    emit errorSignal("Faltou preencher unidade!");
-    return false;
+    return qApp->enqueueError(false, "Faltou preencher unidade!");
   }
 
   if (ui->dateEditValidade->date().toString("dd-MM-yyyy") == "01-01-1900") {
     ui->dateEditValidade->setFocus();
-    emit errorSignal("Faltou preencher validade!");
-    return false;
+    return qApp->enqueueError(false, "Faltou preencher validade!");
   }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxCusto->value())) {
     ui->doubleSpinBoxCusto->setFocus();
-    emit errorSignal("Custo inválido!");
-    return false;
+    return qApp->enqueueError(false, "Custo inválido!");
   }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxVenda->value())) {
     ui->doubleSpinBoxVenda->setFocus();
-    emit errorSignal("Preço inválido!");
-    return false;
+    return qApp->enqueueError(false, "Preço inválido!");
   }
 
   if (ui->itemBoxFornecedor->getValue().isNull()) {
     ui->itemBoxFornecedor->setFocus();
-    emit errorSignal("Faltou preencher fornecedor!");
-    return false;
+    return qApp->enqueueError(false, "Faltou preencher fornecedor!");
   }
 
   if (ui->lineEditICMS->text().isEmpty()) {
     ui->lineEditICMS->setFocus();
-    emit errorSignal("Faltou preencher ICMS!");
-    return false;
+    return qApp->enqueueError(false, "Faltou preencher ICMS!");
   }
 
   if (ui->lineEditCodComer->text().isEmpty()) {
     ui->lineEditCodComer->setFocus();
-    emit errorSignal("Faltou preencher Código comercial!");
-    return false;
+    return qApp->enqueueError(false, "Faltou preencher Código comercial!");
   }
 
   if (tipo == Tipo::Cadastrar) {
@@ -132,15 +126,9 @@ bool CadastroProduto::verifyFields() {
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
 
-    if (not query.exec()) {
-      emit errorSignal("Erro verificando se produto já cadastrado!");
-      return false;
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se produto já cadastrado!"); }
 
-    if (query.first()) {
-      emit errorSignal("Código comercial já cadastrado!");
-      return false;
-    }
+    if (query.first()) { return qApp->enqueueError(false, "Código comercial já cadastrado!"); }
   }
 
   return true;
@@ -178,7 +166,7 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->checkBoxPromocao, "promocao");
 }
 
-void CadastroProduto::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
+void CadastroProduto::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
 
 bool CadastroProduto::savingProcedures() {
   if (not setData("codBarras", ui->lineEditCodBarras->text())) { return false; }
@@ -213,10 +201,7 @@ bool CadastroProduto::savingProcedures() {
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getValue());
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro verificando se fornecedor é representacao: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
 
   const bool representacao = query.value("representacao").toBool();
 
@@ -246,15 +231,9 @@ void CadastroProduto::calcularMarkup() {
 bool CadastroProduto::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) {
-    emit errorSignal("Erro linha -1");
-    return false;
-  }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
-    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
-    return false;
-  }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
 
   if (not savingProcedures()) { return false; }
 
@@ -267,12 +246,9 @@ bool CadastroProduto::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
+  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) {
-    emit errorSignal("Id vazio!");
-    return false;
-  }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 
   return true;
 }

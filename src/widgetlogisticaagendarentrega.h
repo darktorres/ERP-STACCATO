@@ -1,15 +1,16 @@
 #ifndef WIDGETLOGISTICAAGENDARENTREGA_H
 #define WIDGETLOGISTICAAGENDARENTREGA_H
 
+#include <QWidget>
+
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetLogisticaAgendarEntrega;
 }
 
-class WidgetLogisticaAgendarEntrega final : public Widget {
+class WidgetLogisticaAgendarEntrega final : public QWidget {
   Q_OBJECT
 
 public:
@@ -47,7 +48,7 @@ private:
   auto on_tableVendas_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableVendas_entered(const QModelIndex &) -> void;
   auto processRows() -> bool;
-  auto quebrarConsumo(const int row, const double proporcao, const double proporcaoNovo) -> bool;
+  auto quebrarConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto) -> bool;
   auto quebrarProduto(const int row, const int quantAgendar, const int quantTotal) -> bool;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) -> bool;
   auto setupTables() -> void;

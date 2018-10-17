@@ -18,10 +18,6 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QScrollArea(parent), ui(ne
   auto *scrollLayout = new QVBoxLayout(frame);
   scrollLayout->setSizeConstraint(QLayout::SetMinimumSize);
   setWidget(frame);
-
-  connect(this, &WidgetPagamentos::informationSignal, qApp, &Application::enqueueInformation);
-  connect(this, &WidgetPagamentos::warningSignal, qApp, &Application::enqueueWarning);
-  connect(this, &WidgetPagamentos::errorSignal, qApp, &Application::enqueueError);
 }
 
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
@@ -44,10 +40,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", UserSession::idLoja());
 
-  if (not queryPag.exec()) {
-    emit errorSignal("Erro lendo formas de pagamentos: " + queryPag.lastError().text());
-    return;
-  }
+  if (not queryPag.exec()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
@@ -133,19 +126,13 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
       "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) {
-    emit errorSignal("Erro buscando orçamento: " + queryOrc.lastError().text());
-    return;
-  }
+  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError("Erro buscando orçamento: " + queryOrc.lastError().text()); }
 
   QSqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
 
-  if (not queryPag.exec()) {
-    emit errorSignal("Erro lendo formas de pagamentos: " + queryPag.lastError().text());
-    return;
-  }
+  if (not queryPag.exec()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
@@ -211,10 +198,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listComboPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro lendo formas de pagamentos: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text()); }
 
   const int parcelas = query.value("parcelas").toInt();
 
@@ -236,10 +220,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listComboPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro lendo formas de pagamentos: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text()); }
 
   const int parcelas = query.value("parcelas").toInt();
 

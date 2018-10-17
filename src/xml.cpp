@@ -1,13 +1,7 @@
 #include "xml.h"
 #include "application.h"
 
-XML::XML(QByteArray fileContent, QString fileName) : fileContent(std::move(fileContent)), fileName(std::move(fileName)) {
-  connect(this, &XML::informationSignal, qApp, &Application::enqueueInformation);
-  connect(this, &XML::warningSignal, qApp, &Application::enqueueWarning);
-  connect(this, &XML::errorSignal, qApp, &Application::enqueueError);
-
-  montarArvore(model);
-}
+XML::XML(QByteArray fileContent, QString fileName) : fileContent(std::move(fileContent)), fileName(std::move(fileName)) { montarArvore(model); }
 
 void XML::readChild(QDomElement &element, QStandardItem *elementItem) {
   QDomElement child = element.firstChildElement();
@@ -164,10 +158,7 @@ void XML::montarArvore(QStandardItemModel &model) {
   QDomDocument document;
   QString error;
 
-  if (not document.setContent(fileContent, &error)) {
-    emit errorSignal("Erro lendo arquivo: " + error);
-    return;
-  }
+  if (not document.setContent(fileContent, &error)) { return qApp->enqueueError("Erro lendo arquivo: " + error); }
 
   QDomElement root = document.firstChildElement();
   QDomNamedNodeMap map = root.attributes();

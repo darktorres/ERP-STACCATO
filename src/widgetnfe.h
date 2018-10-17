@@ -1,13 +1,13 @@
 #ifndef WIDGETNFE_H
 #define WIDGETNFE_H
 
-#include "widget.h"
+#include <QWidget>
 
 namespace Ui {
 class WidgetNfe;
 }
 
-class WidgetNfe final : public Widget {
+class WidgetNfe final : public QWidget {
   Q_OBJECT
 
 public:

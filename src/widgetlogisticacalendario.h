@@ -1,13 +1,13 @@
 #ifndef WIDGETLOGISTICACALENDARIO_H
 #define WIDGETLOGISTICACALENDARIO_H
 
-#include "widget.h"
+#include <QWidget>
 
 namespace Ui {
 class WidgetLogisticaCalendario;
 }
 
-class WidgetLogisticaCalendario final : public Widget {
+class WidgetLogisticaCalendario final : public QWidget {
   Q_OBJECT
 
 public:

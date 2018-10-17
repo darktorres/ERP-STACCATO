@@ -1,14 +1,15 @@
 #ifndef WIDGETCOMPRAOC_H
 #define WIDGETCOMPRAOC_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetCompraOC;
 }
 
-class WidgetCompraOC final : public Widget {
+class WidgetCompraOC final : public QWidget {
   Q_OBJECT
 
 public:

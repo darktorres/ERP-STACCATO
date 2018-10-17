@@ -1,32 +1,20 @@
 #include <QDateTime>
-#include <QDebug>
 #include <QDesktopServices>
-#include <QFileDialog>
-#include <QLocale>
-#include <QMessageBox>
+#include <QDir>
 #include <QSqlError>
 
 #include "application.h"
 #include "excel.h"
 #include "usersession.h"
 
-Excel::Excel(QString id, QWidget *parent) : id(std::move(id)), parent(parent) {
-  connect(this, &Excel::informationSignal, qApp, &Application::enqueueInformation);
-  connect(this, &Excel::warningSignal, qApp, &Application::enqueueWarning);
-  connect(this, &Excel::errorSignal, qApp, &Application::enqueueError);
-
-  verificaTipo();
-}
+Excel::Excel(QString id) : id(std::move(id)) { verificaTipo(); }
 
 void Excel::verificaTipo() {
   QSqlQuery query;
   query.prepare("SELECT idOrcamento FROM orcamento WHERE idOrcamento = :idOrcamento");
   query.bindValue(":idOrcamento", id);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro verificando se id é Orçamento!");
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro verificando se id é Orçamento!"); }
 
   tipo = query.first() ? Tipo::Orcamento : Tipo::Venda;
 }
@@ -42,44 +30,28 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   const auto folderKey = UserSession::getSetting(folder);
 
-  if (not folderKey or folderKey.value().toString().isEmpty()) {
-    emit errorSignal("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!");
-    return false;
-  }
+  if (not folderKey) { return qApp->enqueueError(false, "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
   const QString path = folderKey.value().toString();
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkdir(path)) {
-    emit errorSignal("Erro ao criar a pasta escolhida nas configurações!");
-    return false;
-  }
+  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueError(false, "Erro ao criar a pasta escolhida nas configurações!"); }
 
   const QString arquivoModelo = "modelo pedido.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) {
-    emit errorSignal("Não encontrou o modelo do Excel!");
-    return false;
-  }
+  if (not modelo.exists()) { return qApp->enqueueError(false, "Não encontrou o modelo do Excel!"); }
 
-  if (not setQuerys()) {
-    emit errorSignal("Processo interrompido, ocorreu algum erro!");
-    return false;
-  }
+  if (not setQuerys()) { return false; }
 
   fileName = isRepresentacao ? path + "/" + representacao + ".xlsx"
                              : path + "/" + id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) {
-    emit errorSignal("Não foi possível abrir o arquivo para escrita:\n" + fileName);
-    emit errorSignal("Erro: " + file.errorString());
-    return false;
-  }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
@@ -159,10 +131,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QSqlQuery queryPgt1("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                       "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
-  if (not queryPgt1.exec() or not queryPgt1.first()) {
-    emit errorSignal("Erro buscando pagamentos 1: " + queryPgt1.lastError().text());
-    return false;
-  }
+  if (not queryPgt1.exec() or not queryPgt1.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 1: " + queryPgt1.lastError().text()); }
 
   const QString pgt1 = queryPgt1.value("valor") == 0 ? ""
                                                      : queryPgt1.value("tipo").toString() + " - " + queryPgt1.value("COUNT(valor)").toString() + "x de R$ " +
@@ -172,10 +141,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QSqlQuery queryPgt2("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                       "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
-  if (not queryPgt2.exec() or not queryPgt2.first()) {
-    emit errorSignal("Erro buscando pagamentos 2: " + queryPgt2.lastError().text());
-    return false;
-  }
+  if (not queryPgt2.exec() or not queryPgt2.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 2: " + queryPgt2.lastError().text()); }
 
   const QString pgt2 = queryPgt2.value("valor") == 0 ? ""
                                                      : queryPgt2.value("tipo").toString() + " - " + queryPgt2.value("COUNT(valor)").toString() + "x de R$ " +
@@ -185,10 +151,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QSqlQuery queryPgt3("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                       "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
-  if (not queryPgt3.exec() or not queryPgt3.first()) {
-    emit errorSignal("Erro buscando pagamentos 3: " + queryPgt3.lastError().text());
-    return false;
-  }
+  if (not queryPgt3.exec() or not queryPgt3.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 3: " + queryPgt3.lastError().text()); }
 
   const QString pgt3 = queryPgt3.value("valor") == 0 ? ""
                                                      : queryPgt3.value("tipo").toString() + " - " + queryPgt3.value("COUNT(valor)").toString() + "x de R$ " +
@@ -200,10 +163,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QSqlQuery queryPgt4("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                       "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
-  if (not queryPgt4.exec() or not queryPgt4.first()) {
-    emit errorSignal("Erro buscando pagamentos 4: " + queryPgt4.lastError().text());
-    return false;
-  }
+  if (not queryPgt4.exec() or not queryPgt4.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 4: " + queryPgt4.lastError().text()); }
 
   const QString pgt4 = queryPgt4.value("valor") == 0 ? ""
                                                      : queryPgt4.value("tipo").toString() + " - " + queryPgt4.value("COUNT(valor)").toString() + "x de R$ " +
@@ -215,10 +175,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   QSqlQuery queryPgt5("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
                       "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
-  if (not queryPgt5.exec() or not queryPgt5.first()) {
-    emit errorSignal("Erro buscando pagamentos 5: " + queryPgt5.lastError().text());
-    return false;
-  }
+  if (not queryPgt5.exec() or not queryPgt5.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 5: " + queryPgt5.lastError().text()); }
 
   const QString pgt5 = queryPgt5.value("valor") == 0 ? ""
                                                      : queryPgt5.value("tipo").toString() + " - " + queryPgt5.value("COUNT(valor)").toString() + "x de R$ " +
@@ -242,10 +199,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     query.prepare("SELECT ui FROM produto WHERE idProduto = :idProduto");
     query.bindValue(":idProduto", queryProduto.value("idProduto"));
 
-    if (not query.exec() or not query.first()) {
-      emit errorSignal("Erro buscando dados do produto: " + query.lastError().text());
-      return false;
-    }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
 
     const QString loes = query.value("ui").toString().contains("- L") ? " LOES" : "";
 
@@ -277,13 +231,10 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   hideUnusedRows(xlsx);
 
-  if (not xlsx.saveAs(fileName)) {
-    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return false;
-  }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName);
 
   return true;
 }
@@ -311,71 +262,44 @@ bool Excel::setQuerys() {
     queryProduto.bindValue(":idVenda", id);
   }
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando dados da venda/orçamento: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
 
-  if (not queryProduto.exec() or not queryProduto.first()) {
-    emit errorSignal("Erro buscando dados dos produtos: " + query.lastError().text());
-    return false;
-  }
+  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados dos produtos: " + query.lastError().text()); }
 
   queryCliente.prepare("SELECT nome_razao, email, cpf, cnpj, pfpj, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
-  if (not queryCliente.exec() or not queryCliente.first()) {
-    emit errorSignal("Erro buscando cliente: " + queryCliente.lastError().text());
-    return false;
-  }
+  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro buscando cliente: " + queryCliente.lastError().text()); }
 
   queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
-  if (not queryEndEnt.exec() or not queryEndEnt.first()) {
-    emit errorSignal("Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text());
-    return false;
-  }
+  if (not queryEndEnt.exec() or not queryEndEnt.first()) { return qApp->enqueueError(false, "Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
 
   queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
-  if (not queryEndFat.exec() or not queryEndFat.first()) {
-    emit errorSignal("Erro buscando dados do endereço: " + queryEndFat.lastError().text());
-    return false;
-  }
+  if (not queryEndFat.exec() or not queryEndFat.first()) { return qApp->enqueueError(false, "Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
 
   queryProfissional.prepare("SELECT nome_razao, tel, email FROM profissional WHERE idProfissional = :idProfissional");
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
-  if (not queryProfissional.exec() or not queryProfissional.first()) {
-    emit errorSignal("Erro buscando profissional: " + queryProfissional.lastError().text());
-    return false;
-  }
+  if (not queryProfissional.exec() or not queryProfissional.first()) { return qApp->enqueueError(false, "Erro buscando profissional: " + queryProfissional.lastError().text()); }
 
   queryVendedor.prepare("SELECT nome, email FROM usuario WHERE idUsuario = :idUsuario");
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
-  if (not queryVendedor.exec() or not queryVendedor.first()) {
-    emit errorSignal("Erro buscando vendedor: " + queryVendedor.lastError().text());
-    return false;
-  }
+  if (not queryVendedor.exec() or not queryVendedor.first()) { return qApp->enqueueError(false, "Erro buscando vendedor: " + queryVendedor.lastError().text()); }
 
   queryLoja.prepare("SELECT tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLoja.exec() or not queryLoja.first()) {
-    emit errorSignal("Erro buscando loja: " + queryLoja.lastError().text());
-    return false;
-  }
+  if (not queryLoja.exec() or not queryLoja.first()) { return qApp->enqueueError(false, "Erro buscando loja: " + queryLoja.lastError().text()); }
 
   queryLojaEnd.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) {
-    emit errorSignal("Erro buscando endereço loja: " + queryLojaEnd.lastError().text());
-    return false;
-  }
+  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { return qApp->enqueueError(false, "Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }
 
   return true;
 }

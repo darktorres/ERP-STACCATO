@@ -2,12 +2,13 @@
 #include <QSqlError>
 #include <QSqlRecord>
 
+#include "application.h"
 #include "noeditdelegate.h"
 #include "precoestoque.h"
 #include "reaisdelegate.h"
 #include "ui_precoestoque.h"
 
-PrecoEstoque::PrecoEstoque(QWidget *parent) : Dialog(parent), ui(new Ui::PrecoEstoque) {
+PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged);
@@ -88,7 +89,7 @@ void PrecoEstoque::setupTables() {
 void PrecoEstoque::on_pushButtonSalvar_clicked() {
   if (not modelProduto.submitAll()) { return; }
 
-  emit informationSignal("Dados atualizados!");
+  qApp->enqueueInformation("Dados atualizados!");
   close();
 }
 

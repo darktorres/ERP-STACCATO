@@ -22,7 +22,7 @@ private:
   QPushButton *pushButtonStatus;
   // methods
   auto event(QEvent *event) -> bool;
-  auto gerarEnviarRelatorio() -> void;
+  //  auto gerarEnviarRelatorio() -> void;
   auto on_actionCadastrarCliente_triggered() -> void;
   auto on_actionCadastrarFornecedor_triggered() -> void;
   auto on_actionCadastrarProdutos_triggered() -> void;

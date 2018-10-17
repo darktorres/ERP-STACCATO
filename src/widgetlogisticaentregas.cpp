@@ -12,6 +12,7 @@
 #include <QUrl>
 
 #include "acbr.h"
+#include "application.h"
 #include "cadastrarnfe.h"
 #include "doubledelegate.h"
 #include "inputdialog.h"
@@ -23,7 +24,7 @@
 #include "widgetlogisticaentregas.h"
 #include "xlsxdocument.h"
 
-WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaEntregas) {
+WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);
 
   ui->splitter->setStretchFactor(0, 0);
@@ -123,6 +124,8 @@ void WidgetLogisticaEntregas::setupTables() {
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
   modelProdutos.setHeaderData("produto", "Produto");
+  modelProdutos.setHeaderData("codComercial", "Código");
+  modelProdutos.setHeaderData("formComercial", "Formato");
   modelProdutos.setHeaderData("caixas", "Cx.");
   modelProdutos.setHeaderData("kg", "Kg.");
   modelProdutos.setHeaderData("quant", "Quant.");
@@ -146,32 +149,20 @@ void WidgetLogisticaEntregas::setupTables() {
 void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   InputDialog input(InputDialog::Tipo::AgendarEntrega);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
-  if (not reagendar(list, input.getNextDate())) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Reagendado com sucesso!");
+  qApp->enqueueInformation("Reagendado com sucesso!");
 }
 
 bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
@@ -189,27 +180,18 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
       query1.bindValue(":dataPrevEnt", dataPrevEnt);
       query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-      if (not query1.exec()) {
-        emit errorSignal("Erro atualizando data venda: " + query1.lastError().text());
-        return false;
-      }
+      if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando data venda: " + query1.lastError().text()); }
 
       query2.bindValue(":dataPrevEnt", dataPrevEnt);
       query2.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-      if (not query2.exec()) {
-        emit errorSignal("Erro atualizando data pedido_fornecedor: " + query2.lastError().text());
-        return false;
-      }
+      if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando data pedido_fornecedor: " + query2.lastError().text()); }
     }
 
     query3.bindValue(":data", dataPrevEnt);
     query3.bindValue(":idEvento", modelCarga.data(item.row(), "idEvento"));
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro atualizando data carga: " + query3.lastError().text());
-      return false;
-    }
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando data carga: " + query3.lastError().text()); }
   }
 
   return true;
@@ -218,10 +200,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
 void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
@@ -231,9 +210,8 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   const CadastrarNFe::Tipo tipo = modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0 ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
 
-  auto *nfe = new CadastrarNFe(idVenda, tipo, this);
+  auto *nfe = new CadastrarNFe(idVenda, lista, tipo, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
-  nfe->prepararNFe(lista);
 
   nfe->show();
 }
@@ -242,7 +220,7 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
   const QString data = modelCalendario.data(index.row(), "data").toString();
   const QString veiculo = modelCalendario.data(index.row(), "idVeiculo").toString();
 
-  modelCarga.setFilter("DATE_FORMAT(dataPrevEnt, '%d-%m-%Y') = '" + data + "' AND idVeiculo = " + veiculo);
+  modelCarga.setFilter("CAST(dataPrevEnt AS DATE) = '" + data + "' AND idVeiculo = " + veiculo);
 
   if (not modelCarga.select()) { return; }
 
@@ -309,28 +287,19 @@ bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, con
 
     query1.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro salvando veiculo_has_produto: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando veiculo_has_produto: " + query1.lastError().text()); }
 
     query2.bindValue(":dataRealEnt", dataRealEnt);
     query2.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando pedido_fornecedor: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando pedido_fornecedor: " + query2.lastError().text()); }
 
     query3.bindValue(":entregou", entregou);
     query3.bindValue(":recebeu", recebeu);
     query3.bindValue(":dataRealEnt", dataRealEnt);
     query3.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro salvando venda_produto: " + query3.lastError().text());
-      return false;
-    }
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando venda_produto: " + query3.lastError().text()); }
   }
 
   return true;
@@ -339,10 +308,7 @@ bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, con
 void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   const int row = list.first().row();
 
@@ -359,36 +325,24 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   const QString entregou = inputDlg.getEntregou();
   const QString recebeu = inputDlg.getRecebeu();
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not confirmarEntrega(dataRealEnt, entregou, recebeu)) { return qApp->rollbackTransaction(); }
 
-  if (not confirmarEntrega(dataRealEnt, entregou, recebeu)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Entrega confirmada!");
+  qApp->enqueueInformation("Entrega confirmada!");
 }
 
 void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  if (not ACBr::gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbr; not acbr.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &) { montaFiltro(); }
@@ -404,10 +358,7 @@ void WidgetLogisticaEntregas::montaFiltro() {
 void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
@@ -415,22 +366,13 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cancelarEntrega(list)) { return qApp->rollbackTransaction(); }
 
-  if (not cancelarEntrega(list)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
+  if (not qApp->endTransaction()) { return; }
 
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
-
-  emit informationSignal("Operação realizada com sucesso!");
+  qApp->enqueueInformation("Operação realizada com sucesso!");
 }
 
 bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
@@ -440,10 +382,7 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   query.prepare("SELECT idVendaProduto FROM veiculo_has_produto WHERE idEvento = :idEvento");
   query.bindValue(":idEvento", idEvento);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro buscando produtos: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + query.lastError().text()); }
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
@@ -451,20 +390,14 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   while (query.next()) {
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro voltando status produto: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro voltando status produto: " + query2.lastError().text()); }
   }
 
   QSqlQuery query3;
   query3.prepare("DELETE FROM veiculo_has_produto WHERE idEvento = :idEvento");
   query3.bindValue(":idEvento", idEvento);
 
-  if (not query3.exec()) {
-    emit errorSignal("Erro deletando evento: " + query3.lastError().text());
-    return false;
-  }
+  if (not query3.exec()) { return qApp->enqueueError(false, "Erro deletando evento: " + query3.lastError().text()); }
 
   return true;
 }
@@ -478,32 +411,22 @@ void WidgetLogisticaEntregas::on_tableCarga_entered(const QModelIndex &) { ui->t
 void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) {
-    emit errorSignal("Nenhuma linha selecionada!");
-    return;
-  }
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
 
   const int idNFe = modelCarga.data(selection.first().row(), "idNFe").toInt();
 
-  if (auto tuple = ACBr::consultarNFe(idNFe); tuple) {
+  ACBr acbr;
+
+  if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
     auto [xml, resposta] = *tuple;
 
-    emit transactionStarted();
+    if (not qApp->startTransaction()) { return; }
 
-    if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-    if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+    if (not consultarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
 
-    if (not consultarNFe(idNFe, xml)) {
-      QSqlQuery("ROLLBACK").exec();
-      emit transactionEnded();
-      return;
-    }
+    if (not qApp->endTransaction()) { return; }
 
-    if (not QSqlQuery("COMMIT").exec()) { return; }
-
-    emit transactionEnded();
-
-    emit informationSignal(resposta);
+    qApp->enqueueInformation(resposta);
   }
 }
 
@@ -513,10 +436,7 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) {
-    emit errorSignal("Erro marcando nota como 'AUTORIZADO': " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text()); }
 
   // REFAC: refactor this to use 'IN', add a '?' for each idVendaProduto then bind each one with 'addBindValue'
   QSqlQuery query1;
@@ -531,26 +451,17 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":idNFeSaida", idNFe);
     query2.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando NFe nos produtos: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query2.lastError().text()); }
 
     query3.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
     query3.bindValue(":idNFeSaida", idNFe);
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro atualizando carga veiculo: " + query3.lastError().text());
-      return false;
-    }
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando carga veiculo: " + query3.lastError().text()); }
   }
 
   return true;
@@ -559,10 +470,7 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
 void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
   const QString idEvento = modelCarga.data(list.first().row(), "idEvento").toString();
@@ -570,58 +478,38 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   SqlQueryModel modelProdutosAgrupado;
 
   modelProdutosAgrupado.setQuery(
-      "SELECT idEvento, idVenda, GROUP_CONCAT(DISTINCT fornecedor) AS fornecedor, produto, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, GROUP_CONCAT(DISTINCT un) AS "
-      "un FROM view_calendario_produto WHERE idVenda = '" +
-      idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY produto");
+      "SELECT idEvento, idVenda, fornecedor, produto, codComercial, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, un FROM view_calendario_produto WHERE idVenda = '" + idVenda +
+      "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
-  if (modelProdutosAgrupado.lastError().isValid()) {
-    emit errorSignal("Erro buscando dados: " + modelProdutosAgrupado.lastError().text());
-    return;
-  }
+  if (modelProdutosAgrupado.lastError().isValid()) { return qApp->enqueueError("Erro buscando dados: " + modelProdutosAgrupado.lastError().text()); }
 
   // -------------------------------------------------------------------------
 
-  if (modelProdutosAgrupado.rowCount() > 20) {
-    emit errorSignal("Mais produtos do que cabe no modelo do Excel!");
-    return;
-  }
+  if (modelProdutosAgrupado.rowCount() > 20) { return qApp->enqueueError("Mais produtos do que cabe no modelo do Excel!"); }
 
   // -------------------------------------------------------------------------
 
   const auto folderKey = UserSession::getSetting("User/EntregasPdfFolder");
 
-  if (not folderKey or folderKey.value().toString().isEmpty()) {
-    emit errorSignal("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!");
-    return;
-  }
+  if (not folderKey) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!"); }
 
   const QString path = folderKey.value().toString();
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkdir(path)) {
-    emit errorSignal("Erro ao criar a pasta escolhida nas configurações!");
-    return;
-  }
+  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueError("Erro ao criar a pasta escolhida nas configurações!"); }
 
   const QString arquivoModelo = "espelho_entrega.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) {
-    emit errorSignal("Não encontrou o modelo do Excel!");
-    return;
-  }
+  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!"); }
 
   const QString fileName = path + "/teste_protocolo_entrega.xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) {
-    emit errorSignal("Não foi psossível abrir o arquivo para escrita:\n" + fileName);
-    emit errorSignal("Erro: " + file.errorString());
-    return;
-  }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi psossível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
@@ -635,10 +523,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   queryCliente.prepare("SELECT nome_razao, tel, telCel FROM cliente c WHERE c.idCliente = (SELECT idCliente FROM venda WHERE idVenda = :idVenda)");
   queryCliente.bindValue(":idVenda", idVenda);
 
-  if (not queryCliente.exec() or not queryCliente.first()) {
-    emit errorSignal("Erro buscando dados cliente: " + queryCliente.lastError().text());
-    return;
-  }
+  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError("Erro buscando dados cliente: " + queryCliente.lastError().text()); }
 
   const QString tel = queryCliente.value("tel").toString();
   const QString telCel = queryCliente.value("telCel").toString();
@@ -652,10 +537,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");
   queryEndereco.bindValue(":idVenda", idVenda);
 
-  if (not queryEndereco.exec()) {
-    emit errorSignal("Erro buscando endereço: " + queryEndereco.lastError().text());
-    return;
-  }
+  if (not queryEndereco.exec()) { return qApp->enqueueError("Erro buscando endereço: " + queryEndereco.lastError().text()); }
 
   if (queryEndereco.first()) {
     xlsx.write("J19", queryEndereco.value("logradouro").toString() + " " + queryEndereco.value("numero").toString() + " " + queryEndereco.value("complemento").toString() + " - " +
@@ -665,16 +547,13 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row = row + 2, ++index) {
     xlsx.write("D" + QString::number(row), modelProdutosAgrupado.data(index, "fornecedor"));
-    xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto"));                                                                     // produto
-    xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString()); // quant
-    xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                     // caixas
+    xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto").toString() + " - " + modelProdutosAgrupado.data(index, "codComercial").toString()); // produto
+    xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString());               // quant
+    xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                                   // caixas
   }
 
-  if (not xlsx.saveAs(fileName)) {
-    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return;
-  }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo."); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName);
 }

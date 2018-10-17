@@ -1,14 +1,15 @@
 #ifndef WIDGETCOMPRARESUMO_H
 #define WIDGETCOMPRARESUMO_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetCompraResumo;
 }
 
-class WidgetCompraResumo : public Widget {
+class WidgetCompraResumo : public QWidget {
   Q_OBJECT
 
 public:

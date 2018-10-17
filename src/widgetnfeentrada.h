@@ -1,14 +1,15 @@
 #ifndef WIDGETNFEENTRADA_H
 #define WIDGETNFEENTRADA_H
 
+#include <QWidget>
+
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetNfeEntrada;
 }
 
-class WidgetNfeEntrada final : public Widget {
+class WidgetNfeEntrada final : public QWidget {
   Q_OBJECT
 
 public:

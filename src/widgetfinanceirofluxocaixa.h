@@ -1,15 +1,16 @@
 #ifndef WIDGETFINANCEIROFLUXOCAIXA_H
 #define WIDGETFINANCEIROFLUXOCAIXA_H
 
+#include <QWidget>
+
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetFinanceiroFluxoCaixa;
 }
 
-class WidgetFinanceiroFluxoCaixa final : public Widget {
+class WidgetFinanceiroFluxoCaixa final : public QWidget {
   Q_OBJECT
 
 public:

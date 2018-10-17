@@ -1,15 +1,14 @@
 #ifndef CALCULOFRETE_H
 #define CALCULOFRETE_H
 
+#include <QDialog>
 #include <QNetworkAccessManager>
-
-#include "dialog.h"
 
 namespace Ui {
 class CalculoFrete;
 }
 
-class CalculoFrete : public Dialog {
+class CalculoFrete : public QDialog {
   Q_OBJECT
 
 public:

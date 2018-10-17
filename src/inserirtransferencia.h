@@ -1,14 +1,15 @@
 #ifndef INSERIRTRANSFERENCIA_H
 #define INSERIRTRANSFERENCIA_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InserirTransferencia;
 }
 
-class InserirTransferencia final : public Dialog {
+class InserirTransferencia final : public QDialog {
   Q_OBJECT
 
 public:

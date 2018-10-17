@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "comboboxdelegate.h"
 #include "usersession.h"
 
@@ -39,7 +40,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     query.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
     query.bindValue(":idLoja", UserSession::idLoja());
 
-    if (not query.exec()) { QMessageBox::critical(parent, "Erro!", "Erro lendo formas de pagamentos: " + query.lastError().text()); }
+    if (not query.exec()) { qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text()); }
 
     list << "";
 
@@ -51,7 +52,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   if (tipo == Tipo::Conta) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) { QMessageBox::critical(parent, "Erro!", "Erro lendo contas da loja: " + query.lastError().text()); }
+    if (not query.exec("SELECT banco, agencia, conta FROM loja_has_conta")) { qApp->enqueueError("Erro lendo contas da loja: " + query.lastError().text()); }
 
     list << "";
 
@@ -61,7 +62,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   if (tipo == Tipo::Grupo) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) { QMessageBox::critical(parent, "Erro!", "Erro lendo grupos de despesa: " + query.lastError().text()); }
+    if (not query.exec("SELECT tipo FROM despesa WHERE tipo <> 'Transferencia' ORDER BY tipo")) { qApp->enqueueError("Erro lendo grupos de despesa: " + query.lastError().text()); }
 
     list << "";
 

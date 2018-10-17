@@ -1,9 +1,8 @@
-#include <QApplication>
 #include <QBrush>
 #include <QDate>
-#include <QStyle>
 
 #include "searchdialogproxymodel.h"
+#include "usersession.h"
 
 SearchDialogProxyModel::SearchDialogProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), estoque(model->fieldIndex("estoque")), promocao(model->fieldIndex("promocao")), descontinuado(model->fieldIndex("descontinuado")),
@@ -54,7 +53,11 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
 
     // -------------------------------------------------------------------------
 
-    return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
+    const auto tema = UserSession::getSetting("User/tema");
+
+    if (not tema) { return QBrush(Qt::black); }
+
+    return tema->toString() == "claro" ? QBrush(Qt::black) : QBrush(Qt::white);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

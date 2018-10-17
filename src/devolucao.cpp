@@ -6,6 +6,7 @@
 #include <QSqlRecord>
 
 #include "QDecDouble.hh"
+#include "application.h"
 #include "checkboxdelegate.h"
 #include "devolucao.h"
 #include "porcentagemdelegate.h"
@@ -13,7 +14,7 @@
 #include "ui_devolucao.h"
 #include "usersession.h"
 
-Devolucao::Devolucao(QString idVenda, QWidget *parent) : Dialog(parent), idVenda(std::move(idVenda)), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(QString idVenda, QWidget *parent) : QDialog(parent), idVenda(std::move(idVenda)), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   connect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
@@ -38,10 +39,7 @@ void Devolucao::determinarIdDevolucao() {
   query.bindValue(":idVenda", idVenda + "D%");
   query.bindValue(":month", QDate::currentDate().month());
 
-  if (not query.exec()) {
-    emit errorSignal("Erro verificando se existe devolução: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec()) { return qApp->enqueueError("Erro verificando se existe devolução: " + query.lastError().text()); }
 
   if (query.first()) {
     idDevolucao = query.value("id").toString();
@@ -50,7 +48,7 @@ void Devolucao::determinarIdDevolucao() {
     query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
     query2.bindValue(":idVenda", idVenda + "D%");
 
-    if (not query2.exec() or not query2.first()) { emit errorSignal("Erro determinando próximo id: " + query2.lastError().text()); }
+    if (not query2.exec() or not query2.first()) { qApp->enqueueError("Erro determinando próximo id: " + query2.lastError().text()); }
 
     idDevolucao = idVenda + "D" + query2.value("number").toString();
     createNewId = true;
@@ -458,10 +456,7 @@ bool Devolucao::criarContas() {
   //    query.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   //    query.bindValue(":razaoSocial", fornecedor);
 
-  //    if (not query.exec() or not query.first()) {
-  //      emit errorSignal("Erro buscando comissão: " + query.lastError().text());
-  //      return false;
-  //    }
+  //  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando comissão: " + query.lastError().text()); }
 
   //    const double comissao = query.value("comissaoLoja").toDouble() / 100;
 
@@ -531,34 +526,19 @@ void Devolucao::limparCampos() {
 void Devolucao::on_pushButtonDevolverItem_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhuma linha selecionada!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) {
-    emit errorSignal("Não selecionou quantidade!");
-    return;
-  }
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Não selecionou quantidade!"); }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not devolverItem(list.first().row())) { return qApp->rollbackTransaction(); }
 
-  if (not devolverItem(list.first().row())) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   limparCampos();
 
-  emit informationSignal("Devolução realizada com sucesso!");
+  qApp->enqueueInformation("Devolução realizada com sucesso!");
 }
 
 bool Devolucao::atualizarDevolucao() {
@@ -566,10 +546,7 @@ bool Devolucao::atualizarDevolucao() {
   query.prepare("SELECT SUM(parcial) AS parcial, SUM(parcialDesc) AS parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idDevolucao);
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando dados da devolução: " + query.lastError().text());
-    return false;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados da devolução: " + query.lastError().text()); }
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda SET subTotalBru = :subTotalBru, subTotalLiq = :subTotalLiq, total = :total WHERE idVenda = :idVenda");
@@ -578,10 +555,7 @@ bool Devolucao::atualizarDevolucao() {
   query2.bindValue(":total", query.value("parcialDesc"));
   query2.bindValue(":idVenda", idDevolucao);
 
-  if (not query2.exec()) {
-    emit errorSignal("Erro atualizando devolução: " + query2.lastError().text());
-    return false;
-  }
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando devolução: " + query2.lastError().text()); }
 
   return true;
 }

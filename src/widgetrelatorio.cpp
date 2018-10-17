@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QSqlError>
 
+#include "application.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "ui_widgetrelatorio.h"
@@ -10,7 +11,7 @@
 #include "widgetrelatorio.h"
 #include "xlsxdocument.h"
 
-WidgetRelatorio::WidgetRelatorio(QWidget *parent) : Widget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
+WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
@@ -177,10 +178,7 @@ void WidgetRelatorio::updateTables() {
 void WidgetRelatorio::setResumoOrcamento() {
   QSqlQuery query;
 
-  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) {
-    emit errorSignal("Erro comunicando com o banco de dados: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text()); }
 
   modelOrcamento.setTable("view_resumo_relatorio");
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -218,27 +216,20 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) {
-    emit errorSignal("Não encontrou o modelo do Excel!");
-    return;
-  }
+  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!"); }
 
   const QString fileName = dir + "/relatorio-" + ui->dateEditMes->date().toString("MM-yyyy") + ".xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) {
-    emit errorSignal("Não foi possível abrir o arquivo para escrita: " + fileName);
-    emit errorSignal("Erro: " + file.errorString());
-    return;
-  }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
   if (not gerarExcel(arquivoModelo, fileName)) { return; }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  emit informationSignal("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName);
 }
 
 bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fileName) {
@@ -286,10 +277,7 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) {
-    emit errorSignal("Ocorreu algum erro ao salvar o arquivo.");
-    return false;
-  }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
 
   return true;
 }

@@ -6,18 +6,13 @@
 #include "lrreportengine.h"
 #include "sqlrelationaltablemodel.h"
 
-class Impressao final : public QObject {
-  Q_OBJECT
+class Impressao final {
 
 public:
   explicit Impressao(const QString &id);
+  ~Impressao() = default;
   Impressao(const Impressao &) = delete;
   auto print() -> void;
-
-signals:
-  void errorSignal(const QString &error);
-  void warningSignal(const QString &warning);
-  void informationSignal(const QString &information);
 
 private:
   // attributes
@@ -32,7 +27,6 @@ private:
   QSqlQuery queryProfissional;
   QSqlQuery queryVendedor;
   SqlRelationalTableModel modelItem;
-  LimeReport::ReportEngine *report;
   // methods
   auto setQuerys() -> bool;
   auto verificaTipo() -> void;

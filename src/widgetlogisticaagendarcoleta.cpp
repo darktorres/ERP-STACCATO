@@ -10,6 +10,7 @@
 #include <QUrl>
 
 #include "acbr.h"
+#include "application.h"
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
@@ -18,7 +19,7 @@
 #include "venda.h"
 #include "widgetlogisticaagendarcoleta.h"
 
-WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : Widget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) { ui->setupUi(this); }
+WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) { ui->setupUi(this); }
 
 WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
 
@@ -205,32 +206,20 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
     return;
   }
 
-  if (modelTranspAtual.rowCount() == 0) {
-    emit errorSignal("Nenhum item no veículo!");
-    return;
-  }
+  if (modelTranspAtual.rowCount() == 0) { return qApp->enqueueError("Nenhum item no veículo!"); }
 
   QModelIndexList list;
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { list << modelTranspAtual.index(row, 0); }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not processRows(list, ui->dateTimeEdit->date(), true)) { return qApp->rollbackTransaction(); }
 
-  if (not processRows(list, ui->dateTimeEdit->date(), true)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Agendado com sucesso!");
+  qApp->enqueueInformation("Agendado com sucesso!");
 
   ui->frameCaminhao->setVisible(false);
 }
@@ -238,33 +227,21 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   InputDialog input(InputDialog::Tipo::AgendarColeta, this);
   // TODO: 5colocar qual a linha/id esta sendo trabalhada para o usuario nao se perder ao trocar de janela e voltar
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not processRows(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
-  if (not processRows(list, input.getNextDate())) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Agendado com sucesso!");
+  qApp->enqueueInformation("Agendado com sucesso!");
 }
 
 bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga) {
@@ -300,10 +277,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       queryTemp.bindValue(":idEstoque", idEstoque);
 
-      if (not queryTemp.exec() or not queryTemp.first()) {
-        emit errorSignal("Erro buscando codComercial: " + queryTemp.lastError().text());
-        return false;
-      }
+      if (not queryTemp.exec() or not queryTemp.first()) { return qApp->enqueueError(false, "Erro buscando codComercial: " + queryTemp.lastError().text()); }
 
       codComercial = queryTemp.value("codComercial").toString();
     } else {
@@ -313,27 +287,18 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
     query1.bindValue(":idEstoque", idEstoque);
 
-    if (not query1.exec()) {
-      emit errorSignal("Erro salvando status no estoque: " + query1.lastError().text());
-      return false;
-    }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no estoque: " + query1.lastError().text()); }
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) {
-      emit errorSignal("Erro salvando status no pedido_fornecedor: " + query2.lastError().text());
-      return false;
-    }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text()); }
 
     query3.bindValue(":dataPrevColeta", dataPrevColeta);
     query3.bindValue(":idEstoque", idEstoque);
 
-    if (not query3.exec()) {
-      emit errorSignal("Erro salvando status na venda_produto: " + query3.lastError().text());
-      return false;
-    }
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query3.lastError().text()); }
   }
 
   return modelTranspAtual.submitAll();
@@ -346,10 +311,7 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getValue());
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando dados veiculo: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados veiculo: " + query.lastError().text()); }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
@@ -392,22 +354,14 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
 void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
   // TODO: nao deixar adicionar o mesmo item mais de uma vez
 
-  if (ui->itemBoxVeiculo->getValue().isNull()) {
-    emit errorSignal("Deve escolher uma transportadora antes!");
-    return;
-  }
+  if (ui->itemBoxVeiculo->getValue().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!"); }
 
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxCapacidade->value()) {
-    emit errorSignal("Peso maior que capacidade do veículo!");
-    return;
-  }
+  // TODO: apenas avisar e não bloquear?
+  if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxCapacidade->value()) { return qApp->enqueueError("Peso maior que capacidade do veículo!"); }
 
   if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
 }
@@ -415,14 +369,9 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
   const auto list = ui->tableTranspAtual->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   for (const auto &item : list) { modelTranspAtual.removeRow(item.row()); }
-
-  if (not modelTranspAtual.submitAll()) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
@@ -442,12 +391,9 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
 void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  if (not ACBr::gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbr; not acbr.gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
@@ -465,10 +411,7 @@ void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date
 void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhum item selecionado!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   for (const auto &item : list) {
     const QString idVenda = modelEstoque.data(item.row(), "idVenda").toString();

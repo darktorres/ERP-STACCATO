@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "cadastrotransportadora.h"
 #include "cepcompleter.h"
 #include "searchdialog.h"
@@ -153,24 +154,18 @@ void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 void CadastroTransportadora::on_pushButtonBuscar_clicked() { sdTransportadora->show(); }
 
 void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
-  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "background-color: rgb(255, 255, 127)"
+  ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "background-color: rgb(255, 255, 127);color: rgb(0, 190, 0)"
                                                                                                 : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco()) {
-    emit errorSignal("Não foi possível cadastrar este endereço!");
-    return;
-  }
+  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!"); }
 
   novoEndereco();
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(true)) {
-    emit errorSignal("Não foi possível atualizar este endereço!");
-    return;
-  }
+  if (not cadastrarEndereco(true)) { return qApp->enqueueError("Não foi possível atualizar este endereço!"); }
 
   novoEndereco();
 }
@@ -202,8 +197,7 @@ bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    emit errorSignal("CEP inválido!");
-    return false;
+    return qApp->enqueueError(false, "CEP inválido!");
   }
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -251,17 +245,12 @@ void CadastroTransportadora::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
 
-  CepCompleter cc;
-
-  if (not cc.buscaCEP(cep)) {
-    emit warningSignal("CEP não encontrado!");
-    return;
+  if (CepCompleter cc; cc.buscaCEP(cep)) {
+    ui->lineEditUF->setText(cc.getUf());
+    ui->lineEditCidade->setText(cc.getCidade());
+    ui->lineEditLogradouro->setText(cc.getEndereco());
+    ui->lineEditBairro->setText(cc.getBairro());
   }
-
-  ui->lineEditUF->setText(cc.getUf());
-  ui->lineEditCidade->setText(cc.getCidade());
-  ui->lineEditLogradouro->setText(cc.getEndereco());
-  ui->lineEditBairro->setText(cc.getBairro());
 }
 
 void CadastroTransportadora::on_tableEndereco_clicked(const QModelIndex &index) {
@@ -299,7 +288,7 @@ bool CadastroTransportadora::viewRegister() {
   return true;
 }
 
-void CadastroTransportadora::successMessage() { emit informationSignal(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
+void CadastroTransportadora::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
 
 void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
@@ -329,19 +318,13 @@ bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
-  if (not cadastrarVeiculo()) {
-    emit errorSignal("Não foi possível cadastrar este veículo!");
-    return;
-  }
+  if (not cadastrarVeiculo()) { return qApp->enqueueError("Não foi possível cadastrar este veículo!"); }
 
   novoVeiculo();
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
-  if (not cadastrarVeiculo(true)) {
-    emit errorSignal("Não foi possível atualizar este veículo!");
-    return;
-  }
+  if (not cadastrarVeiculo(true)) { return qApp->enqueueError("Não foi possível atualizar este veículo!"); }
 
   novoVeiculo();
 }
@@ -379,15 +362,9 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 bool CadastroTransportadora::cadastrar() {
   currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) {
-    emit errorSignal("Erro linha -1");
-    return false;
-  }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) {
-    emit errorSignal("Erro inserindo linha na tabela: " + model.lastError().text());
-    return false;
-  }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
 
   if (not savingProcedures()) { return false; }
 
@@ -400,12 +377,9 @@ bool CadastroTransportadora::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : getLastInsertId().toString();
+  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) {
-    emit errorSignal("Id vazio!");
-    return false;
-  }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
     if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }

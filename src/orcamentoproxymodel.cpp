@@ -1,8 +1,7 @@
-#include <QApplication>
 #include <QBrush>
-#include <QStyle>
 
 #include "orcamentoproxymodel.h"
+#include "usersession.h"
 
 OrcamentoProxyModel::OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("status")), followupIndex(model->fieldIndex("Observação")),
@@ -63,7 +62,11 @@ QVariant OrcamentoProxyModel::data(const QModelIndex &proxyIndex, const int role
 
     // -------------------------------------------------------------------------
 
-    return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
+    const auto tema = UserSession::getSetting("User/tema");
+
+    if (not tema) { return QBrush(Qt::black); }
+
+    return tema->toString() == "claro" ? QBrush(Qt::black) : QBrush(Qt::white);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

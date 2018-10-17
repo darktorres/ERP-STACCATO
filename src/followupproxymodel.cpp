@@ -1,9 +1,7 @@
-#include <QApplication>
 #include <QBrush>
-#include <QDebug>
-#include <QStyle>
 
 #include "followupproxymodel.h"
+#include "usersession.h"
 
 FollowUpProxyModel::FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforo(model->fieldIndex("semaforo")) { setSourceModel(model); }
 
@@ -23,7 +21,11 @@ QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const
     if (semaforo == FieldColors::Morno) { return QBrush(Qt::black); }
     if (semaforo == FieldColors::Frio) { return QBrush(Qt::black); }
 
-    return qApp->style()->objectName() == "fusion" ? QBrush(Qt::black) : QBrush(Qt::white);
+    const auto tema = UserSession::getSetting("User/tema");
+
+    if (not tema) { return QBrush(Qt::black); }
+
+    return tema->toString() == "claro" ? QBrush(Qt::black) : QBrush(Qt::white);
   }
 
   return QIdentityProxyModel::data(proxyIndex, role);

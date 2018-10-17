@@ -6,7 +6,7 @@
 #include "ui_widgetfinanceirocompra.h"
 #include "widgetfinanceirocompra.h"
 
-WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : Widget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
+WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 
 WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 

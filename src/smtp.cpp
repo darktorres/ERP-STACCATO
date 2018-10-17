@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <QMessageBox>
 #include <QResource>
 
+#include "application.h"
 #include "smtp.h"
 
 Smtp::Smtp(QString user, QString pass, QString host, const quint16 port, const int timeout) : timeout(timeout), host(std::move(host)), pass(std::move(pass)), user(std::move(user)), port(port) {
@@ -56,10 +57,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
     //    QFile file("://assinatura conrado.png");
     QFile file(assinatura);
 
-    if (not file.open(QIODevice::ReadOnly)) {
-      QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo: " + file.errorString());
-      return;
-    }
+    if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueError("Erro abrindo arquivo: " + file.errorString()); }
 
     const QByteArray bytes = file.readAll();
     message.append("--frontier\n");
@@ -77,12 +75,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
       QFile file(filePath);
 
       if (file.exists()) {
-        if (not file.open(QIODevice::ReadOnly)) {
-          //          qDebug("Couldn't open the file");
-          QMessageBox::critical(nullptr, "Qt Simple SMTP client", "Erro ao abrir o arquivo do anexo!");
-          QMessageBox::critical(nullptr, "Erro!", "Erro: " + file.errorString());
-          return;
-        }
+        if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueError("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
 
         const QByteArray bytes = file.readAll();
         message.append("--frontier\n");
@@ -265,7 +258,7 @@ void Smtp::readyRead() {
     return;
   } else {
     // something broke.
-    QMessageBox::critical(nullptr, tr("Qt Simple SMTP client"), tr("Unexpected reply from SMTP server:\n\n") + response);
+    qApp->enqueueError(tr("Unexpected reply from SMTP server:\n\n") + response);
     state = States::Close;
     emit status(tr("Failed to send message"));
   }

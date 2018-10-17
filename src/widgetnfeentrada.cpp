@@ -3,12 +3,13 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "doubledelegate.h"
 #include "ui_widgetnfeentrada.h"
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
 
-WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : Widget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
+WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
@@ -52,10 +53,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeEntrada.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) {
-    emit errorSignal("Erro buscando xml da nota: " + query.lastError().text());
-    return;
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text()); }
 
   auto *viewer = new XML_Viewer(this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -77,10 +75,7 @@ void WidgetNfeEntrada::montaFiltro() {
 void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) {
-    emit errorSignal("Nenhuma linha selecionada!");
-    return;
-  }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
@@ -90,23 +85,14 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
 
   const int row = list.first().row();
 
-  emit transactionStarted();
+  if (not qApp->startTransaction()) { return; }
 
-  if (not QSqlQuery("SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE").exec()) { return; }
-  if (not QSqlQuery("START TRANSACTION").exec()) { return; }
+  if (not cancelar(row)) { return qApp->rollbackTransaction(); }
 
-  if (not cancelar(row)) {
-    QSqlQuery("ROLLBACK").exec();
-    emit transactionEnded();
-    return;
-  }
-
-  if (not QSqlQuery("COMMIT").exec()) { return; }
-
-  emit transactionEnded();
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  emit informationSignal("Cancelado com sucesso!");
+  qApp->enqueueInformation("Cancelado com sucesso!");
 }
 
 bool WidgetNfeEntrada::cancelar(const int row) {
@@ -118,19 +104,13 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   query1.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE idNFe = :idNFe");
   query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query1.exec()) {
-    emit errorSignal("Erro cancelando nota: " + query1.lastError().text());
-    return false;
-  }
+  if (not query1.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query1.lastError().text()); }
 
   QSqlQuery query2;
   query2.prepare("UPDATE estoque SET status = 'CANCELADO' WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe)");
   query2.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query2.exec()) {
-    emit errorSignal("Erro marcando estoque cancelado: " + query2.lastError().text());
-    return false;
-  }
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro marcando estoque cancelado: " + query2.lastError().text()); }
 
   // voltar compra para faturamento
   QSqlQuery query3;
@@ -140,20 +120,14 @@ bool WidgetNfeEntrada::cancelar(const int row) {
                  "FROM estoque_has_nfe WHERE idNFe = :idNFe))");
   query3.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query3.exec()) {
-    emit errorSignal("Erro voltando compra para faturamento: " + query3.lastError().text());
-    return false;
-  }
+  if (not query3.exec()) { return qApp->enqueueError(false, "Erro voltando compra para faturamento: " + query3.lastError().text()); }
 
   // desvincular produtos associados (se houver)
   QSqlQuery query4;
   query4.prepare("SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe)");
   query4.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query4.exec()) {
-    emit errorSignal("Erro buscando consumos: " + query4.lastError().text());
-    return false;
-  }
+  if (not query4.exec()) { return qApp->enqueueError(false, "Erro buscando consumos: " + query4.lastError().text()); }
 
   QSqlQuery query5;
   query5.prepare("UPDATE estoque_has_consumo SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
@@ -171,17 +145,11 @@ bool WidgetNfeEntrada::cancelar(const int row) {
 
     query5.bindValue(":idVendaProduto", query4.value("idVendaProduto"));
 
-    if (not query5.exec()) {
-      emit errorSignal("Erro cancelando consumos: " + query5.lastError().text());
-      return false;
-    }
+    if (not query5.exec()) { return qApp->enqueueError(false, "Erro cancelando consumos: " + query5.lastError().text()); }
 
     query6.bindValue(":idVendaProduto", query4.value("idVendaProduto"));
 
-    if (not query6.exec()) {
-      emit errorSignal("Erro voltando produtos para pendente: " + query6.lastError().text());
-      return false;
-    }
+    if (not query6.exec()) { return qApp->enqueueError(false, "Erro voltando produtos para pendente: " + query6.lastError().text()); }
   }
 
   return true;

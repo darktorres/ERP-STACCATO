@@ -1,7 +1,8 @@
 #ifndef PRODUTOSPENDENTES_H
 #define PRODUTOSPENDENTES_H
 
-#include "dialog.h"
+#include <QDialog>
+
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
 
@@ -9,7 +10,7 @@ namespace Ui {
 class ProdutosPendentes;
 }
 
-class ProdutosPendentes final : public Dialog {
+class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:

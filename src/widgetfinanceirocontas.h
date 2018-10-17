@@ -1,15 +1,16 @@
 #ifndef WIDGETFINANCEIROCONTAS_H
 #define WIDGETFINANCEIROCONTAS_H
 
+#include <QWidget>
+
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
-#include "widget.h"
 
 namespace Ui {
 class WidgetFinanceiroContas;
 }
 
-class WidgetFinanceiroContas final : public Widget {
+class WidgetFinanceiroContas final : public QWidget {
   Q_OBJECT
 
 public:

@@ -14,13 +14,11 @@ class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(QWidget *parent = nullptr);
+  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent = nullptr);
   ~ProdutosPendentes();
-  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 
 private:
   // attributes
-  QString codComercial;
   SqlRelationalTableModel modelProdutos;
   SqlRelationalTableModel modelViewProdutos;
   SqlQueryModel modelEstoque;
@@ -35,10 +33,11 @@ private:
   auto on_pushButtonComprar_clicked() -> void;
   auto on_pushButtonConsumirEstoque_clicked() -> void;
   auto on_tableProdutos_entered(const QModelIndex &) -> void;
-  auto quebrarVenda(const double quantConsumir, const double quantVenda, const int rowProduto) -> bool;
+  auto dividirVenda(const double quantConsumir, const double quantVenda, const int rowProduto) -> bool;
   auto recalcularQuantidade() -> void;
   auto recarregarTabelas() -> void;
   auto setupTables() -> void;
+  auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 };
 
 #endif // PRODUTOSPENDENTES_H

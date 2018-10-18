@@ -4,9 +4,9 @@
 #include <QString>
 
 class Sql {
-
 public:
-  auto updateVendaStatus(const QString &idVenda) -> bool;
+  Sql() = delete;
+  static auto updateVendaStatus(const QString &idVenda) -> bool;
 };
 
 #endif // SQL_H

@@ -105,7 +105,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   if (not cadastrar(list, input.getDate(), input.getNextDate())) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

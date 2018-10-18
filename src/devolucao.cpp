@@ -294,7 +294,9 @@ bool Devolucao::criarDevolucao() {
     if (modelVenda.fieldIndex("created") == column) { continue; }
     if (modelVenda.fieldIndex("lastUpdated") == column) { continue; }
 
-    if (not modelVenda.setData(newRow, column, modelVenda.data(0, column))) { return false; }
+    const QVariant value = modelVenda.data(0, column);
+
+    if (not modelVenda.setData(newRow, column, value)) { return false; }
   }
 
   if (not modelVenda.setData(newRow, "idVenda", idDevolucao)) { return false; }
@@ -330,7 +332,9 @@ bool Devolucao::inserirItens(const int currentRow) {
     if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
     if (modelProdutos.fieldIndex("idNFeSaida") == column) { continue; }
 
-    if (not modelDevolvidos.setData(rowDevolucao, column, modelProdutos.data(currentRow, column))) { return false; }
+    const QVariant value = modelProdutos.data(currentRow, column);
+
+    if (not modelDevolvidos.setData(rowDevolucao, column, value)) { return false; }
   }
 
   if (not modelDevolvidos.setData(rowDevolucao, "idVenda", idDevolucao)) { return false; }
@@ -363,7 +367,9 @@ bool Devolucao::inserirItens(const int currentRow) {
       if (modelProdutos.fieldIndex("created") == column) { continue; }
       if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
 
-      if (not modelProdutos.setData(newRowRestante, column, modelProdutos.data(currentRow, column))) { return false; }
+      const QVariant value = modelProdutos.data(currentRow, column);
+
+      if (not modelProdutos.setData(newRowRestante, column, value)) { return false; }
     }
 
     if (not modelProdutos.setData(newRowRestante, "caixas", (restante / step).toDouble())) { return false; }

@@ -152,7 +152,7 @@ void MainWindow::verifyDb() {
   const bool conectado = qApp->dbReconnect();
 
   pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
-  pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 255, 0);" : "color: rgb(255, 0, 0);");
+  pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }
 }

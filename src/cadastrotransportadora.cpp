@@ -387,6 +387,7 @@ bool CadastroTransportadora::cadastrar() {
 
   for (int column = 0, columnCount = modelEnd.columnCount(); column < columnCount; ++column) {
     const QVariant dado = modelEnd.data(currentRow, column);
+
     if (dado.type() == QVariant::String) {
       if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }
@@ -400,6 +401,7 @@ bool CadastroTransportadora::cadastrar() {
 
   for (int column = 0, columnCount = modelVeiculo.columnCount(); column < columnCount; ++column) {
     const QVariant dado = modelVeiculo.data(currentRow, column);
+
     if (dado.type() == QVariant::String) {
       if (not modelVeiculo.setData(currentRow, column, dado.toString().toUpper())) { return false; }
     }

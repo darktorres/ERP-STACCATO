@@ -400,7 +400,9 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
     if (modelVeiculo.fieldIndex("created") == col) { continue; }
     if (modelVeiculo.fieldIndex("lastUpdated") == col) { continue; }
 
-    if (not modelVeiculo.setData(rowQuebrado, col, modelVeiculo.data(row, col))) { return false; }
+    const QVariant value = modelVeiculo.data(row, col);
+
+    if (not modelVeiculo.setData(rowQuebrado, col, value)) { return false; }
   }
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
@@ -446,7 +448,9 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
     if (modelVendaProduto.fieldIndex("created") == col) { continue; }
     if (modelVendaProduto.fieldIndex("lastUpdated") == col) { continue; }
 
-    if (not modelVendaProduto.setData(rowQuebrado2, col, modelVendaProduto.data(0, col))) { return false; }
+    const QVariant value = modelVendaProduto.data(0, col);
+
+    if (not modelVendaProduto.setData(rowQuebrado2, col, value)) { return false; }
   }
 
   if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
@@ -516,7 +520,9 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
     if (modelVendaProduto.fieldIndex("created") == col) { continue; }
     if (modelVendaProduto.fieldIndex("lastUpdated") == col) { continue; }
 
-    if (not modelVendaProduto.setData(newRow, col, modelVendaProduto.data(0, col))) { return false; }
+    const QVariant value = modelVendaProduto.data(0, col);
+
+    if (not modelVendaProduto.setData(newRow, col, value)) { return false; }
   }
 
   if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) { return false; }
@@ -552,7 +558,9 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
     if (modelEstoque.fieldIndex("created") == col) { continue; }
     if (modelEstoque.fieldIndex("lastUpdated") == col) { continue; }
 
-    if (not modelEstoque.setData(rowQuebrado, col, modelEstoque.data(row, col))) { return false; }
+    const QVariant value = modelEstoque.data(row, col);
+
+    if (not modelEstoque.setData(rowQuebrado, col, value)) { return false; }
   }
 
   const QString obs = "Estoque: " + modelEstoque.data(row, "idEstoque").toString() + " - " + QInputDialog::getText(this, "Observacao", "Observacao: ");

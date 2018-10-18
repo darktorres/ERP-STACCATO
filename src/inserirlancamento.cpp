@@ -143,7 +143,9 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
     if (modelContaPagamento.fieldIndex("created") == col) { continue; }
     if (modelContaPagamento.fieldIndex("lastUpdated") == col) { continue; }
 
-    if (not modelContaPagamento.setData(newRow, col, modelContaPagamento.data(row, col))) { return; }
+    const QVariant value = modelContaPagamento.data(row, col);
+
+    if (not modelContaPagamento.setData(newRow, col, value)) { return; }
   }
 
   openPersistentEditor();

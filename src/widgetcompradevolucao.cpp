@@ -165,7 +165,9 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
         if (modelConsumo.fieldIndex("created") == column) { continue; }
         if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 
-        if (not modelConsumo.setData(newRow, column, modelConsumo.data(0, column))) { return false; }
+        const QVariant value = modelConsumo.data(0, column);
+
+        if (not modelConsumo.setData(newRow, column, value)) { return false; }
       }
 
       // TODO: update other fields

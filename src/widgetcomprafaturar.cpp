@@ -134,7 +134,8 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
+  // TODO: put this inside a transaction
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
   updateTables();
   qApp->enqueueInformation("Confirmado faturamento!");
@@ -198,7 +199,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

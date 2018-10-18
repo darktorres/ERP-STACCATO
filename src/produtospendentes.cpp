@@ -16,7 +16,7 @@
 #include "sql.h"
 #include "ui_produtospendentes.h"
 
-ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
+ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -27,6 +27,8 @@ ProdutosPendentes::ProdutosPendentes(QWidget *parent) : QDialog(parent), ui(new 
   connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked);
   connect(ui->tableProdutos, &TableView::entered, this, &ProdutosPendentes::on_tableProdutos_entered);
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
+
+  viewProduto(codComercial, idVenda);
 
   show();
   ui->tableProdutos->resizeColumnsToContents();
@@ -44,10 +46,6 @@ void ProdutosPendentes::recalcularQuantidade() {
 }
 
 void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &idVenda) {
-  // NOTE: put this in the constructor because this object always use this function?
-
-  this->codComercial = codComercial;
-
   modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
 
   if (not modelProdutos.select()) { return; }
@@ -110,6 +108,8 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 void ProdutosPendentes::setupTables() {
   modelProdutos.setTable("venda_has_produto");
   modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  //--------------------------------------------------------------------
 
   modelViewProdutos.setTable("view_produto_pendente");
   modelViewProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -187,7 +187,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   if (not comprar(list, inputDlg.getNextDate())) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -238,7 +238,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   // separar venda se quantidade nao bate
 
   if (quantConsumir < quantVenda) {
-    if (not quebrarVenda(quantConsumir, quantVenda, rowProduto)) { return false; }
+    if (not dividirVenda(quantConsumir, quantVenda, rowProduto)) { return false; }
   }
 
   // TODO: marcar idCompra no venda_has_produto
@@ -246,7 +246,6 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 
   // TODO: 0fazer vinculo no pedido_fornecedor (quebrar as linhas)
 
-  // model submit
   if (not modelProdutos.submitAll()) { return false; }
 
   return true;
@@ -279,7 +278,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -291,9 +290,8 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) {
   const double excedente = ui->doubleSpinBoxComprar->value() - ui->doubleSpinBoxQuantTotal->value();
 
-  QSqlQuery query;
-
   if (excedente > 0.) {
+    QSqlQuery query;
     query.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
                   "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, "
                   ":dataPrevCompra)");
@@ -321,8 +319,6 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
 
 bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
   QSqlQuery query;
-
-  // inserir em pedido_fornecedor
   query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
                 "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, "
                 ":kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
@@ -352,7 +348,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
 
 bool ProdutosPendentes::atualizarVenda(const int row) { return modelProdutos.setData(row, "status", "INICIADO"); }
 
-bool ProdutosPendentes::quebrarVenda(const double quantConsumir, const double quantVenda, const int rowProduto) {
+bool ProdutosPendentes::dividirVenda(const double quantConsumir, const double quantVenda, const int rowProduto) {
   // NOTE: quebrar linha de cima em dois para poder comprar a outra parte?
 
   if (not Log::createLog("idVendaProduto '" + modelProdutos.data(rowProduto, "idVendaProduto").toString() + "': linha dividida para consumo parcial de estoque.")) { return false; }

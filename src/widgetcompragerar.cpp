@@ -282,7 +282,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   if (not gerarCompra(lista, dataCompra, dataPrevista)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -428,7 +428,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

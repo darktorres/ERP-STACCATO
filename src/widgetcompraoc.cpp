@@ -167,7 +167,7 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
 
   if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

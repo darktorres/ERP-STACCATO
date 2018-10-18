@@ -89,10 +89,14 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
 
+  //--------------------------------------------------------------------
+
   modelConsumo.setTable("estoque_has_consumo");
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelConsumo.setFilter("0");
+
+  //--------------------------------------------------------------------
 
   modelViewConsumo.setTable("view_estoque_consumo");
   modelViewConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -115,6 +119,8 @@ void Estoque::setupTables() {
   ui->tableConsumo->showColumn("created");
   ui->tableConsumo->hideColumn("idEstoque");
   ui->tableConsumo->hideColumn("quantUpd");
+
+  //--------------------------------------------------------------------
 
   modelCompra.setTable("pedido_fornecedor_has_produto");
   modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);

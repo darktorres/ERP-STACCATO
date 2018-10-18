@@ -88,7 +88,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   if (not confirmarCompra(idCompra, dataPrevista, dataConf)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -181,7 +181,7 @@ void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
 
   if (not cancelar(row)) { return qApp->rollbackTransaction(); }
 
-  if (Sql sql; not sql.updateVendaStatus(idVenda)) { return; }
+  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

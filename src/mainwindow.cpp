@@ -147,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
+// TODO: call this after sql error to see if still connected
 void MainWindow::verifyDb() {
   const bool conectado = qApp->dbReconnect();
 

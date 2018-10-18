@@ -17,7 +17,6 @@ bool Sql::updateVendaStatus(const QString &idVenda) {
 
   const QString idVenda2 = list.join(",");
 
-  // TODO: use a transaction?
   // TODO: como a devolucao vai entrar no fluxo de logistica o status dos produtos não vão mais ser fixos e devem ser alterados nessas querys tambem
 
   if (QSqlQuery query; not query.exec("UPDATE venda v, venda_has_produto vp SET v.status = vp.status "

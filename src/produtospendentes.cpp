@@ -74,7 +74,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   ui->doubleSpinBoxQuantTotal->setSingleStep(step);
   ui->doubleSpinBoxComprar->setSingleStep(step);
-  ui->doubleSpinBoxComprar->setMinimum(step);
+  ui->doubleSpinBoxComprar->setMinimum(quant);
 
   ui->tableProdutos->resizeColumnsToContents();
 

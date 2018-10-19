@@ -95,66 +95,67 @@ void Impressao::print() {
     dataManager->setReportVariable("Orcamento", query.value("idOrcamento"));
     dataManager->setReportVariable("PrazoEntrega", query.value("prazoEntrega").toString() + " dias");
 
-    QSqlQuery queryPgt1("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+    QSqlQuery queryPgt1("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
+                        "conta_a_receber_has_pagamento WHERE idVenda = '" +
+                        id + "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt1.exec() or not queryPgt1.first()) { return qApp->enqueueError("Erro buscando pagamentos 1: " + queryPgt1.lastError().text()); }
 
-    const QString pgt1 = queryPgt1.value("tipo").toString() + " - " + queryPgt1.value("COUNT(valor)").toString() + "x de R$ " + locale.toString(queryPgt1.value("valor").toDouble(), 'f', 2) +
-                         (queryPgt1.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt1.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
+    const QString pgt1 = queryPgt1.value("tipo").toString() + " - " + queryPgt1.value("parcelas").toString() + "x de R$ " + locale.toString(queryPgt1.value("valor").toDouble(), 'f', 2) +
+                         (queryPgt1.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt1.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
                          queryPgt1.value("observacao").toString();
 
     dataManager->setReportVariable("FormaPagamento1", pgt1);
 
-    QSqlQuery queryPgt2("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+    QSqlQuery queryPgt2("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
+                        "conta_a_receber_has_pagamento WHERE idVenda = '" +
+                        id + "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt2.exec() or not queryPgt2.first()) { return qApp->enqueueError("Erro buscando pagamentos 2: " + queryPgt2.lastError().text()); }
 
-    const QString pgt2 = queryPgt2.value("valor") == 0
-                             ? ""
-                             : queryPgt2.value("tipo").toString() + " - " + queryPgt2.value("COUNT(valor)").toString() + "x de R$ " + locale.toString(queryPgt2.value("valor").toDouble(), 'f', 2) +
-                                   (queryPgt2.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt2.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
-                                   queryPgt2.value("observacao").toString();
+    const QString pgt2 = queryPgt2.value("valor") == 0 ? ""
+                                                       : queryPgt2.value("tipo").toString() + " - " + queryPgt2.value("parcelas").toString() + "x de R$ " +
+                                                             locale.toString(queryPgt2.value("valor").toDouble(), 'f', 2) + (queryPgt2.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
+                                                             queryPgt2.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt2.value("observacao").toString();
 
     dataManager->setReportVariable("FormaPagamento2", pgt2);
 
-    QSqlQuery queryPgt3("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+    QSqlQuery queryPgt3("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
+                        "conta_a_receber_has_pagamento WHERE idVenda = '" +
+                        id + "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt3.exec() or not queryPgt3.first()) { return qApp->enqueueError("Erro buscando pagamentos 3: " + queryPgt3.lastError().text()); }
 
-    const QString pgt3 = queryPgt3.value("valor") == 0
-                             ? ""
-                             : queryPgt3.value("tipo").toString() + " - " + queryPgt3.value("COUNT(valor)").toString() + "x de R$ " + locale.toString(queryPgt3.value("valor").toDouble(), 'f', 2) +
-                                   (queryPgt3.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt3.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
-                                   queryPgt3.value("observacao").toString();
+    const QString pgt3 = queryPgt3.value("valor") == 0 ? ""
+                                                       : queryPgt3.value("tipo").toString() + " - " + queryPgt3.value("parcelas").toString() + "x de R$ " +
+                                                             locale.toString(queryPgt3.value("valor").toDouble(), 'f', 2) + (queryPgt3.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
+                                                             queryPgt3.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt3.value("observacao").toString();
 
     dataManager->setReportVariable("FormaPagamento3", pgt3);
 
-    QSqlQuery queryPgt4("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+    QSqlQuery queryPgt4("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
+                        "conta_a_receber_has_pagamento WHERE idVenda = '" +
+                        id + "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt4.exec() or not queryPgt4.first()) { return qApp->enqueueError("Erro buscando pagamentos 4: " + queryPgt4.lastError().text()); }
 
-    const QString pgt4 = queryPgt4.value("valor") == 0
-                             ? ""
-                             : queryPgt4.value("tipo").toString() + " - " + queryPgt4.value("COUNT(valor)").toString() + "x de R$ " + locale.toString(queryPgt4.value("valor").toDouble(), 'f', 2) +
-                                   (queryPgt4.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt4.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
-                                   queryPgt4.value("observacao").toString();
+    const QString pgt4 = queryPgt4.value("valor") == 0 ? ""
+                                                       : queryPgt4.value("tipo").toString() + " - " + queryPgt4.value("parcelas").toString() + "x de R$ " +
+                                                             locale.toString(queryPgt4.value("valor").toDouble(), 'f', 2) + (queryPgt4.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
+                                                             queryPgt4.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt4.value("observacao").toString();
 
     dataManager->setReportVariable("FormaPagamento4", pgt4);
 
-    QSqlQuery queryPgt5("SELECT tipo, COUNT(valor), valor, dataPagamento, observacao FROM conta_a_receber_has_pagamento WHERE idVenda = '" + id +
-                        "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+    QSqlQuery queryPgt5("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
+                        "conta_a_receber_has_pagamento WHERE idVenda = '" +
+                        id + "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
 
     if (not queryPgt5.exec() or not queryPgt5.first()) { return qApp->enqueueError("Erro buscando pagamentos 5: " + queryPgt5.lastError().text()); }
 
-    const QString pgt5 = queryPgt5.value("valor") == 0
-                             ? ""
-                             : queryPgt5.value("tipo").toString() + " - " + queryPgt5.value("COUNT(valor)").toString() + "x de R$ " + locale.toString(queryPgt5.value("valor").toDouble(), 'f', 2) +
-                                   (queryPgt5.value("COUNT(valor)") == 1 ? " - pag. em: " : " - 1° pag. em: ") + queryPgt5.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " +
-                                   queryPgt5.value("observacao").toString();
+    const QString pgt5 = queryPgt5.value("valor") == 0 ? ""
+                                                       : queryPgt5.value("tipo").toString() + " - " + queryPgt5.value("parcelas").toString() + "x de R$ " +
+                                                             locale.toString(queryPgt5.value("valor").toDouble(), 'f', 2) + (queryPgt5.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
+                                                             queryPgt5.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt5.value("observacao").toString();
 
     dataManager->setReportVariable("FormaPagamento5", pgt5);
   }

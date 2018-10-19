@@ -122,9 +122,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   if (pularNota) {
     if (not qApp->startTransaction()) { return; }
-
     if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
-
     if (not qApp->endTransaction()) { return; }
   } else {
     auto *import = new ImportarXML(idsCompra, dataReal, this);
@@ -134,8 +132,9 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  // TODO: put this inside a transaction
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not qApp->startTransaction()) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
+  if (not qApp->endTransaction()) { return; }
 
   updateTables();
   qApp->enqueueInformation("Confirmado faturamento!");
@@ -199,7 +198,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

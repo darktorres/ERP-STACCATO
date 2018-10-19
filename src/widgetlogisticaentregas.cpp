@@ -329,7 +329,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (not confirmarEntrega(dataRealEnt, entregou, recebeu)) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

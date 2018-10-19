@@ -288,7 +288,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 
   if (not processRows()) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

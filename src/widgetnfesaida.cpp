@@ -306,7 +306,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   ACBr acbr;
 
   if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
-    auto [xml, resposta] = *tuple;
+    const auto [xml, resposta] = tuple.value();
 
     if (not qApp->startTransaction()) { return; }
 

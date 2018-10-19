@@ -188,7 +188,7 @@ void Application::lightTheme() {
 bool Application::startTransaction() {
   if (inTransaction) { return qApp->enqueueError(false, "Transação já em execução!"); }
 
-  if (not QSqlQuery("START TRANSACTION").exec()) { return false; }
+  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return qApp->enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
   inTransaction = true;
 
@@ -198,7 +198,7 @@ bool Application::startTransaction() {
 bool Application::endTransaction() {
   if (not inTransaction) { return qApp->enqueueError(false, "Não está em transação"); }
 
-  if (not QSqlQuery("COMMIT").exec()) { return false; }
+  if (QSqlQuery query; not query.exec("COMMIT")) { return qApp->enqueueError(false, "Erro no commit: " + query.lastError().text()); }
 
   inTransaction = false;
 
@@ -209,6 +209,8 @@ bool Application::endTransaction() {
 
 void Application::rollbackTransaction() {
   if (not inTransaction) { return qApp->enqueueError("Não está em transação!"); }
+
+  if (QSqlQuery query; not query.exec("ROLLBACK")) { return qApp->enqueueError("Erro rollback: " + query.lastError().text()); }
 
   QSqlQuery("ROLLBACK").exec();
 

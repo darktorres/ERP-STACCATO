@@ -215,6 +215,8 @@ void Application::rollbackTransaction() {
   QSqlQuery("ROLLBACK").exec();
 
   inTransaction = false;
+
+  showMessages();
 }
 
 bool Application::getShowingErrors() const { return showingErrors; }

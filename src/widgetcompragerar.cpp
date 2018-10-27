@@ -349,11 +349,11 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
 }
 
 std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int oc, const bool isRepresentacao) {
-  const int row = list.first().row();
-  const QString fornecedor = modelProdutos.data(row, "fornecedor").toString();
+  const int firstRow = list.first().row();
+  const QString fornecedor = modelProdutos.data(firstRow, "fornecedor").toString();
 
   if (isRepresentacao) {
-    const QString idVenda = modelProdutos.data(row, "idVenda").toString();
+    const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
     Excel excel(idVenda);
     const QString representacao = "OC " + QString::number(oc) + " " + idVenda + " " + fornecedor;
     if (not excel.gerarExcel(oc, true, representacao)) { return {}; }
@@ -438,14 +438,13 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
     excelRow++;
   }
 
-  const QString st = modelProdutos.data(row, "st").toString();
+  const QString st = modelProdutos.data(firstRow, "st").toString();
 
   if (st == "ST Fornecedor") {
     xlsx.write("G200", "ST:");
-    xlsx.write("H200", total * modelProdutos.data(row, "aliquotaSt").toDouble() / 100);
+    xlsx.write("H200", total * modelProdutos.data(firstRow, "aliquotaSt").toDouble() / 100);
   }
 
-  // FIXME: shadowed row declaration
   for (int row = list.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
   if (not xlsx.saveAs(fileName)) {

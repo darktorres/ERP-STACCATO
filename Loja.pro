@@ -32,13 +32,17 @@ win32{
     RC_ICONS = Staccato.ico
 }
 
-QMAKE_CXXFLAGS_DEBUG *= -O0
-QMAKE_CXXFLAGS_RELEASE  *= -O0
-QMAKE_LFLAGS_DEBUG *= -O0
-QMAKE_LFLAGS_RELEASE *= -O0
-
-#QMAKE_CXXFLAGS_RELEASE  = -Ofast
-#QMAKE_LFLAGS_RELEASE *= -O3
+contains(CONFIG, deploy){
+    message(deploy)
+    QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
+    QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
+} else{
+    message(not deploy)
+    QMAKE_CXXFLAGS_DEBUG *= -O0
+    QMAKE_CXXFLAGS_RELEASE *= -O0
+    QMAKE_LFLAGS_DEBUG *= -O0
+    QMAKE_LFLAGS_RELEASE *= -O0
+}
 
 win32-g++{
     PRECOMPILED_HEADER = pch.h

@@ -701,7 +701,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Vendedor que indicou:</string>
+                 <string>Consultor</string>
                 </property>
                </widget>
               </item>
@@ -736,7 +736,7 @@
                <widget class="ItemBox" name="itemBoxVendedor"/>
               </item>
               <item>
-               <widget class="ItemBox" name="itemBoxVendedorIndicou"/>
+               <widget class="ItemBox" name="itemBoxConsultor"/>
               </item>
               <item>
                <widget class="ItemBox" name="itemBoxCliente"/>

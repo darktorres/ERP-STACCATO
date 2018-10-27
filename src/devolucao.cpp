@@ -345,7 +345,7 @@ bool Devolucao::inserirItens(const int currentRow) {
   if (not modelDevolvidos.setData(rowDevolucao, "statusOriginal", modelProdutos.data(currentRow, "status"))) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "descUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
-  if (not modelDevolvidos.setData(rowDevolucao, "caixas", QDecDouble(quantDevolvida / step * -1).toDouble())) { return false; }
+  if (not modelDevolvidos.setData(rowDevolucao, "caixas", (quantDevolvida / step * -1).toDouble())) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "quant", quantDevolvidaInvertida.toDouble())) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "parcial", parcialDevolvido.toDouble())) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "desconto", 0)) { return false; }

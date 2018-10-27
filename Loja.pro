@@ -47,7 +47,7 @@ contains(CONFIG, deploy){
 win32-g++{
     PRECOMPILED_HEADER = pch.h
 
-    CONFIG   *= precompile_header
+    CONFIG *= precompile_header
 }
 
 *-g++{

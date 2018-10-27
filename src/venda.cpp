@@ -1,10 +1,7 @@
-#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 
-#include "QDecDouble.hh"
-#include "QDecSingle.hh"
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
@@ -267,9 +264,8 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   tipo = Tipo::Atualizar;
 
   QSqlQuery queryOrc;
-  queryOrc.prepare(
-      "SELECT idUsuario, idOrcamento, idLoja, idUsuarioIndicou, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, freteManual, descontoPorc, "
-      "descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
+  queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioConsultor, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, "
+                   "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
   if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError("Erro buscando orçamento: " + queryOrc.lastError().text()); }
@@ -324,7 +320,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   if (not model.setData(row, "idOrcamento", queryOrc.value("idOrcamento"))) { return; }
   if (not model.setData(row, "idLoja", queryOrc.value("idLoja"))) { return; }
   if (not model.setData(row, "idUsuario", queryOrc.value("idUsuario"))) { return; }
-  if (not model.setData(row, "idUsuarioIndicou", queryOrc.value("idUsuarioIndicou"))) { return; }
+  if (not model.setData(row, "idUsuarioConsultor", queryOrc.value("idUsuarioConsultor"))) { return; }
   if (not model.setData(row, "idCliente", queryOrc.value("idCliente"))) { return; }
   if (not model.setData(row, "idEnderecoEntrega", queryOrc.value("idEnderecoEntrega"))) { return; }
   if (not model.setData(row, "idProfissional", queryOrc.value("idProfissional"))) { return; }
@@ -1344,3 +1340,4 @@ void Venda::on_doubleSpinBoxTotalPag_valueChanged(double) {
 // NOTE: bloquear desconto maximo por classe de funcionario
 // TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
 // REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
+// TODO: usar coluna 'idRelacionado' para vincular a linha quebrada/reposicao com a correspondente

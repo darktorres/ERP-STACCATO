@@ -39,15 +39,15 @@ private:
   // methods
   auto atualizaQuantEstoque() -> bool;
   auto calcularRestante() -> void;
+  auto desfazerConsumo() -> bool;
+  auto dividirCompra(const int idVendaProduto, const double quant) -> std::optional<int>;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto on_tableConsumo_entered(const QModelIndex) -> void;
   auto on_tableEstoque_activated(const QModelIndex &) -> void;
   auto on_tableEstoque_entered(const QModelIndex) -> void;
-  auto quebrarCompra(const int idVendaProduto, const double quant) -> bool;
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
-  bool desfazerConsumo();
 };
 
 #endif // ESTOQUE_H

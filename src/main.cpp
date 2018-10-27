@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
   if (dialog.exec() == QDialog::Rejected) { exit(1); }
 
   MainWindow window;
+  // TODO: restore
   //  window.showMaximized();
   window.show();
 

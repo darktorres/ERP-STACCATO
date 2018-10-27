@@ -13,15 +13,12 @@ class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ImportaProdutos(QWidget *parent = nullptr);
+  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 };
+  explicit ImportaProdutos(const Tipo tipo, QWidget *parent = nullptr);
   ~ImportaProdutos();
-  auto importarProduto() -> void;
-  auto importarEstoque() -> void;
-  auto importarPromocao() -> void;
+  auto importarTabela() -> void;
 
 private:
-  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 };
-
   enum class FieldColors {
     White = 0,  // no change
     Green = 1,  // new value
@@ -31,14 +28,12 @@ private:
   };
 
   // attributes
-  bool hasError = false;
-  int i = 0;
+  int currentRow = 0;
   int itensError = 0;
   int itensExpired = 0;
   int itensImported = 0;
   int itensNotChanged = 0;
   int itensUpdated = 0;
-  int row = 0;
   int validade;
   QHash<int, bool> hashAtualizado;
   QHash<QString, int> hash;
@@ -52,12 +47,12 @@ private:
   SqlRelationalTableModel modelProduto;
   SqlRelationalTableModel modelErro;
   // REFAC: a tabela no BD nao usa mais uma unica coluna, nao é mais (1,2,3) e sim 3 colunas separadas
-  Tipo tipo;
+  const Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods
   auto atualizaCamposProduto() -> bool;
   auto atualizaProduto() -> bool;
-  auto buscarCadastrarFornecedor(const QString &fornecedor, int &id) -> bool;
+  auto buscarCadastrarFornecedor(const QString &fornecedor) -> std::optional<int>;
   auto cadastraFornecedores() -> bool;
   auto cadastraProduto() -> bool;
   auto camposForaDoPadrao() -> bool;
@@ -65,9 +60,7 @@ private:
   auto consistenciaDados() -> void;
   auto contaProdutos() -> void;
   auto expiraPrecosAntigos() -> bool;
-  auto guardaNovoPrecoValidade() -> bool;
   auto importar() -> bool;
-  auto importarTabela() -> void;
   auto insereEmErro() -> bool;
   auto insereEmOk() -> bool;
   auto leituraProduto(const QSqlQuery &query, const QSqlRecord &record) -> void;
@@ -82,7 +75,7 @@ private:
   auto pintarCamposForaDoPadrao(const int row) -> bool;
   auto readFile() -> bool;
   auto readValidade() -> bool;
-  auto salvar() -> void;
+  auto salvar() -> bool;
   auto setProgressDialog() -> void;
   auto setVariantMap() -> void;
   auto setupTables() -> void;

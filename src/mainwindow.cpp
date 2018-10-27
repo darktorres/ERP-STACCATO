@@ -376,21 +376,21 @@ void MainWindow::on_actionConfiguracoes_triggered() {
 void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
 
 void MainWindow::on_actionProdutos_triggered() {
-  auto *importa = new ImportaProdutos(this);
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Produto, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
-  importa->importarProduto();
+  importa->importarTabela();
 }
 
 void MainWindow::on_actionEstoque_triggered() {
-  auto *importa = new ImportaProdutos(this);
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Estoque, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
-  importa->importarEstoque();
+  importa->importarTabela();
 }
 
 void MainWindow::on_actionPromocao_triggered() {
-  auto *importa = new ImportaProdutos(this);
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Promocao, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
-  importa->importarPromocao();
+  importa->importarTabela();
 }
 
 void MainWindow::on_actionGerenciar_preco_estoque_triggered() {

@@ -138,52 +138,51 @@ void WidgetCompraGerar::updateTables() {
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraGerar::gerarCompra(const QList<int> &lista, const QDateTime &dataCompra, const QDateTime &dataPrevista) {
-  QStringList produtos;
+bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateTime &dataCompra, const QDateTime &dataPrevista, const int oc) {
+  QSqlQuery queryId;
 
-  for (const auto &row : lista) {
-    produtos.append(modelProdutos.data(row, "descricao").toString() + ", Quant: " + modelProdutos.data(row, "quant").toString() + ", R$ " +
-                    modelProdutos.data(row, "preco").toString().replace(".", ","));
+  if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
+    return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text());
   }
 
-  QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto "
-                     "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  const int idCompra = queryId.value("idCompra").toInt();
 
-  for (const auto &row : lista) {
+  QVector<int> ids;
+
+  for (const auto &index : list) {
+    const auto row = index.row();
+
     if (not modelProdutos.setData(row, "status", "EM COMPRA")) { return false; }
 
-    QSqlQuery queryId;
-
-    if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
-      return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text());
-    }
-
-    const QString id = queryId.value("idCompra").toString();
-
-    if (not modelProdutos.setData(row, "idCompra", id)) { return false; }
+    if (not modelProdutos.setData(row, "idCompra", idCompra)) { return false; }
     if (not modelProdutos.setData(row, "ordemCompra", oc)) { return false; }
     if (not modelProdutos.setData(row, "dataRealCompra", dataCompra)) { return false; }
     if (not modelProdutos.setData(row, "dataPrevConf", dataPrevista)) { return false; }
 
     // salvar status na venda
 
-    if (modelProdutos.data(row, "idVendaProduto").toInt() != 0) {
-      queryVenda.bindValue(":idCompra", id);
-      queryVenda.bindValue(":dataRealCompra", dataCompra);
-      queryVenda.bindValue(":dataPrevConf", dataPrevista);
-      queryVenda.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
-
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text()); }
-    }
+    if (modelProdutos.data(row, "idVendaProduto").toInt() != 0) { ids << modelProdutos.data(row, "idVendaProduto").toInt(); }
   }
 
-  return modelProdutos.submitAll();
+  if (not modelProdutos.submitAll()) { return false; }
+
+  QSqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto "
+                     "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+
+  for (const auto idVendaProduto : ids) {
+    queryVenda.bindValue(":idCompra", idCompra);
+    queryVenda.bindValue(":dataRealCompra", dataCompra);
+    queryVenda.bindValue(":dataPrevConf", dataPrevista);
+    queryVenda.bindValue(":idVendaProduto", idVendaProduto);
+
+    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text()); }
+  }
+
+  return true;
 }
 
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
-  // TODO: 1refatorar essa funcao, dividir em funcoes menores etc
-
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
   if (not folderKey) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!"); }
@@ -192,35 +191,93 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  QList<int> lista;
-  QStringList ids;
-  QStringList idVendas;
+  //
 
-  for (const auto &index : list) {
-    lista << index.row();
-    ids << modelProdutos.data(index.row(), "idPedido").toString();
-    idVendas << modelProdutos.data(index.row(), "idVenda").toString();
-  }
+  const auto isRepresentacao = verificaRepresentacao(list);
 
-  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra);
-  if (not inputDlg.setFilter(ids)) { return; }
-
-  if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
-
-  const QDateTime dataCompra = inputDlg.getDate();
-  const QDateTime dataPrevista = inputDlg.getNextDate();
+  if (not isRepresentacao) { return; }
 
   // oc
 
+  const auto ordemCompra = getOrdemCompra();
+
+  if (not ordemCompra) { return; }
+
+  const int oc = ordemCompra.value();
+
+  const auto dates = getDates(list);
+
+  if (not dates) { return; }
+
+  const auto [dataCompra, dataPrevista] = dates.value();
+
+  // email --------------------------------
+
+  const QString razaoSocial = modelProdutos.data(list.first().row(), "fornecedor").toString();
+
+  const auto anexo = gerarExcel(list, oc, isRepresentacao.value());
+
+  if (not anexo) { return; }
+
+  // -------------------------------------------------------------------------
+
+  if (not qApp->startTransaction()) { return; }
+
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+
+  if (not gerarCompra(list, dataCompra, dataPrevista, oc)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return; }
+
+  if (not qApp->endTransaction()) { return; }
+
+  enviarEmail(razaoSocial, anexo.value());
+
+  // -------------------------------------------------------------------------
+
+  updateTables();
+  qApp->enqueueInformation("Compra gerada com sucesso!");
+}
+
+void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &anexo) {
+  QMessageBox msgBox(QMessageBox::Question, "Enviar E-mail?", "Deseja enviar e-mail?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Enviar");
+  msgBox.setButtonText(QMessageBox::No, "Pular");
+
+  if (msgBox.exec() == QMessageBox::Yes) {
+    auto *mail = new SendMail(SendMail::Tipo::GerarCompra, anexo, razaoSocial, this);
+    mail->setAttribute(Qt::WA_DeleteOnClose);
+
+    mail->exec();
+  }
+}
+
+std::optional<std::tuple<QDateTime, QDateTime>> WidgetCompraGerar::getDates(const QList<QModelIndex> &list) {
+  QStringList ids;
+
+  for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido").toString(); }
+
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra);
+  if (not inputDlg.setFilter(ids)) { return {}; }
+
+  if (inputDlg.exec() != InputDialogProduto::Accepted) { return {}; }
+
+  return std::make_tuple<>(inputDlg.getDate(), inputDlg.getNextDate());
+}
+
+std::optional<int> WidgetCompraGerar::getOrdemCompra() {
   QSqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
-    return qApp->enqueueError("Erro buscando próximo O.C.!");
+    qApp->enqueueError("Erro buscando próximo O.C.!");
+    return {};
   }
 
   bool ok;
-  oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 99999, 1, &ok);
-  if (not ok) { return; }
+  int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 99999, 1, &ok);
+  if (not ok) { return {}; }
 
   QSqlQuery query2;
   query2.prepare("SELECT ordemCompra FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra LIMIT 1");
@@ -228,7 +285,10 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   while (true) {
     query2.bindValue(":ordemCompra", oc);
 
-    if (not query2.exec()) { return qApp->enqueueError("Erro buscando O.C.!"); }
+    if (not query2.exec()) {
+      qApp->enqueueError("Erro buscando O.C.!");
+      return {};
+    }
 
     if (not query2.first()) { break; }
 
@@ -244,83 +304,89 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
       if (choice != QMessageBox::Yes) {
         bool ok2;
         oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 99999, 1, &ok2);
-        if (not ok2) { return; }
+        if (not ok2) { return {}; }
       }
     }
   }
 
-  // enviar email
+  return oc;
+}
+
+std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelIndex> &list) {
+  const int row = list.first().row();
+  const QString fornecedor = modelProdutos.data(row, "fornecedor").toString();
 
   QSqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
-  query.bindValue(":razaoSocial", modelProdutos.data(0, "fornecedor").toString());
+  query.bindValue(":razaoSocial", fornecedor);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text()); }
-
-  QString anexo;
+  if (not query.exec() or not query.first()) {
+    qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text());
+    return {};
+  }
 
   const bool isRepresentacao = query.value("representacao").toBool();
 
-  if (not gerarExcel(lista, anexo, isRepresentacao)) { return; }
+  if (isRepresentacao) {
+    if (modelProdutos.data(row, "idVenda").toString().isEmpty()) {
+      qApp->enqueueError("'Venda' vazio!");
+      return {};
+    }
 
-  QMessageBox msgBox(QMessageBox::Question, "Enviar E-mail?", "Deseja enviar e-mail?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Enviar");
-  msgBox.setButtonText(QMessageBox::No, "Pular");
+    // search list for repeated idVendas and return
 
-  if (msgBox.exec() == QMessageBox::Yes) {
-    const QString fornecedor = modelProdutos.data(0, "fornecedor").toString();
+    const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
 
-    auto *mail = new SendMail(SendMail::Tipo::GerarCompra, anexo, fornecedor, this);
-    mail->setAttribute(Qt::WA_DeleteOnClose);
-
-    mail->exec();
+    for (const auto &index : list) {
+      if (modelProdutos.data(index.row(), "idVenda").toString() != idVenda) {
+        qApp->enqueueError("Não pode misturar produtos de vendas diferentes na representação!");
+        return {};
+      }
+    }
   }
 
-  // -------------------------------------------------------------------------
-
-  if (not qApp->startTransaction()) { return; }
-
-  if (not gerarCompra(lista, dataCompra, dataPrevista)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
-
-  if (not qApp->endTransaction()) { return; }
-
-  updateTables();
-  qApp->enqueueInformation("Compra gerada com sucesso!");
+  return isRepresentacao;
 }
 
-bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, const bool isRepresentacao) {
-  if (isRepresentacao) {
-    if (modelProdutos.data(lista.first(), "idVenda").toString().isEmpty()) { return qApp->enqueueError(false, "'Venda' vazio!"); }
+std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &list, const int oc, const bool isRepresentacao) {
+  const int row = list.first().row();
+  const QString fornecedor = modelProdutos.data(row, "fornecedor").toString();
 
-    Excel excel(modelProdutos.data(lista.at(0), "idVenda").toString());
-    const QString representacao = "OC " + QString::number(oc) + " " + modelProdutos.data(lista.first(), "idVenda").toString() + " " + modelProdutos.data(lista.first(), "fornecedor").toString();
-    if (not excel.gerarExcel(oc, true, representacao)) { return false; }
-    anexo = excel.getFileName();
-    return true;
+  if (isRepresentacao) {
+    const QString idVenda = modelProdutos.data(row, "idVenda").toString();
+    Excel excel(idVenda);
+    const QString representacao = "OC " + QString::number(oc) + " " + idVenda + " " + fornecedor;
+    if (not excel.gerarExcel(oc, true, representacao)) { return {}; }
+    return excel.getFileName();
   }
 
-  const QString fornecedor = modelProdutos.data(lista.at(0), "fornecedor").toString();
-  const QString idVenda = modelProdutos.data(lista.at(0), "idVenda").toString();
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+
+  const QString idVenda = idVendas.join(", ");
 
   const QString arquivoModelo = "modelo compras.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) { return qApp->enqueueError(false, "Não encontrou o modelo do Excel!"); }
+  if (not modelo.exists()) {
+    qApp->enqueueError("Não encontrou o modelo do Excel!");
+    return {};
+  }
 
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
-  if (not folderKey) { return false; }
+  if (not folderKey) { return {}; }
 
   const QString fileName = folderKey.value().toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
-  anexo = fileName;
-
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+  if (not file.open(QFile::WriteOnly)) {
+    qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString());
+    return {};
+  }
 
   file.close();
 
@@ -328,7 +394,10 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
   queryFornecedor.prepare("SELECT contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-  if (not queryFornecedor.exec()) { return qApp->enqueueError(false, "Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text()); }
+  if (not queryFornecedor.exec()) {
+    qApp->enqueueError("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text());
+    return {};
+  }
 
   QXlsx::Document xlsx(arquivoModelo);
 
@@ -336,48 +405,58 @@ bool WidgetCompraGerar::gerarExcel(const QList<int> &lista, QString &anexo, cons
   //  xlsx.currentWorksheet()->setFitToHeight(true);
   //  xlsx.currentWorksheet()->setOrientationVertical(false);
 
-  xlsx.write("E4", oc);                                                                             // ordem compra
-  xlsx.write("E5", idVenda);                                                                        // idVenda
-  xlsx.write("E6", modelProdutos.data(lista.at(0), "fornecedor"));                                  // fornecedor
-  xlsx.write("E7", queryFornecedor.first() ? queryFornecedor.value("contatoNome").toString() : ""); // representante
-  xlsx.write("E8", QDateTime::currentDateTime().toString("dddd dd 'de' MMMM 'de' yyyy hh:mm"));     // Data: dd//mm/yyyy
+  xlsx.write("E4", oc);
+  xlsx.write("E5", idVenda);
+  xlsx.write("E6", fornecedor);
+  xlsx.write("E7", queryFornecedor.first() ? queryFornecedor.value("contatoNome").toString() : "");
+  xlsx.write("E8", QDateTime::currentDateTime().toString("dddd dd 'de' MMMM 'de' yyyy hh:mm"));
 
   double total = 0;
+  int excelRow = 0;
 
-  for (int row = 0; row < lista.size(); ++row) {
-    xlsx.write("A" + QString::number(13 + row), QString::number(row + 1));                          // item n. 1,2,3...
-    xlsx.write("B" + QString::number(13 + row), modelProdutos.data(lista.at(row), "codComercial")); // cod produto
-    QString formato = modelProdutos.data(lista.at(row), "formComercial").toString();
-    QString produto = modelProdutos.data(lista.at(row), "descricao").toString() + (formato.isEmpty() ? "" : " - " + formato);
-    xlsx.write("C" + QString::number(13 + row), produto);                                          // descricao produto
-    xlsx.write("E" + QString::number(13 + row), modelProdutos.data(lista.at(row), "prcUnitario")); // prc. unitario
-    xlsx.write("F" + QString::number(13 + row), modelProdutos.data(lista.at(row), "un"));          // un.
-    xlsx.write("G" + QString::number(13 + row), modelProdutos.data(lista.at(row), "quant"));       // qtd.
-    xlsx.write("H" + QString::number(13 + row), modelProdutos.data(lista.at(row), "preco"));       // valor
+  for (const auto &index : list) {
+    const int currentRow = index.row();
 
-    const QString st = modelProdutos.data(lista.at(row), "st").toString();
+    xlsx.write("A" + QString::number(13 + excelRow), QString::number(excelRow + 1));
+    xlsx.write("B" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "codComercial"));
+    QString formato = modelProdutos.data(currentRow, "formComercial").toString();
+    QString produto = modelProdutos.data(currentRow, "descricao").toString() + (formato.isEmpty() ? "" : " - " + formato);
+    xlsx.write("C" + QString::number(13 + excelRow), produto);
+    xlsx.write("E" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "prcUnitario"));
+    xlsx.write("F" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "un"));
+    xlsx.write("G" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "quant"));
+    xlsx.write("H" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "preco"));
+    xlsx.write("I" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "idVenda"));
+
+    const QString st = modelProdutos.data(currentRow, "st").toString();
 
     if (st == "ST Fornecedor") {
-      xlsx.write("I" + QString::number(13 + row), modelProdutos.data(lista.at(row), "idVenda"));
-      total += modelProdutos.data(lista.at(row), "preco").toDouble();
+      xlsx.write("I" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "idVenda"));
+      total += modelProdutos.data(currentRow, "preco").toDouble();
     }
+
+    excelRow++;
   }
 
-  const QString st = modelProdutos.data(lista.first(), "st").toString();
+  const QString st = modelProdutos.data(row, "st").toString();
 
   if (st == "ST Fornecedor") {
     xlsx.write("G200", "ST:");
-    xlsx.write("H200", total * modelProdutos.data(lista.first(), "aliquotaSt").toDouble() / 100);
+    xlsx.write("H200", total * modelProdutos.data(row, "aliquotaSt").toDouble() / 100);
   }
 
-  for (int row = lista.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
+  // FIXME: shadowed row declaration
+  for (int row = list.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
+  if (not xlsx.saveAs(fileName)) {
+    qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.");
+    return {};
+  }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  qApp->enqueueInformation("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como: " + fileName);
 
-  return true;
+  return fileName;
 }
 
 void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection(); }
@@ -414,21 +493,21 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  QStringList idVendas;
-
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
-
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
+
   if (not qApp->startTransaction()) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVendas.join(", "))) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

@@ -56,8 +56,6 @@ void XML::lerValores(const QStandardItem *item) {
 void XML::lerDadosProduto(const QStandardItem *child) {
   QString text = child->text();
 
-  if (text.mid(0, 10) == "det nItem=") { itemNumero = text.right(text.size() - 10).remove(R"(")").toInt(); }
-
   if (child->parent()->text() == "prod") {
     if (text.left(7) == "cProd -") { codProd = text.remove(0, 8); }
     if (text.left(6) == "cEAN -") { codBarras = text.remove(0, 7); }
@@ -76,6 +74,9 @@ void XML::lerDadosProduto(const QStandardItem *child) {
     if (text.left(8) == "indTot -") { compoeTotal = static_cast<bool>(text.remove(0, 9).toInt()); }
     if (text.left(6) == "xPed -") { numeroPedido = text.remove(0, 7); }
     if (text.left(10) == "nItemPed -") { itemPedido = text.remove(0, 11).toInt(); }
+
+    // remove 'A'
+    if (xNome == "CECRISA REVEST. CERAMICOS S.A." and codProd.endsWith("A")) { codProd = codProd.left(codProd.size() - 1); }
   }
 }
 

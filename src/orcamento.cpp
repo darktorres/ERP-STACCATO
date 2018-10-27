@@ -33,7 +33,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
   ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
-  ui->itemBoxVendedorIndicou->setSearchDialog(SearchDialog::vendedor(this));
+  ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
 
@@ -50,7 +50,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
     ui->labelLoja->hide();
     ui->comboBoxLoja->hide();
     ui->labelVendedorIndicou->hide();
-    ui->itemBoxVendedorIndicou->hide();
+    ui->itemBoxConsultor->hide();
   }
 
   if (UserSession::tipoUsuario() == "ADMINISTRADOR") {
@@ -324,7 +324,7 @@ void Orcamento::setupMapper() {
   addMapping(ui->itemBoxEndereco, "idEnderecoEntrega", "value");
   addMapping(ui->itemBoxProfissional, "idProfissional", "value");
   addMapping(ui->itemBoxVendedor, "idUsuario", "value");
-  addMapping(ui->itemBoxVendedorIndicou, "idUsuarioIndicou", "value");
+  addMapping(ui->itemBoxConsultor, "idUsuarioConsultor", "value");
   addMapping(ui->lineEditOrcamento, "idOrcamento");
   addMapping(ui->lineEditReplicaDe, "replicadoDe");
   addMapping(ui->lineEditReplicadoEm, "replicadoEm");
@@ -516,7 +516,7 @@ bool Orcamento::savingProcedures() {
   if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
   if (not setData("idProfissional", ui->itemBoxProfissional->getValue())) { return false; }
   if (not setData("idUsuario", ui->itemBoxVendedor->getValue())) { return false; }
-  if (not setData("idUsuarioIndicou", ui->itemBoxVendedorIndicou->getValue())) { return false; }
+  if (not setData("idUsuarioConsultor", ui->itemBoxConsultor->getValue())) { return false; }
   if (not setData("observacao", ui->plainTextEditObs->toPlainText())) { return false; }
   if (not setData("prazoEntrega", ui->spinBoxPrazoEntrega->value())) { return false; }
   if (not setData("replicadoDe", ui->lineEditReplicaDe->text())) { return false; }
@@ -1113,8 +1113,8 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
 void Orcamento::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Orçamento cadastrado com sucesso!"); }
 
 void Orcamento::on_comboBoxLoja_currentTextChanged(const QString &) {
-  ui->itemBoxVendedorIndicou->clear();
-  ui->itemBoxVendedorIndicou->setFilter("idLoja = " + ui->comboBoxLoja->getCurrentValue().toString() + " AND tipo = 'VENDEDOR'");
+  ui->itemBoxConsultor->clear();
+  ui->itemBoxConsultor->setFilter("idLoja = " + ui->comboBoxLoja->getCurrentValue().toString() + " AND tipo = 'VENDEDOR'");
 }
 
 void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }

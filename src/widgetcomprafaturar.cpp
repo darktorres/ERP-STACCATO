@@ -40,7 +40,7 @@ void WidgetCompraFaturar::setupTables() {
 }
 
 void WidgetCompraFaturar::setConnections() {
-  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::montaFiltro);
+  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::on_checkBoxRepresentacao_toggled);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked);
@@ -245,3 +245,8 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
 // TODO: 5reimportar nota id 4936 que veio com o produto dividido para testar o quantConsumido
 // TODO: 5reestruturar na medida do possivel de forma que cada estoque tenha apenas uma nota/compra
 // TODO: 0colocar tela de busca
+
+void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
+  ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NFe");
+  montaFiltro();
+}

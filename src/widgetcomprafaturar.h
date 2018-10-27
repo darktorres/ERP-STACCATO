@@ -29,6 +29,7 @@ private:
   auto cancelar(const QModelIndexList &list) -> bool;
   auto faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) -> bool;
   auto montaFiltro() -> void;
+  auto on_checkBoxRepresentacao_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonMarcarFaturado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;

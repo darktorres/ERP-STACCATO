@@ -16,11 +16,7 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
-  ui->setupUi(this);
-  // FIXME: fix query
-  //  ui->pushButtonRelatorio->setDisabled(true);
-}
+WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
@@ -65,7 +61,6 @@ void WidgetEstoque::setupTables() {
   proxyFilter->setSourceModel(&model);
 
   ui->table->setModel(proxyFilter);
-  ui->table->hideColumn("idCompra");
   ui->table->hideColumn("restante est");
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
@@ -119,13 +114,13 @@ void WidgetEstoque::montaFiltro() {
   model.setQuery(
       "SELECT `n`.`cnpjDest` AS `cnpjDest`, e.status, e.idEstoque, pf.fornecedor, e.descricao, e.consumo AS restante, e.un AS `unEst`, "
       "if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
-      "(consumo / `p`.`m2cx`), (consumo / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, `n`.`numeroNFe` AS `nfe`, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, "
+      "(consumo / `p`.`m2cx`), (consumo / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, `n`.`numeroNFe` AS `nfe`, pf.dataPrevColeta, pf.dataRealColeta, "
       "pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + "
       "coalesce(sum(consumo.quant), 0) AS consumo FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status != 'CANCELADO' AND e.status != 'QUEBRADO' " +
       match1 + " GROUP BY e.idEstoque HAVING " + restante +
       ") e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial "
       "LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque , n.cnpjDest , "
-      "pf.fornecedor , pf.idCompra , pf.dataPrevColeta , pf.dataRealColeta , pf.dataPrevReceb , pf.dataRealReceb , n.numeroNFe");
+      "pf.fornecedor , pf.dataPrevColeta , pf.dataRealColeta , pf.dataPrevReceb , pf.dataRealReceb , n.numeroNFe");
 
   //  model.setQuery(view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante);
 
@@ -151,12 +146,12 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
       "((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), ((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, "
       "group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS custo, "
-      "p.precoVenda * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS precoVenda, pf.idCompra, pf.dataPrevColeta, pf.dataRealColeta, pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, "
+      "p.precoVenda * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS precoVenda FROM (SELECT e.idProduto, "
       "e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS restante, sum(CASE WHEN consumo.status = "
       "'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status = 'ESTOQUE' "
       "AND e.created < '" +
       data +
-      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda, vp.dataRealEnt FROM "
+      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM "
       "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
       data +
       "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "

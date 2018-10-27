@@ -24,8 +24,6 @@ public:
   // dest
   QString cnpj;
   // produto
-  int idProduto = 0;
-  int itemNumero = 0;
   QString codProd;
   QString codBarras;
   QString descricao;

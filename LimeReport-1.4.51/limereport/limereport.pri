@@ -201,7 +201,7 @@ contains(CONFIG, staticlib){
     HEADERS += $$REPORT_PATH/lrfactoryinitializer.h
 }
 
-contains(CONFIG,zint){
+contains(CONFIG, zint){
     HEADERS += $$REPORT_PATH/items/lrbarcodeitem.h
 }
 

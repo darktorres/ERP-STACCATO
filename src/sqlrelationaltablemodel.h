@@ -21,10 +21,8 @@ public:
 private:
   using QSqlRelationalTableModel::data;
   using QSqlRelationalTableModel::match;
-  using QSqlRelationalTableModel::select;
   using QSqlRelationalTableModel::setData;
   using QSqlRelationalTableModel::setHeaderData;
-  using QSqlRelationalTableModel::submitAll;
 
 protected:
   // attributes

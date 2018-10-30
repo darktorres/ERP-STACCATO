@@ -364,6 +364,8 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
+  idVendas.removeDuplicates();
+
   const QString idVenda = idVendas.join(", ");
 
   const QString arquivoModelo = "modelo compras.xlsx";
@@ -426,8 +428,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
     xlsx.write("F" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "un"));
     xlsx.write("G" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "quant"));
     xlsx.write("H" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "preco"));
-    xlsx.write("I" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "idVenda"));
-
+    if (idVendas.size() > 1) { xlsx.write("I" + QString::number(13 + excelRow), modelProdutos.data(currentRow, "idVenda")); }
     const QString st = modelProdutos.data(currentRow, "st").toString();
 
     if (st == "ST Fornecedor") {

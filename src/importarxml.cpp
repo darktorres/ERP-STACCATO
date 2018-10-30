@@ -418,6 +418,8 @@ bool ImportarXML::limparAssociacoes() {
     if (not modelConsumo.removeRow(0)) { return false; }
   }
 
+  if (not modelEstoque_compra.select()) { return false; }
+
   return modelConsumo.submitAll();
 }
 
@@ -778,9 +780,6 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
 
   const double quant = query.value("quant").toDouble();
-  const double quant2 = modelEstoque.data(rowEstoque, "quant").toDouble();
-
-  if (not qFuzzyCompare(quant, quant2)) { return qApp->enqueueError(false, "Quantidade da venda é diferente do estoque!"); }
 
   // -------------------------------------
 
@@ -803,6 +802,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "idPedido", modelCompra.data(rowCompra, "idPedido"))) { return false; }
 
   return true;
 }

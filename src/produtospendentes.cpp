@@ -311,8 +311,6 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
 }
 
 bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
-  const double quant = ui->doubleSpinBoxComprar->value();
-
   QSqlQuery query;
   query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
                 "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, "
@@ -324,17 +322,26 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   query.bindValue(":descricao", modelViewProdutos.data(row, "produto"));
   query.bindValue(":obs", modelViewProdutos.data(row, "obs"));
   query.bindValue(":colecao", modelViewProdutos.data(row, "colecao"));
-  query.bindValue(":quant", quant);
   query.bindValue(":un", modelViewProdutos.data(row, "un"));
   query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
-  query.bindValue(":caixas", quant / ui->doubleSpinBoxQuantTotal->singleStep());
   query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo").toDouble());
-  query.bindValue(":preco", quant * modelViewProdutos.data(row, "custo").toDouble());
   query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));
   query.bindValue(":formComercial", modelViewProdutos.data(row, "formComercial"));
   query.bindValue(":codComercial", modelViewProdutos.data(row, "codComercial"));
   query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
   query.bindValue(":dataPrevCompra", dataPrevista);
+
+  if (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { // compra avulsa para menos
+    const double quant = ui->doubleSpinBoxComprar->value();
+
+    query.bindValue(":quant", quant);
+    query.bindValue(":caixas", quant / ui->doubleSpinBoxQuantTotal->singleStep());
+    query.bindValue(":preco", quant * modelViewProdutos.data(row, "custo").toDouble());
+  } else {
+    query.bindValue(":quant", modelViewProdutos.data(row, "quant"));
+    query.bindValue(":caixas", modelViewProdutos.data(row, "quant").toDouble() / ui->doubleSpinBoxQuantTotal->singleStep());
+    query.bindValue(":preco", modelViewProdutos.data(row, "quant").toDouble() * modelViewProdutos.data(row, "custo").toDouble());
+  }
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
 

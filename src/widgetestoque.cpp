@@ -16,7 +16,10 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
+WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
+  ui->setupUi(this);
+  // TODO: se 'vendedor' esconder filtros para mostar apenas os estoques disponiveis
+}
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
@@ -39,10 +42,8 @@ void WidgetEstoque::setupTables() {
   model.setHeaderData("fornecedor", "Fornecedor");
   model.setHeaderData("descricao", "Produto");
   model.setHeaderData("restante", "Quant. Rest.");
-  model.setHeaderData("restante est", "Quant. Depósito");
-  model.setHeaderData("unEst", "Un. Est.");
-  model.setHeaderData("unProd", "Un. Prod.");
-  model.setHeaderData("unProd2", "Un. Prod. 2");
+  model.setHeaderData("contabil", "Quant. Depósito");
+  model.setHeaderData("unEst", "Un.");
   model.setHeaderData("lote", "Lote");
   model.setHeaderData("local", "Local");
   model.setHeaderData("bloco", "Bloco");
@@ -61,7 +62,7 @@ void WidgetEstoque::setupTables() {
   proxyFilter->setSourceModel(&model);
 
   ui->table->setModel(proxyFilter);
-  ui->table->hideColumn("restante est");
+  ui->table->hideColumn("contabil");
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
@@ -95,41 +96,41 @@ void WidgetEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeCol
 
 void WidgetEstoque::montaFiltro() {
   // FIXME: digitar hifen causa erro na pesquisa
-  // TODO: arrumar query (está nas gambiarras temporariamente)
-  // TODO: this query is different from view_estoque2 string and some columns change
 
-  ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("restante est") : ui->table->hideColumn("restante est");
+  const bool contabil = ui->radioButtonEstoqueContabil->isChecked();
+
+  contabil ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
 
   const QString text = ui->lineEditBusca->text();
 
-  const QString match1 = text.isEmpty() ? "" : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  const QString match = text.isEmpty() ? ""
+                                       : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
+                                             "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  // TODO: remove
-  //  const QString match2 = text.isEmpty() ? ""
-  //                                        : "(MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
-  //                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "HAVING restante <= 0" : contabil ? "" : "HAVING restante > 0";
 
-  const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "consumo <= 0" : "consumo > 0";
+  const QString filtroContabil = ui->radioButtonEstoqueContabil->isChecked() ? " HAVING contabil > 0" : "";
 
   model.setQuery(
-      "SELECT `n`.`cnpjDest` AS `cnpjDest`, e.status, e.idEstoque, pf.fornecedor, e.descricao, e.consumo AS restante, e.un AS `unEst`, "
-      "if((`p`.`un` = `p`.`un2`), `p`.`un`, concat(`p`.`un`, '/', `p`.`un2`)) AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), "
-      "(consumo / `p`.`m2cx`), (consumo / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, `n`.`numeroNFe` AS `nfe`, pf.dataPrevColeta, pf.dataRealColeta, "
-      "pf.dataPrevReceb, pf.dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + "
-      "coalesce(sum(consumo.quant), 0) AS consumo FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE e.status != 'CANCELADO' AND e.status != 'QUEBRADO' " +
-      match1 + " GROUP BY e.idEstoque HAVING " + restante +
-      ") e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial "
-      "LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque , n.cnpjDest , "
-      "pf.fornecedor , pf.dataPrevColeta , pf.dataRealColeta , pf.dataPrevReceb , pf.dataRealReceb , n.numeroNFe");
-
-  //  model.setQuery(view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante);
-
-  //  qDebug() << "query: " << view_estoque2 + " " + match + " GROUP BY e.idEstoque HAVING " + restante;
+      "SELECT ANY_VALUE(`n`.`cnpjDest`) AS `cnpjDest`, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + e.ajuste AS contabil, e.restante AS "
+      "restante, e.un AS `unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')),(e.restante / `p`.`m2cx`), (e.restante / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco,"
+      " e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb,"
+      " ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote,e.local, e.bloco, e.quant, e.quant + "
+      "COALESCE(SUM(consumo.quant), 0) AS restante, SUM(IF(consumo.status = 'AJUSTE', consumo.quant, 0)) AS ajuste FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = "
+      "consumo.idEstoque LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
+      match + " GROUP BY e.idEstoque " + restante +
+      ") e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto"
+      " WHERE (vp.dataRealEnt < '2018-10-30') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = "
+      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT "
+      "JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque" +
+      filtroContabil);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
+  // NOTE: verificar se deve considerar os estoques não recebidos (em coleta/recebimento)
+
   // 1. codigo produto
   // 2. descricao
   // 3. ncm

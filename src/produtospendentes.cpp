@@ -174,7 +174,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!"); }
 
-  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { return qApp->enqueueError("Para comprar menos que o vendido selecione uma linha por vez!"); }
+  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { return qApp->enqueueError("Para comprar menos que o total selecione uma linha por vez!"); }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { return qApp->enqueueError("Quantidade 0!"); }
 

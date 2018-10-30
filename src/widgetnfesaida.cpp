@@ -187,7 +187,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   dataManager->addModel("view", &view, true);
 
-  if (not report.loadFromFile("view.lrxml")) { return qApp->enqueueError("Não encontrou o modelo de impressão!"); }
+  if (not report.loadFromFile("relatorio_nfe.lrxml")) { return qApp->enqueueError("Não encontrou o modelo de impressão!"); }
 
   QSqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "

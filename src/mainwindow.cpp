@@ -21,8 +21,6 @@
 #include "usersession.h"
 #include "xlsxdocument.h"
 
-// QT_CHARTS_USE_NAMESPACE
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
@@ -92,10 +90,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   // -------------------------------------------------------------------------
 
-  ui->tabWidget->setTabEnabled(8, false);
-
-  // -------------------------------------------------------------------------
-
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
   pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").value().toString());
@@ -105,42 +99,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::verifyDb);
 
-  //  QSqlQuery queryChart;
+  //---------------------------------------------------------------------------
 
-  //  qDebug() << queryChart.exec("SELECT * FROM view_relatorio_temp");
+  ui->tabWidget->setTabEnabled(8, false); // graficos
 
-  //  int dia = 1;
+  const QString nomeUsuario = UserSession::nome();
 
-  //  QLineSeries *seriesJan = new QLineSeries();
-  //  QLineSeries *seriesFev = new QLineSeries();
-  //  QLineSeries *seriesMar = new QLineSeries();
-
-  //  while (queryChart.next()) {
-
-  //    seriesJan->append(dia, queryChart.value("jan").toDouble());
-  //    seriesFev->append(dia, queryChart.value("fev").toDouble());
-  //    seriesMar->append(dia, queryChart.value("mar").toDouble());
-
-  //    dia++;
-  //  }
-
-  //  QChart *chart = new QChart();
-  //  chart->legend()->hide();
-  //  chart->addSeries(seriesJan);
-  //  chart->addSeries(seriesFev);
-  //  chart->addSeries(seriesMar);
-  //  chart->createDefaultAxes();
-  //  chart->setTitle("Simple line chart example");
-
-  //  QChartView *chartView = new QChartView(chart);
-  //  chartView->setRenderHint(QPainter::Antialiasing);
-
-  //  ui->tabWidget->widget(8)->layout()->addWidget(chartView);
-
-  // NOTE: fazer o mes atual ate o dia corrente
-  // fazer o mes atual com a linha em bold
-  // fazer o mesmo mes do ano anterior em bold
-  // fazer uma linha diferente com a media
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(8, true); }
 
   //  gerarEnviarRelatorio();
 }
@@ -313,6 +278,7 @@ void MainWindow::resetTables() {
   ui->widgetEstoque->resetTables();
   ui->widgetFinanceiro->resetTables();
   ui->widgetRelatorio->resetTables();
+  ui->widgetGraficos->resetTables();
 
   updateTables();
 }
@@ -334,6 +300,7 @@ void MainWindow::updateTables() {
   if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
   if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
 
   qApp->setUpdating(false);
 }

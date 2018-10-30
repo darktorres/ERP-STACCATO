@@ -210,7 +210,7 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
   if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + query3.lastError().text()); }
 
   QSqlQuery query4;
-  query4.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query4.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query4.bindValue(":idVendaProduto", idVendaProduto);
 
   if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + query4.lastError().text()); }

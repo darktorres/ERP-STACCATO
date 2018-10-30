@@ -218,8 +218,6 @@ bool Estoque::atualizaQuantEstoque() {
 }
 
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
-  // TODO: [*** Conrado/Anderson] relacionar o consumo quebrando a linha em pedido_fornecedor_has_produto e setar o idVenda/idVendaProduto
-
   if (modelEstoque.filter().isEmpty()) { return qApp->enqueueError(false, "Não setou idEstoque!"); }
 
   if (quant > ui->doubleSpinBoxRestante->value()) { return qApp->enqueueError(false, "Quantidade insuficiente!"); }
@@ -227,8 +225,6 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   // -------------------------------------------------------------------------
 
   const auto idPedido = dividirCompra(idVendaProduto, quant);
-
-  if (not idPedido) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -268,7 +264,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
+  if (idPedido and not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
@@ -282,7 +278,9 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
   // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
   // senao fazer a quebra
 
-  if (modelCompra.rowCount() != 1) {
+  if (modelCompra.rowCount() == 0) { return {}; }
+
+  if (modelCompra.rowCount() > 1) {
     qApp->enqueueError("Erro modelCompra.rowCount");
     return {};
   }

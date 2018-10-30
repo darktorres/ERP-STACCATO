@@ -405,12 +405,4 @@ void MainWindow::on_actionCalcular_frete_triggered() {
 // TASK: terminar de implantar quebra/reposicao
 // TASK: reimportar notas do pedido 172646
 // TODO: na reposicao concatenar '(REPOSICAO)' no comeco da descricao do produto
-// REFAC: make a code that checks if the program is inside a transaction and if it is it postpones showing error messages
 // TODO: diff defaultPalette and darkPalette to find the stuff that is missing implementing
-// TODO: verificar no banco de dados as tabelas que usam coluna 'caixas', tem varias linhas com casas decimais (4.999999999), verificar os calculos
-
-// NOTE: *quebralinha venda_produto/pedido_fornecedor
-// *compra/consumo parcial
-// *agendamento parcial
-// *devolucao (separar no pf em 2 linhas, uma mantem o vinculo da parte que foi entregue e a outra fica sem vinculo da porte que foi devolvida)
-// *quebra/reposicao

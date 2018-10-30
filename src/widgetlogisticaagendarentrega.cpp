@@ -314,7 +314,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) {
     if (not modelTranspAtual.setData(row, "data", dataPrevEnt)) { return false; }
@@ -542,6 +542,8 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
 }
 
 bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quantAgendar, const int quantTotal) {
+  // TODO: rename this to 'dividirProduto'
+  // TODO: marcar idRelacionado
   // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
 
   SqlRelationalTableModel modelProdutos;
@@ -600,6 +602,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 }
 
 bool WidgetLogisticaAgendarEntrega::quebrarConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto) {
+  // TODO: rename this to 'dividirConsumo'
   SqlRelationalTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
   modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);

@@ -136,7 +136,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   QSqlQuery query6;
   query6.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
                  "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = "
-                 ":idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+                 ":idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   while (query4.next()) {
     // TODO: 1quando cancelar nota pegar os estoques e cancelar/remover da logistica (exceto quando estiverem entregues?)

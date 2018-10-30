@@ -1063,7 +1063,7 @@ bool Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query.lastError().text()); }

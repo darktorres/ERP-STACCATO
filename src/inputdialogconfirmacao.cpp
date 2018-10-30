@@ -289,6 +289,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
   }
 
   bool ok;
+  // TODO: verify if this needs to be changed to use step after &ok
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 
   if (not ok or qFuzzyIsNull(caixasDefeito)) { return; }
@@ -413,6 +414,8 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   //  // perguntar se gerar credito ou reposicao
 
   if (choice == QMessageBox::Cancel) { return false; }
+
+  // TODO: marcar idRelacionado
 
   SqlRelationalTableModel modelVendaProduto;
   modelVendaProduto.setTable("venda_has_produto");
@@ -607,7 +610,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
     query3.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
     QSqlQuery query4;
-    query4.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+    query4.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     while (query2.next()) {
       const int caixas = query2.value("caixas").toInt();

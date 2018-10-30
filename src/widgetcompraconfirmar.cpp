@@ -110,7 +110,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 
   QSqlQuery queryUpdate2;
   queryUpdate2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE idVendaProduto = :idVendaProduto "
-                       "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+                       "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   while (query1.next()) {
     queryUpdate1.bindValue(":dataRealConf", dataConf);
@@ -141,8 +141,7 @@ bool WidgetCompraConfirmar::cancelar(const int row) {
   if (not query1.exec()) { return qApp->enqueueError(false, "Erro buscando dados: " + query1.lastError().text()); }
 
   QSqlQuery query2;
-  query2.prepare(
-      "UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM COMPRA' AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM COMPRA' AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   while (query1.next()) {
     query2.bindValue(":idVendaProduto", query1.value("idVendaProduto"));

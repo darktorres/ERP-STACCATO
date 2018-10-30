@@ -223,4 +223,3 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
 }
 
 // TODO: verificar os pedidos de devolucao que estao com o status errado (update_venda_status)
-// TODO: sempre que fechar um pedido rodar update_venda_status/update_produto_estoque_quant

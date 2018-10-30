@@ -327,8 +327,7 @@ bool ImportarXML::importar() {
 
 bool ImportarXML::atualizaDados() {
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO' AND status != 'CANCELADO' "
-                "AND status != 'DEVOLVIDO'");
+  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO'");
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
     const int idVendaProduto = modelCompra.data(row, "idVendaProduto").toInt();
@@ -633,37 +632,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   return true;
 }
 
-bool ImportarXML::inserirItemModel(XML &xml) { // REFAC: extract functions, too big/complex
-                                               // NOTE: disabling this for now
-                                               //  const auto list = modelEstoque.match("codComercial", xml.codProd, -1, Qt::MatchFlags(Qt::MatchFixedString));
-
-  //  for (const auto &item : list) {
-  //    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Produto é do mesmo lote da linha " + QString::number(item.row() + 1) + "?", QMessageBox::Yes | QMessageBox::No, nullptr);
-  //    msgBox.setButtonText(QMessageBox::Yes, "Sim");
-  //    msgBox.setButtonText(QMessageBox::No, "Não");
-
-  //    if (msgBox.exec() == QMessageBox::Yes) {
-  //      const int row = item.row();
-
-  //      const double newQuant = xml.quant + modelEstoque.data(row, "quant").toDouble();
-
-  //      if (not modelEstoque.setData(row, "quant", newQuant)) { return false; }
-  //      // FIXME: should update other values too
-
-  //      // -------------------------------------------------------------------------
-
-  //      const int rowNFe = modelEstoque_nfe.rowCount();
-  //      modelEstoque_nfe.insertRow(rowNFe);
-
-  //      if (not modelEstoque_nfe.setData(rowNFe, "idEstoque", modelEstoque.data(row, "idEstoque"))) { return false; }
-  //      if (not modelEstoque_nfe.setData(rowNFe, "idNFe", xml.idNFe)) { return false; }
-
-  //      // -------------------------------------------------------------------------
-
-  //      return true;
-  //    }
-  //  }
-
+bool ImportarXML::inserirItemModel(XML &xml) {
   const auto idEstoque = buscarProximoIdEstoque();
 
   if (not idEstoque) { return false; }

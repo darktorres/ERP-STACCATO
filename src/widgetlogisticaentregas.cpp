@@ -167,7 +167,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
 bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
   QSqlQuery query1;
-  query1.prepare("UPDATE venda_has_produto SET dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query1.prepare("UPDATE venda_has_produto SET dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto");
@@ -280,7 +280,7 @@ bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, con
 
   QSqlQuery query3;
   query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto "
-                 "AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     const int idVendaProduto = modelProdutos.data(row, "idVendaProduto").toInt();
@@ -385,7 +385,7 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + query.lastError().text()); }
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   while (query.next()) {
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
@@ -443,7 +443,7 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");

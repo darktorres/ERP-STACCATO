@@ -227,7 +227,7 @@ bool ProdutosPendentes::insere(const QDateTime &dataPrevista) {
 void ProdutosPendentes::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
-  // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturado ainda
+  // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturada ainda
 
   auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
   if (not estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto").toInt(), quantConsumir)) { return false; }
@@ -262,7 +262,8 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const double quantEstoque = modelEstoque.data(rowEstoque, "restante").toDouble();
 
   bool ok;
-  const double quantConsumir = QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok);
+  const double quantConsumir =
+      QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
   if (not ok) { return; }
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();

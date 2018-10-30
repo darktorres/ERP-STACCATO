@@ -75,7 +75,7 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const 
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE idCompra = :idCompra AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE idCompra = :idCompra AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   for (const auto &idCompra : idsCompra) {
     query1.bindValue(":dataRealFat", dataReal);
@@ -160,7 +160,7 @@ bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
 
   QSqlQuery query1;
   query1.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE status = 'EM FATURAMENTO' AND idVendaProduto IN (SELECT idVendaProduto FROM pedido_fornecedor_has_produto "
-                 "WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO') AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+                 "WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO') AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO'");
@@ -220,7 +220,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+  query2.prepare("UPDATE venda_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   for (const auto &item : list) {
     const int idCompra = modelViewFaturamento.data(item.row(), "idCompra").toInt();

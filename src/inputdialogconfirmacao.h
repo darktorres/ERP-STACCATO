@@ -40,6 +40,7 @@ private:
   auto on_pushButtonQuebrado_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;
+  // TODO: rename those to 'dividirXXXX'
   auto quebrarEntrega(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;
   auto quebrarLinhaRecebimento(const int row, const int caixas, const double caixasDefeito, const double unCaixa) -> bool;
   auto quebrarRecebimento(const int row, const double caixasDefeito, const double unCaixa) -> bool;

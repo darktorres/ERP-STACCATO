@@ -230,11 +230,8 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
-  // TODO: salvar os dados preenchidos no model e verificar se isso pode atrapalhar de alguma forma outros fluxos
   // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
-  // TODO: colocar um qprogressdialog
-  // TODO: quando um campo é maior que o permitido o ACBr retorna 'OK' e na linha seguinte 'Alertas:'
-  // TODO: quando clicar em enviar dar um submitAll no model para salvar os dados preenchidos?
+  // TODO: quando clicar em enviar dar um submitAll no model para salvar os dados preenchidos? (é uma view, não pode dar submit)
 
   // TODO: como o ACBr vai ser usado remotamente antes de enviar cada nota alterar para 'producao/4.0'
 
@@ -323,7 +320,7 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
 
   if (tipo == Tipo::Futura) {
     QSqlQuery query;
-    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto AND status != 'CANCELADO' AND status != 'DEVOLVIDO'");
+    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query.bindValue(":idNFeFutura", idNFe);
@@ -336,14 +333,13 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
   if (tipo == Tipo::Normal) {
     // REFAC: use 'idVendaProduto IN'?
     QSqlQuery query1;
-    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto");
+    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     QSqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status = 'ENTREGA AGEND.' AND status != 'CANCELADO' "
-                   "AND status != 'DEVOLVIDO'");
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status = 'ENTREGA AGEND.'");
 
     QSqlQuery query3;
-    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));

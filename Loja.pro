@@ -172,6 +172,7 @@ SOURCES += \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
+    src/widgetgraficos.cpp \
     src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
@@ -278,6 +279,7 @@ HEADERS  += \
     src/widgetfinanceirocompra.h\
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
+    src/widgetgraficos.h \
     src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \
@@ -346,6 +348,7 @@ FORMS += \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
+    ui/widgetgraficos.ui \
     ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
     ui/widgetlogisticaagendarentrega.ui \

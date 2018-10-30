@@ -333,15 +333,15 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
       return {};
     }
 
-    // search list for repeated idVendas and return
+    QStringList idVendaList;
 
-    const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
+    for (const auto &index : list) { idVendaList << modelProdutos.data(index.row(), "idVenda").toString(); }
 
-    for (const auto &index : list) {
-      if (modelProdutos.data(index.row(), "idVenda").toString() != idVenda) {
-        qApp->enqueueError("Não pode misturar produtos de vendas diferentes na representação!");
-        return {};
-      }
+    idVendaList.removeDuplicates();
+
+    if (idVendaList.size() > 1) {
+      qApp->enqueueError("Não pode misturar produtos de vendas diferentes na representação!");
+      return {};
     }
   }
 

@@ -60,6 +60,7 @@ void CadastroUsuario::setupTables() {
   ui->table->hideRow(proxyModel->rowCount() - 1); // created
   ui->table->hideRow(proxyModel->rowCount() - 2); // lastUpdated
   ui->table->setItemDelegate(new CheckBoxDelegate(this));
+  ui->table->horizontalHeader()->setVisible(false);
 }
 
 void CadastroUsuario::modificarUsuario() {

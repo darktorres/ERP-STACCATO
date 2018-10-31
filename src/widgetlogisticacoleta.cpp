@@ -119,7 +119,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
 
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM "
-                 "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+                 "estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query3;
   // salvar status na venda
@@ -193,7 +193,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) {
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque)"
-                 " AND codComercial = :codComercial");
+                 " AND codComercial = :codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
@@ -248,8 +248,8 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
 
 bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
   QSqlQuery query1;
-  query1.prepare(
-      "UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial");
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = "
+                 ":codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET dataPrevColeta = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = :codComercial "

@@ -157,6 +157,7 @@ QString CadastrarNFe::gravarNota() {
 std::optional<int> CadastrarNFe::preCadastrarNota() {
   QSqlQuery queryNota;
   queryNota.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, valor) VALUES (:numeroNFe, :tipo, :xml, :status, :chaveAcesso, :cnpjOrig, :valor)");
+  // TODO: cadastrar idVenda para poder consultar na tela de entregas caso tenha perdido a conexao com o acbr
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":tipo", "SAÍDA");
   queryNota.bindValue(":xml", xml);
@@ -1881,3 +1882,5 @@ void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &
 // TODO: 5bloquear edicao direto na tabela
 // TODO: os produtos de reposicao devem sair na nota com o valor que foram vendidos originalmente
 // TODO: quando mudar a finalidade operacao para devolucao mudar as tabelas de cfop
+// TODO: testar a função de pré-gravar nota e consultar (não está salvando o idVenda e portanto na tela de logistica nao esta vinculando)
+// TODO: verificar notas pendentes soltas no sistema

@@ -253,7 +253,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
-                 "AND codComercial = :codComercial");
+                 "AND codComercial = :codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query3;
   query3.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "

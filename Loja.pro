@@ -99,6 +99,7 @@ SOURCES += \
     src/cadastrotransportadora.cpp \
     src/cadastrousuario.cpp \
     src/calculofrete.cpp \
+    src/cancelaproduto.cpp \
     src/cepcompleter.cpp \
     src/checkboxdelegate.cpp \
     src/combobox.cpp \
@@ -207,6 +208,7 @@ HEADERS  += \
     src/cadastrotransportadora.h \
     src/cadastrousuario.h \
     src/calculofrete.h \
+    src/cancelaproduto.h \
     src/cepcompleter.h \
     src/checkboxdelegate.h \
     src/combobox.h \
@@ -312,6 +314,7 @@ FORMS += \
     ui/cadastrotransportadora.ui \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
+    ui/cancelaproduto.ui \
     ui/contas.ui \
     ui/devolucao.ui \
     ui/estoque.ui \

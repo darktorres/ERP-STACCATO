@@ -2,6 +2,9 @@
 #include "logindialog.h"
 #include "mainwindow.h"
 
+#include <QMessageBox>
+#include <QSharedMemory>
+
 int main(int argc, char *argv[]) {
 
 #ifdef QT_DEBUG
@@ -10,6 +13,15 @@ int main(int argc, char *argv[]) {
   qSetMessagePattern("%{message}");
 #endif
   Application app(argc, argv);
+  QSharedMemory sharedMemory;
+
+  sharedMemory.setKey("staccato-erp");
+
+  if (sharedMemory.create(1) == false) {
+    QMessageBox::critical(nullptr, "Erro!", "ERP já rodando!");
+    app.exit();
+    return 0;
+  }
 
   LoginDialog dialog;
 

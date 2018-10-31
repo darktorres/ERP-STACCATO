@@ -100,7 +100,7 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
 
   QSqlQuery query3;
   query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE "
-                 "idEstoque = :idEstoque) AND codComercial = :codComercial");
+                 "idEstoque = :idEstoque) AND codComercial = :codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query4;
   // salvar status na venda
@@ -202,8 +202,8 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
 bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) {
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND codComercial = "
-                 ":codComercial");
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
+                 "AND codComercial = :codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
@@ -281,7 +281,7 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
 
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE "
-                 "idEstoque = :idEstoque) AND codComercial = :codComercial");
+                 "idEstoque = :idEstoque) AND codComercial = :codComercial AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query3;
   query3.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra "

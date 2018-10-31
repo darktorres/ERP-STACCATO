@@ -204,7 +204,7 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
   // TODO: juntar linhas sem consumo do mesmo tipo?
 
   QSqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto");
+  query3.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query3.bindValue(":idVendaProduto", idVendaProduto);
 
   if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + query3.lastError().text()); }

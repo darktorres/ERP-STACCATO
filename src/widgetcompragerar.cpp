@@ -474,7 +474,7 @@ void WidgetCompraGerar::on_tableProdutos_entered(const QModelIndex &) { ui->tabl
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'INICIADO' AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query.prepare("UPDATE venda_has_produto SET status = 'PENDENTE' WHERE idVendaProduto = :idVendaProduto AND status = 'INICIADO'");
 
   for (const auto &index : list) {
     if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) { return false; }

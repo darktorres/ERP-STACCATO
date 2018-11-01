@@ -5,6 +5,7 @@
 #include <QSqlQuery>
 
 #include "application.h"
+#include "cancelaproduto.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -97,8 +98,6 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 }
 
 bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {
-  // REFAC: prepare querys beforehand
-
   QSqlQuery querySelect;
   querySelect.prepare("SELECT idPedido, idVendaProduto FROM pedido_fornecedor_has_produto WHERE idCompra = :idCompra AND selecionado = TRUE");
   querySelect.bindValue(":idCompra", idCompra);
@@ -134,59 +133,14 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 
 void WidgetCompraConfirmar::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
-bool WidgetCompraConfirmar::cancelar(const int row) {
-  QSqlQuery query1;
-  query1.prepare("SELECT idVendaProduto FROM pedido_fornecedor_has_produto WHERE ordemCompra = :ordemCompra AND status = 'EM COMPRA'");
-  query1.bindValue(":ordemCompra", modelViewCompras.data(row, "OC"));
-
-  if (not query1.exec()) { return qApp->enqueueError(false, "Erro buscando dados: " + query1.lastError().text()); }
-
-  QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE idVendaProduto = :idVendaProduto AND status = 'EM COMPRA' AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-
-  while (query1.next()) {
-    query2.bindValue(":idVendaProduto", query1.value("idVendaProduto"));
-
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query2.lastError().text()); }
-  }
-
-  QSqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM COMPRA'");
-  query3.bindValue(":ordemCompra", modelViewCompras.data(row, "OC"));
-
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando dados: " + query3.lastError().text()); }
-
-  return true;
-}
-
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
-  // TODO: 5cancelar itens individuais no lugar da compra toda?
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  const int row = list.first().row();
-
-  const QString idVenda = modelViewCompras.data(row, "idVenda").toString();
-
-  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Essa operação ira cancelar todos os itens desta OC, mesmo os já confirmados/faturados! Deseja continuar?", QMessageBox::Yes | QMessageBox::No,
-                     this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::No) { return; }
-
-  if (not qApp->startTransaction()) { return; }
-
-  if (not cancelar(row)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
-
-  if (not qApp->endTransaction()) { return; }
-
-  updateTables();
-  qApp->enqueueInformation("Itens cancelados!");
+  auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
+  cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
+  cancelaProduto->setFilter(modelViewCompras.data(list.first().row(), "OC").toString());
 }
 
 // TODO: 1poder confirmar dois pedidos juntos (quando vem um espelho só) (cancelar os pedidos e fazer um pedido só?)

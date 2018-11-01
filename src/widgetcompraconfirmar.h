@@ -26,7 +26,6 @@ private:
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
-  auto cancelar(const int row) -> bool;
   auto confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) -> bool;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonConfirmarCompra_clicked() -> void;

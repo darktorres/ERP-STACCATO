@@ -598,30 +598,31 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
   if (sobra < 0) {
     // faltando pecas para consumo, desfazer os consumos com prazo maior
 
-    QSqlQuery query2;
-    query2.prepare("SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = "
-                   "vp.idVendaProduto LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
-    query2.bindValue(":idEstoque", idEstoque);
+    QSqlQuery querySelect;
+    querySelect.prepare(
+        "SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = "
+        "vp.idVendaProduto LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
+    querySelect.bindValue(":idEstoque", idEstoque);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro buscando consumo estoque: " + query2.lastError().text()); }
+    if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando consumo estoque: " + querySelect.lastError().text()); }
 
-    QSqlQuery query3;
+    QSqlQuery queryDelete;
     // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
-    query3.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
+    queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
-    QSqlQuery query4;
-    query4.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+    QSqlQuery queryVenda;
+    queryVenda.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
-    while (query2.next()) {
-      const int caixas = query2.value("caixas").toInt();
+    while (querySelect.next()) {
+      const int caixas = querySelect.value("caixas").toInt();
 
-      query3.bindValue(":idConsumo", query2.value("idConsumo"));
+      queryDelete.bindValue(":idConsumo", querySelect.value("idConsumo"));
 
-      if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo consumo: " + query3.lastError().text()); }
+      if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo: " + queryDelete.lastError().text()); }
 
-      query4.bindValue(":idVendaProduto", query2.value("idVendaProduto"));
+      queryVenda.bindValue(":idVendaProduto", querySelect.value("idVendaProduto"));
 
-      if (not query4.exec()) { return qApp->enqueueError(false, "Erro voltando produto para pendente: " + query4.lastError().text()); }
+      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro voltando produto para pendente: " + queryVenda.lastError().text()); }
 
       sobra += caixas;
       if (sobra >= 0) { break; }

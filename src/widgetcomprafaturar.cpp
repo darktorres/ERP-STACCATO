@@ -5,6 +5,7 @@
 #include <QSqlQuery>
 
 #include "application.h"
+#include "cancelaproduto.h"
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
@@ -152,58 +153,14 @@ void WidgetCompraFaturar::montaFiltro() {
   ui->table->resizeColumnsToContents();
 }
 
-bool WidgetCompraFaturar::cancelar(const QModelIndexList &list) {
-  // TODO: 0nas outras telas com cancelamento verificar se estou filtrando
-  // TODO: 5verificar como tratar conta_a_pagar_has_pagamento
-  // TODO: alterar a funcao de cancelar por uma tela de SAC onde o usuario indica as operacoes necessarias (troca de nfe, produto nao disponivel etc) e realiza as mudanças necessarias, bem como
-  // alteracoes no fluxo de pagamento se necessario
-
-  QSqlQuery query1;
-  query1.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL WHERE status = 'EM FATURAMENTO' AND idVendaProduto IN (SELECT idVendaProduto FROM pedido_fornecedor_has_produto "
-                 "WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO') AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-
-  QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE ordemCompra = :ordemCompra AND status = 'EM FATURAMENTO'");
-
-  for (const auto &item : list) {
-    query1.bindValue(":ordemCompra", modelViewFaturamento.data(item.row(), "OC"));
-
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro buscando dados: " + query1.lastError().text()); }
-
-    query2.bindValue(":ordemCompra", modelViewFaturamento.data(item.row(), "OC"));
-
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando dados: " + query2.lastError().text()); }
-  }
-
-  return true;
-}
-
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
-  QStringList idVendas;
-
-  for (const auto &item : list) { idVendas << modelViewFaturamento.data(item.row(), "Código").toString(); }
-
-  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Essa operação ira cancelar todos os itens desta OC, mesmo os já confirmados/faturados! Deseja continuar?", QMessageBox::Yes | QMessageBox::No,
-                     this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::No) { return; }
-
-  if (not qApp->startTransaction()) { return; }
-
-  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
-
-  if (not qApp->endTransaction()) { return; }
-
-  updateTables();
-  qApp->enqueueInformation("Itens cancelados!");
+  auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
+  cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
+  cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "OC").toString());
 }
 
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {

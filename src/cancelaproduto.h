@@ -13,13 +13,14 @@ class CancelaProduto : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { CompraConfirmar, CompraGerar, CompraFaturamento, LogisticaColeta, LogisticaEntregues, LogisticaRecebimento, NFeEntrada };
-  explicit CancelaProduto(QWidget *parent = nullptr);
+  enum class Tipo { CompraConfirmar, CompraFaturamento, LogisticaColeta, LogisticaRecebimento, LogisticaEntregues, NFeEntrada };
+  explicit CancelaProduto(const Tipo &tipo, QWidget *parent = nullptr);
   ~CancelaProduto();
-  auto setFilter(const QString &ordemCompra, const Tipo &tipo) -> void;
+  auto setFilter(const QString &ordemCompra) -> void;
 
 private:
   // attributes
+  const Tipo tipo;
   SqlRelationalTableModel model;
   Ui::CancelaProduto *ui;
   // methods

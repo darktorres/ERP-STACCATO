@@ -6,7 +6,7 @@
 #include "sql.h"
 #include "ui_cancelaproduto.h"
 
-CancelaProduto::CancelaProduto(QWidget *parent) : QDialog(parent), ui(new Ui::CancelaProduto) {
+CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
 
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonCancelar_clicked);
@@ -22,10 +22,9 @@ CancelaProduto::CancelaProduto(QWidget *parent) : QDialog(parent), ui(new Ui::Ca
 
 CancelaProduto::~CancelaProduto() { delete ui; }
 
-void CancelaProduto::setFilter(const QString &ordemCompra, const Tipo &tipo) {
-  // switch on tipo?
-
-  model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM FATURAMENTO'");
+void CancelaProduto::setFilter(const QString &ordemCompra) {
+  if (tipo == Tipo::CompraConfirmar) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM COMPRA'"); }
+  if (tipo == Tipo::CompraFaturamento) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM FATURAMENTO'"); }
 
   if (not model.select()) { return qApp->enqueueError("Erro carregando tabela: " + model.lastError().text()); }
 
@@ -101,31 +100,37 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 void CancelaProduto::on_pushButtonCancelar_clicked() { close(); }
 
 bool CancelaProduto::cancelar(const QModelIndexList &list) {
-  QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido = :idPedido");
+  if (tipo == Tipo::CompraConfirmar or tipo == Tipo::CompraFaturamento) {
+    QSqlQuery queryCompra;
+    queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido = :idPedido");
 
-  QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
-                     "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = 'EM "
-                     "FATURAMENTO' AND idVendaProduto = :idVendaProduto");
+    const QString status = tipo == Tipo::CompraConfirmar ? "EM COMPRA" : "EM FATURAMENTO";
 
-  QStringList idVendas;
+    QSqlQuery queryVenda;
+    queryVenda.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
+                       "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
+                       status + "' AND idVendaProduto = :idVendaProduto");
 
-  for (const auto &index : list) {
-    const int row = index.row();
+    QStringList idVendas;
 
-    queryCompra.bindValue(":idPedido", model.data(row, "idPedido"));
+    for (const auto &index : list) {
+      const int row = index.row();
 
-    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text()); }
+      queryCompra.bindValue(":idPedido", model.data(row, "idPedido"));
 
-    queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
+      if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text()); }
 
-    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text()); }
+      queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
 
-    idVendas << model.data(row, "idVenda").toString();
+      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text()); }
+
+      idVendas << model.data(row, "idVenda").toString();
+    }
+
+    if (not Sql::updateVendaStatus(idVendas)) { return false; }
+  } else {
+    return qApp->enqueueError(false, "Não implementado!");
   }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return false; }
 
   return true;
 }

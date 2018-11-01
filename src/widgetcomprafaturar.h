@@ -26,7 +26,6 @@ private:
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
-  auto cancelar(const QModelIndexList &list) -> bool;
   auto faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) -> bool;
   auto montaFiltro() -> void;
   auto on_checkBoxRepresentacao_toggled(bool checked) -> void;

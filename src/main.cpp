@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
   Application app(argc, argv);
   QSharedMemory sharedMemory;
 
+#ifdef Q_OS_WIN
   sharedMemory.setKey("staccato-erp");
 
   if (sharedMemory.create(1) == false) {
@@ -22,6 +23,7 @@ int main(int argc, char *argv[]) {
     app.exit();
     return 0;
   }
+#endif
 
   LoginDialog dialog;
 

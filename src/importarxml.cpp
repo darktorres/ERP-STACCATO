@@ -451,26 +451,23 @@ void ImportarXML::procurar() {
   ui->tableCompra->resizeColumnsToContents();
 }
 
-std::optional<double> ImportarXML::buscarCaixas(const XML &xml) {
+std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
   QSqlQuery query;
   query.prepare("SELECT idProduto, m2cx, pccx, UPPER(un) AS un FROM produto WHERE codComercial = :codComercial");
-  query.bindValue(":codComercial", xml.codProd);
+  query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
   if (not query.exec()) {
     qApp->enqueueError(false, "Erro lendo tabela produto: " + query.lastError().text());
     return {};
   }
 
-  if (not query.first()) {
-    qApp->enqueueError(false, "Produto não cadastrado: " + xml.codProd);
-    return {};
-  }
+  if (not query.first()) { return {}; }
 
-  const QString un = xml.un;
+  const QString un = modelEstoque.data(rowEstoque, "un").toString();
 
   const double quantCaixa = un == "M2" or un == "M²" or un == "ML" ? query.value("m2cx").toDouble() : query.value("pccx").toDouble();
 
-  const double quant = xml.quant;
+  const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
 
   const double caixas = qRound(quant / quantCaixa * 100) / 100.;
 
@@ -491,6 +488,9 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
   if (not modelCompra.setData(rowCompra, "quantConsumida", quantConsumida + quantAdicionar)) { return false; }
   if (not modelCompra.setData(rowCompra, "quantUpd", static_cast<int>(qFuzzyCompare((quantConsumida + quantAdicionar), quantCompra) ? FieldColors::Green : FieldColors::Yellow))) { return false; }
 
+  const auto caixas = buscarCaixas(rowEstoque);
+
+  if (caixas and not modelEstoque.setData(rowEstoque, "caixas", caixas.value())) { return false; }
   if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoqueConsumido, quantEstoque) ? FieldColors::Green : FieldColors::Yellow))) { return false; }
   if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(rowCompra, "idProduto"))) { return false; }
 
@@ -637,16 +637,11 @@ bool ImportarXML::inserirItemModel(XML &xml) {
 
   if (not idEstoque) { return false; }
 
-  const auto caixas = buscarCaixas(xml);
-
-  if (not caixas) { return false; }
-
   const int newRow = modelEstoque.rowCount();
 
   if (not modelEstoque.insertRow(newRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelEstoque.lastError().text()); }
 
   if (not modelEstoque.setData(newRow, "idEstoque", idEstoque.value())) { return false; }
-  if (not modelEstoque.setData(newRow, "caixas", caixas.value())) { return false; }
   if (not modelEstoque.setData(newRow, "fornecedor", xml.xNome)) { return false; }
   if (not modelEstoque.setData(newRow, "local", xml.local)) { return false; }
   if (not modelEstoque.setData(newRow, "descricao", xml.descricao)) { return false; }

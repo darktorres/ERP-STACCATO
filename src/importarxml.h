@@ -43,7 +43,7 @@ private:
   // methods
   auto associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) -> bool;
   auto atualizaDados() -> bool;
-  auto buscarCaixas(const XML &xml) -> std::optional<double>;
+  auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto buscarProximoIdEstoque() -> std::optional<int>;
   auto cadastrarNFe(XML &xml) -> bool;
   auto cadastrarProdutoEstoque(const QVector<std::tuple<int, int, double>> &tuples) -> bool;

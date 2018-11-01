@@ -117,8 +117,6 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const QDateTime dataReal = inputDlg.getDate();
 
-  // TODO: 0quando a sigla CAMB pular
-
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {

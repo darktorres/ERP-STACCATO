@@ -58,7 +58,6 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroSul, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->doubleSpinBoxQuantAvulso, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged);
   connect(ui->doubleSpinBoxQuantAvulsoCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
@@ -160,15 +159,13 @@ void WidgetCompraPendentes::montaFiltro() {
 
   const QString textoBusca = ui->lineEditBusca->text();
 
-  const QString textoSul = ui->checkBoxFiltroSul->isChecked() ? "" : " AND idVenda NOT LIKE 'CAMB-%'";
-
   const QString filtroBusca = textoBusca.isEmpty() ? ""
                                                    : QString(filtroCheck.isEmpty() ? "" : " AND ") + "((idVenda LIKE '%" + textoBusca + "%') OR (fornecedor LIKE '%" + textoBusca +
                                                          "%') OR (produto LIKE '%" + textoBusca + "%') OR (`codComercial` LIKE '%" + textoBusca + "%'))";
 
   const QString filtroStatus = QString((filtroCheck + filtroBusca).isEmpty() ? "" : " AND ") + "status != 'CANCELADO'";
 
-  modelViewVendaProduto.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0" + textoSul);
+  modelViewVendaProduto.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0");
 
   if (not modelViewVendaProduto.select()) { return; }
 

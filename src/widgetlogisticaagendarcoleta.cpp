@@ -25,7 +25,6 @@ WidgetLogisticaAgendarColeta::~WidgetLogisticaAgendarColeta() { delete ui; }
 
 void WidgetLogisticaAgendarColeta::setConnections() {
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled);
-  connect(ui->checkBoxSul, &QCheckBox::toggled, this, &WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged);
@@ -427,15 +426,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
   }
 }
 
-void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled(const bool checked) {
-  if (checked) { ui->checkBoxSul->setChecked(false); }
-  montaFiltro();
-}
-
-void WidgetLogisticaAgendarColeta::on_checkBoxSul_toggled(const bool checked) {
-  if (checked) { ui->checkBoxEstoque->setChecked(false); }
-  montaFiltro();
-}
+void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled() { montaFiltro(); }
 
 void WidgetLogisticaAgendarColeta::montaFiltro() {
   QString filtro;
@@ -443,8 +434,6 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
   filtro += filterFornecedor;
   const QString filterEstoque = "idVenda " + QString(ui->checkBoxEstoque->isChecked() ? "IS NULL" : "IS NOT NULL");
   filtro += QString(filtro.isEmpty() ? "" : " AND ") + filterEstoque;
-  const QString filterSul = ui->checkBoxEstoque->isChecked() ? "" : "idVenda " + QString(ui->checkBoxSul->isChecked() ? "LIKE 'CAMB%'" : "NOT LIKE 'CAMB%'");
-  filtro += filterSul.isEmpty() ? "" : QString(filtro.isEmpty() ? "" : " AND ") + filterSul;
 
   if (const QString text = ui->lineEditBusca->text(); not text.isEmpty()) {
     const QString filterText = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";

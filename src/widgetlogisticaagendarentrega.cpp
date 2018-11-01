@@ -129,7 +129,6 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 }
 
 void WidgetLogisticaAgendarEntrega::setConnections() {
-  connect(ui->checkBoxMostrarSul, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
@@ -258,10 +257,6 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
       textoBusca.isEmpty() ? "" : "(idVenda LIKE '%" + textoBusca + "%' OR Bairro LIKE '%" + textoBusca + "%' OR Logradouro LIKE '%" + textoBusca + "%' OR Cidade LIKE '%" + textoBusca + "%')";
 
   if (not filtroBusca.isEmpty()) { filtro += filtro.isEmpty() ? filtroBusca : " AND " + filtroBusca; }
-
-  const QString filtroSul = ui->checkBoxMostrarSul->isChecked() ? "" : "(idVenda NOT LIKE '%CAMB%')";
-
-  if (not filtroSul.isEmpty()) { filtro += filtro.isEmpty() ? filtroSul : " AND " + filtroSul; }
 
   modelVendas.setFilter(filtro);
 

@@ -32,8 +32,7 @@ private:
   auto adicionarProduto(const QModelIndexList &list) -> bool;
   auto calcularPeso() -> void;
   auto montaFiltro() -> void;
-  auto on_checkBoxEstoque_toggled(const bool checked) -> void;
-  auto on_checkBoxSul_toggled(const bool checked) -> void;
+  auto on_checkBoxEstoque_toggled() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;
   auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;

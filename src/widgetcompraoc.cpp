@@ -34,20 +34,22 @@ void WidgetCompraOC::updateTables() {
 void WidgetCompraOC::resetTables() { modelIsSet = false; }
 
 void WidgetCompraOC::setupTables() {
-  modelPedido.setTable("view_ordemcompra");
+  modelPedido.setTable("view_ordemcompra_resumo");
   modelPedido.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   ui->tablePedido->setModel(&modelPedido);
 
   //------------------------------------------------------
 
-  modelProduto.setTable("pedido_fornecedor_has_produto");
+  modelProduto.setTable("view_ordemcompra");
   modelProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProduto.setFilter("0");
 
-  modelProduto.setHeaderData("status", "Status");
+  modelProduto.setHeaderData("statusPF", "Status Compra");
+  modelProduto.setHeaderData("statusVP", "Status Venda");
   modelProduto.setHeaderData("idVenda", "Venda");
+  modelProduto.setHeaderData("idVendaProdutoEHC", "Consumo");
   modelProduto.setHeaderData("fornecedor", "Fornecedor");
   modelProduto.setHeaderData("descricao", "Produto");
   modelProduto.setHeaderData("colecao", "Coleção");
@@ -68,29 +70,10 @@ void WidgetCompraOC::setupTables() {
   ui->tableProduto->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProduto->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableProduto->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
+  ui->tableProduto->hideColumn("idVendaProdutoPF");
   ui->tableProduto->hideColumn("idPedido");
-  ui->tableProduto->hideColumn("selecionado");
-  ui->tableProduto->hideColumn("statusFinanceiro");
-  ui->tableProduto->hideColumn("idVendaProduto");
-  ui->tableProduto->hideColumn("ordemCompra");
   ui->tableProduto->hideColumn("idCompra");
-  ui->tableProduto->hideColumn("idProduto");
-  ui->tableProduto->hideColumn("quantUpd");
-  ui->tableProduto->hideColumn("quantConsumida");
-  ui->tableProduto->hideColumn("aliquotaSt");
-  ui->tableProduto->hideColumn("st");
-  ui->tableProduto->hideColumn("dataPrevCompra");
-  ui->tableProduto->hideColumn("dataRealCompra");
-  ui->tableProduto->hideColumn("dataPrevConf");
-  ui->tableProduto->hideColumn("dataRealConf");
-  ui->tableProduto->hideColumn("dataPrevFat");
-  ui->tableProduto->hideColumn("dataRealFat");
-  ui->tableProduto->hideColumn("dataPrevColeta");
-  ui->tableProduto->hideColumn("dataRealColeta");
-  ui->tableProduto->hideColumn("dataPrevReceb");
-  ui->tableProduto->hideColumn("dataRealReceb");
-  ui->tableProduto->hideColumn("dataPrevEnt");
-  ui->tableProduto->hideColumn("dataRealEnt");
+  ui->tableProduto->hideColumn("ordemCompra");
 
   //------------------------------------------------------
 
@@ -147,13 +130,19 @@ void WidgetCompraOC::on_tableProduto_entered(const QModelIndex &) { ui->tablePro
 void WidgetCompraOC::on_tableNFe_entered(const QModelIndex &) { ui->tableNFe->resizeColumnsToContents(); }
 
 void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
-  // TODO: mostrar erro/aviso se a linha selecionada noa possuir consumo (linhas de estoque)
-
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   const int row = list.first().row();
+
+  const int idVendaConsumo = modelProduto.data(row, "idVendaProdutoEHC").toInt();
+
+  if (idVendaConsumo == 0) { return qApp->enqueueError("A linha não possui consumo associado!"); }
+
+  const QString status = modelProduto.data(row, "statusVP").toString();
+
+  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!"); }
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Continuar");
@@ -162,10 +151,11 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
   if (msgBox.exec() == QMessageBox::No) { return; }
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
+  const int idVendaProduto = modelProduto.data(row, "idVendaProdutoPF").toInt();
 
   if (not qApp->startTransaction()) { return; }
 
-  if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
+  if (not desfazerConsumo(idVendaProduto, idVendaConsumo)) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVenda)) { return; }
 
@@ -176,44 +166,34 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!");
 }
 
-bool WidgetCompraOC::desfazerConsumo(const int row) {
-  // REFAC: pass this responsability to Estoque class
+bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVendaConsumo) {
+  // REFAC: pass this responsability to Estoque class?
 
-  const int idVendaProduto = modelProduto.data(row, "idVendaProduto").toInt();
+  // NOTE: estoque_has_consumo may have the same idVendaProduto in more than one row
+  if (idVendaConsumo != 0) {
+    QSqlQuery queryDelete;
+    queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
+    // TODO: change this to idPedido?
+    queryDelete.bindValue(":idVendaProduto", idVendaConsumo);
 
-  if (idVendaProduto == 0) { return qApp->enqueueError(false, "A linha não possui consumo associado!"); }
-
-  QSqlQuery query1;
-  query1.prepare("SELECT status FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-  query1.bindValue(":idVendaProduto", idVendaProduto);
-
-  if (not query1.exec()) { return qApp->enqueueError(false, "Erro buscando status do consumo estoque: " + query1.lastError().text()); }
-
-  if (query1.first()) {
-    const QString status = query1.value("status").toString();
-
-    if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError(false, "Consumo do estoque está em entrega/entregue!"); }
-
-    QSqlQuery query2;
-    query2.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-    query2.bindValue(":idVendaProduto", idVendaProduto);
-
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + query2.lastError().text()); }
+    if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
   }
 
-  // TODO: juntar linhas sem consumo do mesmo tipo?
+  // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
 
-  QSqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  query3.bindValue(":idVendaProduto", idVendaProduto);
+  QSqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryCompra.bindValue(":idVendaProduto", idVendaProduto);
 
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + query3.lastError().text()); }
+  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
 
-  QSqlQuery query4;
-  query4.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  query4.bindValue(":idVendaProduto", idVendaProduto);
+  QSqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto SET status = 'PENDENTE', idCompra = NULL, dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
+                     "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = "
+                     ":idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.bindValue(":idVendaProduto", idVendaProduto);
 
-  if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + query4.lastError().text()); }
+  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
 
   return true;
 }

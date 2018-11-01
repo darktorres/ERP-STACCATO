@@ -307,7 +307,9 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
     if (not modelCompra.setData(row, "idVendaProduto", idVendaProduto)) { return {}; }
   }
 
-  if (quant < quantCompra) {
+  const bool dividir = quant < quantCompra;
+
+  if (dividir) {
     const int newRow = modelCompra.rowCount();
     // NOTE: *quebralinha venda_produto/pedido_fornecedor
     modelCompra.insertRow(newRow);
@@ -342,9 +344,11 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
     if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return {}; }
   }
 
+  const int id = modelCompra.data(row, "idPedido").toInt();
+
   if (not modelCompra.submitAll()) { return {}; }
 
-  return quant < quantCompra ? modelCompra.query().lastInsertId().toInt() : modelCompra.data(row, "idPedido").toInt();
+  return dividir ? modelCompra.query().lastInsertId().toInt() : id;
 }
 
 void Estoque::on_tableEstoque_entered(const QModelIndex) { ui->tableEstoque->resizeColumnsToContents(); }

@@ -161,7 +161,8 @@ void Venda::setupTables() {
   ui->tableProdutos->hideColumn("idLoja");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("comissao");
-  ui->tableProdutos->hideColumn("reposicao");
+  ui->tableProdutos->hideColumn("reposicaoEntrega");
+  ui->tableProdutos->hideColumn("reposicaoReceb");
   ui->tableProdutos->hideColumn("mostrarDesconto");
 
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));

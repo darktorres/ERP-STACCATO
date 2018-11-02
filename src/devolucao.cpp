@@ -80,7 +80,8 @@ void Devolucao::setupTables() {
   ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("statusOriginal");
   ui->tableProdutos->hideColumn("mostrarDesconto");
-  ui->tableProdutos->hideColumn("reposicao");
+  ui->tableProdutos->hideColumn("reposicaoEntrega");
+  ui->tableProdutos->hideColumn("reposicaoReceb");
   ui->tableProdutos->hideColumn("recebeu");
   ui->tableProdutos->hideColumn("entregou");
   ui->tableProdutos->hideColumn("descUnitario");
@@ -142,7 +143,8 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->setModel(&modelDevolvidos);
   ui->tableDevolvidos->hideColumn("idRelacionado");
   ui->tableDevolvidos->hideColumn("mostrarDesconto");
-  ui->tableDevolvidos->hideColumn("reposicao");
+  ui->tableDevolvidos->hideColumn("reposicaoEntrega");
+  ui->tableDevolvidos->hideColumn("reposicaoReceb");
   ui->tableDevolvidos->hideColumn("recebeu");
   ui->tableDevolvidos->hideColumn("entregou");
   ui->tableDevolvidos->hideColumn("descUnitario");

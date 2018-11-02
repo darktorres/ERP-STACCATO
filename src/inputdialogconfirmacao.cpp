@@ -536,7 +536,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
   if (not modelVendaProduto.setData(newRow, "descGlobal", 0)) { return false; }
   if (not modelVendaProduto.setData(newRow, "total", 0)) { return false; }
   if (not modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA")) { return false; }
-  if (not modelVendaProduto.setData(newRow, "reposicao", true)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "reposicaoEntrega", true)) { return false; }
 
   // REFAC: this blocks the transaction
   const QString obs = QInputDialog::getText(this, "Observacao", "Observacao: ");

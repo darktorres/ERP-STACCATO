@@ -73,7 +73,8 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("parcialDesc");
   ui->table->hideColumn("descGlobal");
   ui->table->hideColumn("total");
-  ui->table->hideColumn("reposicao");
+  ui->table->hideColumn("reposicaoEntrega");
+  ui->table->hideColumn("reposicaoReceb");
   ui->table->hideColumn("estoque");
   ui->table->hideColumn("promocao");
   ui->table->hideColumn("mostrarDesconto");

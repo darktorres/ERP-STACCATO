@@ -29,6 +29,7 @@ private:
   auto adicionarItem(const bool isUpdate = false) -> void; // REFAC: refac this to enum
   auto atualizaReplica() -> bool;
   auto atualizarItem() -> void;
+  auto buscarCadastrarConsultor() -> bool;
   auto buscarParametrosFrete() -> bool;
   auto cadastrar() -> bool final;
   auto calcPrecoGlobalTotal() -> void;
@@ -38,7 +39,6 @@ private:
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
-  auto on_comboBoxLoja_currentTextChanged(const QString &) -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
   auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;

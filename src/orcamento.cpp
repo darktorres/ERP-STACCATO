@@ -40,18 +40,9 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   setupMapper();
   newRegister();
 
-  if (UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
-    QSqlQuery query("SELECT descricao, idLoja FROM loja");
-
-    while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
-
-    ui->comboBoxLoja->setCurrentValue(UserSession::idLoja());
-  } else {
-    ui->labelLoja->hide();
-    ui->comboBoxLoja->hide();
-    ui->labelVendedorIndicou->hide();
-    ui->itemBoxConsultor->hide();
-  }
+  ui->labelConsultor->hide();
+  ui->itemBoxConsultor->hide();
+  ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
   if (UserSession::tipoUsuario() == "ADMINISTRADOR") {
     ui->dateTimeEdit->setReadOnly(false);
@@ -95,7 +86,6 @@ void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
 void Orcamento::setConnections() {
   connect(ui->checkBoxFreteManual, &QCheckBox::clicked, this, &Orcamento::on_checkBoxFreteManual_clicked);
   connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &Orcamento::on_checkBoxRepresentacao_toggled);
-  connect(ui->comboBoxLoja, &ComboBox::currentTextChanged, this, &Orcamento::on_comboBoxLoja_currentTextChanged);
   connect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxCaixas_valueChanged);
   connect(ui->doubleSpinBoxDesconto, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDesconto_valueChanged);
   connect(ui->doubleSpinBoxDescontoGlobal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged);
@@ -125,7 +115,6 @@ void Orcamento::setConnections() {
 void Orcamento::unsetConnections() {
   disconnect(ui->checkBoxFreteManual, &QCheckBox::clicked, this, &Orcamento::on_checkBoxFreteManual_clicked);
   disconnect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &Orcamento::on_checkBoxRepresentacao_toggled);
-  disconnect(ui->comboBoxLoja, &ComboBox::currentTextChanged, this, &Orcamento::on_comboBoxLoja_currentTextChanged);
   disconnect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxCaixas_valueChanged);
   disconnect(ui->doubleSpinBoxDesconto, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDesconto_valueChanged);
   disconnect(ui->doubleSpinBoxDescontoGlobal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged);
@@ -265,6 +254,11 @@ bool Orcamento::viewRegister() {
     if (not data("replicadoEm").toString().isEmpty()) {
       ui->labelReplicadoEm->show();
       ui->lineEditReplicadoEm->show();
+    }
+
+    if (data("idUsuarioConsultor").toInt() != 0) {
+      ui->labelConsultor->show();
+      ui->itemBoxConsultor->show();
     }
 
     return true;
@@ -535,7 +529,34 @@ bool Orcamento::savingProcedures() {
     if (not modelItem.setData(row, "descUnitario", prcUnitario - (prcUnitario * desconto))) { return false; }
   }
 
+  if (not buscarCadastrarConsultor()) { return false; }
+
   return atualizaReplica();
+}
+
+bool Orcamento::buscarCadastrarConsultor() {
+  QStringList fornecedores;
+
+  for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
+
+  fornecedores.removeDuplicates();
+
+  for (auto &fornecedor : fornecedores) {
+    fornecedor.prepend("'");
+    fornecedor.append("'");
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT idUsuario FROM usuario WHERE especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" + fornecedores.join(", ") + "))")) {
+    return qApp->enqueueError(false, "Erro buscando consultor: " + query.lastError().text());
+  }
+
+  if (query.size() > 1) { return qApp->enqueueError(false, "Mais de um consultor disponível!"); }
+
+  if (query.size() == 1 and query.first() and not setData("idUsuarioConsultor", query.value("idUsuario"))) { return false; }
+
+  return true;
 }
 
 bool Orcamento::atualizaReplica() {
@@ -1111,11 +1132,6 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
 }
 
 void Orcamento::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Orçamento cadastrado com sucesso!"); }
-
-void Orcamento::on_comboBoxLoja_currentTextChanged(const QString &) {
-  ui->itemBoxConsultor->clear();
-  ui->itemBoxConsultor->setFilter("idLoja = " + ui->comboBoxLoja->getCurrentValue().toString() + " AND tipo = 'VENDEDOR'");
-}
 
 void Orcamento::on_pushButtonCalculadora_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
 

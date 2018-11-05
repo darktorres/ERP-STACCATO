@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1170</width>
+    <width>1307</width>
     <height>879</height>
    </rect>
   </property>
@@ -666,13 +666,6 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
-               <widget class="QLabel" name="labelLoja">
-                <property name="text">
-                 <string>Loja:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QLabel" name="labelOrcamento">
                 <property name="text">
                  <string>Orçamento:</string>
@@ -693,7 +686,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="labelVendedorIndicou">
+               <widget class="QLabel" name="labelConsultor">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -716,9 +709,6 @@
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="ComboBox" name="comboBoxLoja"/>
-              </item>
               <item>
                <widget class="QLineEdit" name="lineEditOrcamento">
                 <property name="toolTip">
@@ -1508,11 +1498,6 @@ color: rgb(0, 0, 0);</string>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/combobox.h</header>
   </customwidget>
   <customwidget>
    <class>LineEditDecimal</class>

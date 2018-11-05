@@ -32,11 +32,16 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
+  ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxEnderecoFat->setSearchDialog(SearchDialog::enderecoCliente(this));
 
   setupMapper();
   newRegister();
+
+  ui->labelConsultor->hide();
+  ui->itemBoxConsultor->hide();
+  ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
   ui->groupBoxFinanceiro->hide();
   ui->tableFluxoCaixa2->hide();
@@ -466,6 +471,7 @@ void Venda::setupMapper() {
   addMapping(ui->doubleSpinBoxSubTotalLiq, "subTotalLiq");
   addMapping(ui->doubleSpinBoxTotal, "total");
   addMapping(ui->itemBoxCliente, "idCliente", "value");
+  addMapping(ui->itemBoxConsultor, "idUsuarioConsultor", "value");
   addMapping(ui->itemBoxEndereco, "idEnderecoEntrega", "value");
   addMapping(ui->itemBoxEnderecoFat, "idEnderecoFaturamento", "value");
   addMapping(ui->itemBoxProfissional, "idProfissional", "value");
@@ -671,6 +677,11 @@ bool Venda::viewRegister() {
     ui->checkBoxRT->setHidden(true);
 
     if (data("devolucao").toBool()) { ui->pushButtonDevolucao->hide(); }
+
+    if (data("idUsuarioConsultor").toInt() != 0) {
+      ui->labelConsultor->show();
+      ui->itemBoxConsultor->show();
+    }
 
     return true;
   }();

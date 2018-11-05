@@ -12,8 +12,7 @@ class CadastroFornecedor final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  // TODO: implement this
-  enum class Tipo2 { Revestimentos = 0, Loucas_Metais = 1, Acessorios = 2, Insumos = 3, Servicos = 4 };
+  enum class Especialidade { Revestimentos = 1, Loucas_Metais = 2, Acessorios = 3, Insumos = 4, Servicos = 5 };
   explicit CadastroFornecedor(QWidget *parent = nullptr);
   ~CadastroFornecedor() final;
 

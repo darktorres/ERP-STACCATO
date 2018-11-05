@@ -49,8 +49,6 @@ void WidgetLogisticaRecebimento::updateTables() {
 void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaRecebimento::tableFornLogistica_activated(const QString &fornecedor) {
-  this->fornecedor = fornecedor;
-
   ui->lineEditBusca->clear();
 
   modelViewRecebimento.setFilter("fornecedor = '" + fornecedor + "'");

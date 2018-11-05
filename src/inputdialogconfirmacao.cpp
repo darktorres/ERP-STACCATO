@@ -611,6 +611,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
     queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
     QSqlQuery queryVenda;
+    // TODO: should set flag 'reposicao'
     queryVenda.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     while (querySelect.next()) {

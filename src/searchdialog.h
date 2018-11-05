@@ -62,7 +62,7 @@ private:
   auto setHeaderData(const QString &column, const QString &value) -> void;
   auto setPrimaryKey(const QString &value) -> void;
   auto setTextKeys(const QStringList &value) -> void;
-  auto setupTables(const QString &table, const QString &filter) -> void;
+  auto setupTables(const QString &table) -> void;
 };
 
 #endif // SEARCHDIALOG_H

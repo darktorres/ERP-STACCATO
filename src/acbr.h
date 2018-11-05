@@ -29,7 +29,7 @@ private:
   bool recebido = false;
   QProgressDialog *progressDialog = new QProgressDialog();
   // methods
-  auto abrirPdf(const QString &resposta) -> bool;
+  auto abrirPdf(const QString &filePath) -> bool;
   auto readSocket() -> void;
   auto setDisconnected() -> void;
   auto setConnected() -> void;

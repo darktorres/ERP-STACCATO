@@ -13,7 +13,7 @@ public:
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
-  const int descontinuado;
+  const int descontinuadoColumn;
   enum class Status { Novo = 1, Atualizado = 2, ForaPadrao = 3, Errado = 4 };
 };
 

@@ -130,8 +130,6 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
-
-  ui->tableFuturo->hideColumn("idConta");
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCaixa->resizeColumnsToContents(); }

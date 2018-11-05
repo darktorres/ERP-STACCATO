@@ -45,25 +45,25 @@ void ItemBox::edit() {
 // REFAC: replace this with eliding? https://wiki.qt.io/Elided_Label
 void ItemBox::resetCursor() { setCursorPosition(0); }
 
-void ItemBox::setRegisterDialog(RegisterDialog *value) {
-  registerDialog = value;
-  connect(value, &RegisterDialog::registerUpdated, this, &ItemBox::changeItem);
+void ItemBox::setRegisterDialog(RegisterDialog *dialog) {
+  registerDialog = dialog;
+  connect(dialog, &RegisterDialog::registerUpdated, this, &ItemBox::changeItem);
   setIcons();
 }
 
 QVariant ItemBox::getValue() const { return value; }
 
-void ItemBox::setValue(const QVariant &value) {
-  if (value.isNull()) { return; }
-  if (this->value == value) { return; }
+void ItemBox::setValue(const QVariant &newValue) {
+  if (newValue.isNull()) { return; }
+  if (value == newValue) { return; }
 
-  this->value = value;
+  value = newValue;
 
-  if (searchDialog) { setText(searchDialog->getText(value)); }
+  if (searchDialog) { setText(searchDialog->getText(newValue)); }
 
   QLineEdit::setToolTip(text());
 
-  emit valueChanged(value);
+  emit valueChanged(newValue);
 }
 
 void ItemBox::setReadOnlyItemBox(const bool isReadOnly) {
@@ -81,14 +81,14 @@ void ItemBox::clear() {
   QLineEdit::clear();
 }
 
-void ItemBox::setSearchDialog(SearchDialog *value) {
-  searchDialog = value;
+void ItemBox::setSearchDialog(SearchDialog *dialog) {
+  searchDialog = dialog;
   connect(searchDialog, &SearchDialog::itemSelected, this, &ItemBox::changeItem);
   setIcons();
 }
 
-void ItemBox::changeItem(const QVariant &value) {
-  setValue(value);
+void ItemBox::changeItem(const QVariant &newValue) {
+  setValue(newValue);
 
   if (registerDialog) { registerDialog->close(); }
   if (searchDialog) { searchDialog->close(); }

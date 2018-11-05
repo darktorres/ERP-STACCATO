@@ -14,7 +14,7 @@
 #include "usersession.h"
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
-    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), model(50), ui(new Ui::SearchDialog) {
+    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), filter(filter), model(50), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
@@ -28,7 +28,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
-  setupTables(table, filter);
+  setupTables(table);
 
   if (indexes.isEmpty()) {
     ui->lineEditBusca->hide();
@@ -50,7 +50,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
 
 SearchDialog::~SearchDialog() { delete ui; }
 
-void SearchDialog::setupTables(const QString &table, const QString &filter) {
+void SearchDialog::setupTables(const QString &table) {
   model.setTable(table);
   model.setEditStrategy(QSqlTableModel::OnManualSubmit);
   setFilter(filter);
@@ -183,8 +183,7 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
   sdCliente->setPrimaryKey("idCliente");
   sdCliente->setTextKeys({"nome_razao"});
 
-  sdCliente->hideColumns(
-      {"idCliente", "inscEstadual", "idEnderecoFaturamento", "idEnderecoCobranca", "credito", "idEnderecoEntrega", "idUsuarioRel", "idCadastroRel", "idProfissionalRel", "incompleto", "desativado"});
+  sdCliente->hideColumns({"idCliente", "inscEstadual", "credito", "idUsuarioRel", "idCadastroRel", "idProfissionalRel", "incompleto", "desativado"});
 
   sdCliente->setHeaderData("pfpj", "Tipo");
   sdCliente->setHeaderData("nome_razao", "Cliente");
@@ -215,7 +214,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->setPrimaryKey("idLoja");
   sdLoja->setTextKeys({"nomeFantasia"});
 
-  sdLoja->hideColumns({"idLoja", "idEndereco", "codUF", "desativado"});
+  sdLoja->hideColumns({"idLoja", "codUF", "desativado"});
 
   sdLoja->setHeaderData("descricao", "Descrição");
   sdLoja->setHeaderData("nomeFantasia", "Nome Fantasia");
@@ -282,28 +281,8 @@ SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
   sdFornecedor->setPrimaryKey("idFornecedor");
   sdFornecedor->setTextKeys({"nomeFantasia", "razaoSocial"});
 
-  sdFornecedor->hideColumns({"aliquotaSt",
-                             "coleta",
-                             "comissao1",
-                             "comissao2",
-                             "comissaoLoja",
-                             "desativado",
-                             "email",
-                             "idCadastroRel",
-                             "idEnderecoCobranca",
-                             "idEnderecoEntrega",
-                             "idEnderecoFaturamento",
-                             "idFornecedor",
-                             "idNextel",
-                             "idProfissionalRel",
-                             "idUsuarioRel",
-                             "inscEstadual",
-                             "nextel",
-                             "representacao",
-                             "st",
-                             "tel",
-                             "telCel",
-                             "telCom"});
+  sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2", "comissaoLoja", "desativado", "email", "idFornecedor", "idNextel", "inscEstadual", "nextel", "representacao", "st", "tel",
+                             "telCel", "telCom", "especialidade"});
 
   sdFornecedor->setHeaderData("razaoSocial", "Razão Social");
   sdFornecedor->setHeaderData("nomeFantasia", "Nome Fantasia");
@@ -323,7 +302,7 @@ SearchDialog *SearchDialog::transportadora(QWidget *parent) {
   sdTransportadora->setPrimaryKey("idTransportadora");
   sdTransportadora->setTextKeys({"nomeFantasia"});
 
-  sdTransportadora->hideColumns({"idTransportadora", "idEndereco", "desativado"});
+  sdTransportadora->hideColumns({"idTransportadora", "desativado"});
 
   sdTransportadora->setHeaderData("razaoSocial", "Razão Social");
   sdTransportadora->setHeaderData("nomeFantasia", "Nome Fantasia");
@@ -341,7 +320,7 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
   sdTransportadora->setPrimaryKey("idVeiculo");
   sdTransportadora->setTextKeys({"razaoSocial", "modelo", "placa"});
 
-  sdTransportadora->hideColumns({"idVeiculo", "idTransportadora", "desativado"});
+  sdTransportadora->hideColumns({"idVeiculo", "desativado"});
 
   sdTransportadora->setHeaderData("razaoSocial", "Transportadora");
   sdTransportadora->setHeaderData("modelo", "Modelo");
@@ -357,7 +336,7 @@ SearchDialog *SearchDialog::usuario(QWidget *parent) {
   sdUsuario->setPrimaryKey("idUsuario");
   sdUsuario->setTextKeys({"nome"});
 
-  sdUsuario->hideColumns({"idUsuario", "user", "passwd", "desativado"});
+  sdUsuario->hideColumns({"idUsuario", "user", "passwd", "especialidade", "desativado"});
 
   sdUsuario->setHeaderData("idLoja", "Loja");
   sdUsuario->setHeaderData("tipo", "Função");

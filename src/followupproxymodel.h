@@ -13,7 +13,7 @@ public:
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
 private:
-  const int semaforo;
+  const int semaforoColumn;
   enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
 };
 

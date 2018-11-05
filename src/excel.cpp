@@ -9,14 +9,14 @@
 
 Excel::Excel(QString id) : id(std::move(id)) { verificaTipo(); }
 
-void Excel::verificaTipo() {
-  QSqlQuery query;
-  query.prepare("SELECT idOrcamento FROM orcamento WHERE idOrcamento = :idOrcamento");
-  query.bindValue(":idOrcamento", id);
+void Excel::verificaTipo() { // TODO: replace this with enum in constructor
+  QSqlQuery queryTipo;
+  queryTipo.prepare("SELECT idOrcamento FROM orcamento WHERE idOrcamento = :idOrcamento");
+  queryTipo.bindValue(":idOrcamento", id);
 
-  if (not query.exec()) { return qApp->enqueueError("Erro verificando se id é Orçamento!"); }
+  if (not queryTipo.exec()) { return qApp->enqueueError("Erro verificando se id é Orçamento!"); }
 
-  tipo = query.first() ? Tipo::Orcamento : Tipo::Venda;
+  tipo = queryTipo.first() ? Tipo::Orcamento : Tipo::Venda;
 }
 
 void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
@@ -199,14 +199,15 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   int row = 0;
   queryProduto.first();
 
+  QSqlQuery queryUi; // TODO: put this query in 'setQuerys'?
+  queryUi.prepare("SELECT ui FROM produto WHERE idProduto = :idProduto");
+
   do {
-    QSqlQuery query;
-    query.prepare("SELECT ui FROM produto WHERE idProduto = :idProduto");
-    query.bindValue(":idProduto", queryProduto.value("idProduto"));
+    queryUi.bindValue(":idProduto", queryProduto.value("idProduto"));
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
+    if (not queryUi.exec() or not queryUi.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + queryUi.lastError().text()); }
 
-    const QString loes = query.value("ui").toString().contains("- L") ? " LOES" : "";
+    const QString loes = queryUi.value("ui").toString().contains("- L") ? " LOES" : "";
 
     xlsx.write("A" + QString::number(12 + row), queryProduto.value("fornecedor").toString() + loes);
     xlsx.write("B" + QString::number(12 + row), queryProduto.value("codComercial").toString());

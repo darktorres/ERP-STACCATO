@@ -13,10 +13,10 @@ public:
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
 private:
-  const int estoque;
-  const int promocao;
-  const int descontinuado;
-  const int validade;
+  const int estoqueColumn;
+  const int promocaoColumn;
+  const int descontinuadoColumn;
+  const int validadeColumn;
 };
 
 #endif // SEARCHDIALOGPROXY_H

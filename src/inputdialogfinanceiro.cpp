@@ -166,8 +166,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantConsumida");
-  ui->table->hideColumn("idNfe");
-  ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("idPedido");
   ui->table->hideColumn("idProduto");
@@ -218,7 +216,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->hideColumn("centroCusto");
   ui->tableFluxoCaixa->hideColumn("grupo");
   ui->tableFluxoCaixa->hideColumn("subGrupo");
-  ui->tableFluxoCaixa->hideColumn("taxa");
   ui->tableFluxoCaixa->hideColumn("desativado");
   ui->tableFluxoCaixa->setItemDelegate(new DoubleDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));

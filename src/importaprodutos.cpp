@@ -407,7 +407,7 @@ bool ImportaProdutos::cadastraFornecedores() {
 
 void ImportaProdutos::mostraApenasEstesFornecedores() {
   // TODO: refactor this to store joined string in a variable directly
-  Q_FOREACH (const auto &fornecedor, fornecedores) { idsFornecedor.append(QString::number(fornecedor)); }
+  Q_FOREACH (const auto &fornecedor, fornecedores) { idsFornecedor.append(QString::number(fornecedor)); } // FIXME: shadows
 }
 
 bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
@@ -674,7 +674,7 @@ bool ImportaProdutos::insereEmOk() {
 
 bool ImportaProdutos::cadastraProduto() { return insereEmOk(); }
 
-std::optional<int> ImportaProdutos::buscarCadastrarFornecedor(const QString &fornecedor) {
+std::optional<int> ImportaProdutos::buscarCadastrarFornecedor(const QString &fornecedor) { // FIXME: shadows
   QSqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);

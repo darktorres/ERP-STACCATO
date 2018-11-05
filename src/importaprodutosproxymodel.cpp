@@ -3,14 +3,14 @@
 #include "importaprodutosproxymodel.h"
 #include "usersession.h"
 
-ImportaProdutosProxyModel::ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuado(model->fieldIndex("descontinuado")) {
+ImportaProdutosProxyModel::ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->fieldIndex("descontinuado")) {
   setSourceModel(model);
 }
 
 QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole) {
     // verifica se está descontinuado
-    const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
+    const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), descontinuadoColumn), Qt::DisplayRole).toBool();
 
     if (descontinuado) { return QBrush(Qt::cyan); }
 
@@ -31,7 +31,7 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
 
     // those paint the text as black if the background is colored
 
-    const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), this->descontinuado), Qt::DisplayRole).toBool();
+    const bool descontinuado = QIdentityProxyModel::data(index(proxyIndex.row(), descontinuadoColumn), Qt::DisplayRole).toBool();
 
     if (descontinuado) { return QBrush(Qt::black); }
 

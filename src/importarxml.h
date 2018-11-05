@@ -65,7 +65,7 @@ private:
   auto procurar() -> void;
   auto produtoCompativel(const int rowCompra, const QString &codComercialEstoque) -> bool;
   auto reparear(const QModelIndex &index) -> bool;
-  auto setupTables(const QStringList &idsCompra) -> void;
+  auto setupTables() -> void;
   auto verificaCNPJ(const XML &xml) -> bool;
   auto verificaExiste(const XML &xml) -> bool;
   auto verificaValido(const XML &xml) -> bool;

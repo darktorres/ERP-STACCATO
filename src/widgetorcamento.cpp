@@ -53,7 +53,7 @@ void WidgetOrcamento::setPermissions() {
 }
 
 void WidgetOrcamento::setupTables() {
-  modelViewOrcamento.setTable("view_orcamento"); // REFAC: 5refactor other querys that use 'find last of'
+  modelViewOrcamento.setTable("view_orcamento");
 
   ui->table->setModel(new OrcamentoProxyModel(&modelViewOrcamento, this));
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
@@ -183,5 +183,4 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged(const int) {
   while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
 }
 
-// TODO: 1por padrao nao ativar filtro mes quando for vendedor (acho que já foi feito)
 // TODO: 5alterar followup para guardar apenas os 12 primeiros caracteres (remover -RevXXX)

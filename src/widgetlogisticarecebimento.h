@@ -23,7 +23,6 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  QString fornecedor;
   SqlRelationalTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods

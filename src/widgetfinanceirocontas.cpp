@@ -223,7 +223,6 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
   ui->table->setModel(&model);
-  ui->table->hideColumn("representacao");
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
   ui->table->setItemDelegate(new DoubleDelegate(this));

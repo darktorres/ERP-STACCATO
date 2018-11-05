@@ -23,7 +23,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  QString fornecedor; // REFAC: make this not class member
+  QString fornecedor;
   SqlRelationalTableModel modelEstoque;
   SqlRelationalTableModel modelTranspAtual;
   SqlRelationalTableModel modelTranspAgend;

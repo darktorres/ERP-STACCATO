@@ -39,6 +39,7 @@ private:
   auto setConnections() -> void;
   auto setPermissions() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };
 
 #endif // WIDGETVENDA_H

@@ -11,7 +11,10 @@
 #include "vendaproxymodel.h"
 #include "widgetvenda.h"
 
-WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) { ui->setupUi(this); }
+WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) {
+  ui->setupUi(this);
+  ui->groupBoxStatusFinanceiro->hide();
+}
 
 WidgetVenda::~WidgetVenda() { delete ui; }
 
@@ -25,54 +28,68 @@ void WidgetVenda::setupTables() {
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
-
-  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") { ui->table->hideColumn("Indicou"); }
 }
 
 void WidgetVenda::montaFiltro() {
-  const auto siglaLoja = UserSession::fromLoja("sigla");
+  QStringList filtros;
 
-  QString sigla = siglaLoja ? siglaLoja.value().toString() : QString();
+  QString filtroLoja;
 
-  if (ui->groupBoxLojas->isVisible() and not ui->comboBoxLojas->currentText().isEmpty()) {
-    QSqlQuery query;
-    query.prepare("SELECT sigla FROM loja WHERE descricao = :descricao");
-    query.bindValue(":descricao", ui->comboBoxLojas->currentText());
-
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando sigla da loja: " + query.lastError().text()); }
-
-    sigla = query.value("sigla").toString();
+  if (const auto tipoUsuario = UserSession::tipoUsuario(); not ui->comboBoxLojas->currentText().isEmpty()) {
+    filtroLoja = "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+  } else if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR" or tipoUsuario == "GERENTE DEPARTAMENTO" or tipoUsuario == "VENDEDOR ESPECIAL") {
+    filtroLoja = "";
+  } else if (tipoUsuario == "GERENTE LOJA" or tipoUsuario == "VENDEDOR") {
+    const auto siglaLoja = UserSession::fromLoja("sigla");
+    const auto sigla = siglaLoja ? siglaLoja.value().toString() : "";
+    filtroLoja = "(Código LIKE '%" + sigla + "%')";
   }
 
-  const QString filtroLoja = "(Código LIKE '%" + sigla + "%')";
+  if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
 
-  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : " AND Vendedor = '" + UserSession::nome() + "'";
+  //-------------------------------------
 
-  QString filtroCheck;
+  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  if (not filtroData.isEmpty()) { filtros << filtroData; }
+
+  //-------------------------------------
+
+  const QString filtroVendedor = ui->comboBoxVendedores->currentText().isEmpty() ? "" : "idUsuario = " + ui->comboBoxVendedores->getCurrentValue().toString();
+  if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
+
+  //-------------------------------------
+
+  const QString vendedor_consultor = UserSession::tipoUsuario() == "VENDEDOR ESPECIAL" ? "Consultor" : "Vendedor";
+  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : vendedor_consultor + " = '" + UserSession::nome() + "'";
+  if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
+
+  //-------------------------------------
+
+  QStringList filtroCheck;
 
   if (financeiro) {
     Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
-      if (child->isChecked()) { filtroCheck += filtroCheck.isEmpty() ? "statusFinanceiro = '" + child->text().toUpper() + "'" : " OR statusFinanceiro = '" + child->text().toUpper() + "'"; }
+      if (child->isChecked()) { filtroCheck << "statusFinanceiro = '" + child->text().toUpper() + "'"; }
     }
   } else {
     Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-      if (child->isChecked()) { filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'"; }
+      if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
     }
   }
 
-  filtroCheck = filtroCheck.isEmpty() ? "" : " AND (" + filtroCheck + ")";
+  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? " AND DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
-
-  const QString filtroVendedor = ui->comboBoxVendedores->currentText().isEmpty() ? "" : " AND idUsuario = " + ui->comboBoxVendedores->getCurrentValue().toString();
+  //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text();
 
   const QString filtroBusca =
-      textoBusca.isEmpty() ? ""
-                           : " AND (Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
+      textoBusca.isEmpty() ? "" : "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
+  if (not filtroBusca.isEmpty()) { filtros << filtroBusca; }
 
-  modelViewVenda.setFilter(filtroLoja + filtroData + filtroVendedor + filtroRadio + filtroCheck + filtroBusca);
+  //-------------------------------------
+
+  modelViewVenda.setFilter(filtros.join(" AND "));
 
   if (not modelViewVenda.select()) { return; }
 
@@ -80,14 +97,22 @@ void WidgetVenda::montaFiltro() {
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
+  unsetConnections();
+
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
+
+  setConnections();
+
+  montaFiltro();
 }
 
 void WidgetVenda::setPermissions() {
-  if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "DIRETOR") {
+  const QString tipoUsuario = UserSession::tipoUsuario();
+
+  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
     QSqlQuery query("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE");
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
@@ -95,7 +120,7 @@ void WidgetVenda::setPermissions() {
     ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
   }
 
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
+  if (tipoUsuario == "GERENTE LOJA") {
     ui->groupBoxLojas->hide();
 
     QSqlQuery query("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()));
@@ -105,7 +130,7 @@ void WidgetVenda::setPermissions() {
     while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
   }
 
-  if (UserSession::tipoUsuario() == "VENDEDOR") {
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
     QSqlQuery query("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE");
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
@@ -117,11 +142,14 @@ void WidgetVenda::setPermissions() {
     ui->radioButtonTodos->click();
   }
 
+  if (tipoUsuario == "VENDEDOR ESPECIAL") { ui->radioButtonTodos->hide(); }
+
   ui->dateEdit->setDate(QDate::currentDate());
 }
 
 void WidgetVenda::setConnections() {
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEmCompra, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
@@ -131,10 +159,12 @@ void WidgetVenda::setConnections() {
   connect(ui->checkBoxEntregaAgend, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEntregue, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxLiberado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  connect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   connect(ui->comboBoxLojas, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
   connect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
@@ -149,6 +179,40 @@ void WidgetVenda::setConnections() {
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
   connect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
+}
+
+void WidgetVenda::unsetConnections() {
+  disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEmCompra, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEmEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEmFaturamento, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEmRecebimento, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEntregaAgend, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEntregue, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxLiberado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->comboBoxLojas, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
+  disconnect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
+  disconnect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
+  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
+  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
+  disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
+  disconnect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
 }
 
 void WidgetVenda::updateTables() {
@@ -183,24 +247,24 @@ void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
 }
 
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged(const int) {
+  unsetConnections();
+
   ui->comboBoxVendedores->clear();
 
-  QSqlQuery query2("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" +
-                   (ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString()));
+  QSqlQuery query("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" +
+                  (ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString()));
 
   ui->comboBoxVendedores->addItem("");
 
-  while (query2.next()) { ui->comboBoxVendedores->addItem(query2.value("user").toString(), query2.value("idUsuario")); }
+  while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
+
+  setConnections();
 }
 
 void WidgetVenda::setFinanceiro() {
-  ui->pushButtonFollowup->show();
+  ui->groupBoxStatusFinanceiro->show();
   ui->groupBoxStatus->hide();
   financeiro = true;
-
-  connect(ui->checkBoxPendente2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->checkBoxLiberado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
 }
 
 void WidgetVenda::resetTables() { modelIsSet = false; }
@@ -216,10 +280,16 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 }
 
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
+  unsetConnections();
+
   Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
+
+  setConnections();
+
+  montaFiltro();
 }
 
 // TODO: verificar os pedidos de devolucao que estao com o status errado (update_venda_status)

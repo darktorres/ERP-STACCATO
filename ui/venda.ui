@@ -131,6 +131,19 @@
                    </widget>
                   </item>
                   <item>
+                   <widget class="QLabel" name="labelConsultor">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Consultor:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <widget class="QLabel" name="labelCliente">
                     <property name="text">
                      <string>Cliente:</string>
@@ -156,6 +169,9 @@
                   </item>
                   <item>
                    <widget class="ItemBox" name="itemBoxVendedor"/>
+                  </item>
+                  <item>
+                   <widget class="ItemBox" name="itemBoxConsultor"/>
                   </item>
                   <item>
                    <widget class="ItemBox" name="itemBoxCliente">

@@ -109,6 +109,7 @@ bool CadastroFornecedor::savingProcedures() {
   if (not setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value())) { return false; }
   if (not setData("st", ui->comboBoxSt->currentText())) { return false; }
   if (not setData("comissao1", ui->doubleSpinBoxComissao->value())) { return false; }
+  if (not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
 
   return true;
 }
@@ -276,6 +277,8 @@ bool CadastroFornecedor::viewRegister() {
   ui->tableEndereco->resizeColumnsToContents();
 
   ui->pushButtonValidade->show();
+
+  ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt());
 
   return true;
 }

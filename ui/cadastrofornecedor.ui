@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1294</width>
-    <height>720</height>
+    <height>756</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -465,7 +465,7 @@ color: rgb(0, 0, 0);</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="5">
+               <item row="2" column="6">
                 <widget class="QCheckBox" name="checkBoxRepresentacao">
                  <property name="enabled">
                   <bool>false</bool>
@@ -475,18 +475,59 @@ color: rgb(0, 0, 0);</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="4">
+               <item row="2" column="5">
                 <widget class="QDoubleSpinBox" name="doubleSpinBoxComissao">
                  <property name="suffix">
                   <string> %</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="4">
+               <item row="0" column="5">
                 <widget class="QLabel" name="labelInscricaoEstadual_2">
                  <property name="text">
                   <string>Comissão</string>
                  </property>
+                </widget>
+               </item>
+               <item row="0" column="4">
+                <widget class="QLabel" name="labelEspecialidade">
+                 <property name="text">
+                  <string>Especialidade</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="4">
+                <widget class="QComboBox" name="comboBoxEspecialidade">
+                 <item>
+                  <property name="text">
+                   <string>0 - Não definido</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>1 - Revestimentos</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>2 - Louças e Metais</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>3 - Acessórios</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>4 - Insumos</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>5 - Serviços</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
               </layout>

@@ -25,6 +25,7 @@ private:
   auto cadastrar() -> bool final;
   auto clearFields() -> void final;
   auto fillCombobox() -> void;
+  auto on_comboBoxTipo_currentTextChanged(const QString &text) -> void;
   auto on_lineEditUser_textEdited(const QString &text) -> void;
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;

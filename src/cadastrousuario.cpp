@@ -15,6 +15,10 @@
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
 
+  ui->labelEspecialidade->hide();
+  ui->comboBoxEspecialidade->hide();
+
+  connect(ui->comboBoxTipo, &QComboBox::currentTextChanged, this, &CadastroUsuario::on_comboBoxTipo_currentTextChanged);
   connect(ui->lineEditUser, &QLineEdit::textEdited, this, &CadastroUsuario::on_lineEditUser_textEdited);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonAtualizar_clicked);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonBuscar_clicked);
@@ -124,6 +128,8 @@ bool CadastroUsuario::savingProcedures() {
     if (not setData("passwd", query.value(0))) { return false; }
   }
 
+  if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL" and not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
+
   return true;
 }
 
@@ -138,6 +144,8 @@ bool CadastroUsuario::viewRegister() {
   if (not modelPermissoes.select()) { return false; }
 
   for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
+
+  if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt()); }
 
   return true;
 }
@@ -224,6 +232,16 @@ void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   if (not query.exec()) { return qApp->enqueueError("Erro buscando usuário: " + query.lastError().text()); }
 
   if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!"); }
+}
+
+void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
+  if (text == "VENDEDOR ESPECIAL") {
+    ui->labelEspecialidade->show();
+    ui->comboBoxEspecialidade->show();
+  } else {
+    ui->labelEspecialidade->hide();
+    ui->comboBoxEspecialidade->hide();
+  }
 }
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario

@@ -117,7 +117,7 @@ void WidgetRelatorio::calcularTotalGeral() {
 
   ui->doubleSpinBoxGeral->setValue(totalGeral);
   ui->doubleSpinBoxValorComissao->setValue(comissao);
-  ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioLoja.rowCount());
+  if (modelViewRelatorioLoja.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioLoja.rowCount()); }
 }
 
 void WidgetRelatorio::setFilterRelatorio() {

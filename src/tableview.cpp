@@ -13,56 +13,56 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
 }
 
 void TableView::hideColumn(const QString &column) {
-  if (auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+  if (const auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
+    if (const auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::hideColumn(sourceModel->record().indexOf(column));
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (const auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
     QTableView::hideColumn(model->record().indexOf(column));
     return;
   }
 }
 
 void TableView::showColumn(const QString &column) {
-  if (auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+  if (const auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
+    if (const auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::showColumn(sourceModel->record().indexOf(column));
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (const auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
     QTableView::showColumn(model->record().indexOf(column));
     return;
   }
 }
 
 void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) {
-  if (auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+  if (const auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
+    if (const auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::setItemDelegateForColumn(sourceModel->record().indexOf(column), delegate);
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (const auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
     QTableView::setItemDelegateForColumn(model->record().indexOf(column), delegate);
     return;
   }
 }
 
 void TableView::openPersistentEditor(const int row, const QString &column) {
-  if (auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+  if (const auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
+    if (const auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::openPersistentEditor(model->index(row, sourceModel->record().indexOf(column)));
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (const auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
     QTableView::openPersistentEditor(model->index(row, model->record().indexOf(column)));
     return;
   }
@@ -73,14 +73,14 @@ void TableView::openPersistentEditor(const int row, const int column) { QTableVi
 void TableView::setItemDelegateForColumn(const int column, QAbstractItemDelegate *delegate) { QTableView::setItemDelegateForColumn(column, delegate); }
 
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) {
-  if (auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
-    if (auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
+  if (const auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
+    if (const auto *sourceModel = qobject_cast<QSqlQueryModel *>(model->sourceModel())) {
       QTableView::sortByColumn(sourceModel->record().indexOf(column), order);
       return;
     }
   }
 
-  if (auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
+  if (const auto *model = qobject_cast<QSqlQueryModel *>(QTableView::model())) {
     QTableView::sortByColumn(model->record().indexOf(column), order);
     return;
   }

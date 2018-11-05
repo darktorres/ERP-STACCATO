@@ -36,8 +36,6 @@ void WidgetLogisticaRepresentacao::updateTables() {
 }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &fornecedor) {
-  this->fornecedor = fornecedor;
-
   ui->lineEditBusca->clear();
 
   modelViewLogisticaRepresentacao.setFilter("fornecedor = '" + fornecedor + "'");
@@ -73,7 +71,6 @@ void WidgetLogisticaRepresentacao::setupTables() {
   ui->table->setModel(new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this));
   ui->table->hideColumn("idPedido");
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("status");
   ui->table->hideColumn("idVendaProduto");
 }
 

@@ -3,11 +3,11 @@
 #include "followupproxymodel.h"
 #include "usersession.h"
 
-FollowUpProxyModel::FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforo(model->fieldIndex("semaforo")) { setSourceModel(model); }
+FollowUpProxyModel::FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->fieldIndex("semaforo")) { setSourceModel(model); }
 
 QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole) {
-    const FieldColors semaforo = static_cast<FieldColors>(QIdentityProxyModel::data(index(proxyIndex.row(), this->semaforo), Qt::DisplayRole).toInt());
+    const FieldColors semaforo = static_cast<FieldColors>(QIdentityProxyModel::data(index(proxyIndex.row(), semaforoColumn), Qt::DisplayRole).toInt());
 
     if (semaforo == FieldColors::Quente) { return QBrush(QColor(255, 66, 66)); }
     if (semaforo == FieldColors::Morno) { return QBrush(QColor(255, 170, 0)); }
@@ -15,7 +15,7 @@ QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const
   }
 
   if (role == Qt::ForegroundRole) {
-    const FieldColors semaforo = static_cast<FieldColors>(QIdentityProxyModel::data(index(proxyIndex.row(), this->semaforo), Qt::DisplayRole).toInt());
+    const FieldColors semaforo = static_cast<FieldColors>(QIdentityProxyModel::data(index(proxyIndex.row(), semaforoColumn), Qt::DisplayRole).toInt());
 
     if (semaforo == FieldColors::Quente) { return QBrush(Qt::black); }
     if (semaforo == FieldColors::Morno) { return QBrush(Qt::black); }

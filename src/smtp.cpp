@@ -34,7 +34,7 @@ Smtp::Smtp(QString user, QString pass, QString host, const quint16 port, const i
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
 
-void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {
+void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) { // FIXME: shadows
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
   message.append("From: " + from + "\n");

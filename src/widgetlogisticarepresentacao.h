@@ -24,7 +24,6 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   SqlRelationalTableModel modelViewLogisticaRepresentacao;
-  QString fornecedor;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;

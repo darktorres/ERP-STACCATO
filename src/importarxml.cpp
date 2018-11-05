@@ -25,12 +25,12 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime dataReal,
 
   setWindowFlags(Qt::Window);
 
-  setupTables(idsCompra);
+  setupTables();
 }
 
 ImportarXML::~ImportarXML() { delete ui; }
 
-void ImportarXML::setupTables(const QStringList &idsCompra) {
+void ImportarXML::setupTables() {
   modelEstoque.setTable("estoque");
   modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
@@ -541,11 +541,9 @@ bool ImportarXML::verificaExiste(const XML &xml) {
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
 
-  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
-
   const auto list = modelNFe.match("chaveAcesso", xml.chaveAcesso);
 
-  if (not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
+  if (query.first() or not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
 
   return false;
 }

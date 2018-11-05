@@ -406,3 +406,4 @@ void MainWindow::on_actionCalcular_frete_triggered() {
 // TASK: reimportar notas do pedido 172646
 // TODO: na reposicao concatenar '(REPOSICAO)' no comeco da descricao do produto
 // TODO: diff defaultPalette and darkPalette to find the stuff that is missing implementing
+// NOTE: add logging everywhere so when the need for debugging on the client pc arises it can be run from the terminal to see the logs

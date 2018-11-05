@@ -44,8 +44,6 @@ void WidgetLogisticaColeta::updateTables() {
 }
 
 void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &fornecedor) {
-  this->fornecedor = fornecedor;
-
   ui->lineEditBusca->clear();
 
   modelViewColeta.setFilter("fornecedor = '" + fornecedor + "'");

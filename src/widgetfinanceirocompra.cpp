@@ -39,7 +39,6 @@ void WidgetFinanceiroCompra::setupTables() {
 
   ui->table->setModel(&modelViewComprasFinanceiro);
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
-  ui->table->hideColumn("desativado");
 }
 
 void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {

@@ -19,14 +19,14 @@ Impressao::Impressao(const QString &id) : id(id) {
   if (not modelItem.select()) { return; }
 }
 
-void Impressao::verificaTipo() {
-  QSqlQuery query;
-  query.prepare("SELECT idOrcamento FROM orcamento WHERE idOrcamento = :idOrcamento");
-  query.bindValue(":idOrcamento", id);
+void Impressao::verificaTipo() { // TODO: replace this with enum in constructor
+  QSqlQuery queryTipo;
+  queryTipo.prepare("SELECT idOrcamento FROM orcamento WHERE idOrcamento = :idOrcamento");
+  queryTipo.bindValue(":idOrcamento", id);
 
-  if (not query.exec()) { return qApp->enqueueError("Erro verificando se id é Orçamento!"); }
+  if (not queryTipo.exec()) { return qApp->enqueueError("Erro verificando se id é Orçamento!"); }
 
-  tipo = query.first() ? Tipo::Orcamento : Tipo::Venda;
+  tipo = queryTipo.first() ? Tipo::Orcamento : Tipo::Venda;
 }
 
 void Impressao::print() {

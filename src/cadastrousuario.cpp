@@ -117,6 +117,7 @@ bool CadastroUsuario::savingProcedures() {
   if (not setData("email", ui->lineEditEmail->text())) { return false; }
   if (not setData("user", ui->lineEditUser->text())) { return false; }
 
+  // NOTE: change this when upgrading for MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
     QSqlQuery query("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')");
     if (not query.first()) { return false; }
@@ -208,9 +209,7 @@ bool CadastroUsuario::cadastrar() {
     if (not modelPermissoes.submitAll()) { return false; }
   }
 
-  if (tipo == Tipo::Atualizar) {
-    if (not modelPermissoes.submitAll()) { return false; }
-  }
+  if (tipo == Tipo::Atualizar and not modelPermissoes.submitAll()) { return false; }
 
   return true;
 }

@@ -77,16 +77,9 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->hideColumn("ordemCompra");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->hideColumn("quantConsumida");
-  ui->tableProdutos->hideColumn("idNfe");
-  ui->tableProdutos->hideColumn("idEstoque");
   ui->tableProdutos->hideColumn("quantUpd");
   ui->tableProdutos->hideColumn("idPedido");
-  ui->tableProdutos->hideColumn("idLoja");
   ui->tableProdutos->hideColumn("idProduto");
-  ui->tableProdutos->hideColumn("parcial");
-  ui->tableProdutos->hideColumn("desconto");
-  ui->tableProdutos->hideColumn("parcialDesc");
-  ui->tableProdutos->hideColumn("descGlobal");
   ui->tableProdutos->hideColumn("dataRealCompra");
   ui->tableProdutos->hideColumn("dataPrevConf");
   ui->tableProdutos->hideColumn("dataRealConf");

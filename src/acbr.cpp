@@ -87,7 +87,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   if (not respostaSaveXml) { return {}; }
 
   if (not respostaSaveXml->contains("OK")) {
-    qApp->enqueueError("Erro salvando XML: " + *respostaSaveXml);
+    qApp->enqueueError("Erro salvando XML: " + respostaSaveXml.value());
     return {};
   }
 
@@ -96,13 +96,13 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   if (not respostaSavePdf) { return {}; }
 
   if (not respostaSavePdf->contains("Arquivo criado em:")) {
-    qApp->enqueueError(*respostaSavePdf + " - Verifique se o arquivo não está aberto!");
+    qApp->enqueueError(respostaSavePdf.value() + " - Verifique se o arquivo não está aberto!");
     return {};
   }
 
   respostaSavePdf = respostaSavePdf->remove("OK: Arquivo criado em: ");
 
-  if (openFile) { abrirPdf(*respostaSavePdf); }
+  if (openFile) { abrirPdf(respostaSavePdf.value()); }
 
   return respostaSavePdf;
 
@@ -128,7 +128,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
   if (not resposta2) { return {}; }
 
   if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e")) {
-    qApp->enqueueError(*resposta2);
+    qApp->enqueueError(resposta2.value());
     return {};
   }
 
@@ -138,11 +138,11 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   const QString xml = resposta3->remove("OK: ");
 
-  return std::make_tuple<>(xml, *resposta2);
+  return std::make_tuple<>(xml, resposta2.value());
 }
 
-bool ACBr::abrirPdf(const QString &resposta) {
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(resposta))) { return qApp->enqueueError(false, "Erro abrindo PDF!"); }
+bool ACBr::abrirPdf(const QString &filePath) {
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filePath))) { return qApp->enqueueError(false, "Erro abrindo PDF!"); }
 
   return true;
 }
@@ -185,14 +185,14 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
 }
 
 bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &filePath) {
-  const auto resposta = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
+  const auto respostaEmail = enviarComando("NFE.EnviarEmail(" + emailDestino + "," + filePath + ",1,'" + assunto + "', " + emailCopia + ")", true);
 
-  if (not resposta) { return false; }
+  if (not respostaEmail) { return false; }
 
   // TODO: perguntar se deseja tentar enviar novamente?
-  if (not resposta->contains("OK: Email enviado com sucesso")) { return qApp->enqueueError(false, *resposta); }
+  if (not respostaEmail->contains("OK: Email enviado com sucesso")) { return qApp->enqueueError(false, respostaEmail.value()); }
 
-  qApp->enqueueInformation(*resposta);
+  qApp->enqueueInformation(respostaEmail.value());
 
   return true;
 }

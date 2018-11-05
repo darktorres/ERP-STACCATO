@@ -153,7 +153,7 @@ void XML::lerTotais(const QStandardItem *child) {
   }
 }
 
-void XML::montarArvore(QStandardItemModel &model) {
+void XML::montarArvore(QStandardItemModel &model) { // FIXME: model shadows member model
   if (fileContent.isEmpty()) { return; }
 
   QDomDocument document;

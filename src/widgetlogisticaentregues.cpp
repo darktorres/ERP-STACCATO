@@ -84,8 +84,6 @@ void WidgetLogisticaEntregues::setupTables() {
 
   ui->tableVendas->setModel(new VendaProxyModel(&modelVendas, this));
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
-
-  if (UserSession::tipoUsuario() != "VENDEDOR ESPECIAL") { ui->tableVendas->hideColumn("Indicou"); }
 }
 
 void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {

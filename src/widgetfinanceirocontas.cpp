@@ -54,10 +54,11 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->pushButtonInserirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked);
   connect(ui->pushButtonInserirTransferencia, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked);
   connect(ui->pushButtonReverterPagamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked);
-  connect(ui->radioButtonCancelado, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
-  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
-  connect(ui->radioButtonRecebido, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
-  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonPago, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonPendente, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonRecebido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
+  connect(ui->radioButtonTodos, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroContas::on_table_activated);
   connect(ui->table, &TableView::entered, this, &WidgetFinanceiroContas::on_table_entered);
   connect(ui->tableVencer, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencer_doubleClicked);
@@ -123,88 +124,115 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
 
 void WidgetFinanceiroContas::montaFiltro() {
   if (tipo == Tipo::Pagar) {
+    QStringList filtros;
     QString status;
 
     Q_FOREACH (const auto &child, ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
       if (child->text() == "Todos") { break; }
 
-      if (child->isChecked() and child->text() == "Pendente/Conferido") {
-        status = "(cp.status = 'PENDENTE' OR cp.status = 'CONFERIDO')";
+      if (child->isChecked()) {
+        status = child->text();
         break;
       }
-
-      if (child->isChecked()) { status = child->text(); }
     }
 
-    if (not status.isEmpty() and status != "(cp.status = 'PENDENTE' OR cp.status = 'CONFERIDO')") status = "cp.status = '" + status + "'";
+    if (ui->radioButtonPendente->isChecked()) {
+      filtros << "cp.status IN ('PENDENTE', 'CONFERIDO')";
+    } else {
+      if (not status.isEmpty()) { filtros << "cp.status = '" + status + "'"; }
+    }
 
-    const QString valor =
-        not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())
-            ? QString(status.isEmpty() ? "" : " AND ") + "cp.valor BETWEEN " + QString::number(ui->doubleSpinBoxDe->value() - 1) + " AND " + QString::number(ui->doubleSpinBoxAte->value() + 1)
-            : "";
+    //-------------------------------------
 
-    const QString dataPag = ui->groupBoxData->isChecked() ? QString(status.isEmpty() and valor.isEmpty() ? "" : " AND ") + "cp.dataPagamento BETWEEN '" +
-                                                                ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"
-                                                          : "";
+    const QString valor = not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())
+                              ? "cp.valor BETWEEN " + QString::number(ui->doubleSpinBoxDe->value() - 1) + " AND " + QString::number(ui->doubleSpinBoxAte->value() + 1)
+                              : "";
+    if (not valor.isEmpty()) { filtros << valor; }
 
-    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty()
-                             ? QString(status.isEmpty() and valor.isEmpty() and dataPag.isEmpty() ? "" : " AND ") + "cp.idLoja = " + ui->itemBoxLojas->getValue().toString()
-                             : "";
+    //-------------------------------------
+
+    const QString dataPag =
+        ui->groupBoxData->isChecked() ? "cp.dataPagamento BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'" : "";
+    if (not dataPag.isEmpty()) { filtros << dataPag; }
+
+    //-------------------------------------
+
+    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty() ? "cp.idLoja = " + ui->itemBoxLojas->getValue().toString() : "";
+    if (not loja.isEmpty()) { filtros << loja; }
+
+    //-------------------------------------
 
     const QString text = ui->lineEditBusca->text();
-    const QString busca = "(ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%')";
+    const QString busca = text.isEmpty() ? "" : "(ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR pf.idVenda LIKE '%" + text + "%')";
+    if (not text.isEmpty()) { filtros << busca; }
+
+    //-------------------------------------
+
+    filtros << "cp.desativado = FALSE";
 
     model.setQuery(
-        "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS `dataPagamento`, "
+        "SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS `dataPagamento`, "
         "`cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, group_concat(DISTINCT `pf`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
         "group_concat(DISTINCT `pf`.`idVenda` SEPARATOR ', ') AS `idVenda`, group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS "
         "`parcela`, `cp`.`observacao` AS `observacao`, group_concat(DISTINCT `pf`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro` FROM ((((`mydb`.`conta_a_pagar_has_pagamento` `cp` "
         "LEFT JOIN `mydb`.`pedido_fornecedor_has_produto` `pf` ON ((`cp`.`idCompra` = `pf`.`idCompra`))) LEFT JOIN `mydb`.`estoque_has_compra` `ehc` ON ((`ehc`.`idCompra` = "
         "`cp`.`idCompra`))) LEFT JOIN `mydb`.`estoque_has_nfe` `ehn` ON ((`ehc`.`idEstoque` = `ehn`.`idEstoque`))) LEFT JOIN `mydb`.`nfe` `n` ON ((`n`.`idNFe` = `ehn`.`idNFe`))) WHERE " +
-        status + valor + dataPag + loja + QString(status.isEmpty() and valor.isEmpty() and dataPag.isEmpty() and loja.isEmpty() ? "" : " AND ") +
-        "`cp`.`desativado` = FALSE GROUP BY `cp`.`idPagamento` ORDER BY `cp`.`dataPagamento`) view WHERE " + busca + " ORDER BY `dataPagamento` , `idVenda` , `tipo` , `parcela` DESC");
+        filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento` ORDER BY cp.`dataPagamento` , pf.`idVenda` , cp.`tipo` , cp.`parcela` DESC");
   }
 
   if (tipo == Tipo::Receber) {
+    QStringList filtros;
     QString status;
 
     Q_FOREACH (const auto &child, ui->groupBoxFiltros->findChildren<QRadioButton *>()) {
       if (child->text() == "Todos") { break; }
 
-      if (child->isChecked() and child->text() == "Pendente/Conferido") {
-        status = "(cr.status = 'PENDENTE' OR cr.status = 'CONFERIDO')";
+      if (child->isChecked()) {
+        status = child->text();
         break;
       }
-
-      if (child->isChecked()) { status = child->text(); }
     }
 
-    if (not status.isEmpty() and status != "(cr.status = 'PENDENTE' OR cr.status = 'CONFERIDO')") { status = "cr.status = '" + status + "'"; }
+    if (ui->radioButtonPendente->isChecked()) {
+      filtros << "cr.status IN ('PENDENTE', 'CONFERIDO')";
+    } else {
+      if (not status.isEmpty()) { filtros << "cr.status = '" + status + "'"; }
+    }
 
-    const QString valor =
-        not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())
-            ? QString(status.isEmpty() ? "" : " AND ") + "cr.valor BETWEEN " + QString::number(ui->doubleSpinBoxDe->value() - 1) + " AND " + QString::number(ui->doubleSpinBoxAte->value() + 1)
-            : "";
+    //-------------------------------------
 
-    const QString dataPag = ui->groupBoxData->isChecked() ? QString(status.isEmpty() and valor.isEmpty() ? "" : " AND ") + "cr.dataPagamento BETWEEN '" +
-                                                                ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'"
-                                                          : "";
+    const QString valor = not qFuzzyIsNull(ui->doubleSpinBoxDe->value()) or not qFuzzyIsNull(ui->doubleSpinBoxAte->value())
+                              ? "cr.valor BETWEEN " + QString::number(ui->doubleSpinBoxDe->value() - 1) + " AND " + QString::number(ui->doubleSpinBoxAte->value() + 1)
+                              : "";
+    if (not valor.isEmpty()) { filtros << valor; }
 
-    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty()
-                             ? QString(status.isEmpty() and valor.isEmpty() and dataPag.isEmpty() ? "" : " AND ") + "cr.idLoja = " + ui->itemBoxLojas->getValue().toString()
-                             : "";
+    //-------------------------------------
+
+    const QString dataPag =
+        ui->groupBoxData->isChecked() ? "cr.dataPagamento BETWEEN '" + ui->dateEditDe->date().toString("yyyy-MM-dd") + "' AND '" + ui->dateEditAte->date().toString("yyyy-MM-dd") + "'" : "";
+    if (not dataPag.isEmpty()) { filtros << dataPag; }
+
+    //-------------------------------------
+
+    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty() ? "cr.idLoja = " + ui->itemBoxLojas->getValue().toString() : "";
+    if (not loja.isEmpty()) { filtros << loja; }
+
+    //-------------------------------------
 
     const QString text = ui->lineEditBusca->text();
-    const QString busca =
-        QString(status.isEmpty() and valor.isEmpty() and dataPag.isEmpty() and loja.isEmpty() ? "" : " AND ") + "(cr.idVenda LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
+    const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
+    if (not text.isEmpty()) { filtros << busca; }
+
+    //-------------------------------------
+
+    filtros << "cr.desativado = FALSE";
+    filtros << "cr.representacao = FALSE";
 
     model.setQuery("SELECT `cr`.`idPagamento` AS `idPagamento`, `cr`.`idLoja` AS `idLoja`, `cr`.`representacao` AS `representacao`, `cr`.`contraParte` AS `contraparte`, `cr`.`dataPagamento` AS "
                    "`dataPagamento`, `cr`.`dataEmissao` AS `dataEmissao`, `cr`.`idVenda` AS `idVenda`, `cr`.`valor` AS `valor`, `cr`.`tipo` AS `tipo`, `cr`.`parcela` AS `parcela`, `cr`.`observacao` "
                    "AS `observacao`, `cr`.`status` AS `status`, `v`.`statusFinanceiro` AS `statusFinanceiro` FROM (`mydb`.`conta_a_receber_has_pagamento` `cr` LEFT JOIN `mydb`.`venda` `v` ON "
                    "((`cr`.`idVenda` = `v`.`idVenda`))) WHERE " +
-                   status + valor + dataPag + loja + busca +
-                   " AND `cr`.`desativado` = FALSE AND `cr`.`representacao` = FALSE GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, "
-                   "`cr`.`tipo`, `cr`.`parcela` DESC");
+                   filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
   }
 
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + model.lastError().text()); }
@@ -223,6 +251,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
   ui->table->setModel(&model);
+  ui->table->hideColumn("representacao");
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
   ui->table->setItemDelegate(new DoubleDelegate(this));

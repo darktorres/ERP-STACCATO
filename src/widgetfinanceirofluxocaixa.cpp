@@ -60,6 +60,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   const QString filtroConta = ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getValue().isValid() ? "idConta = " + ui->itemBoxCaixa1->getValue().toString() : "";
 
+  // TODO: see if the outer select can be removed
   if (filtroConta.isEmpty()) {
     modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS "
                         "NOT NULL ORDER BY Data, idConta) x WHERE " +
@@ -122,8 +123,9 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
-  // REFAC: test and return error if false
   modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v JOIN (SELECT @running_total := 0) r");
+
+  if (modelFuturo.lastError().isValid()) { return qApp->enqueueError("Erro buscando dados futuros: " + modelFuturo.lastError().text()); }
 
   ui->tableFuturo->setModel(&modelFuturo);
   ui->tableFuturo->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));

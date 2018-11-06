@@ -149,23 +149,35 @@ void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
 }
 
 void WidgetCompraPendentes::montaFiltro() {
-  QString filtroCheck;
+  QStringList filtros;
+  QStringList filtroCheck;
 
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) { filtroCheck += QString(filtroCheck.isEmpty() ? "" : " OR ") + "status = '" + child->text().toUpper() + "'"; }
+    if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
   }
 
-  filtroCheck = filtroCheck.isEmpty() ? "" : "(" + filtroCheck + ")";
+  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
+
+  //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text();
 
-  const QString filtroBusca = textoBusca.isEmpty() ? ""
-                                                   : QString(filtroCheck.isEmpty() ? "" : " AND ") + "((idVenda LIKE '%" + textoBusca + "%') OR (fornecedor LIKE '%" + textoBusca +
-                                                         "%') OR (produto LIKE '%" + textoBusca + "%') OR (`codComercial` LIKE '%" + textoBusca + "%'))";
+  if (not textoBusca.isEmpty()) {
+    const QString filtroBusca =
+        "((idVenda LIKE '%" + textoBusca + "%') OR (fornecedor LIKE '%" + textoBusca + "%') OR (produto LIKE '%" + textoBusca + "%') OR (`codComercial` LIKE '%" + textoBusca + "%'))";
+    filtros << filtroBusca;
+  }
 
-  const QString filtroStatus = QString((filtroCheck + filtroBusca).isEmpty() ? "" : " AND ") + "status != 'CANCELADO'";
+  //-------------------------------------
 
-  modelViewVendaProduto.setFilter(filtroCheck + filtroBusca + filtroStatus + " AND quant > 0");
+  const QString filtroStatus = "status != 'CANCELADO'";
+  if (not filtroStatus.isEmpty()) { filtros << filtroStatus; }
+
+  //-------------------------------------
+
+  filtros << "quant > 0";
+
+  modelViewVendaProduto.setFilter(filtros.join(" AND "));
 
   if (not modelViewVendaProduto.select()) { return; }
 

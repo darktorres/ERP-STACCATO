@@ -429,18 +429,26 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
 void WidgetLogisticaAgendarColeta::on_checkBoxEstoque_toggled() { montaFiltro(); }
 
 void WidgetLogisticaAgendarColeta::montaFiltro() {
-  QString filtro;
-  const QString filterFornecedor = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
-  filtro += filterFornecedor;
-  const QString filterEstoque = "idVenda " + QString(ui->checkBoxEstoque->isChecked() ? "IS NULL" : "IS NOT NULL");
-  filtro += QString(filtro.isEmpty() ? "" : " AND ") + filterEstoque;
+  QStringList filtros;
 
-  if (const QString text = ui->lineEditBusca->text(); not text.isEmpty()) {
-    const QString filterText = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";
-    filtro = filterText;
-  }
+  const QString filtroFornecedor = "fornecedor = '" + fornecedor + "'";
+  if (not fornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
-  modelEstoque.setFilter(filtro);
+  //-------------------------------------
+
+  const QString filtroEstoque = "idVenda " + QString(ui->checkBoxEstoque->isChecked() ? "IS NULL" : "IS NOT NULL");
+  if (not filtroEstoque.isEmpty()) { filtros << filtroEstoque; }
+
+  //-------------------------------------
+
+  const QString text = ui->lineEditBusca->text();
+
+  const QString filtroBusca = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";
+  if (not text.isEmpty()) { filtros << filtroBusca; }
+
+  //-------------------------------------
+
+  modelEstoque.setFilter(filtros.join(" AND "));
 
   if (not modelEstoque.select()) { return; }
 }

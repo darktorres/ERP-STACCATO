@@ -55,6 +55,8 @@ void WidgetLogisticaEntregues::updateTables() {
 void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaEntregues::montaFiltro() {
+  QStringList filtros;
+
   QString filtroCheck;
 
   if (ui->radioButtonEntregaLimpar->isChecked()) { filtroCheck = ""; }
@@ -62,13 +64,17 @@ void WidgetLogisticaEntregues::montaFiltro() {
   if (ui->radioButtonParcialEntrega->isChecked()) { filtroCheck = "Entregue > 0 AND (Estoque > 0 OR Outros > 0)"; }
   if (ui->radioButtonSemEntrega->isChecked()) { filtroCheck = "Entregue = 0"; }
 
+  if (not filtroCheck.isEmpty()) { filtros << filtroCheck; }
+
+  //-------------------------------------
+
   const QString textoBusca = ui->lineEditBusca->text();
+  const QString filtroBusca = "idVenda LIKE '%" + textoBusca + "%'";
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
-  QString filtroBusca = textoBusca.isEmpty() ? "" : "idVenda LIKE '%" + textoBusca + "%'";
+  //-------------------------------------
 
-  if (not filtroCheck.isEmpty() and not filtroBusca.isEmpty()) { filtroBusca.prepend(" AND "); }
-
-  modelVendas.setFilter(filtroCheck + filtroBusca);
+  modelVendas.setFilter(filtros.join(" AND "));
 
   if (not modelVendas.select()) { return; }
 

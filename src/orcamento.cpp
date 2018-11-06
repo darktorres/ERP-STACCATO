@@ -29,13 +29,13 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
-  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
-  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
-  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
+  ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
+  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
+  ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 
   setupMapper();
   newRegister();

@@ -39,6 +39,22 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->table, &TableView::entered, this, &WidgetNfeSaida::on_table_entered);
 }
 
+void WidgetNfeSaida::unsetConnections() {
+  disconnect(ui->checkBoxAutorizado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetNfeSaida::on_groupBoxStatus_toggled);
+  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeSaida::montaFiltro);
+  disconnect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonCancelarNFe_clicked);
+  disconnect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonConsultarNFe_clicked);
+  disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
+  disconnect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked);
+  disconnect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated);
+  disconnect(ui->table, &TableView::entered, this, &WidgetNfeSaida::on_table_entered);
+}
+
 void WidgetNfeSaida::updateTables() {
   if (not isSet) {
     ui->dateEdit->setDate(QDate::currentDate());
@@ -88,21 +104,31 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 void WidgetNfeSaida::montaFiltro() {
   // TODO: 5ordenar por 'data criado'
 
+  QStringList filtros;
+
   const QString text = ui->lineEditBusca->text();
 
   const QString filtroBusca = "(NFe LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%' OR `CPF/CNPJ` LIKE '%" + text + "%' OR Cliente LIKE '%" + text + "%')";
+  if (not text.isEmpty()) { filtros << filtroBusca; }
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? " AND DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  //-------------------------------------
 
-  QString filtroCheck;
+  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
+  if (not filtroData.isEmpty()) { filtros << filtroData; }
+
+  //-------------------------------------
+
+  QStringList filtroCheck;
 
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) { filtroCheck += filtroCheck.isEmpty() ? "status = '" + child->text().toUpper() + "'" : " OR status = '" + child->text().toUpper() + "'"; }
+    if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
   }
 
-  filtroCheck = filtroCheck.isEmpty() ? "" : " AND (" + filtroCheck + ")";
+  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
 
-  modelViewNFeSaida.setFilter(filtroBusca + filtroData + filtroCheck);
+  //-------------------------------------
+
+  modelViewNFeSaida.setFilter(filtros.join(" AND "));
 
   if (not modelViewNFeSaida.select()) { return; }
 
@@ -290,10 +316,16 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
+  unsetConnections();
+
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
+
+  setConnections();
+
+  montaFiltro();
 }
 
 void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {

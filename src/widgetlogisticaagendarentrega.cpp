@@ -240,6 +240,8 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
 }
 
 void WidgetLogisticaAgendarEntrega::montaFiltro() {
+  QStringList filtros;
+
   QString filtroCheck;
 
   if (ui->radioButtonEntregaLimpar->isChecked()) { filtroCheck = "(Estoque > 0 OR Outros > 0)"; }
@@ -247,16 +249,19 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
   if (ui->radioButtonParcialEstoque->isChecked()) { filtroCheck = "Estoque > 0 AND Outros > 0"; }
   if (ui->radioButtonSemEstoque->isChecked()) { filtroCheck = "Estoque = 0 AND Outros > 0"; }
 
-  QString filtro = filtroCheck;
+  if (not filtroCheck.isEmpty()) { filtros << filtroCheck; }
+
+  //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text();
 
-  const QString filtroBusca =
-      textoBusca.isEmpty() ? "" : "(idVenda LIKE '%" + textoBusca + "%' OR Bairro LIKE '%" + textoBusca + "%' OR Logradouro LIKE '%" + textoBusca + "%' OR Cidade LIKE '%" + textoBusca + "%')";
+  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR Bairro LIKE '%" + textoBusca + "%' OR Logradouro LIKE '%" + textoBusca + "%' OR Cidade LIKE '%" + textoBusca + "%')";
 
-  if (not filtroBusca.isEmpty()) { filtro += filtro.isEmpty() ? filtroBusca : " AND " + filtroBusca; }
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
-  modelVendas.setFilter(filtro);
+  //-------------------------------------
+
+  modelVendas.setFilter(filtros.join(" AND "));
 
   if (not modelVendas.select()) { return; }
 

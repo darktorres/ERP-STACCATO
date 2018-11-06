@@ -38,6 +38,7 @@ private:
   auto on_table_entered(const QModelIndex) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };
 
 #endif // WIDGETNFESAIDA_H

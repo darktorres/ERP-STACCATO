@@ -293,6 +293,7 @@ bool Devolucao::criarDevolucao() {
   if (not modelVenda.insertRow(newRow)) { return false; }
 
   for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
+    if (modelVenda.fieldIndex("idVendaBase") == column) { continue; }
     if (modelVenda.fieldIndex("created") == column) { continue; }
     if (modelVenda.fieldIndex("lastUpdated") == column) { continue; }
 

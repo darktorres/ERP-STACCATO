@@ -24,7 +24,6 @@ private:
   SqlRelationalTableModel modelEstoque;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelViewConsumo;
-  SqlRelationalTableModel modelCompra;
   Ui::Estoque *ui;
 
   enum class FieldColors {

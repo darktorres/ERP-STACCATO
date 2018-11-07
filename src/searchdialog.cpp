@@ -148,8 +148,6 @@ void SearchDialog::setTextKeys(const QStringList &value) { textKeys = value; }
 void SearchDialog::setPrimaryKey(const QString &value) { primaryKey = value; }
 
 QString SearchDialog::getText(const QVariant &value) {
-  // TODO: refactor this to optional?
-
   if (model.tableName().contains("endereco") and value == 1) { return "Não há/Retira"; }
   if (value == 0) { return QString(); }
 
@@ -230,8 +228,6 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, QWidget *parent) {
-  // TODO: 1retornar um SearchDialogProxy direto aqui? (assim o consumidor do codigo nao precisa saber quando nem que
-  // precisa usar o proxy)
   SearchDialog *sdProd = new SearchDialog(
       // TODO: 3nao mostrar promocao vencida no descontinuado
       "Buscar Produto", "produto", {"fornecedor", "descricao", "colecao", "codcomercial"}, "idProduto = 0", permitirDescontinuados, parent);

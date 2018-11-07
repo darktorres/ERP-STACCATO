@@ -55,9 +55,8 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text()); }
 
-  auto *viewer = new XML_Viewer(this);
+  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
-  viewer->exibirXML(query.value("xml").toByteArray());
 }
 
 void WidgetNfeEntrada::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
@@ -156,3 +155,4 @@ bool WidgetNfeEntrada::cancelar(const int row) {
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
+// TODO: 2 funções necessarias: trocar nfe (fornecedor emitiu outra) e realocar nfe para outro pedido (foi importado errado)

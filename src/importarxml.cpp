@@ -128,6 +128,7 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableConsumo->hideColumn("idPedido");
   ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("quantUpd");
   ui->tableConsumo->hideColumn("idNFe");
@@ -873,4 +874,6 @@ void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsum
 // TODO: quando o usuario editar valorUnid recalcular o total
 // TODO: poder fazer importacao parcial de nota (quando a linha fica amarela)
 
-// TODO: erro na criacao dos consumos: item que foi consumido em 2 estoques fez o consumo total nos dois (vide ALPH-180154)
+// TODO: verificar:
+//          *1 linha vp/pf para 2 linhas estoque
+//          *2 linhas vp/pf para 1 linha estoque

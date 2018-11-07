@@ -59,8 +59,8 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString vendedor_consultor = UserSession::tipoUsuario() == "VENDEDOR ESPECIAL" ? "Consultor" : "Vendedor";
-  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : vendedor_consultor + " = '" + UserSession::nome() + "'";
+  QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "Vendedor = '" + UserSession::nome() + "'";
+  if (UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") { filtroRadio = "Vendedor = '" + UserSession::nome() + "' OR Consultor = '" + UserSession::nome() + "'"; }
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------

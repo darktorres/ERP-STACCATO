@@ -742,7 +742,14 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
 
-  const double quant = query.value("quant").toDouble();
+  const double quantConsumo = query.value("quant").toDouble();
+  const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
+  const double quant = qMin(quantConsumo, quantEstoque);
+
+  // TODO: implement this
+  //  if (quantConsumo > quantEstoque) {
+  // dividir venda/pedido_fornecedor
+  //  }
 
   // -------------------------------------
 

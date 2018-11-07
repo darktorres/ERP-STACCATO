@@ -1,7 +1,7 @@
 #include "xml.h"
 #include "application.h"
 
-XML::XML(QByteArray fileContent, QString fileName) : fileContent(std::move(fileContent)), fileName(std::move(fileName)) { montarArvore(model); }
+XML::XML(QByteArray fileContent, QString fileName) : fileContent(std::move(fileContent)), fileName(std::move(fileName)) { montarArvore(); }
 
 void XML::readChild(QDomElement &element, QStandardItem *elementItem) {
   QDomElement child = element.firstChildElement();
@@ -153,7 +153,7 @@ void XML::lerTotais(const QStandardItem *child) {
   }
 }
 
-void XML::montarArvore(QStandardItemModel &model) { // FIXME: model shadows member model
+void XML::montarArvore() {
   if (fileContent.isEmpty()) { return; }
 
   QDomDocument document;

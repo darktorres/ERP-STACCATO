@@ -8,7 +8,6 @@ class XML final {
 
 public:
   XML(QByteArray fileContent, QString fileName = QString());
-  auto montarArvore(QStandardItemModel &model) -> void;
   auto lerValores(const QStandardItem *item) -> void;
 
   const QByteArray fileContent;
@@ -90,6 +89,7 @@ public:
 
   // methods
 private:
+  auto montarArvore() -> void;
   auto lerCOFINSProduto(const QStandardItem *child) -> void;
   auto lerDadosProduto(const QStandardItem *child) -> void;
   auto lerICMSProduto(const QStandardItem *child) -> void;

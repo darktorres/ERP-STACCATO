@@ -119,13 +119,6 @@ void Estoque::setupTables() {
   ui->tableConsumo->showColumn("created");
   ui->tableConsumo->hideColumn("idEstoque");
   ui->tableConsumo->hideColumn("quantUpd");
-
-  //--------------------------------------------------------------------
-
-  modelCompra.setTable("pedido_fornecedor_has_produto");
-  modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelCompra.setFilter("0");
 }
 
 void Estoque::on_tableEstoque_activated(const QModelIndex &) { exibirNota(); }
@@ -169,20 +162,6 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   ui->tableConsumo->resizeColumnsToContents();
 
-  QSqlQuery query;
-  query.prepare("SELECT pf.codComercial, pf.idCompra FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = "
-                "ehc.idCompra AND pf.codComercial = e.codComercial WHERE e.idEstoque = :idEstoque");
-  query.bindValue(":idEstoque", idEstoque);
-
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando compra relacionada ao estoque: " + query.lastError().text()); }
-
-  const QString idCompra = query.value("idCompra").toString();
-  const QString codComercial = query.value("codComercial").toString();
-
-  modelCompra.setFilter("idCompra = " + idCompra + " AND codComercial = '" + codComercial + "' AND idVenda IS NULL AND idVendaProduto IS NULL");
-
-  if (not modelCompra.select()) { return false; }
-
   calcularRestante();
 
   if (showWindow) { show(); }
@@ -202,8 +181,8 @@ void Estoque::exibirNota() {
   if (query.size() == 0) { return qApp->enqueueWarning("Não encontrou NFe associada!"); }
 
   while (query.next()) {
-    auto *viewer = new XML_Viewer(this);
-    viewer->exibirXML(query.value("xml").toByteArray());
+    auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
   }
 }
 
@@ -225,6 +204,8 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   // -------------------------------------------------------------------------
 
   const auto idPedido = dividirCompra(idVendaProduto, quant);
+
+  if (not idPedido) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -264,7 +245,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
-  if (idPedido and not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
@@ -278,10 +259,32 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
   // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
   // senao fazer a quebra
 
-  if (modelCompra.rowCount() == 0) { return {}; }
+  QSqlQuery query1;
+  query1.prepare(
+      "SELECT pf.codComercial, pf.idCompra, pf.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = "
+      "ehc.idCompra AND pf.codComercial = e.codComercial WHERE e.idEstoque = :idEstoque");
+  query1.bindValue(":idEstoque", idEstoque);
 
-  if (modelCompra.rowCount() > 1) {
-    qApp->enqueueError("Erro modelCompra.rowCount");
+  if (not query1.exec() or not query1.first()) {
+    qApp->enqueueError("Erro buscando compra relacionada ao estoque: " + query1.lastError().text());
+    return {};
+  }
+
+  const QString idCompra = query1.value("idCompra").toString();
+  const QString codComercial = query1.value("codComercial").toString();
+
+  //--------------------------------------------------------------------
+
+  SqlRelationalTableModel modelCompra;
+  modelCompra.setTable("pedido_fornecedor_has_produto");
+  modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelCompra.setFilter("idCompra = " + idCompra + " AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto IS NULL");
+
+  if (not modelCompra.select()) { return {}; }
+
+  if (modelCompra.rowCount() == 0) {
+    qApp->enqueueError("Não foi possível dividir a compra!");
     return {};
   }
 

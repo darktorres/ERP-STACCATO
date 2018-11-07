@@ -96,9 +96,8 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text()); }
 
-  auto *viewer = new XML_Viewer(this);
+  auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
-  viewer->exibirXML(query.value("xml").toByteArray());
 }
 
 void WidgetNfeSaida::montaFiltro() {

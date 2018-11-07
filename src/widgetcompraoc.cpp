@@ -129,7 +129,7 @@ void WidgetCompraOC::on_tableProduto_entered(const QModelIndex &) { ui->tablePro
 
 void WidgetCompraOC::on_tableNFe_entered(const QModelIndex &) { ui->tableNFe->resizeColumnsToContents(); }
 
-void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
+void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this should update produto_estoque.quant
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
@@ -188,9 +188,10 @@ bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVenda
   if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE', idCompra = NULL, dataPrevCompra = "
-                     "NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
-                     "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.prepare(
+      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, dataPrevCompra = "
+      "NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
+      "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryVenda.bindValue(":idVendaProduto", idVendaProduto);
 
   if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
@@ -207,3 +208,5 @@ void WidgetCompraOC::montaFiltro() {
 
   if (not modelPedido.select()) { return; }
 }
+
+// TODO: alterar filtros, muito ruim de achar coisas nessa tela

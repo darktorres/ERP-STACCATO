@@ -163,21 +163,20 @@ void WidgetFinanceiroContas::montaFiltro() {
     //-------------------------------------
 
     const QString text = ui->lineEditBusca->text();
-    const QString busca = text.isEmpty() ? "" : "(ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR pf.idVenda LIKE '%" + text + "%')";
-    if (not text.isEmpty()) { filtros << busca; }
+    const QString busca = text.isEmpty() ? "" : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%')";
 
     //-------------------------------------
 
     filtros << "cp.desativado = FALSE";
 
     model.setQuery(
-        "SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS `dataPagamento`, "
+        "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS `dataPagamento`, "
         "`cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, group_concat(DISTINCT `pf`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
         "group_concat(DISTINCT `pf`.`idVenda` SEPARATOR ', ') AS `idVenda`, group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS "
         "`parcela`, `cp`.`observacao` AS `observacao`, group_concat(DISTINCT `pf`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro` FROM ((((`mydb`.`conta_a_pagar_has_pagamento` `cp` "
         "LEFT JOIN `mydb`.`pedido_fornecedor_has_produto` `pf` ON ((`cp`.`idCompra` = `pf`.`idCompra`))) LEFT JOIN `mydb`.`estoque_has_compra` `ehc` ON ((`ehc`.`idCompra` = "
         "`cp`.`idCompra`))) LEFT JOIN `mydb`.`estoque_has_nfe` `ehn` ON ((`ehc`.`idEstoque` = `ehn`.`idEstoque`))) LEFT JOIN `mydb`.`nfe` `n` ON ((`n`.`idNFe` = `ehn`.`idNFe`))) WHERE " +
-        filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento` ORDER BY cp.`dataPagamento` , pf.`idVenda` , cp.`tipo` , cp.`parcela` DESC");
+        filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
   }
 
   if (tipo == Tipo::Receber) {

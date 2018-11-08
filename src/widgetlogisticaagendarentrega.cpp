@@ -359,7 +359,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
     if (not modelTranspAtual.setData(row, "fornecedor", modelViewProdutos.data(item.row(), "fornecedor"))) { return false; }
     if (not modelTranspAtual.setData(row, "unCaixa", modelViewProdutos.data(item.row(), "unCaixa"))) { return false; }
     if (not modelTranspAtual.setData(row, "formComercial", modelViewProdutos.data(item.row(), "formComercial"))) { return false; }
-    if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
+    if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
     if (not modelTranspAtual.setData(row, "idVenda", modelViewProdutos.data(item.row(), "idVenda"))) { return false; }
     if (not modelTranspAtual.setData(row, "idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"))) { return false; }
     if (not modelTranspAtual.setData(row, "idProduto", modelViewProdutos.data(item.row(), "idProduto"))) { return false; }
@@ -378,7 +378,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
-  if (ui->itemBoxVeiculo->getValue().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!"); }
+  if (ui->itemBoxVeiculo->getId().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!"); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
@@ -414,13 +414,13 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {
   QSqlQuery query;
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
-  query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getValue());
+  query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados veiculo: " + query.lastError().text()); }
 
   if (not modelTranspAtual.select()) { return; }
 
-  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
+  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
   if (not modelTranspAgend.select()) { return; }
 
@@ -452,7 +452,7 @@ void WidgetLogisticaAgendarEntrega::calcularDisponivel() {
 void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &date) {
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
-  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getValue().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
+  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
 
   if (not modelTranspAgend.select()) { return; }
 
@@ -462,7 +462,7 @@ void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &dat
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
-  if (ui->itemBoxVeiculo->getValue().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!"); }
+  if (ui->itemBoxVeiculo->getId().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!"); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
@@ -522,7 +522,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
   if (not modelTranspAtual.setData(newRow, "fornecedor", modelViewProdutos.data(row, "fornecedor"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "unCaixa", modelViewProdutos.data(row, "unCaixa"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getValue())) { return false; }
+  if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
   if (not modelTranspAtual.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "idProduto", modelViewProdutos.data(row, "idProduto"))) { return false; }

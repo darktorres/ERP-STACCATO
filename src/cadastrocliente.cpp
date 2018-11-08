@@ -120,9 +120,9 @@ bool CadastroCliente::savingProcedures() {
   if (not setData("telCom", ui->lineEditTel_Com->text())) { return false; }
   if (not setData("nextel", ui->lineEditNextel->text())) { return false; }
   if (not setData("email", ui->lineEditEmail->text())) { return false; }
-  if (not setData("idCadastroRel", ui->itemBoxCliente->getValue())) { return false; }
-  if (not setData("idProfissionalRel", ui->itemBoxProfissional->getValue())) { return false; }
-  if (not setData("idUsuarioRel", ui->itemBoxVendedor->getValue())) { return false; }
+  if (not setData("idCadastroRel", ui->itemBoxCliente->getId())) { return false; }
+  if (not setData("idProfissionalRel", ui->itemBoxProfissional->getId())) { return false; }
+  if (not setData("idUsuarioRel", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("pfpj", tipoPFPJ)) { return false; }
   if (not setData("incompleto", modelEnd.rowCount() == 0)) { return false; }
   if (not setData("credito", ui->doubleSpinBoxCredito->value())) { return false; }
@@ -145,9 +145,9 @@ void CadastroCliente::clearFields() {
 void CadastroCliente::setupMapper() {
   addMapping(ui->dateEdit, "dataNasc");
   addMapping(ui->doubleSpinBoxCredito, "credito");
-  addMapping(ui->itemBoxCliente, "idCadastroRel", "value");
-  addMapping(ui->itemBoxProfissional, "idProfissionalRel", "value");
-  addMapping(ui->itemBoxVendedor, "idUsuarioRel", "value");
+  addMapping(ui->itemBoxCliente, "idCadastroRel", "id");
+  addMapping(ui->itemBoxProfissional, "idProfissionalRel", "id");
+  addMapping(ui->itemBoxVendedor, "idUsuarioRel", "id");
   addMapping(ui->lineEditCliente, "nome_razao");
   addMapping(ui->lineEditCNPJ, "cnpj");
   addMapping(ui->lineEditContatoApelido, "contatoApelido");
@@ -216,7 +216,11 @@ void CadastroCliente::on_pushButtonRemover_clicked() { remove(); }
 
 void CadastroCliente::on_pushButtonNovoCad_clicked() { newRegister(); }
 
-void CadastroCliente::on_pushButtonBuscar_clicked() { sdCliente->show(); }
+void CadastroCliente::on_pushButtonBuscar_clicked() {
+  if (not confirmationMessage()) { return; }
+
+  sdCliente->show();
+}
 
 void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
   ui->lineEditCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
@@ -267,7 +271,7 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
     return qApp->enqueueError(false, "Número vazio!");
   }
 
-  currentRowEnd = tipo == Tipo::Atualizar ? mapperEnd.currentIndex() : modelEnd.rowCount();
+  currentRowEnd = (tipo == Tipo::Atualizar) ? mapperEnd.currentIndex() : modelEnd.rowCount();
 
   if (tipo == Tipo::Cadastrar) { modelEnd.insertRow(currentRowEnd); }
 
@@ -290,7 +294,7 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 }
 
 bool CadastroCliente::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
@@ -307,7 +311,7 @@ bool CadastroCliente::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = tipo == Tipo::Atualizar ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 
@@ -434,7 +438,7 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroCliente::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
+void CadastroCliente::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
 
 void CadastroCliente::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

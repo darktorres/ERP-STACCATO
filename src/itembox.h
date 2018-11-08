@@ -13,27 +13,27 @@ class ItemBox final : public QLineEdit {
 public:
   explicit ItemBox(QWidget *parent);
   ~ItemBox() = default;
-  auto changeItem(const QVariant &newValue) -> void;
+  auto changeItem(const QVariant &newId) -> void;
   auto clear() -> void;
-  auto getValue() const -> QVariant;
+  auto getId() const -> QVariant;
   auto setFilter(const QString &filter) -> void;
   auto setFornecedorRep(const QString &fornecedor) -> void;
   auto setReadOnlyItemBox(const bool isReadOnly) -> void;
   auto setRegisterDialog(RegisterDialog *dialog) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setSearchDialog(SearchDialog *dialog) -> void;
-  auto setValue(const QVariant &newValue) -> void;
+  auto setId(const QVariant &newId) -> void;
 
 signals:
-  void valueChanged(const QVariant &changedValue);
+  void idChanged(const QVariant &changedId);
 
 private:
-  Q_PROPERTY(QVariant value READ getValue WRITE setValue STORED false)
+  Q_PROPERTY(QVariant id READ getId WRITE setId STORED false)
   // attributes
   bool readOnlyItemBox = false;
   QPushButton *searchButton;
   QPushButton *plusButton;
-  QVariant value;
+  QVariant id;
   RegisterDialog *registerDialog = nullptr;
   SearchDialog *searchDialog = nullptr;
   // methods

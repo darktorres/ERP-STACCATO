@@ -197,6 +197,8 @@ bool Estoque::atualizaQuantEstoque() {
 }
 
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
+  // TODO: verificar se as divisões de linha batem com a outra função criarConsumo
+
   if (modelEstoque.filter().isEmpty()) { return qApp->enqueueError(false, "Não setou idEstoque!"); }
 
   if (quant > ui->doubleSpinBoxRestante->value()) { return qApp->enqueueError(false, "Quantidade insuficiente!"); }

@@ -166,10 +166,14 @@ void CadastroUsuario::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 void CadastroUsuario::on_pushButtonRemover_clicked() { remove(); }
 
-void CadastroUsuario::on_pushButtonBuscar_clicked() { sdUsuario->show(); }
+void CadastroUsuario::on_pushButtonBuscar_clicked() {
+  if (not confirmationMessage()) { return; }
+
+  sdUsuario->show();
+}
 
 bool CadastroUsuario::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
@@ -222,7 +226,7 @@ bool CadastroUsuario::cadastrar() {
   return true;
 }
 
-void CadastroUsuario::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
+void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   QSqlQuery query;

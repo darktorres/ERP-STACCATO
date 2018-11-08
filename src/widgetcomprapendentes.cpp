@@ -20,7 +20,7 @@ WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent),
 WidgetCompraPendentes::~WidgetCompraPendentes() { delete ui; }
 
 void WidgetCompraPendentes::setarDadosAvulso() {
-  if (ui->itemBoxProduto->getValue().isNull()) {
+  if (ui->itemBoxProduto->getId().isNull()) {
     ui->doubleSpinBoxQuantAvulso->setValue(0);
     ui->doubleSpinBoxQuantAvulsoCaixas->setValue(0);
     ui->doubleSpinBoxQuantAvulso->setSuffix("");
@@ -30,7 +30,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 
   QSqlQuery query;
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
-  query.bindValue(":idProduto", ui->itemBoxProduto->getValue());
+  query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando produto: " + query.lastError().text()); }
 
@@ -203,7 +203,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   QSqlQuery query;
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
-  query.bindValue(":idProduto", ui->itemBoxProduto->getValue());
+  query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando produto: " + query.lastError().text()); }
 

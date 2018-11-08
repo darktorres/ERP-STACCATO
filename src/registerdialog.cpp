@@ -1,4 +1,5 @@
 #include <QCloseEvent>
+#include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QSqlError>
@@ -21,7 +22,7 @@ RegisterDialog::RegisterDialog(const QString &table, QString primaryKey, QWidget
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
 
   connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this), &QShortcut::activated, this, &QWidget::close);
-  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, this, &RegisterDialog::saveSlot);
+  connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this), &QShortcut::activated, [&]() { save(); });
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
@@ -44,9 +45,9 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 }
 
 bool RegisterDialog::viewRegister() {
-  tipo = Tipo::Atualizar;
-
   if (not confirmationMessage()) { return false; }
+
+  tipo = Tipo::Atualizar;
 
   clearFields();
   updateMode();
@@ -108,8 +109,6 @@ QStringList RegisterDialog::getTextKeys() const { return textKeys; }
 
 void RegisterDialog::setTextKeys(const QStringList &value) { textKeys = value; }
 
-void RegisterDialog::saveSlot() { save(); }
-
 void RegisterDialog::show() {
   QWidget::show();
   adjustSize();
@@ -136,7 +135,7 @@ bool RegisterDialog::confirmationMessage() {
   if (isDirty) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Deseja salvar as alterações?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
     msgBox.setButtonText(QMessageBox::Yes, "Salvar");
-    msgBox.setButtonText(QMessageBox::No, "Sair");
+    msgBox.setButtonText(QMessageBox::No, "Descartar");
     msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
 
     const int escolha = msgBox.exec();
@@ -181,6 +180,8 @@ bool RegisterDialog::save(const bool silent) {
   viewRegisterById(primaryId);
 
   if (not silent) { successMessage(); }
+
+  emit registerUpdated(data("idCliente"));
 
   return true;
 }

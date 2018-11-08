@@ -18,11 +18,12 @@ public:
 
 private:
   // attributes
-  bool financeiro = false; // REFAC: change this to ctor enum
+  bool financeiro = false;
   bool correcao = false;
+  int idLoja;
+  bool representacao;
   double minimoFrete;
   double porcFrete;
-  QString idOrcamento;
   SqlRelationalTableModel modelFluxoCaixa;
   SqlRelationalTableModel modelFluxoCaixa2;
   SqlRelationalTableModel modelItem;
@@ -34,6 +35,7 @@ private:
   auto calcPrecoGlobalTotal() -> void;
   auto cancelamento() -> bool;
   auto clearFields() -> void final;
+  auto copiaProdutosOrcamento() -> bool;
   auto financeiroSalvar() -> bool;
   auto generateId() -> bool;
   auto montarFluxoCaixa() -> void;

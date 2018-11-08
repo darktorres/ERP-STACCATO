@@ -157,7 +157,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty() ? "cp.idLoja = " + ui->itemBoxLojas->getValue().toString() : "";
+    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty() ? "cp.idLoja = " + ui->itemBoxLojas->getId().toString() : "";
     if (not loja.isEmpty()) { filtros << loja; }
 
     //-------------------------------------
@@ -213,7 +213,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty() ? "cr.idLoja = " + ui->itemBoxLojas->getValue().toString() : "";
+    const QString loja = ui->groupBoxLojas->isChecked() and not ui->itemBoxLojas->text().isEmpty() ? "cr.idLoja = " + ui->itemBoxLojas->getId().toString() : "";
     if (not loja.isEmpty()) { filtros << loja; }
 
     //-------------------------------------

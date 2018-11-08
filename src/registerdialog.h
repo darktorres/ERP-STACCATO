@@ -15,13 +15,11 @@ public:
   ~RegisterDialog() override = default;
 
   auto marcarDirty() -> void;
-  auto saveSlot() -> void;
   auto show() -> void;
-  virtual auto viewRegister() -> bool;
   virtual auto viewRegisterById(const QVariant &id) -> bool;
 
 signals:
-  void registerUpdated(const QVariant &idCliente, const QString &text);
+  void registerUpdated(const QVariant &idCliente);
 
 protected:
   // attributes
@@ -59,6 +57,7 @@ protected:
   virtual auto updateMode() -> void = 0;
   virtual auto verifyFields() -> bool = 0;
   virtual auto verifyRequiredField(QLineEdit *line, const bool silent = false) -> bool;
+  virtual auto viewRegister() -> bool;
 };
 
 #endif // REGISTERDIALOG_H

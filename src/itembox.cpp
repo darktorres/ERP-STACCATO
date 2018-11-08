@@ -36,7 +36,7 @@ void ItemBox::search() {
 
 void ItemBox::edit() {
   if (registerDialog) {
-    if (not value.isNull()) { registerDialog->viewRegisterById(value); }
+    if (not id.isNull()) { registerDialog->viewRegisterById(id); }
 
     registerDialog->show();
   }
@@ -51,19 +51,19 @@ void ItemBox::setRegisterDialog(RegisterDialog *dialog) {
   setIcons();
 }
 
-QVariant ItemBox::getValue() const { return value; }
+QVariant ItemBox::getId() const { return id; }
 
-void ItemBox::setValue(const QVariant &newValue) {
-  if (newValue.isNull()) { return; }
-  if (value == newValue) { return; }
+void ItemBox::setId(const QVariant &newId) {
+  if (newId.isNull()) { return; }
+  if (id == newId) { return; }
 
-  value = newValue;
+  id = newId;
 
-  if (searchDialog) { setText(searchDialog->getText(newValue)); }
+  if (searchDialog) { setText(searchDialog->getText(newId)); }
 
   QLineEdit::setToolTip(text());
 
-  emit valueChanged(newValue);
+  emit idChanged(newId);
 }
 
 void ItemBox::setReadOnlyItemBox(const bool isReadOnly) {
@@ -76,7 +76,7 @@ void ItemBox::setReadOnlyItemBox(const bool isReadOnly) {
 }
 
 void ItemBox::clear() {
-  value.clear();
+  id.clear();
 
   QLineEdit::clear();
 }
@@ -87,8 +87,8 @@ void ItemBox::setSearchDialog(SearchDialog *dialog) {
   setIcons();
 }
 
-void ItemBox::changeItem(const QVariant &newValue) {
-  setValue(newValue);
+void ItemBox::changeItem(const QVariant &newId) {
+  setId(newId);
 
   if (registerDialog) { registerDialog->close(); }
   if (searchDialog) { searchDialog->close(); }

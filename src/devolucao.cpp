@@ -237,9 +237,9 @@ void Devolucao::setupTables() {
   mapperItem.setModel(&modelProdutos);
   mapperItem.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 
-  mapperItem.addMapping(ui->doubleSpinBoxQuant, modelProdutos.fieldIndex("quant"), "value");
-  mapperItem.addMapping(ui->doubleSpinBoxCaixas, modelProdutos.fieldIndex("caixas"), "value");
-  mapperItem.addMapping(ui->lineEditUn, modelProdutos.fieldIndex("un"), "text");
+  mapperItem.addMapping(ui->doubleSpinBoxQuant, modelProdutos.fieldIndex("quant"));
+  mapperItem.addMapping(ui->doubleSpinBoxCaixas, modelProdutos.fieldIndex("caixas"));
+  mapperItem.addMapping(ui->lineEditUn, modelProdutos.fieldIndex("un"));
 }
 
 void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {

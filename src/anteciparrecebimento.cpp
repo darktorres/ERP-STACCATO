@@ -16,7 +16,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
   setupTables();
 
   ui->itemBoxConta->setSearchDialog(SearchDialog::conta(this));
-  ui->itemBoxConta->setValue(3);
+  ui->itemBoxConta->setId(3);
 
   ui->comboBox->clear();
   ui->comboBox->addItem("");
@@ -202,7 +202,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
     if (not modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"))) { return false; }
     if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(row, "contaDestino", ui->itemBoxConta->getValue())) { return false; }
+    if (not modelContaReceber.setData(row, "contaDestino", ui->itemBoxConta->getId())) { return false; }
 
     if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString()); }
 
@@ -224,7 +224,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   QSqlQuery query;
   query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
-  query.bindValue(":idConta", ui->itemBoxConta->getValue());
+  query.bindValue(":idConta", ui->itemBoxConta->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando 'banco': " + query.lastError().text()); }
 
@@ -243,7 +243,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaPagar.setData(rowPagar1, "dataRealizado", ui->dateEditEvento->date())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "valorReal", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "tipoReal", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "contaDestino", ui->itemBoxConta->getValue())) { return false; }
+    if (not modelContaPagar.setData(rowPagar1, "contaDestino", ui->itemBoxConta->getId())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "centroCusto", "1")) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "grupo", "Despesas Financeiras")) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "subGrupo", "Juros")) { return false; }
@@ -266,7 +266,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaPagar.setData(rowPagar2, "dataRealizado", ui->dateEditEvento->date())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "valorReal", ui->doubleSpinBoxIOF->value())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "tipoReal", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "contaDestino", ui->itemBoxConta->getValue())) { return false; }
+    if (not modelContaPagar.setData(rowPagar2, "contaDestino", ui->itemBoxConta->getId())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "centroCusto", "1")) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "grupo", "Despesas Financeiras")) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "subGrupo", "IOF")) { return false; }

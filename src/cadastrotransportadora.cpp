@@ -151,7 +151,11 @@ void CadastroTransportadora::on_pushButtonNovoCad_clicked() {
 
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 
-void CadastroTransportadora::on_pushButtonBuscar_clicked() { sdTransportadora->show(); }
+void CadastroTransportadora::on_pushButtonBuscar_clicked() {
+  if (not confirmationMessage()) { return; }
+
+  sdTransportadora->show();
+}
 
 void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
   ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "background-color: rgb(255, 255, 127);color: rgb(0, 190, 0)"
@@ -288,7 +292,7 @@ bool CadastroTransportadora::viewRegister() {
   return true;
 }
 
-void CadastroTransportadora::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
+void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
 
 void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
@@ -360,7 +364,7 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 

@@ -167,7 +167,7 @@ void CadastroFornecedor::updateMode() {
 }
 
 bool CadastroFornecedor::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog!"); }
 
@@ -185,7 +185,7 @@ bool CadastroFornecedor::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = tipo == Tipo::Atualizar ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 
@@ -196,7 +196,11 @@ void CadastroFornecedor::on_pushButtonCadastrar_clicked() { save(); }
 
 void CadastroFornecedor::on_pushButtonAtualizar_clicked() { save(); }
 
-void CadastroFornecedor::on_pushButtonBuscar_clicked() { sdFornecedor->show(); }
+void CadastroFornecedor::on_pushButtonBuscar_clicked() {
+  if (not confirmationMessage()) { return; }
+
+  sdFornecedor->show();
+}
 
 void CadastroFornecedor::on_pushButtonNovoCad_clicked() { newRegister(); }
 
@@ -297,7 +301,7 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroFornecedor::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!"); }
+void CadastroFornecedor::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!"); }
 
 void CadastroFornecedor::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

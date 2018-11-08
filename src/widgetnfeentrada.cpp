@@ -96,6 +96,7 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
 
 bool WidgetNfeEntrada::cancelar(const int row) {
   // FIXME: ao cancelar nota nao voltar o pedido de compra inteiro, apenas o item da nota cancelada
+  // FIXME: não pode voltar o status para 'faturamento' pois o item pode estar em qualquer status antes do cancelamento
 
   // marcar nota como cancelada
 

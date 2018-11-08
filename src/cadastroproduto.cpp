@@ -105,7 +105,7 @@ bool CadastroProduto::verifyFields() {
     return qApp->enqueueError(false, "Preço inválido!");
   }
 
-  if (ui->itemBoxFornecedor->getValue().isNull()) {
+  if (ui->itemBoxFornecedor->getId().isNull()) {
     ui->itemBoxFornecedor->setFocus();
     return qApp->enqueueError(false, "Faltou preencher fornecedor!");
   }
@@ -139,18 +139,18 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->comboBoxOrigem, "origem");
   addMapping(ui->comboBoxUn, "un");
   addMapping(ui->dateEditValidade, "validade");
-  addMapping(ui->doubleSpinBoxComissao, "comissao", "value");
-  addMapping(ui->doubleSpinBoxCusto, "custo", "value");
+  addMapping(ui->doubleSpinBoxComissao, "comissao");
+  addMapping(ui->doubleSpinBoxCusto, "custo");
   addMapping(ui->doubleSpinBoxEstoque, "estoqueRestante");
-  addMapping(ui->doubleSpinBoxIPI, "ipi", "value");
+  addMapping(ui->doubleSpinBoxIPI, "ipi");
   addMapping(ui->doubleSpinBoxKgCx, "kgcx");
-  addMapping(ui->doubleSpinBoxM2Cx, "m2cx", "value");
-  addMapping(ui->doubleSpinBoxMarkup, "markup", "value");
+  addMapping(ui->doubleSpinBoxM2Cx, "m2cx");
+  addMapping(ui->doubleSpinBoxMarkup, "markup");
   addMapping(ui->doubleSpinBoxPcCx, "pccx");
-  addMapping(ui->doubleSpinBoxQtePallet, "qtdPallet", "value");
-  addMapping(ui->doubleSpinBoxST, "st", "value");
-  addMapping(ui->doubleSpinBoxVenda, "precoVenda", "value");
-  addMapping(ui->itemBoxFornecedor, "idFornecedor", "value");
+  addMapping(ui->doubleSpinBoxQtePallet, "qtdPallet");
+  addMapping(ui->doubleSpinBoxST, "st");
+  addMapping(ui->doubleSpinBoxVenda, "precoVenda");
+  addMapping(ui->itemBoxFornecedor, "idFornecedor", "id");
   addMapping(ui->lineEditCodBarras, "codBarras");
   addMapping(ui->lineEditCodComer, "codComercial");
   addMapping(ui->lineEditColecao, "colecao");
@@ -166,7 +166,7 @@ void CadastroProduto::setupMapper() {
   addMapping(ui->checkBoxPromocao, "promocao");
 }
 
-void CadastroProduto::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
+void CadastroProduto::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!"); }
 
 bool CadastroProduto::savingProcedures() {
   if (not setData("codBarras", ui->lineEditCodBarras->text())) { return false; }
@@ -180,7 +180,7 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
   if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) { return false; }
   if (not setData("icms", ui->lineEditICMS->text())) { return false; }
-  if (not setData("idFornecedor", ui->itemBoxFornecedor->getValue())) { return false; }
+  if (not setData("idFornecedor", ui->itemBoxFornecedor->getId())) { return false; }
   if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }
   if (not setData("kgcx", ui->doubleSpinBoxKgCx->value())) { return false; }
   if (not setData("m2cx", ui->doubleSpinBoxM2Cx->value())) { return false; }
@@ -199,7 +199,7 @@ bool CadastroProduto::savingProcedures() {
 
   QSqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
-  query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getValue());
+  query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
 
@@ -229,7 +229,7 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 

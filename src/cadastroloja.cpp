@@ -244,7 +244,11 @@ void CadastroLoja::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 void CadastroLoja::on_pushButtonRemover_clicked() { remove(); }
 
-void CadastroLoja::on_pushButtonBuscar_clicked() { sdLoja->show(); }
+void CadastroLoja::on_pushButtonBuscar_clicked() {
+  if (not confirmationMessage()) { return; }
+
+  sdLoja->show();
+}
 
 void CadastroLoja::on_lineEditCNPJ_textEdited(const QString &text) {
   ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "background-color: rgb(255, 255, 127);color: rgb(0, 190, 0)"
@@ -392,12 +396,12 @@ bool CadastroLoja::viewRegister() {
   return modelAssocia2.select();
 }
 
-void CadastroLoja::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
+void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
 
 void CadastroLoja::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroLoja::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
 
@@ -414,7 +418,7 @@ bool CadastroLoja::cadastrar() {
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = tipo == Tipo::Atualizar ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
 

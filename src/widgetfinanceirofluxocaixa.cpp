@@ -38,8 +38,8 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     const int contaSantander = 3;
     const int contaCaixa = 8;
 
-    ui->itemBoxCaixa1->setValue(contaSantander);
-    ui->itemBoxCaixa2->setValue(contaCaixa);
+    ui->itemBoxCaixa1->setId(contaSantander);
+    ui->itemBoxCaixa2->setId(contaCaixa);
 
     ui->groupBoxCaixa1->setChecked(true);
     ui->groupBoxCaixa2->setChecked(true);
@@ -58,7 +58,7 @@ void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }
 void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   const QString filtroData = ui->groupBoxMes->isChecked() ? "`Data` IS NOT NULL AND DATE_FORMAT(`Data`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`Data` IS NOT NULL";
 
-  const QString filtroConta = ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getValue().isValid() ? "idConta = " + ui->itemBoxCaixa1->getValue().toString() : "";
+  const QString filtroConta = ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid() ? "idConta = " + ui->itemBoxCaixa1->getId().toString() : "";
 
   // TODO: see if the outer select can be removed
   if (filtroConta.isEmpty()) {
@@ -92,7 +92,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
-  const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getValue().isValid() ? "idConta = " + ui->itemBoxCaixa2->getValue().toString() : "";
+  const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid() ? "idConta = " + ui->itemBoxCaixa2->getId().toString() : "";
 
   if (filtroConta2.isEmpty()) {
     modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS "

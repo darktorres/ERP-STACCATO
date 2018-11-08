@@ -39,7 +39,7 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QList<int> &items, cons
 
   const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
 
-  lojaACBr ? ui->itemBoxLoja->setValue(lojaACBr.value()) : qApp->enqueueError("A chave 'lojaACBr' não está configurada!");
+  lojaACBr ? ui->itemBoxLoja->setId(lojaACBr.value()) : qApp->enqueueError("A chave 'lojaACBr' não está configurada!");
 
   ui->lineEditModelo->setInputMask("99;_");
   ui->lineEditSerie->setInputMask("999;_");
@@ -387,7 +387,7 @@ void CadastrarNFe::updateImpostos() {
   ui->doubleSpinBoxValorPIS->setValue(valorPIS);
   ui->doubleSpinBoxValorCOFINS->setValue(valorCOFINS);
 
-  const QString endereco = ui->itemBoxEnderecoEntrega->getValue() == 1
+  const QString endereco = ui->itemBoxEnderecoEntrega->getId() == 1
                                ? "Não há/Retira"
                                : ui->lineEditDestinatarioLogradouro_2->text() + ", " + ui->lineEditDestinatarioNumero_2->text() + " " + ui->lineEditDestinatarioComplemento_2->text() + " - " +
                                      ui->lineEditDestinatarioBairro_2->text() + " - " + ui->lineEditDestinatarioCidade_2->text() + " - " + ui->lineEditDestinatarioUF_2->text() + " - " +
@@ -405,7 +405,7 @@ bool CadastrarNFe::preencherNumeroNFe() {
 
   QSqlQuery queryCnpj;
   queryCnpj.prepare("SELECT cnpj FROM loja WHERE idLoja = :idLoja");
-  queryCnpj.bindValue(":idLoja", ui->itemBoxLoja->getValue());
+  queryCnpj.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not queryCnpj.exec() or not queryCnpj.first()) { return qApp->enqueueError(false, "Erro buscando CNPJ: " + queryCnpj.lastError().text()); }
 
@@ -459,7 +459,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   QSqlQuery queryEmitente;
   queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
-  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getValue());
+  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not queryEmitente.exec() or not queryEmitente.first()) { return qApp->enqueueError("Erro lendo dados do emitente: " + queryEmitente.lastError().text()); }
 
@@ -472,7 +472,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   QSqlQuery queryEmitenteEndereco;
   queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
-  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getValue());
+  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) { return qApp->enqueueError("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text()); }
 
@@ -498,12 +498,12 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   ui->lineEditDestinatarioTel1->setText(queryDestinatario.value("tel").toString());
   ui->lineEditDestinatarioTel2->setText(queryDestinatario.value("telCel").toString());
 
-  ui->itemBoxCliente->setValue(modelVenda.data(0, "idCliente"));
+  ui->itemBoxCliente->setId(modelVenda.data(0, "idCliente"));
 
   // endereco faturamento
 
   ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
-  ui->itemBoxEnderecoFaturamento->setValue(modelVenda.data(0, "idEnderecoFaturamento"));
+  ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
 
   QSqlQuery queryDestinatarioEndereco;
   queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
@@ -522,7 +522,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   // endereco entrega
 
   ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
-  ui->itemBoxEnderecoEntrega->setValue(modelVenda.data(0, "idEnderecoEntrega"));
+  ui->itemBoxEnderecoEntrega->setId(modelVenda.data(0, "idEnderecoEntrega"));
 
   queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryDestinatarioEndereco.bindValue(":idEndereco", modelVenda.data(0, "idEnderecoEntrega"));
@@ -1216,7 +1216,7 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
 void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   QSqlQuery queryDestinatarioEndereco;
   queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getValue());
+  queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
 
   if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) { return qApp->enqueueError("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text()); }
 
@@ -1232,7 +1232,7 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
 void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
   QSqlQuery queryDestinatarioEndereco;
   queryDestinatarioEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getValue());
+  queryDestinatarioEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoEntrega->getId());
 
   if (not queryDestinatarioEndereco.exec() or not queryDestinatarioEndereco.first()) { return qApp->enqueueError("Erro lendo endereço do cliente: " + queryDestinatarioEndereco.lastError().text()); }
 
@@ -1521,7 +1521,7 @@ void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
   queryTransp.prepare("SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
                       "transportadora_has_veiculo thv LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT JOIN transportadora_has_endereco the ON the.idTransportadora = "
                       "t.idTransportadora WHERE thv.idVeiculo = :idVeiculo");
-  queryTransp.bindValue(":idVeiculo", ui->itemBoxVeiculo->getValue());
+  queryTransp.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
   if (not queryTransp.exec() or not queryTransp.first()) { return qApp->enqueueError("Erro buscando dados da transportadora: " + queryTransp.lastError().text()); }
 
@@ -1543,7 +1543,7 @@ void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
 void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
   QSqlQuery query;
   query.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel, telCel FROM cliente WHERE idCliente = :idCliente");
-  query.bindValue(":idCliente", ui->itemBoxCliente->getValue());
+  query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados do cliente: " + query.lastError().text()); }
 
@@ -1553,12 +1553,12 @@ void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
   ui->lineEditDestinatarioTel1->setText(query.value("tel").toString());
   ui->lineEditDestinatarioTel2->setText(query.value("telCel").toString());
 
-  ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + ui->itemBoxCliente->getValue().toString() + " AND desativado = FALSE OR idEndereco = 1");
-  ui->itemBoxEnderecoFaturamento->setValue(1);
+  ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + ui->itemBoxCliente->getId().toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoFaturamento->setId(1);
 
-  ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + ui->itemBoxCliente->getValue().toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + ui->itemBoxCliente->getId().toString() + " AND desativado = FALSE OR idEndereco = 1");
 
-  ui->itemBoxEnderecoEntrega->setValue(1);
+  ui->itemBoxEnderecoEntrega->setId(1);
 }
 
 bool CadastrarNFe::validar() {
@@ -1626,7 +1626,7 @@ bool CadastrarNFe::validar() {
   // -------------------------------------------------------------------------
 
   queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
-  queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getValue());
+  queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
 
   if (not queryEndereco.exec() or not queryEndereco.first()) { return qApp->enqueueError(false, "Erro buscando endereço cliente: " + queryEndereco.lastError().text()); }
 
@@ -1736,7 +1736,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   QSqlQuery query;
   query.prepare("SELECT certificadoSerie, certificadoSenha FROM loja WHERE idLoja = :idLoja AND certificadoSerie IS NOT NULL");
-  query.bindValue(":idLoja", ui->itemBoxLoja->getValue());
+  query.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not query.exec()) { return qApp->enqueueError("Erro buscando certificado: " + query.lastError().text()); }
 
@@ -1754,7 +1754,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   QSqlQuery queryEmitente;
   queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
-  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getValue());
+  queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not queryEmitente.exec() or not queryEmitente.first()) { return qApp->enqueueError("Erro lendo dados do emitente: " + queryEmitente.lastError().text()); }
 
@@ -1767,7 +1767,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   QSqlQuery queryEmitenteEndereco;
   queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
-  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getValue());
+  queryEmitenteEndereco.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
   if (not queryEmitenteEndereco.exec() or not queryEmitenteEndereco.first()) { return qApp->enqueueError("Erro lendo endereço do emitente: " + queryEmitenteEndereco.lastError().text()); }
 

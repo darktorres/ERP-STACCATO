@@ -19,11 +19,11 @@ QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 }
 
 void ItemBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
-  if (auto *box = qobject_cast<ItemBox *>(editor)) { box->setValue(index.data(Qt::EditRole).toInt()); }
+  if (auto *box = qobject_cast<ItemBox *>(editor)) { box->setId(index.data(Qt::EditRole).toInt()); }
 }
 
 void ItemBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
-  if (auto *box = qobject_cast<ItemBox *>(editor)) { model->setData(index, box->getValue(), Qt::EditRole); }
+  if (auto *box = qobject_cast<ItemBox *>(editor)) { model->setData(index, box->getId(), Qt::EditRole); }
 }
 
 void ItemBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const { editor->setGeometry(option.rect); }

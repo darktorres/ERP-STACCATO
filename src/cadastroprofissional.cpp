@@ -84,13 +84,17 @@ void CadastroProfissional::setupUi() {
 }
 
 void CadastroProfissional::setupMapper() {
-  addMapping(ui->itemBoxVendedor, "idUsuarioRel", "value");
-  addMapping(ui->itemBoxLoja, "idLoja", "value");
   addMapping(ui->comboBoxTipo, "tipoProf");
+  addMapping(ui->doubleSpinBoxComissao, "comissao");
+  addMapping(ui->itemBoxLoja, "idLoja", "id");
+  addMapping(ui->itemBoxVendedor, "idUsuarioRel", "id");
   addMapping(ui->lineEditAgencia, "agencia");
   addMapping(ui->lineEditBanco, "banco");
   addMapping(ui->lineEditCC, "cc");
   addMapping(ui->lineEditCNPJ, "cnpj");
+  addMapping(ui->lineEditCNPJBancario, "cnpjBanco");
+  addMapping(ui->lineEditCPF, "cpf");
+  addMapping(ui->lineEditCPFBancario, "cpfBanco");
   addMapping(ui->lineEditContatoApelido, "contatoApelido");
   addMapping(ui->lineEditContatoApelido, "contatoApelido");
   addMapping(ui->lineEditContatoCPF, "contatoCPF");
@@ -98,9 +102,6 @@ void CadastroProfissional::setupMapper() {
   addMapping(ui->lineEditContatoNome, "contatoNome");
   addMapping(ui->lineEditContatoRG, "contatoRG");
   addMapping(ui->lineEditContatoRG, "contatoRG");
-  addMapping(ui->lineEditCPF, "cpf");
-  addMapping(ui->lineEditCPFBancario, "cpfBanco");
-  addMapping(ui->lineEditCNPJBancario, "cnpjBanco");
   addMapping(ui->lineEditEmail, "email");
   addMapping(ui->lineEditIdNextel, "idNextel");
   addMapping(ui->lineEditInscEstadual, "inscEstadual");
@@ -111,7 +112,6 @@ void CadastroProfissional::setupMapper() {
   addMapping(ui->lineEditTel_Cel, "telCel");
   addMapping(ui->lineEditTel_Com, "telCom");
   addMapping(ui->lineEditTel_Res, "tel");
-  addMapping(ui->doubleSpinBoxComissao, "comissao");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
@@ -154,7 +154,7 @@ bool CadastroProfissional::viewRegister() {
 }
 
 bool CadastroProfissional::cadastrar() {
-  currentRow = tipo == Tipo::Atualizar ? mapper.currentIndex() : model.rowCount();
+  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
   if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog"); }
 
@@ -208,8 +208,8 @@ bool CadastroProfissional::savingProcedures() {
   if (not setData("email", ui->lineEditEmail->text())) { return false; }
   if (not setData("pfpj", tipoPFPJ)) { return false; }
   if (not setData("tipoProf", ui->comboBoxTipo->currentText())) { return false; }
-  if (not setData("idUsuarioRel", ui->itemBoxVendedor->getValue())) { return false; }
-  if (not setData("idLoja", ui->itemBoxLoja->getValue())) { return false; }
+  if (not setData("idUsuarioRel", ui->itemBoxVendedor->getId())) { return false; }
+  if (not setData("idLoja", ui->itemBoxLoja->getId())) { return false; }
   if (not setData("comissao", ui->doubleSpinBoxComissao->value())) { return false; }
   // Dados bancários
   if (not setData("banco", ui->lineEditBanco->text())) { return false; }
@@ -263,7 +263,11 @@ void CadastroProfissional::clearEndereco() {
 
 void CadastroProfissional::on_pushButtonCancelar_clicked() { close(); }
 
-void CadastroProfissional::on_pushButtonBuscar_clicked() { sdProfissional->show(); }
+void CadastroProfissional::on_pushButtonBuscar_clicked() {
+  if (not confirmationMessage()) { return; }
+
+  sdProfissional->show();
+}
 
 void CadastroProfissional::on_lineEditCPF_textEdited(const QString &text) { ui->lineEditCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "" : "color: rgb(255, 0, 0)"); }
 
@@ -374,7 +378,7 @@ void CadastroProfissional::on_lineEditCNPJBancario_textEdited(const QString &tex
   ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroProfissional::successMessage() { qApp->enqueueInformation(tipo == Tipo::Atualizar ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
+void CadastroProfissional::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
 
 void CadastroProfissional::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

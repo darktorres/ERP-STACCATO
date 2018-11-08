@@ -21,7 +21,7 @@ CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::Calcul
 CalculoFrete::~CalculoFrete() { delete ui; }
 
 void CalculoFrete::setCliente(const QVariant &idCliente) {
-  ui->itemBoxCliente->setValue(idCliente);
+  ui->itemBoxCliente->setId(idCliente);
   //  on_itemBoxCliente_textChanged("");
 }
 
@@ -92,7 +92,7 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
 
   QSqlQuery query;
   query.prepare("SELECT logradouro, numero, cidade, uf FROM cliente_has_endereco WHERE idCliente = :idCliente");
-  query.bindValue(":idCliente", ui->itemBoxCliente->getValue());
+  query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
   if (not query.exec()) { return qApp->enqueueError("Erro buscando endereço do cliente: " + query.lastError().text()); }
 

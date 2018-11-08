@@ -394,9 +394,6 @@ color: rgb(0, 0, 0);</string>
            </item>
            <item row="4" column="1">
             <widget class="QSpinBox" name="spinBoxPrazoEntrega">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Validade em dias do orçamento, contando a partir de hoje&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
              <property name="suffix">
               <string> dias</string>
              </property>

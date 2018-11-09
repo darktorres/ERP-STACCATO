@@ -358,7 +358,7 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   sdVendedor->setPrimaryKey("idUsuario");
   sdVendedor->setTextKeys({"nome"});
 
-  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "desativado"});
+  sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "especialidade", "desativado"});
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");

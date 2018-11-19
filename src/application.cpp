@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.24");
+  setApplicationVersion("0.6.27");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -114,6 +114,7 @@ bool Application::dbConnect() {
   if (not runSqlJobs()) { return false; }
 
   startSqlPing();
+  // startUpdaterPing();
 
   return true;
 }
@@ -273,7 +274,7 @@ void Application::updater() {
 
   if (not hostname) { return; }
 
-  auto *updater = new QSimpleUpdater();
+  auto *updater = new QSimpleUpdater(this);
   updater->setApplicationVersion(qApp->applicationVersion());
   updater->setReferenceUrl("http://" + hostname.value().toString() + "/versao.txt");
   updater->setDownloadUrl("http://" + hostname.value().toString() + "/Instalador.exe");

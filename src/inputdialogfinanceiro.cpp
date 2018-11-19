@@ -574,7 +574,7 @@ void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, c
 void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate &) { montarFluxoCaixa(false); }
 
 void InputDialogFinanceiro::on_pushButtonAdicionarPagamento_clicked() {
-  ui->widgetPgts->adicionarPagamentoCompra(ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value());
+  if (not ui->widgetPgts->adicionarPagamentoCompra(ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value())) { return; }
 
   on_doubleSpinBoxPgt_valueChanged();
 }

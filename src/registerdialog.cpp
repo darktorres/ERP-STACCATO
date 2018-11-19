@@ -177,11 +177,9 @@ bool RegisterDialog::save(const bool silent) {
 
   if (not qApp->endTransaction()) { return false; }
 
-  viewRegisterById(primaryId);
-
   if (not silent) { successMessage(); }
 
-  emit registerUpdated(data("idCliente"));
+  viewRegisterById(primaryId);
 
   return true;
 }

@@ -694,7 +694,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Consultor</string>
+                 <string>Consultor:</string>
                 </property>
                </widget>
               </item>

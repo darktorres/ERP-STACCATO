@@ -72,6 +72,8 @@ void WidgetNfeEntrada::montaFiltro() {
 }
 
 void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
+  // TODO: bloquear se a nota possuir consumo/estiver coletada?
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }

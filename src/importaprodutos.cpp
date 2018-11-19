@@ -101,8 +101,8 @@ bool ImportaProdutos::importar() {
 
   if (not verificaTabela(record)) { return false; }
   if (not cadastraFornecedores()) { return false; }
-  if (not verificaSeRepresentacao()) { return false; }
   mostraApenasEstesFornecedores();
+  if (not verificaSeRepresentacao()) { return false; }
   if (not marcaTodosProdutosDescontinuados()) { return false; }
 
   modelProduto.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));

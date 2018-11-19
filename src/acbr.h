@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QProgressDialog>
 #include <QTcpSocket>
-#include <optional>
 
 class ACBr final : public QObject {
   Q_OBJECT

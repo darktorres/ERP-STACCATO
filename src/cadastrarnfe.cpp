@@ -127,7 +127,7 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->hideColumn("itemPedido");
 }
 
-QString CadastrarNFe::gravarNota() {
+QString CadastrarNFe::gerarNota() {
   QString nfe;
 
   QTextStream stream(&nfe);
@@ -176,6 +176,16 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
   if (queryNota.lastInsertId().isNull()) {
     qApp->enqueueError("Erro lastInsertId");
     return {};
+  }
+
+  // TODO: vincular idNFeFutura/idNFe com as outras tabelas aqui
+
+  if (tipo == Tipo::Futura) {
+    //
+  }
+
+  if (tipo == Tipo::Normal) {
+    //
   }
 
   return id.toInt();
@@ -253,13 +263,13 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   ACBr acbr;
 
-  auto resposta = acbr.enviarComando(gravarNota());
+  auto resposta = acbr.enviarComando(gerarNota());
 
   if (not resposta) { return; }
 
-  qDebug() << "gravarNota: " << *resposta;
+  qDebug() << "gravarNota: " << resposta.value();
 
-  if (resposta->contains("Alertas:") or not resposta->contains("OK")) { return qApp->enqueueError(*resposta); }
+  if (resposta->contains("Alertas:") or not resposta->contains("OK")) { return qApp->enqueueError(resposta.value()); }
 
   const QStringList respostaSplit = resposta->remove("OK: ").split("\r\n");
 
@@ -275,9 +285,9 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
     if (not verificaRegras) { return; }
 
-    if (verificaRegras->contains("ERRO:") or not verificaRegras->contains("OK")) { return qApp->enqueueError(*verificaRegras); }
+    if (verificaRegras->contains("ERRO:") or not verificaRegras->contains("OK")) { return qApp->enqueueError(verificaRegras.value()); }
 
-    qDebug() << "valida: " << *verificaRegras;
+    qDebug() << "valida: " << verificaRegras.value();
   }
 
   const auto idNFe = preCadastrarNota();
@@ -288,15 +298,17 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not resposta2) { return; }
 
-  if (not processarResposta(*resposta2, filePath, *idNFe, acbr)) { return; }
+  qDebug() << "enviar nfe: " << resposta2.value();
+
+  if (not processarResposta(resposta2.value(), filePath, idNFe.value(), acbr)) { return; }
 
   if (not qApp->startTransaction()) { return; }
 
-  if (not cadastrar(*idNFe)) { return qApp->rollbackTransaction(); }
+  if (not cadastrar(idNFe.value())) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation(*resposta2);
+  qApp->enqueueInformation(resposta2.value());
 
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
@@ -778,8 +790,8 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
 
 void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "[Emitente]" << endl;
-  stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) << endl;
-  //  stream << "CNPJ = 99999090910270" << endl;
+  //  stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) << endl;
+  stream << "CNPJ = 99999090910270" << endl;
   stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() << endl;
   stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(60) << endl;
   stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() << endl;
@@ -876,17 +888,24 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
-      stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl;
-      stream << "pFCPUFDest = 2" << endl; // REFAC: depende do estado
+      qDebug() << "a: " << modelViewProdutoEstoque.data(row, "vBCPIS").toString();
+      qDebug() << "b: " << modelViewProdutoEstoque.data(row, "total").toDouble() + frete;
+      qDebug() << "c: " << frete;
+      //      const double vBCUFDest = modelViewProdutoEstoque.data(row, "total").toDouble() + frete;
+      stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl; // TODO: should be valorProduto + frete + ipi + outros - desconto
+                                                                                                 //      stream << "vBCUFDest = " + QString::number(vBCUFDest) << endl;
+      stream << "pFCPUFDest = 2" << endl;                                                        // REFAC: depende do estado
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
       stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() << endl;
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
       const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
+      //      const double difal = vBCUFDest * diferencaICMS;
 
       // REFAC: o valor depende do ano atual; a partir de 2019 é 100% para o estado de destino
       stream << "pICMSInterPart = 80" << endl;
       stream << "vFCPUFDest = " + QString::number(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * 0.02, 'f', 2) << endl; // 2% FCP
+      //      stream << "vFCPUFDest = " + QString::number(vBCUFDest * 0.02, 'f', 2) << endl; // 2% FCP
       stream << "vICMSUFDest = " + QString::number(difal * 0.8, 'f', 2) << endl;
       stream << "vICMSUFRemet = " + QString::number(difal * 0.2, 'f', 2) << endl;
     }
@@ -975,7 +994,7 @@ void CadastrarNFe::writeVolume(QTextStream &stream) const {
 void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
   const QString field = modelViewProdutoEstoque.record().fieldName(index.column());
 
-  qDebug() << "field: " << field;
+  //  qDebug() << "field: " << field;
 
   //  if (field == "codBarras" or field == "ncm" or field == "cfop" or field == "unTrib" or field == "numeroPedido" or field == "itemPedido" or field == "tipoICMS" or field == "orig" or
   //      field == "cstICMS" or field == "modBC" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == ""
@@ -1884,3 +1903,6 @@ void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &
 // TODO: quando mudar a finalidade operacao para devolucao mudar as tabelas de cfop
 // TODO: testar a função de pré-gravar nota e consultar (não está salvando o idVenda e portanto na tela de logistica nao esta vinculando)
 // TODO: verificar notas pendentes soltas no sistema
+// TODO: replace 'endl' with newline and flush on end?
+// TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e precisa detalhar a partilha no complemento bem como origem e
+// destino

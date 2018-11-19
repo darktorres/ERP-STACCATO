@@ -47,7 +47,7 @@ std::optional<QVariant> UserSession::fromLoja(const QString &parameter, const QS
     return {};
   }
 
-  if (queryLoja.value(0).isNull()) return {};
+  if (queryLoja.value(0).isNull()) { return {}; }
 
   return queryLoja.value(0);
 }

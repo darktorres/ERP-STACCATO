@@ -19,8 +19,8 @@ class WidgetPagamentos final : public QScrollArea {
 public:
   explicit WidgetPagamentos(QWidget *parent = nullptr);
   ~WidgetPagamentos();
-  auto adicionarPagamentoCompra(const double restante) -> void;
-  auto adicionarPagamentoVenda(const bool representacao, const QString &idOrcamento, const double creditoTotal, const double restante) -> void;
+  auto adicionarPagamentoCompra(const double restante) -> bool;
+  auto adicionarPagamentoVenda(const bool representacao, const QString &idOrcamento, const double creditoTotal, const double restante) -> bool;
   auto resetarPagamentos() -> void;
 
   // REFAC: make this private

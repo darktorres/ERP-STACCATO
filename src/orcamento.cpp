@@ -164,7 +164,10 @@ bool Orcamento::viewRegister() {
 
     if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
 
-    if (ui->dateTimeEdit->dateTime().addDays(data("validade").toInt()).date() < QDateTime::currentDateTime().date() or status != "ATIVO") {
+    ui->itemBoxVendedor->setReadOnlyItemBox(true);
+    ui->itemBoxCliente->setReadOnlyItemBox(true);
+
+    if (ui->dateTimeEdit->dateTime().addDays(data("validade").toInt()).date() < QDate::currentDate() or status != "ATIVO") {
       isReadOnly = true;
 
       ui->pushButtonGerarVenda->hide();
@@ -334,7 +337,7 @@ void Orcamento::setupMapper() {
   mapperItem.addMapping(ui->lineEditCodComercial, modelItem.fieldIndex("codComercial"));
   mapperItem.addMapping(ui->lineEditFormComercial, modelItem.fieldIndex("formComercial"));
   mapperItem.addMapping(ui->lineEditObs, modelItem.fieldIndex("obs"));
-  mapperItem.addMapping(ui->lineEditPrecoUn, modelItem.fieldIndex("prcUnitario"));
+  mapperItem.addMapping(ui->lineEditPrecoUn, modelItem.fieldIndex("prcUnitario"), "value"); // TODO: replace this with a simple doubleSpinbox?
   mapperItem.addMapping(ui->lineEditUn, modelItem.fieldIndex("un"));
   mapperItem.addMapping(ui->doubleSpinBoxQuant, modelItem.fieldIndex("quant"));
   mapperItem.addMapping(ui->doubleSpinBoxDesconto, modelItem.fieldIndex("desconto"));
@@ -377,22 +380,33 @@ bool Orcamento::newRegister() {
 }
 
 void Orcamento::removeItem() {
-  if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text()); }
-
-  calcPrecoGlobalTotal();
-
-  if (ui->lineEditOrcamento->text() != "Auto gerado") {
-    if (not modelItem.submitAll()) { return; }
-
-    save();
+  if (modelItem.rowCount() == 1 and ui->lineEditOrcamento->text() != "Auto gerado") {
+    ui->itemBoxProduto->setFocus();
+    return qApp->enqueueError("Não pode cadastrar um orçamento sem itens!");
   }
 
-  if (modelItem.rowCount() == 0) {
-    if (ui->lineEditOrcamento->text() == "Auto gerado") { ui->checkBoxRepresentacao->setEnabled(true); }
-    ui->itemBoxProduto->setFornecedorRep("");
-  }
+  unsetConnections();
 
-  novoItem();
+  [=] {
+    if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text()); }
+
+    if (ui->lineEditOrcamento->text() != "Auto gerado") {
+      if (not modelItem.submitAll()) { return; }
+      calcPrecoGlobalTotal();
+      save();
+    } else {
+      calcPrecoGlobalTotal();
+    }
+
+    if (modelItem.rowCount() == 0) {
+      if (ui->lineEditOrcamento->text() == "Auto gerado") { ui->checkBoxRepresentacao->setEnabled(true); }
+      ui->itemBoxProduto->setFornecedorRep("");
+    }
+
+    novoItem();
+  }();
+
+  setConnections();
 }
 
 bool Orcamento::generateId() {
@@ -420,9 +434,9 @@ bool Orcamento::generateId() {
     if (id.size() != 12 and id.size() != 13) { return qApp->enqueueError(false, "Tamanho do Id errado: " + id); }
   } else {
     QSqlQuery query;
-    query.prepare("SELECT COALESCE(MAX(CAST(REPLACE(idOrcamento, LEFT(idOrcamento, LOCATE('Rev', idOrcamento) + 2), '') AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE LENGTH(idOrcamento) > 16 "
+    query.prepare("SELECT COALESCE(MAX(CAST(RIGHT(idOrcamento, LENGTH(idOrcamento) - LOCATE('Rev', idOrcamento) - 2) AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE LENGTH(idOrcamento) > 16 "
                   "AND idOrcamento LIKE :idOrcamento");
-    query.bindValue(":idOrcamento", replica.left(16) + "%");
+    query.bindValue(":idOrcamento", replica.left(11) + "%");
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando próxima revisão disponível: " + query.lastError().text()); }
 
@@ -495,26 +509,28 @@ bool Orcamento::verifyFields() {
 }
 
 bool Orcamento::savingProcedures() {
+  if (tipo == Tipo::Cadastrar) {
+    const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+
+    if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!"); }
+
+    if (not setData("idLoja", idLoja.value().toInt())) { return false; }
+
+    if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
+    if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
+    if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
+    if (not setData("replicadoDe", ui->lineEditReplicaDe->text())) { return false; }
+    if (not setData("representacao", ui->checkBoxRepresentacao->isChecked())) { return false; }
+  }
+
   if (not setData("data", ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.)) { return false; }
   if (not setData("frete", ui->doubleSpinBoxFrete->value())) { return false; }
-  if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
   if (not setData("idEnderecoEntrega", ui->itemBoxEndereco->getId())) { return false; }
-
-  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
-
-  if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!"); }
-
-  if (not setData("idLoja", idLoja.value().toInt())) { return false; }
-  if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
   if (not setData("idProfissional", ui->itemBoxProfissional->getId())) { return false; }
-  if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
-  if (not setData("idUsuarioConsultor", ui->itemBoxConsultor->getId())) { return false; }
   if (not setData("observacao", ui->plainTextEditObs->toPlainText())) { return false; }
   if (not setData("prazoEntrega", ui->spinBoxPrazoEntrega->value())) { return false; }
-  if (not setData("replicadoDe", ui->lineEditReplicaDe->text())) { return false; }
-  if (not setData("representacao", ui->checkBoxRepresentacao->isChecked())) { return false; }
   if (not setData("subTotalBru", ui->doubleSpinBoxSubTotalBruto->value())) { return false; }
   if (not setData("subTotalLiq", ui->doubleSpinBoxSubTotalLiq->value())) { return false; }
   if (not setData("total", ui->doubleSpinBoxTotal->value())) { return false; }
@@ -719,8 +735,6 @@ void Orcamento::adicionarItem(const bool isUpdate) {
     if (not modelItem.setData(row, "total", ui->doubleSpinBoxTotalItem->value() * (1 - (ui->doubleSpinBoxDescontoGlobal->value() / 100)))) { return; }
     const bool mostrarDesconto = (modelItem.data(row, "total").toDouble() - modelItem.data(row, "parcial").toDouble()) < -0.1;
     if (not modelItem.setData(row, "mostrarDesconto", mostrarDesconto)) { return; }
-
-    if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); }
 
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
 

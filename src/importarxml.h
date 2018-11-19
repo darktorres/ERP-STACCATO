@@ -4,7 +4,6 @@
 #include <QDataWidgetMapper>
 #include <QDate>
 #include <QFileDialog>
-#include <optional>
 
 #include "sqlrelationaltablemodel.h"
 #include "xml.h"

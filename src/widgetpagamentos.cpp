@@ -22,7 +22,7 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QScrollArea(parent), ui(ne
 
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 
-void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
+bool WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   // REFAC: refactor this with the other adicionarPagamento
 
   auto *frame = new QFrame(this);
@@ -40,7 +40,7 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", UserSession::idLoja());
 
-  if (not queryPag.exec()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
+  if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
@@ -98,9 +98,11 @@ void WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   listLinePgt << lineEditPgt;
   //
   widget()->layout()->addWidget(frame);
+
+  return true;
 }
 
-void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const QString &idOrcamento, const double creditoTotal, const double restante) {
+bool WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const QString &idOrcamento, const double creditoTotal, const double restante) {
   auto *frame = new QFrame(this);
   frame->setLayout(new QHBoxLayout(frame));
   // label
@@ -125,13 +127,13 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError("Erro buscando orçamento: " + queryOrc.lastError().text()); }
+  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError(false, "Erro buscando orçamento: " + queryOrc.lastError().text()); }
 
   QSqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
 
-  if (not queryPag.exec()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
+  if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("Escolha uma opção!");
@@ -180,6 +182,8 @@ void WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   //
 
   widget()->layout()->addWidget(frame);
+
+  return true;
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text, const double creditoTotal) {

@@ -438,7 +438,10 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroCliente::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!"); }
+void CadastroCliente::successMessage() {
+  qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!");
+  emit registerUpdated(data("idCliente"));
+}
 
 void CadastroCliente::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 

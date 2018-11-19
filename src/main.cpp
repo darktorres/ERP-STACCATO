@@ -13,9 +13,9 @@ int main(int argc, char *argv[]) {
   qSetMessagePattern("%{message}");
 #endif
   Application app(argc, argv);
-  QSharedMemory sharedMemory;
 
 #ifdef Q_OS_WIN
+  QSharedMemory sharedMemory;
   sharedMemory.setKey("staccato-erp");
 
   if (sharedMemory.create(1) == false) {

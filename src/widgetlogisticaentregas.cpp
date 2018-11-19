@@ -420,6 +420,8 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
     auto [xml, resposta] = *tuple;
 
+    // TODO: se não autorizado deletar nota e remover vinculos? (tem que tomar cuidado para não pular o numero)
+
     if (not qApp->startTransaction()) { return; }
 
     if (not consultarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }

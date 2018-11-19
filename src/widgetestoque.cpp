@@ -12,6 +12,7 @@
 #include "estoque.h"
 #include "importarxml.h"
 #include "ui_widgetestoque.h"
+#include "usersession.h"
 #include "widgetestoque.h"
 #include "xlsxdocument.h"
 #include "xml.h"
@@ -70,6 +71,14 @@ void WidgetEstoque::updateTables() {
   if (not isSet) {
     ui->dateEditMes->setDate(QDate::currentDate());
     setConnections();
+
+    const QString tipoUsuario = UserSession::tipoUsuario();
+
+    if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
+      ui->groupBox->hide();
+      ui->groupBox_2->hide();
+    }
+
     isSet = true;
   }
 

@@ -281,3 +281,5 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 
   return true;
 }
+
+// TODO: para vendedores está mostrando a comissao total?

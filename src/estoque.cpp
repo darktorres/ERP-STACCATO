@@ -9,6 +9,7 @@
 #include "estoque.h"
 #include "estoqueproxymodel.h"
 #include "ui_estoque.h"
+#include "usersession.h"
 #include "xml_viewer.h"
 
 Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
@@ -24,6 +25,10 @@ Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QD
   connect(ui->tableEstoque, &TableView::entered, this, &Estoque::on_tableEstoque_entered);
 
   viewRegisterById(showWindow);
+
+  const QString tipoUsuario = UserSession::tipoUsuario();
+
+  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->pushButtonExibirNfe->hide(); }
 
   ui->labelRestante_2->hide();
   ui->doubleSpinBoxComprometidoNaoEntregue->hide();
@@ -187,6 +192,7 @@ void Estoque::exibirNota() {
 }
 
 bool Estoque::atualizaQuantEstoque() {
+  // NOTE: can this be simplified so no query is necessary?
   QSqlQuery query;
   query.prepare("UPDATE produto p, view_estoque2 v SET p.estoqueRestante = v.restante, descontinuado = IF(v.restante = 0, TRUE, FALSE) WHERE p.idEstoque = v.idEstoque AND v.idEstoque = :idEstoque");
   query.bindValue(":idEstoque", modelEstoque.data(0, "idEstoque"));
@@ -206,8 +212,6 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   // -------------------------------------------------------------------------
 
   const auto idPedido = dividirCompra(idVendaProduto, quant);
-
-  if (not idPedido) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -247,12 +251,28 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto", idVendaProduto)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
+  if (idPedido and not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
 
   if (not atualizaQuantEstoque()) { return false; }
+
+  // -------------------------------------------------------------------------
+  // copy lote to venda_has_produto
+
+  const QString lote = modelEstoque.data(rowEstoque, "lote").toString();
+
+  if (not lote.isEmpty() and lote != "N/D") {
+    QSqlQuery queryProduto;
+    queryProduto.prepare("UPDATE venda_has_produto SET lote = :lote WHERE idVendaProduto = :idVendaProduto");
+    queryProduto.bindValue(":lote", modelEstoque.data(rowEstoque, "lote"));
+    queryProduto.bindValue(":idVendaProduto", idVendaProduto);
+
+    if (not queryProduto.exec()) { return qApp->enqueueError(false, "Erro salvando lote: " + queryProduto.lastError().text()); }
+  }
+
+  // -------------------------------------------------------------------------
 
   return true;
 }
@@ -285,10 +305,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
 
   if (not modelCompra.select()) { return {}; }
 
-  if (modelCompra.rowCount() == 0) {
-    qApp->enqueueError("Não foi possível dividir a compra!");
-    return {};
-  }
+  if (modelCompra.rowCount() == 0) { return {}; }
 
   QSqlQuery query;
   query.prepare("SELECT idVenda FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");

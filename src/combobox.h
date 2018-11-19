@@ -11,9 +11,6 @@ public:
   ~ComboBox() = default;
   auto getCurrentValue() const -> QVariant;
   auto setCurrentValue(const QVariant &value) -> bool;
-
-private:
-  Q_PROPERTY(QVariant currentValue READ getCurrentValue WRITE setCurrentValue STORED false)
 };
 
 #endif // COMBOBOX_H

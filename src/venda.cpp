@@ -120,6 +120,7 @@ void Venda::setupTables() {
   modelItem.setHeaderData("fornecedor", "Fornecedor");
   modelItem.setHeaderData("produto", "Produto");
   modelItem.setHeaderData("obs", "Obs.");
+  modelItem.setHeaderData("lote", "Lote");
   modelItem.setHeaderData("prcUnitario", "Preço/Un");
   modelItem.setHeaderData("caixas", "Caixas");
   modelItem.setHeaderData("quant", "Quant.");
@@ -243,6 +244,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa2->hideColumn("dataEmissao");
   ui->tableFluxoCaixa2->hideColumn("idVenda");
   ui->tableFluxoCaixa2->hideColumn("idLoja");
+  ui->tableFluxoCaixa2->hideColumn("nfe");
   ui->tableFluxoCaixa2->hideColumn("representacao");
   ui->tableFluxoCaixa2->hideColumn("dataRealizado");
   ui->tableFluxoCaixa2->hideColumn("valorReal");
@@ -641,6 +643,8 @@ bool Venda::viewRegister() {
       ui->labelConsultor->show();
       ui->itemBoxConsultor->show();
     }
+
+    idLoja = data("idLoja").toInt();
 
     return true;
   }();
@@ -1180,8 +1184,7 @@ void Venda::setFinanceiro() {
 }
 
 bool Venda::financeiroSalvar() {
-  // REFAC: if false return
-  atualizarCredito();
+  if (not atualizarCredito()) { return false; }
 
   if (not model.setData(mapper.currentIndex(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
 
@@ -1274,7 +1277,10 @@ void Venda::on_checkBoxRT_toggled(bool checked) {
 void Venda::on_itemBoxProfissional_textChanged(const QString &) { on_checkBoxPontuacaoPadrao_toggled(ui->checkBoxPontuacaoPadrao->isChecked()); }
 
 void Venda::on_pushButtonAdicionarPagamento_clicked() {
-  ui->widgetPgts->adicionarPagamentoVenda(representacao, ui->lineEditIdOrcamento->text(), ui->doubleSpinBoxCreditoTotal->value(), ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value());
+  if (not ui->widgetPgts->adicionarPagamentoVenda(representacao, ui->lineEditIdOrcamento->text(), ui->doubleSpinBoxCreditoTotal->value(),
+                                                  ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxTotalPag->value())) {
+    return;
+  }
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa);
   connect(ui->widgetPgts, &WidgetPagamentos::valueChanged, this, &Venda::on_doubleSpinBoxPgt_valueChanged);

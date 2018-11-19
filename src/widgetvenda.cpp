@@ -27,6 +27,7 @@ void WidgetVenda::setupTables() {
   ui->table->setModel(new VendaProxyModel(&modelViewVenda, this));
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
+  ui->table->hideColumn("idUsuarioConsultor");
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
 }
 
@@ -54,13 +55,13 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroVendedor = ui->comboBoxVendedores->currentText().isEmpty() ? "" : "idUsuario = " + ui->comboBoxVendedores->getCurrentValue().toString();
+  const QString idVendedor = ui->comboBoxVendedores->getCurrentValue().toString();
+  const QString filtroVendedor = ui->comboBoxVendedores->currentText().isEmpty() ? "" : "(idUsuario = " + idVendedor + " OR idUsuarioConsultor = " + idVendedor + ")";
   if (not filtroVendedor.isEmpty()) { filtros << filtroVendedor; }
 
   //-------------------------------------
 
-  QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "Vendedor = '" + UserSession::nome() + "'";
-  if (UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") { filtroRadio = "Vendedor = '" + UserSession::nome() + "' OR Consultor = '" + UserSession::nome() + "'"; }
+  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + UserSession::nome() + "'" + " OR Consultor = '" + UserSession::nome() + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -142,8 +143,6 @@ void WidgetVenda::setPermissions() {
     ui->radioButtonTodos->click();
   }
 
-  if (tipoUsuario == "VENDEDOR ESPECIAL") { ui->radioButtonTodos->hide(); }
-
   ui->dateEdit->setDate(QDate::currentDate());
 }
 
@@ -219,6 +218,7 @@ void WidgetVenda::updateTables() {
   if (not isSet) {
     setPermissions();
     setConnections();
+    on_comboBoxLojas_currentIndexChanged(0);
     isSet = true;
   }
 
@@ -251,12 +251,13 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged(const int) {
 
   ui->comboBoxVendedores->clear();
 
-  QSqlQuery query("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" +
-                  (ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString()));
+  const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+
+  QSqlQuery query("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" + filtroLoja + " ORDER BY nome");
 
   ui->comboBoxVendedores->addItem("");
 
-  while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
+  while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
 
   setConnections();
 }

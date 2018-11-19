@@ -46,7 +46,7 @@ private:
   auto calculaDigitoVerificador(QString &chave) -> bool;
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> bool;
-  auto gravarNota() -> QString;
+  auto gerarNota() -> QString;
   auto listarCfop() -> bool;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;

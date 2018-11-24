@@ -645,6 +645,7 @@ bool Venda::viewRegister() {
     }
 
     idLoja = data("idLoja").toInt();
+    representacao = data("representacao").toBool();
 
     return true;
   }();

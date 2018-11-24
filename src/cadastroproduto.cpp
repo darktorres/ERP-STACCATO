@@ -260,3 +260,4 @@ bool CadastroProduto::cadastrar() {
 // TODO: colocar logica para trabalhar a tabela produto_has_preco para que os produtos nao sejam descontinuados com validade ativa
 // TODO: validar entrada do campo icms para apenas numeros
 // REFAC: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
+// TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto

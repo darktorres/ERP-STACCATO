@@ -884,3 +884,5 @@ void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsum
 // TODO: verificar:
 //          *1 linha vp/pf para 2 linhas estoque
 //          *2 linhas vp/pf para 1 linha estoque
+
+// TODO: salvar valor nota no SQL

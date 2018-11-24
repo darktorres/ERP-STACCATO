@@ -79,11 +79,13 @@ private:
   auto on_pushButtonEnviarNFE_clicked() -> void;
   auto on_tabWidget_currentChanged(const int index) -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
-  auto on_tableItens_entered(const QModelIndex &) -> void;
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
+  auto on_tableItens_entered(const QModelIndex &) -> void;
   auto preCadastrarNota() -> std::optional<int>;
   auto preencherNumeroNFe() -> bool;
+  auto prepararNFe(const QList<int> &items) -> void;
   auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbr) -> bool;
+  auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
@@ -97,7 +99,6 @@ private:
   auto writeTotal(QTextStream &stream) const -> void;
   auto writeTransportadora(QTextStream &stream) const -> void;
   auto writeVolume(QTextStream &stream) const -> void;
-  auto prepararNFe(const QList<int> &items) -> void;
 };
 
 #endif // CADASTRARNFE_H

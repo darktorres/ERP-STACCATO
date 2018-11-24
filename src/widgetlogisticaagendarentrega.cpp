@@ -759,7 +759,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
 
   for (const auto &item : list) {
-    if (not modelViewProdutos.data(item.row(), "idNFeFutura").isNull()) { return qApp->enqueueError("Produto já possui nota futura!"); }
+    if (not modelViewProdutos.data(item.row(), "NFe Fut.").isNull()) { return qApp->enqueueError("Produto já possui nota futura!"); }
 
     if (modelViewProdutos.data(item.row(), "idConsumo").toInt() == 0) { return qApp->enqueueError("Nem todos os produtos selecionados possuem nota de entrada!"); }
   }

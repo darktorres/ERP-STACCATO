@@ -19,7 +19,7 @@ public:
 
 private:
   // attributes
-  QTcpSocket socket{};
+  QTcpSocket socket;
   const QString welcome = "Esperando por comandos.\x03";
   QString resposta;
   bool pronto = false;
@@ -29,10 +29,11 @@ private:
   QProgressDialog *progressDialog = new QProgressDialog();
   // methods
   auto abrirPdf(const QString &filePath) -> bool;
-  auto readSocket() -> void;
-  auto setDisconnected() -> void;
-  auto setConnected() -> void;
   auto error() -> void;
+  auto readSocket() -> void;
+  auto removerNota(const int idNFe) -> void;
+  auto setConnected() -> void;
+  auto setDisconnected() -> void;
   auto write() -> void;
 };
 

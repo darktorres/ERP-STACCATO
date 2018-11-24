@@ -54,9 +54,6 @@ void WidgetEstoque::setupTables() {
   model.setHeaderData("dataRealColeta", "Coleta");
   model.setHeaderData("dataPrevReceb", "Prev. Receb.");
   model.setHeaderData("dataRealReceb", "Receb.");
-  model.setHeaderData("dataPrevEnt", "Prev. Ent.");
-  model.setHeaderData("dataRealEnt", "Entrega");
-  model.setHeaderData("ordemCompra", "OC");
 
   auto *proxyFilter = new QSortFilterProxyModel(this);
   proxyFilter->setDynamicSortFilter(true);

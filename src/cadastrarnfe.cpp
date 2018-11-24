@@ -157,7 +157,6 @@ QString CadastrarNFe::gerarNota() {
 std::optional<int> CadastrarNFe::preCadastrarNota() {
   QSqlQuery queryNota;
   queryNota.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, valor) VALUES (:numeroNFe, :tipo, :xml, :status, :chaveAcesso, :cnpjOrig, :valor)");
-  // TODO: cadastrar idVenda para poder consultar na tela de entregas caso tenha perdido a conexao com o acbr
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":tipo", "SAÍDA");
   queryNota.bindValue(":xml", xml);
@@ -165,6 +164,7 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
   queryNota.bindValue(":chaveAcesso", chaveNum);
   queryNota.bindValue(":cnpjOrig", clearStr(ui->lineEditEmitenteCNPJ->text()));
   queryNota.bindValue(":valor", ui->doubleSpinBoxValorNota->value());
+  // TODO: verificar se devo salvar idVenda aqui ou apenas remover esse campo do BD
 
   if (not queryNota.exec()) {
     qApp->enqueueError("Erro guardando nota: " + queryNota.lastError().text());
@@ -178,29 +178,82 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
     return {};
   }
 
-  // TODO: vincular idNFeFutura/idNFe com as outras tabelas aqui
+  if (tipo == Tipo::Normal or tipo == Tipo::NormalAposFutura) {
+    QSqlQuery query1;
+    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
-  if (tipo == Tipo::Futura) {
-    //
-  }
+    QSqlQuery query2;
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status = 'ENTREGA AGEND.'");
 
-  if (tipo == Tipo::Normal) {
-    //
+    QSqlQuery query3;
+    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+
+      if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do pedido_fornecedor: " + query1.lastError().text()); }
+
+      query2.bindValue(":idNFeSaida", id);
+      query2.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+
+      if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query2.lastError().text()); }
+
+      query3.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query3.bindValue(":idNFeSaida", id);
+
+      if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando carga veiculo: " + query3.lastError().text()); }
+    }
   }
 
   return id.toInt();
 }
 
+void CadastrarNFe::removerNota(const int idNFe) {
+  if (not qApp->startTransaction()) { return; }
+
+  const bool remover = [&] {
+    QSqlQuery query2a;
+    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query2a.bindValue(":idNFeSaida", idNFe);
+
+    if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }
+
+    QSqlQuery query3a;
+    query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query3a.bindValue(":idNFeSaida", idNFe);
+
+    if (not query3a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
+
+    QSqlQuery query1a;
+    query1a.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+
+    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
+      query1a.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+
+      if (not query1a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da compra: " + query1a.lastError().text()); }
+    }
+
+    QSqlQuery queryNota;
+    queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+    queryNota.bindValue(":idNFe", idNFe);
+
+    if (not queryNota.exec()) { return qApp->enqueueError(false, "Erro removendo nota: " + queryNota.lastError().text()); }
+
+    return true;
+  }();
+
+  if (not remover) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
+}
+
 bool CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbr) {
   // erro de comunicacao/rejeicao
+  qDebug() << "resposta: " << resposta;
   if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
     if (resposta.contains("Rejeição:")) {
-      QSqlQuery queryNota;
-      queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-      queryNota.bindValue(":idNFe", idNFe);
-
-      if (not queryNota.exec()) { return qApp->enqueueError(false, "Erro removendo nota: " + queryNota.lastError().text()); }
-
+      qDebug() << "rejeicao";
+      removerNota(idNFe);
       return qApp->enqueueError(false, "Resposta EnviarNFe: " + resposta);
     }
 
@@ -210,13 +263,9 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     // erro de comunicacao/rejeicao
     if (not respostaConsultar->contains("XMotivo=Autorizado o uso da NF-e")) {
-      QSqlQuery queryNota;
-      queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-      queryNota.bindValue(":idNFe", idNFe);
-
-      if (not queryNota.exec()) { return qApp->enqueueError(false, "Erro removendo nota: " + queryNota.lastError().text()); }
-
-      return qApp->enqueueError(false, "Resposta ConsultarNFe: " + *respostaConsultar);
+      qDebug() << "!consulta";
+      removerNota(idNFe);
+      return qApp->enqueueError(false, "Resposta ConsultarNFe: " + respostaConsultar.value());
     }
   }
 
@@ -228,7 +277,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     xml = resposta2->remove("OK: ");
 
-    QFile file(filePath);
+    QFile file(filePath); // write file locally for sending email
 
     if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Erro abrindo arquivo para escrita: " + file.errorString()); }
 
@@ -267,7 +316,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not resposta) { return; }
 
-  qDebug() << "gravarNota: " << resposta.value();
+  qDebug() << "gerarNota: " << resposta.value();
 
   if (resposta->contains("Alertas:") or not resposta->contains("OK")) { return qApp->enqueueError(resposta.value()); }
 
@@ -280,19 +329,14 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   qDebug() << "filePath: " << filePath;
 
-  if (ui->checkBoxPrevalidar->isChecked()) {
-    const auto verificaRegras = acbr.enviarComando("NFE.ValidarNFeRegraNegocios(" + filePath + ")");
-
-    if (not verificaRegras) { return; }
-
-    if (verificaRegras->contains("ERRO:") or not verificaRegras->contains("OK")) { return qApp->enqueueError(verificaRegras.value()); }
-
-    qDebug() << "valida: " << verificaRegras.value();
-  }
+  if (not qApp->startTransaction()) { return; }
 
   const auto idNFe = preCadastrarNota();
+  qDebug() << "precadastrar";
 
-  if (not idNFe) { return; }
+  if (not idNFe) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
 
   const auto resposta2 = acbr.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
 
@@ -343,34 +387,6 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
     }
   }
 
-  if (tipo == Tipo::Normal) {
-    // REFAC: use 'idVendaProduto IN'?
-    QSqlQuery query1;
-    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-
-    QSqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status = 'ENTREGA AGEND.'");
-
-    QSqlQuery query3;
-    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-
-    for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
-
-      if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do pedido_fornecedor: " + query1.lastError().text()); }
-
-      query2.bindValue(":idNFeSaida", idNFe);
-      query2.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
-
-      if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query2.lastError().text()); }
-
-      query3.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
-      query3.bindValue(":idNFeSaida", idNFe);
-
-      if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando carga veiculo: " + query3.lastError().text()); }
-    }
-  }
-
   return true;
 }
 
@@ -387,8 +403,8 @@ void CadastrarNFe::updateImpostos() {
     baseICMS += modelViewProdutoEstoque.data(row, "vBC").toDouble();
     valorICMS += modelViewProdutoEstoque.data(row, "vICMS").toDouble();
     //    valorIPI += modelProd.data(row, "vIPI").toDouble();
-    valorPIS += modelViewProdutoEstoque.data(row, "vPIS").toDouble();
-    valorCOFINS += modelViewProdutoEstoque.data(row, "vCOFINS").toDouble();
+    valorPIS += QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2).toDouble();
+    valorCOFINS += QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2).toDouble();
   }
 
   const double total = valorICMS + /*valorIPI +*/ valorPIS + valorCOFINS;
@@ -790,8 +806,8 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) const {
 
 void CadastrarNFe::writeEmitente(QTextStream &stream) const {
   stream << "[Emitente]" << endl;
-  //  stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) << endl;
-  stream << "CNPJ = 99999090910270" << endl;
+  stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) << endl;
+  //  stream << "CNPJ = 99999090910270" << endl;
   stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() << endl;
   stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(60) << endl;
   stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() << endl;
@@ -836,6 +852,8 @@ void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
 }
 
 void CadastrarNFe::writeProduto(QTextStream &stream) const {
+  double sumFrete = 0;
+
   for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
     const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
     stream << "[Produto" + numProd + "]" << endl;
@@ -856,9 +874,18 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
     const double quant = modelViewProdutoEstoque.data(row, "quant").toDouble();
     stream << "ValorUnitario = " + QString::number(total / quant, 'f', 10) << endl;
-    stream << "ValorTotal = " + modelViewProdutoEstoque.data(row, "total").toString() << endl;
-    const double frete = total / ui->doubleSpinBoxValorProdutos->value() * ui->doubleSpinBoxValorFrete->value();
-    stream << "vFrete = " + QString::number(frete, 'f', 2) << endl;
+    stream << "ValorTotal = " + QString::number(total, 'f', 2) << endl;
+    const double proporcao = total / ui->doubleSpinBoxValorProdutos->value();
+    const double frete = ui->doubleSpinBoxValorFrete->value() * proporcao;
+    sumFrete += QString::number(frete, 'f', 2).toDouble();
+
+    if (sumFrete > ui->doubleSpinBoxValorFrete->value()) {
+      const double diff = sumFrete - ui->doubleSpinBoxValorFrete->value();
+      const double frete2 = frete - diff;
+      stream << "vFrete = " + QString::number(frete2, 'f', 2) << endl;
+    } else {
+      stream << "vFrete = " + QString::number(frete, 'f', 2) << endl;
+    }
 
     stream << "[ICMS" + numProd + "]" << endl;
     stream << "CST = " + modelViewProdutoEstoque.data(row, "cstICMS").toString() << endl;
@@ -876,13 +903,13 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     stream << "CST = " + modelViewProdutoEstoque.data(row, "cstPIS").toString() << endl;
     stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl;
     stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pPIS").toString() << endl;
-    stream << "Valor = " + modelViewProdutoEstoque.data(row, "vPIS").toString() << endl;
+    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2) << endl;
 
     stream << "[COFINS" + numProd + "]" << endl;
     stream << "CST = " + modelViewProdutoEstoque.data(row, "cstCOFINS").toString() << endl;
     stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCCOFINS").toString() << endl;
     stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pCOFINS").toString() << endl;
-    stream << "Valor = " + modelViewProdutoEstoque.data(row, "vCOFINS").toString() << endl;
+    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2) << endl;
 
     // PARTILHA ICMS
 
@@ -1797,8 +1824,6 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
   ui->lineEditEmitenteCidade->setText(queryEmitenteEndereco.value("cidade").toString());
   ui->lineEditEmitenteUF->setText(queryEmitenteEndereco.value("uf").toString());
   ui->lineEditEmitenteCEP->setText(queryEmitenteEndereco.value("cep").toString());
-
-  // TODO: 0pedir para trocar cartao e rodar teste no acbr para verificar se esta tudo ok e funcionando
 }
 
 void CadastrarNFe::setConnections() {
@@ -1906,3 +1931,4 @@ void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &
 // TODO: replace 'endl' with newline and flush on end?
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e precisa detalhar a partilha no complemento bem como origem e
 // destino
+// TODO: na importacao verificar se a nota está autorizada

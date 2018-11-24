@@ -238,8 +238,10 @@ void WidgetFinanceiroContas::montaFiltro() {
 
   model.setHeaderData("dataEmissao", "Data Emissão");
   model.setHeaderData("idVenda", "Código");
-  if (tipo == Tipo::Pagar) { model.setHeaderData("ordemCompra", "OC"); }
-  model.setHeaderData("numeroNFe", "NFe");
+  if (tipo == Tipo::Pagar) {
+    model.setHeaderData("ordemCompra", "OC");
+    model.setHeaderData("numeroNFe", "NFe");
+  }
   model.setHeaderData("contraParte", "ContraParte");
   model.setHeaderData("valor", "R$");
   model.setHeaderData("tipo", "Tipo");

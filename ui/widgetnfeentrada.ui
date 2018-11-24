@@ -72,10 +72,10 @@
    <item row="2" column="1">
     <widget class="QPushButton" name="pushButtonCancelarNFe">
      <property name="enabled">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="text">
-      <string>Cancelar NFe</string>
+      <string>Remover NFe</string>
      </property>
     </widget>
    </item>

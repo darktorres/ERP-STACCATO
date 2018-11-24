@@ -387,17 +387,24 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
+  QSqlQuery query3;
+  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+
   while (query.next()) {
     query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro voltando status produto: " + query2.lastError().text()); }
+
+    query3.bindValue(":idVendaProduto", query.value("idVendaProduto"));
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro voltando status produto compra: " + query3.lastError().text()); }
   }
 
-  QSqlQuery query3;
-  query3.prepare("DELETE FROM veiculo_has_produto WHERE idEvento = :idEvento");
-  query3.bindValue(":idEvento", idEvento);
+  QSqlQuery query4;
+  query4.prepare("DELETE FROM veiculo_has_produto WHERE idEvento = :idEvento");
+  query4.bindValue(":idEvento", idEvento);
 
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro deletando evento: " + query3.lastError().text()); }
+  if (not query4.exec()) { return qApp->enqueueError(false, "Erro deletando evento: " + query4.lastError().text()); }
 
   return true;
 }
@@ -418,7 +425,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   ACBr acbr;
 
   if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
-    auto [xml, resposta] = *tuple;
+    const auto [xml, resposta] = *tuple;
 
     // TODO: se não autorizado deletar nota e remover vinculos? (tem que tomar cuidado para não pular o numero)
 
@@ -430,6 +437,8 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
     qApp->enqueueInformation(resposta);
   }
+
+  updateTables();
 }
 
 bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) {
@@ -440,7 +449,6 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text()); }
 
-  // REFAC: refactor this to use 'IN', add a '?' for each idVendaProduto then bind each one with 'addBindValue'
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
@@ -479,9 +487,9 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   SqlQueryModel modelProdutosAgrupado;
 
-  modelProdutosAgrupado.setQuery(
-      "SELECT idEvento, idVenda, fornecedor, produto, codComercial, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, un FROM view_calendario_produto WHERE idVenda = '" + idVenda +
-      "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
+  modelProdutosAgrupado.setQuery("SELECT idEvento, idVenda, fornecedor, ANY_VALUE(produto) AS produto, codComercial, SUM(caixas) AS caixas, SUM(kg) AS kg, SUM(quant) AS quant, ANY_VALUE(un) AS un "
+                                 "FROM view_calendario_produto WHERE idVenda = '" +
+                                 idVenda + "' AND idEvento = '" + idEvento + "' GROUP BY fornecedor, codComercial");
 
   if (modelProdutosAgrupado.lastError().isValid()) { return qApp->enqueueError("Erro buscando dados: " + modelProdutosAgrupado.lastError().text()); }
 

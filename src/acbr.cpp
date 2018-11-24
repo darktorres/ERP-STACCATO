@@ -26,23 +26,23 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
 }
 
 void ACBr::error() {
-  qDebug() << "error";
+  //  qDebug() << "error";
   qApp->enqueueError("Erro socket: " + socket.errorString());
   progressDialog->cancel();
 }
 
 void ACBr::write() {
-  qDebug() << "writen";
+  //  qDebug() << "writen";
   enviado = true;
 }
 
 void ACBr::setConnected() {
-  qDebug() << "conectado";
+  //  qDebug() << "conectado";
   conectado = true;
 }
 
 void ACBr::setDisconnected() {
-  qDebug() << "desconectado";
+  //  qDebug() << "desconectado";
   pronto = false;
   conectado = false;
   recebido = false;
@@ -50,20 +50,20 @@ void ACBr::setDisconnected() {
 }
 
 void ACBr::readSocket() {
-  auto stream = socket.readAll();
+  const auto stream = socket.readAll();
   resposta += stream;
 
-  qDebug() << "answer: " << stream;
+  //  qDebug() << "answer: " << stream;
 
   if (resposta.endsWith(welcome)) {
-    qDebug() << "pronto";
+    //    qDebug() << "pronto";
     pronto = true;
     resposta.clear();
     return;
   }
 
   if (resposta.endsWith("\u0003")) {
-    qDebug() << "recebido";
+    //    qDebug() << "recebido";
     resposta.remove("\u0003");
     recebido = true;
   }
@@ -123,9 +123,19 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   if (not resposta1) { return {}; }
 
+  qDebug() << "resposta1: " << resposta1.value();
+
   const auto resposta2 = enviarComando("NFE.ConsultarNFe(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
 
   if (not resposta2) { return {}; }
+
+  qDebug() << "resposta2: " << resposta2.value();
+
+  if (resposta2->contains("NF-e não consta na base de dados da SEFAZ")) {
+    removerNota(idNFe);
+    qApp->enqueueError("NFe não consta na SEFAZ, removendo do sistema...");
+    return {};
+  }
 
   if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e")) {
     qApp->enqueueError(resposta2.value());
@@ -136,9 +146,41 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   if (not resposta3) { return {}; }
 
+  qDebug() << "resposta3: " << resposta3.value();
+
   const QString xml = resposta3->remove("OK: ");
 
   return std::make_tuple<>(xml, resposta2.value());
+}
+
+void ACBr::removerNota(const int idNFe) {
+  if (not qApp->startTransaction()) { return; }
+
+  const bool remover = [&] {
+    QSqlQuery query2a;
+    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query2a.bindValue(":idNFeSaida", idNFe);
+
+    if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }
+
+    QSqlQuery query3a;
+    query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query3a.bindValue(":idNFeSaida", idNFe);
+
+    if (not query3a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
+
+    QSqlQuery queryNota;
+    queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+    queryNota.bindValue(":idNFe", idNFe);
+
+    if (not queryNota.exec()) { return qApp->enqueueError(false, "Erro removendo nota: " + queryNota.lastError().text()); }
+
+    return true;
+  }();
+
+  if (not remover) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
 }
 
 bool ACBr::abrirPdf(const QString &filePath) {
@@ -156,7 +198,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   if (socket.state() != QTcpSocket::ConnectedState) {
     conectado = false;
     pronto = false;
-    qDebug() << "conectando";
+    //    qDebug() << "conectando";
 
     const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
     const auto porta = UserSession::getSetting("User/portaACBr");
@@ -177,7 +219,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
 
   while (not recebido and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
 
-  qDebug() << "resposta: " << resposta;
+  //  qDebug() << "resposta: " << resposta;
 
   progressDialog->cancel();
 

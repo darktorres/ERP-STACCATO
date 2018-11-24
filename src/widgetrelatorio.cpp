@@ -40,6 +40,8 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   modelViewRelatorioVendedor.setFilter(filter);
 
+  qDebug() << "filter2: " << modelViewRelatorioVendedor.filter();
+
   if (not modelViewRelatorioVendedor.select()) { return; }
 
   ui->tableTotalVendedor->resizeColumnsToContents();
@@ -120,6 +122,19 @@ void WidgetRelatorio::calcularTotalGeral() {
   if (modelViewRelatorioLoja.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioLoja.rowCount()); }
 }
 
+void WidgetRelatorio::calcularTotalVendedor() {
+  double comissao = 0;
+  double porcentagem = 0;
+
+  for (int row = 0; row < modelViewRelatorioVendedor.rowCount(); ++row) {
+    comissao += modelViewRelatorioVendedor.data(row, "Valor Comissão").toDouble();
+    porcentagem += modelViewRelatorioVendedor.data(row, "% Comissão").toDouble();
+  }
+
+  ui->doubleSpinBoxValorComissao->setValue(comissao);
+  if (modelViewRelatorioVendedor.rowCount() > 0) { ui->doubleSpinBoxPorcentagemComissao->setValue(porcentagem / modelViewRelatorioVendedor.rowCount()); }
+}
+
 void WidgetRelatorio::setFilterRelatorio() {
   const QString date = ui->dateEditMes->date().toString("yyyy-MM");
   const QString tipoUsuario = UserSession::tipoUsuario();
@@ -137,6 +152,8 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   modelViewRelatorio.setFilter(filter);
 
+  qDebug() << "filter1: " << modelViewRelatorio.filter();
+
   if (not modelViewRelatorio.select()) { return; }
 
   ui->tableRelatorio->resizeColumnsToContents();
@@ -147,8 +164,10 @@ void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
 void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
 void WidgetRelatorio::updateTables() {
+  const auto tipo = UserSession::tipoUsuario();
+
   if (not isSet) {
-    if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
+    if (tipo == "VENDEDOR" or tipo == "VENDEDOR ESPECIAL") {
       ui->labelTotalLoja->hide();
       ui->tableTotalLoja->hide();
       ui->labelGeral->hide();
@@ -166,13 +185,25 @@ void WidgetRelatorio::updateTables() {
     modelIsSet = true;
   }
 
-  setFilterRelatorio();
-  setFilterTotaisVendedor();
-  setFilterTotaisLoja();
+  if (tipo == "VENDEDOR" or tipo == "VENDEDOR ESPECIAL") {
+    setFilterRelatorio();
+    setFilterTotaisVendedor();
 
-  calcularTotalGeral();
-
-  setResumoOrcamento();
+    calcularTotalVendedor();
+  } else {
+    QTime time;
+    time.start();
+    setFilterRelatorio();
+    qDebug() << "1: " << time.restart();
+    setFilterTotaisVendedor();
+    qDebug() << "2: " << time.restart();
+    setFilterTotaisLoja();
+    qDebug() << "3: " << time.restart();
+    calcularTotalGeral();
+    qDebug() << "4: " << time.restart();
+    setResumoOrcamento();
+    qDebug() << "5: " << time.restart();
+  }
 }
 
 void WidgetRelatorio::setResumoOrcamento() {
@@ -282,4 +313,4 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
   return true;
 }
 
-// TODO: para vendedores está mostrando a comissao total?
+// TODO: vendedor especial recebe 0,5% nas vendas como consultor

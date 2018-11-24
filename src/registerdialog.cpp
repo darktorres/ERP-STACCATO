@@ -177,6 +177,8 @@ bool RegisterDialog::save(const bool silent) {
 
   if (not qApp->endTransaction()) { return false; }
 
+  isDirty = false;
+
   if (not silent) { successMessage(); }
 
   viewRegisterById(primaryId);

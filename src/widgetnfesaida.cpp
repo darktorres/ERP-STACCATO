@@ -141,15 +141,31 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
 
+  // -------------------------------------------------------------------------
+
+  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+
+  if (not emailContabilidade) { return qApp->enqueueError("A chave 'emailContabilidade' não está configurada!"); }
+
+  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+
+  if (not emailLogistica) { return qApp->enqueueError("A chave 'emailLogistica' não está configurada!"); }
+
+  // -------------------------------------------------------------------------
+
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
+  // -------------------------------------------------------------------------
+
   const QString justificativa = QInputDialog::getText(this, "Justificativa", "Entre 15 e 200 caracteres: ");
 
   if (justificativa.size() < 15 or justificativa.size() > 200) { return qApp->enqueueError("Justificativa fora do tamanho!"); }
+
+  // -------------------------------------------------------------------------
 
   const int row = list.first().row();
 
@@ -162,7 +178,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   if (not resposta) { return; }
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
-  if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueError("Resposta: " + *resposta); }
+  if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueError("Resposta: " + resposta.value()); }
 
   if (not qApp->startTransaction()) { return; }
 
@@ -170,24 +186,17 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation(*resposta);
+  qApp->enqueueInformation(resposta.value());
 
-  if (not gravarArquivo(*resposta)) { return; }
+  if (not gravarArquivo(resposta.value())) { return; }
 
   const QString filePath = QDir::currentPath() + "/cancelamento.xml";
 
   // -------------------------------------------------------------------------
 
-  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
-
-  if (not emailContabilidade) { return qApp->enqueueError("A chave 'emailContabilidade' não está configurada!"); }
-
-  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
-
-  if (not emailLogistica) { return qApp->enqueueError("A chave 'emailLogistica' não está configurada!"); }
-
   const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
+  // TODO: usar ACBR.EnviarEmailInutilizacao?
   acbr.enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath);
 }
 

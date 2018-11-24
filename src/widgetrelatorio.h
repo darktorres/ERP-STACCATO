@@ -29,6 +29,7 @@ private:
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;
+  auto calcularTotalVendedor() -> void;
   auto dateEditMes_dateChanged(const QDate &) -> void;
   auto gerarExcel(const QString &arquivoModelo, const QString &fileName) -> bool;
   auto on_pushButtonExcel_clicked() -> void;

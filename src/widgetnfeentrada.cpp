@@ -100,10 +100,22 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   // FIXME: ao cancelar nota nao voltar o pedido de compra inteiro, apenas o item da nota cancelada
   // FIXME: não pode voltar o status para 'faturamento' pois o item pode estar em qualquer status antes do cancelamento
 
+  // NOTE: verificar como associar/buscar linhas em pedido_fornecedor com linhas de estoques sem consumo
+
   // marcar nota como cancelada
 
+  // update vp based on consumo
+  // delete consumo
+  // delete from estoque_has_consumo
+  // update pf based on estoque_has_compra
+  // delete from estoque_has_compra
+  // delete from estoque_has_nfe
+  // delete nfe
+  // delete estoque
+
   QSqlQuery query1;
-  query1.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE idNFe = :idNFe");
+  //  query1.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE idNFe = :idNFe");
+  query1.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
   query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not query1.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query1.lastError().text()); }

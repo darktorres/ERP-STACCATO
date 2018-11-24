@@ -42,7 +42,6 @@ void ItemBox::edit() {
   }
 }
 
-// REFAC: replace this with eliding? https://wiki.qt.io/Elided_Label
 void ItemBox::resetCursor() { setCursorPosition(0); }
 
 void ItemBox::setRegisterDialog(RegisterDialog *dialog) {
@@ -66,14 +65,7 @@ void ItemBox::setId(const QVariant &newId) {
   emit idChanged(newId);
 }
 
-void ItemBox::setReadOnlyItemBox(const bool isReadOnly) {
-  readOnlyItemBox = isReadOnly;
-
-  plusButton->setHidden(isReadOnly);
-  plusButton->setDisabled(isReadOnly);
-  searchButton->setHidden(isReadOnly);
-  searchButton->setDisabled(isReadOnly);
-}
+void ItemBox::setReadOnlyItemBox(const bool isReadOnly) { readOnlyItemBox = isReadOnly; }
 
 void ItemBox::clear() {
   id.clear();
@@ -114,7 +106,7 @@ void ItemBox::setIcons() {
     searchButton->hide();
   }
 
-  if (registerDialog and not readOnlyItemBox) {
+  if (registerDialog /* and not readOnlyItemBox*/) {
     x -= size.width();
     plusButton->setGeometry(QRect(QPoint(x, y), size));
     plusButton->show();
@@ -132,3 +124,5 @@ void ItemBox::setRepresentacao(const bool isRepresentacao) { searchDialog->setRe
 void ItemBox::setFilter(const QString &filter) { searchDialog->setFilter(filter); }
 
 void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFornecedorRep(fornecedor); }
+
+// REFAC: replace this with eliding? https://wiki.qt.io/Elided_Label

@@ -42,13 +42,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBoxPrevalidar">
-       <property name="text">
-        <string>Pré-validar</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="verticalSpacer_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -1068,8 +1061,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>1041</width>
+                   <height>337</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
@@ -1535,8 +1528,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>92</height>
+                   <width>134</width>
+                   <height>98</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1685,8 +1678,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>161</width>
-                   <height>151</height>
+                   <width>192</width>
+                   <height>163</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -1999,8 +1992,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>183</width>
-                   <height>151</height>
+                   <width>223</width>
+                   <height>163</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2312,8 +2305,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>498</width>
+                   <height>290</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">

@@ -199,7 +199,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
       "SELECT `vp`.`idVendaProduto` AS `idVendaProduto`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` AS `status`, "
       "`vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`idNFeFutura` AS `NFe Fut.`, `vp`.`produto` AS `produto`, e.idEstoque, e.lote, e.local, e.bloco, `vp`.`caixas` AS "
       "`caixas`, `vp`.`quant` AS `quant`, `vp`.`un` AS `un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial`  AS `formComercial`, `ehc`.`idConsumo` AS "
-      "`idConsumo` FROM `mydb`.`venda_has_produto` `vp` LEFT JOIN `mydb`.`estoque_has_consumo` `ehc` ON `vp`.`idVendaProduto` = `ehc`.`idVendaProduto` LEFT JOIN estoque e ON ehc.idEstoque = "
+      "`idConsumo` FROM `venda_has_produto` `vp` LEFT JOIN `estoque_has_consumo` `ehc` ON `vp`.`idVendaProduto` = `ehc`.`idVendaProduto` LEFT JOIN estoque e ON ehc.idEstoque = "
       "e.idEstoque WHERE vp.idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`, e.idEstoque, ehc.idConsumo");
 

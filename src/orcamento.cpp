@@ -7,6 +7,7 @@
 #include "application.h"
 #include "baixaorcamento.h"
 #include "cadastrocliente.h"
+#include "cadastroprofissional.h"
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
@@ -34,6 +35,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
+  ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 
@@ -165,7 +167,6 @@ bool Orcamento::viewRegister() {
     if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
 
     ui->itemBoxVendedor->setReadOnlyItemBox(true);
-    ui->itemBoxCliente->setReadOnlyItemBox(true);
 
     if (ui->dateTimeEdit->dateTime().addDays(data("validade").toInt()).date() < QDate::currentDate() or status != "ATIVO") {
       isReadOnly = true;

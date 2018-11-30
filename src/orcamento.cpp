@@ -519,11 +519,11 @@ bool Orcamento::savingProcedures() {
 
     if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
     if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
-    if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
     if (not setData("replicadoDe", ui->lineEditReplicaDe->text())) { return false; }
     if (not setData("representacao", ui->checkBoxRepresentacao->isChecked())) { return false; }
   }
 
+  if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
   if (not setData("data", ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.)) { return false; }

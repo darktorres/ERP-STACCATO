@@ -26,7 +26,6 @@ private:
   SqlRelationalTableModel modelCompra;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelEstoque_nfe;
   SqlRelationalTableModel modelEstoque_compra;
   SqlRelationalTableModel modelNFe;
   Ui::ImportarXML *ui;

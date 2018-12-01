@@ -121,14 +121,14 @@ void WidgetEstoque::montaFiltro() {
       "SELECT ANY_VALUE(`n`.`cnpjDest`) AS `cnpjDest`, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + e.ajuste AS contabil, e.restante AS "
       "restante, e.un AS `unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')),(e.restante / `p`.`m2cx`), (e.restante / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco,"
       " e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb,"
-      " ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote,e.local, e.bloco, e.quant, e.quant + "
+      " ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote,e.local, e.bloco, e.quant, e.quant + "
       "COALESCE(SUM(consumo.quant), 0) AS restante, SUM(IF(consumo.status = 'AJUSTE', consumo.quant, 0)) AS ajuste FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = "
       "consumo.idEstoque LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
       match + " GROUP BY e.idEstoque " + restante +
       ") e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto"
       " WHERE (vp.dataRealEnt < NOW()) AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = "
-      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT "
-      "JOIN nfe n ON ehn.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque" +
+      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON "
+      "e.idProduto = p.idProduto GROUP BY e.idEstoque" +
       filtroContabil);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
@@ -153,16 +153,16 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), "
       "((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo "
       "AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS custo, p.precoVenda * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS precoVenda "
-      "FROM (SELECT e.idProduto, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS restante, "
-      "sum(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque WHERE "
-      "e.status = 'ESTOQUE' AND e.created < '" +
+      "FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS "
+      "restante, SUM(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque "
+      "WHERE e.status = 'ESTOQUE' AND e.created < '" +
       data +
       "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM "
       "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
       data +
       "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
-      "pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN estoque_has_nfe ehn ON e.idEstoque = ehn.idEstoque LEFT JOIN nfe n ON ehn.idNFe = "
-      "n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY e.idEstoque HAVING contabil > 0");
+      "pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP "
+      "BY e.idEstoque HAVING contabil > 0");
 
   if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text()); }
 

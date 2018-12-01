@@ -174,7 +174,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                    "group_concat(DISTINCT `pf`.`idVenda` SEPARATOR ', ') AS `idVenda`, group_concat(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS "
                    "`parcela`, `cp`.`observacao` AS `observacao`, group_concat(DISTINCT `pf`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro` FROM ((((`conta_a_pagar_has_pagamento` `cp` "
                    "LEFT JOIN `pedido_fornecedor_has_produto` `pf` ON ((`cp`.`idCompra` = `pf`.`idCompra`))) LEFT JOIN `estoque_has_compra` `ehc` ON ((`ehc`.`idCompra` = "
-                   "`cp`.`idCompra`))) LEFT JOIN `estoque_has_nfe` `ehn` ON ((`ehc`.`idEstoque` = `ehn`.`idEstoque`))) LEFT JOIN `nfe` `n` ON ((`n`.`idNFe` = `ehn`.`idNFe`))) WHERE " +
+                   "`cp`.`idCompra`))) LEFT JOIN `estoque` `e` ON ((`ehc`.`idEstoque` = `e`.`idEstoque`))) LEFT JOIN `nfe` `n` ON ((`n`.`idNFe` = `e`.`idNFe`))) WHERE " +
                    filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
   }
 

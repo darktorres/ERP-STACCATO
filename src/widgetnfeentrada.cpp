@@ -109,7 +109,6 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   // delete from estoque_has_consumo
   // update pf based on estoque_has_compra
   // delete from estoque_has_compra
-  // delete from estoque_has_nfe
   // delete nfe
   // delete estoque
 
@@ -121,7 +120,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   if (not query1.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query1.lastError().text()); }
 
   QSqlQuery query2;
-  query2.prepare("UPDATE estoque SET status = 'CANCELADO' WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe)");
+  query2.prepare("UPDATE estoque SET status = 'CANCELADO' WHERE idNFe = :idNFe");
   query2.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not query2.exec()) { return qApp->enqueueError(false, "Erro marcando estoque cancelado: " + query2.lastError().text()); }
@@ -131,14 +130,14 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   // FIXME: restringir seleção para pegar apenas as linhas daquela NFe
   query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
                  "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
-                 "FROM estoque_has_nfe WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+                 "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query3.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not query3.exec()) { return qApp->enqueueError(false, "Erro voltando compra para faturamento: " + query3.lastError().text()); }
 
   // desvincular produtos associados (se houver)
   QSqlQuery query4;
-  query4.prepare("SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque_has_nfe WHERE idNFe = :idNFe)");
+  query4.prepare("SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
   query4.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not query4.exec()) { return qApp->enqueueError(false, "Erro buscando consumos: " + query4.lastError().text()); }

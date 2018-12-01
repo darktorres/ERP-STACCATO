@@ -66,6 +66,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
   ui->tableEstoque->hideColumn("idEstoque");
+  ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("recebidoPor");
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("observacao");
@@ -238,12 +239,7 @@ void ImportarXML::setupTables() {
 
   if (not modelNFe.select()) { return; }
 
-  modelEstoque_nfe.setTable("estoque_has_nfe");
-  modelEstoque_nfe.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelEstoque_nfe.setFilter("0");
-
-  if (not modelEstoque_nfe.select()) { return; }
+  // -------------------------------------------------------------------------
 
   modelEstoque_compra.setTable("estoque_has_compra");
   modelEstoque_compra.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -316,8 +312,6 @@ bool ImportarXML::importar() {
   if (not modelEstoque_compra.submitAll()) { return false; }
 
   if (not modelNFe.submitAll()) { return false; }
-
-  if (not modelEstoque_nfe.submitAll()) { return false; }
 
   if (not cadastrarProdutoEstoque(tuples)) { return false; }
 
@@ -495,25 +489,12 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
   if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoqueConsumido, quantEstoque) ? FieldColors::Green : FieldColors::Yellow))) { return false; }
   if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(rowCompra, "idProduto"))) { return false; }
 
-  const int idCompra = modelCompra.data(rowCompra, "idCompra").toInt();
-  const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
+  const int rowEstoque_compra = modelEstoque_compra.rowCount();
+  modelEstoque_compra.insertRow(rowEstoque_compra);
 
-  bool exists = false;
-
-  for (int row = 0; row < modelEstoque_compra.rowCount(); ++row) {
-    const int idEstoque_temp = modelEstoque_compra.data(row, "idEstoque").toInt();
-    const int idCompra_temp = modelEstoque_compra.data(row, "idCompra").toInt();
-
-    if (idEstoque_temp == idEstoque and idCompra_temp == idCompra) { exists = true; }
-  }
-
-  if (not exists) {
-    const int rowEstoque_compra = modelEstoque_compra.rowCount();
-    modelEstoque_compra.insertRow(rowEstoque_compra);
-
-    if (not modelEstoque_compra.setData(rowEstoque_compra, "idEstoque", idEstoque)) { return false; }
-    if (not modelEstoque_compra.setData(rowEstoque_compra, "idCompra", idCompra)) { return false; }
-  }
+  if (not modelEstoque_compra.setData(rowEstoque_compra, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
+  if (not modelEstoque_compra.setData(rowEstoque_compra, "idCompra", modelCompra.data(rowCompra, "idCompra"))) { return false; }
+  if (not modelEstoque_compra.setData(rowEstoque_compra, "idPedido", modelCompra.data(rowCompra, "idPedido"))) { return false; }
 
   return criarConsumo(rowCompra, rowEstoque);
 }
@@ -641,6 +622,7 @@ bool ImportarXML::inserirItemModel(XML &xml) {
   if (not modelEstoque.insertRow(newRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelEstoque.lastError().text()); }
 
   if (not modelEstoque.setData(newRow, "idEstoque", idEstoque.value())) { return false; }
+  if (not modelEstoque.setData(newRow, "idNFe", xml.idNFe)) { return false; }
   if (not modelEstoque.setData(newRow, "fornecedor", xml.xNome)) { return false; }
   if (not modelEstoque.setData(newRow, "local", xml.local)) { return false; }
   if (not modelEstoque.setData(newRow, "descricao", xml.descricao)) { return false; }
@@ -683,14 +665,6 @@ bool ImportarXML::inserirItemModel(XML &xml) {
   if (not modelEstoque.setData(newRow, "pCOFINS", xml.pCOFINS)) { return false; }
   if (not modelEstoque.setData(newRow, "vCOFINS", xml.vCOFINS)) { return false; }
   if (not modelEstoque.setData(newRow, "status", "EM COLETA")) { return false; }
-
-  //-------------------------------
-
-  const int rowNFe = modelEstoque_nfe.rowCount();
-  modelEstoque_nfe.insertRow(rowNFe);
-
-  if (not modelEstoque_nfe.setData(rowNFe, "idEstoque", idEstoque.value())) { return false; }
-  if (not modelEstoque_nfe.setData(rowNFe, "idNFe", xml.idNFe)) { return false; }
 
   return true;
 }

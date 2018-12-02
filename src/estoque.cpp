@@ -178,8 +178,8 @@ void Estoque::on_pushButtonExibirNfe_clicked() { exibirNota(); }
 
 void Estoque::exibirNota() {
   QSqlQuery query;
-  query.prepare("SELECT xml FROM estoque e LEFT JOIN nfe n ON e.idNFe = n.idNFe WHERE e.idEstoque = :idEstoque AND xml IS NOT NULL");
-  query.bindValue(":idEstoque", modelEstoque.data(0, "idEstoque"));
+  query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
+  query.bindValue(":idNFe", modelEstoque.data(0, "idNFe"));
 
   if (not query.exec()) { return qApp->enqueueError("Erro buscando nfe: " + query.lastError().text()); }
 

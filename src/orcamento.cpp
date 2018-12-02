@@ -518,6 +518,7 @@ bool Orcamento::savingProcedures() {
     if (not setData("idLoja", idLoja.value().toInt())) { return false; }
 
     if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
+    if (not setData("idOrcamentoBase", ui->lineEditOrcamento->text().left(11))) { return false; }
     if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
     if (not setData("replicadoDe", ui->lineEditReplicaDe->text())) { return false; }
     if (not setData("representacao", ui->checkBoxRepresentacao->isChecked())) { return false; }

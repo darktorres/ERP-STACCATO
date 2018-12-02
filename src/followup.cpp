@@ -35,9 +35,10 @@ void FollowUp::on_pushButtonSalvar_clicked() {
 
   QSqlQuery query;
   if (tipo == Tipo::Orcamento) {
-    query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idLoja, idUsuario, semaforo, observacao, dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idLoja, :idUsuario, :semaforo, "
-                  ":observacao, :dataFollowup, :dataProxFollowup)");
+    query.prepare("INSERT INTO orcamento_has_followup (idOrcamento, idOrcamentoBase, idLoja, idUsuario, semaforo, observacao, dataFollowup, dataProxFollowup) VALUES (:idOrcamento, :idOrcamentoBase, "
+                  ":idLoja, :idUsuario, :semaforo, :observacao, :dataFollowup, :dataProxFollowup)");
     query.bindValue(":idOrcamento", id);
+    query.bindValue(":idOrcamentoBase", id.left(11));
     query.bindValue(":idLoja", UserSession::idLoja());
     query.bindValue(":idUsuario", UserSession::idUsuario());
     query.bindValue(":semaforo", ui->radioButtonQuente->isChecked() ? 1 : ui->radioButtonMorno->isChecked() ? 2 : ui->radioButtonFrio->isChecked() ? 3 : 0);
@@ -47,8 +48,10 @@ void FollowUp::on_pushButtonSalvar_clicked() {
   }
 
   if (tipo == Tipo::Venda) {
-    query.prepare("INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idVenda, :idLoja, :idUsuario, :observacao, :dataFollowup)");
+    query.prepare(
+        "INSERT INTO venda_has_followup (idVenda, idVendaBase, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idVenda, :idVendaBase, :idLoja, :idUsuario, :observacao, :dataFollowup)");
     query.bindValue(":idVenda", id);
+    query.bindValue(":idVendaBase", id.left(11));
     query.bindValue(":idLoja", UserSession::idLoja());
     query.bindValue(":idUsuario", UserSession::idUsuario());
     query.bindValue(":observacao", ui->plainTextEdit->toPlainText());

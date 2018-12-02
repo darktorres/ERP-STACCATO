@@ -127,8 +127,8 @@ void WidgetEstoque::montaFiltro() {
       match + " GROUP BY e.idEstoque " + restante +
       ") e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto"
       " WHERE (vp.dataRealEnt < NOW()) AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = "
-      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON "
-      "e.idProduto = p.idProduto GROUP BY e.idEstoque" +
+      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idPedido = ehc.idPedido LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY "
+      "e.idEstoque" +
       filtroContabil);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
@@ -161,7 +161,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
       data +
       "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
-      "pedido_fornecedor_has_produto pf ON pf.idCompra = ehc.idCompra AND e.codComercial = pf.codComercial LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP "
+      "pedido_fornecedor_has_produto pf ON pf.idPedido = ehc.idPedido LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP "
       "BY e.idEstoque HAVING contabil > 0");
 
   if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text()); }

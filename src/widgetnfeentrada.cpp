@@ -129,7 +129,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   QSqlQuery query3;
   // FIXME: restringir seleção para pegar apenas as linhas daquela NFe
   query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
-                 "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idCompra IN (SELECT idCompra FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
+                 "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
                  "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query3.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -147,6 +147,7 @@ bool WidgetNfeEntrada::cancelar(const int row) {
 
   // voltar status para pendente
   QSqlQuery query6;
+  // TODO: merge query4 and query5 here
   query6.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
                  "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = "
                  ":idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");

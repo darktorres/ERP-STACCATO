@@ -282,9 +282,8 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
   // senao fazer a quebra
 
   QSqlQuery query1;
-  query1.prepare(
-      "SELECT pf.codComercial, pf.idCompra, pf.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idCompra = "
-      "ehc.idCompra AND pf.codComercial = e.codComercial WHERE e.idEstoque = :idEstoque");
+  query1.prepare("SELECT pf.codComercial, pf.idCompra, pf.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON "
+                 "pf.idPedido = ehc.idPedido WHERE e.idEstoque = :idEstoque");
   query1.bindValue(":idEstoque", idEstoque);
 
   if (not query1.exec() or not query1.first()) {

@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QtMath>
@@ -303,8 +304,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     setWindowTitle("Contas A Pagar - " + contraparte + (ordemCompra == "0" ? "" : " OC " + ordemCompra));
 
-    modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO')"
-                                             : "idCompra = '" + idCompra + "' AND (status = 'PENDENTE' OR status = 'CONFERIDO')");
+    modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO')" : "idCompra = '" + idCompra + "' AND status IN ('PENDENTE', 'CONFERIDO')");
 
     if (not modelPendentes.select()) { return; }
 
@@ -312,14 +312,14 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
       ui->tablePendentes->openPersistentEditor(row, "status");
-      ui->tablePendentes->openPersistentEditor(row, "contaDestino");
-      ui->tablePendentes->openPersistentEditor(row, "centroCusto");
+      ui->tablePendentes->openPersistentEditor(row, "contaDestino"); // FIXME: slow
+      ui->tablePendentes->openPersistentEditor(row, "centroCusto");  // FIXME: slow
     }
 
     // -------------------------------------------------------------------------
 
-    modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'"
-                                               : "idCompra = '" + idCompra + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO'");
+    modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO')"
+                                               : "idCompra = " + idCompra + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO')");
 
     if (not modelProcessados.select()) { return; }
 

@@ -504,6 +504,7 @@ bool Venda::savingProcedures() {
   if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
   if (ui->itemBoxConsultor->getId().isValid() and not setData("idUsuarioConsultor", ui->itemBoxConsultor->getId())) { return false; }
   if (not setData("idVenda", ui->lineEditVenda->text())) { return false; }
+  if (not setData("idVendaBase", ui->lineEditVenda->text().left(11))) { return false; }
   if (not setData("novoPrazoEntrega", ui->spinBoxPrazoEntrega->value())) { return false; }
   if (not setData("observacao", ui->plainTextEdit->toPlainText())) { return false; }
   if (not setData("prazoEntrega", ui->spinBoxPrazoEntrega->value())) { return false; }

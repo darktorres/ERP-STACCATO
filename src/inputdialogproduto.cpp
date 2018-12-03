@@ -60,7 +60,6 @@ void InputDialogProduto::setConnections() {
   connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
   connect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
-  connect(ui->table, &TableView::entered, this, &InputDialogProduto::on_table_entered);
 }
 
 void InputDialogProduto::unsetConnections() {
@@ -69,7 +68,6 @@ void InputDialogProduto::unsetConnections() {
   disconnect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
-  disconnect(ui->table, &TableView::entered, this, &InputDialogProduto::on_table_entered);
 }
 
 void InputDialogProduto::setupTables() {
@@ -142,8 +140,6 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   modelPedidoFornecedor.setFilter(filter);
 
   if (not modelPedidoFornecedor.select()) { return false; }
-
-  ui->table->resizeColumnsToContents();
 
   calcularTotal();
 
@@ -268,5 +264,3 @@ void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
     if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
   }
 }
-
-void InputDialogProduto::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

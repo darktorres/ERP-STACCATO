@@ -34,7 +34,6 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemoverEnd_clicked);
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroProfissional::on_radioButtonPF_toggled);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroProfissional::on_tableEndereco_clicked);
-  connect(ui->tableEndereco, &TableView::entered, this, &CadastroProfissional::on_tableEndereco_entered);
 
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -143,8 +142,6 @@ bool CadastroProfissional::viewRegister() {
   if (not modelEnd.select()) { return false; }
 
   ui->checkBoxPoupanca->setChecked(data("poupanca").toBool());
-
-  ui->tableEndereco->resizeColumnsToContents();
 
   tipoPFPJ = data("pfpj").toString();
 
@@ -300,8 +297,6 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -379,8 +374,6 @@ void CadastroProfissional::on_lineEditCNPJBancario_textEdited(const QString &tex
 }
 
 void CadastroProfissional::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
-
-void CadastroProfissional::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 void CadastroProfissional::on_lineEditProfissional_editingFinished() { ui->lineEditNomeBancario->setText(ui->lineEditProfissional->text()); }
 

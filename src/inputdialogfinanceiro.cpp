@@ -62,7 +62,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
   setConnections();
 
-  connect(ui->table, &TableView::entered, [=] { ui->table->resizeColumnsToContents(); });
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { this->montarFluxoCaixa(); });
   connect(ui->widgetPgts, &WidgetPagamentos::valueChanged, this, &InputDialogFinanceiro::on_doubleSpinBoxPgt_valueChanged);
 
@@ -345,10 +344,6 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
       if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
-
-    //----------------------------------------------
-
-    ui->tableFluxoCaixa->resizeColumnsToContents();
   }();
 
   setConnections();
@@ -408,16 +403,12 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   if (not modelPedidoFornecedor.select()) { return false; }
 
-  ui->table->resizeColumnsToContents();
-
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
 
     if (not modelFluxoCaixa.select()) { return false; }
 
     ui->checkBoxMarcarTodos->setChecked(true);
-
-    ui->tableFluxoCaixa->resizeColumnsToContents();
   }
 
   if (tipo == Tipo::Financeiro) {

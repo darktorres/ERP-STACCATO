@@ -22,8 +22,6 @@ void WidgetCompraResumo::updateTables() {
   }
 
   if (not modelResumo.select()) { return; }
-
-  ui->tableResumo->resizeColumnsToContents();
 }
 
 void WidgetCompraResumo::resetTables() { modelIsSet = false; }

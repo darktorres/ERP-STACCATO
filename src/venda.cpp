@@ -81,8 +81,6 @@ void Venda::setConnections() {
   connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &Venda::on_pushButtonLimparPag_clicked);
   connect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &Venda::on_pushButtonPgtLoja_clicked);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
-  connect(ui->tableFluxoCaixa, &TableView::entered, this, &Venda::on_tableFluxoCaixa_entered);
-  connect(ui->tableFluxoCaixa2, &TableView::entered, this, &Venda::on_tableFluxoCaixa2_entered);
 }
 
 void Venda::unsetConnections() {
@@ -109,14 +107,11 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &Venda::on_pushButtonLimparPag_clicked);
   disconnect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &Venda::on_pushButtonPgtLoja_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
-  disconnect(ui->tableFluxoCaixa, &TableView::entered, this, &Venda::on_tableFluxoCaixa_entered);
-  disconnect(ui->tableFluxoCaixa2, &TableView::entered, this, &Venda::on_tableFluxoCaixa2_entered);
 }
 
 void Venda::setupTables() {
   modelItem.setTable("venda_has_produto");
   modelItem.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  modelItem.setHeaderData("selecionado", "");
   modelItem.setHeaderData("fornecedor", "Fornecedor");
   modelItem.setHeaderData("produto", "Produto");
   modelItem.setHeaderData("obs", "Obs.");
@@ -175,7 +170,6 @@ void Venda::setupTables() {
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
@@ -341,7 +335,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   resetarPagamentos();
 
   ui->widgetPgts->setMinimumWidth(550);
-  ui->tableProdutos->resizeColumnsToContents();
 
   if (ui->itemBoxConsultor->getId().isValid()) {
     ui->labelConsultor->show();
@@ -599,10 +592,6 @@ bool Venda::viewRegister() {
       ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
     }
 
-    ui->tableProdutos->resizeColumnsToContents();
-    ui->tableFluxoCaixa->resizeColumnsToContents();
-    ui->tableFluxoCaixa2->resizeColumnsToContents();
-
     ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     ui->spinBoxPrazoEntrega->setReadOnly(true);
@@ -791,9 +780,6 @@ void Venda::montarFluxoCaixa() {
   }
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) { ui->tableFluxoCaixa->openPersistentEditor(row, "representacao"); }
-
-  ui->tableFluxoCaixa->resizeColumnsToContents();
-  ui->tableFluxoCaixa2->resizeColumnsToContents();
 }
 
 void Venda::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
@@ -1145,9 +1131,6 @@ void Venda::on_pushButtonDevolucao_clicked() {
   devolucao->show();
 }
 
-void Venda::on_tableFluxoCaixa_entered(const QModelIndex &) { ui->tableFluxoCaixa->resizeColumnsToContents(); }
-
-void Venda::on_tableFluxoCaixa2_entered(const QModelIndex &) { ui->tableFluxoCaixa2->resizeColumnsToContents(); }
 
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { resetarPagamentos(); }
 

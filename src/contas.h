@@ -26,8 +26,6 @@ private:
   Ui::Contas *ui;
   // methods
   auto on_pushButtonSalvar_clicked() -> void;
-  auto on_tablePendentes_entered(const QModelIndex &) -> void;
-  auto on_tableProcessados_entered(const QModelIndex &) -> void;
   auto preencher(const QModelIndex &index) -> void;
   auto setupTables() -> void;
   auto validarData(const QModelIndex &index) -> void;

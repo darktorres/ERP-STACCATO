@@ -32,7 +32,6 @@ private:
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonMarcarFaturado_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setupTables() -> void;
   auto setConnections() -> void;
 };

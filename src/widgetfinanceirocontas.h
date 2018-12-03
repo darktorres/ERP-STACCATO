@@ -41,11 +41,8 @@ private:
   auto on_pushButtonInserirTransferencia_clicked() -> void;
   auto on_pushButtonReverterPagamento_clicked() -> void;
   auto on_tableVencer_doubleClicked(const QModelIndex &index) -> void;
-  auto on_tableVencer_entered(const QModelIndex &) -> void;
   auto on_tableVencidos_doubleClicked(const QModelIndex &index) -> void;
-  auto on_tableVencidos_entered(const QModelIndex &) -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

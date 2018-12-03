@@ -35,7 +35,6 @@ void WidgetLogisticaAgendarColeta::setConnections() {
   connect(ui->pushButtonMontarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked);
-  connect(ui->tableEstoque, &TableView::entered, this, &WidgetLogisticaAgendarColeta::on_tableEstoque_entered);
 }
 
 void WidgetLogisticaAgendarColeta::setupTables() {
@@ -174,11 +173,7 @@ void WidgetLogisticaAgendarColeta::updateTables() {
 
   if (not modelEstoque.select()) { return; }
 
-  ui->tableEstoque->resizeColumnsToContents();
-
   if (not modelTranspAgend.select()) { return; }
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &fornecedor) {
@@ -191,8 +186,6 @@ void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &f
   if (not modelEstoque.select()) { return; }
 
   ui->tableEstoque->sortByColumn("prazoEntrega");
-
-  ui->tableEstoque->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::resetTables() { modelIsSet = false; }
@@ -303,8 +296,6 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
   return modelTranspAtual.submitAll();
 }
 
-void WidgetLogisticaAgendarColeta::on_tableEstoque_entered(const QModelIndex &) { ui->tableEstoque->resizeColumnsToContents(); }
-
 void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &) {
   QSqlQuery query;
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
@@ -315,8 +306,6 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
   if (not modelTranspAgend.select()) { return; }
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 }
@@ -344,8 +333,6 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
     if (not modelTranspAtual.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) { return false; }
     if (not modelTranspAtual.setData(row, "status", "EM COLETA")) { return false; }
   }
-
-  ui->tableTranspAtual->resizeColumnsToContents();
 
   return true;
 }
@@ -403,8 +390,6 @@ void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
 
   if (not modelTranspAgend.select()) { return; }
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {

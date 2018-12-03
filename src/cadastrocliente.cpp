@@ -60,7 +60,6 @@ void CadastroCliente::setConnections() {
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemoverEnd_clicked);
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroCliente::on_radioButtonPF_toggled);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroCliente::on_tableEndereco_clicked);
-  connect(ui->tableEndereco, &TableView::entered, this, &CadastroCliente::on_tableEndereco_entered);
 }
 
 void CadastroCliente::setupUi() {
@@ -203,8 +202,6 @@ bool CadastroCliente::viewRegister() {
 
   ui->checkBoxInscEstIsento->setChecked(data("inscEstadual").toString() == "ISENTO");
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   return true;
 }
 
@@ -285,8 +282,6 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
-
-  ui->tableEndereco->resizeColumnsToContents();
 
   isDirty = true;
 
@@ -442,8 +437,6 @@ void CadastroCliente::successMessage() {
   qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!");
   emit registerUpdated(primaryId);
 }
-
-void CadastroCliente::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 void CadastroCliente::on_checkBoxInscEstIsento_toggled(bool checked) {
   if (checked) {

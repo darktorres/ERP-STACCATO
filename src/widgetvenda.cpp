@@ -93,8 +93,6 @@ void WidgetVenda::montaFiltro() {
   modelViewVenda.setFilter(filtros.join(" AND "));
 
   if (not modelViewVenda.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
@@ -177,7 +175,6 @@ void WidgetVenda::setConnections() {
   connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
 }
 
 void WidgetVenda::unsetConnections() {
@@ -211,7 +208,6 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
   disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
-  disconnect(ui->table, &TableView::entered, this, &WidgetVenda::on_table_entered);
 }
 
 void WidgetVenda::updateTables() {
@@ -229,8 +225,6 @@ void WidgetVenda::updateTables() {
   }
 
   if (not modelViewVenda.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetVenda::on_table_activated(const QModelIndex index) {
@@ -239,8 +233,6 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   if (financeiro) { vendas->setFinanceiro(); }
   vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
 }
-
-void WidgetVenda::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
   if (UserSession::tipoUsuario() == "VENDEDOR") { checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide(); }

@@ -210,8 +210,6 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 
   if (not modelVeiculo.select()) { return false; }
 
-  ui->tableLogistica->resizeColumnsToContents();
-
   ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
   return true;
@@ -228,8 +226,6 @@ bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebi
   modelEstoque.setFilter(filter);
 
   if (not modelEstoque.select()) { return false; }
-
-  ui->tableLogistica->resizeColumnsToContents();
 
   setWindowTitle("Estoque: " + ids.join(", "));
 

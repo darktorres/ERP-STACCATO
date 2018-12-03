@@ -22,7 +22,6 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   connect(ui->radioButtonProdAtivos, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
   connect(ui->radioButtonProdDesc, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdDesc_toggled);
   connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
-  connect(ui->table, &TableView::entered, this, &SearchDialog::on_table_entered);
 
   setWindowTitle(title);
   setWindowModality(Qt::NonModal);
@@ -106,8 +105,6 @@ void SearchDialog::show() {
   ui->lineEditEstoque_2->setText("Staccato OFF");
   ui->lineEditEstoque->setText("Estoque");
   ui->lineEditPromocao->setText("Promoção");
-
-  ui->table->resizeColumnsToContents();
 }
 
 void SearchDialog::showMaximized() {
@@ -116,7 +113,6 @@ void SearchDialog::showMaximized() {
   ui->lineEditBusca->setFocus();
 
   QDialog::showMaximized();
-  ui->table->resizeColumnsToContents();
 }
 
 void SearchDialog::on_table_doubleClicked(const QModelIndex &) { on_pushButtonSelecionar_clicked(); }
@@ -427,8 +423,6 @@ SearchDialog *SearchDialog::profissional(QWidget *parent) {
 
   return sdProfissional;
 }
-
-void SearchDialog::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void SearchDialog::setFornecedorRep(const QString &value) { fornecedorRep = value.isEmpty() ? "" : " AND fornecedor = '" + value + "'"; }
 

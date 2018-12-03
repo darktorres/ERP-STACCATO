@@ -32,9 +32,7 @@ private:
   auto on_groupBoxCaixa1_toggled(const bool checked) -> void;
   auto on_groupBoxCaixa2_toggled(const bool checked) -> void;
   auto on_tableCaixa2_activated(const QModelIndex &index) -> void;
-  auto on_tableCaixa2_entered(const QModelIndex &) -> void;
   auto on_tableCaixa_activated(const QModelIndex &index) -> void;
-  auto on_tableCaixa_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
 };
 

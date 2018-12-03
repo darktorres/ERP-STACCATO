@@ -35,7 +35,6 @@ private:
   auto on_pushButtonExportar_clicked() -> void;
   auto on_pushButtonRelatorio_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto on_table_entered(const QModelIndex) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

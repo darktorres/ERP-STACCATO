@@ -13,7 +13,6 @@ WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 void WidgetFinanceiroCompra::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetFinanceiroCompra::on_table_entered);
 }
 
 void WidgetFinanceiroCompra::updateTables() {
@@ -47,8 +46,6 @@ void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
 
   if (input.exec() != InputDialogFinanceiro::Accepted) { return; }
 }
-
-void WidgetFinanceiroCompra::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 

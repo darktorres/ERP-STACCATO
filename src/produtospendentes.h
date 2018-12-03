@@ -34,7 +34,6 @@ private:
   auto insere(const QDateTime &dataPrevista) -> bool;
   auto on_pushButtonComprar_clicked() -> void;
   auto on_pushButtonConsumirEstoque_clicked() -> void;
-  auto on_tableProdutos_entered(const QModelIndex &) -> void;
   auto recalcularQuantidade() -> void;
   auto recarregarTabelas() -> void;
   auto setupTables() -> void;

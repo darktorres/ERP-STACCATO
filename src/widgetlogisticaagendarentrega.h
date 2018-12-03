@@ -42,11 +42,8 @@ private:
   auto on_pushButtonGerarNFeFutura_clicked() -> void;
   auto on_pushButtonReagendarPedido_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
-  auto on_tableProdutos_entered(const QModelIndex &) -> void;
-  auto on_tableTransp2_entered(const QModelIndex &) -> void;
   auto on_tableVendas_clicked(const QModelIndex &index) -> void;
   auto on_tableVendas_doubleClicked(const QModelIndex &index) -> void;
-  auto on_tableVendas_entered(const QModelIndex &) -> void;
   auto processRows() -> bool;
   auto quebrarConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto) -> bool;
   auto quebrarProduto(const int row, const int quantAgendar, const int quantTotal) -> bool;

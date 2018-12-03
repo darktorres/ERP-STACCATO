@@ -60,11 +60,8 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->radioButtonRecebido, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
   connect(ui->radioButtonTodos, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetFinanceiroContas::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetFinanceiroContas::on_table_entered);
   connect(ui->tableVencer, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencer_doubleClicked);
-  connect(ui->tableVencer, &TableView::entered, this, &WidgetFinanceiroContas::on_tableVencer_entered);
   connect(ui->tableVencidos, &TableView::doubleClicked, this, &WidgetFinanceiroContas::on_tableVencidos_doubleClicked);
-  connect(ui->tableVencidos, &TableView::entered, this, &WidgetFinanceiroContas::on_tableVencidos_entered);
 }
 
 void WidgetFinanceiroContas::updateTables() {
@@ -89,28 +86,20 @@ void WidgetFinanceiroContas::updateTables() {
 
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela resumo: " + model.lastError().text()); }
 
-  ui->table->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelVencidos.setQuery(modelVencidos.query().executedQuery());
 
   if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text()); }
 
-  ui->tableVencidos->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelVencer.setQuery(modelVencer.query().executedQuery());
 
   if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text()); }
-
-  ui->tableVencer->resizeColumnsToContents();
 }
 
 void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
-
-void WidgetFinanceiroContas::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   auto *contas = new Contas(tipo == Tipo::Receber ? Contas::Tipo::Receber : Contas::Tipo::Pagar, this);
@@ -256,8 +245,6 @@ void WidgetFinanceiroContas::montaFiltro() {
   ui->table->hideColumn("idLoja");
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
@@ -290,10 +277,6 @@ void WidgetFinanceiroContas::setTipo(const Tipo &value) {
 void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
   Q_FOREACH (const auto &child, ui->groupBoxData->findChildren<QDateEdit *>()) { child->setEnabled(enabled); }
 }
-
-void WidgetFinanceiroContas::on_tableVencidos_entered(const QModelIndex &) { ui->tableVencidos->resizeColumnsToContents(); }
-
-void WidgetFinanceiroContas::on_tableVencer_entered(const QModelIndex &) { ui->tableVencer->resizeColumnsToContents(); }
 
 void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
   ui->dateEditDe->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());

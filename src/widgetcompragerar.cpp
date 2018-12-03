@@ -101,7 +101,6 @@ void WidgetCompraGerar::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
-  connect(ui->tableProdutos, &TableView::entered, this, &WidgetCompraGerar::on_tableProdutos_entered);
   connect(ui->tableResumo, &TableView::activated, this, &WidgetCompraGerar::on_tableResumo_activated);
 }
 
@@ -122,11 +121,7 @@ void WidgetCompraGerar::updateTables() {
 
   if (not selection.isEmpty()) { ui->tableResumo->selectRow(selection.first().row()); }
 
-  ui->tableResumo->resizeColumnsToContents();
-
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
@@ -459,11 +454,7 @@ void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
   modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
 
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
-
-void WidgetCompraGerar::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
   QSqlQuery query;

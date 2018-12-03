@@ -116,8 +116,6 @@ void Devolucao::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   modelDevolvidos.setTable("venda_has_produto");
   modelDevolvidos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
@@ -216,8 +214,6 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("representacao"), new CheckBoxDelegate(this, true));
 
   for (int row = 0; row < modelPagamentos.rowCount(); ++row) { ui->tablePagamentos->openPersistentEditor(row, "representacao"); }
-
-  ui->tablePagamentos->resizeColumnsToContents();
 
   modelVenda.setTable("venda");
   modelVenda.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
@@ -513,10 +509,6 @@ bool Devolucao::devolverItem(const int currentRow) {
   if (not salvarCredito()) { return false; }
   if (not inserirItens(currentRow)) { return false; }
   if (not atualizarDevolucao()) { return false; }
-
-  ui->tableProdutos->resizeColumnsToContents();
-  ui->tableDevolvidos->resizeColumnsToContents();
-  ui->tablePagamentos->resizeColumnsToContents();
 
   return true;
 }

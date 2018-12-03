@@ -16,7 +16,6 @@ WidgetLogisticaRepresentacao::~WidgetLogisticaRepresentacao() { delete ui; }
 void WidgetLogisticaRepresentacao::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged);
   connect(ui->pushButtonMarcarEntregue, &QPushButton::clicked, this, &WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetLogisticaRepresentacao::on_table_entered);
 }
 
 void WidgetLogisticaRepresentacao::updateTables() {
@@ -31,8 +30,6 @@ void WidgetLogisticaRepresentacao::updateTables() {
   }
 
   if (not modelViewLogisticaRepresentacao.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &fornecedor) {
@@ -43,8 +40,6 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
   if (not modelViewLogisticaRepresentacao.select()) { return; }
 
   ui->table->sortByColumn("prazoEntrega", Qt::AscendingOrder);
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRepresentacao::resetTables() { modelIsSet = false; }
@@ -116,8 +111,6 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 
   return true;
 }
-
-void WidgetLogisticaRepresentacao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) {
   modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");

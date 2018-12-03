@@ -19,9 +19,6 @@ ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(par
 
   connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &ImportaProdutos::on_checkBoxRepresentacao_toggled);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ImportaProdutos::on_pushButtonSalvar_clicked);
-  connect(ui->tableErro, &TableView::entered, this, &ImportaProdutos::on_tableErro_entered);
-  connect(ui->tableProdutos, &TableView::entered, this, &ImportaProdutos::on_tableProdutos_entered);
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &ImportaProdutos::on_tabWidget_currentChanged);
 
   setWindowFlags(Qt::Window);
 
@@ -161,7 +158,6 @@ bool ImportaProdutos::importar() {
   if (canceled) { return false; }
 
   show();
-  ui->tableProdutos->resizeColumnsToContents();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
@@ -744,15 +740,6 @@ bool ImportaProdutos::verificaTabela(const QSqlRecord &record) {
   }
 
   return true;
-}
-
-void ImportaProdutos::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
-
-void ImportaProdutos::on_tableErro_entered(const QModelIndex &) { ui->tableErro->resizeColumnsToContents(); }
-
-void ImportaProdutos::on_tabWidget_currentChanged(const int index) {
-  if (index == 0) { ui->tableProdutos->resizeColumnsToContents(); }
-  if (index == 1) { ui->tableErro->resizeColumnsToContents(); }
 }
 
 void ImportaProdutos::closeEvent(QCloseEvent *event) {

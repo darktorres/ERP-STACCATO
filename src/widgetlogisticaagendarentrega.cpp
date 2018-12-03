@@ -140,11 +140,8 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   connect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
   connect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
-  connect(ui->tableProdutos, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableProdutos_entered);
-  connect(ui->tableTranspAgend, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableTransp2_entered);
   connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked);
   connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked);
-  connect(ui->tableVendas, &TableView::entered, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_entered);
 }
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
@@ -171,19 +168,13 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
 
   ui->tableVendas->sortByColumn("prazoEntrega");
 
-  ui->tableVendas->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelViewProdutos.setQuery(modelViewProdutos.query().executedQuery());
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   if (not modelTranspAgend.select()) { return; }
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -191,8 +182,6 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
 }
 
 void WidgetLogisticaAgendarEntrega::resetTables() { modelIsSet = false; }
-
-void WidgetLogisticaAgendarEntrega::on_tableVendas_entered(const QModelIndex &) { ui->tableVendas->resizeColumnsToContents(); }
 
 void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &index) {
   modelViewProdutos.setQuery(
@@ -232,8 +221,6 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
   ui->tableProdutos->hideColumn("dataRealEnt");
   ui->tableProdutos->hideColumn("idConsumo");
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarEntrega::calcularPeso);
 
   ui->lineEditAviso->setText(modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO" ? "Financeiro não liberou!" : "");
@@ -266,12 +253,9 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
   if (not modelVendas.select()) { return; }
 
   ui->tableVendas->sortByColumn("prazoEntrega");
-  ui->tableVendas->resizeColumnsToContents();
 
   modelViewProdutos.setQuery("");
 }
-
-void WidgetLogisticaAgendarEntrega::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
   // TODO: não deixar agendar carga com mistura de produtos com e sem nfe futura
@@ -372,8 +356,6 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
     if (not modelTranspAtual.setData(row, "status", "ENTREGA AGEND.")) { return false; }
   }
 
-  ui->tableTranspAtual->resizeColumnsToContents();
-
   return true;
 }
 
@@ -424,14 +406,10 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString 
 
   if (not modelTranspAgend.select()) { return; }
 
-  ui->tableTranspAgend->resizeColumnsToContents();
-
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 
   calcularDisponivel();
 }
-
-void WidgetLogisticaAgendarEntrega::on_tableTransp2_entered(const QModelIndex &) { ui->tableTranspAgend->resizeColumnsToContents(); }
 
 void WidgetLogisticaAgendarEntrega::calcularDisponivel() {
   double peso = 0;
@@ -455,8 +433,6 @@ void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &dat
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
 
   if (not modelTranspAgend.select()) { return; }
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 
   calcularDisponivel();
 }
@@ -533,8 +509,6 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
   if (not modelTranspAtual.setData(newRow, "kg", kg * quantAgendar)) { return false; }
   if (not modelTranspAtual.setData(newRow, "quant", quantAgendar * unCaixa)) { return false; }
   if (not modelTranspAtual.setData(newRow, "status", "ENTREGA AGEND.")) { return false; }
-
-  ui->tableTranspAtual->resizeColumnsToContents();
 
   return true;
 }

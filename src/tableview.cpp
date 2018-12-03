@@ -1,16 +1,37 @@
 #include <QAbstractProxyModel>
 #include <QHeaderView>
+#include <QMenu>
 #include <QSqlQueryModel>
 #include <QSqlRecord>
 
 #include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
+  setContextMenuPolicy(Qt::CustomContextMenu);
+
+  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
+
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);
 
   verticalHeader()->setDefaultSectionSize(20);
+
+  setMouseTracking(true);
 }
+
+void TableView::showContextMenu(const QPoint &pos) {
+  QMenu contextMenu;
+
+  QAction action("Autodimensionar", this);
+  action.setCheckable(true);
+  action.setChecked(autoResize);
+  connect(&action, &QAction::triggered, this, &TableView::toggleAutoResize);
+  contextMenu.addAction(&action);
+
+  contextMenu.exec(mapToGlobal(pos));
+}
+
+void TableView::toggleAutoResize() { autoResize = not autoResize; }
 
 void TableView::hideColumn(const QString &column) {
   if (const auto *model = qobject_cast<QAbstractProxyModel *>(QTableView::model())) {
@@ -91,6 +112,11 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   hideColumn("created");
   hideColumn("lastUpdated");
+}
+
+void TableView::enterEvent(QEvent *event) {
+  if (autoResize) { resizeColumnsToContents(); }
+  QTableView::enterEvent(event);
 }
 
 // TODO: 4program copy - http://stackoverflow.com/questions/3135737/copying-part-of-qtableview

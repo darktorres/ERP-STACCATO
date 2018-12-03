@@ -42,9 +42,7 @@ private:
   auto dividirCompra(const int idVendaProduto, const double quant) -> std::optional<int>;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
-  auto on_tableConsumo_entered(const QModelIndex) -> void;
   auto on_tableEstoque_activated(const QModelIndex &) -> void;
-  auto on_tableEstoque_entered(const QModelIndex) -> void;
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
 };

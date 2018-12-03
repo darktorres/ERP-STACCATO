@@ -57,7 +57,6 @@ private:
   auto on_radioButtonProdAtivos_toggled(const bool) -> void;
   auto on_radioButtonProdDesc_toggled(const bool) -> void;
   auto on_table_doubleClicked(const QModelIndex &) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto sendUpdateMessage() -> void;
   auto setHeaderData(const QString &column, const QString &value) -> void;
   auto setPrimaryKey(const QString &value) -> void;

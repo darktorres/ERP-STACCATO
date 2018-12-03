@@ -65,7 +65,6 @@ private:
   auto on_pushButtonRemover_clicked() -> void;
   auto on_tableConta_clicked(const QModelIndex &index) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
-  auto on_tableEndereco_entered(const QModelIndex &) -> void;
   auto on_tablePagamentos_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;

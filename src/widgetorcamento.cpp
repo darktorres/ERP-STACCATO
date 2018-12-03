@@ -83,7 +83,6 @@ void WidgetOrcamento::setConnections() {
   connect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   connect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetOrcamento::on_table_entered);
 }
 
 void WidgetOrcamento::unsetConnections() {
@@ -105,7 +104,6 @@ void WidgetOrcamento::unsetConnections() {
   disconnect(ui->radioButtonProprios, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->radioButtonTodos, &QAbstractButton::toggled, this, &WidgetOrcamento::montaFiltro);
   disconnect(ui->table, &TableView::activated, this, &WidgetOrcamento::on_table_activated);
-  disconnect(ui->table, &TableView::entered, this, &WidgetOrcamento::on_table_entered);
 }
 
 void WidgetOrcamento::updateTables() {
@@ -123,8 +121,6 @@ void WidgetOrcamento::updateTables() {
   }
 
   if (not modelViewOrcamento.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetOrcamento::resetTables() { modelIsSet = false; }
@@ -200,11 +196,7 @@ void WidgetOrcamento::montaFiltro() {
   modelViewOrcamento.setFilter(filtros.join(" AND "));
 
   if (not modelViewOrcamento.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
-
-void WidgetOrcamento::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

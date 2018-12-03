@@ -93,10 +93,7 @@ void WidgetCompraOC::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraOC::on_lineEditBusca_textChanged);
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDanfe_clicked);
   connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked);
-  connect(ui->tableNFe, &TableView::entered, this, &WidgetCompraOC::on_tableNFe_entered);
   connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraOC::on_tablePedido_clicked);
-  connect(ui->tablePedido, &TableView::entered, this, &WidgetCompraOC::on_tablePedido_entered);
-  connect(ui->tableProduto, &TableView::entered, this, &WidgetCompraOC::on_tableProduto_entered);
 }
 
 void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
@@ -106,13 +103,9 @@ void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
 
   if (not modelProduto.select()) { return; }
 
-  ui->tableProduto->resizeColumnsToContents();
-
   modelNFe.setFilter("ordemCompra = " + oc);
 
   if (not modelNFe.select()) { return; }
-
-  ui->tableNFe->resizeColumnsToContents();
 }
 
 void WidgetCompraOC::on_pushButtonDanfe_clicked() {
@@ -122,12 +115,6 @@ void WidgetCompraOC::on_pushButtonDanfe_clicked() {
 
   if (ACBr acbr; not acbr.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
 }
-
-void WidgetCompraOC::on_tablePedido_entered(const QModelIndex &) { ui->tablePedido->resizeColumnsToContents(); }
-
-void WidgetCompraOC::on_tableProduto_entered(const QModelIndex &) { ui->tableProduto->resizeColumnsToContents(); }
-
-void WidgetCompraOC::on_tableNFe_entered(const QModelIndex &) { ui->tableNFe->resizeColumnsToContents(); }
 
 void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this should update produto_estoque.quant
   const auto list = ui->tableProduto->selectionModel()->selectedRows();

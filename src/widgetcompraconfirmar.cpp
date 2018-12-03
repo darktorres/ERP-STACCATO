@@ -40,7 +40,6 @@ void WidgetCompraConfirmar::setupTables() {
 void WidgetCompraConfirmar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraConfirmar::on_table_entered);
 }
 
 void WidgetCompraConfirmar::updateTables() {
@@ -56,11 +55,7 @@ void WidgetCompraConfirmar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
-  ui->tableResumo->resizeColumnsToContents();
-
   if (not modelViewCompras.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraConfirmar::resetTables() { modelIsSet = false; }
@@ -130,8 +125,6 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 
   return true;
 }
-
-void WidgetCompraConfirmar::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

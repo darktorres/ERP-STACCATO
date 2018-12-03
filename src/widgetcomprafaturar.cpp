@@ -45,7 +45,6 @@ void WidgetCompraFaturar::setConnections() {
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraFaturar::on_table_entered);
 }
 
 void WidgetCompraFaturar::updateTables() {
@@ -62,11 +61,7 @@ void WidgetCompraFaturar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
-  ui->tableResumo->resizeColumnsToContents();
-
   if (not modelViewFaturamento.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
@@ -139,16 +134,12 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   qApp->enqueueInformation("Confirmado faturamento!");
 }
 
-void WidgetCompraFaturar::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
-
 void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();
 
   modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE"));
 
   if (not modelViewFaturamento.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {

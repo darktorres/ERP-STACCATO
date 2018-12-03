@@ -66,7 +66,6 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
   connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraPendentes::on_table_entered);
 }
 
 void WidgetCompraPendentes::updateTables() {
@@ -88,8 +87,6 @@ void WidgetCompraPendentes::updateTables() {
   }
 
   if (not modelViewVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
@@ -117,7 +114,6 @@ void WidgetCompraPendentes::setupTables() {
   ui->table->sortByColumn("idVenda");
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
@@ -180,8 +176,6 @@ void WidgetCompraPendentes::montaFiltro() {
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
 
   if (not modelViewVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
@@ -235,8 +229,6 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
 void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) { ui->doubleSpinBoxQuantAvulso->setValue(value * ui->doubleSpinBoxQuantAvulso->singleStep()); }
 
 void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged(const double value) { ui->doubleSpinBoxQuantAvulsoCaixas->setValue(value / ui->doubleSpinBoxQuantAvulso->singleStep()); }
-
-void WidgetCompraPendentes::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

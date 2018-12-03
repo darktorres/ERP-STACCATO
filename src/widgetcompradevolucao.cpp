@@ -18,7 +18,6 @@ void WidgetCompraDevolucao::setConnections() {
   connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked);
   connect(ui->radioButtonFiltroPendente, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled);
   connect(ui->radioButtonFiltroDevolvido, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_toggled);
-  connect(ui->table, &TableView::entered, this, &WidgetCompraDevolucao::on_table_entered);
 }
 
 void WidgetCompraDevolucao::updateTables() {
@@ -34,8 +33,6 @@ void WidgetCompraDevolucao::updateTables() {
   }
 
   if (not modelVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraDevolucao::setupTables() {
@@ -92,7 +89,6 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("dataRealEnt");
 
   ui->table->sortByColumn("idVenda");
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
@@ -204,8 +200,6 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool) { montaFiltro(); }
 
 void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_toggled(const bool) { montaFiltro(); }
-
-void WidgetCompraDevolucao::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetCompraDevolucao::montaFiltro() {
   const bool isPendente = ui->radioButtonFiltroPendente->isChecked();

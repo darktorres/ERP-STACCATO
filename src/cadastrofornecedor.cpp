@@ -43,7 +43,6 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked);
   connect(ui->pushButtonValidade, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonValidade_clicked);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroFornecedor::on_tableEndereco_clicked);
-  connect(ui->tableEndereco, &TableView::entered, this, &CadastroFornecedor::on_tableEndereco_entered);
 }
 
 CadastroFornecedor::~CadastroFornecedor() { delete ui; }
@@ -242,8 +241,6 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -278,8 +275,6 @@ bool CadastroFornecedor::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   ui->pushButtonValidade->show();
 
   ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt());
@@ -302,8 +297,6 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
 }
 
 void CadastroFornecedor::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!"); }
-
-void CadastroFornecedor::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = model.data(mapper.currentIndex(), "razaoSocial").toString();

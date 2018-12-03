@@ -69,9 +69,6 @@ private:
   auto mostraApenasEstesFornecedores() -> void;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto on_tabWidget_currentChanged(const int index) -> void;
-  auto on_tableErro_entered(const QModelIndex &) -> void;
-  auto on_tableProdutos_entered(const QModelIndex &) -> void;
   auto pintarCamposForaDoPadrao(const int row) -> bool;
   auto readFile() -> bool;
   auto readValidade() -> bool;

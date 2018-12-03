@@ -36,7 +36,6 @@ void WidgetNfeSaida::setConnections() {
   connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetNfeSaida::on_table_entered);
 }
 
 void WidgetNfeSaida::unsetConnections() {
@@ -52,7 +51,6 @@ void WidgetNfeSaida::unsetConnections() {
   disconnect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonExportar_clicked);
   disconnect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetNfeSaida::on_pushButtonRelatorio_clicked);
   disconnect(ui->table, &TableView::activated, this, &WidgetNfeSaida::on_table_activated);
-  disconnect(ui->table, &TableView::entered, this, &WidgetNfeSaida::on_table_entered);
 }
 
 void WidgetNfeSaida::updateTables() {
@@ -69,8 +67,6 @@ void WidgetNfeSaida::updateTables() {
   }
 
   if (not modelViewNFeSaida.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
@@ -130,11 +126,7 @@ void WidgetNfeSaida::montaFiltro() {
   modelViewNFeSaida.setFilter(filtros.join(" AND "));
 
   if (not modelViewNFeSaida.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
-
-void WidgetNfeSaida::on_table_entered(const QModelIndex) { ui->table->resizeColumnsToContents(); }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();

@@ -58,7 +58,6 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
   connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverPagamento_clicked);
   connect(ui->tableConta, &TableView::clicked, this, &CadastroLoja::on_tableConta_clicked);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroLoja::on_tableEndereco_clicked);
-  connect(ui->tableEndereco, &TableView::entered, this, &CadastroLoja::on_tableEndereco_entered);
   connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroLoja::on_tablePagamentos_clicked);
 }
 
@@ -287,8 +286,6 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
@@ -315,8 +312,6 @@ bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
-
-  ui->tableEndereco->resizeColumnsToContents();
 
   isDirty = true;
 
@@ -367,15 +362,11 @@ bool CadastroLoja::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelConta.setFilter("idLoja = " + primaryId + " AND desativado = FALSE");
 
   if (not modelConta.select()) { return false; }
-
-  ui->tableConta->resizeColumnsToContents();
 
   //  modelPagamentos.setFilter("idLoja = " + primaryId);
 
@@ -397,8 +388,6 @@ bool CadastroLoja::viewRegister() {
 }
 
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
-
-void CadastroLoja::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroLoja::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
@@ -473,8 +462,6 @@ bool CadastroLoja::cadastrarConta(const bool isUpdate) {
   if (not modelConta.setData(rowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
   if (not modelConta.setData(rowConta, "conta", ui->lineEditConta->text())) { return false; }
 
-  ui->tableConta->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -525,8 +512,6 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
   modelConta.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelConta.select()) { return; }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 bool CadastroLoja::adicionarPagamento() {

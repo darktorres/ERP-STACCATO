@@ -14,7 +14,6 @@ PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoE
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &PrecoEstoque::on_lineEditBusca_textChanged);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonCancelar_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &PrecoEstoque::on_pushButtonSalvar_clicked);
-  connect(ui->table, &TableView::entered, this, &PrecoEstoque::on_table_entered);
 
   setWindowFlags(Qt::Window);
 
@@ -101,5 +100,3 @@ void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
 
   if (not modelProduto.select()) { return; }
 }
-
-void PrecoEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }

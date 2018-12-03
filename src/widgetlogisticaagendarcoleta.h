@@ -43,7 +43,6 @@ private:
   auto on_pushButtonMontarCarga_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto on_tableEstoque_entered(const QModelIndex &) -> void;
   auto processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga = false) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

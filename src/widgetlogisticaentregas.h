@@ -41,7 +41,6 @@ private:
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_tableCalendario_clicked(const QModelIndex &index) -> void;
   auto on_tableCarga_clicked(const QModelIndex &index) -> void;
-  auto on_tableCarga_entered(const QModelIndex &) -> void;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

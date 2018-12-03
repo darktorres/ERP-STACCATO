@@ -40,7 +40,6 @@ private:
   auto on_pushButtonRemover_clicked() -> void;
   auto on_pushButtonValidade_clicked() -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
-  auto on_tableEndereco_entered(const QModelIndex &) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
   auto setupMapper() -> void final;

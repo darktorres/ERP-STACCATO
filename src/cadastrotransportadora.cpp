@@ -30,9 +30,7 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   connect(ui->pushButtonRemoverVeiculo, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked);
   connect(ui->pushButtonVeiculoLimpar, &QPushButton::clicked, this, &CadastroTransportadora::on_pushButtonVeiculoLimpar_clicked);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroTransportadora::on_tableEndereco_clicked);
-  connect(ui->tableEndereco, &TableView::entered, this, &CadastroTransportadora::on_tableEndereco_entered);
   connect(ui->tableVeiculo, &TableView::clicked, this, &CadastroTransportadora::on_tableVeiculo_clicked);
-  connect(ui->tableVeiculo, &TableView::entered, this, &CadastroTransportadora::on_tableVeiculo_entered);
 
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
@@ -219,8 +217,6 @@ bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -281,20 +277,14 @@ bool CadastroTransportadora::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + " AND desativado = FALSE");
 
   if (not modelVeiculo.select()) { return false; }
-
-  ui->tableVeiculo->resizeColumnsToContents();
 
   return true;
 }
 
 void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
-
-void CadastroTransportadora::on_tableEndereco_entered(const QModelIndex &) { ui->tableEndereco->resizeColumnsToContents(); }
 
 bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
@@ -313,8 +303,6 @@ bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
   }
 
   if (not modelVeiculo.setData(row, "ufPlaca", ui->lineEditUfPlaca->text())) { return false; }
-
-  ui->tableVeiculo->resizeColumnsToContents();
 
   isDirty = true;
 
@@ -423,5 +411,3 @@ void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {
   ui->pushButtonAdicionarVeiculo->hide();
   mapperVeiculo.setCurrentModelIndex(index);
 }
-
-void CadastroTransportadora::on_tableVeiculo_entered(const QModelIndex &) { ui->tableVeiculo->resizeColumnsToContents(); }

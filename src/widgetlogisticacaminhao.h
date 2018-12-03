@@ -27,7 +27,6 @@ private:
   Ui::WidgetLogisticaCaminhao *ui;
   // methods
   auto on_table_clicked(const QModelIndex &index) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

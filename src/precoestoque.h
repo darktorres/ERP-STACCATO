@@ -24,7 +24,6 @@ private:
   auto on_lineEditBusca_textChanged(const QString &text) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setupTables() -> void;
 };
 

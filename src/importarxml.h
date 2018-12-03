@@ -54,13 +54,9 @@ private:
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;
-  auto on_tableCompra_entered(const QModelIndex &) -> void;
-  auto on_tableConsumo_entered(const QModelIndex &) -> void;
-  auto on_tableEstoque_entered(const QModelIndex &) -> void;
   auto parear() -> bool;
   auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
-  auto procurar() -> void;
   auto produtoCompativel(const int rowCompra, const QString &codComercialEstoque) -> bool;
   auto reparear(const QModelIndex &index) -> bool;
   auto setupTables() -> void;

@@ -64,8 +64,6 @@ private:
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
-  auto on_tableFluxoCaixa2_entered(const QModelIndex &) -> void;
-  auto on_tableFluxoCaixa_entered(const QModelIndex &) -> void;
   auto registerMode() -> void final;
   auto resetarPagamentos() -> void;
   auto savingProcedures() -> bool final;

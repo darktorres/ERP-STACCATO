@@ -32,10 +32,7 @@ private:
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonDanfe_clicked() -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;
-  auto on_tableNFe_entered(const QModelIndex &) -> void;
   auto on_tablePedido_clicked(const QModelIndex &index) -> void;
-  auto on_tablePedido_entered(const QModelIndex &) -> void;
-  auto on_tableProduto_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

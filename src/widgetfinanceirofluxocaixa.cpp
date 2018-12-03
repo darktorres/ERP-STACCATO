@@ -22,9 +22,7 @@ void WidgetFinanceiroFluxoCaixa::setConnections() {
   connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
   connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
   connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated);
-  connect(ui->tableCaixa, &TableView::entered, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered);
   connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated);
-  connect(ui->tableCaixa2, &TableView::entered, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_entered);
 }
 
 void WidgetFinanceiroFluxoCaixa::updateTables() {
@@ -133,10 +131,6 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 }
-
-void WidgetFinanceiroFluxoCaixa::on_tableCaixa_entered(const QModelIndex &) { ui->tableCaixa->resizeColumnsToContents(); }
-
-void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_entered(const QModelIndex &) { ui->tableCaixa2->resizeColumnsToContents(); }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
   const QDate date = modelCaixa2.data(index.row(), "Data").toDate();

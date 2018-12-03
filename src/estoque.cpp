@@ -20,9 +20,7 @@ Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QD
   setupTables();
 
   connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked);
-  connect(ui->tableConsumo, &TableView::entered, this, &Estoque::on_tableConsumo_entered);
   connect(ui->tableEstoque, &TableView::activated, this, &Estoque::on_tableEstoque_activated);
-  connect(ui->tableEstoque, &TableView::entered, this, &Estoque::on_tableEstoque_entered);
 
   viewRegisterById(showWindow);
 
@@ -157,15 +155,11 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   if (not modelEstoque.select()) { return false; }
 
-  ui->tableEstoque->resizeColumnsToContents();
-
   if (not modelConsumo.select()) { return false; }
 
   modelViewConsumo.setFilter("idEstoque = " + idEstoque);
 
   if (not modelViewConsumo.select()) { return false; }
-
-  ui->tableConsumo->resizeColumnsToContents();
 
   calcularRestante();
 
@@ -371,10 +365,6 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
 
   return dividir ? modelCompra.query().lastInsertId().toInt() : id;
 }
-
-void Estoque::on_tableEstoque_entered(const QModelIndex) { ui->tableEstoque->resizeColumnsToContents(); }
-
-void Estoque::on_tableConsumo_entered(const QModelIndex) { ui->tableConsumo->resizeColumnsToContents(); }
 
 bool Estoque::desfazerConsumo() {
   // there is one implementation in InputDialogConfirmacao

@@ -28,7 +28,6 @@ private:
   auto on_comboBox_currentTextChanged(const QString &) -> void;
   auto on_doubleSpinBoxValorPresente_valueChanged(double) -> void;
   auto on_pushButtonGerar_clicked() -> void;
-  auto on_table_entered(const QModelIndex) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

@@ -29,7 +29,6 @@ private:
   auto confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) -> bool;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonConfirmarCompra_clicked() -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setupTables() -> void;
   auto setConnections() -> void;
 };

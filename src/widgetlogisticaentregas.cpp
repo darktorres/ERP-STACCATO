@@ -44,7 +44,6 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked);
   connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked);
   connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked);
-  connect(ui->tableCarga, &TableView::entered, this, &WidgetLogisticaEntregas::on_tableCarga_entered);
 }
 
 void WidgetLogisticaEntregas::updateTables() {
@@ -61,21 +60,15 @@ void WidgetLogisticaEntregas::updateTables() {
 
   if (not modelCalendario.select()) { return; }
 
-  ui->tableCalendario->resizeColumnsToContents();
-
   // -----------------------------------------------------------------
 
   if (not modelCarga.select()) { return; }
-
-  ui->tableCarga->resizeColumnsToContents();
 
   // -----------------------------------------------------------------
 
   if (modelCarga.rowCount() == 0) { modelProdutos.setFilter("0"); }
 
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }
@@ -224,8 +217,6 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   if (not modelCarga.select()) { return; }
 
-  ui->tableCarga->resizeColumnsToContents();
-
   modelProdutos.setFilter("0");
 
   if (not modelProdutos.select()) { return; }
@@ -241,8 +232,6 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
 
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 
   const QString status = modelCarga.data(index.row(), "status").toString();
   const QString nfeStatus = modelCarga.data(index.row(), "NFe Status").toString();
@@ -409,12 +398,6 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   return true;
 }
 
-// TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
-// TODO: 1refazer sistema para permitir multiplas notas para uma mesma carga/pedido (notas parciais)
-// TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'
-
-void WidgetLogisticaEntregas::on_tableCarga_entered(const QModelIndex &) { ui->tableCarga->resizeColumnsToContents(); }
-
 void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   const auto selection = ui->tableCarga->selectionModel()->selectedRows();
 
@@ -567,3 +550,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName);
 }
+
+// TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
+// TODO: 1refazer sistema para permitir multiplas notas para uma mesma carga/pedido (notas parciais)
+// TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'

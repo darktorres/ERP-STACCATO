@@ -70,10 +70,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
 Orcamento::~Orcamento() { delete ui; }
 
-void Orcamento::show() {
-  RegisterDialog::show();
-  ui->tableProdutos->resizeColumnsToContents();
-}
+void Orcamento::show() { RegisterDialog::show(); }
 
 void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   if (isReadOnly) { return; }
@@ -238,8 +235,6 @@ bool Orcamento::viewRegister() {
     ui->lineEditReplicaDe->setReadOnly(true);
     ui->lineEditReplicadoEm->setReadOnly(true);
 
-    ui->tableProdutos->resizeColumnsToContents();
-
     ui->checkBoxRepresentacao->setDisabled(true);
 
     ui->plainTextEditObs->setPlainText(data("observacao").toString());
@@ -279,8 +274,6 @@ void Orcamento::novoItem() {
   ui->pushButtonRemoverItem->hide();
   ui->itemBoxProduto->clear();
   ui->tableProdutos->clearSelection();
-  ui->tableProdutos->resizeColumnsToContents();
-
   // -----------------------
 
   ui->doubleSpinBoxCaixas->setDisabled(true);
@@ -741,8 +734,6 @@ void Orcamento::adicionarItem(const bool isUpdate) {
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
 
     isDirty = true;
-
-    ui->tableProdutos->resizeColumnsToContents();
   }();
 
   calcPrecoGlobalTotal();

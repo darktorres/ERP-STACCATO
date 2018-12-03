@@ -472,8 +472,6 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   if (not modelViewProdutoEstoque.select()) { return; }
 
-  ui->tableItens->resizeColumnsToContents();
-
   preencherNumeroNFe();
 
   ui->lineEditModelo->setText("55");
@@ -1056,8 +1054,6 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
   //     `ehc`.`pCOFINS` AS `pCOFINS`,
   //     SUM(`ehc`.`vCOFINS`) AS `vCOFINS`
 }
-
-void CadastrarNFe::on_tableItens_entered(const QModelIndex &) { ui->tableItens->resizeColumnsToContents(); }
 
 void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   unsetConnections();
@@ -1858,7 +1854,6 @@ void CadastrarNFe::setConnections() {
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
   connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
-  connect(ui->tableItens, &TableView::entered, this, &CadastrarNFe::on_tableItens_entered);
   connect(&modelViewProdutoEstoque, &SqlRelationalTableModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged);
 }
 
@@ -1894,7 +1889,6 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
   disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
   disconnect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
-  disconnect(ui->tableItens, &TableView::entered, this, &CadastrarNFe::on_tableItens_entered);
 }
 
 bool CadastrarNFe::listarCfop() {

@@ -30,7 +30,6 @@ private:
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonCancelarNFe_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

@@ -34,7 +34,6 @@ private:
   auto on_doubleSpinBoxAliquota_valueChanged(double aliquota) -> void;
   auto on_doubleSpinBoxST_valueChanged(double valueSt) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

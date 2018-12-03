@@ -19,9 +19,6 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime dataReal,
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
   connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
   connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
-  connect(ui->tableCompra, &TableView::entered, this, &ImportarXML::on_tableCompra_entered);
-  connect(ui->tableConsumo, &TableView::entered, this, &ImportarXML::on_tableConsumo_entered);
-  connect(ui->tableEstoque, &TableView::entered, this, &ImportarXML::on_tableEstoque_entered);
 
   setWindowFlags(Qt::Window);
 
@@ -228,8 +225,6 @@ void ImportarXML::setupTables() {
   ui->tableCompra->hideColumn("aliquotaSt");
   ui->tableCompra->hideColumn("st");
 
-  ui->tableCompra->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelNFe.setTable("nfe");
@@ -420,30 +415,24 @@ bool ImportarXML::limparAssociacoes() {
 void ImportarXML::on_pushButtonProcurar_clicked() {
   disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
 
-  procurar();
+  [&] {
+    if (not lerXML()) { return; }
+
+    if (not parear()) { return; }
+
+    bool ok = true;
+
+    for (int row = 0; row < modelCompra.rowCount(); ++row) {
+      if (static_cast<FieldColors>(modelCompra.data(row, "quantUpd").toInt()) != FieldColors::Green) {
+        ok = false;
+        break;
+      }
+    }
+
+    if (ok) { ui->pushButtonProcurar->setDisabled(true); }
+  }();
 
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
-}
-
-void ImportarXML::procurar() {
-  if (not lerXML()) { return; }
-
-  if (not parear()) { return; }
-
-  bool ok = true;
-
-  for (int row = 0; row < modelCompra.rowCount(); ++row) {
-    if (static_cast<FieldColors>(modelCompra.data(row, "quantUpd").toInt()) != FieldColors::Green) {
-      ok = false;
-      break;
-    }
-  }
-
-  if (ok) { ui->pushButtonProcurar->setDisabled(true); }
-
-  ui->tableEstoque->resizeColumnsToContents();
-  ui->tableConsumo->resizeColumnsToContents();
-  ui->tableCompra->resizeColumnsToContents();
 }
 
 std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
@@ -838,12 +827,6 @@ std::optional<int> ImportarXML::buscarProximoIdEstoque() {
 
   return idEstoque;
 }
-
-void ImportarXML::on_tableEstoque_entered(const QModelIndex &) { ui->tableEstoque->resizeColumnsToContents(); }
-
-void ImportarXML::on_tableCompra_entered(const QModelIndex &) { ui->tableCompra->resizeColumnsToContents(); }
-
-void ImportarXML::on_tableConsumo_entered(const QModelIndex &) { ui->tableConsumo->resizeColumnsToContents(); }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque (para cada linha do model inserir
 // items na arvore?)

@@ -25,13 +25,11 @@ ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString 
 
   connect(ui->pushButtonComprar, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonComprar_clicked);
   connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked);
-  connect(ui->tableProdutos, &TableView::entered, this, &ProdutosPendentes::on_tableProdutos_entered);
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
 
   viewProduto(codComercial, idVenda);
 
   show();
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 ProdutosPendentes::~ProdutosPendentes() { delete ui; }
@@ -72,8 +70,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->doubleSpinBoxQuantTotal->setSingleStep(step);
   ui->doubleSpinBoxComprar->setSingleStep(step);
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   const QString fornecedor = modelViewProdutos.data(0, "fornecedor").toString();
 
   modelEstoque.setQuery(
@@ -99,8 +95,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
   ui->tableEstoque->hideColumn("idCompra");
-
-  ui->tableEstoque->resizeColumnsToContents();
 
   //-----------------------------------------------
 
@@ -139,7 +133,6 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idCompra");
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
@@ -222,8 +215,6 @@ bool ProdutosPendentes::insere(const QDateTime &dataPrevista) {
 
   return true;
 }
-
-void ProdutosPendentes::on_tableProdutos_entered(const QModelIndex &) { ui->tableProdutos->resizeColumnsToContents(); }
 
 bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
   // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturada ainda

@@ -31,7 +31,6 @@ void WidgetEstoque::setConnections() {
   connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
   connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetEstoque::on_table_entered);
 }
 
 void WidgetEstoque::setupTables() {
@@ -87,8 +86,6 @@ void WidgetEstoque::updateTables() {
   model.setQuery(model.query().executedQuery());
 
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetEstoque::resetTables() { modelIsSet = false; }
@@ -97,8 +94,6 @@ void WidgetEstoque::on_table_activated(const QModelIndex &index) {
   auto *estoque = new Estoque(ui->table->model()->data(ui->table->model()->index(index.row(), model.record().indexOf("idEstoque"))).toString(), true, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
 }
-
-void WidgetEstoque::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetEstoque::montaFiltro() {
   // FIXME: digitar hifen causa erro na pesquisa

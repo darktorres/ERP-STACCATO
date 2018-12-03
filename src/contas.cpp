@@ -25,8 +25,6 @@ Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), 
   showMaximized();
 
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
-  connect(ui->tablePendentes, &TableView::entered, this, &Contas::on_tablePendentes_entered);
-  connect(ui->tableProcessados, &TableView::entered, this, &Contas::on_tableProcessados_entered);
   connect(&modelPendentes, &QSqlTableModel::dataChanged, this, &Contas::preencher);
   connect(&modelPendentes, &QSqlTableModel::dataChanged, this, &Contas::validarData);
 }
@@ -182,8 +180,6 @@ void Contas::setupTables() {
   ui->tablePendentes->hideColumn("taxa");
   ui->tablePendentes->hideColumn("desativado");
 
-  ui->tablePendentes->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelProcessados.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
@@ -224,8 +220,6 @@ void Contas::setupTables() {
   ui->tableProcessados->hideColumn("comissao");
   ui->tableProcessados->hideColumn("taxa");
   ui->tableProcessados->hideColumn("desativado");
-
-  ui->tableProcessados->resizeColumnsToContents();
 }
 
 bool Contas::verifyFields() {
@@ -269,8 +263,6 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     if (not modelPendentes.select()) { return; }
 
-    ui->tablePendentes->resizeColumnsToContents();
-
     for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
       ui->tablePendentes->openPersistentEditor(row, "status");
       ui->tablePendentes->openPersistentEditor(row, "contaDestino");
@@ -288,8 +280,6 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");
       ui->tableProcessados->openPersistentEditor(row, "centroCusto");
     }
-
-    ui->tableProcessados->resizeColumnsToContents();
   }
 
   if (tipo == Tipo::Pagar) {
@@ -308,8 +298,6 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     if (not modelPendentes.select()) { return; }
 
-    ui->tablePendentes->resizeColumnsToContents();
-
     for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
       ui->tablePendentes->openPersistentEditor(row, "status");
       ui->tablePendentes->openPersistentEditor(row, "contaDestino"); // FIXME: slow
@@ -327,14 +315,8 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
       ui->tableProcessados->openPersistentEditor(row, "contaDestino");
       ui->tableProcessados->openPersistentEditor(row, "centroCusto");
     }
-
-    ui->tableProcessados->resizeColumnsToContents();
   }
 }
-
-void Contas::on_tablePendentes_entered(const QModelIndex &) { ui->tablePendentes->resizeColumnsToContents(); }
-
-void Contas::on_tableProcessados_entered(const QModelIndex &) { ui->tableProcessados->resizeColumnsToContents(); }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago
 // TODO: 5fazer somatoria dos valores

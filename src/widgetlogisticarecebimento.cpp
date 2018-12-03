@@ -24,7 +24,6 @@ void WidgetLogisticaRecebimento::setConnections() {
   connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonVenda_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetLogisticaRecebimento::on_table_entered);
 }
 
 void WidgetLogisticaRecebimento::updateTables() {
@@ -42,8 +41,6 @@ void WidgetLogisticaRecebimento::updateTables() {
   if (not modelViewRecebimento.select()) { return; }
 
   for (int row = 0; row < modelViewRecebimento.rowCount(); ++row) { ui->table->openPersistentEditor(row, "selecionado"); }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
@@ -56,8 +53,6 @@ void WidgetLogisticaRecebimento::tableFornLogistica_activated(const QString &for
   if (not modelViewRecebimento.select()) { return; }
 
   ui->checkBoxMarcarTodos->setChecked(false);
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRecebimento::setupTables() {
@@ -166,8 +161,6 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 }
 
 void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool) { ui->table->selectAll(); }
-
-void WidgetLogisticaRecebimento::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 

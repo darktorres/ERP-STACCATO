@@ -35,7 +35,6 @@ private:
   auto on_pushButtonExcel_clicked() -> void;
   auto on_pushButtonPDF_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setarDadosAvulso() -> void;
   auto setupTables() -> void;
 };

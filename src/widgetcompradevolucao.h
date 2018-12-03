@@ -30,7 +30,6 @@ private:
   auto on_pushButtonRetornarEstoque_clicked() -> void;
   auto on_radioButtonFiltroDevolvido_toggled(const bool) -> void;
   auto on_radioButtonFiltroPendente_toggled(const bool) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto retornarEstoque(const QModelIndexList &list) -> bool;
   auto setupTables() -> void;
   auto setConnections() -> void;

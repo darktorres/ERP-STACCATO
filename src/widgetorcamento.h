@@ -31,7 +31,6 @@ private:
   auto on_pushButtonCriarOrc_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto on_table_entered(const QModelIndex &) -> void;
   auto setConnections() -> void;
   auto setPermissions() -> void;
   auto setupTables() -> void;

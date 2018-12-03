@@ -23,7 +23,6 @@ void WidgetLogisticaColeta::setConnections() {
   connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonReagendar_clicked);
   connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonVenda_clicked);
-  connect(ui->table, &TableView::entered, this, &WidgetLogisticaColeta::on_table_entered);
 }
 
 void WidgetLogisticaColeta::updateTables() {
@@ -39,8 +38,6 @@ void WidgetLogisticaColeta::updateTables() {
   }
 
   if (not modelViewColeta.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &fornecedor) {
@@ -51,8 +48,6 @@ void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &forneced
   if (not modelViewColeta.select()) { return; }
 
   ui->checkBoxMarcarTodos->setChecked(false);
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::resetTables() { modelIsSet = false; }
@@ -156,8 +151,6 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
 }
 
 void WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked(const bool) { ui->table->selectAll(); }
-
-void WidgetLogisticaColeta::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetLogisticaColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 

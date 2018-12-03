@@ -17,6 +17,16 @@ public:
   auto setModel(QAbstractItemModel *model) -> void final;
   auto showColumn(const QString &column) -> void;
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
+
+protected:
+  virtual auto enterEvent(QEvent *event) -> void override;
+
+private:
+  // attributes
+  bool autoResize = true;
+  // methods
+  auto showContextMenu(const QPoint &pos) -> void;
+  auto toggleAutoResize() -> void;
 };
 
 #endif // TABLEVIEW_H

@@ -18,9 +18,6 @@ WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 void WidgetRelatorio::setConnections() {
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetRelatorio::dateEditMes_dateChanged);
   connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetRelatorio::on_pushButtonExcel_clicked);
-  connect(ui->tableRelatorio, &TableView::entered, this, &WidgetRelatorio::on_tableRelatorio_entered);
-  connect(ui->tableTotalLoja, &TableView::entered, this, &WidgetRelatorio::on_tableTotalLoja_entered);
-  connect(ui->tableTotalVendedor, &TableView::entered, this, &WidgetRelatorio::on_tableTotalVendedor_entered);
 }
 
 void WidgetRelatorio::setFilterTotaisVendedor() {
@@ -43,8 +40,6 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
   qDebug() << "filter2: " << modelViewRelatorioVendedor.filter();
 
   if (not modelViewRelatorioVendedor.select()) { return; }
-
-  ui->tableTotalVendedor->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
@@ -61,8 +56,6 @@ void WidgetRelatorio::setFilterTotaisLoja() {
   modelViewRelatorioLoja.setFilter(filter);
 
   if (not modelViewRelatorioLoja.select()) { return; }
-
-  ui->tableTotalLoja->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::setupTables() {
@@ -77,7 +70,6 @@ void WidgetRelatorio::setupTables() {
   ui->tableRelatorio->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
-  ui->tableRelatorio->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -90,7 +82,6 @@ void WidgetRelatorio::setupTables() {
   ui->tableTotalVendedor->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
   ui->tableTotalVendedor->hideColumn("idUsuario");
   ui->tableTotalVendedor->hideColumn("Mês");
-  ui->tableTotalVendedor->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -103,7 +94,6 @@ void WidgetRelatorio::setupTables() {
   ui->tableTotalLoja->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
   ui->tableTotalLoja->hideColumn("Mês");
-  ui->tableTotalLoja->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::calcularTotalGeral() {
@@ -155,13 +145,9 @@ void WidgetRelatorio::setFilterRelatorio() {
   qDebug() << "filter1: " << modelViewRelatorio.filter();
 
   if (not modelViewRelatorio.select()) { return; }
-
-  ui->tableRelatorio->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
-
-void WidgetRelatorio::on_tableRelatorio_entered(const QModelIndex &) { ui->tableRelatorio->resizeColumnsToContents(); }
 
 void WidgetRelatorio::updateTables() {
   const auto tipo = UserSession::tipoUsuario();
@@ -229,14 +215,9 @@ void WidgetRelatorio::setResumoOrcamento() {
   ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Mes", new ReaisDelegate(this));
   ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(this));
   ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(this));
-  ui->tableResumoOrcamento->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::resetTables() { modelIsSet = false; }
-
-void WidgetRelatorio::on_tableTotalLoja_entered(const QModelIndex &) { ui->tableTotalLoja->resizeColumnsToContents(); }
-
-void WidgetRelatorio::on_tableTotalVendedor_entered(const QModelIndex &) { ui->tableTotalVendedor->resizeColumnsToContents(); }
 
 void WidgetRelatorio::on_pushButtonExcel_clicked() {
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");

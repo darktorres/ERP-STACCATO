@@ -36,7 +36,6 @@ private:
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonGerarCompra_clicked() -> void;
-  auto on_tableProdutos_entered(const QModelIndex &) -> void;
   auto on_tableResumo_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

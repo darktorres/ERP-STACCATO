@@ -17,7 +17,6 @@ void WidgetNfeEntrada::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);
   connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
-  connect(ui->table, &TableView::entered, this, &WidgetNfeEntrada::on_table_entered);
 }
 
 void WidgetNfeEntrada::updateTables() {
@@ -33,8 +32,6 @@ void WidgetNfeEntrada::updateTables() {
   }
 
   if (not modelViewNFeEntrada.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
@@ -58,8 +55,6 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
 }
-
-void WidgetNfeEntrada::on_table_entered(const QModelIndex &) { ui->table->resizeColumnsToContents(); }
 
 void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 

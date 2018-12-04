@@ -67,7 +67,7 @@ void WidgetNfeEntrada::montaFiltro() {
 }
 
 void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
-  // TODO: bloquear se a nota possuir consumo/estiver coletada?
+  // TODO: bloquear se a nota estiver coletada?
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
@@ -92,77 +92,57 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
 }
 
 bool WidgetNfeEntrada::cancelar(const int row) {
-  // FIXME: ao cancelar nota nao voltar o pedido de compra inteiro, apenas o item da nota cancelada
-  // FIXME: não pode voltar o status para 'faturamento' pois o item pode estar em qualquer status antes do cancelamento
-
-  // NOTE: verificar como associar/buscar linhas em pedido_fornecedor com linhas de estoques sem consumo
-
-  // marcar nota como cancelada
-
-  // update vp based on consumo
-  // delete consumo
-  // delete from estoque_has_consumo
-  // update pf based on estoque_has_compra
-  // delete from estoque_has_compra
-  // delete nfe
-  // delete estoque
-
   QSqlQuery query1;
-  //  query1.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE idNFe = :idNFe");
-  query1.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-  query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
-
-  if (not query1.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query1.lastError().text()); }
-
-  QSqlQuery query2;
-  query2.prepare("UPDATE estoque SET status = 'CANCELADO' WHERE idNFe = :idNFe");
-  query2.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
-
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro marcando estoque cancelado: " + query2.lastError().text()); }
-
-  // voltar compra para faturamento
-  QSqlQuery query3;
-  // FIXME: restringir seleção para pegar apenas as linhas daquela NFe
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
                  "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
                  "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not query1.exec()) { return qApp->enqueueError(false, "Erro voltando compra para faturamento: " + query1.lastError().text()); }
+
+  //-----------------------------------------------------------------------------
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
+                 "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto IN (SELECT "
+                 "idVendaProduto FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro voltando venda para faturamento: " + query2.lastError().text()); }
+
+  //-----------------------------------------------------------------------------
+
+  QSqlQuery query3;
+  query3.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
   query3.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro voltando compra para faturamento: " + query3.lastError().text()); }
+  if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo consumos: " + query3.lastError().text()); }
 
-  // desvincular produtos associados (se houver)
+  //-----------------------------------------------------------------------------
+
   QSqlQuery query4;
-  query4.prepare("SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
+  query4.prepare("DELETE FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
   query4.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query4.exec()) { return qApp->enqueueError(false, "Erro buscando consumos: " + query4.lastError().text()); }
+  if (not query4.exec()) { return qApp->enqueueError(false, "Erro removendo compras: " + query4.lastError().text()); }
+
+  //-----------------------------------------------------------------------------
 
   QSqlQuery query5;
-  query5.prepare("UPDATE estoque_has_consumo SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
+  query5.prepare("DELETE FROM estoque WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
+  query5.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  // voltar status para pendente
+  if (not query5.exec()) { return qApp->enqueueError(false, "Erro removendo estoque: " + query5.lastError().text()); }
+
+  //-----------------------------------------------------------------------------
+
   QSqlQuery query6;
-  // TODO: merge query4 and query5 here
-  query6.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
-                 "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = "
-                 ":idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query6.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+  query6.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  while (query4.next()) {
-    // TODO: 1quando cancelar nota pegar os estoques e cancelar/remover da logistica (exceto quando estiverem entregues?)
-    // se existir linhas de consumo pode ser que existam linhas de entrega, tratar
-    // se houver consumos na nota mostrar para o usuario e pedir que ele faça os 'desconsumir'
-
-    query5.bindValue(":idVendaProduto", query4.value("idVendaProduto"));
-
-    if (not query5.exec()) { return qApp->enqueueError(false, "Erro cancelando consumos: " + query5.lastError().text()); }
-
-    query6.bindValue(":idVendaProduto", query4.value("idVendaProduto"));
-
-    if (not query6.exec()) { return qApp->enqueueError(false, "Erro voltando produtos para pendente: " + query6.lastError().text()); }
-  }
+  if (not query6.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query6.lastError().text()); }
 
   return true;
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
-// TODO: 2 funções necessarias: trocar nfe (fornecedor emitiu outra) e realocar nfe para outro pedido (foi importado errado)

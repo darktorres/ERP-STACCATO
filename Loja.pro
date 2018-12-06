@@ -100,6 +100,8 @@ SOURCES += \
     src/calculofrete.cpp \
     src/cancelaproduto.cpp \
     src/cepcompleter.cpp \
+    src/charttooltip.cpp \
+    src/chartview.cpp \
     src/checkboxdelegate.cpp \
     src/combobox.cpp \
     src/comboboxdelegate.cpp \
@@ -209,6 +211,8 @@ HEADERS  += \
     src/calculofrete.h \
     src/cancelaproduto.h \
     src/cepcompleter.h \
+    src/charttooltip.h \
+    src/chartview.h \
     src/checkboxdelegate.h \
     src/combobox.h \
     src/comboboxdelegate.h \

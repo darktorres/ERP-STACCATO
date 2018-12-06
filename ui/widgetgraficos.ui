@@ -13,7 +13,70 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2"/>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="text">
+        <string>Habilitar/desabilitar linhas</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonCleanTooltips">
+       <property name="text">
+        <string>Limpar marcadores</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxTheme">
+       <item>
+        <property name="text">
+         <string>Light</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BlueCerulean</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Dark</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BrownSand</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BlueNcs</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HighContrast</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>BlueIcy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Qt</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

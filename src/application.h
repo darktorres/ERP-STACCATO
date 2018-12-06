@@ -5,6 +5,8 @@
 #include <QPalette>
 #include <QSqlDatabase>
 
+#include "mainwindow.h"
+
 #if defined(qApp)
 #undef qApp
 #endif
@@ -18,6 +20,7 @@ public:
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
   auto dbReconnect() -> bool;
+  auto endTransaction() -> bool;
   auto enqueueError(const QString &error) -> void;
   auto enqueueError(const bool boolean, const QString &error) -> bool;
   auto enqueueInformation(const QString &information) -> void;
@@ -28,16 +31,17 @@ public:
   auto getShowingErrors() const -> bool;
   auto getUpdating() const -> bool;
   auto lightTheme() -> void;
+  auto rollbackTransaction() -> void;
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
+  auto setWindow(MainWindow *value) -> void;
   auto showMessages() -> void;
   auto startTransaction() -> bool;
-  auto endTransaction() -> bool;
-  auto rollbackTransaction() -> void;
   auto updater() -> void;
 
 private:
   // attributes
+  MainWindow *window;
   QMap<QString, QString> mapLojas;
   QSqlDatabase db;
   QStringList errorQueue;

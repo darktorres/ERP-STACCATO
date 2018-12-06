@@ -36,6 +36,8 @@ int main(int argc, char *argv[]) {
   window.show();
 #endif
 
+  app.setWindow(&window);
+
   return app.exec();
 }
 

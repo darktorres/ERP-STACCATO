@@ -5,6 +5,7 @@
 
 #include "sqlrelationaltablemodel.h"
 
+// TODO: change this to inherit from QSortFilterProxyModel
 class EstoqueProxyModel final : public QIdentityProxyModel {
 
 public:
@@ -18,3 +19,8 @@ private:
 };
 
 #endif // ESTOQUEPROXYMODEL_H
+
+//  auto *proxyFilter = new QSortFilterProxyModel(this);
+//  proxyFilter->setDynamicSortFilter(true);
+//  proxyFilter->setSourceModel(&modelEstoque);
+//  ui->tableEstoque->setModel(proxyFilter);

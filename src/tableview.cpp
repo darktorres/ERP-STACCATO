@@ -77,6 +77,7 @@ void TableView::setModel(QAbstractItemModel *model) {
 
 void TableView::enterEvent(QEvent *event) {
   if (autoResize) { resizeColumnsToContents(); }
+
   QTableView::enterEvent(event);
 }
 

@@ -60,15 +60,21 @@ void WidgetLogisticaEntregas::updateTables() {
 
   if (not modelCalendario.select()) { return; }
 
+  ui->tableCalendario->resizeColumnsToContents();
+
   // -----------------------------------------------------------------
 
   if (not modelCarga.select()) { return; }
+
+  ui->tableCarga->resizeColumnsToContents();
 
   // -----------------------------------------------------------------
 
   if (modelCarga.rowCount() == 0) { modelProdutos.setFilter("0"); }
 
   if (not modelProdutos.select()) { return; }
+
+  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }
@@ -217,6 +223,8 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   if (not modelCarga.select()) { return; }
 
+  ui->tableCarga->resizeColumnsToContents();
+
   modelProdutos.setFilter("0");
 
   if (not modelProdutos.select()) { return; }
@@ -232,6 +240,8 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
 
   if (not modelProdutos.select()) { return; }
+
+  ui->tableProdutos->resizeColumnsToContents();
 
   const QString status = modelCarga.data(index.row(), "status").toString();
   const QString nfeStatus = modelCarga.data(index.row(), "NFe Status").toString();
@@ -342,6 +352,8 @@ void WidgetLogisticaEntregas::montaFiltro() {
   modelCarga.setFilter(text.isEmpty() ? "0" : "idVenda LIKE '%" + text + "%'");
 
   if (not modelCarga.select()) { return; }
+
+  ui->tableCarga->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {

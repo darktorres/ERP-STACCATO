@@ -54,6 +54,7 @@ void Estoque::setupTables() {
 
   ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("codBarras");
@@ -155,11 +156,15 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   if (not modelEstoque.select()) { return false; }
 
+  ui->tableEstoque->resizeColumnsToContents();
+
   if (not modelConsumo.select()) { return false; }
 
   modelViewConsumo.setFilter("idEstoque = " + idEstoque);
 
   if (not modelViewConsumo.select()) { return false; }
+
+  ui->tableConsumo->resizeColumnsToContents();
 
   calcularRestante();
 

@@ -28,8 +28,8 @@ private:
   auto montaFiltro() -> void;
   auto on_pushButtonDevolucaoFornecedor_clicked() -> void;
   auto on_pushButtonRetornarEstoque_clicked() -> void;
-  auto on_radioButtonFiltroDevolvido_toggled(const bool) -> void;
-  auto on_radioButtonFiltroPendente_toggled(const bool) -> void;
+  auto on_radioButtonFiltroDevolvido_clicked(const bool) -> void;
+  auto on_radioButtonFiltroPendente_clicked(const bool) -> void;
   auto retornarEstoque(const QModelIndexList &list) -> bool;
   auto setupTables() -> void;
   auto setConnections() -> void;

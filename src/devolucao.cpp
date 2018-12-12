@@ -210,8 +210,8 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->hideColumn("contraParte");
   ui->tablePagamentos->hideColumn("comissao");
   ui->tablePagamentos->hideColumn("desativado");
-  ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("valor"), new ReaisDelegate(this));
-  ui->tablePagamentos->setItemDelegateForColumn(modelPagamentos.fieldIndex("representacao"), new CheckBoxDelegate(this, true));
+  ui->tablePagamentos->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tablePagamentos->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
 
   for (int row = 0; row < modelPagamentos.rowCount(); ++row) { ui->tablePagamentos->openPersistentEditor(row, "representacao"); }
 

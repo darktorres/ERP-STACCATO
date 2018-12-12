@@ -86,6 +86,8 @@ void WidgetEstoque::updateTables() {
   model.setQuery(model.query().executedQuery());
 
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetEstoque::resetTables() { modelIsSet = false; }
@@ -127,6 +129,8 @@ void WidgetEstoque::montaFiltro() {
       filtroContabil);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {

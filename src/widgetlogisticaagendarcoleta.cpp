@@ -173,7 +173,11 @@ void WidgetLogisticaAgendarColeta::updateTables() {
 
   if (not modelEstoque.select()) { return; }
 
+  ui->tableEstoque->resizeColumnsToContents();
+
   if (not modelTranspAgend.select()) { return; }
+
+  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &fornecedor) {
@@ -182,8 +186,6 @@ void WidgetLogisticaAgendarColeta::tableFornLogistica_activated(const QString &f
   ui->lineEditBusca->clear();
 
   montaFiltro();
-
-  if (not modelEstoque.select()) { return; }
 
   ui->tableEstoque->sortByColumn("prazoEntrega");
 }
@@ -436,6 +438,8 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
   modelEstoque.setFilter(filtros.join(" AND "));
 
   if (not modelEstoque.select()) { return; }
+
+  ui->tableEstoque->resizeColumnsToContents();
 }
 
 // TODO: 1poder marcar nota de entrada como cancelada (talvez direto na tela de nfe's e retirar dos fluxos os estoques?)

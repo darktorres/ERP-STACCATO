@@ -41,11 +41,15 @@ void WidgetLogisticaEntregues::updateTables() {
 
   ui->tableVendas->sortByColumn("prazoEntrega");
 
+  ui->tableVendas->resizeColumnsToContents();
+
   // -----------------------------------------------------------------
 
   modelProdutos.setQuery(modelProdutos.query().executedQuery());
 
   if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
+
+  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
@@ -73,6 +77,8 @@ void WidgetLogisticaEntregues::montaFiltro() {
   modelVendas.setFilter(filtros.join(" AND "));
 
   if (not modelVendas.select()) { return; }
+
+  ui->tableVendas->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregues::setupTables() {
@@ -115,8 +121,11 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataPrevEnt");
+  ui->tableProdutos->hideColumn("idConsumo");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) { ui->tableProdutos->openPersistentEditor(row, "selecionado"); }
+
+  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {

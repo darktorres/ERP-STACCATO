@@ -87,6 +87,8 @@ void WidgetCompraPendentes::updateTables() {
   }
 
   if (not modelViewVendaProduto.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
@@ -111,7 +113,6 @@ void WidgetCompraPendentes::setupTables() {
 
   ui->table->setModel(new FinanceiroProxyModel(&modelViewVendaProduto, this));
 
-  ui->table->sortByColumn("idVenda");
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
@@ -138,10 +139,16 @@ void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetCompraPendentes::on_groupBoxStatus_toggled(bool enabled) {
-  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  const auto container = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (const auto &child : container) {
+    disconnect(child, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
     child->setEnabled(true);
     child->setChecked(enabled);
+    connect(child, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   }
+
+  montaFiltro();
 }
 
 void WidgetCompraPendentes::montaFiltro() {
@@ -149,10 +156,10 @@ void WidgetCompraPendentes::montaFiltro() {
   QStringList filtroCheck;
 
   Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-    if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
 
   //-------------------------------------
 
@@ -164,10 +171,6 @@ void WidgetCompraPendentes::montaFiltro() {
     filtros << filtroBusca;
   }
 
-  //-------------------------------------
-
-  const QString filtroStatus = "status != 'CANCELADO'";
-  if (not filtroStatus.isEmpty()) { filtros << filtroStatus; }
 
   //-------------------------------------
 
@@ -176,6 +179,8 @@ void WidgetCompraPendentes::montaFiltro() {
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
 
   if (not modelViewVendaProduto.select()) { return; }
+  ui->table->sortByColumn("idVenda");
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {

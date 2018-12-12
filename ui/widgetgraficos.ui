@@ -19,7 +19,7 @@
      <item>
       <widget class="QCheckBox" name="checkBox">
        <property name="text">
-        <string>Habilitar/desabilitar linhas</string>
+        <string>Mostrar/esconder linhas</string>
        </property>
       </widget>
      </item>

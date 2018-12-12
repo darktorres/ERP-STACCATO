@@ -1,3 +1,4 @@
+#include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
@@ -16,8 +17,8 @@ void WidgetCompraDevolucao::resetTables() { modelIsSet = false; }
 void WidgetCompraDevolucao::setConnections() {
   connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked);
   connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked);
-  connect(ui->radioButtonFiltroPendente, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled);
-  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::toggled, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_toggled);
+  connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked);
+  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked);
 }
 
 void WidgetCompraDevolucao::updateTables() {
@@ -33,6 +34,8 @@ void WidgetCompraDevolucao::updateTables() {
   }
 
   if (not modelVendaProduto.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraDevolucao::setupTables() {
@@ -87,8 +90,6 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
-
-  ui->table->sortByColumn("idVenda");
 }
 
 void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
@@ -197,9 +198,9 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   qApp->enqueueInformation("Retornado para estoque!");
 }
 
-void WidgetCompraDevolucao::on_radioButtonFiltroPendente_toggled(const bool) { montaFiltro(); }
+void WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked(const bool) { montaFiltro(); }
 
-void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_toggled(const bool) { montaFiltro(); }
+void WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked(const bool) { montaFiltro(); }
 
 void WidgetCompraDevolucao::montaFiltro() {
   const bool isPendente = ui->radioButtonFiltroPendente->isChecked();
@@ -210,4 +211,7 @@ void WidgetCompraDevolucao::montaFiltro() {
   modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
 
   if (not modelVendaProduto.select()) { return; }
+
+  ui->table->sortByColumn("idVenda");
+  ui->table->resizeColumnsToContents();
 }

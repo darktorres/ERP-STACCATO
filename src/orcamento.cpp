@@ -260,6 +260,8 @@ bool Orcamento::viewRegister() {
       ui->itemBoxConsultor->show();
     }
 
+    ui->tableProdutos->resizeColumnsToContents();
+
     return true;
   }();
 
@@ -685,7 +687,7 @@ void Orcamento::setupTables() {
   ui->tableProdutos->hideColumn("mostrarDesconto");
 
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn(modelItem.fieldIndex("quant"), new DoubleDelegate(this, 4));
+  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));

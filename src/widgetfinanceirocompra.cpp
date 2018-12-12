@@ -28,6 +28,8 @@ void WidgetFinanceiroCompra::updateTables() {
   }
 
   if (not modelViewComprasFinanceiro.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
@@ -56,6 +58,8 @@ void WidgetFinanceiroCompra::montaFiltro() {
   modelViewComprasFinanceiro.setFilter(filtroBusca);
 
   if (not modelViewComprasFinanceiro.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

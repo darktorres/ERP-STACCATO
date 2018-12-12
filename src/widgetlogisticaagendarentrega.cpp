@@ -378,7 +378,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!"); }
 
   for (const auto &item : list) {
-    const auto listMatch = modelTranspAtual.match("idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"), Qt::MatchExactly);
+    const auto listMatch = modelTranspAtual.match("idVendaProduto", modelViewProdutos.data(item.row(), "idVendaProduto"), 1, Qt::MatchExactly);
 
     if (not listMatch.isEmpty()) { return qApp->enqueueError("Item já inserido!"); }
 

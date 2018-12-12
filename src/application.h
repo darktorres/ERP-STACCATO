@@ -41,7 +41,7 @@ public:
 
 private:
   // attributes
-  MainWindow *window;
+  MainWindow *window = nullptr;
   QMap<QString, QString> mapLojas;
   QSqlDatabase db;
   QStringList errorQueue;

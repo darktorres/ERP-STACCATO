@@ -372,12 +372,6 @@ void MainWindow::on_actionCalcular_frete_triggered() {
   frete->show();
 }
 
-void MainWindow::showMessages(const QStringList &errorQueue, const QStringList &warningQueue, const QStringList &informationQueue) {
-  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(this, "Erro!", error); }
-  for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(this, "Aviso!", warning); }
-  for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(this, "Informação!", information); }
-}
-
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
 // NOTE: colocar logo da staccato na mainwindow
 

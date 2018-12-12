@@ -75,6 +75,11 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
   if (model.tableName() == "produto") {
     model.setFilter(searchFilter + " AND descontinuado = " + (ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE") + " AND desativado = FALSE" + representacao + fornecedorRep);
+
+    if (not model.select()) { return; }
+
+    ui->table->resizeColumnsToContents();
+
     return;
   }
 

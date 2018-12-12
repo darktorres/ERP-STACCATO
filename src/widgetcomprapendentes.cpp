@@ -171,7 +171,6 @@ void WidgetCompraPendentes::montaFiltro() {
     filtros << filtroBusca;
   }
 
-
   //-------------------------------------
 
   filtros << "quant > 0";
@@ -179,6 +178,7 @@ void WidgetCompraPendentes::montaFiltro() {
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
 
   if (not modelViewVendaProduto.select()) { return; }
+
   ui->table->sortByColumn("idVenda");
   ui->table->resizeColumnsToContents();
 }

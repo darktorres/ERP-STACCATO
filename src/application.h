@@ -21,10 +21,10 @@ public:
   auto dbConnect() -> bool;
   auto dbReconnect() -> bool;
   auto endTransaction() -> bool;
-  auto enqueueError(const QString &error) -> void;
-  auto enqueueError(const bool boolean, const QString &error) -> bool;
-  auto enqueueInformation(const QString &information) -> void;
-  auto enqueueWarning(const QString &warning) -> void;
+  auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
+  auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
+  auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
+  auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
   auto getInTransaction() const -> bool;
   auto getIsConnected() const -> bool;
   auto getMapLojas() const -> QMap<QString, QString>;
@@ -40,13 +40,17 @@ public:
   auto updater() -> void;
 
 private:
+  struct Message {
+    QString message;
+    QWidget *widget = nullptr;
+  };
   // attributes
   MainWindow *window = nullptr;
   QMap<QString, QString> mapLojas;
   QSqlDatabase db;
-  QStringList errorQueue;
-  QStringList informationQueue;
-  QStringList warningQueue;
+  QVector<Message> errorQueue;
+  QVector<Message> informationQueue;
+  QVector<Message> warningQueue;
   bool inTransaction = false;
   bool isConnected = false;
   bool showingErrors = false;

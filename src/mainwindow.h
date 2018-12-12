@@ -14,7 +14,6 @@ class MainWindow final : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
-  auto showMessages(const QStringList &errorQueue, const QStringList &warningQueue, const QStringList &informationQueue) -> void;
   auto updateTables() -> void;
 
 private:

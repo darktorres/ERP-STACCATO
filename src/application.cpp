@@ -26,25 +26,25 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") { darkTheme(); }
 }
 
-void Application::enqueueError(const QString &error) {
-  errorQueue << error;
+void Application::enqueueError(const QString &error, QWidget *parent) {
+  errorQueue << Message{error, parent};
 
   if (not updating) { showMessages(); }
 }
 
-bool Application::enqueueError(const bool boolean, const QString &error) {
-  enqueueError(error);
+bool Application::enqueueError(const bool boolean, const QString &error, QWidget *parent) {
+  enqueueError(error, parent);
   return boolean;
 }
 
-void Application::enqueueWarning(const QString &warning) {
-  warningQueue << warning;
+void Application::enqueueInformation(const QString &information, QWidget *parent) {
+  informationQueue << Message{information, parent};
 
   if (not updating) { showMessages(); }
 }
 
-void Application::enqueueInformation(const QString &information) {
-  informationQueue << information;
+void Application::enqueueWarning(const QString &warning, QWidget *parent) {
+  warningQueue << Message{warning, parent};
 
   if (not updating) { showMessages(); }
 }
@@ -258,13 +258,9 @@ void Application::showMessages() {
 
   // TODO: deal with 'Lost connection to MySQL server'
 
-  if (window) {
-    window->showMessages(errorQueue, warningQueue, informationQueue);
-  } else {
-    for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(nullptr, "Erro!", error); }
-    for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(nullptr, "Aviso!", warning); }
-    for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(nullptr, "Informação!", information); }
-  }
+  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+  for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
+  for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
 
   errorQueue.clear();
   warningQueue.clear();

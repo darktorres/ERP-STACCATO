@@ -85,9 +85,9 @@ bool CadastroCliente::verifyFields() {
     if (not verifyRequiredField(line)) { return false; }
   }
 
-  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!"); }
+  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!", this); }
 
-  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!"); }
+  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
@@ -95,9 +95,9 @@ bool CadastroCliente::verifyFields() {
     query.bindValue(":cpf", ui->lineEditCPF->text());
     query.bindValue(":cnpj", ui->lineEditCNPJ->text());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se CPF/CNPJ já cadastrado!"); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se CPF/CNPJ já cadastrado!", this); }
 
-    if (query.first()) { return qApp->enqueueError(false, "CPF/CNPJ já cadastrado!"); }
+    if (query.first()) { return qApp->enqueueError(false, "CPF/CNPJ já cadastrado!", this); }
   }
 
   return true;
@@ -188,7 +188,7 @@ void CadastroCliente::updateMode() {
 bool CadastroCliente::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
-  if (data("idCliente").toString().isEmpty()) { return qApp->enqueueError(false, "idCliente vazio!"); }
+  if (data("idCliente").toString().isEmpty()) { return qApp->enqueueError(false, "idCliente vazio!", this); }
 
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + " AND desativado = FALSE");
 
@@ -227,10 +227,10 @@ void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
     query.prepare("SELECT idCliente FROM cliente WHERE cpf = :cpf");
     query.bindValue(":cpf", text);
 
-    if (not query.exec()) { return qApp->enqueueError("Erro buscando CPF: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError("Erro buscando CPF: " + query.lastError().text(), this); }
 
     if (query.first()) {
-      qApp->enqueueError("CPF já cadastrado!");
+      qApp->enqueueError("CPF já cadastrado!", this);
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -244,10 +244,10 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
     query.prepare("SELECT idCliente FROM cliente WHERE cnpj = :cnpj");
     query.bindValue(":cnpj", text);
 
-    if (not query.exec()) { return qApp->enqueueError("Erro buscando CNPJ: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError("Erro buscando CNPJ: " + query.lastError().text(), this); }
 
     if (query.first()) {
-      qApp->enqueueError("CNPJ já cadastrado!");
+      qApp->enqueueError("CNPJ já cadastrado!", this);
       viewRegisterById(query.value("idCliente"));
     }
   }
@@ -260,12 +260,12 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!");
+    return qApp->enqueueError(false, "CEP inválido!", this);
   }
 
   if (ui->lineEditNro->text().isEmpty()) {
     ui->lineEditNro->setFocus();
-    return qApp->enqueueError(false, "Número vazio!");
+    return qApp->enqueueError(false, "Número vazio!", this);
   }
 
   currentRowEnd = (tipo == Tipo::Atualizar) ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -291,9 +291,9 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 bool CadastroCliente::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
 
   if (not savingProcedures()) { return false; }
 
@@ -308,7 +308,7 @@ bool CadastroCliente::cadastrar() {
 
   primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
     if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }
@@ -325,13 +325,13 @@ bool CadastroCliente::cadastrar() {
 }
 
 void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!"); }
+  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
 
   novoEndereco();
 }
 
 void CadastroCliente::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(Tipo::Atualizar)) { return qApp->enqueueError("Não foi possível atualizar este endereço!"); }
+  if (not cadastrarEndereco(Tipo::Atualizar)) { return qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
   novoEndereco();
 }
@@ -434,7 +434,7 @@ void CadastroCliente::on_pushButtonRemoverEnd_clicked() {
 }
 
 void CadastroCliente::successMessage() {
-  qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!");
+  qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Cliente cadastrado com sucesso!", this);
   emit registerUpdated(primaryId);
 }
 

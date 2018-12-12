@@ -26,7 +26,7 @@ void CancelaProduto::setFilter(const QString &ordemCompra) {
   if (tipo == Tipo::CompraConfirmar) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM COMPRA'"); }
   if (tipo == Tipo::CompraFaturamento) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM FATURAMENTO'"); }
 
-  if (not model.select()) { return qApp->enqueueError("Erro carregando tabela: " + model.lastError().text()); }
+  if (not model.select()) { return qApp->enqueueError("Erro carregando tabela: " + model.lastError().text(), this); }
 }
 
 void CancelaProduto::setupTables() {
@@ -82,7 +82,7 @@ void CancelaProduto::setupTables() {
 void CancelaProduto::on_pushButtonSalvar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
 
   if (not qApp->startTransaction()) { return; }
 
@@ -90,7 +90,7 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation("Itens cancelados!");
+  qApp->enqueueInformation("Itens cancelados!", this);
 
   close();
 }
@@ -118,18 +118,18 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
 
       queryCompra.bindValue(":idPedido", model.data(row, "idPedido"));
 
-      if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text()); }
+      if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
 
       queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
 
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text()); }
+      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
 
       idVendas << model.data(row, "idVenda").toString();
     }
 
     if (not Sql::updateVendaStatus(idVendas)) { return false; }
   } else {
-    return qApp->enqueueError(false, "Não implementado!");
+    return qApp->enqueueError(false, "Não implementado!", this);
   }
 
   return true;

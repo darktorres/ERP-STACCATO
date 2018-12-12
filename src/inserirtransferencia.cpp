@@ -31,7 +31,7 @@ void InserirTransferencia::on_pushButtonSalvar_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation("Transferência registrada com sucesso!");
+  qApp->enqueueInformation("Transferência registrada com sucesso!", this);
   close();
 }
 
@@ -88,13 +88,13 @@ bool InserirTransferencia::cadastrar() {
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
 
 bool InserirTransferencia::verifyFields() {
-  if (ui->itemBoxDe->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'De' não preenchido!"); }
+  if (ui->itemBoxDe->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'De' não preenchido!", this); }
 
-  if (ui->itemBoxPara->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'Para' não preenchido!"); }
+  if (ui->itemBoxPara->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'Para' não preenchido!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { return qApp->enqueueError(false, "Valor não preenchido!"); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { return qApp->enqueueError(false, "Valor não preenchido!", this); }
 
-  if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError(false, "Preencha a observação!"); }
+  if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError(false, "Preencha a observação!", this); }
 
   return true;
 }

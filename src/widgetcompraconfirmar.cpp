@@ -69,7 +69,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
@@ -93,7 +93,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Compra confirmada!");
+  qApp->enqueueInformation("Compra confirmada!", this);
 }
 
 bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {
@@ -101,7 +101,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
   querySelect.prepare("SELECT idPedido, idVendaProduto FROM pedido_fornecedor_has_produto WHERE idCompra = :idCompra AND selecionado = TRUE");
   querySelect.bindValue(":idCompra", idCompra);
 
-  if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + querySelect.lastError().text()); }
+  if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + querySelect.lastError().text(), this); }
 
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE idPedido = :idPedido "
@@ -116,14 +116,14 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idPedido", querySelect.value("idPedido"));
 
-    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text()); }
+    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
 
     if (querySelect.value("idVendaProduto").toInt() != 0) {
       queryVenda.bindValue(":dataRealConf", dataConf);
       queryVenda.bindValue(":dataPrevFat", dataPrevista);
       queryVenda.bindValue(":idVendaProduto", querySelect.value("idVendaProduto"));
 
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro salvando status da venda: " + queryVenda.lastError().text()); }
+      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
     }
   }
 
@@ -133,7 +133,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
 void WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraConfirmar, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);

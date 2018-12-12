@@ -103,25 +103,25 @@ void InserirLancamento::on_pushButtonSalvar_clicked() {
 
   if (not modelContaPagamento.submitAll()) { return; }
 
-  qApp->enqueueInformation("Lançamento salvo com sucesso!");
+  qApp->enqueueInformation("Lançamento salvo com sucesso!", this);
   close();
 }
 
 bool InserirLancamento::verifyFields() {
   for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
-    if (modelContaPagamento.data(row, "dataEmissao").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "dataEmissao").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "idLoja").toInt() == 0) { return qApp->enqueueError(false, "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "idLoja").toInt() == 0) { return qApp->enqueueError(false, "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "valor").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'R$' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "valor").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Tipo' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Tipo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "dataPagamento").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "dataPagamento").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Grupo' na linha: " + QString::number(row + 1)); }
+    if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
   }
 
   return true;
@@ -130,7 +130,7 @@ bool InserirLancamento::verifyFields() {
 void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Deve selecionar uma linha primeiro!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Deve selecionar uma linha primeiro!", this); }
 
   const int row = list.first().row();
   const int newRow = modelContaPagamento.rowCount();

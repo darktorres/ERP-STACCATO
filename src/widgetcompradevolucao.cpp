@@ -99,7 +99,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
   for (const auto &item : list) {
     if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) { return; }
@@ -107,7 +107,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (not modelVendaProduto.submitAll()) { return; }
 
-  qApp->enqueueInformation("Retornado para fornecedor!");
+  qApp->enqueueInformation("Retornado para fornecedor!", this);
 }
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
@@ -142,7 +142,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       query.bindValue(":idVenda", modelVendaProduto.data(item.row(), "idVenda").toString().left(11));
       query.bindValue(":idProduto", modelVendaProduto.data(item.row(), "idProduto"));
 
-      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto: " + query.lastError().text()); }
+      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto: " + query.lastError().text(), this); }
 
       const QString idVendaProduto = query.value("idVendaProduto").toString();
 
@@ -152,7 +152,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       if (not modelConsumo.select()) { return false; }
 
-      if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!"); }
+      if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!", this); }
 
       const int newRow = modelConsumo.rowCount();
       modelConsumo.insertRow(newRow);
@@ -185,7 +185,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
   if (not qApp->startTransaction()) { return; }
 
@@ -195,7 +195,7 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   if (not modelVendaProduto.select()) { return; }
 
-  qApp->enqueueInformation("Retornado para estoque!");
+  qApp->enqueueInformation("Retornado para estoque!", this);
 }
 
 void WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked(const bool) { montaFiltro(); }

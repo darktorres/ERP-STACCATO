@@ -19,10 +19,7 @@ QVariant SqlQueryModel::data(const int row, const QString &column) const {
 bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) {
   const int index = QSqlQueryModel::record().indexOf(column);
 
-  if (index == -1) {
-    qApp->enqueueError("Coluna '" + column + "' não encontada na tabela!");
-    return false;
-  }
+  if (index == -1) { return qApp->enqueueError(false, "Coluna '" + column + "' não encontada na tabela!"); }
 
   return QSqlQueryModel::setHeaderData(index, Qt::Horizontal, value);
 }

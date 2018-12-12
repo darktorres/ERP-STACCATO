@@ -123,7 +123,7 @@ void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
 void WidgetCompraOC::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableNFe->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   if (ACBr acbr; not acbr.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
 }
@@ -131,17 +131,17 @@ void WidgetCompraOC::on_pushButtonDanfe_clicked() {
 void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this should update produto_estoque.quant
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
   const int idVendaConsumo = modelProduto.data(row, "idVendaProdutoEHC").toInt();
 
-  if (idVendaConsumo == 0) { return qApp->enqueueError("A linha não possui consumo associado!"); }
+  if (idVendaConsumo == 0) { return qApp->enqueueError("A linha não possui consumo associado!", this); }
 
   const QString status = modelProduto.data(row, "statusVP").toString();
 
-  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!"); }
+  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Continuar");
@@ -162,7 +162,7 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this shou
 
   updateTables();
 
-  qApp->enqueueInformation("Operação realizada com sucesso!");
+  qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
 bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVendaConsumo) {
@@ -175,7 +175,7 @@ bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVenda
     // TODO: change this to idPedido?
     queryDelete.bindValue(":idVendaProduto", idVendaConsumo);
 
-    if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
+    if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
   }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
@@ -184,7 +184,7 @@ bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVenda
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryCompra.bindValue(":idVendaProduto", idVendaProduto);
 
-  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
+  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), this); }
 
   QSqlQuery queryVenda;
   queryVenda.prepare(
@@ -193,7 +193,7 @@ bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVenda
       "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryVenda.bindValue(":idVendaProduto", idVendaProduto);
 
-  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
+  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text(), this); }
 
   return true;
 }

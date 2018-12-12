@@ -88,7 +88,7 @@ void PrecoEstoque::setupTables() {
 void PrecoEstoque::on_pushButtonSalvar_clicked() {
   if (not modelProduto.submitAll()) { return; }
 
-  qApp->enqueueInformation("Dados atualizados!");
+  qApp->enqueueInformation("Dados atualizados!", this);
   close();
 }
 

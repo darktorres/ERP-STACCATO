@@ -81,11 +81,11 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const 
     queryCompra.bindValue(":dataRealFat", dataReal);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text()); }
+    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + queryVenda.lastError().text()); }
+    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + queryVenda.lastError().text(), this); }
   }
 
   return true;
@@ -94,7 +94,7 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const 
 void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma compra!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma compra!", this); }
 
   QStringList idsCompra;
   QStringList fornecedores;
@@ -108,7 +108,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const int size = fornecedores.size();
 
-  if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!"); }
+  if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!", this); }
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento);
   if (not inputDlg.setFilter(idsCompra)) { return; }
@@ -135,7 +135,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Confirmado faturamento!");
+  qApp->enqueueInformation("Confirmado faturamento!", this);
 }
 
 void WidgetCompraFaturar::montaFiltro() {
@@ -151,7 +151,7 @@ void WidgetCompraFaturar::montaFiltro() {
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
@@ -161,7 +161,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::Faturamento);
   if (input.exec() != InputDialog::Accepted) { return; }
@@ -180,17 +180,17 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueError("Erro query pedido_fornecedor: " + queryCompra.lastError().text()); }
+    if (not queryCompra.exec()) { return qApp->enqueueError("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":dataPrevFat", dataPrevista);
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto: " + queryVenda.lastError().text()); }
+    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();
 
-  qApp->enqueueInformation("Operação realizada com sucesso!");
+  qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
 // TODO: 4quando importar nota vincular com as contas_pagar

@@ -255,13 +255,13 @@ void CadastroLoja::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 void CadastroLoja::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço."); }
+  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço.", this); }
 
   novoEndereco();
 }
 
 void CadastroLoja::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(true)) { return qApp->enqueueError("Não foi possível atualizar este endereço."); }
+  if (not cadastrarEndereco(true)) { return qApp->enqueueError("Não foi possível atualizar este endereço.", this); }
 
   novoEndereco();
 }
@@ -295,7 +295,7 @@ bool CadastroLoja::cadastrarEndereco(const bool isUpdate) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!");
+    return qApp->enqueueError(false, "CEP inválido!", this);
   }
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -387,14 +387,14 @@ bool CadastroLoja::viewRegister() {
   return modelAssocia2.select();
 }
 
-void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!"); }
+void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
 bool CadastroLoja::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
 
   if (not savingProcedures()) { return false; }
 
@@ -409,7 +409,7 @@ bool CadastroLoja::cadastrar() {
 
   primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -481,13 +481,13 @@ void CadastroLoja::clearConta() {
 }
 
 void CadastroLoja::on_pushButtonAdicionarConta_clicked() {
-  if (not cadastrarConta()) { return qApp->enqueueError("Não foi possível cadastrar esta conta."); }
+  if (not cadastrarConta()) { return qApp->enqueueError("Não foi possível cadastrar esta conta.", this); }
 
   novaConta();
 }
 
 void CadastroLoja::on_pushButtonAtualizarConta_clicked() {
-  if (not cadastrarConta(true)) { return qApp->enqueueError("Não foi possível cadastrar esta conta."); }
+  if (not cadastrarConta(true)) { return qApp->enqueueError("Não foi possível cadastrar esta conta.", this); }
 
   novaConta();
 }
@@ -516,7 +516,7 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
 
 bool CadastroLoja::adicionarPagamento() {
   const int row = modelPagamentos.rowCount();
-  if (not modelPagamentos.insertRow(row)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
+  if (not modelPagamentos.insertRow(row)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
 
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
@@ -527,7 +527,7 @@ bool CadastroLoja::adicionarPagamento() {
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
     const int rowTaxas = modelTaxas.rowCount();
-    if (not modelTaxas.insertRow(rowTaxas)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelTaxas.lastError().text()); }
+    if (not modelTaxas.insertRow(rowTaxas)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelTaxas.lastError().text(), this); }
 
     if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) { return false; }
     if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
@@ -566,7 +566,7 @@ void CadastroLoja::on_tablePagamentos_clicked(const QModelIndex &index) {
 void CadastroLoja::on_pushButtonRemoverPagamento_clicked() {
   const auto list = ui->tablePagamentos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   const int id = modelPagamentos.data(list.first().row(), "idPagamento").toInt();
 
@@ -574,7 +574,7 @@ void CadastroLoja::on_pushButtonRemoverPagamento_clicked() {
   query.prepare("DELETE FROM forma_pagamento WHERE idPagamento = :idPagamento");
   query.bindValue(":idPagamento", id);
 
-  if (not query.exec()) { return qApp->enqueueError("Erro apagando pagamentos: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError("Erro apagando pagamentos: " + query.lastError().text(), this); }
 
   if (not modelPagamentos.select()) { return; }
 
@@ -593,11 +593,11 @@ bool CadastroLoja::atualizarPagamento() {
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
 
-  if (not modelTaxas.removeRows(0, modelTaxas.rowCount())) { return qApp->enqueueError(false, "Erro removendo linha: " + modelTaxas.lastError().text()); }
+  if (not modelTaxas.removeRows(0, modelTaxas.rowCount())) { return qApp->enqueueError(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
     const int rowTaxas = modelTaxas.rowCount();
-    if (not modelTaxas.insertRow(rowTaxas)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelTaxas.lastError().text()); }
+    if (not modelTaxas.insertRow(rowTaxas)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelTaxas.lastError().text(), this); }
 
     if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(rowTaxas, "idPagamento"))) { return false; }
     if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
@@ -632,13 +632,13 @@ void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
 void CadastroLoja::on_pushButtonAtualizarTaxas_clicked() {
   if (not modelTaxas.submitAll()) { return; }
 
-  qApp->enqueueInformation("Taxas atualizadas!");
+  qApp->enqueueInformation("Taxas atualizadas!", this);
 }
 
 void CadastroLoja::on_pushButtonAdicionaAssociacao_clicked() {
   const auto list = ui->tableAssocia1->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   QSqlQuery query;
   query.prepare("INSERT INTO forma_pagamento_has_loja (idPagamento, idLoja) VALUES (:idPagamento, :idLoja)");
@@ -647,7 +647,7 @@ void CadastroLoja::on_pushButtonAdicionaAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", data("idLoja"));
 
-    if (not query.exec()) { qApp->enqueueError("Erro cadastrando associacao: " + query.lastError().text()); }
+    if (not query.exec()) { qApp->enqueueError("Erro cadastrando associacao: " + query.lastError().text(), this); }
   }
 
   if (not modelAssocia2.select()) { return; }
@@ -656,7 +656,7 @@ void CadastroLoja::on_pushButtonAdicionaAssociacao_clicked() {
 void CadastroLoja::on_pushButtonRemoveAssociacao_clicked() {
   const auto list = ui->tableAssocia2->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   QSqlQuery query;
   query.prepare("DELETE FROM forma_pagamento_has_loja WHERE idPagamento = :idPagamento AND idLoja = :idLoja");
@@ -665,7 +665,7 @@ void CadastroLoja::on_pushButtonRemoveAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 
-    if (not query.exec()) { qApp->enqueueError("Erro removendo associacao: " + query.lastError().text()); }
+    if (not query.exec()) { qApp->enqueueError("Erro removendo associacao: " + query.lastError().text(), this); }
   }
 
   if (not modelAssocia2.select()) { return; }

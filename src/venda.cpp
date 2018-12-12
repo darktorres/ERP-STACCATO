@@ -280,7 +280,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError("Erro buscando orçamento: " + queryOrc.lastError().text()); }
+  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError("Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
 
   ui->itemBoxVendedor->setId(queryOrc.value("idUsuario"));
   ui->itemBoxConsultor->setId(queryOrc.value("idUsuarioConsultor"));
@@ -309,7 +309,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
   queryFrete.bindValue(":idLoja", idLoja);
 
-  if (not queryFrete.exec() or not queryFrete.first()) { return qApp->enqueueError("Erro buscando parâmetros do frete: " + queryFrete.lastError().text()); }
+  if (not queryFrete.exec() or not queryFrete.first()) { return qApp->enqueueError("Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
 
   minimoFrete = queryFrete.value("valorMinimoFrete").toDouble();
   porcFrete = queryFrete.value("porcentagemFrete").toDouble();
@@ -326,7 +326,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryCredito.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryCredito.bindValue(":idCliente", queryOrc.value("idCliente"));
 
-  if (not queryCredito.exec() or not queryCredito.first()) { return qApp->enqueueError("Erro buscando crédito cliente: " + queryCredito.lastError().text()); }
+  if (not queryCredito.exec() or not queryCredito.first()) { return qApp->enqueueError("Erro buscando crédito cliente: " + queryCredito.lastError().text(), this); }
 
   ui->doubleSpinBoxCreditoTotal->setValue(queryCredito.value("credito").toDouble());
 
@@ -352,45 +352,45 @@ bool Venda::verifyFields() {
 
   if (ui->framePagamentos_2->isHidden()) { return true; }
 
-  if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!"); }
+  if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
 
   double sum = 0;
 
   Q_FOREACH (const auto &spinbox, ui->widgetPgts->listDoubleSpinPgt) { sum += spinbox->value(); }
 
-  if (not qFuzzyCompare(sum, ui->doubleSpinBoxTotalPag->value())) { return qApp->enqueueError(false, "Valor dos pagamentos difere do total!"); }
+  if (not qFuzzyCompare(sum, ui->doubleSpinBoxTotalPag->value())) { return qApp->enqueueError(false, "Valor dos pagamentos difere do total!", this); }
 
   for (int i = 0; i < ui->widgetPgts->listCheckBoxRep.size(); ++i) {
     if (ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!" and ui->widgetPgts->listLinePgt.at(i)->text().isEmpty()) {
       ui->widgetPgts->listLinePgt.at(i)->setFocus();
-      return qApp->enqueueError(false, "Faltou preencher observação do pagamento " + QString::number(i + 1) + "!");
+      return qApp->enqueueError(false, "Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
     }
 
     if (ui->widgetPgts->listDoubleSpinPgt.at(i)->value() > 0 and ui->widgetPgts->listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
       ui->widgetPgts->listComboPgt.at(i)->setFocus();
-      return qApp->enqueueError(false, "Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!");
+      return qApp->enqueueError(false, "Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
     }
 
     if (qFuzzyIsNull(ui->widgetPgts->listDoubleSpinPgt.at(i)->value()) and ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
       ui->widgetPgts->listDoubleSpinPgt.at(i)->setFocus();
-      return qApp->enqueueError(false, "Pagamento " + QString::number(i + 1) + " está com valor 0!");
+      return qApp->enqueueError(false, "Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
     }
   }
 
   if (ui->spinBoxPrazoEntrega->value() == 0) {
     ui->spinBoxPrazoEntrega->setFocus();
-    return qApp->enqueueError(false, "Por favor preencha o prazo de entrega.");
+    return qApp->enqueueError(false, "Por favor preencha o prazo de entrega.", this);
   }
 
   if (ui->itemBoxEnderecoFat->text().isEmpty()) {
     ui->itemBoxEnderecoFat->setFocus();
-    return qApp->enqueueError(false, "Deve selecionar um endereço de faturamento!");
+    return qApp->enqueueError(false, "Deve selecionar um endereço de faturamento!", this);
   }
 
   if (ui->itemBoxProfissional->getId() != 1 and not ui->checkBoxPontuacaoIsento->isChecked() and not ui->checkBoxPontuacaoPadrao->isChecked()) {
     ui->checkBoxRT->setChecked(true);
     ui->doubleSpinBoxPontuacao->setFocus();
-    return qApp->enqueueError(false, "Por favor preencha a pontuação!");
+    return qApp->enqueueError(false, "Por favor preencha a pontuação!", this);
   }
 
   return true;
@@ -463,7 +463,7 @@ void Venda::on_comboBoxPgt_currentTextChanged(const int index, const QString &te
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", ui->widgetPgts->listComboPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
 
   const int parcelas = query.value("parcelas").toInt();
 
@@ -722,7 +722,7 @@ void Venda::montarFluxoCaixa() {
         query.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
         query.bindValue(":razaoSocial", fornecedor);
 
-        if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando comissão: " + query.lastError().text()); }
+        if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando comissão: " + query.lastError().text(), this); }
 
         const double taxaComissao = query.value("comissaoLoja").toDouble() / 100;
         const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
@@ -758,7 +758,7 @@ void Venda::montarFluxoCaixa() {
         query.bindValue(":pagamento", ui->widgetPgts->listComboPgt.at(i)->currentText());
         query.bindValue(":parcela", ui->widgetPgts->listComboParc.at(i)->currentText().remove("x").toInt());
 
-        if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando taxa: " + query.lastError().text()); }
+        if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando taxa: " + query.lastError().text(), this); }
 
         if (qFuzzyIsNull(query.value("taxa").toDouble())) { continue; }
 
@@ -876,7 +876,7 @@ void Venda::on_pushButtonImprimir_clicked() {
   impressao.print();
 }
 
-void Venda::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Venda cadastrada com sucesso!"); }
+void Venda::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Venda cadastrada com sucesso!", this); }
 
 void Venda::on_pushButtonGerarExcel_clicked() {
   Excel excel(ui->lineEditVenda->text());
@@ -900,7 +900,7 @@ bool Venda::atualizarCredito() {
     query.bindValue(":credito", creditoRestante);
     query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando crédito do cliente: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando crédito do cliente: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -909,13 +909,13 @@ bool Venda::atualizarCredito() {
 bool Venda::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
 
-  if (tipo == Tipo::Atualizar) { return qApp->enqueueError(false, "Erro venda atualizar"); }
+  if (tipo == Tipo::Atualizar) { return qApp->enqueueError(false, "Erro venda atualizar", this); }
 
   if (not generateId()) { return false; }
 
-  if (not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela"); }
+  if (not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela", this); }
 
   if (not savingProcedures()) { return false; }
 
@@ -941,7 +941,7 @@ bool Venda::cadastrar() {
     query.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
     query.bindValue(":grupo", "RT's");
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query.lastError().text(), this); }
   }
   // -------------------------------------------------------------------------
 
@@ -949,7 +949,7 @@ bool Venda::cadastrar() {
 
   primaryId = ui->lineEditVenda->text();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
@@ -973,7 +973,7 @@ bool Venda::cadastrar() {
   query.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p on p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query.lastError().text(), this); }
 
   while (query.next()) {
     auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
@@ -986,7 +986,7 @@ bool Venda::cadastrar() {
   query.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
   query.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query.lastError().text(), this); }
 
   return true;
 }
@@ -999,7 +999,7 @@ bool Venda::atualizaQuantEstoque() {
     if (modelItem.data(row, "estoque").toInt() > 0) {
       query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-      if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando quant. estoque: " + query.lastError().text()); }
+      if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando quant. estoque: " + query.lastError().text(), this); }
     }
   }
 
@@ -1015,7 +1015,7 @@ bool Venda::cancelamento() {
     query.prepare("UPDATE orcamento SET status = 'ATIVO' WHERE idOrcamento = :idOrcamento");
     query.bindValue(":idOrcamento", idOrcamento);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro reativando orçamento: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro reativando orçamento: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
@@ -1023,7 +1023,7 @@ bool Venda::cancelamento() {
   query.prepare("UPDATE venda SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando venda como cancelada: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando venda como cancelada: " + query.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
@@ -1031,14 +1031,14 @@ bool Venda::cancelamento() {
                 "status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo vínculo da compra: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo vínculo da compra: " + query.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
   query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query.lastError().text(), this); }
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) {
@@ -1049,7 +1049,7 @@ bool Venda::cancelamento() {
       query.bindValue(":valor", credito);
       query.bindValue(":idCliente", model.data(0, "idCliente"));
 
-      if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando credito do cliente: " + query.lastError().text()); }
+      if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando credito do cliente: " + query.lastError().text(), this); }
     }
   }
 
@@ -1058,7 +1058,7 @@ bool Venda::cancelamento() {
   query.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando contas como canceladas: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando contas como canceladas: " + query.lastError().text(), this); }
 
   return true;
 }
@@ -1075,7 +1075,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
     }
   }
 
-  if (not ok) { return qApp->enqueueError("Um ou mais produtos não estão pendentes!"); }
+  if (not ok) { return qApp->enqueueError("Um ou mais produtos não estão pendentes!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar venda");
@@ -1091,20 +1091,20 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   const QString idOrcamento = ui->lineEditIdOrcamento->text();
 
-  qApp->enqueueInformation(idOrcamento.isEmpty() ? "Não havia Orçamento associado para ativar!" : "Orçamento " + idOrcamento + " reativado!");
+  qApp->enqueueInformation(idOrcamento.isEmpty() ? "Não havia Orçamento associado para ativar!" : "Orçamento " + idOrcamento + " reativado!", this);
 
-  qApp->enqueueInformation("Venda cancelada!");
+  qApp->enqueueInformation("Venda cancelada!", this);
   close();
 }
 
 bool Venda::generateId() {
   const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
 
-  if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!"); }
+  if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
 
   const auto idLoja = UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text());
 
-  if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!"); }
+  if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!", this); }
 
   QString id = siglaLoja.value().toString() + "-" + ui->dateTimeEdit->date().toString("yy");
 
@@ -1112,13 +1112,13 @@ bool Venda::generateId() {
   query.prepare("SELECT MAX(idVenda) AS idVenda FROM venda WHERE idVenda LIKE :id");
   query.bindValue(":id", id + "%");
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro na query: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro na query: " + query.lastError().text(), this); }
 
   const int last = query.first() ? query.value("idVenda").toString().remove(id).leftRef(4).toInt() : 0;
 
   id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
 
-  if (id.size() != 11) { return qApp->enqueueError(false, "Ocorreu algum erro ao gerar id: " + id); }
+  if (id.size() != 11) { return qApp->enqueueError(false, "Ocorreu algum erro ao gerar id: " + id, this); }
 
   id += representacao ? "R" : "";
 
@@ -1136,7 +1136,7 @@ void Venda::on_pushButtonDevolucao_clicked() {
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { resetarPagamentos(); }
 
 void Venda::on_pushButtonFreteLoja_clicked() {
-  if (qFuzzyIsNull(ui->doubleSpinBoxFrete->value())) { return qApp->enqueueError("Não há frete!"); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxFrete->value())) { return qApp->enqueueError("Não há frete!", this); }
 
   resetarPagamentos();
 
@@ -1194,7 +1194,7 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation("Dados salvos com sucesso!");
+  qApp->enqueueInformation("Dados salvos com sucesso!", this);
   close();
 }
 
@@ -1203,7 +1203,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   queryPag.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryPag.bindValue(":idCliente", data("idCliente"));
 
-  if (not queryPag.exec() or not queryPag.first()) { return qApp->enqueueError("Erro lendo credito cliente: " + queryPag.lastError().text()); }
+  if (not queryPag.exec() or not queryPag.first()) { return qApp->enqueueError("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
 
   double credito = queryPag.value("credito").toDouble();
 
@@ -1233,7 +1233,7 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
     query.prepare("SELECT comissao FROM profissional WHERE idProfissional = :idProfissional");
     query.bindValue(":idProfissional", ui->itemBoxProfissional->getId());
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando pontuação: " + query.lastError().text()); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando pontuação: " + query.lastError().text(), this); }
 
     ui->checkBoxPontuacaoIsento->setChecked(false);
     ui->doubleSpinBoxPontuacao->setMaximum(query.value("comissao").toDouble());
@@ -1297,7 +1297,7 @@ bool Venda::copiaProdutosOrcamento() {
   queryProdutos.prepare("SELECT * FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
   queryProdutos.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
-  if (not queryProdutos.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + queryProdutos.lastError().text()); }
+  if (not queryProdutos.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + queryProdutos.lastError().text(), this); }
 
   while (queryProdutos.next()) {
     const int rowItem = modelItem.rowCount();

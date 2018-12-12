@@ -134,7 +134,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateT
   QSqlQuery queryId;
 
   if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
-    return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text());
+    return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text(), this);
   }
 
   const int idCompra = queryId.value("idCompra").toInt();
@@ -167,7 +167,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateT
     queryVenda.bindValue(":dataPrevConf", dataPrevista);
     queryVenda.bindValue(":idVendaProduto", idVendaProduto);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text()); }
+    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text(), this); }
   }
 
   return true;
@@ -176,11 +176,11 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateT
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   const auto folderKey = UserSession::getSetting("User/ComprasFolder");
 
-  if (not folderKey) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!"); }
+  if (not folderKey) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   //
 
@@ -229,7 +229,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   // -------------------------------------------------------------------------
 
   updateTables();
-  qApp->enqueueInformation("Compra gerada com sucesso!");
+  qApp->enqueueInformation("Compra gerada com sucesso!", this);
 }
 
 void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &anexo) {
@@ -262,7 +262,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
   QSqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
-    qApp->enqueueError("Erro buscando próximo O.C.!");
+    qApp->enqueueError("Erro buscando próximo O.C.!", this);
     return {};
   }
 
@@ -277,7 +277,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
     query2.bindValue(":ordemCompra", oc);
 
     if (not query2.exec()) {
-      qApp->enqueueError("Erro buscando O.C.!");
+      qApp->enqueueError("Erro buscando O.C.!", this);
       return {};
     }
 
@@ -312,7 +312,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
   query.bindValue(":razaoSocial", fornecedor);
 
   if (not query.exec() or not query.first()) {
-    qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text());
+    qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text(), this);
     return {};
   }
 
@@ -320,7 +320,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
 
   if (isRepresentacao) {
     if (modelProdutos.data(row, "idVenda").toString().isEmpty()) {
-      qApp->enqueueError("'Venda' vazio!");
+      qApp->enqueueError("'Venda' vazio!", this);
       return {};
     }
 
@@ -331,7 +331,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
     idVendaList.removeDuplicates();
 
     if (idVendaList.size() > 1) {
-      qApp->enqueueError("Não pode misturar produtos de vendas diferentes na representação!");
+      qApp->enqueueError("Não pode misturar produtos de vendas diferentes na representação!", this);
       return {};
     }
   }
@@ -364,7 +364,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
   if (not modelo.exists()) {
-    qApp->enqueueError("Não encontrou o modelo do Excel!");
+    qApp->enqueueError("Não encontrou o modelo do Excel!", this);
     return {};
   }
 
@@ -377,7 +377,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString());
+    qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this);
     return {};
   }
 
@@ -388,7 +388,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
   if (not queryFornecedor.exec()) {
-    qApp->enqueueError("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text());
+    qApp->enqueueError("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text(), this);
     return {};
   }
 
@@ -440,12 +440,12 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   for (int row = list.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
   if (not xlsx.saveAs(fileName)) {
-    qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.");
+    qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this);
     return {};
   }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  qApp->enqueueInformation("Arquivo salvo como: " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como: " + fileName, this);
 
   return fileName;
 }
@@ -473,7 +473,7 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
 
     query.bindValue(":idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"));
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query.lastError().text(), this); }
   }
 
   return modelProdutos.submitAll();
@@ -482,7 +482,7 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
@@ -503,7 +503,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Itens cancelados!");
+  qApp->enqueueInformation("Itens cancelados!", this);
 }
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes

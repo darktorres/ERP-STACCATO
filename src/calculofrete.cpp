@@ -94,7 +94,7 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   query.prepare("SELECT logradouro, numero, cidade, uf FROM cliente_has_endereco WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-  if (not query.exec()) { return qApp->enqueueError("Erro buscando endereço do cliente: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError("Erro buscando endereço do cliente: " + query.lastError().text(), this); }
 
   while (query.next()) {
     ui->comboBoxDestino->addItem(query.value("logradouro").toString() + ", " + query.value("numero").toString() + ", " + query.value("cidade").toString() + ", " + query.value("uf").toString());

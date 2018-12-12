@@ -67,7 +67,7 @@ void TableView::setModel(QAbstractItemModel *model) {
     if (proxyModel) { baseModel = qobject_cast<QSqlQueryModel *>(proxyModel->sourceModel()); }
   }
 
-  if (not baseModel) { qApp->enqueueError("TableView model não implementado!"); }
+  if (not baseModel) { qApp->enqueueError("TableView model não implementado!", this); }
 
   //---------------------------------------
 

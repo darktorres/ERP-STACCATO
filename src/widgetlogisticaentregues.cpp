@@ -47,7 +47,7 @@ void WidgetLogisticaEntregues::updateTables() {
 
   modelProdutos.setQuery(modelProdutos.query().executedQuery());
 
-  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela produtos: " + modelProdutos.lastError().text()); }
+  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
 
   ui->tableProdutos->resizeColumnsToContents();
 }
@@ -99,7 +99,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
                          "FROM (`venda_has_produto` `vp` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp`.`idVendaProduto` = `ehc`.`idVendaProduto`))) WHERE idVenda = '" +
                          modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto`");
 
-  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro: " + modelProdutos.lastError().text()); }
+  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro: " + modelProdutos.lastError().text(), this); }
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -131,12 +131,12 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
   for (const auto &index : list) {
     const QString status = modelProdutos.data(index.row(), "status").toString();
 
-    if (status != "ENTREGUE") { return qApp->enqueueError("Produto não marcado como 'ENTREGUE'!"); }
+    if (status != "ENTREGUE") { return qApp->enqueueError("Produto não marcado como 'ENTREGUE'!", this); }
   }
 
   QStringList idVendas;
@@ -160,7 +160,7 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Entrega cancelada!");
+  qApp->enqueueInformation("Entrega cancelada!", this);
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
@@ -174,11 +174,11 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   for (const auto &item : list) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando veiculo_produto: " + query1.lastError().text()); }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando veiculo_produto: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text()); }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
   }
 
   return true;

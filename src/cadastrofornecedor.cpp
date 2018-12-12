@@ -86,7 +86,7 @@ bool CadastroFornecedor::verifyFields() {
     if (not verifyRequiredField(line)) { return false; }
   }
 
-  if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!"); }
+  if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
 
   return true;
 }
@@ -168,7 +168,7 @@ void CadastroFornecedor::updateMode() {
 bool CadastroFornecedor::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog!"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog!", this); }
 
   if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return false; }
 
@@ -186,7 +186,7 @@ bool CadastroFornecedor::cadastrar() {
 
   primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   return true;
 }
@@ -214,7 +214,7 @@ void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
   ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço."); }
+void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço.", this); }
 
 bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
@@ -223,7 +223,7 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!");
+    return qApp->enqueueError(false, "CEP inválido!", this);
   }
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -260,7 +260,7 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   }
 }
 
-void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!"); }
+void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
 void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
   ui->pushButtonAtualizarEnd->show();
@@ -296,7 +296,7 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
   }
 }
 
-void CadastroFornecedor::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!"); }
+void CadastroFornecedor::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!", this); }
 
 bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = model.data(mapper.currentIndex(), "razaoSocial").toString();
@@ -307,22 +307,22 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   query.bindValue(":fornecedor", fornecedor);
   query.bindValue(":oldValidade", model.data(mapper.currentIndex(), "validadeProdutos"));
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
 
   query.prepare(
       "UPDATE produto_has_preco php, produto p SET php.validadeFim = :novaValidade, expirado = FALSE WHERE php.idProduto = p.idProduto AND php.preco = p.precoVenda AND p.fornecedor = :fornecedor");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no preço/produto: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no preço/produto: " + query.lastError().text(), this); }
 
   query.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query.lastError().text(), this); }
 
-  if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text()); }
+  if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text(), this); }
 
   return true;
 }
@@ -340,7 +340,7 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation("Validade alterada com sucesso!");
+  qApp->enqueueInformation("Validade alterada com sucesso!", this);
 }
 
 // TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)

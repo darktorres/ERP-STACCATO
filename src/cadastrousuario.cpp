@@ -85,7 +85,7 @@ bool CadastroUsuario::verifyFields() {
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
     ui->lineEditPasswd->setFocus();
-    return qApp->enqueueError(false, "As senhas não batem!");
+    return qApp->enqueueError(false, "As senhas não batem!", this);
   }
 
   return true;
@@ -175,9 +175,9 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 bool CadastroUsuario::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
 
   if (not savingProcedures()) { return false; }
 
@@ -192,19 +192,19 @@ bool CadastroUsuario::cadastrar() {
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   if (tipo == Tipo::Cadastrar) {
     QSqlQuery query;
     query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
 
     query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
     query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
 
     if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
 
@@ -226,16 +226,16 @@ bool CadastroUsuario::cadastrar() {
   return true;
 }
 
-void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!"); }
+void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }
 
 void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   QSqlQuery query;
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 
-  if (not query.exec()) { return qApp->enqueueError("Erro buscando usuário: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError("Erro buscando usuário: " + query.lastError().text(), this); }
 
-  if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!"); }
+  if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!", this); }
 }
 
 void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {

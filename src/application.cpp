@@ -258,9 +258,13 @@ void Application::showMessages() {
 
   // TODO: deal with 'Lost connection to MySQL server'
 
-  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(window, "Erro!", error); }
-  for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(window, "Aviso!", warning); }
-  for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(window, "Informação!", information); }
+  if (window) {
+    window->showMessages(errorQueue, warningQueue, informationQueue);
+  } else {
+    for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(nullptr, "Erro!", error); }
+    for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(nullptr, "Aviso!", warning); }
+    for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(nullptr, "Informação!", information); }
+  }
 
   errorQueue.clear();
   warningQueue.clear();

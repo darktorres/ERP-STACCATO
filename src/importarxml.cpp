@@ -19,6 +19,7 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime dataReal,
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
   connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
   connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
+  connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
 
   setWindowFlags(Qt::Window);
 
@@ -830,6 +831,12 @@ std::optional<int> ImportarXML::buscarProximoIdEstoque() {
   idEstoque++;
 
   return idEstoque;
+}
+
+void ImportarXML::on_checkBoxSemLote_toggled(bool checked) {
+  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+    if (not modelEstoque.setData(row, "lote", checked ? "N/D" : "")) { return; }
+  }
 }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque (para cada linha do model inserir

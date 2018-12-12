@@ -51,6 +51,7 @@ private:
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
   auto mapTuples() -> QVector<std::tuple<int, int, double>>;
+  auto on_checkBoxSemLote_toggled(bool checked) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;

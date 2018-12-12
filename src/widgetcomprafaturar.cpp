@@ -61,7 +61,11 @@ void WidgetCompraFaturar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
+  ui->tableResumo->resizeColumnsToContents();
+
   if (not modelViewFaturamento.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
@@ -140,6 +144,8 @@ void WidgetCompraFaturar::montaFiltro() {
   modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE"));
 
   if (not modelViewFaturamento.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {

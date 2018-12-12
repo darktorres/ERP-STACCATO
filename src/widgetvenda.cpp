@@ -93,6 +93,8 @@ void WidgetVenda::montaFiltro() {
   modelViewVenda.setFilter(filtros.join(" AND "));
 
   if (not modelViewVenda.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
@@ -225,6 +227,8 @@ void WidgetVenda::updateTables() {
   }
 
   if (not modelViewVenda.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetVenda::on_table_activated(const QModelIndex index) {

@@ -167,6 +167,7 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
   if (not modelVendas.select()) { return; }
 
   ui->tableVendas->sortByColumn("prazoEntrega");
+  ui->tableVendas->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -175,6 +176,8 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
   // -------------------------------------------------------------------------
 
   if (not modelTranspAgend.select()) { return; }
+
+  ui->tableTranspAgend->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -221,6 +224,8 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
   ui->tableProdutos->hideColumn("dataRealEnt");
   ui->tableProdutos->hideColumn("idConsumo");
 
+  ui->tableProdutos->resizeColumnsToContents();
+
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarEntrega::calcularPeso);
 
   ui->lineEditAviso->setText(modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO" ? "Financeiro não liberou!" : "");
@@ -255,6 +260,10 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
   ui->tableVendas->sortByColumn("prazoEntrega");
 
   modelViewProdutos.setQuery("");
+
+  //-------------------------------------
+
+  ui->tableVendas->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {

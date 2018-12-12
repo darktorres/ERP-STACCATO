@@ -84,7 +84,6 @@
  */
 
 QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version_available(false), m_show_newest_version(true), m_show_update_available(true), m_silent(false) {
-
   m_progressDialog = new ProgressDialog();
   m_downloadDialog = new DownloadDialog();
 
@@ -121,7 +120,7 @@ void QSimpleUpdater::checkForUpdates() {
 
   m_manager->get(QNetworkRequest(m_reference_url));
 
-  if (not silent()) m_progressDialog->show();
+  if (not silent()) { m_progressDialog->show(); }
 }
 
 /*!

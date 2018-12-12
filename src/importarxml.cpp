@@ -430,6 +430,10 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
     }
 
     if (ok) { ui->pushButtonProcurar->setDisabled(true); }
+
+    ui->tableCompra->resizeColumnsToContents();
+    ui->tableConsumo->resizeColumnsToContents();
+    ui->tableEstoque->resizeColumnsToContents();
   }();
 
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);

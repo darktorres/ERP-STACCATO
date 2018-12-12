@@ -38,6 +38,8 @@ void WidgetLogisticaColeta::updateTables() {
   }
 
   if (not modelViewColeta.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &fornecedor) {
@@ -160,6 +162,8 @@ void WidgetLogisticaColeta::montaFiltro() {
   modelViewColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
 
   if (not modelViewColeta.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {

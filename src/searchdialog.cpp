@@ -63,6 +63,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
   if (text.isEmpty()) {
     model.setFilter(filter);
+    ui->table->resizeColumnsToContents();
     return;
   }
 
@@ -82,6 +83,8 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   model.setFilter(searchFilter);
 
   if (not model.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void SearchDialog::sendUpdateMessage() {
@@ -97,6 +100,8 @@ void SearchDialog::show() {
 
   if (not model.select()) { return; }
 
+  ui->table->resizeColumnsToContents();
+
   ui->lineEditBusca->setFocus();
   ui->lineEditBusca->clear();
 
@@ -109,6 +114,8 @@ void SearchDialog::show() {
 
 void SearchDialog::showMaximized() {
   if (not model.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 
   ui->lineEditBusca->setFocus();
 

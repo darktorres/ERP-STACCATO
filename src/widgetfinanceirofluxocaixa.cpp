@@ -43,6 +43,7 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     ui->groupBoxCaixa2->setChecked(true);
 
     setConnections();
+
     isSet = true;
   }
 
@@ -130,6 +131,12 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableFuturo->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
+
+  // ----------------------------------------------------------------------------------------------------------
+
+  ui->tableCaixa->resizeColumnsToContents();
+  ui->tableCaixa2->resizeColumnsToContents();
+  ui->tableFuturo->resizeColumnsToContents();
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {

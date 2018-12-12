@@ -30,6 +30,8 @@ void WidgetLogisticaRepresentacao::updateTables() {
   }
 
   if (not modelViewLogisticaRepresentacao.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &fornecedor) {
@@ -38,6 +40,8 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &f
   modelViewLogisticaRepresentacao.setFilter("fornecedor = '" + fornecedor + "'");
 
   if (not modelViewLogisticaRepresentacao.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 
   ui->table->sortByColumn("prazoEntrega", Qt::AscendingOrder);
 }
@@ -116,6 +120,8 @@ void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &t
   modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
 
   if (not modelViewLogisticaRepresentacao.select()) { return; }
+
+  ui->table->resizeColumnsToContents();
 }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

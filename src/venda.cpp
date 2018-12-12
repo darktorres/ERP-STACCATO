@@ -637,6 +637,8 @@ bool Venda::viewRegister() {
     idLoja = data("idLoja").toInt();
     representacao = data("representacao").toBool();
 
+    ui->tableProdutos->resizeColumnsToContents();
+
     return true;
   }();
 
@@ -1130,7 +1132,6 @@ void Venda::on_pushButtonDevolucao_clicked() {
   connect(devolucao, &Devolucao::finished, [=] { this->viewRegisterById(ui->lineEditVenda->text()); });
   devolucao->show();
 }
-
 
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { resetarPagamentos(); }
 

@@ -23,7 +23,7 @@ void WidgetFinanceiroContas::setupTables() {
   modelVencidos.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString(tipo == Tipo::Receber ? "view_a_receber_vencidos_base" : "view_a_pagar_vencidos_base") +
                          " v JOIN (SELECT @running_total := 0) r");
 
-  if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text()); }
+  if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   ui->tableVencidos->setModel(&modelVencidos);
   ui->tableVencidos->setItemDelegate(new ReaisDelegate(this));
@@ -33,7 +33,7 @@ void WidgetFinanceiroContas::setupTables() {
   modelVencer.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString(tipo == Tipo::Receber ? "view_a_receber_vencer_base" : "view_a_pagar_vencer_base") +
                        " v JOIN (SELECT @running_total := 0) r");
 
-  if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text()); }
+  if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
   ui->tableVencer->setModel(&modelVencer);
   ui->tableVencer->setItemDelegate(new ReaisDelegate(this));
@@ -84,7 +84,7 @@ void WidgetFinanceiroContas::updateTables() {
 
   model.setQuery(model.query().executedQuery());
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela resumo: " + model.lastError().text()); }
+  if (model.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
 
   ui->table->resizeColumnsToContents();
 
@@ -92,7 +92,7 @@ void WidgetFinanceiroContas::updateTables() {
 
   modelVencidos.setQuery(modelVencidos.query().executedQuery());
 
-  if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text()); }
+  if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   ui->tableVencidos->resizeColumnsToContents();
 
@@ -100,7 +100,7 @@ void WidgetFinanceiroContas::updateTables() {
 
   modelVencer.setQuery(modelVencer.query().executedQuery());
 
-  if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text()); }
+  if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
   ui->tableVencer->resizeColumnsToContents();
 }
@@ -228,7 +228,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                    filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
   }
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + model.lastError().text()); }
+  if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + model.lastError().text(), this); }
 
   model.setHeaderData("dataEmissao", "Data Emissão");
   model.setHeaderData("idVenda", "Código");
@@ -319,7 +319,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Excluir");
@@ -330,11 +330,11 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
     query.prepare("UPDATE " + QString(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET desativado = TRUE WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { return qApp->enqueueError("Erro excluindo lançamento: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError("Erro excluindo lançamento: " + query.lastError().text(), this); }
 
     montaFiltro();
 
-    qApp->enqueueInformation("Lançamento excluído com sucesso!");
+    qApp->enqueueInformation("Lançamento excluído com sucesso!", this);
   }
 }
 
@@ -343,17 +343,17 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
   QSqlQuery queryPagamento;
   queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
   queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-  if (not queryPagamento.exec() or not queryPagamento.first()) { return qApp->enqueueError("Erro buscando pagamento: " + queryPagamento.lastError().text()); }
+  if (not queryPagamento.exec() or not queryPagamento.first()) { return qApp->enqueueError("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-  if (queryPagamento.value("dataPagamento").toDate().daysTo(QDate::currentDate()) > 5) { return qApp->enqueueError("No máximo 5 dias para reverter!"); }
+  if (queryPagamento.value("dataPagamento").toDate().daysTo(QDate::currentDate()) > 5) { return qApp->enqueueError("No máximo 5 dias para reverter!", this); }
 
-  if (queryPagamento.value("grupo").toString() == "Transferência") { return qApp->enqueueError("Não pode reverter transferência!"); }
+  if (queryPagamento.value("grupo").toString() == "Transferência") { return qApp->enqueueError("Não pode reverter transferência!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Reverter");
@@ -364,10 +364,10 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     query.prepare("UPDATE " + QString(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { return qApp->enqueueError("Erro revertendo lançamento: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError("Erro revertendo lançamento: " + query.lastError().text(), this); }
 
     updateTables();
 
-    qApp->enqueueInformation("Lançamento revertido com sucesso!");
+    qApp->enqueueInformation("Lançamento revertido com sucesso!", this);
   }
 }

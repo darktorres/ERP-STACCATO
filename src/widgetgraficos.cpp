@@ -21,7 +21,7 @@ void WidgetGraficos::updateTables() {
     if (not queryChart.exec("SELECT dia, @s12:=@s12 + mes12 AS mes12, @s11:=@s11 + mes11 AS mes11, @s10:=@s10 + mes10 AS mes10, @s9:=@s9 + mes9 AS mes9, @s8:=@s8 + mes8 AS mes8, @s7:=@s7 + mes7 AS "
                             "mes7, @s6:=@s6 + mes6 AS mes6, @s5:=@s5 + mes5 AS mes5, @s4:=@s4 + mes4 AS mes4, @s3:=@s3 + mes3 AS mes3, @s2:=@s2 + mes2 AS mes2, @s1:=@s1 + mes1 AS mes1, @s0:=@s0 + "
                             "mes0 AS mes0 FROM view_relatorio_temp2 v JOIN (SELECT @s12:=0, @s11:=0,@s10:=0,@s9:=0,@s8:=0,@s7:=0,@s6:=0,@s5:=0,@s4:=0,@s3:=0,@s2:=0,@s1:=0,@s0:=0) s")) {
-      return qApp->enqueueError("Erro lendo tabela: " + queryChart.lastError().text());
+      return qApp->enqueueError("Erro lendo tabela: " + queryChart.lastError().text(), this);
     }
 
     const QDate now = QDate::currentDate();
@@ -111,7 +111,7 @@ void WidgetGraficos::updateTables() {
     series1.clear();
     series0.clear();
 
-    if (not queryChart.exec(queryChart.lastQuery())) { return qApp->enqueueError("Erro lendo tabela: " + queryChart.lastError().text()); }
+    if (not queryChart.exec(queryChart.lastQuery())) { return qApp->enqueueError("Erro lendo tabela: " + queryChart.lastError().text(), this); }
 
     int dia = 1;
 

@@ -264,7 +264,7 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<std::tuple<int, int, dou
     query.bindValue(":idEstoque", idEstoque);
     query.bindValue(":estoqueRestante", estoqueRestante);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando produto_estoque: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando produto_estoque: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -332,7 +332,7 @@ bool ImportarXML::atualizaDados() {
     query.bindValue(":dataRealFat", dataReal);
     query.bindValue(":idVendaProduto", modelCompra.data(row, "idVendaProduto"));
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query.lastError().text(), this); }
   }
 
   query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
@@ -341,7 +341,7 @@ bool ImportarXML::atualizaDados() {
     query.bindValue(":dataRealFat", dataReal);
     query.bindValue(":idCompra", idCompra);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -357,16 +357,16 @@ bool ImportarXML::verifyFields() {
     }
   }
 
-  if (not ok) { return qApp->enqueueError(false, "Nenhuma compra pareada!"); }
+  if (not ok) { return qApp->enqueueError(false, "Nenhuma compra pareada!", this); }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     const FieldColors color = static_cast<FieldColors>(modelEstoque.data(row, "quantUpd").toInt());
 
-    if (color == FieldColors::Red) { return qApp->enqueueError(false, "Nem todos os estoques estão ok!"); }
+    if (color == FieldColors::Red) { return qApp->enqueueError(false, "Nem todos os estoques estão ok!", this); }
   }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    if (modelEstoque.data(row, "lote").toString().isEmpty()) { return qApp->enqueueError(false, "Lote vazio! Se não há coloque 'N/D'"); }
+    if (modelEstoque.data(row, "lote").toString().isEmpty()) { return qApp->enqueueError(false, "Lote vazio! Se não há coloque 'N/D'", this); }
   }
 
   return true;
@@ -446,7 +446,7 @@ std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
   query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
   if (not query.exec()) {
-    qApp->enqueueError(false, "Erro lendo tabela produto: " + query.lastError().text());
+    qApp->enqueueError(false, "Erro lendo tabela produto: " + query.lastError().text(), this);
     return {};
   }
 
@@ -497,7 +497,7 @@ bool ImportarXML::verificaCNPJ(const XML &xml) {
   QSqlQuery queryLoja;
 
   // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
-  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text()); }
+  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
 
   if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != xml.cnpj) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "CNPJ da nota não é do galpão. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
@@ -515,17 +515,17 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
 
   const auto list = modelNFe.match("chaveAcesso", xml.chaveAcesso);
 
-  if (query.first() or not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
+  if (query.first() or not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
 
   return false;
 }
 
 bool ImportarXML::verificaValido(const XML &xml) {
-  if (not xml.fileContent.contains("nProt")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!"); }
+  if (not xml.fileContent.contains("nProt")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", this); }
 
   return true;
 }
@@ -535,7 +535,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT COALESCE(MAX(idNFe), 1) AS idNFe FROM nfe") or not query.first()) { return qApp->enqueueError(false, "Erro buscando próximo id: " + query.lastError().text()); }
+  if (not query.exec("SELECT COALESCE(MAX(idNFe), 1) AS idNFe FROM nfe") or not query.first()) { return qApp->enqueueError(false, "Erro buscando próximo id: " + query.lastError().text(), this); }
 
   xml.idNFe = query.value("idNFe").toInt();
 
@@ -569,7 +569,7 @@ bool ImportarXML::lerXML() {
 
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo arquivo: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo arquivo: " + file.errorString(), this); }
 
   XML xml(file.readAll(), file.fileName());
 
@@ -585,7 +585,7 @@ bool ImportarXML::lerXML() {
 bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD')")) { return qApp->enqueueError(false, "Erro buscando lojas: " + query.lastError().text()); }
+  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD')")) { return qApp->enqueueError(false, "Erro buscando lojas: " + query.lastError().text(), this); }
 
   QStringList lojas{"CD"};
 
@@ -613,7 +613,7 @@ bool ImportarXML::inserirItemModel(XML &xml) {
 
   const int newRow = modelEstoque.rowCount();
 
-  if (not modelEstoque.insertRow(newRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelEstoque.lastError().text()); }
+  if (not modelEstoque.insertRow(newRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelEstoque.lastError().text(), this); }
 
   if (not modelEstoque.setData(newRow, "idEstoque", idEstoque.value())) { return false; }
   if (not modelEstoque.setData(newRow, "idNFe", xml.idNFe)) { return false; }
@@ -708,7 +708,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   query.prepare("SELECT quant FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
   query.bindValue(":idVendaProduto", idVendaProduto);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
 
   const double quantConsumo = query.value("quant").toDouble();
   const double quantEstoque = modelEstoque.data(rowEstoque, "quant").toDouble();
@@ -724,7 +724,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
 
   const QString un = query.value("un").toString();
   const double m2cx = query.value("m2cx").toDouble();
@@ -817,7 +817,7 @@ std::optional<int> ImportarXML::buscarProximoIdEstoque() {
   QSqlQuery query;
 
   if (not query.exec("SELECT COALESCE(MAX(idEstoque), 1) AS idEstoque FROM estoque") or not query.first()) {
-    qApp->enqueueError("Erro buscando próximo id: " + query.lastError().text());
+    qApp->enqueueError("Erro buscando próximo id: " + query.lastError().text(), this);
     return {};
   }
 

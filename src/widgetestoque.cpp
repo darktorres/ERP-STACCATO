@@ -85,7 +85,7 @@ void WidgetEstoque::updateTables() {
 
   model.setQuery(model.query().executedQuery());
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
+  if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   ui->table->resizeColumnsToContents();
 }
@@ -128,7 +128,7 @@ void WidgetEstoque::montaFiltro() {
       "e.idEstoque" +
       filtroContabil);
 
-  if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text()); }
+  if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   ui->table->resizeColumnsToContents();
 }
@@ -163,7 +163,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
       "pedido_fornecedor_has_produto pf ON pf.idPedido = ehc.idPedido LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP "
       "BY e.idEstoque HAVING contabil > 0");
 
-  if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text()); }
+  if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text(), this); }
 
   const QString dir = QFileDialog::getExistingDirectory(this, "Pasta para salvar relatório");
 
@@ -173,20 +173,20 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!"); }
+  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!", this); }
 
   const QString fileName = dir + "/relatorio_contabil.xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
 
   file.close();
 
   if (not gerarExcel(arquivoModelo, fileName, modelContabil)) { return; }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  qApp->enqueueInformation("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
 }
 
 bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) {
@@ -206,7 +206,7 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo.", this); }
 
   return true;
 }

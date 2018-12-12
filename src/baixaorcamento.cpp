@@ -26,7 +26,7 @@ void BaixaOrcamento::setupTables(const QString &idOrcamento) {
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
-  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { return qApp->enqueueError("Deve preencher a observação!"); }
+  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { return qApp->enqueueError("Deve preencher a observação!", this); }
 
   QString motivo;
 
@@ -34,7 +34,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     if (child->isChecked()) { motivo = child->text(); }
   }
 
-  if (motivo.isEmpty()) { return qApp->enqueueError("Deve escolher um motivo!"); }
+  if (motivo.isEmpty()) { return qApp->enqueueError("Deve escolher um motivo!", this); }
 
   if (not modelOrcamento.setData(0, "status", "PERDIDO")) { return; }
   if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) { return; }

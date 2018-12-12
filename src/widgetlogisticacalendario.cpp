@@ -23,7 +23,7 @@ void WidgetLogisticaCalendario::listarVeiculos() {
   QSqlQuery query;
 
   if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
-    return qApp->enqueueError("Erro buscando veiculos: " + query.lastError().text());
+    return qApp->enqueueError("Erro buscando veiculos: " + query.lastError().text(), this);
   }
 
   while (query.next()) {
@@ -98,7 +98,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
 
-  if (not query.exec()) { return qApp->enqueueError("Erro query: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError("Erro query: " + query.lastError().text(), this); }
 
   while (query.next()) {
     const QString transportadora = query.value("razaoSocial").toString() + "\n" + query.value("modelo").toString();

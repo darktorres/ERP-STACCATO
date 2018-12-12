@@ -112,7 +112,7 @@ void InputDialog::on_dateEditEvento_dateChanged(const QDate &date) {
 
 void InputDialog::on_pushButtonSalvar_clicked() {
   if (tipo == Tipo::ReagendarPedido) {
-    if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError("Observação não pode estar vazio!"); }
+    if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError("Observação não pode estar vazio!", this); }
   }
 
   QDialog::accept();

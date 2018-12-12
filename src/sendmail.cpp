@@ -29,7 +29,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) { qApp->enqueueError("Erro buscando email do fornecedor: " + query.lastError().text()); }
+    if (not query.exec()) { qApp->enqueueError("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
 
     QString representante;
 
@@ -106,9 +106,9 @@ void SendMail::mailSent(const QString &status) {
 }
 
 void SendMail::successStatus() {
-  qApp->enqueueInformation(tr("Mensagem enviada!"));
+  qApp->enqueueInformation("Mensagem enviada!", this);
 
   QDialog::accept();
 }
 
-void SendMail::failureStatus(const QString &status) { qApp->enqueueError("Ocorreu erro: " + status); }
+void SendMail::failureStatus(const QString &status) { qApp->enqueueError("Ocorreu erro: " + status, this); }

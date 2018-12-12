@@ -92,7 +92,7 @@ private:
   auto validar() -> bool;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;
-  auto writeIdentificacao(QTextStream &stream) const -> void;
+  auto writeIdentificacao(QTextStream &stream) -> void;
   auto writePagamento(QTextStream &stream) -> void;
   auto writeProduto(QTextStream &stream) const -> void;
   auto writeTotal(QTextStream &stream) const -> void;

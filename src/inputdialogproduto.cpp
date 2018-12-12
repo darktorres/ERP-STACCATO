@@ -127,7 +127,7 @@ void InputDialogProduto::setupTables() {
 bool InputDialogProduto::setFilter(const QStringList &ids) {
   if (ids.isEmpty()) {
     modelPedidoFornecedor.setFilter("0");
-    return qApp->enqueueError(false, "Ids vazio!");
+    return qApp->enqueueError(false, "Ids vazio!", this);
   }
 
   QString filter;
@@ -135,7 +135,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   if (tipo == Tipo::GerarCompra) { filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'"; }
   if (tipo == Tipo::Faturamento) { filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'"; }
 
-  if (filter.isEmpty()) { return qApp->enqueueError(false, "Filtro vazio!"); }
+  if (filter.isEmpty()) { return qApp->enqueueError(false, "Filtro vazio!", this); }
 
   modelPedidoFornecedor.setFilter(filter);
 
@@ -147,12 +147,12 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   query.prepare("SELECT aliquotaSt, st FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text(), this); }
 
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
 
-  if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário."); }
+  if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário.", this); }
 
   return true;
 }

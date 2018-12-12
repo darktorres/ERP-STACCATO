@@ -28,7 +28,7 @@ RegisterDialog::RegisterDialog(const QString &table, QString primaryKey, QWidget
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
   primaryId = id.toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "primaryId vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "primaryId vazio!", this); }
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
@@ -36,7 +36,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   if (model.rowCount() == 0) {
     close();
-    return qApp->enqueueError(false, "Item não encontrado.");
+    return qApp->enqueueError(false, "Item não encontrado.", this);
   }
 
   isDirty = false;
@@ -86,7 +86,7 @@ QVariant RegisterDialog::data(const QString &key) { return model.data(mapper.cur
 QVariant RegisterDialog::data(const int row, const QString &key) { return model.data(row, key); }
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
-  if (model.fieldIndex(key) == -1) { return qApp->enqueueError("Chave " + key + " não encontrada na tabela " + model.tableName()); }
+  if (model.fieldIndex(key) == -1) { return qApp->enqueueError("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
 
   propertyName.isNull() ? mapper.addMapping(widget, model.fieldIndex(key)) : mapper.addMapping(widget, model.fieldIndex(key), propertyName);
 }
@@ -122,7 +122,7 @@ bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
       (line->text().size() < line->placeholderText().size() - 1)) {
     if (not silent) {
       line->setFocus();
-      qApp->enqueueError("Você não preencheu um campo obrigatório: " + line->accessibleName());
+      qApp->enqueueError("Você não preencheu um campo obrigatório: " + line->accessibleName(), this);
     }
 
     return false;
@@ -237,7 +237,7 @@ bool RegisterDialog::validaCNPJ(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) { return qApp->enqueueError(false, "CNPJ inválido!"); }
+  if (digito1 != text.at(12).digitValue() or digito2 != text.at(13).digitValue()) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
 
   return true;
 }
@@ -247,7 +247,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   if (text == "00000000000" or text == "11111111111" or text == "22222222222" or text == "33333333333" or text == "44444444444" or text == "55555555555" or text == "66666666666" or
       text == "77777777777" or text == "88888888888" or text == "99999999999") {
-    return qApp->enqueueError(false, "CPF inválido!");
+    return qApp->enqueueError(false, "CPF inválido!", this);
   }
 
   const QString sub = text.left(9);
@@ -278,7 +278,7 @@ bool RegisterDialog::validaCPF(const QString &text) {
 
   const int digito2 = resto2 < 2 ? 0 : 11 - resto2;
 
-  if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) { return qApp->enqueueError(false, "CPF inválido!"); }
+  if (digito1 != text.at(9).digitValue() or digito2 != text.at(10).digitValue()) { return qApp->enqueueError(false, "CPF inválido!", this); }
 
   return true;
 }

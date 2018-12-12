@@ -27,7 +27,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 }
 
 void Application::enqueueError(const QString &error, QWidget *parent) {
-  errorQueue << Message{error, parent};
+  errorQueue << Message{error, parent ? parent : window ? window : nullptr};
 
   if (not updating) { showMessages(); }
 }
@@ -38,13 +38,13 @@ bool Application::enqueueError(const bool boolean, const QString &error, QWidget
 }
 
 void Application::enqueueInformation(const QString &information, QWidget *parent) {
-  informationQueue << Message{information, parent};
+  informationQueue << Message{information, parent ? parent : window ? window : nullptr};
 
   if (not updating) { showMessages(); }
 }
 
 void Application::enqueueWarning(const QString &warning, QWidget *parent) {
-  warningQueue << Message{warning, parent};
+  warningQueue << Message{warning, parent ? parent : window ? window : nullptr};
 
   if (not updating) { showMessages(); }
 }

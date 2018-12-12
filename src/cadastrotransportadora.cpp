@@ -161,13 +161,13 @@ void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!"); }
+  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
 
   novoEndereco();
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(true)) { return qApp->enqueueError("Não foi possível atualizar este endereço!"); }
+  if (not cadastrarEndereco(true)) { return qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
   novoEndereco();
 }
@@ -199,7 +199,7 @@ bool CadastroTransportadora::cadastrarEndereco(const bool isUpdate) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!");
+    return qApp->enqueueError(false, "CEP inválido!", this);
   }
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -284,7 +284,7 @@ bool CadastroTransportadora::viewRegister() {
   return true;
 }
 
-void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!"); }
+void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!", this); }
 
 bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
   Q_FOREACH (const auto &line, ui->groupBoxVeiculo->findChildren<QLineEdit *>()) {
@@ -310,13 +310,13 @@ bool CadastroTransportadora::cadastrarVeiculo(const bool isUpdate) {
 }
 
 void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
-  if (not cadastrarVeiculo()) { return qApp->enqueueError("Não foi possível cadastrar este veículo!"); }
+  if (not cadastrarVeiculo()) { return qApp->enqueueError("Não foi possível cadastrar este veículo!", this); }
 
   novoVeiculo();
 }
 
 void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
-  if (not cadastrarVeiculo(true)) { return qApp->enqueueError("Não foi possível atualizar este veículo!"); }
+  if (not cadastrarVeiculo(true)) { return qApp->enqueueError("Não foi possível atualizar este veículo!", this); }
 
   novoVeiculo();
 }
@@ -354,9 +354,9 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 bool CadastroTransportadora::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
 
   if (not savingProcedures()) { return false; }
 
@@ -371,7 +371,7 @@ bool CadastroTransportadora::cadastrar() {
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
     if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }

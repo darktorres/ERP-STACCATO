@@ -200,7 +200,7 @@ void WidgetRelatorio::updateTables() {
 void WidgetRelatorio::setResumoOrcamento() {
   QSqlQuery query;
 
-  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text()); }
+  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text(), this); }
 
   modelOrcamento.setTable("view_resumo_relatorio");
   modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -233,20 +233,20 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!"); }
+  if (not modelo.exists()) { return qApp->enqueueError("Não encontrou o modelo do Excel!", this); }
 
   const QString fileName = dir + "/relatorio-" + ui->dateEditMes->date().toString("MM-yyyy") + ".xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
 
   file.close();
 
   if (not gerarExcel(arquivoModelo, fileName)) { return; }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-  qApp->enqueueInformation("Arquivo salvo como " + fileName);
+  qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
 }
 
 bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fileName) {
@@ -294,7 +294,7 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo.", this); }
 
   return true;
 }

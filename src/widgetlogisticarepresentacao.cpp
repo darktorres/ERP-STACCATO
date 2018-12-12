@@ -76,7 +76,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
 void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao);
 
@@ -89,7 +89,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Atualizado!");
+  qApp->enqueueInformation("Atualizado!", this);
 }
 
 bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) {
@@ -104,13 +104,13 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     query1.bindValue(":dataRealEnt", dataEntrega);
     query1.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
     query2.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
     query2.bindValue(":recebeu", recebeu);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text()); }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
   }
 
   return true;

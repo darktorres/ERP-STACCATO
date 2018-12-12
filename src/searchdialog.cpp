@@ -139,12 +139,15 @@ void SearchDialog::hideColumns(const QStringList &columns) {
 }
 
 void SearchDialog::on_pushButtonSelecionar_clicked() {
-  if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) { return qApp->enqueueError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!"); }
+  if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) {
+    return qApp->enqueueError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this);
+  }
 
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
+    const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
 
-    if (not selection.isEmpty() and model.data(selection.first().row(), "estoque").toBool()) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!"); }
+    if (not selection.isEmpty() and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }
 
   sendUpdateMessage();
@@ -168,7 +171,7 @@ QString SearchDialog::getText(const QVariant &value) {
   QSqlQuery query(queryText);
 
   if (not query.exec() or not query.first()) {
-    qApp->enqueueError("Erro na query getText: " + query.lastError().text());
+    qApp->enqueueError("Erro na query getText: " + query.lastError().text(), this);
     return QString();
   }
 

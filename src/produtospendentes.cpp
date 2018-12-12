@@ -65,7 +65,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   query.prepare("SELECT unCaixa FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto");
   query.bindValue(":idVendaProduto", modelViewProdutos.data(0, "idVendaProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando unCaixa: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando unCaixa: " + query.lastError().text(), this); }
 
   const double step = query.value("unCaixa").toDouble();
 
@@ -82,7 +82,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
       "`venda_has_produto` `vp` ON `ec`.`idVendaProduto` = `vp`.`idVendaProduto` WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque`, ecomp.idCompra HAVING restante > 0");
 
-  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + modelEstoque.lastError().text()); }
+  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
 
   modelEstoque.setHeaderData("status", "Status");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
@@ -156,7 +156,7 @@ void ProdutosPendentes::recarregarTabelas() {
 
   modelEstoque.setQuery(modelEstoque.query().executedQuery());
 
-  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro recarregando modelEstoque: " + modelEstoque.lastError().text()); }
+  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro recarregando modelEstoque: " + modelEstoque.lastError().text(), this); }
 
   ui->tableProdutos->clearSelection();
 
@@ -167,11 +167,11 @@ void ProdutosPendentes::recarregarTabelas() {
 void ProdutosPendentes::on_pushButtonComprar_clicked() {
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
 
-  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { return qApp->enqueueError("Para comprar menos que o total selecione uma linha por vez!"); }
+  if (list.size() > 1 and ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { return qApp->enqueueError("Para comprar menos que o total selecione uma linha por vez!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { return qApp->enqueueError("Quantidade 0!"); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { return qApp->enqueueError("Quantidade 0!", this); }
 
   const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
 
@@ -186,7 +186,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation("Produto enviado para carrinho!");
+  qApp->enqueueInformation("Produto enviado para carrinho!", this);
 
   recarregarTabelas();
 }
@@ -214,7 +214,7 @@ bool ProdutosPendentes::insere(const QDateTime &dataPrevista) {
   query.bindValue(":codBarras", modelViewProdutos.data(0, "codBarras"));
   query.bindValue(":dataPrevCompra", dataPrevista);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
 
   return true;
 }
@@ -240,13 +240,13 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
 void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (listProduto.size() > 1) { return qApp->enqueueError("Selecione apenas um item na tabela de produtos!"); }
+  if (listProduto.size() > 1) { return qApp->enqueueError("Selecione apenas um item na tabela de produtos!", this); }
 
-  if (listProduto.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!"); }
+  if (listProduto.isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
 
   const auto listEstoque = ui->tableEstoque->selectionModel()->selectedRows();
 
-  if (listEstoque.isEmpty()) { return qApp->enqueueError("Nenhum estoque selecionado!"); }
+  if (listEstoque.isEmpty()) { return qApp->enqueueError("Nenhum estoque selecionado!", this); }
 
   const int rowProduto = listProduto.first().row();
   const int rowEstoque = listEstoque.first().row();
@@ -269,7 +269,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation("Consumo criado com sucesso!");
+  qApp->enqueueInformation("Consumo criado com sucesso!", this);
 
   recarregarTabelas();
 }
@@ -298,7 +298,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
     query.bindValue(":dataPrevCompra", dataPrevista);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -343,7 +343,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
     query.bindValue(":caixas", (quant / step).toDouble());
   }
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
 
   return true;
 }

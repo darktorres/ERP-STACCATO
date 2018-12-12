@@ -153,9 +153,9 @@ bool CadastroProfissional::viewRegister() {
 bool CadastroProfissional::cadastrar() {
   currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
 
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog"); }
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog", this); }
 
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text()); }
+  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
 
   if (not savingProcedures()) { return false; }
 
@@ -171,7 +171,7 @@ bool CadastroProfissional::cadastrar() {
 
   primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!"); }
+  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
   return true;
 }
@@ -181,9 +181,9 @@ bool CadastroProfissional::verifyFields() {
     if (not verifyRequiredField(line)) { return false; }
   }
 
-  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!"); }
+  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!", this); }
 
-  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!"); }
+  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
 
   return true;
 }
@@ -279,7 +279,7 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
 
   if (not ui->lineEditCEP->isValid()) {
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!");
+    return qApp->enqueueError(false, "CEP inválido!", this);
   }
 
   currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
@@ -302,9 +302,9 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
   return true;
 }
 
-void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!"); }
+void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
 
-void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!"); }
+void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
 void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   if (not ui->lineEditCEP->isValid()) { return; }
@@ -373,7 +373,7 @@ void CadastroProfissional::on_lineEditCNPJBancario_textEdited(const QString &tex
   ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroProfissional::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!"); }
+void CadastroProfissional::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Profissional cadastrado com sucesso!", this); }
 
 void CadastroProfissional::on_lineEditProfissional_editingFinished() { ui->lineEditNomeBancario->setText(ui->lineEditProfissional->text()); }
 

@@ -32,7 +32,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando produto: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando produto: " + query.lastError().text(), this); }
 
   const QString un = query.value("un").toString();
   const QString un2 = un == "M2" or un == "M²" or un == "ML" ? "m2cx" : "pccx";
@@ -120,7 +120,7 @@ void WidgetCompraPendentes::setupTables() {
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   const QString status = modelViewVendaProduto.data(index.row(), "status").toString();
 
-  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está PENDENTE!"); }
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está PENDENTE!", this); }
 
   const QString financeiro = modelViewVendaProduto.data(index.row(), "statusFinanceiro").toString();
   const QString codComercial = modelViewVendaProduto.data(index.row(), "codComercial").toString();
@@ -184,9 +184,9 @@ void WidgetCompraPendentes::montaFiltro() {
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
-  if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!"); }
+  if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Nenhum produto selecionado!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { return qApp->enqueueError("Deve escolher uma quantidade!"); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { return qApp->enqueueError("Deve escolher uma quantidade!", this); }
 
   InputDialog inputDlg(InputDialog::Tipo::Carrinho);
 
@@ -194,7 +194,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   const QDate dataPrevista = inputDlg.getNextDate();
 
-  insere(dataPrevista) ? qApp->enqueueInformation("Produto enviado para compras com sucesso!") : qApp->enqueueError("Erro ao enviar produto para compras!");
+  insere(dataPrevista) ? qApp->enqueueInformation("Produto enviado para compras com sucesso!", this) : qApp->enqueueError("Erro ao enviar produto para compras!", this);
 
   ui->itemBoxProduto->clear();
 }
@@ -204,7 +204,7 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando produto: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando produto: " + query.lastError().text(), this); }
 
   QSqlQuery query2;
   query2.prepare(
@@ -226,7 +226,7 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   query2.bindValue(":codBarras", query.value("codBarras"));
   query2.bindValue(":dataPrevCompra", dataPrevista);
 
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query2.lastError().text()); }
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query2.lastError().text(), this); }
 
   return true;
 }
@@ -238,7 +238,7 @@ void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged(const doubl
 void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   Excel excel(modelViewVendaProduto.data(list.first().row(), "idVenda").toString());
   excel.gerarExcel();
@@ -247,7 +247,7 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
 void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!"); }
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   Impressao impressao(modelViewVendaProduto.data(list.first().row(), "idVenda").toString());
   impressao.print();

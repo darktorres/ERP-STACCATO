@@ -58,18 +58,18 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
-  if (not query.exec()) { return qApp->enqueueError("Erro salvando followup: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueError("Erro salvando followup: " + query.lastError().text(), this); }
 
-  qApp->enqueueInformation("Followup salvo com sucesso!");
+  qApp->enqueueInformation("Followup salvo com sucesso!", this);
   close();
 }
 
 bool FollowUp::verifyFields() {
   if (tipo == Tipo::Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
-    return qApp->enqueueError(false, "Deve selecionar uma temperatura!");
+    return qApp->enqueueError(false, "Deve selecionar uma temperatura!", this);
   }
 
-  if (ui->plainTextEdit->toPlainText().isEmpty()) { return qApp->enqueueError(false, "Deve escrever uma observação!"); }
+  if (ui->plainTextEdit->toPlainText().isEmpty()) { return qApp->enqueueError(false, "Deve escrever uma observação!", this); }
 
   return true;
 }

@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
   } else {
-    qApp->enqueueError("A chave 'hostname' não está configurada!");
+    qApp->enqueueError("A chave 'hostname' não está configurada!", this);
   }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE LOJA") {
@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(6, query.value("view_tab_financeiro").toBool());
     ui->tabWidget->setTabEnabled(7, query.value("view_tab_relatorio").toBool());
   } else {
-    qApp->enqueueError("Erro lendo permissões: " + query.lastError().text());
+    qApp->enqueueError("Erro lendo permissões: " + query.lastError().text(), this);
   }
 
   // -------------------------------------------------------------------------

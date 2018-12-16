@@ -15,6 +15,7 @@ extraction:
         - libminiupnpc-dev
         - libnatpmp-dev
         - libhunspell-dev
+        - ccache
     index:
       build_command:
         - qmake Loja.pro

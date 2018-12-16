@@ -1,0 +1,22 @@
+extraction:
+  cpp:
+    prepare:
+      packages:
+        - build-essential
+        - pkg-config
+        - libssl-dev
+        - qt5-default
+        - libqt5x11extras5-dev
+        - libqt5webkit5-dev
+        - qtmultimedia5-dev
+        - qttools5-dev-tools
+        - qt5-image-formats-plugins
+        - libqt5svg5-dev
+        - libminiupnpc-dev
+        - libnatpmp-dev
+        - libhunspell-dev
+    index:
+      build_command:
+        - source /opt/qt510/bin/qt510-env.sh
+        - /opt/qt510/bin/qmake Loja.pro
+        - make -j4

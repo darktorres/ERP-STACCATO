@@ -256,7 +256,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   bool ok;
   const double quantConsumir =
-      QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags());
+      QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
   if (not ok) { return; }
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();

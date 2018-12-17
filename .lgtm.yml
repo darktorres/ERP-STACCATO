@@ -1,0 +1,18 @@
+extraction:
+  cpp:
+    prepare:
+      packages:
+        - build-essential
+        - qt5-default
+        - qttools5-dev
+        - libqt5script5
+        - libqt5scripttools5
+        - qtscript5-dev
+        - libqt5charts5
+        - libqt5charts5-dev
+        - qtbase5-private-dev
+        - ccache
+    index:
+      build_command:
+        - qmake Loja.pro
+        - make -j4

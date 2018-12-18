@@ -314,12 +314,9 @@ void MainWindow::on_actionCadastrarFornecedor_triggered() {
 
 bool MainWindow::event(QEvent *event) {
   switch (event->type()) {
-  case QEvent::WindowActivate:
-    updateTables();
-    break;
+  case QEvent::WindowActivate: updateTables(); break;
 
-  default:
-    break;
+  default: break;
   }
 
   return QMainWindow::event(event);

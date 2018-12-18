@@ -75,12 +75,12 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   const QString fornecedor = modelViewProdutos.data(0, "fornecedor").toString();
 
   modelEstoque.setQuery(
-      "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, ecomp.idCompra, `e`.`descricao` AS `descricao`, (`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) AS `restante`, `e`.`un` AS "
+      "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, (`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) AS `restante`, `e`.`un` AS "
       "`unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) / `p`.`m2cx`), ((`e`.`quant` + COALESCE(SUM(`ec`.`quant`), 0)) / "
-      "`p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM `estoque` `e` LEFT JOIN estoque_has_compra ecomp ON "
-      "e.idEstoque = ecomp.idEstoque LEFT JOIN `estoque_has_consumo` `ec` ON `e`.`idEstoque` = `ec`.`idEstoque` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` LEFT JOIN "
-      "`venda_has_produto` `vp` ON `ec`.`idVendaProduto` = `vp`.`idVendaProduto` WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO') AND p.fornecedor = '" +
-      fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque`, ecomp.idCompra HAVING restante > 0");
+      "`p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM `estoque` `e` LEFT JOIN `estoque_has_consumo` `ec` ON "
+      "`e`.`idEstoque` = `ec`.`idEstoque` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` LEFT JOIN `venda_has_produto` `vp` ON `ec`.`idVendaProduto` = `vp`.`idVendaProduto` WHERE "
+      "e.status NOT IN ('CANCELADO', 'QUEBRADO') AND p.fornecedor = '" +
+      fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
   if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
 
@@ -96,7 +96,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
-  ui->tableEstoque->hideColumn("idCompra");
   ui->tableEstoque->resizeColumnsToContents();
 
   //-----------------------------------------------
@@ -135,7 +134,6 @@ void ProdutosPendentes::setupTables() {
 
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
-  ui->tableProdutos->hideColumn("idCompra");
 }
 
 bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
@@ -229,7 +227,6 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
     if (not dividirVenda(quantConsumir, quantVenda, rowProduto)) { return false; }
   }
 
-  if (not modelProdutos.setData(rowProduto, "idCompra", modelEstoque.data(rowEstoque, "idCompra"))) { return false; }
   if (not modelProdutos.setData(rowProduto, "status", modelEstoque.data(rowEstoque, "status"))) { return false; }
 
   if (not modelProdutos.submitAll()) { return false; }

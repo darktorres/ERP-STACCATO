@@ -245,7 +245,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
   QSqlQuery query3;
   query3.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
-                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+                 "AND status = 'EM COLETA'");
 
   for (const auto &item : list) {
     int idEstoque;
@@ -279,7 +279,6 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);
-    query2.bindValue(":codComercial", codComercial);
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
 

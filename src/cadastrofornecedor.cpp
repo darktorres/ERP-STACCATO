@@ -7,6 +7,7 @@
 #include "application.h"
 #include "cadastrofornecedor.h"
 #include "cepcompleter.h"
+#include "checkboxdelegate.h"
 #include "searchdialog.h"
 #include "ui_cadastrofornecedor.h"
 #include "usersession.h"
@@ -29,6 +30,7 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
 
+  connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroFornecedor::on_checkBoxMostrarInativos_clicked);
   connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged);
   connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJ_textEdited);
   connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditContatoCPF_textEdited);
@@ -37,7 +39,6 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizarEnd_clicked);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonBuscar_clicked);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, [=] { novoEndereco(); });
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemover_clicked);
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonRemoverEnd_clicked);
@@ -49,10 +50,14 @@ CadastroFornecedor::~CadastroFornecedor() { delete ui; }
 
 void CadastroFornecedor::setupTables() {
   ui->tableEndereco->setModel(&modelEnd);
+
   ui->tableEndereco->hideColumn("idEndereco");
-  ui->tableEndereco->hideColumn("desativado");
   ui->tableEndereco->hideColumn("idFornecedor");
   ui->tableEndereco->hideColumn("codUF");
+
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+
+  ui->tableEndereco->resizeColumnsToContents();
 }
 
 void CadastroFornecedor::setupUi() {
@@ -77,8 +82,11 @@ void CadastroFornecedor::clearEndereco() {
 void CadastroFornecedor::novoEndereco() {
   ui->pushButtonAtualizarEnd->hide();
   ui->pushButtonAdicionarEnd->show();
+  ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 bool CadastroFornecedor::verifyFields() {
@@ -157,6 +165,8 @@ void CadastroFornecedor::registerMode() {
   ui->pushButtonAtualizar->hide();
   ui->pushButtonRemover->hide();
   ui->pushButtonValidade->hide();
+
+  ui->pushButtonRemoverEnd->hide();
 }
 
 void CadastroFornecedor::updateMode() {
@@ -166,21 +176,14 @@ void CadastroFornecedor::updateMode() {
 }
 
 bool CadastroFornecedor::cadastrar() {
-  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog!", this); }
-
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return false; }
+  if (tipo == Tipo::Cadastrar) {
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
+  }
 
   if (not savingProcedures()) { return false; }
 
-  for (int column = 0; column < model.rowCount(); ++column) {
-    const QVariant dado = model.data(currentRow, column);
-
-    if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
-    }
-  }
+  if (not columnsToUpper(model, currentRow)) { return false; }
 
   if (not model.submitAll()) { return false; }
 
@@ -188,7 +191,11 @@ bool CadastroFornecedor::cadastrar() {
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  return true;
+  // -------------------------------------------------------------------------
+
+  if (not setForeignKey(modelEnd)) { return false; }
+
+  return modelEnd.submitAll();
 }
 
 void CadastroFornecedor::on_pushButtonCadastrar_clicked() { save(); }
@@ -216,19 +223,17 @@ void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
 
 void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço.", this); }
 
-bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
-  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) { return false; }
-  }
-
+bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
+    qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!", this);
+    return false;
   }
 
-  currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
-
-  if (not isUpdate) { modelEnd.insertRow(currentRowEnd); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRowEnd = modelEnd.rowCount();
+    modelEnd.insertRow(currentRowEnd);
+  }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -240,6 +245,10 @@ bool CadastroFornecedor::cadastrarEndereco(const bool isUpdate) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
+
+  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+
+  ui->tableEndereco->resizeColumnsToContents();
 
   isDirty = true;
 
@@ -260,20 +269,33 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   }
 }
 
-void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
+void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
 void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return novoEndereco(); }
+
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
+  ui->pushButtonRemoverEnd->show();
   mapperEnd.setCurrentModelIndex(index);
+  currentRowEnd = index.row();
 }
 
 bool CadastroFornecedor::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
-  modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + " AND desativado = FALSE");
+  //---------------------------------------------------
+
+  const bool inativos = ui->checkBoxMostrarInativos->isChecked();
+  modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return false; }
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
+
+  ui->tableEndereco->resizeColumnsToContents();
+
+  //---------------------------------------------------
 
   ui->pushButtonValidade->show();
 
@@ -299,13 +321,13 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
 void CadastroFornecedor::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!", this); }
 
 bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
-  const QString fornecedor = model.data(mapper.currentIndex(), "razaoSocial").toString();
+  const QString fornecedor = data("razaoSocial").toString();
 
   QSqlQuery query;
   query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = 0 WHERE fornecedor = :fornecedor AND validade = :oldValidade");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
-  query.bindValue(":oldValidade", model.data(mapper.currentIndex(), "validadeProdutos"));
+  query.bindValue(":oldValidade", data("validadeProdutos"));
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
 
@@ -341,6 +363,18 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   qApp->enqueueInformation("Validade alterada com sucesso!", this);
+}
+
+void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) {
+  if (currentRow == -1) { return; }
+
+  modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (checked ? "" : " AND desativado = FALSE"));
+
+  if (not modelEnd.select()) { return; }
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
+
+  ui->tableEndereco->resizeColumnsToContents();
 }
 
 // TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)

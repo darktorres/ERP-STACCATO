@@ -16,7 +16,7 @@ public:
   explicit WidgetLogisticaAgendarColeta(QWidget *parent = nullptr);
   ~WidgetLogisticaAgendarColeta();
   auto resetTables() -> void;
-  auto tableFornLogistica_activated(const QString &fornecedor) -> void;
+  auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
   auto updateTables() -> void;
 
 private:

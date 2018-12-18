@@ -81,7 +81,8 @@ void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setTable("view_calendario_entrega");
-  modelCalendario.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelCalendario.setFilter("");
 
   modelCalendario.setHeaderData("data", "Agendado");
   modelCalendario.setHeaderData("modelo", "Modelo");
@@ -90,13 +91,14 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCalendario.setHeaderData("idVenda", "Venda");
 
   ui->tableCalendario->setModel(&modelCalendario);
+
   ui->tableCalendario->hideColumn("idVeiculo");
+
   ui->tableCalendario->setItemDelegateForColumn("kg", new DoubleDelegate(this));
 
   // -----------------------------------------------------------------
 
   modelCarga.setTable("view_calendario_carga");
-  modelCarga.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelCarga.setHeaderData("dataPrevEnt", "Agendado");
   modelCarga.setHeaderData("numeroNFe", "NFe");
@@ -105,20 +107,17 @@ void WidgetLogisticaEntregas::setupTables() {
   modelCarga.setHeaderData("produtos", "Produtos");
   modelCarga.setHeaderData("kg", "Kg.");
 
-  modelCarga.setFilter("0");
-
-  if (not modelCarga.select()) { return; }
-
   ui->tableCarga->setModel(&modelCarga);
+
   ui->tableCarga->hideColumn("idEvento");
   ui->tableCarga->hideColumn("idNFe");
   ui->tableCarga->hideColumn("idVeiculo");
+
   ui->tableCarga->setItemDelegateForColumn("kg", new DoubleDelegate(this));
 
   // -----------------------------------------------------------------
 
   modelProdutos.setTable("view_calendario_produto");
-  modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
@@ -134,13 +133,11 @@ void WidgetLogisticaEntregas::setupTables() {
   modelProdutos.setHeaderData("local", "Local");
   modelProdutos.setHeaderData("bloco", "Bloco");
 
-  modelProdutos.setFilter("0");
-
-  if (not modelProdutos.select()) { return; }
-
   ui->tableProdutos->setModel(&modelProdutos);
+
   ui->tableProdutos->hideColumn("idEvento");
   ui->tableProdutos->hideColumn("idVendaProduto");
+
   ui->tableProdutos->setItemDelegateForColumn("kg", new DoubleDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this));
 }
@@ -216,18 +213,20 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 }
 
 void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString data = modelCalendario.data(index.row(), "data").toString();
   const QString veiculo = modelCalendario.data(index.row(), "idVeiculo").toString();
 
   modelCarga.setFilter("CAST(dataPrevEnt AS DATE) = '" + data + "' AND idVeiculo = " + veiculo);
 
-  if (not modelCarga.select()) { return; }
-
   ui->tableCarga->resizeColumnsToContents();
+
+  //--------------------------------------
 
   modelProdutos.setFilter("0");
 
-  if (not modelProdutos.select()) { return; }
+  //--------------------------------------
 
   ui->pushButtonReagendar->setDisabled(true);
   ui->pushButtonConfirmarEntrega->setDisabled(true);
@@ -237,9 +236,12 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 }
 
 void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
-  modelProdutos.setFilter("idVenda = '" + modelCarga.data(index.row(), "idVenda").toString() + "' AND idEvento = " + modelCarga.data(index.row(), "idEvento").toString());
+  if (not index.isValid()) { return; }
 
-  if (not modelProdutos.select()) { return; }
+  const QString idVenda = modelCarga.data(index.row(), "idVenda").toString();
+  const QString idEvento = modelCarga.data(index.row(), "idEvento").toString();
+
+  modelProdutos.setFilter("idVenda = '" + idVenda + "' AND idEvento = " + idEvento);
 
   ui->tableProdutos->resizeColumnsToContents();
 
@@ -267,7 +269,9 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
-  ui->pushButtonConsultarNFe->setEnabled(nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO");
+  const bool isValid = nfeStatus == "NOTA PENDENTE" or nfeStatus == "AUTORIZADO";
+
+  ui->pushButtonConsultarNFe->setEnabled(isValid);
 }
 
 bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
@@ -351,9 +355,11 @@ void WidgetLogisticaEntregas::montaFiltro() {
 
   modelCarga.setFilter(text.isEmpty() ? "0" : "idVenda LIKE '%" + text + "%'");
 
-  if (not modelCarga.select()) { return; }
-
   ui->tableCarga->resizeColumnsToContents();
+
+  //--------------------------------------
+
+  modelProdutos.setFilter("0");
 }
 
 void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {

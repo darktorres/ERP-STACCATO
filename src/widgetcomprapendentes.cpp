@@ -72,7 +72,7 @@ void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
     setConnections();
 
-    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
+    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, this));
     ui->itemBoxProduto->setRepresentacao(false);
 
     connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
@@ -96,9 +96,12 @@ void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
 void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setTable("view_venda_produto");
 
-  modelViewVendaProduto.setHeaderData("data", "Data");
-  modelViewVendaProduto.setHeaderData("fornecedor", "Fornecedor");
+  modelViewVendaProduto.setSort("idVenda", Qt::AscendingOrder);
+
+  modelViewVendaProduto.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelViewVendaProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
   modelViewVendaProduto.setHeaderData("idVenda", "Venda");
+  modelViewVendaProduto.setHeaderData("fornecedor", "Fornecedor");
   modelViewVendaProduto.setHeaderData("produto", "Produto");
   modelViewVendaProduto.setHeaderData("caixas", "Caixas");
   modelViewVendaProduto.setHeaderData("quant", "Quant.");
@@ -108,7 +111,6 @@ void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setHeaderData("formComercial", "Form. Com.");
   modelViewVendaProduto.setHeaderData("status", "Status");
   modelViewVendaProduto.setHeaderData("statusFinanceiro", "Financeiro");
-  modelViewVendaProduto.setHeaderData("dataFinanceiro", "Data Fin.");
   modelViewVendaProduto.setHeaderData("obs", "Obs.");
 
   ui->table->setModel(new FinanceiroProxyModel(&modelViewVendaProduto, this));
@@ -164,12 +166,9 @@ void WidgetCompraPendentes::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text();
+  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR fornecedor LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR `codComercial` LIKE '%" + textoBusca + "%')";
 
-  if (not textoBusca.isEmpty()) {
-    const QString filtroBusca =
-        "((idVenda LIKE '%" + textoBusca + "%') OR (fornecedor LIKE '%" + textoBusca + "%') OR (produto LIKE '%" + textoBusca + "%') OR (`codComercial` LIKE '%" + textoBusca + "%'))";
-    filtros << filtroBusca;
-  }
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
   //-------------------------------------
 
@@ -177,9 +176,6 @@ void WidgetCompraPendentes::montaFiltro() {
 
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
 
-  if (not modelViewVendaProduto.select()) { return; }
-
-  ui->table->sortByColumn("idVenda");
   ui->table->resizeColumnsToContents();
 }
 
@@ -240,7 +236,9 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  Excel excel(modelViewVendaProduto.data(list.first().row(), "idVenda").toString());
+  const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
+
+  Excel excel(idVenda, Excel::Tipo::Venda);
   excel.gerarExcel();
 }
 
@@ -249,7 +247,9 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  Impressao impressao(modelViewVendaProduto.data(list.first().row(), "idVenda").toString());
+  const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
+
+  Impressao impressao(idVenda, Impressao::Tipo::Venda);
   impressao.print();
 }
 

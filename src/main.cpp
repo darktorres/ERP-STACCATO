@@ -6,12 +6,6 @@
 #include <QSharedMemory>
 
 int main(int argc, char *argv[]) {
-
-#ifdef QT_DEBUG
-  qSetMessagePattern("%{function}:%{file}:%{line} - %{message}");
-#else
-  qSetMessagePattern("%{message}");
-#endif
   Application app(argc, argv);
 
 #ifdef Q_OS_WIN
@@ -35,8 +29,6 @@ int main(int argc, char *argv[]) {
 #else
   window.show();
 #endif
-
-  app.setWindow(&window);
 
   return app.exec();
 }

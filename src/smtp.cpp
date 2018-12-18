@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "application.h"
 #include "smtp.h"
 
-Smtp::Smtp(QString user, QString pass, QString host, const quint16 port, const int timeout) : timeout(timeout), host(std::move(host)), pass(std::move(pass)), user(std::move(user)), port(port) {
+Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
   socket = new QSslSocket(this);
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);

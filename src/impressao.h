@@ -9,14 +9,15 @@
 class Impressao final {
 
 public:
-  explicit Impressao(const QString &id);
+  enum class Tipo { Orcamento, Venda };
+  explicit Impressao(const QString &id, const Tipo tipo);
   ~Impressao() = default;
   Impressao(const Impressao &) = delete;
   auto print() -> void;
 
 private:
   // attributes
-  enum class Tipo { Orcamento, Venda } tipo;
+  const Tipo tipo;
   const QString id;
   QSqlQuery queryCliente;
   QSqlQuery queryEndEnt;
@@ -29,7 +30,6 @@ private:
   SqlRelationalTableModel modelItem;
   // methods
   auto setQuerys() -> bool;
-  auto verificaTipo() -> void;
 };
 
 #endif // IMPRESSAO_H

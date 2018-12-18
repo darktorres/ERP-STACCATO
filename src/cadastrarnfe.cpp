@@ -66,13 +66,14 @@ CadastrarNFe::~CadastrarNFe() { delete ui; }
 
 void CadastrarNFe::setupTables() {
   modelVenda.setTable("venda");
-  modelVenda.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
   if (not modelVenda.select()) { return; }
 
+  //----------------------------------------------------------
+
   modelLoja.setTable("loja");
-  modelLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
 
@@ -87,7 +88,6 @@ void CadastrarNFe::setupTables() {
   // TODO: make a table.dataChanged connection that takes the changed value and update it in the original table (only the allowed values)
 
   modelViewProdutoEstoque.setTable("view_produto_estoque");
-  modelViewProdutoEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewProdutoEstoque.setHeaderData("fornecedor", "Fornecedor");
   modelViewProdutoEstoque.setHeaderData("produto", "Produto");
@@ -105,6 +105,7 @@ void CadastrarNFe::setupTables() {
   modelViewProdutoEstoque.setHeaderData("cfop", "CFOP");
 
   ui->tableItens->setModel(&modelViewProdutoEstoque);
+
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
   // TODO: these works only on some lines
@@ -121,6 +122,7 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("vBCCOFINS", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
+
   ui->tableItens->hideColumn("idProduto");
   ui->tableItens->hideColumn("idVendaProduto");
   ui->tableItens->hideColumn("numeroPedido");
@@ -465,12 +467,16 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
       return qApp->enqueueError("Erro buscando idVendaProduto " + QString::number(item), this);
     }
 
+    //--------------------------------------
+
     filter += QString(filter.isEmpty() ? "" : " OR ") + "idVendaProduto = " + QString::number(item);
   }
 
   modelViewProdutoEstoque.setFilter(filter);
 
   if (not modelViewProdutoEstoque.select()) { return; }
+
+  //--------------------------------------
 
   preencherNumeroNFe();
 
@@ -495,6 +501,8 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   ui->lineEditEmitenteInscEstadual->setText(queryEmitente.value("inscEstadual").toString());
   ui->lineEditEmitenteTel1->setText(queryEmitente.value("tel").toString());
   ui->lineEditEmitenteTel2->setText(queryEmitente.value("tel2").toString());
+
+  //--------------------------------------
 
   QSqlQuery queryEmitenteEndereco;
   queryEmitenteEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, uf, cep FROM loja_has_endereco WHERE idLoja = :idLoja");
@@ -1060,6 +1068,8 @@ void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
 }
 
 void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   unsetConnections();
 
   [=] {
@@ -1350,19 +1360,19 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
     ui->frame_2->hide();
   }
 
-  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {}
+  //  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {}
 
-  if (text == "20 - Com redução de base de cálculo") {}
+  //  if (text == "20 - Com redução de base de cálculo") {}
 
-  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {}
+  //  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {}
 
-  if (text == "40 - Isenta") {}
+  //  if (text == "40 - Isenta") {}
 
-  if (text == "41 - Não tributada") {}
+  //  if (text == "41 - Não tributada") {}
 
-  if (text == "50 - Suspensão") {}
+  //  if (text == "50 - Suspensão") {}
 
-  if (text == "51 - Diferimento") {}
+  //  if (text == "51 - Diferimento") {}
 
   if (text == "60 - ICMS cobrado anteriormente por substituição tributária") {
     ui->frame->hide();
@@ -1373,31 +1383,31 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
     // TODO: icms retido anteriormente, é outro campo?
   }
 
-  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {}
+  //  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {}
 
-  if (text == "90 - Outras") {}
+  //  if (text == "90 - Outras") {}
 
   // simples nacional
 
-  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {}
+  //  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {}
 
-  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {}
+  //  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {}
 
-  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {}
+  //  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {}
 
-  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {}
+  //  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {}
 
-  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {}
+  //  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {}
 
-  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {}
+  //  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {}
 
-  if (text == "400 - Não tributada pelo Simples Nacional") {}
+  //  if (text == "400 - Não tributada pelo Simples Nacional") {}
 
-  if (text == "300 - Imune") {}
+  //  if (text == "300 - Imune") {}
 
-  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {}
+  //  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {}
 
-  if (text == "900 - Outros") {}
+  //  if (text == "900 - Outros") {}
 }
 
 void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(const int index) {

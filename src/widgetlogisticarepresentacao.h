@@ -16,7 +16,7 @@ public:
   explicit WidgetLogisticaRepresentacao(QWidget *parent = nullptr);
   ~WidgetLogisticaRepresentacao();
   auto resetTables() -> void;
-  auto tableFornLogistica_activated(const QString &fornecedor) -> void;
+  auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
   auto updateTables() -> void;
 
 private:

@@ -13,7 +13,7 @@
 #include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime dataReal, QWidget *parent) : QDialog(parent), dataReal(std::move(dataReal)), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
@@ -30,7 +30,6 @@ ImportarXML::~ImportarXML() { delete ui; }
 
 void ImportarXML::setupTables() {
   modelEstoque.setTable("estoque");
-  modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque.setHeaderData("status", "Status");
   modelEstoque.setHeaderData("numeroNFe", "NFe");
@@ -48,12 +47,10 @@ void ImportarXML::setupTables() {
   modelEstoque.setHeaderData("valor", "R$");
   modelEstoque.setHeaderData("vICMSST", "ST");
 
-  modelEstoque.setFilter("0");
-
-  if (not modelEstoque.select()) { return; }
-
   ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
+
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
+
   ui->tableEstoque->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("lote", new SingleEditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("bloco", new SingleEditDelegate(this));
@@ -63,6 +60,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
+
   ui->tableEstoque->hideColumn("idEstoque");
   ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("recebidoPor");
@@ -101,10 +99,11 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
 
+  ui->tableEstoque->resizeColumnsToContents();
+
   // -------------------------------------------------------------------------
 
   modelConsumo.setTable("estoque_has_consumo");
-  modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelConsumo.setHeaderData("status", "Status");
   modelConsumo.setHeaderData("numeroNFe", "NFe");
@@ -119,14 +118,13 @@ void ImportarXML::setupTables() {
   modelConsumo.setHeaderData("valorUnid", "R$ Unid.");
   modelConsumo.setHeaderData("valor", "R$");
 
-  modelConsumo.setFilter("0");
-
-  if (not modelConsumo.select()) { return; }
-
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelConsumo, this));
+
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
+
   ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+
   ui->tableConsumo->hideColumn("idPedido");
   ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("quantUpd");
@@ -168,10 +166,11 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->hideColumn("pCOFINS");
   ui->tableConsumo->hideColumn("vCOFINS");
 
+  ui->tableConsumo->resizeColumnsToContents();
+
   // -------------------------------------------------------------------------
 
   modelCompra.setTable("pedido_fornecedor_has_produto");
-  modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelCompra.setHeaderData("status", "Status");
   modelCompra.setHeaderData("ordemCompra", "OC");
@@ -197,11 +196,14 @@ void ImportarXML::setupTables() {
   if (not modelCompra.select()) { return; }
 
   ui->tableCompra->setModel(new EstoqueProxyModel(&modelCompra, this));
+
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
+
   ui->tableCompra->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+
   ui->tableCompra->hideColumn("idVendaProduto");
   ui->tableCompra->hideColumn("selecionado");
   ui->tableCompra->hideColumn("statusFinanceiro");
@@ -226,23 +228,15 @@ void ImportarXML::setupTables() {
   ui->tableCompra->hideColumn("aliquotaSt");
   ui->tableCompra->hideColumn("st");
 
+  ui->tableCompra->resizeColumnsToContents();
+
   // -------------------------------------------------------------------------
 
   modelNFe.setTable("nfe");
-  modelNFe.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelNFe.setFilter("0");
-
-  if (not modelNFe.select()) { return; }
 
   // -------------------------------------------------------------------------
 
   modelEstoque_compra.setTable("estoque_has_compra");
-  modelEstoque_compra.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelEstoque_compra.setFilter("0");
-
-  if (not modelEstoque_compra.select()) { return; }
 }
 
 bool ImportarXML::cadastrarProdutoEstoque(const QVector<std::tuple<int, int, double>> &tuples) {
@@ -404,13 +398,10 @@ bool ImportarXML::limparAssociacoes() {
     if (not modelEstoque.setData(row, "quantUpd", static_cast<int>(FieldColors::None))) { return false; }
   }
 
-  while (modelConsumo.rowCount() > 0) {
-    if (not modelConsumo.removeRow(0)) { return false; }
-  }
+  modelConsumo.revertAll();
+  modelEstoque_compra.revertAll();
 
-  if (not modelEstoque_compra.select()) { return false; }
-
-  return modelConsumo.submitAll();
+  return true;
 }
 
 void ImportarXML::on_pushButtonProcurar_clicked() {
@@ -694,7 +685,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   for (int column = 0, columnCount = modelEstoque.columnCount(); column < columnCount; ++column) {
     const QString field = modelEstoque.record().fieldName(column);
-    const int index = modelConsumo.fieldIndex(field);
+    const int index = modelConsumo.fieldIndex(field, true);
 
     if (index == -1) { continue; }
     if (column == modelEstoque.fieldIndex("cfop")) { break; }
@@ -757,7 +748,7 @@ bool ImportarXML::produtoCompativel(const int rowCompra, const QString &codComer
 }
 
 bool ImportarXML::reparear(const QModelIndex &index) {
-  if (index.column() != modelEstoque.fieldIndex("codComercial")) { return true; }
+  if (index.column() != modelEstoque.fieldIndex("codComercial") and index.column() != modelEstoque.fieldIndex("quant")) { return true; }
 
   return parear();
 }
@@ -807,6 +798,10 @@ bool ImportarXML::parear() {
 
     return true;
   }();
+
+  ui->tableEstoque->resizeColumnsToContents();
+  ui->tableConsumo->resizeColumnsToContents();
+  ui->tableCompra->resizeColumnsToContents();
 
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
 

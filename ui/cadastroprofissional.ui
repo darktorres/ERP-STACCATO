@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1286</width>
-    <height>651</height>
+    <width>1592</width>
+    <height>684</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -297,13 +297,6 @@
              <widget class="QPushButton" name="pushButtonAtualizarEnd">
               <property name="text">
                <string>Atualizar End.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButtonEndLimpar">
-              <property name="text">
-               <string>Limpar seleção</string>
               </property>
              </widget>
             </item>
@@ -1006,16 +999,6 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonCancelar">
-       <property name="text">
-        <string>Cancelar</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -1039,11 +1022,6 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>LineEditCEP</class>
    <extends>QLineEdit</extends>
    <header>src/lineeditcep.h</header>
@@ -1052,6 +1030,11 @@ color: rgb(0, 0, 0);</string>
    <class>LineEditTel</class>
    <extends>QLineEdit</extends>
    <header>src/lineedittel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1066,6 +1049,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>comboBoxTipo</tabstop>
   <tabstop>itemBoxVendedor</tabstop>
   <tabstop>doubleSpinBoxComissao</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>
@@ -1087,9 +1071,13 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>
-  <tabstop>pushButtonEndLimpar</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
+  <tabstop>pushButtonCadastrar</tabstop>
+  <tabstop>pushButtonAtualizar</tabstop>
+  <tabstop>pushButtonBuscar</tabstop>
+  <tabstop>pushButtonNovoCad</tabstop>
+  <tabstop>pushButtonRemover</tabstop>
   <tabstop>lineEditNomeBancario</tabstop>
   <tabstop>lineEditCPFBancario</tabstop>
   <tabstop>lineEditCNPJBancario</tabstop>
@@ -1097,12 +1085,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditAgencia</tabstop>
   <tabstop>lineEditCC</tabstop>
   <tabstop>checkBoxPoupanca</tabstop>
-  <tabstop>pushButtonCadastrar</tabstop>
-  <tabstop>pushButtonAtualizar</tabstop>
-  <tabstop>pushButtonBuscar</tabstop>
-  <tabstop>pushButtonNovoCad</tabstop>
-  <tabstop>pushButtonRemover</tabstop>
-  <tabstop>pushButtonCancelar</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

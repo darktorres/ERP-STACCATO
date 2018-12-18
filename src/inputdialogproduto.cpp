@@ -9,6 +9,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "singleeditdelegate.h"
+#include "sortfilterproxymodel.h"
 #include "ui_inputdialogproduto.h"
 
 InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
@@ -43,6 +44,8 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->doubleSpinBoxST->hide();
 
     ui->labelEvento->setText("Data faturamento:");
+
+    ui->table->setEditTriggers(QTableView::NoEditTriggers);
   }
 
   setConnections();
@@ -72,7 +75,7 @@ void InputDialogProduto::unsetConnections() {
 
 void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
-  modelPedidoFornecedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
@@ -90,7 +93,8 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
 
-  ui->table->setModel(&modelPedidoFornecedor);
+  ui->table->setModel(new SortFilterProxyModel(&modelPedidoFornecedor, this));
+
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
@@ -116,7 +120,9 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+
   ui->table->setItemDelegate(new NoEditDelegate(this));
+
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
@@ -125,10 +131,7 @@ void InputDialogProduto::setupTables() {
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {
-  if (ids.isEmpty()) {
-    modelPedidoFornecedor.setFilter("0");
-    return qApp->enqueueError(false, "Ids vazio!", this);
-  }
+  if (ids.isEmpty()) { return qApp->enqueueError(false, "Ids vazio!", this); }
 
   QString filter;
 

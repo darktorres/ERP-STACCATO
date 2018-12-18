@@ -110,7 +110,6 @@ void Contas::preencher(const QModelIndex &index) {
 
 void Contas::setupTables() {
   modelPendentes.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
-  modelPendentes.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
@@ -132,6 +131,7 @@ void Contas::setupTables() {
   modelPendentes.setHeaderData("subGrupo", "SubGrupo");
 
   ui->tablePendentes->setModel(&modelPendentes);
+
   ui->tablePendentes->setItemDelegate(new DoubleDelegate(this));
 
   ui->tablePendentes->setItemDelegateForColumn("dataEmissao", new NoEditDelegate(this));
@@ -183,7 +183,6 @@ void Contas::setupTables() {
   // -------------------------------------------------------------------------
 
   modelProcessados.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
-  modelProcessados.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
@@ -205,11 +204,14 @@ void Contas::setupTables() {
   modelProcessados.setHeaderData("subGrupo", "SubGrupo");
 
   ui->tableProcessados->setModel(&modelProcessados);
+
   ui->tableProcessados->setItemDelegate(new DoubleDelegate(this));
+
   ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
+
   ui->tableProcessados->hideColumn("representacao");
   ui->tableProcessados->hideColumn("idPagamento");
   ui->tableProcessados->hideColumn("idVenda");
@@ -258,28 +260,13 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
 
-    modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE"
-                                               : "idVenda LIKE '" + idVenda + "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE");
-
-    if (not modelPendentes.select()) { return; }
-
-    for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
-      ui->tablePendentes->openPersistentEditor(row, "status");
-      ui->tablePendentes->openPersistentEditor(row, "contaDestino");
-      ui->tablePendentes->openPersistentEditor(row, "centroCusto");
-    }
+    modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE"
+                                               : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE");
 
     // -------------------------------------------------------------------------
 
-    modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE"
-                                                 : "idVenda = '" + idVenda + "' AND status != 'PENDENTE' AND status != 'CANCELADO' AND status != 'CONFERIDO' AND representacao = FALSE");
-
-    if (not modelProcessados.select()) { return; }
-
-    for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
-      ui->tableProcessados->openPersistentEditor(row, "contaDestino");
-      ui->tableProcessados->openPersistentEditor(row, "centroCusto");
-    }
+    modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE"
+                                                 : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE");
   }
 
   if (tipo == Tipo::Pagar) {
@@ -296,26 +283,32 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO')" : "idCompra = '" + idCompra + "' AND status IN ('PENDENTE', 'CONFERIDO')");
 
-    if (not modelPendentes.select()) { return; }
-
-    for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
-      ui->tablePendentes->openPersistentEditor(row, "status");
-      ui->tablePendentes->openPersistentEditor(row, "contaDestino"); // FIXME: slow
-      ui->tablePendentes->openPersistentEditor(row, "centroCusto");  // FIXME: slow
-    }
-
     // -------------------------------------------------------------------------
 
     modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO')"
                                                : "idCompra = " + idCompra + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO')");
-
-    if (not modelProcessados.select()) { return; }
-
-    for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
-      ui->tableProcessados->openPersistentEditor(row, "contaDestino");
-      ui->tableProcessados->openPersistentEditor(row, "centroCusto");
-    }
   }
+
+  if (not modelPendentes.select()) { return; }
+
+  for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
+    ui->tablePendentes->openPersistentEditor(row, "status");
+    ui->tablePendentes->openPersistentEditor(row, "contaDestino"); // FIXME: slow
+    ui->tablePendentes->openPersistentEditor(row, "centroCusto");  // FIXME: slow
+  }
+
+  ui->tablePendentes->resizeColumnsToContents();
+
+  // -------------------------------------------------------------------------
+
+  if (not modelProcessados.select()) { return; }
+
+  for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
+    ui->tableProcessados->openPersistentEditor(row, "contaDestino");
+    ui->tableProcessados->openPersistentEditor(row, "centroCusto");
+  }
+
+  ui->tableProcessados->resizeColumnsToContents();
 }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago

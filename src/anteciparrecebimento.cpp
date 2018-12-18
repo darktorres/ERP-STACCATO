@@ -104,7 +104,6 @@ void AnteciparRecebimento::calcularTotais() {
 
 void AnteciparRecebimento::setupTables() {
   modelContaReceber.setTable("conta_a_receber_has_pagamento");
-  modelContaReceber.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelContaReceber.setHeaderData("dataEmissao", "Data Emissão");
   modelContaReceber.setHeaderData("idVenda", "Código");
@@ -127,11 +126,12 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("contraParte", "Contraparte");
   modelContaReceber.setHeaderData("statusFinanceiro", "Financeiro");
 
-  modelContaReceber.setFilter("(status = 'PENDENTE' OR status = 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
+  modelContaReceber.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
 
   if (not modelContaReceber.select()) { return; }
 
   ui->table->setModel(&modelContaReceber);
+
   ui->table->hideColumn("representacao");
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
@@ -149,6 +149,7 @@ void AnteciparRecebimento::setupTables() {
   ui->table->hideColumn("desativado");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 }
 
@@ -158,13 +159,13 @@ void AnteciparRecebimento::montaFiltro() {
 
   if (textTipo == "Cartão de crédito" or textTipo == "Cartão de débito") {
     modelContaReceber.setFilter("(tipo LIKE '%Cartão de crédito%' OR tipo LIKE '%Cartão de débito%' OR tipo LIKE '%Taxa Cartão%') AND representacao = FALSE AND idVenda LIKE '" + textLoja +
-                                "%' AND (status = 'PENDENTE' OR status = 'CONFERIDO') AND desativado = FALSE ORDER BY dataPagamento");
+                                "%' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE ORDER BY dataPagamento");
   } else {
     modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%' AND idVenda LIKE '" + textLoja +
-                                "%' AND (status = 'PENDENTE' or status = 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
+                                "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
   }
 
-  if (not modelContaReceber.select()) { return; }
+  ui->table->resizeColumnsToContents();
 }
 
 void AnteciparRecebimento::on_comboBoxLoja_currentTextChanged(const QString &) { montaFiltro(); }
@@ -216,7 +217,6 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   SqlRelationalTableModel modelContaPagar;
   modelContaPagar.setTable("conta_a_pagar_has_pagamento");
-  modelContaPagar.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   QSqlQuery query;
   query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");

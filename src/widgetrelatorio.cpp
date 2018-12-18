@@ -60,39 +60,42 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
 void WidgetRelatorio::setupTables() {
   modelViewRelatorio.setTable("view_relatorio");
-  modelViewRelatorio.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewRelatorio.setHeaderData("idVenda", "Venda");
 
   ui->tableRelatorio->setModel(&modelViewRelatorio);
+
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
+
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
 
   // -------------------------------------------------------------------------
 
   modelViewRelatorioVendedor.setTable("view_relatorio_vendedor");
-  modelViewRelatorioVendedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
+
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
+
   ui->tableTotalVendedor->hideColumn("idUsuario");
   ui->tableTotalVendedor->hideColumn("Mês");
 
   // -------------------------------------------------------------------------
 
   modelViewRelatorioLoja.setTable("view_relatorio_loja");
-  modelViewRelatorioLoja.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
+
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
+
   ui->tableTotalLoja->hideColumn("Mês");
 }
 
@@ -203,7 +206,8 @@ void WidgetRelatorio::setResumoOrcamento() {
   if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text(), this); }
 
   modelOrcamento.setTable("view_resumo_relatorio");
-  modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelOrcamento.setFilter("");
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
     if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor"); }
@@ -212,6 +216,7 @@ void WidgetRelatorio::setResumoOrcamento() {
   if (not modelOrcamento.select()) { return; }
 
   ui->tableResumoOrcamento->setModel(&modelOrcamento);
+
   ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Anteriores", new ReaisDelegate(this));
   ui->tableResumoOrcamento->setItemDelegateForColumn("Gerados Mes", new ReaisDelegate(this));
   ui->tableResumoOrcamento->setItemDelegateForColumn("Revalidados Mes", new ReaisDelegate(this));

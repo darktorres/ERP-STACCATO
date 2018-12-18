@@ -39,12 +39,13 @@ void WidgetCompraGerar::calcularPreco() {
 void WidgetCompraGerar::setupTables() {
   modelResumo.setTable("view_fornecedor_compra_gerar");
 
+  modelResumo.setFilter("");
+
   ui->tableResumo->setModel(&modelResumo);
 
   //---------------------------------------------------------------------------------------
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
-  modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProdutos.setHeaderData("selecionado", "");
   modelProdutos.setHeaderData("idVenda", "Código");
@@ -66,11 +67,11 @@ void WidgetCompraGerar::setupTables() {
   modelProdutos.setHeaderData("obs", "Obs.");
   modelProdutos.setHeaderData("status", "Status");
 
-  modelProdutos.setFilter("0");
-
   ui->tableProdutos->setModel(&modelProdutos);
+
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("statusFinanceiro");
   ui->tableProdutos->hideColumn("selecionado");
@@ -101,7 +102,7 @@ void WidgetCompraGerar::setConnections() {
   connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
   connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
   connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
-  connect(ui->tableResumo, &TableView::activated, this, &WidgetCompraGerar::on_tableResumo_activated);
+  connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked);
 }
 
 void WidgetCompraGerar::updateTables() {
@@ -345,7 +346,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
-    Excel excel(idVenda);
+    Excel excel(idVenda, Excel::Tipo::Venda);
     const QString representacao = "OC " + QString::number(oc) + " " + idVenda + " " + fornecedor;
     if (not excel.gerarExcel(oc, true, representacao)) { return {}; }
     return excel.getFileName();
@@ -452,12 +453,12 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
 void WidgetCompraGerar::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->tableProdutos->selectAll() : ui->tableProdutos->clearSelection(); }
 
-void WidgetCompraGerar::on_tableResumo_activated(const QModelIndex &index) {
+void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
 
   modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
-
-  if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->resizeColumnsToContents();
 }

@@ -34,23 +34,22 @@ void WidgetLogisticaRepresentacao::updateTables() {
   ui->table->resizeColumnsToContents();
 }
 
-void WidgetLogisticaRepresentacao::tableFornLogistica_activated(const QString &fornecedor) {
+void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
 
-  modelViewLogisticaRepresentacao.setFilter("fornecedor = '" + fornecedor + "'");
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
-  if (not modelViewLogisticaRepresentacao.select()) { return; }
+  modelViewLogisticaRepresentacao.setFilter(filtro);
 
   ui->table->resizeColumnsToContents();
-
-  ui->table->sortByColumn("prazoEntrega", Qt::AscendingOrder);
 }
 
 void WidgetLogisticaRepresentacao::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaRepresentacao::setupTables() {
   modelViewLogisticaRepresentacao.setTable("view_logistica_representacao");
-  modelViewLogisticaRepresentacao.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelViewLogisticaRepresentacao.setFilter("");
 
   modelViewLogisticaRepresentacao.setHeaderData("idVenda", "Venda");
   modelViewLogisticaRepresentacao.setHeaderData("cliente", "Cliente");
@@ -63,11 +62,10 @@ void WidgetLogisticaRepresentacao::setupTables() {
   modelViewLogisticaRepresentacao.setHeaderData("ordemCompra", "OC");
   modelViewLogisticaRepresentacao.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  modelViewLogisticaRepresentacao.setFilter("0");
-
-  if (not modelViewLogisticaRepresentacao.select()) { return; }
+  modelViewLogisticaRepresentacao.setSort("prazoEntrega", Qt::AscendingOrder);
 
   ui->table->setModel(new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this));
+
   ui->table->hideColumn("idPedido");
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idVendaProduto");
@@ -118,8 +116,6 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) {
   modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
-
-  if (not modelViewLogisticaRepresentacao.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

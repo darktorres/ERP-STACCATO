@@ -97,6 +97,11 @@ QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version
   setApplicationVersion(qApp->applicationVersion());
 }
 
+QSimpleUpdater::~QSimpleUpdater() {
+  delete m_progressDialog;
+  delete m_downloadDialog;
+}
+
 /*!
  * Returns the downloaded change log as a \c QString.
  *

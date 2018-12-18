@@ -31,7 +31,6 @@ InserirLancamento::~InserirLancamento() { delete ui; }
 
 void InserirLancamento::setupTables() {
   modelContaPagamento.setTable(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento");
-  modelContaPagamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelContaPagamento.setHeaderData("dataEmissao", "Data Emissão");
   modelContaPagamento.setHeaderData("contraParte", "ContraParte");
@@ -43,12 +42,10 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setHeaderData("grupo", "Grupo");
   modelContaPagamento.setHeaderData("subGrupo", "SubGrupo");
 
-  modelContaPagamento.setFilter("0");
-
-  if (not modelContaPagamento.select()) { return; }
-
   ui->table->setModel(&modelContaPagamento);
+
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
   ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
@@ -59,6 +56,7 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
+
   ui->table->hideColumn("nfe");
   ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");

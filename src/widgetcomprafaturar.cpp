@@ -26,6 +26,8 @@ WidgetCompraFaturar::~WidgetCompraFaturar() { delete ui; }
 void WidgetCompraFaturar::setupTables() {
   modelResumo.setTable("view_fornecedor_compra_faturar");
 
+  modelResumo.setFilter("");
+
   ui->tableResumo->setModel(&modelResumo);
 
   //---------------------------------------------------------------------------
@@ -35,7 +37,9 @@ void WidgetCompraFaturar::setupTables() {
   modelViewFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
 
   ui->table->setModel(&modelViewFaturamento);
+
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
+
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("representacao");
 }
@@ -62,6 +66,8 @@ void WidgetCompraFaturar::updateTables() {
   if (not modelResumo.select()) { return; }
 
   ui->tableResumo->resizeColumnsToContents();
+
+  //--------------------------------------
 
   if (not modelViewFaturamento.select()) { return; }
 
@@ -142,8 +148,6 @@ void WidgetCompraFaturar::montaFiltro() {
   const bool representacao = ui->checkBoxRepresentacao->isChecked();
 
   modelViewFaturamento.setFilter("representacao = " + QString(representacao ? "TRUE" : "FALSE"));
-
-  if (not modelViewFaturamento.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

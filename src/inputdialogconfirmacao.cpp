@@ -7,6 +7,7 @@
 #include "application.h"
 #include "inputdialogconfirmacao.h"
 #include "orcamento.h"
+#include "sortfilterproxymodel.h"
 #include "ui_inputdialogconfirmacao.h"
 
 InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
@@ -106,11 +107,12 @@ void InputDialogConfirmacao::on_dateEditEvento_dateChanged(const QDate &date) {
 void InputDialogConfirmacao::setupTables() {
   if (tipo == Tipo::Recebimento) {
     modelEstoque.setTable("estoque");
-    modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
     modelEstoque.setHeaderData("status", "Status");
     modelEstoque.setHeaderData("local", "Local");
     modelEstoque.setHeaderData("fornecedor", "Fornecedor");
     modelEstoque.setHeaderData("descricao", "Produto");
+    modelEstoque.setHeaderData("observacao", "Obs.");
     modelEstoque.setHeaderData("quant", "Quant.");
     modelEstoque.setHeaderData("un", "Un.");
     modelEstoque.setHeaderData("caixas", "Cx.");
@@ -118,12 +120,10 @@ void InputDialogConfirmacao::setupTables() {
     modelEstoque.setHeaderData("lote", "Lote");
     modelEstoque.setHeaderData("bloco", "Bloco");
 
-    modelEstoque.setFilter("0");
+    ui->tableLogistica->setModel(new SortFilterProxyModel(&modelEstoque, this));
 
-    if (not modelEstoque.select()) { return; }
-
-    ui->tableLogistica->setModel(&modelEstoque);
     ui->tableLogistica->hideColumn("idEstoque");
+    ui->tableLogistica->hideColumn("idNFe");
     ui->tableLogistica->hideColumn("recebidoPor");
     ui->tableLogistica->hideColumn("idProduto");
     ui->tableLogistica->hideColumn("quantUpd");
@@ -166,7 +166,7 @@ void InputDialogConfirmacao::setupTables() {
 
   if (tipo == Tipo::Entrega) {
     modelVeiculo.setTable("veiculo_has_produto");
-    modelVeiculo.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
     modelVeiculo.setHeaderData("idVenda", "Venda");
     modelVeiculo.setHeaderData("status", "Status");
     modelVeiculo.setHeaderData("fornecedor", "Fornecedor");
@@ -180,11 +180,8 @@ void InputDialogConfirmacao::setupTables() {
     modelVeiculo.setHeaderData("codComercial", "Cód. Com.");
     modelVeiculo.setHeaderData("formComercial", "Form. Com.");
 
-    modelVeiculo.setFilter("0");
+    ui->tableLogistica->setModel(new SortFilterProxyModel(&modelVeiculo, this));
 
-    if (not modelVeiculo.select()) { return; }
-
-    ui->tableLogistica->setModel(&modelVeiculo);
     ui->tableLogistica->hideColumn("id");
     ui->tableLogistica->hideColumn("data");
     ui->tableLogistica->hideColumn("idEvento");
@@ -199,10 +196,7 @@ void InputDialogConfirmacao::setupTables() {
 }
 
 bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &idEvento) { // entrega
-  if (id.isEmpty()) {
-    modelVeiculo.setFilter("0");
-    return qApp->enqueueError(false, "IdsCompra vazio!", this);
-  }
+  if (id.isEmpty()) { return qApp->enqueueError(false, "IdsCompra vazio!", this); }
 
   const QString filter = "idVenda = '" + id + "' AND idEvento = " + idEvento;
 
@@ -210,22 +204,23 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 
   if (not modelVeiculo.select()) { return false; }
 
+  ui->tableLogistica->resizeColumnsToContents();
+
   ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
   return true;
 }
 
 bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebimento
-  if (ids.isEmpty()) {
-    modelEstoque.setFilter("0");
-    return qApp->enqueueError(false, "IdsCompra vazio!", this);
-  }
+  if (ids.isEmpty()) { return qApp->enqueueError(false, "IdsCompra vazio!", this); }
 
   const QString filter = "idEstoque = " + ids.join(" OR idEstoque = ");
 
   modelEstoque.setFilter(filter);
 
   if (not modelEstoque.select()) { return false; }
+
+  ui->tableLogistica->resizeColumnsToContents();
 
   setWindowTitle("Estoque: " + ids.join(", "));
 
@@ -415,7 +410,6 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   SqlRelationalTableModel modelVendaProduto;
   modelVendaProduto.setTable("venda_has_produto");
-  modelVendaProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelVendaProduto.setFilter("idVendaProduto = " + modelVeiculo.data(row, "idVendaProduto").toString());
 
@@ -473,7 +467,6 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 
   SqlRelationalTableModel modelCliente;
   modelCliente.setTable("cliente");
-  modelCliente.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   QSqlQuery query;
   query.prepare("SELECT idCliente FROM venda WHERE idVenda = :idVenda");

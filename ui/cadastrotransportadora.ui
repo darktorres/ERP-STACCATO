@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1176</width>
-    <height>685</height>
+    <width>1360</width>
+    <height>697</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -552,13 +552,6 @@ color: rgb(0, 0, 0);</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonEndLimpar">
-           <property name="text">
-            <string>Limpar seleção</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="pushButtonRemoverEnd">
            <property name="text">
             <string>Remover End.</string>
@@ -603,13 +596,6 @@ color: rgb(0, 0, 0);</string>
           <widget class="QPushButton" name="pushButtonAtualizarVeiculo">
            <property name="text">
             <string>Atualizar Veíc.</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButtonVeiculoLimpar">
-           <property name="text">
-            <string>Limpar seleção</string>
            </property>
           </widget>
          </item>
@@ -778,10 +764,10 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditModelo</tabstop>
   <tabstop>lineEditCarga</tabstop>
   <tabstop>lineEditPlaca</tabstop>
+  <tabstop>lineEditUfPlaca</tabstop>
   <tabstop>tableVeiculo</tabstop>
   <tabstop>pushButtonAdicionarVeiculo</tabstop>
   <tabstop>pushButtonAtualizarVeiculo</tabstop>
-  <tabstop>pushButtonVeiculoLimpar</tabstop>
   <tabstop>pushButtonRemoverVeiculo</tabstop>
   <tabstop>checkBoxMostrarInativosVeiculo</tabstop>
   <tabstop>comboBoxTipoEnd</tabstop>
@@ -795,7 +781,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>
-  <tabstop>pushButtonEndLimpar</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>

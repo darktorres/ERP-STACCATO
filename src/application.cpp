@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.32");
+  setApplicationVersion("0.6.33");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -27,7 +27,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 }
 
 void Application::enqueueError(const QString &error, QWidget *parent) {
-  errorQueue << Message{error, parent ? parent : window ? window : nullptr};
+  errorQueue << Message{error, parent};
 
   if (not updating) { showMessages(); }
 }
@@ -38,13 +38,13 @@ bool Application::enqueueError(const bool boolean, const QString &error, QWidget
 }
 
 void Application::enqueueInformation(const QString &information, QWidget *parent) {
-  informationQueue << Message{information, parent ? parent : window ? window : nullptr};
+  informationQueue << Message{information, parent};
 
   if (not updating) { showMessages(); }
 }
 
 void Application::enqueueWarning(const QString &warning, QWidget *parent) {
-  warningQueue << Message{warning, parent ? parent : window ? window : nullptr};
+  warningQueue << Message{warning, parent};
 
   if (not updating) { showMessages(); }
 }
@@ -140,7 +140,7 @@ bool Application::runSqlJobs() {
 
 void Application::startSqlPing() {
   auto *timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, [] { QSqlQuery("DO 0").exec(); });
+  connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
   timer->start(60000);
 
   // TODO: se ping falhar marcar 'desconectado'?
@@ -282,5 +282,3 @@ void Application::updater() {
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
 }
-
-void Application::setWindow(MainWindow *value) { window = value; }

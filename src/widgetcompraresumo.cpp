@@ -10,6 +10,8 @@ WidgetCompraResumo::~WidgetCompraResumo() { delete ui; }
 void WidgetCompraResumo::setupTables() {
   modelResumo.setTable("view_fornecedor_compra");
 
+  modelResumo.setFilter("");
+
   modelResumo.setHeaderData("fornecedor", "Forn.");
 
   ui->tableResumo->setModel(&modelResumo);

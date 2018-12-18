@@ -43,16 +43,12 @@ void WidgetCompraOC::resetTables() { modelIsSet = false; }
 
 void WidgetCompraOC::setupTables() {
   modelPedido.setTable("view_ordemcompra_resumo");
-  modelPedido.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   ui->tablePedido->setModel(&modelPedido);
 
   //------------------------------------------------------
 
   modelProduto.setTable("view_ordemcompra");
-  modelProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelProduto.setFilter("0");
 
   modelProduto.setHeaderData("statusPF", "Status Compra");
   modelProduto.setHeaderData("statusVP", "Status Venda");
@@ -74,10 +70,12 @@ void WidgetCompraOC::setupTables() {
   modelProduto.setHeaderData("obs", "Obs.");
 
   ui->tableProduto->setModel(&modelProduto);
+
   ui->tableProduto->setItemDelegateForColumn("quant", new DoubleDelegate(this));
   ui->tableProduto->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProduto->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableProduto->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
+
   ui->tableProduto->hideColumn("idVendaProdutoPF");
   ui->tableProduto->hideColumn("idPedido");
   ui->tableProduto->hideColumn("idCompra");
@@ -86,13 +84,11 @@ void WidgetCompraOC::setupTables() {
   //------------------------------------------------------
 
   modelNFe.setTable("view_ordemcompra_nfe");
-  modelNFe.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelNFe.setFilter("0");
 
   modelNFe.setHeaderData("numeroNFe", "NFe");
 
   ui->tableNFe->setModel(&modelNFe);
+
   ui->tableNFe->hideColumn("ordemCompra");
   ui->tableNFe->hideColumn("idNFe");
 }
@@ -105,17 +101,15 @@ void WidgetCompraOC::setConnections() {
 }
 
 void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const QString oc = modelPedido.data(index.row(), "OC").toString();
 
   modelProduto.setFilter("ordemCompra = " + oc);
 
-  if (not modelProduto.select()) { return; }
-
   ui->tableProduto->resizeColumnsToContents();
 
   modelNFe.setFilter("ordemCompra = " + oc);
-
-  if (not modelNFe.select()) { return; }
 
   ui->tableNFe->resizeColumnsToContents();
 }
@@ -204,8 +198,6 @@ void WidgetCompraOC::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
-
-  if (not modelPedido.select()) { return; }
 
   ui->tablePedido->resizeColumnsToContents();
 }

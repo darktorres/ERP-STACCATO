@@ -32,7 +32,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  sdProduto = SearchDialog::produto(true, this);
+  sdProduto = SearchDialog::produto(true, true, this);
   connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
 
@@ -52,9 +52,6 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
 CadastroProduto::~CadastroProduto() { delete ui; }
 
-// TODO: implement necessary stuff here
-bool CadastroProduto::viewRegister() { return RegisterDialog::viewRegister(); }
-
 void CadastroProduto::clearFields() {
   Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { line->clear(); }
 
@@ -66,6 +63,8 @@ void CadastroProduto::clearFields() {
   ui->radioButtonLote->setChecked(false);
 
   ui->dateEditValidade->setDate(QDate(1900, 1, 1));
+
+  ui->textEditObserv->clear();
 }
 
 void CadastroProduto::updateMode() {
@@ -86,38 +85,33 @@ bool CadastroProduto::verifyFields() {
   }
 
   if (ui->comboBoxUn->currentText().isEmpty()) {
+    qApp->enqueueError("Faltou preencher unidade!", this);
     ui->comboBoxUn->setFocus();
-    return qApp->enqueueError(false, "Faltou preencher unidade!", this);
+    return false;
   }
 
   if (ui->dateEditValidade->date().toString("dd-MM-yyyy") == "01-01-1900") {
+    qApp->enqueueError("Faltou preencher validade!", this);
     ui->dateEditValidade->setFocus();
-    return qApp->enqueueError(false, "Faltou preencher validade!", this);
+    return false;
   }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxCusto->value())) {
+    qApp->enqueueError("Custo inválido!", this);
     ui->doubleSpinBoxCusto->setFocus();
-    return qApp->enqueueError(false, "Custo inválido!", this);
+    return false;
   }
 
   if (qFuzzyIsNull(ui->doubleSpinBoxVenda->value())) {
+    qApp->enqueueError("Preço inválido!", this);
     ui->doubleSpinBoxVenda->setFocus();
-    return qApp->enqueueError(false, "Preço inválido!", this);
+    return false;
   }
 
   if (ui->itemBoxFornecedor->getId().isNull()) {
+    qApp->enqueueError("Faltou preencher fornecedor!", this);
     ui->itemBoxFornecedor->setFocus();
-    return qApp->enqueueError(false, "Faltou preencher fornecedor!", this);
-  }
-
-  if (ui->lineEditICMS->text().isEmpty()) {
-    ui->lineEditICMS->setFocus();
-    return qApp->enqueueError(false, "Faltou preencher ICMS!", this);
-  }
-
-  if (ui->lineEditCodComer->text().isEmpty()) {
-    ui->lineEditCodComer->setFocus();
-    return qApp->enqueueError(false, "Faltou preencher Código comercial!", this);
+    return false;
   }
 
   if (tipo == Tipo::Cadastrar) {
@@ -229,24 +223,18 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
-
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
+  }
 
   if (not savingProcedures()) { return false; }
 
-  for (int column = 0; column < model.rowCount(); ++column) {
-    const QVariant dado = model.data(currentRow, column);
-    if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
-    }
-  }
+  if (not columnsToUpper(model, currentRow)) { return false; }
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 

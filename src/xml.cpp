@@ -1,7 +1,7 @@
 #include "xml.h"
 #include "application.h"
 
-XML::XML(QByteArray fileContent, QString fileName) : fileContent(std::move(fileContent)), fileName(std::move(fileName)) { montarArvore(); }
+XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(); }
 
 void XML::readChild(QDomElement &element, QStandardItem *elementItem) {
   QDomElement child = element.firstChildElement();

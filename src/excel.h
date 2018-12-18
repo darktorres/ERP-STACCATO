@@ -9,13 +9,14 @@
 class Excel final {
 
 public:
-  Excel(QString id);
+  enum class Tipo { Orcamento, Venda };
+  Excel(const QString &id, const Tipo tipo);
   auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> bool;
   auto getFileName() const -> QString;
 
 private:
   // attributes
-  enum class Tipo { Orcamento, Venda } tipo;
+  const Tipo tipo;
   const QString id;
   QSqlQuery query;
   QSqlQuery queryCliente;
@@ -30,7 +31,6 @@ private:
   // methods
   auto hideUnusedRows(QXlsx::Document &xlsx) -> void;
   auto setQuerys() -> bool;
-  auto verificaTipo() -> void;
 };
 
 #endif // EXCEL_H

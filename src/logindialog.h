@@ -25,6 +25,7 @@ private:
   auto on_pushButtonConfig_clicked() -> void;
   auto on_pushButtonLogin_clicked() -> void;
   auto setComboBox() -> void;
+  auto verificaVersao() -> bool;
 };
 
 #endif // LOGINDIALOG_H

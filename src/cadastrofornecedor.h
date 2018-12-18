@@ -23,10 +23,11 @@ private:
   // methods
   auto ajustarValidade(const int novaValidade) -> bool;
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipo = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
+  auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
   auto on_lineEditContatoCPF_textEdited(const QString &text) -> void;

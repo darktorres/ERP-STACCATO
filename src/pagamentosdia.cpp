@@ -37,7 +37,7 @@ void PagamentosDia::setupTables() {
 bool PagamentosDia::setFilter(const QDate &date, const QString &idConta) {
   const QString filtroConta = idConta.isEmpty() ? "" : "AND idConta = " + idConta;
 
-  modelViewFluxoCaixa.setFilter("`Data` = '" + date.toString("yyyy-MM-dd") + "' AND (status = 'PAGO' OR status = 'RECEBIDO') " + filtroConta);
+  modelViewFluxoCaixa.setFilter("`Data` = '" + date.toString("yyyy-MM-dd") + "' AND status IN ('PAGO', 'RECEBIDO') " + filtroConta);
 
   if (not modelViewFluxoCaixa.select()) { return false; }
 

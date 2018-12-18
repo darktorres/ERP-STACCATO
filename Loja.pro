@@ -152,6 +152,7 @@ SOURCES += \
     src/sendmail.cpp \
     src/singleeditdelegate.cpp \
     src/smtp.cpp \
+    src/sortfilterproxymodel.cpp \
     src/sql.cpp \
     src/sqlquerymodel.cpp \
     src/sqlrelationaltablemodel.cpp \
@@ -262,6 +263,7 @@ HEADERS  += \
     src/sendmail.h \
     src/singleeditdelegate.h \
     src/smtp.h \
+    src/sortfilterproxymodel.h \
     src/sql.h \
     src/sqlquerymodel.h \
     src/sqlrelationaltablemodel.h \

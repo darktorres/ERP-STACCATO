@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1115</width>
-    <height>846</height>
+    <width>1135</width>
+    <height>894</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -954,13 +954,6 @@ color: rgb(0, 0, 0);</string>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButtonEndLimpar">
-              <property name="text">
-               <string>Limpar seleção</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="pushButtonRemoverEnd">
               <property name="text">
                <string>Remover End.</string>
@@ -1031,6 +1024,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditCPF</tabstop>
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
+  <tabstop>checkBoxInscEstIsento</tabstop>
+  <tabstop>dateEdit</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>
@@ -1041,8 +1036,25 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditIdNextel</tabstop>
   <tabstop>lineEditNextel</tabstop>
   <tabstop>lineEditEmail</tabstop>
+  <tabstop>doubleSpinBoxCredito</tabstop>
+  <tabstop>itemBoxProfissional</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
   <tabstop>lineEditSegmento</tabstop>
   <tabstop>checkBox_4</tabstop>
+  <tabstop>comboBoxTipoEnd</tabstop>
+  <tabstop>lineEditCEP</tabstop>
+  <tabstop>lineEditLogradouro</tabstop>
+  <tabstop>lineEditNro</tabstop>
+  <tabstop>lineEditComp</tabstop>
+  <tabstop>lineEditBairro</tabstop>
+  <tabstop>lineEditCidade</tabstop>
+  <tabstop>lineEditUF</tabstop>
+  <tabstop>tableEndereco</tabstop>
+  <tabstop>pushButtonAdicionarEnd</tabstop>
+  <tabstop>pushButtonAtualizarEnd</tabstop>
+  <tabstop>pushButtonRemoverEnd</tabstop>
+  <tabstop>checkBoxMostrarInativos</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>

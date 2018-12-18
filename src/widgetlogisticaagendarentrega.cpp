@@ -12,6 +12,7 @@
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "sortfilterproxymodel.h"
 #include "sql.h"
 #include "ui_widgetlogisticaagendarentrega.h"
 #include "usersession.h"
@@ -23,7 +24,8 @@ WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
 
 void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setTable("view_entrega_pendente");
-  modelVendas.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelVendas.setSort("prazoEntrega", Qt::AscendingOrder);
 
   modelVendas.setHeaderData("idVenda", "Venda");
   modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
@@ -32,6 +34,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setHeaderData("dataRealReceb", "Receb.");
 
   ui->tableVendas->setModel(new FinanceiroProxyModel(&modelVendas, this));
+
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 
   ui->tableVendas->hideColumn("data");
@@ -39,7 +42,6 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   // -----------------------------------------------------------------
 
   modelTranspAtual.setTable("veiculo_has_produto");
-  modelTranspAtual.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelTranspAtual.setHeaderData("idVenda", "Venda");
   modelTranspAtual.setHeaderData("status", "Status");
@@ -53,11 +55,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelTranspAtual.setHeaderData("unCaixa", "Un./Cx.");
   modelTranspAtual.setHeaderData("formComercial", "Form. Com.");
 
-  modelTranspAtual.setFilter("0");
-
-  if (not modelTranspAtual.select()) { return; }
-
   ui->tableTranspAtual->setModel(&modelTranspAtual);
+
   ui->tableTranspAtual->hideColumn("id");
   ui->tableTranspAtual->hideColumn("idEstoque");
   ui->tableTranspAtual->hideColumn("idEvento");
@@ -73,7 +72,6 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   // -----------------------------------------------------------------
 
   modelTranspAgend.setTable("veiculo_has_produto");
-  modelTranspAgend.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("idVenda", "Venda");
@@ -89,11 +87,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelTranspAgend.setHeaderData("unCaixa", "Un./Cx.");
   modelTranspAgend.setHeaderData("formComercial", "Form. Com.");
 
-  modelTranspAgend.setFilter("0");
-
-  if (not modelTranspAgend.select()) { return; }
-
   ui->tableTranspAgend->setModel(&modelTranspAgend);
+
   ui->tableTranspAgend->hideColumn("id");
   ui->tableTranspAgend->hideColumn("idEvento");
   ui->tableTranspAgend->hideColumn("idVeiculo");
@@ -166,12 +161,13 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
 
   if (not modelVendas.select()) { return; }
 
-  ui->tableVendas->sortByColumn("prazoEntrega");
   ui->tableVendas->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
   modelViewProdutos.setQuery(modelViewProdutos.query().executedQuery());
+
+  if (modelViewProdutos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela: " + modelViewProdutos.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
@@ -187,6 +183,8 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
 void WidgetLogisticaAgendarEntrega::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   modelViewProdutos.setQuery(
       "SELECT `vp`.`idVendaProduto` AS `idVendaProduto`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` AS `status`, "
       "`vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`idNFeFutura` AS `NFe Fut.`, `vp`.`produto` AS `produto`, e.idEstoque, e.lote, e.local, e.bloco, `vp`.`caixas` AS "
@@ -213,11 +211,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
   modelViewProdutos.setHeaderData("formComercial", "Form. Com.");
   modelViewProdutos.setHeaderData("dataPrevEnt", "Prev. Ent.");
 
-  auto *proxyFilter = new QSortFilterProxyModel(this);
-  proxyFilter->setDynamicSortFilter(true);
-  proxyFilter->setSourceModel(&modelViewProdutos);
-
-  ui->tableProdutos->setModel(proxyFilter);
+  ui->tableProdutos->setModel(new SortFilterProxyModel(&modelViewProdutos, this));
 
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
@@ -254,10 +248,6 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
   //-------------------------------------
 
   modelVendas.setFilter(filtros.join(" AND "));
-
-  if (not modelVendas.select()) { return; }
-
-  ui->tableVendas->sortByColumn("prazoEntrega");
 
   modelViewProdutos.setQuery("");
 
@@ -390,6 +380,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   }
 
   if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
+
+  ui->tableTranspAtual->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
@@ -412,8 +404,6 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString 
   if (not modelTranspAtual.select()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
-
-  if (not modelTranspAgend.select()) { return; }
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 
@@ -440,8 +430,6 @@ void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &dat
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
-
-  if (not modelTranspAgend.select()) { return; }
 
   calcularDisponivel();
 }
@@ -485,6 +473,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   if (not adicionarProdutoParcial(row, quantAgendar, quantTotal)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
+
+  ui->tableTranspAtual->resizeColumnsToContents();
 }
 
 bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int quantAgendar, const int quantTotal) {
@@ -529,7 +519,6 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
   SqlRelationalTableModel modelProdutos;
   modelProdutos.setTable("venda_has_produto");
-  modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProdutos.setFilter("idVendaProduto = " + modelViewProdutos.data(row, "idVendaProduto").toString());
 
@@ -586,7 +575,6 @@ bool WidgetLogisticaAgendarEntrega::quebrarConsumo(const int row, const double p
   // TODO: rename this to 'dividirConsumo'
   SqlRelationalTableModel modelConsumo;
   modelConsumo.setTable("estoque_has_consumo");
-  modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelConsumo.setFilter("idVendaProduto = " + modelViewProdutos.data(row, "idVendaProduto").toString());
 
@@ -669,9 +657,6 @@ bool WidgetLogisticaAgendarEntrega::quebrarConsumo(const int row, const double p
   return true;
 }
 
-// TODO: 1'em entrega' deve entrar na categoria 100% estoque?
-// TODO: 5adicionar botao para cancelar agendamento (verificar com Anderson)
-
 void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
   // get idVenda from view_entrega_pendente/modelVendas and set 'novoPrazo'
 
@@ -732,8 +717,6 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
   }
 }
 
-// TODO: 5refazer filtros do estoque (casos 'devolvido', 'cancelado', 'em entrega')
-
 void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
   if (not ui->tableProdutos->model()) { return; }
 
@@ -760,3 +743,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   nfe->show();
 }
+
+// TODO: 1'em entrega' deve entrar na categoria 100% estoque?
+// TODO: 5adicionar botao para cancelar agendamento (verificar com Anderson)
+// TODO: 5refazer filtros do estoque (casos 'devolvido', 'cancelado', 'em entrega')

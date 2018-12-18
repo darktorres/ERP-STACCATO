@@ -13,10 +13,8 @@ public:
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
-  const int diasIndex;
+  const int diasRestantesIndex;
   const int statusIndex;
-  const int followupIndex;
-  const int semaforoIndex;
   const int financeiroIndex;
 
   enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };

@@ -25,9 +25,11 @@ void WidgetVenda::setupTables() {
   modelViewVenda.setHeaderData("dataFinanceiro", "Data Financ.");
 
   ui->table->setModel(new VendaProxyModel(&modelViewVenda, this));
+
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");
   ui->table->hideColumn("idUsuarioConsultor");
+
   ui->table->setItemDelegateForColumn("Total R$", new ReaisDelegate(this));
 }
 
@@ -68,31 +70,26 @@ void WidgetVenda::montaFiltro() {
 
   QStringList filtroCheck;
 
-  if (financeiro) {
-    Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
-      if (child->isChecked()) { filtroCheck << "statusFinanceiro = '" + child->text().toUpper() + "'"; }
-    }
-  } else {
-    Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
-      if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
-    }
+  const auto groupBox = financeiro ? ui->groupBoxStatusFinanceiro : ui->groupBoxStatus;
+
+  for (const auto &child : groupBox->findChildren<QCheckBox *>()) {
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
+  const QString tipoStatus = financeiro ? "statusFinanceiro" : "status";
+
+  if (not filtroCheck.isEmpty()) { filtros << tipoStatus + " IN (" + filtroCheck.join(", ") + ")"; }
 
   //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text();
+  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
 
-  const QString filtroBusca =
-      textoBusca.isEmpty() ? "" : "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
-  if (not filtroBusca.isEmpty()) { filtros << filtroBusca; }
+  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
   //-------------------------------------
 
   modelViewVenda.setFilter(filtros.join(" AND "));
-
-  if (not modelViewVenda.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }
@@ -114,7 +111,9 @@ void WidgetVenda::setPermissions() {
   const QString tipoUsuario = UserSession::tipoUsuario();
 
   if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
-    QSqlQuery query("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE");
+    QSqlQuery query;
+
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -124,7 +123,9 @@ void WidgetVenda::setPermissions() {
   if (tipoUsuario == "GERENTE LOJA") {
     ui->groupBoxLojas->hide();
 
-    QSqlQuery query("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()));
+    QSqlQuery query;
+
+    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()))) { return; }
 
     ui->comboBoxVendedores->addItem("");
 
@@ -132,7 +133,9 @@ void WidgetVenda::setPermissions() {
   }
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
-    QSqlQuery query("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE");
+    QSqlQuery query;
+
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -249,7 +252,9 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged(const int) {
 
   const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
-  QSqlQuery query("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" + filtroLoja + " ORDER BY nome");
+  QSqlQuery query;
+
+  if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" + filtroLoja + " ORDER BY nome")) { return; }
 
   ui->comboBoxVendedores->addItem("");
 

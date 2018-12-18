@@ -1,4 +1,5 @@
 #include <QCloseEvent>
+#include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
@@ -8,15 +9,11 @@
 #include "application.h"
 #include "registerdialog.h"
 
-RegisterDialog::RegisterDialog(const QString &table, QString primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(std::move(primaryKey)) {
+RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr) : QDialog(parent), primaryKey(primaryKey) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
   model.setTable(table);
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
-  model.setFilter("0");
-
-  if (not model.select()) { return; }
 
   mapper.setModel(&model);
   mapper.setSubmitPolicy(QDataWidgetMapper::AutoSubmit);
@@ -52,13 +49,8 @@ bool RegisterDialog::viewRegister() {
   clearFields();
   updateMode();
 
-  if (not primaryId.isEmpty()) {
-    model.setFilter(primaryKey + " = '" + primaryId + "'");
-
-    if (not model.select()) { return false; }
-  }
-
-  mapper.setCurrentIndex(0);
+  currentRow = 0;
+  mapper.toFirst();
 
   return true;
 }
@@ -71,17 +63,44 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   return true;
 }
 
-bool RegisterDialog::setData(const QString &key, const QVariant &value) {
-  if (value.isNull() or (value.type() == QVariant::String and value.toString().isEmpty())) { return true; }
-  if (value.type() == QVariant::String and value.toString().remove(".").remove("/").remove("-").isEmpty()) { return true; }
-  if (value.type() == QVariant::Date and value.toString() == "1900-01-01") { return true; }
+bool RegisterDialog::setForeignKey(SqlRelationalTableModel &model) {
+  for (int row = 0; row < model.rowCount(); ++row) {
+    if (not model.setData(row, primaryKey, primaryId)) { return false; }
+  }
 
-  const int row = currentRow != -1 ? currentRow : mapper.currentIndex();
-
-  return model.setData(row, key, value);
+  return true;
 }
 
-QVariant RegisterDialog::data(const QString &key) { return model.data(mapper.currentIndex(), key); }
+bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &model, const int row) {
+  for (int column = 0; column < model.columnCount(); ++column) {
+    const QVariant dado = model.data(row, column);
+
+    if (dado.type() == QVariant::String) {
+      if (not model.setData(row, column, dado.toString().toUpper())) { return false; }
+    }
+  }
+
+  return true;
+}
+
+bool RegisterDialog::setData(const QString &key, const QVariant &value) {
+  if (value.isNull()) { return true; }
+  if (value.type() == QVariant::String and value.toString().isEmpty()) { return true; }
+  if (value.type() == QVariant::String and value.toString().remove(".").remove("/").remove("-").isEmpty()) { return true; }
+
+  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
+
+  return model.setData(currentRow, key, value);
+}
+
+QVariant RegisterDialog::data(const QString &key) {
+  if (currentRow == -1) {
+    qApp->enqueueError("Erro linha -1", this);
+    return QVariant();
+  }
+
+  return model.data(currentRow, key);
+}
 
 QVariant RegisterDialog::data(const int row, const QString &key) { return model.data(row, key); }
 
@@ -118,11 +137,16 @@ bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
   if (not line->styleSheet().contains(requiredStyle())) { return true; }
   if (not line->isVisible()) { return true; }
 
-  if ((line->text().isEmpty()) or (line->text() == "0,00") or (line->text() == "../-") or (line->text().size() < line->inputMask().remove(";").remove(">").remove("_").size()) or
-      (line->text().size() < line->placeholderText().size() - 1)) {
+  const bool isEmpty = line->text().isEmpty();
+  const bool isZero = line->text() == "0,00";
+  const bool isSymbols = line->text() == "../-";
+  const bool isLessMask = line->text().size() < line->inputMask().remove(";").remove(">").remove("_").size();
+  const bool isLessPlcH = line->text().size() < line->placeholderText().size() - 1;
+
+  if (isEmpty or isZero or isSymbols or isLessMask or isLessPlcH) {
     if (not silent) {
-      line->setFocus();
       qApp->enqueueError("Você não preencheu um campo obrigatório: " + line->accessibleName(), this);
+      line->setFocus();
     }
 
     return false;
@@ -153,7 +177,7 @@ bool RegisterDialog::newRegister() {
 
   model.setFilter("0");
 
-  if (not model.select()) { return false; }
+  currentRow = -1;
 
   tipo = Tipo::Cadastrar;
 
@@ -169,9 +193,8 @@ bool RegisterDialog::save(const bool silent) {
   if (not qApp->startTransaction()) { return false; }
 
   if (not cadastrar()) {
+    model.revertAll();
     qApp->rollbackTransaction();
-    void(model.select());
-    mapper.toLast();
     return false;
   }
 
@@ -201,6 +224,8 @@ void RegisterDialog::remove() {
     if (not setData("desativado", true)) { return; }
 
     if (not model.submitAll()) { return; }
+
+    isDirty = false;
 
     newRegister();
   }

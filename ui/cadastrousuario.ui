@@ -328,9 +328,12 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditNome</tabstop>
   <tabstop>comboBoxLoja</tabstop>
   <tabstop>comboBoxTipo</tabstop>
+  <tabstop>comboBoxEspecialidade</tabstop>
   <tabstop>lineEditUser</tabstop>
   <tabstop>lineEditPasswd</tabstop>
   <tabstop>lineEditPasswd_2</tabstop>
+  <tabstop>lineEditEmail</tabstop>
+  <tabstop>table</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
   <tabstop>pushButtonBuscar</tabstop>

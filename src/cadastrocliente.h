@@ -37,7 +37,6 @@ private:
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
-  auto on_pushButtonEndLimpar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonRemoverEnd_clicked() -> void;
   auto on_pushButtonRemover_clicked() -> void;

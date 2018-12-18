@@ -6,6 +6,7 @@
 #include "noeditdelegate.h"
 #include "precoestoque.h"
 #include "reaisdelegate.h"
+#include "sortfilterproxymodel.h"
 #include "ui_precoestoque.h"
 
 PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
@@ -22,9 +23,14 @@ PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoE
 
 PrecoEstoque::~PrecoEstoque() { delete ui; }
 
+void PrecoEstoque::show() {
+  QWidget::show();
+
+  ui->table->resizeColumnsToContents();
+}
+
 void PrecoEstoque::setupTables() {
   modelProduto.setTable("produto");
-  modelProduto.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelProduto.setHeaderData("fornecedor", "Fornecedor");
   modelProduto.setHeaderData("descricao", "Descrição");
@@ -48,7 +54,8 @@ void PrecoEstoque::setupTables() {
 
   if (not modelProduto.select()) { return; }
 
-  ui->table->setModel(&modelProduto);
+  ui->table->setModel(new SortFilterProxyModel(&modelProduto, this));
+
   ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("atualizarTabelaPreco");
   ui->table->hideColumn("cfop");
@@ -82,6 +89,7 @@ void PrecoEstoque::setupTables() {
   }
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
+
   ui->table->setItemDelegateForColumn("precoVenda", new ReaisDelegate(this));
 }
 
@@ -98,5 +106,5 @@ void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
   modelProduto.setFilter(text.isEmpty() ? "estoque = TRUE AND estoqueRestante > 0"
                                         : "MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('+" + text + "*' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
 
-  if (not modelProduto.select()) { return; }
+  ui->table->resizeColumnsToContents();
 }

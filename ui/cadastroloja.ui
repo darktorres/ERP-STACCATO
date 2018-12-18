@@ -26,7 +26,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -547,13 +547,6 @@ color: rgb(0, 0, 0);</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonEndLimpar">
-           <property name="text">
-            <string>Limpar seleção</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="pushButtonRemoverEnd">
            <property name="text">
             <string>Remover end.</string>
@@ -630,13 +623,6 @@ color: rgb(0, 0, 0);</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonContaLimpar">
-           <property name="text">
-            <string>Limpar seleção</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="pushButtonRemoverConta">
            <property name="text">
             <string>Remover Conta</string>
@@ -685,8 +671,8 @@ color: rgb(0, 0, 0);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1046</width>
-            <height>620</height>
+            <width>1017</width>
+            <height>616</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
@@ -1158,7 +1144,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableConta</tabstop>
   <tabstop>pushButtonAdicionarConta</tabstop>
   <tabstop>pushButtonAtualizarConta</tabstop>
-  <tabstop>pushButtonContaLimpar</tabstop>
   <tabstop>pushButtonRemoverConta</tabstop>
   <tabstop>checkBoxMostrarInativosConta</tabstop>
   <tabstop>comboBoxTipoEnd</tabstop>
@@ -1172,7 +1157,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>
-  <tabstop>pushButtonEndLimpar</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
@@ -1180,9 +1164,27 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
   <tabstop>pushButtonRemover</tabstop>
-  <tabstop>doubleSpinBoxPorcFrete</tabstop>
-  <tabstop>doubleSpinBoxValorMinimoFrete</tabstop>
   <tabstop>scrollArea</tabstop>
+  <tabstop>doubleSpinBoxValorMinimoFrete</tabstop>
+  <tabstop>doubleSpinBoxPorcFrete</tabstop>
+  <tabstop>doubleSpinBoxCustoTransportePorTon</tabstop>
+  <tabstop>doubleSpinBoxCustoTransporte2Ton</tabstop>
+  <tabstop>doubleSpinBoxCustoTransporteAcima2Ton</tabstop>
+  <tabstop>doubleSpinBoxCustoFuncionario</tabstop>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>lineEditPagamento</tabstop>
+  <tabstop>spinBoxParcelas</tabstop>
+  <tabstop>pushButtonAdicionarPagamento</tabstop>
+  <tabstop>pushButtonAtualizarPagamento</tabstop>
+  <tabstop>pushButtonLimparSelecao</tabstop>
+  <tabstop>pushButtonRemoverPagamento</tabstop>
+  <tabstop>tablePagamentos</tabstop>
+  <tabstop>pushButtonAtualizarTaxas</tabstop>
+  <tabstop>tableTaxas</tabstop>
+  <tabstop>tableAssocia1</tabstop>
+  <tabstop>tableAssocia2</tabstop>
+  <tabstop>pushButtonAdicionaAssociacao</tabstop>
+  <tabstop>pushButtonRemoveAssociacao</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

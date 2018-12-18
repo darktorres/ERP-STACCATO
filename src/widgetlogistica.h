@@ -24,7 +24,7 @@ private:
   Ui::WidgetLogistica *ui;
   // methods
   auto setConnections() -> void;
-  auto on_tableForn_activated(const QModelIndex &index) -> void;
+  auto on_tableForn_clicked(const QModelIndex &index) -> void;
   auto on_tabWidgetLogistica_currentChanged(const int) -> void;
 };
 

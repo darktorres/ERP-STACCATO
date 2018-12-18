@@ -17,6 +17,7 @@ public:
 
 private:
   // attributes
+  int currentRowConta = -1;
   QDataWidgetMapper mapperConta;
   QDataWidgetMapper mapperPagamento;
   SearchDialog *sdLoja;
@@ -24,15 +25,14 @@ private:
   SqlRelationalTableModel modelAssocia2;
   SqlRelationalTableModel modelConta;
   SqlRelationalTableModel modelPagamentos;
-  SqlRelationalTableModel modelPermissoes;
   SqlRelationalTableModel modelTaxas;
   Ui::CadastroLoja *ui;
   // methods
   auto adicionarPagamento() -> bool;
   auto atualizarPagamento() -> bool;
   auto cadastrar() -> bool final;
-  auto cadastrarConta(const bool isUpdate = false) -> bool;
-  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto cadastrarConta(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
   auto clearConta() -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
@@ -54,8 +54,6 @@ private:
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
-  auto on_pushButtonContaLimpar_clicked() -> void;
-  auto on_pushButtonEndLimpar_clicked() -> void;
   auto on_pushButtonLimparSelecao_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonRemoveAssociacao_clicked() -> void;

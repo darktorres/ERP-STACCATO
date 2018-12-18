@@ -11,6 +11,7 @@
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "importarxml.h"
+#include "sortfilterproxymodel.h"
 #include "ui_widgetestoque.h"
 #include "usersession.h"
 #include "widgetestoque.h"
@@ -54,12 +55,10 @@ void WidgetEstoque::setupTables() {
   model.setHeaderData("dataPrevReceb", "Prev. Receb.");
   model.setHeaderData("dataRealReceb", "Receb.");
 
-  auto *proxyFilter = new QSortFilterProxyModel(this);
-  proxyFilter->setDynamicSortFilter(true);
-  proxyFilter->setSourceModel(&model);
+  ui->table->setModel(new SortFilterProxyModel(&model, this));
 
-  ui->table->setModel(proxyFilter);
   ui->table->hideColumn("contabil");
+
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
@@ -93,7 +92,8 @@ void WidgetEstoque::updateTables() {
 void WidgetEstoque::resetTables() { modelIsSet = false; }
 
 void WidgetEstoque::on_table_activated(const QModelIndex &index) {
-  auto *estoque = new Estoque(ui->table->model()->data(ui->table->model()->index(index.row(), model.record().indexOf("idEstoque"))).toString(), true, this);
+  const QString idEstoque = static_cast<SortFilterProxyModel *>(ui->table->model())->data(index.row(), "idEstoque").toString();
+  auto *estoque = new Estoque(idEstoque, true, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
 }
 

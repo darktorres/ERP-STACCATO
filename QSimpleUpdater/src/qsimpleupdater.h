@@ -44,6 +44,7 @@ class QSimpleUpdater : public QObject {
 
 public:
   explicit QSimpleUpdater(QObject *parent = nullptr);
+  ~QSimpleUpdater();
   auto changeLog() const -> QString;
   auto checkForUpdates() -> void;
   auto downloadLatestVersion() -> void;

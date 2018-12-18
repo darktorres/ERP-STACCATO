@@ -15,6 +15,7 @@ class PrecoEstoque final : public QDialog {
 public:
   explicit PrecoEstoque(QWidget *parent = nullptr);
   ~PrecoEstoque();
+  auto show() -> void;
 
 private:
   // attributes

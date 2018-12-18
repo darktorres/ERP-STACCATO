@@ -22,7 +22,7 @@ private:
   Ui::CadastroProfissional *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const bool isUpdate = false) -> bool;
+  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
@@ -41,8 +41,6 @@ private:
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
-  auto on_pushButtonCancelar_clicked() -> void;
-  auto on_pushButtonEndLimpar_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonRemoverEnd_clicked() -> void;
   auto on_pushButtonRemover_clicked() -> void;

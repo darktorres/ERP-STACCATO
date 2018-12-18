@@ -7,17 +7,7 @@
 #include "excel.h"
 #include "usersession.h"
 
-Excel::Excel(QString id) : id(std::move(id)) { verificaTipo(); }
-
-void Excel::verificaTipo() { // TODO: replace this with enum in constructor
-  QSqlQuery queryTipo;
-  queryTipo.prepare("SELECT idOrcamento FROM orcamento WHERE idOrcamento = :idOrcamento");
-  queryTipo.bindValue(":idOrcamento", id);
-
-  if (not queryTipo.exec()) { return qApp->enqueueError("Erro verificando se id é Orçamento!"); }
-
-  tipo = queryTipo.first() ? Tipo::Orcamento : Tipo::Venda;
-}
+Excel::Excel(const QString &id, const Tipo tipo) : tipo(tipo), id(id) {}
 
 void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
   for (int row = queryProduto.size() + 12; row < 111; ++row) { xlsx.setRowHidden(row, true); }
@@ -126,72 +116,27 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   xlsx.write("N117", "R$ " + locale.toString(query.value("total").toDouble(), 'f', 2));                                                                                      // total final
   xlsx.write("B113", query.value("prazoEntrega").toString() + " dias");
 
-  // REFAC: generify this code
+  const QString pgtQuery = "SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
+                           "conta_a_receber_has_pagamento WHERE idVenda = '" +
+                           id + "' AND tipo LIKE '%1%' AND tipo NOT IN ('%1. Comissão', '%1. Taxa Cartão') AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')";
 
-  QSqlQuery queryPgt1("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
-                      "conta_a_receber_has_pagamento WHERE idVenda = '" +
-                      id + "' AND tipo LIKE '1%' AND tipo != '1. Comissão' AND tipo != '1. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+  for (int i = 1; i <= 5; ++i) {
+    const QString current = QString::number(i);
 
-  if (not queryPgt1.exec() or not queryPgt1.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 1: " + queryPgt1.lastError().text()); }
+    QSqlQuery queryPgt;
 
-  const QString pgt1 = queryPgt1.value("valor") == 0 ? ""
-                                                     : queryPgt1.value("tipo").toString() + " - " + queryPgt1.value("parcelas").toString() + "x de R$ " +
-                                                           locale.toString(queryPgt1.value("valor").toDouble(), 'f', 2) + (queryPgt1.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
-                                                           queryPgt1.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt1.value("observacao").toString();
+    if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { return qApp->enqueueError(false, "Erro buscando pagamento " + current + ": " + queryPgt.lastError().text()); }
 
-  QSqlQuery queryPgt2("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
-                      "conta_a_receber_has_pagamento WHERE idVenda = '" +
-                      id + "' AND tipo LIKE '2%' AND tipo != '2. Comissão' AND tipo != '2. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
+    if (queryPgt.value("valor") == 0) { continue; }
 
-  if (not queryPgt2.exec() or not queryPgt2.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 2: " + queryPgt2.lastError().text()); }
+    const QString pagEm = (queryPgt.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ");
+    const QString observacao = queryPgt.value("observacao").toString();
 
-  const QString pgt2 = queryPgt2.value("valor") == 0 ? ""
-                                                     : queryPgt2.value("tipo").toString() + " - " + queryPgt2.value("parcelas").toString() + "x de R$ " +
-                                                           locale.toString(queryPgt2.value("valor").toDouble(), 'f', 2) + (queryPgt2.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
-                                                           queryPgt2.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt2.value("observacao").toString();
+    const QString pgt = queryPgt.value("tipo").toString() + " - " + queryPgt.value("parcelas").toString() + "x de R$ " + locale.toString(queryPgt.value("valor").toDouble(), 'f', 2) + pagEm +
+                        queryPgt.value("dataPagamento").toDate().toString("dd-MM-yyyy") + (observacao.isEmpty() ? "" : " - " + observacao);
 
-  QSqlQuery queryPgt3("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
-                      "conta_a_receber_has_pagamento WHERE idVenda = '" +
-                      id + "' AND tipo LIKE '3%' AND tipo != '3. Comissão' AND tipo != '3. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
-
-  if (not queryPgt3.exec() or not queryPgt3.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 3: " + queryPgt3.lastError().text()); }
-
-  const QString pgt3 = queryPgt3.value("valor") == 0 ? ""
-                                                     : queryPgt3.value("tipo").toString() + " - " + queryPgt3.value("parcelas").toString() + "x de R$ " +
-                                                           locale.toString(queryPgt3.value("valor").toDouble(), 'f', 2) + (queryPgt3.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
-                                                           queryPgt3.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt3.value("observacao").toString();
-
-  // 4
-
-  QSqlQuery queryPgt4("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
-                      "conta_a_receber_has_pagamento WHERE idVenda = '" +
-                      id + "' AND tipo LIKE '4%' AND tipo != '4. Comissão' AND tipo != '4. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
-
-  if (not queryPgt4.exec() or not queryPgt4.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 4: " + queryPgt4.lastError().text()); }
-
-  const QString pgt4 = queryPgt4.value("valor") == 0 ? ""
-                                                     : queryPgt4.value("tipo").toString() + " - " + queryPgt4.value("parcelas").toString() + "x de R$ " +
-                                                           locale.toString(queryPgt4.value("valor").toDouble(), 'f', 2) + (queryPgt4.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
-                                                           queryPgt4.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt4.value("observacao").toString();
-
-  // 5
-
-  QSqlQuery queryPgt5("SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
-                      "conta_a_receber_has_pagamento WHERE idVenda = '" +
-                      id + "' AND tipo LIKE '5%' AND tipo != '5. Comissão' AND tipo != '5. Taxa Cartão' AND status != 'CANCELADO' AND status != 'SUBSTITUIDO'");
-
-  if (not queryPgt5.exec() or not queryPgt5.first()) { return qApp->enqueueError(false, "Erro buscando pagamentos 5: " + queryPgt5.lastError().text()); }
-
-  const QString pgt5 = queryPgt5.value("valor") == 0 ? ""
-                                                     : queryPgt5.value("tipo").toString() + " - " + queryPgt5.value("parcelas").toString() + "x de R$ " +
-                                                           locale.toString(queryPgt5.value("valor").toDouble(), 'f', 2) + (queryPgt5.value("parcelas") == 1 ? " - pag. em: " : " - 1° pag. em: ") +
-                                                           queryPgt5.value("dataPagamento").toDate().toString("dd-MM-yyyy") + " - " + queryPgt5.value("observacao").toString();
-
-  xlsx.write("B114", pgt1);
-  xlsx.write("B115", pgt2);
-  xlsx.write("B116", pgt3);
-  xlsx.write("B117", pgt4);
-  xlsx.write("B118", pgt5);
+    xlsx.write("B" + QString::number(113 + i), pgt);
+  }
 
   xlsx.write("B119", query.value("observacao").toString().replace("\n", " "));
 
@@ -270,37 +215,53 @@ bool Excel::setQuerys() {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
 
+  //------------------------------------------------------------------------
+
   if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados dos produtos: " + query.lastError().text()); }
+
+  //------------------------------------------------------------------------
 
   queryCliente.prepare("SELECT nome_razao, email, cpf, cnpj, pfpj, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
   if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro buscando cliente: " + queryCliente.lastError().text()); }
 
+  //------------------------------------------------------------------------
+
   queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
   if (not queryEndEnt.exec() or not queryEndEnt.first()) { return qApp->enqueueError(false, "Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
+
+  //------------------------------------------------------------------------
 
   queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
   if (not queryEndFat.exec() or not queryEndFat.first()) { return qApp->enqueueError(false, "Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
 
+  //------------------------------------------------------------------------
+
   queryProfissional.prepare("SELECT nome_razao, tel, email FROM profissional WHERE idProfissional = :idProfissional");
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
   if (not queryProfissional.exec() or not queryProfissional.first()) { return qApp->enqueueError(false, "Erro buscando profissional: " + queryProfissional.lastError().text()); }
+
+  //------------------------------------------------------------------------
 
   queryVendedor.prepare("SELECT nome, email FROM usuario WHERE idUsuario = :idUsuario");
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
   if (not queryVendedor.exec() or not queryVendedor.first()) { return qApp->enqueueError(false, "Erro buscando vendedor: " + queryVendedor.lastError().text()); }
 
+  //------------------------------------------------------------------------
+
   queryLoja.prepare("SELECT tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
   if (not queryLoja.exec() or not queryLoja.first()) { return qApp->enqueueError(false, "Erro buscando loja: " + queryLoja.lastError().text()); }
+
+  //------------------------------------------------------------------------
 
   queryLojaEnd.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));

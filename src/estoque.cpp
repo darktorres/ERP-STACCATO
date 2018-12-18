@@ -12,7 +12,7 @@
 #include "usersession.h"
 #include "xml_viewer.h"
 
-Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(std::move(idEstoque)), ui(new Ui::Estoque) {
+Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(idEstoque), ui(new Ui::Estoque) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -20,7 +20,6 @@ Estoque::Estoque(QString idEstoque, const bool showWindow, QWidget *parent) : QD
   setupTables();
 
   connect(ui->pushButtonExibirNfe, &QPushButton::clicked, this, &Estoque::on_pushButtonExibirNfe_clicked);
-  connect(ui->tableEstoque, &TableView::activated, this, &Estoque::on_tableEstoque_activated);
 
   viewRegisterById(showWindow);
 
@@ -36,7 +35,6 @@ Estoque::~Estoque() { delete ui; }
 
 void Estoque::setupTables() {
   modelEstoque.setTable("estoque");
-  modelEstoque.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEstoque.setHeaderData("idEstoque", "Estoque");
   modelEstoque.setHeaderData("recebidoPor", "Recebido Por");
@@ -53,7 +51,9 @@ void Estoque::setupTables() {
   modelEstoque.setHeaderData("bloco", "Bloco");
 
   ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
+
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+
   ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("idProduto");
@@ -96,14 +96,10 @@ void Estoque::setupTables() {
   //--------------------------------------------------------------------
 
   modelConsumo.setTable("estoque_has_consumo");
-  modelConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelConsumo.setFilter("0");
 
   //--------------------------------------------------------------------
 
   modelViewConsumo.setTable("view_estoque_consumo");
-  modelViewConsumo.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
   modelViewConsumo.setHeaderData("status", "Status Consumo");
@@ -119,13 +115,13 @@ void Estoque::setupTables() {
   modelViewConsumo.setHeaderData("created", "Criado");
 
   ui->tableConsumo->setModel(new EstoqueProxyModel(&modelViewConsumo, this));
+
   ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+
   ui->tableConsumo->showColumn("created");
   ui->tableConsumo->hideColumn("idEstoque");
   ui->tableConsumo->hideColumn("quantUpd");
 }
-
-void Estoque::on_tableEstoque_activated(const QModelIndex &) { exibirNota(); }
 
 void Estoque::calcularRestante() {
   double quantRestante = modelEstoque.data(0, "quant").toDouble();
@@ -158,13 +154,15 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   ui->tableEstoque->resizeColumnsToContents();
 
-  if (not modelConsumo.select()) { return false; }
+  //--------------------------------------
 
   modelViewConsumo.setFilter("idEstoque = " + idEstoque);
 
   if (not modelViewConsumo.select()) { return false; }
 
   ui->tableConsumo->resizeColumnsToContents();
+
+  //--------------------------------------
 
   calcularRestante();
 
@@ -221,7 +219,7 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
 
   for (int column = 0, columnCount = modelEstoque.columnCount(); column < columnCount; ++column) {
     const QString field = modelEstoque.record().fieldName(column);
-    const int index = modelConsumo.fieldIndex(field);
+    const int index = modelConsumo.fieldIndex(field, true);
 
     if (index == -1) { continue; }
     if (column == modelEstoque.fieldIndex("cfop")) { break; }
@@ -297,7 +295,6 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
 
   SqlRelationalTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto");
-  modelCompra.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelCompra.setFilter("idCompra = " + idCompra + " AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto IS NULL");
 

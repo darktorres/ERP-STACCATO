@@ -75,15 +75,17 @@ void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 
 void WidgetNfeSaida::setupTables() {
   modelViewNFeSaida.setTable("view_nfe_saida");
-  modelViewNFeSaida.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewNFeSaida.setHeaderData("created", "Criado em");
   modelViewNFeSaida.setHeaderData("valor", "R$");
 
   ui->table->setModel(&modelViewNFeSaida);
+
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
+
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 }
 
@@ -126,8 +128,6 @@ void WidgetNfeSaida::montaFiltro() {
   //-------------------------------------
 
   modelViewNFeSaida.setFilter(filtros.join(" AND "));
-
-  if (not modelViewNFeSaida.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }
@@ -211,6 +211,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   SqlRelationalTableModel view;
   view.setTable("view_relatorio_nfe");
+
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
   if (not view.select()) { return; }

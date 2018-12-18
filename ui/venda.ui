@@ -1259,11 +1259,50 @@ color: rgb(0, 0, 0);</string>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>lineEditVenda</tabstop>
+  <tabstop>itemBoxVendedor</tabstop>
+  <tabstop>itemBoxConsultor</tabstop>
+  <tabstop>itemBoxCliente</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>itemBoxProfissional</tabstop>
+  <tabstop>itemBoxEndereco</tabstop>
   <tabstop>tableProdutos</tabstop>
+  <tabstop>lineEditEstoque_2</tabstop>
+  <tabstop>lineEditEstoque_3</tabstop>
+  <tabstop>lineEditPromocao_2</tabstop>
+  <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>itemBoxEnderecoFat</tabstop>
+  <tabstop>plainTextEdit</tabstop>
+  <tabstop>dateTimeEditOrc</tabstop>
+  <tabstop>lineEditIdOrcamento</tabstop>
+  <tabstop>checkBoxRT</tabstop>
+  <tabstop>checkBoxPontuacaoIsento</tabstop>
+  <tabstop>checkBoxPontuacaoPadrao</tabstop>
+  <tabstop>doubleSpinBoxPontuacao</tabstop>
+  <tabstop>tableFluxoCaixa</tabstop>
+  <tabstop>tableFluxoCaixa2</tabstop>
+  <tabstop>doubleSpinBoxCreditoTotal</tabstop>
+  <tabstop>pushButtonAdicionarPagamento</tabstop>
+  <tabstop>pushButtonFreteLoja</tabstop>
+  <tabstop>pushButtonPgtLoja</tabstop>
   <tabstop>pushButtonLimparPag</tabstop>
   <tabstop>doubleSpinBoxTotalPag</tabstop>
+  <tabstop>doubleSpinBoxSubTotalBruto</tabstop>
+  <tabstop>doubleSpinBoxSubTotalLiq</tabstop>
+  <tabstop>doubleSpinBoxDescontoGlobalReais</tabstop>
+  <tabstop>doubleSpinBoxDescontoGlobal</tabstop>
+  <tabstop>checkBoxFreteManual</tabstop>
+  <tabstop>doubleSpinBoxFrete</tabstop>
+  <tabstop>doubleSpinBoxTotal</tabstop>
   <tabstop>pushButtonCadastrarPedido</tabstop>
+  <tabstop>pushButtonGerarExcel</tabstop>
   <tabstop>pushButtonImprimir</tabstop>
+  <tabstop>pushButtonDevolucao</tabstop>
+  <tabstop>pushButtonCancelamento</tabstop>
+  <tabstop>pushButtonVoltar</tabstop>
+  <tabstop>comboBoxFinanceiro</tabstop>
+  <tabstop>pushButtonCorrigirFluxo</tabstop>
+  <tabstop>pushButtonFinanceiroSalvar</tabstop>
  </tabstops>
  <resources/>
  <connections/>

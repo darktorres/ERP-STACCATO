@@ -31,7 +31,7 @@ void CancelaProduto::setFilter(const QString &ordemCompra) {
 
 void CancelaProduto::setupTables() {
   model.setTable("pedido_fornecedor_has_produto");
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   model.setHeaderData("idVenda", "Código");
   model.setHeaderData("fornecedor", "Fornecedor");
   model.setHeaderData("descricao", "Produto");
@@ -47,9 +47,8 @@ void CancelaProduto::setupTables() {
   model.setHeaderData("codComercial", "Cód. Com.");
   model.setHeaderData("obs", "Obs.");
 
-  model.setFilter("0");
-
   ui->table->setModel(&model);
+
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");

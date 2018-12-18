@@ -1,11 +1,10 @@
 #ifndef SEARCHDIALOGPROXY_H
 #define SEARCHDIALOGPROXY_H
 
-#include <QIdentityProxyModel>
-
+#include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 
-class SearchDialogProxyModel final : public QIdentityProxyModel {
+class SearchDialogProxyModel final : public SortFilterProxyModel {
 
 public:
   SearchDialogProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);

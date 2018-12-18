@@ -159,6 +159,9 @@ bool ImportaProdutos::importar() {
 
   show();
 
+  ui->tableProdutos->resizeColumnsToContents();
+  ui->tableErro->resizeColumnsToContents();
+
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
 
@@ -201,7 +204,6 @@ bool ImportaProdutos::readValidade() {
 
 void ImportaProdutos::setupTables() {
   modelProduto.setTable("produto");
-  modelProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelProduto.setHeaderData("fornecedor", "Fornecedor");
   modelProduto.setHeaderData("descricao", "Descrição");
@@ -280,7 +282,6 @@ void ImportaProdutos::setupTables() {
   //-------------------------------------------------------------//
 
   modelErro.setTable("produto");
-  modelErro.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelErro.setHeaderData("fornecedor", "Fornecedor");
   modelErro.setHeaderData("descricao", "Descrição");

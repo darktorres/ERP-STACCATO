@@ -21,6 +21,8 @@ public:
 
 protected:
   virtual auto enterEvent(QEvent *event) -> void override;
+  virtual auto keyPressEvent(QKeyEvent *event) -> void override;
+  virtual auto mousePressEvent(QMouseEvent *event) -> void override;
 
 private:
   // attributes

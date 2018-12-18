@@ -14,7 +14,7 @@ class Estoque final : public QDialog {
 
 public:
   // REFAC: turn showWindow into a enum
-  Estoque(QString idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
+  Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
   auto criarConsumo(const int idVendaProduto, const double quant = 0) -> bool;
 
@@ -42,7 +42,6 @@ private:
   auto dividirCompra(const int idVendaProduto, const double quant) -> std::optional<int>;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
-  auto on_tableEstoque_activated(const QModelIndex &) -> void;
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
 };

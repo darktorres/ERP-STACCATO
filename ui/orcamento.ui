@@ -1302,6 +1302,9 @@
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectRows</enum>
             </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item row="0" column="1" rowspan="3">
@@ -1339,19 +1342,6 @@
               </property>
               <property name="text">
                <string>Remover</string>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButtonLimparSelecao">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remover item selecionado&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Limpar seleção</string>
               </property>
               <property name="autoDefault">
                <bool>false</bool>
@@ -1507,25 +1497,57 @@ color: rgb(0, 0, 0);</string>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>dateTimeEdit</tabstop>
-  <tabstop>spinBoxValidade</tabstop>
+  <tabstop>lineEditOrcamento</tabstop>
   <tabstop>itemBoxVendedor</tabstop>
-  <tabstop>itemBoxProfissional</tabstop>
+  <tabstop>itemBoxConsultor</tabstop>
   <tabstop>itemBoxCliente</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
+  <tabstop>spinBoxValidade</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>itemBoxProduto</tabstop>
+  <tabstop>lineEditPrecoUn</tabstop>
+  <tabstop>doubleSpinBoxCaixas</tabstop>
+  <tabstop>doubleSpinBoxQuant</tabstop>
+  <tabstop>spinBoxMinimo</tabstop>
+  <tabstop>spinBoxUnCx</tabstop>
+  <tabstop>lineEditUn</tabstop>
   <tabstop>doubleSpinBoxDesconto</tabstop>
-  <tabstop>tableProdutos</tabstop>
+  <tabstop>doubleSpinBoxTotalItem</tabstop>
+  <tabstop>pushButtonCalculadora</tabstop>
+  <tabstop>lineEditFornecedor</tabstop>
+  <tabstop>lineEditCodComercial</tabstop>
+  <tabstop>lineEditFormComercial</tabstop>
+  <tabstop>lineEditEstoque</tabstop>
+  <tabstop>lineEditObs</tabstop>
   <tabstop>pushButtonAtualizarItem</tabstop>
   <tabstop>pushButtonAdicionarItem</tabstop>
   <tabstop>pushButtonRemoverItem</tabstop>
-  <tabstop>pushButtonLimparSelecao</tabstop>
+  <tabstop>tableProdutos</tabstop>
+  <tabstop>lineEditEstoque_4</tabstop>
+  <tabstop>lineEditEstoque_3</tabstop>
+  <tabstop>lineEditPromocao_2</tabstop>
+  <tabstop>spinBoxPrazoEntrega</tabstop>
+  <tabstop>plainTextEditObs</tabstop>
+  <tabstop>plainTextEditBaixa</tabstop>
+  <tabstop>lineEditReplicaDe</tabstop>
+  <tabstop>lineEditReplicadoEm</tabstop>
+  <tabstop>pushButtonCalcularFrete</tabstop>
+  <tabstop>checkBoxFreteManual</tabstop>
   <tabstop>doubleSpinBoxSubTotalBruto</tabstop>
+  <tabstop>doubleSpinBoxSubTotalLiq</tabstop>
+  <tabstop>doubleSpinBoxDescontoGlobalReais</tabstop>
+  <tabstop>doubleSpinBoxDescontoGlobal</tabstop>
+  <tabstop>doubleSpinBoxFrete</tabstop>
+  <tabstop>doubleSpinBoxTotal</tabstop>
   <tabstop>pushButtonGerarVenda</tabstop>
   <tabstop>pushButtonReplicar</tabstop>
   <tabstop>pushButtonCadastrarOrcamento</tabstop>
   <tabstop>pushButtonAtualizarOrcamento</tabstop>
+  <tabstop>pushButtonGerarExcel</tabstop>
   <tabstop>pushButtonImprimir</tabstop>
+  <tabstop>pushButtonApagarOrc</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

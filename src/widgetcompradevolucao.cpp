@@ -40,7 +40,8 @@ void WidgetCompraDevolucao::updateTables() {
 
 void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setTable("venda_has_produto");
-  modelVendaProduto.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelVendaProduto.setSort("idVenda", Qt::AscendingOrder);
 
   modelVendaProduto.setHeaderData("status", "Status");
   modelVendaProduto.setHeaderData("statusOriginal", "Status Original");
@@ -56,6 +57,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("formComercial", "Form. Com.");
 
   ui->table->setModel(&modelVendaProduto);
+
   ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("recebeu");
   ui->table->hideColumn("entregou");
@@ -210,8 +212,5 @@ void WidgetCompraDevolucao::montaFiltro() {
 
   modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
 
-  if (not modelVendaProduto.select()) { return; }
-
-  ui->table->sortByColumn("idVenda");
   ui->table->resizeColumnsToContents();
 }

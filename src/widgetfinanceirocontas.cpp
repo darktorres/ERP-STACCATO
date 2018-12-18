@@ -26,6 +26,7 @@ void WidgetFinanceiroContas::setupTables() {
   if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   ui->tableVencidos->setModel(&modelVencidos);
+
   ui->tableVencidos->setItemDelegate(new ReaisDelegate(this));
 
   // -------------------------------------------------------------------------
@@ -36,6 +37,7 @@ void WidgetFinanceiroContas::setupTables() {
   if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
   ui->tableVencer->setModel(&modelVencer);
+
   ui->tableVencer->setItemDelegate(new ReaisDelegate(this));
 }
 

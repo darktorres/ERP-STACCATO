@@ -5,8 +5,6 @@
 #include <QPalette>
 #include <QSqlDatabase>
 
-#include "mainwindow.h"
-
 #if defined(qApp)
 #undef qApp
 #endif
@@ -34,7 +32,6 @@ public:
   auto rollbackTransaction() -> void;
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
-  auto setWindow(MainWindow *value) -> void;
   auto showMessages() -> void;
   auto startTransaction() -> bool;
   auto updater() -> void;
@@ -45,7 +42,6 @@ private:
     QWidget *widget = nullptr;
   };
   // attributes
-  MainWindow *window = nullptr;
   QMap<QString, QString> mapLojas;
   QSqlDatabase db;
   QVector<Message> errorQueue;

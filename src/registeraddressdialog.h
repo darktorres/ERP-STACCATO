@@ -7,7 +7,6 @@ class RegisterAddressDialog : public RegisterDialog {
 
 public:
   explicit RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent);
-  auto viewRegisterById(const QVariant &id) -> bool final;
 
 protected:
   // attributes

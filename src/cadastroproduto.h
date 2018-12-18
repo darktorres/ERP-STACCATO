@@ -35,7 +35,6 @@ private:
   auto successMessage() -> void final;
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;
-  auto viewRegister() -> bool final;
 };
 
 #endif // CADASTROPRODUTO_H

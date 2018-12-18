@@ -1,12 +1,10 @@
 #ifndef ESTOQUEPROXYMODEL_H
 #define ESTOQUEPROXYMODEL_H
 
-#include <QIdentityProxyModel>
-
+#include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 
-// TODO: change this to inherit from QSortFilterProxyModel
-class EstoqueProxyModel final : public QIdentityProxyModel {
+class EstoqueProxyModel final : public SortFilterProxyModel {
 
 public:
   explicit EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
@@ -19,8 +17,3 @@ private:
 };
 
 #endif // ESTOQUEPROXYMODEL_H
-
-//  auto *proxyFilter = new QSortFilterProxyModel(this);
-//  proxyFilter->setDynamicSortFilter(true);
-//  proxyFilter->setSourceModel(&modelEstoque);
-//  ui->tableEstoque->setModel(proxyFilter);

@@ -44,11 +44,11 @@ void ProdutosPendentes::recalcularQuantidade() {
 }
 
 void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &idVenda) {
-  modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
+  modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
   if (not modelProdutos.select()) { return; }
 
-  modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND (status = 'PENDENTE' OR status = 'REPO. ENTREGA' OR status = 'REPO. RECEB.')");
+  modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
   if (not modelViewProdutos.select()) { return; }
 
@@ -107,12 +107,10 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
 void ProdutosPendentes::setupTables() {
   modelProdutos.setTable("venda_has_produto");
-  modelProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   //--------------------------------------------------------------------
 
   modelViewProdutos.setTable("view_produto_pendente");
-  modelViewProdutos.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewProdutos.setHeaderData("status", "Status");
   modelViewProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -131,8 +129,10 @@ void ProdutosPendentes::setupTables() {
   modelViewProdutos.setHeaderData("obs", "Obs.");
 
   ui->tableProdutos->setModel(&modelViewProdutos);
+
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
+
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idCompra");
@@ -255,8 +255,12 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const double quantEstoque = modelEstoque.data(rowEstoque, "restante").toDouble();
 
   bool ok;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
   const double quantConsumir =
       QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
+#else
+  const double quantConsumir = QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags());
+#endif
   if (not ok) { return; }
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();

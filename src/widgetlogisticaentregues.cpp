@@ -5,6 +5,7 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "sortfilterproxymodel.h"
 #include "sql.h"
 #include "ui_widgetlogisticaentregues.h"
 #include "usersession.h"
@@ -38,8 +39,6 @@ void WidgetLogisticaEntregues::updateTables() {
   }
 
   if (not modelVendas.select()) { return; }
-
-  ui->tableVendas->sortByColumn("prazoEntrega");
 
   ui->tableVendas->resizeColumnsToContents();
 
@@ -76,23 +75,25 @@ void WidgetLogisticaEntregues::montaFiltro() {
 
   modelVendas.setFilter(filtros.join(" AND "));
 
-  if (not modelVendas.select()) { return; }
-
   ui->tableVendas->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregues::setupTables() {
   modelVendas.setTable("view_entrega");
-  modelVendas.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
+  modelVendas.setSort("prazoEntrega", Qt::AscendingOrder);
 
   modelVendas.setHeaderData("idVenda", "Venda");
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  ui->tableVendas->setModel(new VendaProxyModel(&modelVendas, this));
+  ui->tableVendas->setModel(&modelVendas);
+
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 }
 
 void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   modelProdutos.setQuery("SELECT `vp`.`idVendaProduto` AS `idVendaProduto`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` "
                          "AS `status`, `vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`produto` AS `produto`, `vp`.`caixas` AS `caixas`, `vp`.`quant` AS `quant`, `vp`.`un` AS "
                          "`un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
@@ -113,11 +114,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");
 
-  auto *proxyFilter = new QSortFilterProxyModel(this);
-  proxyFilter->setDynamicSortFilter(true);
-  proxyFilter->setSourceModel(&modelProdutos);
-
-  ui->tableProdutos->setModel(proxyFilter);
+  ui->tableProdutos->setModel(new SortFilterProxyModel(&modelProdutos, this));
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataPrevEnt");

@@ -40,26 +40,23 @@ void WidgetLogisticaRecebimento::updateTables() {
 
   if (not modelViewRecebimento.select()) { return; }
 
-  for (int row = 0; row < modelViewRecebimento.rowCount(); ++row) { ui->table->openPersistentEditor(row, "selecionado"); }
-
   ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
 
-void WidgetLogisticaRecebimento::tableFornLogistica_activated(const QString &fornecedor) {
+void WidgetLogisticaRecebimento::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
 
-  modelViewRecebimento.setFilter("fornecedor = '" + fornecedor + "'");
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
-  if (not modelViewRecebimento.select()) { return; }
+  modelViewRecebimento.setFilter(filtro);
 
   ui->checkBoxMarcarTodos->setChecked(false);
 }
 
 void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setTable("view_recebimento");
-  modelViewRecebimento.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewRecebimento.setHeaderData("idEstoque", "Estoque");
   modelViewRecebimento.setHeaderData("lote", "Lote");
@@ -77,11 +74,9 @@ void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
   modelViewRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  modelViewRecebimento.setFilter("0");
-
   ui->table->setModel(new EstoquePrazoProxyModel(&modelViewRecebimento, this));
+
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("prazoEntrega");
   ui->table->hideColumn("ordemCompra");
 }
 
@@ -162,7 +157,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   qApp->enqueueInformation("Confirmado recebimento!", this);
 }
 
-void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool) { ui->table->selectAll(); }
+void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->table->selectAll() : ui->table->clearSelection(); }
 
 void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
@@ -170,8 +165,6 @@ void WidgetLogisticaRecebimento::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelViewRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
-
-  if (not modelViewRecebimento.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

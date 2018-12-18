@@ -40,10 +40,11 @@ void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 
 void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
-  modelViewNFeEntrada.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   ui->table->setModel(&modelViewNFeEntrada);
+
   ui->table->hideColumn("idNFe");
+
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
@@ -64,8 +65,6 @@ void WidgetNfeEntrada::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
-
-  if (not modelViewNFeEntrada.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

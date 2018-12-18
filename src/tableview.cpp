@@ -1,5 +1,8 @@
 #include <QAbstractProxyModel>
+#include <QClipboard>
+#include <QDebug>
 #include <QHeaderView>
+#include <QKeyEvent>
 #include <QMenu>
 #include <QSqlRecord>
 
@@ -47,7 +50,7 @@ void TableView::showColumn(const QString &column) { QTableView::showColumn(getCo
 
 void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTableView::setItemDelegateForColumn(getColumnIndex(column), delegate); }
 
-void TableView::openPersistentEditor(const int row, const QString &column) { QTableView::openPersistentEditor(baseModel->index(row, getColumnIndex(column))); }
+void TableView::openPersistentEditor(const int row, const QString &column) { QTableView::openPersistentEditor(QTableView::model()->index(row, getColumnIndex(column))); }
 
 void TableView::openPersistentEditor(const int row, const int column) { QTableView::openPersistentEditor(QTableView::model()->index(row, column)); }
 
@@ -67,7 +70,7 @@ void TableView::setModel(QAbstractItemModel *model) {
     if (proxyModel) { baseModel = qobject_cast<QSqlQueryModel *>(proxyModel->sourceModel()); }
   }
 
-  if (not baseModel) { qApp->enqueueError("TableView model não implementado!", this); }
+  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
 
   //---------------------------------------
 
@@ -81,4 +84,38 @@ void TableView::enterEvent(QEvent *event) {
   QTableView::enterEvent(event);
 }
 
-// TODO: 4program copy - http://stackoverflow.com/questions/3135737/copying-part-of-qtableview
+void TableView::mousePressEvent(QMouseEvent *event) {
+  const QModelIndex item = indexAt(event->pos());
+
+  if (not item.isValid()) { emit clicked(item); }
+
+  QTableView::mousePressEvent(event);
+}
+
+void TableView::keyPressEvent(QKeyEvent *event) {
+  if (event->matches(QKeySequence::Copy)) {
+    QModelIndexList cells = selectedIndexes();
+    std::sort(cells.begin(), cells.end()); // Necessary, otherwise they are in column order
+
+    QString text;
+    int currentRow = 0; // To determine when to insert newlines
+    for (const QModelIndex &cell : cells) {
+      if (text.length() == 0) {
+        // First item
+      } else if (cell.row() != currentRow) {
+        // New row
+        text += '\n';
+      } else {
+        // Next cell
+        text += '\t';
+      }
+
+      currentRow = cell.row();
+      text += cell.data().toString();
+    }
+
+    QApplication::clipboard()->setText(text);
+  }
+
+  QTableView::keyPressEvent(event);
+}

@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "application.h"
 #include "registeraddressdialog.h"
 
 RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent) : RegisterDialog(table, primaryKey, parent) {
@@ -14,7 +15,6 @@ RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString
 
 void RegisterAddressDialog::setupTables(const QString &table) {
   modelEnd.setTable(table + "_has_endereco");
-  modelEnd.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelEnd.setHeaderData("descricao", "Descrição");
   modelEnd.setHeaderData("cep", "CEP");
@@ -24,21 +24,21 @@ void RegisterAddressDialog::setupTables(const QString &table) {
   modelEnd.setHeaderData("bairro", "Bairro");
   modelEnd.setHeaderData("cidade", "Cidade");
   modelEnd.setHeaderData("uf", "UF");
+  modelEnd.setHeaderData("desativado", "Desativado");
 
-  modelEnd.setFilter("0");
-
-  if (not modelEnd.select()) { return; }
+  //----------------------------------------------------------
 
   mapperEnd.setModel(&modelEnd);
   mapperEnd.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 }
 
 bool RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) {
-  if (value.isNull() or (value.type() == QVariant::String and value.toString().isEmpty())) { return true; }
+  if (value.isNull()) { return true; }
+  if (value.type() == QVariant::String and value.toString().isEmpty()) { return true; }
 
-  const int rowEnd = currentRowEnd != -1 ? currentRowEnd : mapperEnd.currentIndex();
+  if (currentRowEnd == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
 
-  return modelEnd.setData(rowEnd, key, value);
+  return modelEnd.setData(currentRowEnd, key, value);
 }
 
 bool RegisterAddressDialog::newRegister() {
@@ -46,7 +46,9 @@ bool RegisterAddressDialog::newRegister() {
 
   modelEnd.setFilter("0");
 
-  return modelEnd.select();
+  currentRowEnd = -1;
+
+  return true;
 }
 
 int RegisterAddressDialog::getCodigoUF(QString uf) const {
@@ -81,12 +83,4 @@ int RegisterAddressDialog::getCodigoUF(QString uf) const {
   if (uf == "df") { return 53; }
 
   return 0;
-}
-
-bool RegisterAddressDialog::viewRegisterById(const QVariant &id) {
-  if (not RegisterDialog::viewRegisterById(id)) { return false; }
-
-  modelEnd.setFilter(primaryKey + " = " + data(primaryKey).toString() + " AND desativado = FALSE");
-
-  return modelEnd.select();
 }

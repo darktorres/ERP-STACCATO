@@ -12,6 +12,7 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "singleeditdelegate.h"
+#include "sortfilterproxymodel.h"
 #include "ui_inputdialogfinanceiro.h"
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
@@ -141,7 +142,7 @@ QDateTime InputDialogFinanceiro::getNextDate() const { return ui->dateEditProxim
 
 void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
-  modelPedidoFornecedor.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
@@ -159,7 +160,8 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
 
-  ui->table->setModel(&modelPedidoFornecedor);
+  ui->table->setModel(new SortFilterProxyModel(&modelPedidoFornecedor, this));
+
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
@@ -183,15 +185,19 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+
   ui->table->setItemDelegate(new NoEditDelegate(this));
+
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
 
+  //--------------------------------------------------
+
   modelFluxoCaixa.setTable("conta_a_pagar_has_pagamento");
-  modelFluxoCaixa.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelFluxoCaixa.setHeaderData("tipo", "Tipo");
   modelFluxoCaixa.setHeaderData("parcela", "Parcela");
   modelFluxoCaixa.setHeaderData("valor", "R$");
@@ -200,6 +206,7 @@ void InputDialogFinanceiro::setupTables() {
   modelFluxoCaixa.setHeaderData("status", "Status");
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
+
   ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("contraParte");
   ui->tableFluxoCaixa->hideColumn("idCompra");
@@ -216,7 +223,9 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->hideColumn("grupo");
   ui->tableFluxoCaixa->hideColumn("subGrupo");
   ui->tableFluxoCaixa->hideColumn("desativado");
+
   ui->tableFluxoCaixa->setItemDelegate(new DoubleDelegate(this));
+
   ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 }
 
@@ -226,7 +235,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   [=]() {
     if (representacao) { return; }
 
-    if (not modelFluxoCaixa.select()) { return; }
+    modelFluxoCaixa.revertAll();
 
     if (tipo == Tipo::Financeiro) {
       for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
@@ -344,6 +353,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
       if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
+
+    ui->tableFluxoCaixa->resizeColumnsToContents();
   }();
 
   setConnections();
@@ -393,20 +404,21 @@ void InputDialogFinanceiro::resetarPagamentos() {
 }
 
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
-  if (idCompra.isEmpty()) {
-    modelPedidoFornecedor.setFilter("0");
-    return qApp->enqueueError(false, "IdCompra vazio!", this);
-  }
+  if (idCompra.isEmpty()) { return qApp->enqueueError(false, "IdCompra vazio!", this); }
 
   if (tipo == Tipo::ConfirmarCompra) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra + " AND status = 'EM COMPRA'"); }
   if (tipo == Tipo::Financeiro) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra); }
 
   if (not modelPedidoFornecedor.select()) { return false; }
 
+  ui->table->resizeColumnsToContents();
+
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
 
     if (not modelFluxoCaixa.select()) { return false; }
+
+    ui->tableFluxoCaixa->resizeColumnsToContents();
 
     ui->checkBoxMarcarTodos->setChecked(true);
   }
@@ -468,13 +480,15 @@ bool InputDialogFinanceiro::verifyFields() {
 
     for (int i = 0; i < ui->widgetPgts->listComboPgt.size(); ++i) {
       if (ui->widgetPgts->listDoubleSpinPgt.at(i)->value() > 0 and ui->widgetPgts->listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
+        qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
         ui->widgetPgts->listComboPgt.at(i)->setFocus();
-        return qApp->enqueueError(false, "Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
+        return false;
       }
 
       if (qFuzzyIsNull(ui->widgetPgts->listDoubleSpinPgt.at(i)->value()) and ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
+        qApp->enqueueError("Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
         ui->widgetPgts->listDoubleSpinPgt.at(i)->setFocus();
-        return qApp->enqueueError(false, "Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
+        return false;
       }
     }
   }
@@ -659,3 +673,4 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 // TODO: 3quando for representacao mostrar fluxo de comissao
 // TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
 // TODO: gerar lancamentos da st por produto
+// TODO: colocar checkbox para dizer se a ST vai ser na data do primeiro pagamento ou vai ser dividida junto com as parcelas

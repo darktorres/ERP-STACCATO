@@ -34,7 +34,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, this));
+  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, this));
   ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
@@ -73,6 +73,8 @@ Orcamento::~Orcamento() { delete ui; }
 void Orcamento::show() { RegisterDialog::show(); }
 
 void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return novoItem(); }
+
   if (isReadOnly) { return; }
 
   ui->pushButtonAtualizarItem->show();
@@ -105,7 +107,6 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
   connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked);
-  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::on_pushButtonLimparSelecao_clicked);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
@@ -134,7 +135,6 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
   disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked);
-  disconnect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::on_pushButtonLimparSelecao_clicked);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   disconnect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
@@ -144,11 +144,11 @@ bool Orcamento::viewRegister() {
   unsetConnections();
 
   auto load = [&] {
+    if (not RegisterDialog::viewRegister()) { return false; }
+
     modelItem.setFilter("idOrcamento = '" + data(0, "idOrcamento").toString() + "'");
 
     if (not modelItem.select()) { return false; }
-
-    if (not RegisterDialog::viewRegister()) { return false; }
 
     if (not buscarParametrosFrete()) { return false; }
 
@@ -175,7 +175,6 @@ bool Orcamento::viewRegister() {
       ui->pushButtonAdicionarItem->hide();
       ui->pushButtonAtualizarItem->hide();
       ui->pushButtonRemoverItem->hide();
-      ui->pushButtonLimparSelecao->hide();
       ui->pushButtonCalculadora->hide();
 
       ui->itemBoxCliente->setReadOnlyItemBox(true);
@@ -258,6 +257,9 @@ bool Orcamento::viewRegister() {
     if (data("idUsuarioConsultor").toInt() != 0) {
       ui->labelConsultor->show();
       ui->itemBoxConsultor->show();
+    } else {
+      ui->labelConsultor->hide();
+      ui->itemBoxConsultor->hide();
     }
 
     ui->tableProdutos->resizeColumnsToContents();
@@ -377,8 +379,9 @@ bool Orcamento::newRegister() {
 
 void Orcamento::removeItem() {
   if (modelItem.rowCount() == 1 and ui->lineEditOrcamento->text() != "Auto gerado") {
+    qApp->enqueueError("Não pode cadastrar um orçamento sem itens!", this);
     ui->itemBoxProduto->setFocus();
-    return qApp->enqueueError("Não pode cadastrar um orçamento sem itens!", this);
+    return;
   }
 
   unsetConnections();
@@ -477,28 +480,33 @@ bool Orcamento::verifyFields() {
   if (not recalcularTotais()) { return false; }
 
   if (ui->itemBoxCliente->text().isEmpty()) {
+    qApp->enqueueError("Cliente inválido!", this);
     ui->itemBoxCliente->setFocus();
-    return qApp->enqueueError(false, "Cliente inválido!", this);
+    return false;
   }
 
   if (ui->itemBoxVendedor->text().isEmpty()) {
+    qApp->enqueueError("Vendedor inválido!", this);
     ui->itemBoxVendedor->setFocus();
-    return qApp->enqueueError(false, "Vendedor inválido!", this);
+    return false;
   }
 
   if (ui->itemBoxProfissional->text().isEmpty()) {
+    qApp->enqueueError("Profissional inválido!", this);
     ui->itemBoxProfissional->setFocus();
-    return qApp->enqueueError(false, "Profissional inválido!", this);
+    return false;
   }
 
   if (ui->itemBoxEndereco->text().isEmpty()) {
+    qApp->enqueueError(R"(Endereço inválido! Se não possui endereço, escolha "Não há".)", this);
     ui->itemBoxEndereco->setFocus();
-    return qApp->enqueueError(false, R"(Endereço inválido! Se não possui endereço, escolha "Não há".)", this);
+    return false;
   }
 
   if (modelItem.rowCount() == 0) {
+    qApp->enqueueError("Não pode cadastrar um orçamento sem itens!", this);
     ui->itemBoxProduto->setFocus();
-    return qApp->enqueueError(false, "Não pode cadastrar um orçamento sem itens!", this);
+    return false;
   }
 
   return true;
@@ -554,10 +562,7 @@ bool Orcamento::buscarCadastrarConsultor() {
 
   fornecedores.removeDuplicates();
 
-  for (auto &fornecedor : fornecedores) {
-    fornecedor.prepend("'");
-    fornecedor.append("'");
-  }
+  for (auto &fornecedor : fornecedores) { fornecedor.prepend("'").append("'"); }
 
   QSqlQuery query;
 
@@ -568,6 +573,8 @@ bool Orcamento::buscarCadastrarConsultor() {
   if (query.size() > 1) { return qApp->enqueueError(false, "Mais de um consultor disponível!", this); }
 
   if (query.size() == 1 and query.first() and not setData("idUsuarioConsultor", query.value("idUsuario"))) { return false; }
+
+  if (query.size() == 0 and not model.setData(currentRow, "idUsuarioConsultor", QVariant(QVariant::UInt))) { return false; }
 
   return true;
 }
@@ -648,13 +655,13 @@ void Orcamento::calcPrecoGlobalTotal() {
 }
 
 void Orcamento::on_pushButtonImprimir_clicked() {
-  Impressao impressao(data("idOrcamento").toString());
+  Impressao impressao(data("idOrcamento").toString(), Impressao::Tipo::Orcamento);
   impressao.print();
 }
 
 void Orcamento::setupTables() {
   modelItem.setTable("orcamento_has_produto");
-  modelItem.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelItem.setHeaderData("produto", "Produto");
   modelItem.setHeaderData("fornecedor", "Fornecedor");
   modelItem.setHeaderData("obs", "Obs.");
@@ -669,11 +676,8 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("desconto", "Desc. %");
   modelItem.setHeaderData("parcialDesc", "Total");
 
-  modelItem.setFilter("0");
-
-  if (not modelItem.select()) { return; }
-
   ui->tableProdutos->setModel(new SearchDialogProxyModel(&modelItem, this));
+
   ui->tableProdutos->hideColumn("idOrcamentoProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idOrcamento");
@@ -687,6 +691,7 @@ void Orcamento::setupTables() {
   ui->tableProdutos->hideColumn("mostrarDesconto");
 
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
+
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
@@ -736,6 +741,8 @@ void Orcamento::adicionarItem(const bool isUpdate) {
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
 
     isDirty = true;
+
+    ui->tableProdutos->resizeColumnsToContents();
   }();
 
   calcPrecoGlobalTotal();
@@ -757,8 +764,9 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
   if (time.addDays(data("validade").toInt()).date() < QDateTime::currentDateTime().date()) { return qApp->enqueueError("Orçamento vencido!", this); }
 
   if (ui->itemBoxEndereco->text().isEmpty()) {
+    qApp->enqueueError("Deve selecionar endereço!", this);
     ui->itemBoxEndereco->setFocus();
-    return qApp->enqueueError("Deve selecionar endereço!", this);
+    return;
   }
 
   if (not verificaCadastroCliente()) { return; }
@@ -878,7 +886,8 @@ void Orcamento::on_itemBoxProduto_valueChanged(const QVariant &) {
 }
 
 void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
-  ui->itemBoxEndereco->setFilter("idCliente = " + QString::number(ui->itemBoxCliente->getId().toInt()) + " AND desativado = FALSE OR idEndereco = 1");
+  const QString idCliente = QString::number(ui->itemBoxCliente->getId().toInt());
+  ui->itemBoxEndereco->setFilter("(idCliente = " + idCliente + " OR idEndereco = 1) AND desativado = FALSE");
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT idProfissionalRel FROM cliente WHERE idCliente = :idCliente");
@@ -891,14 +900,14 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
   ui->itemBoxEndereco->clear();
 }
 
-void Orcamento::on_pushButtonLimparSelecao_clicked() { novoItem(); }
-
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
   ui->doubleSpinBoxFrete->setFrame(checked);
   ui->doubleSpinBoxFrete->setReadOnly(not checked);
   ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
 
-  ui->doubleSpinBoxFrete->setValue(ui->checkBoxFreteManual->isChecked() ? ui->doubleSpinBoxFrete->value() : qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+  if (checked) { return; }
+
+  ui->doubleSpinBoxFrete->setValue(qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {
@@ -928,14 +937,11 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 }
 
 bool Orcamento::cadastrar() {
-  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
-
   if (tipo == Tipo::Cadastrar) {
     if (not generateId()) { return false; }
 
-    if (not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela", this); }
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
   }
 
   if (not savingProcedures()) { return false; }
@@ -999,7 +1005,7 @@ bool Orcamento::verificaCadastroCliente() {
 }
 
 void Orcamento::on_pushButtonGerarExcel_clicked() {
-  Excel excel(ui->lineEditOrcamento->text());
+  Excel excel(ui->lineEditOrcamento->text(), Excel::Tipo::Orcamento);
   excel.gerarExcel();
 }
 
@@ -1056,11 +1062,12 @@ void Orcamento::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
 void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
   if (ui->itemBoxVendedor->text().isEmpty()) { return; }
-  if (data("freteManual").toBool()) { return; }
 
   if (not buscarParametrosFrete()) { return; }
 
-  ui->doubleSpinBoxFrete->setValue(ui->checkBoxFreteManual->isChecked() ? ui->doubleSpinBoxFrete->value() : qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+  if (ui->checkBoxFreteManual->isChecked()) { return; }
+
+  ui->doubleSpinBoxFrete->setValue(qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
 }
 
 bool Orcamento::buscarParametrosFrete() {
@@ -1211,3 +1218,4 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
 // TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/
+// TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja

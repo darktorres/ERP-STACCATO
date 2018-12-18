@@ -13,14 +13,14 @@
 #include "ui_searchdialog.h"
 #include "usersession.h"
 
-SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, QWidget *parent)
-    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), filter(filter), model(50), ui(new Ui::SearchDialog) {
+SearchDialog::SearchDialog(const QString &title, const QString &table, const QStringList &indexes, const QString &filter, const bool permitirDescontinuados, const bool silent, QWidget *parent)
+    : QDialog(parent), indexes(indexes), permitirDescontinuados(permitirDescontinuados), silent(silent), filter(filter), model(100), ui(new Ui::SearchDialog) {
   ui->setupUi(this);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &SearchDialog::on_lineEditBusca_textChanged);
   connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
-  connect(ui->radioButtonProdAtivos, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
-  connect(ui->radioButtonProdDesc, &QRadioButton::toggled, this, &SearchDialog::on_radioButtonProdDesc_toggled);
+  connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
+  connect(ui->radioButtonProdDesc, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdDesc_toggled);
   connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
 
   setWindowTitle(title);
@@ -51,10 +51,11 @@ SearchDialog::~SearchDialog() { delete ui; }
 
 void SearchDialog::setupTables(const QString &table) {
   model.setTable(table);
-  model.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   setFilter(filter);
 
   ui->table->setModel(new SearchDialogProxyModel(&model, this));
+
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
@@ -76,8 +77,6 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   if (model.tableName() == "produto") {
     model.setFilter(searchFilter + " AND descontinuado = " + (ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE") + " AND desativado = FALSE" + representacao + fornecedorRep);
 
-    if (not model.select()) { return; }
-
     ui->table->resizeColumnsToContents();
 
     return;
@@ -86,8 +85,6 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   if (not filter.isEmpty()) { searchFilter.append(" AND (" + filter + ")"); }
 
   model.setFilter(searchFilter);
-
-  if (not model.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }
@@ -100,29 +97,34 @@ void SearchDialog::sendUpdateMessage() {
   emit itemSelected(model.data(selection.first().row(), primaryKey).toString());
 }
 
-void SearchDialog::show() {
+bool SearchDialog::prepare_show() {
   model.setFilter(filter);
 
-  if (not model.select()) { return; }
+  if (not isSet) {
+    if (not model.select()) { return false; }
+    isSet = true;
+  }
 
   ui->table->resizeColumnsToContents();
 
   ui->lineEditBusca->setFocus();
   ui->lineEditBusca->clear();
 
-  QDialog::show();
-
   ui->lineEditEstoque_2->setText("Staccato OFF");
   ui->lineEditEstoque->setText("Estoque");
   ui->lineEditPromocao->setText("Promoção");
+
+  return true;
+}
+
+void SearchDialog::show() {
+  if (not prepare_show()) { return; }
+
+  QDialog::show();
 }
 
 void SearchDialog::showMaximized() {
-  if (not model.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
-
-  ui->lineEditBusca->setFocus();
+  if (not prepare_show()) { return; }
 
   QDialog::showMaximized();
 }
@@ -147,7 +149,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
     const auto selection = ui->table->selectionModel()->selection().indexes();
     const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
 
-    if (not selection.isEmpty() and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
+    if (not silent and not selection.isEmpty() and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }
 
   sendUpdateMessage();
@@ -159,8 +161,8 @@ void SearchDialog::setTextKeys(const QStringList &value) { textKeys = value; }
 void SearchDialog::setPrimaryKey(const QString &value) { primaryKey = value; }
 
 QString SearchDialog::getText(const QVariant &value) {
-  if (model.tableName().contains("endereco") and value == 1) { return "Não há/Retira"; }
   if (value == 0) { return QString(); }
+  if (model.tableName().contains("endereco") and value == 1) { return "Não há/Retira"; }
 
   QString queryText;
 
@@ -168,9 +170,9 @@ QString SearchDialog::getText(const QVariant &value) {
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + value.toString() + "'";
 
-  QSqlQuery query(queryText);
+  QSqlQuery query;
 
-  if (not query.exec() or not query.first()) {
+  if (not query.exec(queryText) or not query.first()) {
     qApp->enqueueError("Erro na query getText: " + query.lastError().text(), this);
     return QString();
   }
@@ -238,10 +240,10 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   return sdLoja;
 }
 
-SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, QWidget *parent) {
+SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, QWidget *parent) {
   SearchDialog *sdProd = new SearchDialog(
       // TODO: 3nao mostrar promocao vencida no descontinuado
-      "Buscar Produto", "produto", {"fornecedor", "descricao", "colecao", "codcomercial"}, "idProduto = 0", permitirDescontinuados, parent);
+      "Buscar Produto", "produto", {"fornecedor", "descricao", "colecao", "codcomercial"}, "idProduto = 0", permitirDescontinuados, silent, parent);
 
   sdProd->setPrimaryKey("idProduto");
   sdProd->setTextKeys({"descricao"});
@@ -361,10 +363,10 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   const QString filtro = (idLoja == 1) ? "" : " AND idLoja = " + QString::number(idLoja);
 
-  SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", {"nome, tipo"}, "desativado = FALSE AND (tipo = 'VENDEDOR' OR tipo = 'VENDEDOR ESPECIAL')" + filtro, false, parent);
+  SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", {"nome, tipo"}, "desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtro, false, parent);
 
-  sdVendedor->setFilter(UserSession::tipoUsuario() == "ADMINISTRADOR" ? "desativado = FALSE AND (tipo = 'VENDEDOR' OR tipo = 'VENDEDOR ESPECIAL')"
-                                                                      : "desativado = FALSE AND (tipo = 'VENDEDOR' OR tipo = 'VENDEDOR ESPECIAL') AND nome != 'REPOSIÇÂO'");
+  sdVendedor->setFilter(UserSession::tipoUsuario() == "ADMINISTRADOR" ? "desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')"
+                                                                      : "desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL') AND nome != 'REPOSIÇÂO'");
 
   sdVendedor->setPrimaryKey("idUsuario");
   sdVendedor->setTextKeys({"nome"});

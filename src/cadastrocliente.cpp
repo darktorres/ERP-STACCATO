@@ -8,6 +8,7 @@
 #include "cadastrocliente.h"
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
+#include "checkboxdelegate.h"
 #include "ui_cadastrocliente.h"
 #include "usersession.h"
 
@@ -54,7 +55,6 @@ void CadastroCliente::setConnections() {
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonAtualizarEnd_clicked);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonBuscar_clicked);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonEndLimpar_clicked);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemover_clicked);
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroCliente::on_pushButtonRemoverEnd_clicked);
@@ -74,10 +74,14 @@ void CadastroCliente::setupUi() {
 
 void CadastroCliente::setupTables() {
   ui->tableEndereco->setModel(&modelEnd);
+
   ui->tableEndereco->hideColumn("idEndereco");
-  ui->tableEndereco->hideColumn("desativado");
   ui->tableEndereco->hideColumn("idCliente");
   ui->tableEndereco->hideColumn("codUF");
+
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+
+  ui->tableEndereco->resizeColumnsToContents();
 }
 
 bool CadastroCliente::verifyFields() {
@@ -113,7 +117,7 @@ bool CadastroCliente::savingProcedures() {
   if (not setData("contatoRG", ui->lineEditContatoRG->text())) { return false; }
   if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
   if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
-  if (not setData("dataNasc", ui->dateEdit->date())) { return false; }
+  if (ui->dateEdit->date().toString("yyyy-MM-dd") != "1900-01-01" and not setData("dataNasc", ui->dateEdit->date())) { return false; }
   if (not setData("tel", ui->lineEditTel_Res->text())) { return false; }
   if (not setData("telCel", ui->lineEditTel_Cel->text())) { return false; }
   if (not setData("telCom", ui->lineEditTel_Com->text())) { return false; }
@@ -177,6 +181,8 @@ void CadastroCliente::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
   ui->pushButtonRemover->hide();
+
+  ui->pushButtonRemoverEnd->hide();
 }
 
 void CadastroCliente::updateMode() {
@@ -188,11 +194,18 @@ void CadastroCliente::updateMode() {
 bool CadastroCliente::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
-  if (data("idCliente").toString().isEmpty()) { return qApp->enqueueError(false, "idCliente vazio!", this); }
+  //---------------------------------------------------
 
-  modelEnd.setFilter("idCliente = " + data("idCliente").toString() + " AND desativado = FALSE");
+  const bool inativos = ui->checkBoxMostrarInativos->isChecked();
+  modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return false; }
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
+
+  ui->tableEndereco->resizeColumnsToContents();
+
+  //---------------------------------------------------
 
   ui->itemBoxCliente->setFilter("idCliente NOT IN (" + data("idCliente").toString() + ")");
 
@@ -201,6 +214,8 @@ bool CadastroCliente::viewRegister() {
   tipoPFPJ == "PF" ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
 
   ui->checkBoxInscEstIsento->setChecked(data("inscEstadual").toString() == "ISENTO");
+
+  if (data("dataNasc").isNull()) { ui->dateEdit->setDate(QDate(1900, 1, 1)); }
 
   return true;
 }
@@ -254,23 +269,22 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
 }
 
 bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
-  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) { return false; }
-  }
-
   if (not ui->lineEditCEP->isValid()) {
+    qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!", this);
+    return false;
   }
 
   if (ui->lineEditNro->text().isEmpty()) {
+    qApp->enqueueError("Número vazio!", this);
     ui->lineEditNro->setFocus();
-    return qApp->enqueueError(false, "Número vazio!", this);
+    return false;
   }
 
-  currentRowEnd = (tipo == Tipo::Atualizar) ? mapperEnd.currentIndex() : modelEnd.rowCount();
-
-  if (tipo == Tipo::Cadastrar) { modelEnd.insertRow(currentRowEnd); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRowEnd = modelEnd.rowCount();
+    modelEnd.insertRow(currentRowEnd);
+  }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -283,26 +297,24 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
 
+  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+
+  ui->tableEndereco->resizeColumnsToContents();
+
   isDirty = true;
 
   return true;
 }
 
 bool CadastroCliente::cadastrar() {
-  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
-
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
+  }
 
   if (not savingProcedures()) { return false; }
 
-  for (int column = 0; column < model.rowCount(); ++column) {
-    const QVariant dado = model.data(currentRow, column);
-    if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
-    }
-  }
+  if (not columnsToUpper(model, currentRow)) { return false; }
 
   if (not model.submitAll()) { return false; }
 
@@ -310,31 +322,18 @@ bool CadastroCliente::cadastrar() {
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  for (int row = 0, rowCount = modelEnd.rowCount(); row < rowCount; ++row) {
-    if (not modelEnd.setData(row, primaryKey, primaryId)) { return false; }
-  }
+  // -------------------------------------------------------------------------
 
-  for (int column = 0; column < modelEnd.rowCount(); ++column) {
-    const QVariant dado = modelEnd.data(currentRow, column);
-    if (dado.type() == QVariant::String) {
-      if (not modelEnd.setData(currentRow, column, dado.toString().toUpper())) { return false; }
-    }
-  }
+  if (not setForeignKey(modelEnd)) { return false; }
 
-  return modelEnd.submitAll();
+  if (not modelEnd.submitAll()) { return false; }
+
+  return true;
 }
 
-void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {
-  if (not cadastrarEndereco()) { return qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroCliente::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
 
-  novoEndereco();
-}
-
-void CadastroCliente::on_pushButtonAtualizarEnd_clicked() {
-  if (not cadastrarEndereco(Tipo::Atualizar)) { return qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
-
-  novoEndereco();
-}
+void CadastroCliente::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
 void CadastroCliente::on_lineEditCEP_textChanged(const QString &cep) {
   if (not ui->lineEditCEP->isValid()) { return; }
@@ -363,20 +362,29 @@ void CadastroCliente::clearEndereco() {
 void CadastroCliente::novoEndereco() {
   ui->pushButtonAdicionarEnd->show();
   ui->pushButtonAtualizarEnd->hide();
+  ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
-void CadastroCliente::on_pushButtonEndLimpar_clicked() { novoEndereco(); }
-
 void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return novoEndereco(); }
+
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
+  ui->pushButtonRemoverEnd->show();
+  //------------------------------------------
+  disconnect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroCliente::on_lineEditCEP_textChanged);
   mapperEnd.setCurrentModelIndex(index);
+  connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroCliente::on_lineEditCEP_textChanged);
+  //------------------------------------------
+  currentRowEnd = index.row();
 }
 
 void CadastroCliente::on_radioButtonPF_toggled(const bool checked) {
-  tipoPFPJ = checked ? QString("PF") : QString("PJ");
+  tipoPFPJ = checked ? "PF" : "PJ";
 
   if (checked) {
     ui->lineEditCNPJ->clear();
@@ -414,9 +422,15 @@ void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) {
 }
 
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
+  if (currentRow == -1) { return; }
+
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
+
+  ui->tableEndereco->resizeColumnsToContents();
 }
 
 void CadastroCliente::on_pushButtonRemoverEnd_clicked() {

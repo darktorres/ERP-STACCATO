@@ -20,7 +20,7 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
 WidgetLogistica::~WidgetLogistica() { delete ui; }
 
 void WidgetLogistica::setConnections() {
-  connect(ui->tableForn, &TableView::activated, this, &WidgetLogistica::on_tableForn_activated);
+  connect(ui->tableForn, &TableView::clicked, this, &WidgetLogistica::on_tableForn_clicked);
   connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged);
 }
 
@@ -46,6 +46,8 @@ void WidgetLogistica::updateTables() {
   if (currentText == "Recebimento") { modelViewLogistica.setTable("view_fornecedor_logistica_recebimento"); }
   if (currentText == "Representação") { modelViewLogistica.setTable("view_fornecedor_logistica_representacao"); }
 
+  modelViewLogistica.setFilter("");
+
   if (currentText == "Agendar Coleta" or currentText == "Coleta" or currentText == "Recebimento" or currentText == "Representação") {
     ui->frameForn->show();
 
@@ -67,15 +69,15 @@ void WidgetLogistica::updateTables() {
   if (currentText == "Calendário") { ui->widgetCalendario->updateTables(); }
 }
 
-void WidgetLogistica::on_tableForn_activated(const QModelIndex &index) {
-  const QString fornecedor = modelViewLogistica.data(index.row(), "fornecedor").toString();
+void WidgetLogistica::on_tableForn_clicked(const QModelIndex &index) {
+  const QString fornecedor = index.isValid() ? modelViewLogistica.data(index.row(), "fornecedor").toString() : "";
 
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
-  if (currentText == "Agendar Coleta") { ui->widgetAgendarColeta->tableFornLogistica_activated(fornecedor); }
-  if (currentText == "Coleta") { ui->widgetColeta->tableFornLogistica_activated(fornecedor); }
-  if (currentText == "Recebimento") { ui->widgetRecebimento->tableFornLogistica_activated(fornecedor); }
-  if (currentText == "Representação") { ui->widgetRepresentacao->tableFornLogistica_activated(fornecedor); }
+  if (currentText == "Agendar Coleta") { ui->widgetAgendarColeta->tableFornLogistica_clicked(fornecedor); }
+  if (currentText == "Coleta") { ui->widgetColeta->tableFornLogistica_clicked(fornecedor); }
+  if (currentText == "Recebimento") { ui->widgetRecebimento->tableFornLogistica_clicked(fornecedor); }
+  if (currentText == "Representação") { ui->widgetRepresentacao->tableFornLogistica_clicked(fornecedor); }
 }
 
 void WidgetLogistica::on_tabWidgetLogistica_currentChanged(const int) { updateTables(); }

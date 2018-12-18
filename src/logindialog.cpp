@@ -1,4 +1,6 @@
+#include <QDebug>
 #include <QMessageBox>
+#include <QSqlError>
 
 #include "application.h"
 #include "logindialog.h"
@@ -61,14 +63,29 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
   if (not qApp->dbConnect()) { return; }
 
+  if (not verificaVersao()) { return; }
+
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
+    qApp->enqueueError("Login inválido!", this);
     ui->lineEditPass->setFocus();
-    return qApp->enqueueError("Login inválido!", this);
+    return;
   }
 
   accept();
 
   if (tipo == Tipo::Login) { UserSession::setSetting("User/lastuser", ui->lineEditUser->text()); }
+}
+
+bool LoginDialog::verificaVersao() {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueError(false, "Erro verificando versão atual: " + query.lastError().text()); }
+
+  if (query.value("versaoAtual").toString() != qApp->applicationVersion()) {
+    return qApp->enqueueError(false, "Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString());
+  }
+
+  return true;
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(qApp->getMapLojas().value(loja)); }

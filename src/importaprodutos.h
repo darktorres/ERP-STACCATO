@@ -13,7 +13,7 @@ class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 };
+  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 }; // FIX: tipo não é mais 0/1/2 e sim colunas separadas
   explicit ImportaProdutos(const Tipo tipo, QWidget *parent = nullptr);
   ~ImportaProdutos();
   auto importarTabela() -> void;

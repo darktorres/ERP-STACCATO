@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1294</width>
-    <height>756</height>
+    <width>1388</width>
+    <height>765</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -858,13 +858,6 @@ color: rgb(0, 0, 0);</string>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButtonEndLimpar">
-              <property name="text">
-               <string>Limpar seleção</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="pushButtonRemoverEnd">
               <property name="text">
                <string>Remover end.</string>
@@ -928,6 +921,9 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditNomeFantasia</tabstop>
   <tabstop>lineEditCNPJ</tabstop>
   <tabstop>lineEditInscEstadual</tabstop>
+  <tabstop>comboBoxEspecialidade</tabstop>
+  <tabstop>doubleSpinBoxComissao</tabstop>
+  <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>lineEditContatoNome</tabstop>
   <tabstop>lineEditContatoCPF</tabstop>
   <tabstop>lineEditContatoApelido</tabstop>
@@ -938,6 +934,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditIdNextel</tabstop>
   <tabstop>lineEditNextel</tabstop>
   <tabstop>lineEditEmail</tabstop>
+  <tabstop>comboBoxSt</tabstop>
+  <tabstop>doubleSpinBoxAliquotaSt</tabstop>
   <tabstop>comboBoxTipoEnd</tabstop>
   <tabstop>lineEditCEP</tabstop>
   <tabstop>lineEditEndereco</tabstop>
@@ -949,7 +947,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>tableEndereco</tabstop>
   <tabstop>pushButtonAdicionarEnd</tabstop>
   <tabstop>pushButtonAtualizarEnd</tabstop>
-  <tabstop>pushButtonEndLimpar</tabstop>
   <tabstop>pushButtonRemoverEnd</tabstop>
   <tabstop>checkBoxMostrarInativos</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
@@ -957,6 +954,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
   <tabstop>pushButtonRemover</tabstop>
+  <tabstop>pushButtonValidade</tabstop>
  </tabstops>
  <resources>
   <include location="../qrs/resources.qrc"/>

@@ -5,6 +5,7 @@
 #include "application.h"
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
+#include "checkboxdelegate.h"
 #include "itembox.h"
 #include "ui_cadastroprofissional.h"
 #include "usersession.h"
@@ -27,8 +28,6 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonAtualizarEnd_clicked);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonBuscar_clicked);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonEndLimpar, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonEndLimpar_clicked);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemover_clicked);
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroProfissional::on_pushButtonRemoverEnd_clicked);
@@ -61,12 +60,16 @@ CadastroProfissional::~CadastroProfissional() { delete ui; }
 
 void CadastroProfissional::setupTables() {
   ui->tableEndereco->setModel(&modelEnd);
+
   ui->tableEndereco->hideColumn("idEndereco");
-  ui->tableEndereco->hideColumn("desativado");
   ui->tableEndereco->hideColumn("idProfissional");
   ui->tableEndereco->hideColumn("codUF");
   ui->tableEndereco->hideColumn("created");
   ui->tableEndereco->hideColumn("lastUpdated");
+
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+
+  ui->tableEndereco->resizeColumnsToContents();
 }
 
 void CadastroProfissional::setupUi() {
@@ -126,6 +129,8 @@ void CadastroProfissional::registerMode() {
   ui->pushButtonCadastrar->show();
   ui->pushButtonAtualizar->hide();
   ui->pushButtonRemover->hide();
+
+  ui->pushButtonRemoverEnd->hide();
 }
 
 void CadastroProfissional::updateMode() {
@@ -137,9 +142,18 @@ void CadastroProfissional::updateMode() {
 bool CadastroProfissional::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
-  modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + " AND desativado = FALSE");
+  //---------------------------------------------------
+
+  const bool inativos = ui->checkBoxMostrarInativos->isChecked();
+  modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return false; }
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
+
+  ui->tableEndereco->resizeColumnsToContents();
+
+  //---------------------------------------------------
 
   ui->checkBoxPoupanca->setChecked(data("poupanca").toBool());
 
@@ -151,29 +165,26 @@ bool CadastroProfissional::viewRegister() {
 }
 
 bool CadastroProfissional::cadastrar() {
-  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro: linha -1 RegisterDialog", this); }
-
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
+  }
 
   if (not savingProcedures()) { return false; }
 
-  for (int column = 0; column < model.rowCount(); ++column) {
-    const QVariant dado = model.data(currentRow, column);
-
-    if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
-    }
-  }
+  if (not columnsToUpper(model, currentRow)) { return false; }
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  return true;
+  // -------------------------------------------------------------------------
+
+  if (not setForeignKey(modelEnd)) { return false; }
+
+  return modelEnd.submitAll();
 }
 
 bool CadastroProfissional::verifyFields() {
@@ -244,8 +255,11 @@ void CadastroProfissional::clearFields() {
 void CadastroProfissional::novoEndereco() {
   ui->pushButtonAdicionarEnd->show();
   ui->pushButtonAtualizarEnd->hide();
+  ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroProfissional::clearEndereco() {
@@ -257,8 +271,6 @@ void CadastroProfissional::clearEndereco() {
   ui->lineEditNro->clear();
   ui->lineEditUF->clear();
 }
-
-void CadastroProfissional::on_pushButtonCancelar_clicked() { close(); }
 
 void CadastroProfissional::on_pushButtonBuscar_clicked() {
   if (not confirmationMessage()) { return; }
@@ -272,19 +284,17 @@ void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) {
   ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "" : "color: rgb(255, 0, 0)");
 }
 
-bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
-  Q_FOREACH (const auto &line, ui->groupBoxEndereco->findChildren<QLineEdit *>()) {
-    if (not verifyRequiredField(line)) { return false; }
-  }
-
+bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
+    qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
-    return qApp->enqueueError(false, "CEP inválido!", this);
+    return false;
   }
 
-  currentRowEnd = isUpdate ? mapperEnd.currentIndex() : modelEnd.rowCount();
-
-  if (not isUpdate) { modelEnd.insertRow(currentRowEnd); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRowEnd = modelEnd.rowCount();
+    modelEnd.insertRow(currentRowEnd);
+  }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -297,6 +307,10 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
 
+  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+
+  ui->tableEndereco->resizeColumnsToContents();
+
   isDirty = true;
 
   return true;
@@ -304,7 +318,7 @@ bool CadastroProfissional::cadastrarEndereco(const bool isUpdate) {
 
 void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
 
-void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(true) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
+void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
 
 void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   if (not ui->lineEditCEP->isValid()) { return; }
@@ -320,12 +334,14 @@ void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   }
 }
 
-void CadastroProfissional::on_pushButtonEndLimpar_clicked() { novoEndereco(); }
-
 void CadastroProfissional::on_tableEndereco_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return novoEndereco(); }
+
   ui->pushButtonAtualizarEnd->show();
   ui->pushButtonAdicionarEnd->hide();
+  ui->pushButtonRemoverEnd->show();
   mapperEnd.setCurrentModelIndex(index);
+  currentRowEnd = index.row();
 }
 
 void CadastroProfissional::on_lineEditContatoCPF_textEdited(const QString &text) {
@@ -333,12 +349,20 @@ void CadastroProfissional::on_lineEditContatoCPF_textEdited(const QString &text)
 }
 
 void CadastroProfissional::on_checkBoxMostrarInativos_clicked(const bool checked) {
+  if (currentRow == -1) { return; }
+
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
+
+  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
+
+  ui->tableEndereco->resizeColumnsToContents();
 }
 
 void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {
+  // TODO: se já estiver desativado apenas retornar
+
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Remover");
   msgBox.setButtonText(QMessageBox::No, "Voltar");

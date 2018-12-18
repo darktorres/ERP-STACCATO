@@ -17,7 +17,7 @@ BaixaOrcamento::~BaixaOrcamento() { delete ui; }
 
 void BaixaOrcamento::setupTables(const QString &idOrcamento) {
   modelOrcamento.setTable("orcamento");
-  modelOrcamento.setEditStrategy(QSqlTableModel::OnManualSubmit);
+
   modelOrcamento.setFilter("idOrcamento = '" + idOrcamento + "'");
 
   if (not modelOrcamento.select()) { return; }
@@ -42,7 +42,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
 
   if (not modelOrcamento.submitAll()) { return; }
 
-  // TODO: exibir mensagem de confirmacao
+  qApp->enqueueInformation("Baixa salva!", this);
 
   close();
   parentWidget()->close();

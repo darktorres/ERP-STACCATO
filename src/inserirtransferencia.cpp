@@ -101,18 +101,10 @@ bool InserirTransferencia::verifyFields() {
 
 void InserirTransferencia::setupTables() {
   modelDe.setTable("conta_a_pagar_has_pagamento");
-  modelDe.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-  modelDe.setFilter("0");
-
-  if (not modelDe.select()) { return; }
+  //-----------------------------------------
 
   modelPara.setTable("conta_a_receber_has_pagamento");
-  modelPara.setEditStrategy(QSqlTableModel::OnManualSubmit);
-
-  modelPara.setFilter("0");
-
-  if (not modelPara.select()) { return; }
 }
 
 // TODO: 5colocar campo para observacao (na tabela já tem campo observacao, apenas preencher)

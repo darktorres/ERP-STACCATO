@@ -43,7 +43,6 @@ CadastroUsuario::~CadastroUsuario() { delete ui; }
 
 void CadastroUsuario::setupTables() {
   modelPermissoes.setTable("usuario_has_permissao");
-  modelPermissoes.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelPermissoes.setHeaderData("view_tab_orcamento", "Ver Orçamentos?");
   modelPermissoes.setHeaderData("view_tab_venda", "Ver Vendas?");
@@ -54,16 +53,16 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
 
-  modelPermissoes.setFilter("0");
-
-  if (not modelPermissoes.select()) { return; }
-
   auto *proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
+
   ui->table->setModel(proxyModel);
+
   ui->table->hideRow(0);                          // idUsuario
   ui->table->hideRow(proxyModel->rowCount() - 1); // created
   ui->table->hideRow(proxyModel->rowCount() - 2); // lastUpdated
+
   ui->table->setItemDelegate(new CheckBoxDelegate(this));
+
   ui->table->horizontalHeader()->setVisible(false);
 }
 
@@ -84,8 +83,9 @@ bool CadastroUsuario::verifyFields() {
   }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
+    qApp->enqueueError("As senhas não batem!", this);
     ui->lineEditPasswd->setFocus();
-    return qApp->enqueueError(false, "As senhas não batem!", this);
+    return false;
   }
 
   return true;
@@ -123,8 +123,10 @@ bool CadastroUsuario::savingProcedures() {
 
   // NOTE: change this when upgrading for MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
-    QSqlQuery query("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')");
-    if (not query.first()) { return false; }
+    QSqlQuery query;
+
+    if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { return false; }
+
     if (not setData("passwd", query.value(0))) { return false; }
   }
 
@@ -151,7 +153,9 @@ bool CadastroUsuario::viewRegister() {
 }
 
 void CadastroUsuario::fillCombobox() {
-  QSqlQuery query("SELECT descricao, idLoja FROM loja");
+  QSqlQuery query;
+
+  if (not query.exec("SELECT descricao, idLoja FROM loja")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -173,24 +177,18 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 }
 
 bool CadastroUsuario::cadastrar() {
-  currentRow = (tipo == Tipo::Atualizar) ? mapper.currentIndex() : model.rowCount();
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
-
-  if (tipo == Tipo::Cadastrar and not model.insertRow(currentRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
+  }
 
   if (not savingProcedures()) { return false; }
 
-  for (int column = 0; column < model.rowCount(); ++column) {
-    const QVariant dado = model.data(currentRow, column);
-    if (dado.type() == QVariant::String) {
-      if (not model.setData(currentRow, column, dado.toString().toUpper())) { return false; }
-    }
-  }
+  if (not columnsToUpper(model, currentRow)) { return false; }
 
   if (not model.submitAll()) { return false; }
 
-  primaryId = data(currentRow, primaryKey).isValid() ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
@@ -217,11 +215,9 @@ bool CadastroUsuario::cadastrar() {
     if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
     if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
     if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
-
-    if (not modelPermissoes.submitAll()) { return false; }
   }
 
-  if (tipo == Tipo::Atualizar and not modelPermissoes.submitAll()) { return false; }
+  if (not modelPermissoes.submitAll()) { return false; }
 
   return true;
 }

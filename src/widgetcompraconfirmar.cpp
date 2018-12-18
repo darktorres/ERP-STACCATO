@@ -24,16 +24,22 @@ WidgetCompraConfirmar::~WidgetCompraConfirmar() { delete ui; }
 void WidgetCompraConfirmar::setupTables() {
   modelResumo.setTable("view_fornecedor_compra_confirmar");
 
+  modelResumo.setFilter("");
+
   ui->tableResumo->setModel(&modelResumo);
 
   //---------------------------------------------------------------------------------------
 
   modelViewCompras.setTable("view_compras");
 
+  modelViewCompras.setFilter("");
+
   modelViewCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
 
   ui->table->setModel(&modelViewCompras);
+
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
+
   ui->table->hideColumn("Compra");
 }
 

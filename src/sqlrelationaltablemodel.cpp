@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -55,7 +56,34 @@ QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVar
 }
 
 bool SqlRelationalTableModel::select() {
+  //  qDebug() << "selecting " << tableName();
+  //  qDebug() << "filter: " << filter();
+  //  qDebug() << "stmt: " << selectStatement() << "\n";
+
   if (not QSqlRelationalTableModel::select()) { return qApp->enqueueError(false, "Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 
   return true;
+}
+
+void SqlRelationalTableModel::setFilter(const QString &filter) {
+  //  qDebug() << "table: " << tableName();
+  //  qDebug() << "filter: " << filter << "\n";
+
+  QSqlRelationalTableModel::setFilter(filter);
+}
+
+void SqlRelationalTableModel::setSort(const QString &column, Qt::SortOrder order) { QSqlRelationalTableModel::setSort(fieldIndex(column), order); }
+
+void SqlRelationalTableModel::setTable(const QString &tableName) {
+  QSqlRelationalTableModel::setTable(tableName);
+  setEditStrategy(QSqlTableModel::OnManualSubmit);
+  setFilter("0");
+}
+
+int SqlRelationalTableModel::fieldIndex(const QString &fieldName, const bool silent) {
+  const int field = QSqlRelationalTableModel::fieldIndex(fieldName);
+
+  if (field == -1 and not silent) { qApp->enqueueError(fieldName + " não encontrado na tabela " + tableName()); }
+
+  return field;
 }

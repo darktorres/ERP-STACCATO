@@ -14,7 +14,7 @@
 #include "ui_devolucao.h"
 #include "usersession.h"
 
-Devolucao::Devolucao(QString idVenda, QWidget *parent) : QDialog(parent), idVenda(std::move(idVenda)), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   connect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
@@ -57,12 +57,12 @@ void Devolucao::determinarIdDevolucao() {
 
 void Devolucao::setupTables() {
   modelProdutos.setTable("venda_has_produto");
-  modelProdutos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("produto", "Produto");
   modelProdutos.setHeaderData("obs", "Obs.");
+  modelProdutos.setHeaderData("lote", "Lote");
   modelProdutos.setHeaderData("prcUnitario", "R$ Unit.");
   modelProdutos.setHeaderData("caixas", "Caixas");
   modelProdutos.setHeaderData("quant", "Quant.");
@@ -77,6 +77,7 @@ void Devolucao::setupTables() {
   if (not modelProdutos.select()) { return; }
 
   ui->tableProdutos->setModel(&modelProdutos);
+
   ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("statusOriginal");
   ui->tableProdutos->hideColumn("mostrarDesconto");
@@ -113,11 +114,15 @@ void Devolucao::setupTables() {
   ui->tableProdutos->hideColumn("dataRealReceb");
   ui->tableProdutos->hideColumn("dataPrevEnt");
   ui->tableProdutos->hideColumn("dataRealEnt");
+
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
+  ui->tableProdutos->resizeColumnsToContents();
+
+  //--------------------------------------------------------------
+
   modelDevolvidos.setTable("venda_has_produto");
-  modelDevolvidos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelDevolvidos.setHeaderData("selecionado", "");
   modelDevolvidos.setHeaderData("status", "Status");
@@ -125,6 +130,7 @@ void Devolucao::setupTables() {
   modelDevolvidos.setHeaderData("fornecedor", "Fornecedor");
   modelDevolvidos.setHeaderData("produto", "Produto");
   modelDevolvidos.setHeaderData("obs", "Obs.");
+  modelDevolvidos.setHeaderData("lote", "Lote");
   modelDevolvidos.setHeaderData("prcUnitario", "R$ Unit.");
   modelDevolvidos.setHeaderData("caixas", "Caixas");
   modelDevolvidos.setHeaderData("quant", "Quant.");
@@ -139,6 +145,7 @@ void Devolucao::setupTables() {
   if (not modelDevolvidos.select()) { return; }
 
   ui->tableDevolvidos->setModel(&modelDevolvidos);
+
   ui->tableDevolvidos->hideColumn("idRelacionado");
   ui->tableDevolvidos->hideColumn("mostrarDesconto");
   ui->tableDevolvidos->hideColumn("reposicaoEntrega");
@@ -173,11 +180,15 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->hideColumn("dataRealReceb");
   ui->tableDevolvidos->hideColumn("dataPrevEnt");
   ui->tableDevolvidos->hideColumn("dataRealEnt");
+
   ui->tableDevolvidos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableDevolvidos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
+  ui->tableDevolvidos->resizeColumnsToContents();
+
+  //--------------------------------------------------------------
+
   modelPagamentos.setTable("conta_a_receber_has_pagamento");
-  modelPagamentos.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelPagamentos.setHeaderData("tipo", "Tipo");
   modelPagamentos.setHeaderData("parcela", "Parcela");
@@ -192,6 +203,7 @@ void Devolucao::setupTables() {
   if (not modelPagamentos.select()) { return; }
 
   ui->tablePagamentos->setModel(&modelPagamentos);
+
   ui->tablePagamentos->hideColumn("nfe");
   ui->tablePagamentos->hideColumn("idVenda");
   ui->tablePagamentos->hideColumn("idLoja");
@@ -210,26 +222,32 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->hideColumn("contraParte");
   ui->tablePagamentos->hideColumn("comissao");
   ui->tablePagamentos->hideColumn("desativado");
+
   ui->tablePagamentos->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePagamentos->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
 
   for (int row = 0; row < modelPagamentos.rowCount(); ++row) { ui->tablePagamentos->openPersistentEditor(row, "representacao"); }
 
+  ui->tablePagamentos->resizeColumnsToContents();
+
+  //--------------------------------------------------------------
+
   modelVenda.setTable("venda");
-  modelVenda.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelVenda.setFilter("idVenda = '" + idVenda + "'");
 
   if (not modelVenda.select()) { return; }
 
+  //--------------------------------------------------------------
+
   modelCliente.setTable("cliente");
-  modelCliente.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelCliente.setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString());
 
   if (not modelCliente.select()) { return; }
 
-  // mapper
+  //--------------------------------------------------------------
+
   mapperItem.setModel(&modelProdutos);
   mapperItem.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 
@@ -239,6 +257,8 @@ void Devolucao::setupTables() {
 }
 
 void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   const double total = modelProdutos.data(index.row(), "total").toDouble();
 
   const auto list = modelDevolvidos.match("idRelacionado", modelProdutos.data(index.row(), "idVendaProduto"), -1, Qt::MatchExactly);
@@ -538,6 +558,10 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   limparCampos();
+
+  ui->tableProdutos->resizeColumnsToContents();
+  ui->tableDevolvidos->resizeColumnsToContents();
+  ui->tablePagamentos->resizeColumnsToContents();
 
   qApp->enqueueInformation("Devolução realizada com sucesso!", this);
 }

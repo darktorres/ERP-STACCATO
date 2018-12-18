@@ -13,7 +13,7 @@ public:
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
-  const int dias;
+  const int prazoEntregaColumn;
 };
 
 #endif // ESTOQUEPRAZOPROXYMODEL_H

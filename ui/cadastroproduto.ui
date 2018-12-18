@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
+    <width>1194</width>
     <height>763</height>
    </rect>
   </property>
@@ -1776,12 +1776,16 @@ color: rgb(0, 0, 0);</string>
   <tabstop>lineEditDescricao</tabstop>
   <tabstop>comboBoxUn</tabstop>
   <tabstop>itemBoxFornecedor</tabstop>
+  <tabstop>dateEditValidade</tabstop>
   <tabstop>lineEditColecao</tabstop>
   <tabstop>doubleSpinBoxM2Cx</tabstop>
   <tabstop>doubleSpinBoxPcCx</tabstop>
+  <tabstop>doubleSpinBoxKgCx</tabstop>
   <tabstop>lineEditFormComer</tabstop>
   <tabstop>lineEditCodComer</tabstop>
   <tabstop>lineEditUI</tabstop>
+  <tabstop>checkBoxEstoque</tabstop>
+  <tabstop>checkBoxPromocao</tabstop>
   <tabstop>lineEditCodBarras</tabstop>
   <tabstop>lineEditNCM</tabstop>
   <tabstop>lineEditICMS</tabstop>
@@ -1808,6 +1812,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>textEditObserv</tabstop>
   <tabstop>pushButtonCadastrar</tabstop>
   <tabstop>pushButtonAtualizar</tabstop>
+  <tabstop>pushButtonBuscar</tabstop>
   <tabstop>pushButtonNovoCad</tabstop>
   <tabstop>pushButtonRemover</tabstop>
  </tabstops>

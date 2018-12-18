@@ -42,12 +42,12 @@ void WidgetLogisticaColeta::updateTables() {
   ui->table->resizeColumnsToContents();
 }
 
-void WidgetLogisticaColeta::tableFornLogistica_activated(const QString &fornecedor) {
+void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor) {
   ui->lineEditBusca->clear();
 
-  modelViewColeta.setFilter("fornecedor = '" + fornecedor + "'");
+  const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
-  if (not modelViewColeta.select()) { return; }
+  modelViewColeta.setFilter(filtro);
 
   ui->checkBoxMarcarTodos->setChecked(false);
 }
@@ -56,7 +56,6 @@ void WidgetLogisticaColeta::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setTable("view_coleta");
-  modelViewColeta.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   modelViewColeta.setHeaderData("idEstoque", "Estoque");
   modelViewColeta.setHeaderData("lote", "Lote");
@@ -75,11 +74,9 @@ void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
   modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  modelViewColeta.setFilter("0");
-
   ui->table->setModel(new EstoquePrazoProxyModel(&modelViewColeta, this));
+
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("prazoEntrega");
   ui->table->hideColumn("ordemCompra");
 }
 
@@ -152,7 +149,7 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
   return true;
 }
 
-void WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked(const bool) { ui->table->selectAll(); }
+void WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->table->selectAll() : ui->table->clearSelection(); }
 
 void WidgetLogisticaColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
@@ -160,8 +157,6 @@ void WidgetLogisticaColeta::montaFiltro() {
   const QString textoBusca = ui->lineEditBusca->text();
 
   modelViewColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
-
-  if (not modelViewColeta.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

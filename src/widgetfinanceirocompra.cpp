@@ -36,9 +36,9 @@ void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroCompra::setupTables() {
   modelViewComprasFinanceiro.setTable("view_compras_financeiro");
-  modelViewComprasFinanceiro.setEditStrategy(QSqlTableModel::OnManualSubmit);
 
   ui->table->setModel(&modelViewComprasFinanceiro);
+
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
 }
 
@@ -56,8 +56,6 @@ void WidgetFinanceiroCompra::montaFiltro() {
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
   modelViewComprasFinanceiro.setFilter(filtroBusca);
-
-  if (not modelViewComprasFinanceiro.select()) { return; }
 
   ui->table->resizeColumnsToContents();
 }

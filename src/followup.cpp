@@ -76,7 +76,6 @@ bool FollowUp::verifyFields() {
 
 void FollowUp::setupTables() {
   modelViewFollowup.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
-  modelViewFollowup.setEditStrategy(SqlRelationalTableModel::OnManualSubmit);
 
   modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
   modelViewFollowup.setHeaderData("idVenda", "Venda");
@@ -90,7 +89,10 @@ void FollowUp::setupTables() {
   if (not modelViewFollowup.select()) { return; }
 
   ui->table->setModel(new FollowUpProxyModel(&modelViewFollowup, this));
+
   ui->table->hideColumn("semaforo");
+
+  ui->table->resizeColumnsToContents();
 }
 
 void FollowUp::on_dateFollowup_dateChanged(const QDate &date) {

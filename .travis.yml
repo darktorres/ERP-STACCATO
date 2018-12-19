@@ -17,6 +17,7 @@ addons:
     - qt511script
     - qt511tools
     - mesa-common-dev
+    - libgl1-mesa-dev
     
 script:
   - source /opt/qt511/bin/qt511-env.sh

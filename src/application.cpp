@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.33");
+  setApplicationVersion("0.6.34");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -77,7 +77,7 @@ bool Application::setDatabase() {
 
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
-  db.setPassword("12345");
+  db.setPassword("123456");
   db.setDatabaseName("mydb");
   db.setPort(3306);
 

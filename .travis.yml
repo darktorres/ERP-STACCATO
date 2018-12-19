@@ -16,6 +16,7 @@ addons:
     - qt511charts-no-lgpl
     - qt511script
     - qt511tools
+    - mesa-common-dev
     
 script:
   - source /opt/qt511/bin/qt511-env.sh

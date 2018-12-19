@@ -35,9 +35,10 @@ ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString 
 ProdutosPendentes::~ProdutosPendentes() { delete ui; }
 
 void ProdutosPendentes::recalcularQuantidade() {
+  const auto selectedRows = ui->tableProdutos->selectionModel()->selectedRows();
   double quant = 0;
 
-  Q_FOREACH (const auto &item, ui->tableProdutos->selectionModel()->selectedRows()) { quant += modelViewProdutos.data(item.row(), "quant").toDouble(); }
+  for (const auto &item : selectedRows) { quant += modelViewProdutos.data(item.row(), "quant").toDouble(); }
 
   ui->doubleSpinBoxQuantTotal->setValue(quant);
   ui->doubleSpinBoxComprar->setValue(quant);

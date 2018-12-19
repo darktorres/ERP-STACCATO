@@ -528,7 +528,7 @@ void InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled(const bool checked) {
 void InputDialogFinanceiro::on_doubleSpinBoxPgt_valueChanged() {
   double sum = 0;
 
-  Q_FOREACH (const auto &spinbox, ui->widgetPgts->listDoubleSpinPgt) { sum += spinbox->value(); }
+  for (const auto &spinbox : std::as_const(ui->widgetPgts->listDoubleSpinPgt)) { sum += spinbox->value(); }
 
   ui->doubleSpinBoxTotalPag->setValue(sum);
 
@@ -589,7 +589,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxTotalPag_valueChanged(double) {
 
   double sumWithoutLast = 0;
 
-  Q_FOREACH (const auto &item, ui->widgetPgts->listDoubleSpinPgt) {
+  for (const auto &item : std::as_const(ui->widgetPgts->listDoubleSpinPgt)) {
     item->setMaximum(ui->doubleSpinBoxTotal->value());
     sumWithoutLast += item->value();
   }

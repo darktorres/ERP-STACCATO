@@ -80,7 +80,7 @@ void SendMail::on_pushButtonBuscar_clicked() {
 
   QString fileListString;
 
-  Q_FOREACH (const auto &file, files) { fileListString.append(R"(")" + QFileInfo(file).fileName() + R"(" )"); }
+  for (const auto &file : std::as_const(files)) { fileListString.append(R"(")" + QFileInfo(file).fileName() + R"(" )"); }
 
   ui->lineEditAnexo->setText(fileListString);
 }

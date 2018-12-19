@@ -97,7 +97,9 @@ void WidgetVenda::montaFiltro() {
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (const auto &child : children) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }
@@ -284,7 +286,9 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   unsetConnections();
 
-  Q_FOREACH (const auto &child, ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+  const auto children = ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>();
+
+  for (const auto &child : children) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

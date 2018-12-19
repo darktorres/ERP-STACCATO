@@ -65,12 +65,14 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
   QStringList list;
 
-  Q_FOREACH (const auto &item, ui->groupBoxVeiculos->findChildren<QCheckBox *>()) {
-    if (not item->isChecked()) { continue; }
+  const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>();
+
+  for (const auto &child : children) {
+    if (not child->isChecked()) { continue; }
 
     veiculos++;
 
-    QStringList temp = item->text().split(" / ");
+    QStringList temp = child->text().split(" / ");
 
     list << "Manhã\n" + temp.at(0) + "\n" + temp.at(1);
     list << "Tarde\n" + temp.at(0) + "\n" + temp.at(1);

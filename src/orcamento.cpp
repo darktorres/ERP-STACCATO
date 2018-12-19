@@ -28,7 +28,9 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   connect(ui->pushButtonCalculadora, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalculadora_clicked);
 
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
@@ -36,7 +38,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, this));
   ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 
   setupMapper();
@@ -163,9 +165,9 @@ bool Orcamento::viewRegister() {
 
     if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
 
-    ui->itemBoxVendedor->setReadOnlyItemBox(true);
+    const bool expirado = ui->dateTimeEdit->dateTime().addDays(data("validade").toInt()).date() < QDate::currentDate();
 
-    if (ui->dateTimeEdit->dateTime().addDays(data("validade").toInt()).date() < QDate::currentDate() or status != "ATIVO") {
+    if (expirado or status != "ATIVO") {
       isReadOnly = true;
 
       ui->pushButtonGerarVenda->hide();
@@ -527,11 +529,11 @@ bool Orcamento::savingProcedures() {
 
     if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
     if (not setData("idOrcamentoBase", ui->lineEditOrcamento->text().left(11))) { return false; }
-    if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
     if (not setData("replicadoDe", ui->lineEditReplicaDe->text())) { return false; }
     if (not setData("representacao", ui->checkBoxRepresentacao->isChecked())) { return false; }
   }
 
+  if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
   if (not setData("data", ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }

@@ -404,7 +404,7 @@ bool ImportaProdutos::cadastraFornecedores() {
 
 void ImportaProdutos::mostraApenasEstesFornecedores() {
   // TODO: refactor this to store joined string in a variable directly
-  Q_FOREACH (const auto &fornecedor, fornecedores) { idsFornecedor.append(QString::number(fornecedor)); } // FIXME: shadows
+  for (const auto &fornecedor : std::as_const(fornecedores)) { idsFornecedor.append(QString::number(fornecedor)); } // FIXME: shadows
 }
 
 bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
@@ -424,7 +424,9 @@ void ImportaProdutos::contaProdutos() {
 }
 
 void ImportaProdutos::consistenciaDados() {
-  Q_FOREACH (const auto &key, variantMap.keys()) {
+  const auto keys = variantMap.keys();
+
+  for (const auto &key : keys) {
     if (variantMap.value(key).toString().contains("*")) { variantMap.insert(key, variantMap.value(key).toString().remove("*")); }
   }
 
@@ -452,7 +454,9 @@ void ImportaProdutos::consistenciaDados() {
 }
 
 void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &record) {
-  Q_FOREACH (const auto &key, variantMap.keys()) {
+  const auto keys = variantMap.keys();
+
+  for (const auto &key : keys) {
     if (key == "ncmEx") { continue; }
     if (key == "multiplo") { continue; }
 
@@ -467,7 +471,9 @@ void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &r
 bool ImportaProdutos::atualizaCamposProduto() {
   bool changed = false;
 
-  Q_FOREACH (const auto &key, variantMap.keys()) {
+  const auto keys = variantMap.keys();
+
+  for (const auto &key : keys) {
     if (not variantMap.value(key).isNull() and modelProduto.data(currentRow, key) != variantMap.value(key)) {
       if (not modelProduto.setData(currentRow, key, variantMap.value(key))) { return false; }
       if (not modelProduto.setData(currentRow, key + "Upd", static_cast<int>(FieldColors::Yellow))) { return false; }
@@ -586,7 +592,9 @@ bool ImportaProdutos::insereEmErro() {
   const int row = modelErro.rowCount();
   if (not modelErro.insertRow(row)) { return false; }
 
-  Q_FOREACH (const auto &key, variantMap.keys()) {
+  const auto keys = variantMap.keys();
+
+  for (const auto &key : keys) {
     if (not modelErro.setData(row, key, variantMap.value(key))) { return false; }
     if (not modelErro.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) { return false; }
   }
@@ -622,7 +630,9 @@ bool ImportaProdutos::insereEmOk() {
 
   if (not modelProduto.insertRow(row)) { return false; }
 
-  Q_FOREACH (const auto &key, variantMap.keys()) {
+  const auto keys = variantMap.keys();
+
+  for (const auto &key : keys) {
     if (not modelProduto.setData(row, key, variantMap.value(key))) { return false; }
     if (not modelProduto.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) { return false; }
   }
@@ -736,7 +746,9 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
 }
 
 bool ImportaProdutos::verificaTabela(const QSqlRecord &record) {
-  Q_FOREACH (const auto &key, variantMap.keys()) {
+  const auto keys = variantMap.keys();
+
+  for (const auto &key : keys) {
     if (not record.contains(key)) { return qApp->enqueueError(false, R"(Tabela não possui coluna ")" + key + R"(")", this); }
   }
 

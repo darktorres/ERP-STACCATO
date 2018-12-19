@@ -262,6 +262,11 @@ bool Orcamento::viewRegister() {
       ui->itemBoxConsultor->hide();
     }
 
+    if (ui->lineEditOrcamento->text() != "Auto gerado") {
+      const QString idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).value_or("-1").toString();
+      ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
+    }
+
     ui->tableProdutos->resizeColumnsToContents();
 
     return true;

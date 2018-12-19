@@ -188,7 +188,9 @@ void WidgetOrcamento::montaFiltro() {
 
   QStringList filtroCheck;
 
-  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
@@ -221,7 +223,9 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (const auto &child : children) {
     child->setEnabled(true);
     child->setChecked(enabled);
   }

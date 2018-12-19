@@ -15,10 +15,12 @@
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);
 
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 
@@ -85,7 +87,9 @@ void CadastroCliente::setupTables() {
 }
 
 bool CadastroCliente::verifyFields() {
-  Q_FOREACH (const auto &line, ui->frame->findChildren<QLineEdit *>()) {
+  const auto children = ui->frame->findChildren<QLineEdit *>();
+
+  for (const auto &line : children) {
     if (not verifyRequiredField(line)) { return false; }
   }
 
@@ -140,7 +144,9 @@ void CadastroCliente::clearFields() {
   ui->checkBoxInscEstIsento->setChecked(false);
   novoEndereco();
 
-  Q_FOREACH (const auto &box, findChildren<ItemBox *>()) { box->clear(); }
+  const auto children = findChildren<ItemBox *>();
+
+  for (const auto &box : children) { box->clear(); }
 
   setupUi();
 }

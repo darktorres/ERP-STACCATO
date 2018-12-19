@@ -157,7 +157,9 @@ void WidgetCompraPendentes::montaFiltro() {
   QStringList filtros;
   QStringList filtroCheck;
 
-  Q_FOREACH (const auto &child, ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+  for (const auto &child : children) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 

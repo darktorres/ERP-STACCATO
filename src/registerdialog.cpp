@@ -210,7 +210,9 @@ bool RegisterDialog::save(const bool silent) {
 }
 
 void RegisterDialog::clearFields() {
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) {
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) {
     if (not line->isReadOnly()) { line->clear(); }
   }
 }

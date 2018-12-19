@@ -45,7 +45,9 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 }
 
 void LoginDialog::setComboBox() {
-  Q_FOREACH (const auto &loja, qApp->getMapLojas().keys()) { ui->comboBoxLoja->addItem(loja); }
+  const auto keys = qApp->getMapLojas().keys();
+
+  for (const auto &loja : keys) { ui->comboBoxLoja->addItem(loja); }
 }
 
 LoginDialog::~LoginDialog() { delete ui; }

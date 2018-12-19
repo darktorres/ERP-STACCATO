@@ -106,7 +106,9 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
   QSqlQuery query;
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
 
-  Q_FOREACH (const auto &item, ui->tableProdutos->selectionModel()->selectedRows()) {
+  const auto selectedRows = ui->tableProdutos->selectionModel()->selectedRows();
+
+  for (const auto &item : selectedRows) {
     query.bindValue(":idProduto", modelViewProdutos.data(item.row(), "idProduto"));
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando peso do produto: " + query.lastError().text(), this); }

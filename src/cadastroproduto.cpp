@@ -18,7 +18,9 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonRemover_clicked);
 
-  Q_FOREACH (const QLineEdit *line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const QLineEdit *line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   ui->lineEditCodBarras->setInputMask("9999999999999;_");
   ui->lineEditNCM->setInputMask("99999999;_");
@@ -53,9 +55,13 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 CadastroProduto::~CadastroProduto() { delete ui; }
 
 void CadastroProduto::clearFields() {
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { line->clear(); }
+  const auto children = findChildren<QLineEdit *>();
 
-  Q_FOREACH (const auto &spinBox, findChildren<QDoubleSpinBox *>()) { spinBox->clear(); }
+  for (const auto &line : children) { line->clear(); }
+
+  const auto children2 = findChildren<QDoubleSpinBox *>();
+
+  for (const auto &spinBox : children2) { spinBox->clear(); }
 
   ui->itemBoxFornecedor->clear();
 
@@ -80,7 +86,9 @@ void CadastroProduto::registerMode() {
 }
 
 bool CadastroProduto::verifyFields() {
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) {
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) {
     if (not verifyRequiredField(line)) { return false; }
   }
 
@@ -163,6 +171,8 @@ void CadastroProduto::setupMapper() {
 void CadastroProduto::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!", this); }
 
 bool CadastroProduto::savingProcedures() {
+  // TODO: verificar aonde estou salvando 'estoque'/'promocao' e não deixar marcar os 2
+
   if (not setData("codBarras", ui->lineEditCodBarras->text())) { return false; }
   if (not setData("codComercial", ui->lineEditCodComer->text())) { return false; }
   if (not setData("colecao", ui->lineEditColecao->text())) { return false; }

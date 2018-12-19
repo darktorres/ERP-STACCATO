@@ -28,9 +28,10 @@ void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
   if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { return qApp->enqueueError("Deve preencher a observação!", this); }
 
+  const auto children = ui->groupBox->findChildren<QRadioButton *>();
   QString motivo;
 
-  Q_FOREACH (const auto &child, ui->groupBox->findChildren<QRadioButton *>()) {
+  for (const auto &child : children) {
     if (child->isChecked()) { motivo = child->text(); }
   }
 

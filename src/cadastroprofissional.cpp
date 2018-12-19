@@ -34,7 +34,9 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   connect(ui->radioButtonPF, &QRadioButton::toggled, this, &CadastroProfissional::on_radioButtonPF_toggled);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroProfissional::on_tableEndereco_clicked);
 
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setWindowModality(Qt::NonModal);
 
@@ -43,8 +45,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   setupMapper();
   newRegister();
 
-  sdProfissional = SearchDialog::profissional(this);
-  sdProfissional->setFilter("idProfissional NOT IN (1) AND desativado = FALSE");
+  sdProfissional = SearchDialog::profissional(false, this);
   connect(sdProfissional, &SearchDialog::itemSelected, this, &CadastroProfissional::viewRegisterById);
 
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
@@ -188,7 +189,9 @@ bool CadastroProfissional::cadastrar() {
 }
 
 bool CadastroProfissional::verifyFields() {
-  Q_FOREACH (const auto &line, ui->frame->findChildren<QLineEdit *>()) {
+  const auto children = ui->frame->findChildren<QLineEdit *>();
+
+  for (const auto &line : children) {
     if (not verifyRequiredField(line)) { return false; }
   }
 
@@ -245,7 +248,9 @@ void CadastroProfissional::clearFields() {
   ui->radioButtonPF->setChecked(true);
   novoEndereco();
 
-  Q_FOREACH (const auto &box, findChildren<ItemBox *>()) { box->clear(); }
+  const auto children = findChildren<ItemBox *>();
+
+  for (const auto &box : children) { box->clear(); }
 
   setupUi();
 

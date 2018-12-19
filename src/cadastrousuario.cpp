@@ -26,7 +26,9 @@ CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "i
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonNovoCad_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroUsuario::on_pushButtonRemover_clicked);
 
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->table->hide(); }
 
@@ -78,7 +80,9 @@ void CadastroUsuario::modificarUsuario() {
 }
 
 bool CadastroUsuario::verifyFields() {
-  Q_FOREACH (const auto &line, ui->tab->findChildren<QLineEdit *>()) {
+  const auto children = ui->tab->findChildren<QLineEdit *>();
+
+  for (const auto &line : children) {
     if (not verifyRequiredField(line)) { return false; }
   }
 

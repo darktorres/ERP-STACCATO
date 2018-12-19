@@ -26,7 +26,9 @@
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);
 
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setupTables();
 
@@ -35,7 +37,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxEnderecoFat->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(this));
+  ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
 
   setupMapper();
@@ -353,7 +355,7 @@ bool Venda::verifyFields() {
 
   double sum = 0;
 
-  Q_FOREACH (const auto &spinbox, ui->widgetPgts->listDoubleSpinPgt) { sum += spinbox->value(); }
+  for (const auto &spinbox : std::as_const(ui->widgetPgts->listDoubleSpinPgt)) { sum += spinbox->value(); }
 
   if (not qFuzzyCompare(sum, ui->doubleSpinBoxTotalPag->value())) { return qApp->enqueueError(false, "Valor dos pagamentos difere do total!", this); }
 
@@ -444,7 +446,7 @@ void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 void Venda::on_doubleSpinBoxPgt_valueChanged() {
   double sum = 0;
 
-  Q_FOREACH (const auto &spinbox, ui->widgetPgts->listDoubleSpinPgt) { sum += spinbox->value(); }
+  for (const auto &spinbox : std::as_const(ui->widgetPgts->listDoubleSpinPgt)) { sum += spinbox->value(); }
 
   ui->doubleSpinBoxTotalPag->setValue(sum);
 
@@ -1160,7 +1162,7 @@ void Venda::on_pushButtonPgtLoja_clicked() {
 
   if (dialog.exec() == QDialog::Rejected) { return; }
 
-  Q_FOREACH (auto item, ui->widgetPgts->listCheckBoxRep) { item->setChecked(false); }
+  for (auto item : std::as_const(ui->widgetPgts->listCheckBoxRep)) { item->setChecked(false); }
 }
 
 void Venda::setFinanceiro() {
@@ -1283,7 +1285,7 @@ void Venda::on_doubleSpinBoxTotalPag_valueChanged(double) {
 
   double sumWithoutLast = 0;
 
-  Q_FOREACH (const auto &item, ui->widgetPgts->listDoubleSpinPgt) {
+  for (const auto &item : std::as_const(ui->widgetPgts->listDoubleSpinPgt)) {
     item->setMaximum(ui->doubleSpinBoxTotal->value());
     sumWithoutLast += item->value();
   }

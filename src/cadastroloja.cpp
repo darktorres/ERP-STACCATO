@@ -15,7 +15,9 @@
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);
 
-  Q_FOREACH (const auto &line, findChildren<QLineEdit *>()) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
+  const auto children = findChildren<QLineEdit *>();
+
+  for (const auto &line : children) { connect(line, &QLineEdit::textEdited, this, &RegisterDialog::marcarDirty); }
 
   setupUi();
   setupTables();
@@ -156,7 +158,9 @@ void CadastroLoja::clearFields() {
 }
 
 bool CadastroLoja::verifyFields() {
-  Q_FOREACH (const auto &line, ui->groupBoxCadastro->findChildren<QLineEdit *>()) {
+  const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
+
+  for (const auto &line : children) {
     if (not verifyRequiredField(line)) { return false; }
   }
 

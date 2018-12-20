@@ -455,6 +455,8 @@ bool Orcamento::generateId() {
 }
 
 bool Orcamento::recalcularTotais() {
+  // TODO: just change this function to call 'calcPrecoGlobalTotal' and be sure all is recalculated?
+
   double subTotalBruto = 0.;
   double subTotalLiq = 0.;
   double total = 0.;

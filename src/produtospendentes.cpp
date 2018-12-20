@@ -174,7 +174,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
 
-  InputDialog inputDlg(InputDialog::Tipo::Carrinho);
+  InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
   if (not qApp->startTransaction()) { return; }

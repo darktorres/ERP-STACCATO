@@ -23,6 +23,11 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
+  if (model.tableName() == "profissional" and id == "1") {
+    newRegister();
+    return false;
+  }
+
   primaryId = id.toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "primaryId vazio!", this); }

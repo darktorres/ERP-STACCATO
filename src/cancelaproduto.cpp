@@ -32,6 +32,7 @@ void CancelaProduto::setFilter(const QString &ordemCompra) {
 void CancelaProduto::setupTables() {
   model.setTable("pedido_fornecedor_has_produto");
 
+  model.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   model.setHeaderData("idVenda", "Código");
   model.setHeaderData("fornecedor", "Fornecedor");
   model.setHeaderData("descricao", "Produto");

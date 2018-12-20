@@ -1314,7 +1314,7 @@ bool Venda::copiaProdutosOrcamento() {
 
       if (field == "created") { continue; }
       if (field == "lastUpdated") { continue; }
-      if (modelItem.fieldIndex(field) == -1) { continue; }
+      if (modelItem.fieldIndex(field, true) == -1) { continue; }
 
       if (not modelItem.setData(rowItem, field, queryProdutos.value(field))) { return false; }
     }

@@ -3,6 +3,7 @@
 
 #include <QStyledItemDelegate>
 
+// TODO: rename this to EditDelegate?
 class SingleEditDelegate final : public QStyledItemDelegate {
 
 public:

@@ -332,9 +332,9 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
     modelCompra.insertRow(newRow);
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
-      if (modelCompra.fieldIndex("idPedido") == column) { continue; }
-      if (modelCompra.fieldIndex("created") == column) { continue; }
-      if (modelCompra.fieldIndex("lastUpdated") == column) { continue; }
+      if (column == modelCompra.fieldIndex("idPedido")) { continue; }
+      if (column == modelCompra.fieldIndex("created")) { continue; }
+      if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
       const QVariant value = modelCompra.data(row, column);
 

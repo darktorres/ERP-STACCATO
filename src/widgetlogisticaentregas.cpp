@@ -147,7 +147,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarEntrega);
+  InputDialog input(InputDialog::Tipo::AgendarEntrega, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 

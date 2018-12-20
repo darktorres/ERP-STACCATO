@@ -36,7 +36,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, this));
+  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, this));
   ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
@@ -712,8 +712,6 @@ void Orcamento::adicionarItem(const bool isUpdate) {
   unsetConnections();
 
   [=] {
-    ui->checkBoxRepresentacao->setDisabled(true);
-
     if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Item inválido!", this); }
 
     if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Quantidade inválida!", this); }
@@ -747,9 +745,10 @@ void Orcamento::adicionarItem(const bool isUpdate) {
 
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
 
-    isDirty = true;
-
     ui->tableProdutos->resizeColumnsToContents();
+
+    isDirty = true;
+    ui->checkBoxRepresentacao->setDisabled(true);
   }();
 
   calcPrecoGlobalTotal();
@@ -974,11 +973,13 @@ bool Orcamento::verificaCadastroCliente() {
   if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text(), this); }
 
   if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) {
+    qApp->enqueueError("Cliente não possui CPF/CNPJ cadastrado!", this);
+
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
     cadCliente->show();
 
-    return qApp->enqueueError(false, "Cliente não possui CPF/CNPJ cadastrado!", this);
+    return false;
   }
 
   QSqlQuery queryCadastro;
@@ -988,11 +989,13 @@ bool Orcamento::verificaCadastroCliente() {
   if (not queryCadastro.exec()) { return qApp->enqueueError(false, "Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text(), this); }
 
   if (not queryCadastro.first()) {
+    qApp->enqueueError("Cliente não possui endereço cadastrado!", this);
+
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
     cadCliente->show();
 
-    return qApp->enqueueError(false, "Cliente não possui endereço cadastrado!", this);
+    return false;
   }
 
   queryCadastro.prepare("SELECT c.incompleto FROM orcamento o LEFT JOIN cliente c ON o.idCliente = c.idCliente WHERE c.idCliente = :idCliente AND c.incompleto = TRUE");
@@ -1001,11 +1004,13 @@ bool Orcamento::verificaCadastroCliente() {
   if (not queryCadastro.exec()) { return qApp->enqueueError(false, "Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text(), this); }
 
   if (queryCadastro.first()) {
+    qApp->enqueueError("Cadastro incompleto, deve preencher pelo menos:\n  -Telefone Principal\n  -Email\n  -Endereço", this);
+
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);
     cadCliente->show();
 
-    return qApp->enqueueError(false, "Cadastro incompleto, deve terminar!", this);
+    return false;
   }
 
   return true;
@@ -1016,7 +1021,10 @@ void Orcamento::on_pushButtonGerarExcel_clicked() {
   excel.gerarExcel();
 }
 
-void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) { ui->itemBoxProduto->setRepresentacao(checked); }
+void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
+  ui->itemBoxProduto->setRepresentacao(checked);
+  novoItem();
+}
 
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   const double caixas = ui->doubleSpinBoxCaixas->value();

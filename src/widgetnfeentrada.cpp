@@ -15,7 +15,7 @@ WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
 void WidgetNfeEntrada::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked);
+  connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
 }
 
@@ -69,15 +69,15 @@ void WidgetNfeEntrada::montaFiltro() {
   ui->table->resizeColumnsToContents();
 }
 
-void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
+void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   // TODO: bloquear se a nota estiver coletada?
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
+  QMessageBox msgBox(QMessageBox::Question, "Remover?", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Remover");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
@@ -91,7 +91,7 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Cancelado com sucesso!", this);
+  qApp->enqueueInformation("Removido com sucesso!", this);
 }
 
 bool WidgetNfeEntrada::cancelar(const int row) {

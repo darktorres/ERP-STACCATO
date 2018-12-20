@@ -44,8 +44,6 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->doubleSpinBoxST->hide();
 
     ui->labelEvento->setText("Data faturamento:");
-
-    ui->table->setEditTriggers(QTableView::NoEditTriggers);
   }
 
   setConnections();
@@ -76,6 +74,7 @@ void InputDialogProduto::unsetConnections() {
 void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
 
+  modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
@@ -123,11 +122,14 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
-  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+  if (tipo == Tipo::GerarCompra) {
+    ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+    ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+    ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+    ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
+  }
 
-  if (tipo == Tipo::GerarCompra) { ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this)); }
+  if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new SingleEditDelegate(this)); }
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {

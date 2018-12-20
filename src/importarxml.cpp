@@ -204,6 +204,7 @@ void ImportarXML::setupTables() {
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableCompra->hideColumn("ordemRepresentacao");
   ui->tableCompra->hideColumn("idVendaProduto");
   ui->tableCompra->hideColumn("selecionado");
   ui->tableCompra->hideColumn("statusFinanceiro");
@@ -241,6 +242,7 @@ void ImportarXML::setupTables() {
 
 bool ImportarXML::cadastrarProdutoEstoque(const QVector<std::tuple<int, int, double>> &tuples) {
   QSqlQuery query;
+  // TODO: change hardcoded 'validade'
   query.prepare(
       "INSERT INTO produto SELECT NULL, p.idProdutoUpd, :idEstoque, p.idFornecedor, p.idFornecedorUpd, p.fornecedor, p.fornecedorUpd, CONCAT(p.descricao, ' (ESTOQUE)'), p.descricaoUpd, "
       ":estoqueRestante, p.estoqueRestanteUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, p.multiploUpd, p.m2cx, p.m2cxUpd, "
@@ -286,9 +288,35 @@ QVector<std::tuple<int, int, double>> ImportarXML::mapTuples() {
   return tuples;
 }
 
+bool ImportarXML::salvarLoteNaVenda() {
+  QSqlQuery queryLote;
+  queryLote.prepare("UPDATE venda_has_produto SET lote = :lote WHERE idVendaProduto = :idVendaProduto");
+
+  for (int row = 0; row < modelConsumo.rowCount(); ++row) {
+    const int idEstoque = modelConsumo.data(row, "idEstoque").toInt();
+
+    const auto match = modelEstoque.match("idEstoque", idEstoque, 1, Qt::MatchExactly);
+
+    if (match.isEmpty()) { return qApp->enqueueError(false, "Error out!", this); }
+
+    const int rowEstoque = match.first().row();
+    const QString lote = modelEstoque.data(rowEstoque, "lote").toString();
+    const int idVendaProduto = modelConsumo.data(row, "idVendaProduto").toInt();
+
+    queryLote.bindValue(":lote", lote);
+    queryLote.bindValue(":idVendaProduto", idVendaProduto);
+
+    if (not queryLote.exec()) { return qApp->enqueueError(false, "Erro atualizando lote na venda: " + queryLote.lastError().text(), this); }
+  }
+
+  return true;
+}
+
 bool ImportarXML::importar() {
   for (int row = 0; row < modelCompra.rowCount(); ++row)
     if (not modelCompra.setData(row, "selecionado", false)) { return false; }
+
+  if (not salvarLoteNaVenda()) { return false; }
 
   // mapear idProduto/idEstoque para cadastrarProdutoEstoque
   const auto tuples = mapTuples();
@@ -329,13 +357,14 @@ bool ImportarXML::atualizaDados() {
     if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query.lastError().text(), this); }
   }
 
-  query.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
+  QSqlQuery query2;
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
 
   for (const auto &idCompra : idsCompra) {
-    query.bindValue(":dataRealFat", dataReal);
-    query.bindValue(":idCompra", idCompra);
+    query2.bindValue(":dataRealFat", dataReal);
+    query2.bindValue(":idCompra", idCompra);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query2.lastError().text(), this); }
   }
 
   return true;

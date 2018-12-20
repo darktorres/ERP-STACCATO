@@ -89,7 +89,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   for (const auto &index : list) { idVendas << modelViewColeta.data(index.row(), "idVenda").toString(); }
 
-  InputDialog input(InputDialog::Tipo::Coleta);
+  InputDialog input(InputDialog::Tipo::Coleta, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
@@ -166,7 +166,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarColeta);
+  InputDialog input(InputDialog::Tipo::AgendarColeta, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 

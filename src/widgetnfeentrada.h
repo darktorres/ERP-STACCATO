@@ -28,7 +28,7 @@ private:
   auto cancelar(const int row) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
-  auto on_pushButtonCancelarNFe_clicked() -> void;
+  auto on_pushButtonRemoverNFe_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

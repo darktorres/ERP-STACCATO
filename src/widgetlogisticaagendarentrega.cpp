@@ -384,6 +384,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
   if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
 
   ui->tableTranspAtual->resizeColumnsToContents();
+
+  ui->tableProdutos->clearSelection();
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
@@ -392,8 +394,6 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   for (const auto &item : list) { modelTranspAtual.removeRow(item.row()); }
-
-  if (not modelTranspAtual.submitAll()) { return; }
 }
 
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {
@@ -447,9 +447,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   const int row = list.first().row();
 
-  const auto list2 = modelTranspAtual.match("idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"), -1, Qt::MatchExactly);
+  const auto list2 = modelTranspAtual.match("idVendaProduto", modelViewProdutos.data(row, "idVendaProduto"), 1, Qt::MatchExactly);
 
-  if (not list2.isEmpty()) { return qApp->enqueueError("Item já inserido!", this); }
+  if (not list2.isEmpty()) { return qApp->enqueueError("Item '" + modelViewProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
   if (modelViewProdutos.data(row, "status").toString() != "ESTOQUE") { return qApp->enqueueError("Produto não está em estoque!", this); }
 
@@ -477,6 +477,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   ui->tableTranspAtual->resizeColumnsToContents();
+
+  ui->tableProdutos->clearSelection();
 }
 
 bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int quantAgendar, const int quantTotal) {
@@ -568,6 +570,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
   if (not modelProdutos.submitAll()) { return false; }
 
+  // TODO: em vez de quebrar consumo, mandar para a funcao Estoque::criarConsumo?
   if (not quebrarConsumo(row, proporcao, proporcaoNovo, modelProdutos.query().lastInsertId().toInt())) { return false; }
 
   return true;

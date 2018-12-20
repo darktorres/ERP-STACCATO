@@ -34,18 +34,13 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  sdProduto = SearchDialog::produto(true, true, this);
+  sdProduto = SearchDialog::produto(true, true, true, this);
   connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
 
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->pushButtonRemover->setDisabled(true); }
-
-  if (UserSession::tipoUsuario() == "VENDEDOR") {
-    ui->pushButtonCadastrar->setVisible(false);
-    ui->pushButtonNovoCad->setVisible(false);
-  }
 
   ui->groupBox->hide();
   ui->groupBox_4->hide();

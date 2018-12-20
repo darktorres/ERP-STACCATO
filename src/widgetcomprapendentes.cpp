@@ -72,7 +72,7 @@ void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
     setConnections();
 
-    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, this));
+    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, this));
     ui->itemBoxProduto->setRepresentacao(false);
 
     connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
@@ -186,7 +186,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { return qApp->enqueueError("Deve escolher uma quantidade!", this); }
 
-  InputDialog inputDlg(InputDialog::Tipo::Carrinho);
+  InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
 
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 

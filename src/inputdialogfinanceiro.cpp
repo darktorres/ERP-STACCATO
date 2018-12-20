@@ -143,6 +143,7 @@ QDateTime InputDialogFinanceiro::getNextDate() const { return ui->dateEditProxim
 void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
 
+  modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");

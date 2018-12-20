@@ -28,7 +28,7 @@ public:
   static auto enderecoCliente(QWidget *parent) -> SearchDialog *;
   static auto fornecedor(QWidget *parent) -> SearchDialog *;
   static auto loja(QWidget *parent) -> SearchDialog *;
-  static auto produto(const bool permitirDescontinuados, const bool silent, QWidget *parent) -> SearchDialog *;
+  static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, QWidget *parent) -> SearchDialog *;
   static auto profissional(const bool mostrarNaoHa, QWidget *parent) -> SearchDialog *;
   static auto transportadora(QWidget *parent) -> SearchDialog *;
   static auto usuario(QWidget *parent) -> SearchDialog *;
@@ -43,9 +43,10 @@ private:
   const QString primaryKey;
   const QString fullTextIndex;
   const QStringList textKeys;
-  const bool permitirDescontinuados;
-  const bool silent;
+  bool permitirDescontinuados = false;
+  bool silent = false;
   bool isRepresentacao = false;
+  bool showAllProdutos = false;
   bool isSet = false;
   QString filter;
   QString fornecedorRep;
@@ -53,7 +54,7 @@ private:
   Ui::SearchDialog *ui;
   // methods
   explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
-                        const bool permitirDescontinuados, const bool silent = false, QWidget *parent = nullptr);
+                        QWidget *parent = nullptr);
   auto hideColumns(const QStringList &columns) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonSelecionar_clicked() -> void;

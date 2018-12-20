@@ -72,6 +72,7 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableProdutos->hideColumn("ordemRepresentacao");
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("statusFinanceiro");
   ui->tableProdutos->hideColumn("selecionado");
@@ -321,6 +322,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
 
   if (isRepresentacao) {
     if (modelProdutos.data(row, "idVenda").toString().isEmpty()) {
+      // TODO: verificar quando a loja precisar comprar avulso
       qApp->enqueueError("'Venda' vazio!", this);
       return {};
     }

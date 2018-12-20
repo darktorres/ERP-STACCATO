@@ -666,7 +666,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::ReagendarPedido);
+  InputDialog input(InputDialog::Tipo::ReagendarPedido, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
@@ -685,8 +685,8 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
   query1.prepare("UPDATE venda SET novoPrazoEntrega = :novoPrazoEntrega WHERE idVenda = :idVenda");
 
   QSqlQuery query2;
-  query2.prepare(
-      "INSERT INTO venda_has_followup (idVenda, idLoja, idUsuario, tipoOperacao, observacao, dataFollowup) VALUES (:idVenda, :idLoja, :idUsuario, :tipoOperacao, :observacao, :dataFollowup)");
+  query2.prepare("INSERT INTO venda_has_followup (idVenda, idVendaBase, idLoja, idUsuario, tipoOperacao, observacao, dataFollowup) VALUES (:idVenda, :idVendaBase, :idLoja, :idUsuario, :tipoOperacao, "
+                 ":observacao, :dataFollowup)");
 
   for (const auto &item : list) {
     query1.bindValue(":novoPrazoEntrega", modelVendas.data(item.row(), "data").toDate().daysTo(dataPrev));
@@ -695,6 +695,7 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando novo prazo: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idVenda", modelVendas.data(item.row(), "idVenda"));
+    query2.bindValue(":idVendaBase", modelVendas.data(item.row(), "idVenda").toString().left(11));
     query2.bindValue(":idLoja", UserSession::idLoja());
     query2.bindValue(":idUsuario", UserSession::idUsuario());
     query2.bindValue(":tipoOperacao", "Alteração do prazo de entrega");

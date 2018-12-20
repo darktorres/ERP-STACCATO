@@ -20,7 +20,7 @@ public:
 
 private:
   // attributes
-  const QString idEstoque;
+  const QString idEstoque; // TODO: change this to int?
   SqlRelationalTableModel modelEstoque;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelViewConsumo;

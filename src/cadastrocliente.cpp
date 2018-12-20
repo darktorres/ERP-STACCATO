@@ -131,8 +131,11 @@ bool CadastroCliente::savingProcedures() {
   if (not setData("idProfissionalRel", ui->itemBoxProfissional->getId())) { return false; }
   if (not setData("idUsuarioRel", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("pfpj", tipoPFPJ)) { return false; }
-  if (not setData("incompleto", modelEnd.rowCount() == 0)) { return false; }
   if (not setData("credito", ui->doubleSpinBoxCredito->value())) { return false; }
+
+  const bool incompleto = modelEnd.rowCount() == 0 or ui->lineEditTel_Res->text().isEmpty() or ui->lineEditEmail->text().isEmpty();
+
+  if (not setData("incompleto", incompleto)) { return false; }
 
   return true;
 }

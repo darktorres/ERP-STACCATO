@@ -148,6 +148,8 @@ public:
 
   double toDouble() const;
 
+  int32_t toInt32(QDecContext *c = nullptr) const { return decDoubleToInt32(&m_data, CXT(c), DEC_ROUND_HALF_UP); }
+
   QByteArray toEngString() const {
     char str[MaxStrSize] = {0};
     return decDoubleToEngString(&m_data, str);

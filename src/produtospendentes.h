@@ -1,9 +1,9 @@
 #ifndef PRODUTOSPENDENTES_H
 #define PRODUTOSPENDENTES_H
 
-#include <QDecDouble.hh>
 #include <QDialog>
 
+#include "QDecDouble.hh"
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
 

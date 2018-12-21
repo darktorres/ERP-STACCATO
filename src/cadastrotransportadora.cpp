@@ -154,10 +154,7 @@ void CadastroTransportadora::on_pushButtonCadastrar_clicked() { save(); }
 
 void CadastroTransportadora::on_pushButtonAtualizar_clicked() { save(); }
 
-void CadastroTransportadora::on_pushButtonNovoCad_clicked() {
-  newRegister();
-  modelVeiculo.setFilter("0");
-}
+void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 

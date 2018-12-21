@@ -69,6 +69,8 @@ void SqlRelationalTableModel::setFilter(const QString &filter) {
   //  qDebug() << "table: " << tableName();
   //  qDebug() << "filter: " << filter << "\n";
 
+  // NOTE: use model()->query()->isActive() to know if the filter will be applied now or later
+
   QSqlRelationalTableModel::setFilter(filter);
 }
 

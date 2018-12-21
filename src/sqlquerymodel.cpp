@@ -1,3 +1,4 @@
+#include <QSqlError>
 #include <QSqlRecord>
 
 #include "application.h"
@@ -22,6 +23,16 @@ bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) 
   if (index == -1) { return qApp->enqueueError(false, "Coluna '" + column + "' não encontada na tabela!"); }
 
   return QSqlQueryModel::setHeaderData(index, Qt::Horizontal, value);
+}
+
+bool SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
+  // TODO: redo places that use this function
+
+  QSqlQueryModel::setQuery(query, db);
+
+  if (lastError().isValid()) { return qApp->enqueueError(false, "Erro lendo dados: " + lastError().text()); }
+
+  return true;
 }
 
 QVariant SqlQueryModel::data(const QModelIndex &index, int role) const { return QSqlQueryModel::data(index, role); }

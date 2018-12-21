@@ -379,13 +379,9 @@ bool CadastroLoja::viewRegister() {
 
   // -------------------------------------------------------------------------
 
-  modelPagamentos.setFilter("");
-
   if (not modelPagamentos.select()) { return false; }
 
   // -------------------------------------------------------------------------
-
-  modelAssocia1.setFilter("");
 
   if (not modelAssocia1.select()) { return false; }
 

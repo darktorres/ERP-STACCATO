@@ -10,7 +10,7 @@ QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
   editor->setReadOnlyItemBox(isReadOnly);
 
-  if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); }
+  if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); } // TODO: make those delayed init to avoid making the whole dialog slow
   if (tipo == Tipo::Conta) { editor->setSearchDialog(SearchDialog::conta(parent)); }
 
   connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitEditor);

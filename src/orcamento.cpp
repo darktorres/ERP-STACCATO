@@ -269,8 +269,6 @@ bool Orcamento::viewRegister() {
       ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
     }
 
-    ui->tableProdutos->resizeColumnsToContents();
-
     return true;
   }();
 
@@ -746,8 +744,6 @@ void Orcamento::adicionarItem(const bool isUpdate) {
     if (not modelItem.setData(row, "mostrarDesconto", mostrarDesconto)) { return; }
 
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(row, "fornecedor").toString()); }
-
-    ui->tableProdutos->resizeColumnsToContents();
 
     isDirty = true;
     ui->checkBoxRepresentacao->setDisabled(true);

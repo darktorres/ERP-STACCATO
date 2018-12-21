@@ -32,8 +32,6 @@ void WidgetNfeEntrada::updateTables() {
   }
 
   if (not modelViewNFeEntrada.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
@@ -65,8 +63,6 @@ void WidgetNfeEntrada::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {

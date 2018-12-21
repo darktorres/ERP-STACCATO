@@ -57,6 +57,8 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
 
+  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});
+
   ui->table->hideColumn("nfe");
   ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");
@@ -78,22 +80,12 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("desativado");
 }
 
-void InserirLancamento::openPersistentEditor() {
-  for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
-    ui->table->openPersistentEditor(row, "idLoja");
-    ui->table->openPersistentEditor(row, "tipo");
-    ui->table->openPersistentEditor(row, "grupo");
-  }
-}
-
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   const int newRow = modelContaPagamento.rowCount();
   modelContaPagamento.insertRow(newRow);
 
   if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
   if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) { return; }
-
-  openPersistentEditor();
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
@@ -145,6 +137,4 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 
     if (not modelContaPagamento.setData(newRow, col, value)) { return; }
   }
-
-  openPersistentEditor();
 }

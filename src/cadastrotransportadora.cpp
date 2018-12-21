@@ -67,7 +67,7 @@ void CadastroTransportadora::setupTables() {
 
   ui->tableVeiculo->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableVeiculo->resizeColumnsToContents();
+  ui->tableVeiculo->setPersistentColumns({"desativado"});
 
   // -------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ void CadastroTransportadora::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
 void CadastroTransportadora::clearFields() {
@@ -194,10 +194,6 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
   if (currentRow == -1) { return; }
 
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
@@ -225,8 +221,6 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -238,8 +232,6 @@ void CadastroTransportadora::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroTransportadora::clearEndereco() {
@@ -297,20 +289,12 @@ bool CadastroTransportadora::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
-
   //---------------------------------------------------
 
   const bool inativosVeiculo = ui->checkBoxMostrarInativosVeiculo->isChecked();
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (inativosVeiculo ? "" : " AND desativado = FALSE"));
 
   if (not modelVeiculo.select()) { return false; }
-
-  for (int row = 0; row < ui->tableVeiculo->model()->rowCount(); ++row) { ui->tableVeiculo->openPersistentEditor(row, "desativado"); }
-
-  ui->tableVeiculo->resizeColumnsToContents();
 
   return true;
 }
@@ -334,8 +318,6 @@ bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) {
 
   if (not columnsToUpper(modelVeiculo, currentRowVeiculo)) { return false; }
 
-  ui->tableVeiculo->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -351,8 +333,6 @@ void CadastroTransportadora::novoVeiculo() {
   ui->pushButtonRemoverVeiculo->hide();
   ui->tableVeiculo->clearSelection();
   clearVeiculo();
-
-  for (int row = 0; row < ui->tableVeiculo->model()->rowCount(); ++row) { ui->tableVeiculo->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroTransportadora::clearVeiculo() {
@@ -409,10 +389,6 @@ void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool chec
   if (currentRow == -1) { return; }
 
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
-
-  for (int row = 0; row < ui->tableVeiculo->model()->rowCount(); ++row) { ui->tableVeiculo->openPersistentEditor(row, "desativado"); }
-
-  ui->tableVeiculo->resizeColumnsToContents();
 }
 
 void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {

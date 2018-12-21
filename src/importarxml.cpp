@@ -99,8 +99,6 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
 
-  ui->tableEstoque->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelConsumo.setTable("estoque_has_consumo");
@@ -166,8 +164,6 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->hideColumn("pCOFINS");
   ui->tableConsumo->hideColumn("vCOFINS");
 
-  ui->tableConsumo->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelCompra.setTable("pedido_fornecedor_has_produto");
@@ -228,8 +224,6 @@ void ImportarXML::setupTables() {
   ui->tableCompra->hideColumn("dataRealEnt");
   ui->tableCompra->hideColumn("aliquotaSt");
   ui->tableCompra->hideColumn("st");
-
-  ui->tableCompra->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -451,10 +445,6 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
     }
 
     if (ok) { ui->pushButtonProcurar->setDisabled(true); }
-
-    ui->tableCompra->resizeColumnsToContents();
-    ui->tableConsumo->resizeColumnsToContents();
-    ui->tableEstoque->resizeColumnsToContents();
   }();
 
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
@@ -827,10 +817,6 @@ bool ImportarXML::parear() {
 
     return true;
   }();
-
-  ui->tableEstoque->resizeColumnsToContents();
-  ui->tableConsumo->resizeColumnsToContents();
-  ui->tableCompra->resizeColumnsToContents();
 
   connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
 

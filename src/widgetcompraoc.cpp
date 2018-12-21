@@ -28,15 +28,9 @@ void WidgetCompraOC::updateTables() {
 
   if (not modelPedido.select()) { return; }
 
-  ui->tablePedido->resizeColumnsToContents();
-
   if (not modelProduto.select()) { return; }
 
-  ui->tableProduto->resizeColumnsToContents();
-
   if (not modelNFe.select()) { return; }
-
-  ui->tableNFe->resizeColumnsToContents();
 }
 
 void WidgetCompraOC::resetTables() { modelIsSet = false; }
@@ -107,11 +101,7 @@ void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
 
   modelProduto.setFilter("ordemCompra = " + oc);
 
-  ui->tableProduto->resizeColumnsToContents();
-
   modelNFe.setFilter("ordemCompra = " + oc);
-
-  ui->tableNFe->resizeColumnsToContents();
 }
 
 void WidgetCompraOC::on_pushButtonDanfe_clicked() {
@@ -198,8 +188,6 @@ void WidgetCompraOC::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
-
-  ui->tablePedido->resizeColumnsToContents();
 }
 
 // TODO: alterar filtros, muito ruim de achar coisas nessa tela

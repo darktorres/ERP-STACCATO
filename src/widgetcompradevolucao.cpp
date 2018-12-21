@@ -34,8 +34,6 @@ void WidgetCompraDevolucao::updateTables() {
   }
 
   if (not modelVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraDevolucao::setupTables() {
@@ -211,6 +209,4 @@ void WidgetCompraDevolucao::montaFiltro() {
   ui->pushButtonRetornarEstoque->setEnabled(isPendente);
 
   modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
-
-  ui->table->resizeColumnsToContents();
 }

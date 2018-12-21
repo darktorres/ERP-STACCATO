@@ -216,6 +216,8 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new SingleEditDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
+  ui->tableFluxoCaixa->setPersistentColumns({"representacao"});
+
   //-----------------------------------------------------------------
 
   modelFluxoCaixa2.setTable("conta_a_receber_has_pagamento");
@@ -337,8 +339,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     ui->labelConsultor->show();
     ui->itemBoxConsultor->show();
   }
-
-  ui->tableProdutos->resizeColumnsToContents();
 
   setConnections();
 }
@@ -586,8 +586,6 @@ bool Venda::viewRegister() {
 
     if (not modelFluxoCaixa.select()) { return false; }
 
-    for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) { ui->tableFluxoCaixa->openPersistentEditor(row, "representacao"); }
-
     if (financeiro) {
       // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
       modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND (comissao = TRUE OR taxa = TRUE)");
@@ -641,10 +639,6 @@ bool Venda::viewRegister() {
 
     idLoja = data("idLoja").toInt();
     representacao = data("representacao").toBool();
-
-    ui->tableProdutos->resizeColumnsToContents();
-    ui->tableFluxoCaixa->resizeColumnsToContents();
-    ui->tableFluxoCaixa2->resizeColumnsToContents();
 
     return true;
   }();
@@ -786,11 +780,6 @@ void Venda::montarFluxoCaixa() {
       }
     }
   }
-
-  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) { ui->tableFluxoCaixa->openPersistentEditor(row, "representacao"); }
-
-  ui->tableFluxoCaixa->resizeColumnsToContents();
-  ui->tableFluxoCaixa2->resizeColumnsToContents();
 }
 
 void Venda::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }

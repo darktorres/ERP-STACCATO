@@ -193,11 +193,6 @@ void WidgetRelatorio::updateTables() {
     setResumoOrcamento();
     qDebug() << "5: " << time.restart();
   }
-
-  ui->tableRelatorio->resizeColumnsToContents();
-  ui->tableTotalLoja->resizeColumnsToContents();
-  ui->tableTotalVendedor->resizeColumnsToContents();
-  ui->tableResumoOrcamento->resizeColumnsToContents();
 }
 
 void WidgetRelatorio::setResumoOrcamento() {

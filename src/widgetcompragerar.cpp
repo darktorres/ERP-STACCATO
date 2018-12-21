@@ -121,13 +121,9 @@ void WidgetCompraGerar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
-  ui->tableResumo->resizeColumnsToContents();
-
   if (not selection.isEmpty()) { ui->tableResumo->selectRow(selection.first().row()); }
 
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
@@ -461,8 +457,6 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
   const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
 
   modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {

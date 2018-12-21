@@ -59,7 +59,6 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
   if (text.isEmpty()) {
     model.setFilter(filter);
-    ui->table->resizeColumnsToContents();
     return;
   }
 
@@ -75,16 +74,12 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
     model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + fornecedorRep);
 
-    ui->table->resizeColumnsToContents();
-
     return;
   }
 
   if (not filter.isEmpty()) { searchFilter.append(" AND (" + filter + ")"); }
 
   model.setFilter(searchFilter);
-
-  ui->table->resizeColumnsToContents();
 }
 
 void SearchDialog::sendUpdateMessage() {
@@ -102,8 +97,6 @@ bool SearchDialog::prepare_show() {
     if (not model.select()) { return false; }
     isSet = true;
   }
-
-  ui->table->resizeColumnsToContents();
 
   ui->lineEditBusca->setFocus();
   ui->lineEditBusca->clear();

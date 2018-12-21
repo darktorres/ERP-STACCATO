@@ -152,15 +152,11 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   if (not modelEstoque.select()) { return false; }
 
-  ui->tableEstoque->resizeColumnsToContents();
-
   //--------------------------------------
 
   modelViewConsumo.setFilter("idEstoque = " + idEstoque);
 
   if (not modelViewConsumo.select()) { return false; }
-
-  ui->tableConsumo->resizeColumnsToContents();
 
   //--------------------------------------
 

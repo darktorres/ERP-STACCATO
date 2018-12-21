@@ -87,8 +87,6 @@ void WidgetCompraPendentes::updateTables() {
   }
 
   if (not modelViewVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
@@ -177,8 +175,6 @@ void WidgetCompraPendentes::montaFiltro() {
   filtros << "quant > 0";
 
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {

@@ -53,8 +53,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   if (not modelViewProdutos.select()) { return; }
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   double quant = 0;
 
   for (int row = 0; row < modelViewProdutos.rowCount(); ++row) { quant += modelViewProdutos.data(row, "quant").toDouble(); }
@@ -97,7 +95,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
-  ui->tableEstoque->resizeColumnsToContents();
 
   //-----------------------------------------------
 

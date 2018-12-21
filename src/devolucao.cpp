@@ -118,8 +118,6 @@ void Devolucao::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   //--------------------------------------------------------------
 
   modelDevolvidos.setTable("venda_has_produto");
@@ -184,8 +182,6 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableDevolvidos->setItemDelegateForColumn("total", new ReaisDelegate(this));
 
-  ui->tableDevolvidos->resizeColumnsToContents();
-
   //--------------------------------------------------------------
 
   modelPagamentos.setTable("conta_a_receber_has_pagamento");
@@ -226,9 +222,7 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePagamentos->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
 
-  for (int row = 0; row < modelPagamentos.rowCount(); ++row) { ui->tablePagamentos->openPersistentEditor(row, "representacao"); }
-
-  ui->tablePagamentos->resizeColumnsToContents();
+  ui->tablePagamentos->setPersistentColumns({"representacao"});
 
   //--------------------------------------------------------------
 
@@ -558,10 +552,6 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   limparCampos();
-
-  ui->tableProdutos->resizeColumnsToContents();
-  ui->tableDevolvidos->resizeColumnsToContents();
-  ui->tablePagamentos->resizeColumnsToContents();
 
   qApp->enqueueInformation("Devolução realizada com sucesso!", this);
 }

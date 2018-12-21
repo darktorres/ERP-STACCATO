@@ -354,8 +354,6 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
       if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
-
-    ui->tableFluxoCaixa->resizeColumnsToContents();
   }();
 
   setConnections();
@@ -412,14 +410,10 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   if (not modelPedidoFornecedor.select()) { return false; }
 
-  ui->table->resizeColumnsToContents();
-
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
 
     if (not modelFluxoCaixa.select()) { return false; }
-
-    ui->tableFluxoCaixa->resizeColumnsToContents();
 
     ui->checkBoxMarcarTodos->setChecked(true);
   }

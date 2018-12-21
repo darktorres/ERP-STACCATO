@@ -53,7 +53,6 @@ void WidgetLogistica::updateTables() {
 
     if (not modelViewLogistica.select()) { return; }
 
-    ui->tableForn->resizeColumnsToContents();
   }
 
   //--------------------------------------------------------

@@ -70,7 +70,7 @@ void CadastroProfissional::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
 void CadastroProfissional::setupUi() {
@@ -149,10 +149,6 @@ bool CadastroProfissional::viewRegister() {
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return false; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 
   //---------------------------------------------------
 
@@ -263,8 +259,6 @@ void CadastroProfissional::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroProfissional::clearEndereco() {
@@ -314,8 +308,6 @@ bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -359,10 +351,6 @@ void CadastroProfissional::on_checkBoxMostrarInativos_clicked(const bool checked
   modelEnd.setFilter("idProfissional = " + data("idProfissional").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {

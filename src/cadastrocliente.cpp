@@ -83,7 +83,7 @@ void CadastroCliente::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
 bool CadastroCliente::verifyFields() {
@@ -210,10 +210,6 @@ bool CadastroCliente::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
-
   //---------------------------------------------------
 
   ui->itemBoxCliente->setFilter("idCliente NOT IN (" + data("idCliente").toString() + ")");
@@ -308,8 +304,6 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -374,8 +368,6 @@ void CadastroCliente::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroCliente::on_tableEndereco_clicked(const QModelIndex &index) {
@@ -436,10 +428,6 @@ void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 void CadastroCliente::on_pushButtonRemoverEnd_clicked() {

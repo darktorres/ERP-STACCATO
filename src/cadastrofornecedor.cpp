@@ -59,7 +59,7 @@ void CadastroFornecedor::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
 void CadastroFornecedor::setupUi() {
@@ -87,8 +87,6 @@ void CadastroFornecedor::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 bool CadastroFornecedor::verifyFields() {
@@ -252,8 +250,6 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -294,10 +290,6 @@ bool CadastroFornecedor::viewRegister() {
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return false; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 
   //---------------------------------------------------
 
@@ -375,10 +367,6 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 // TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)

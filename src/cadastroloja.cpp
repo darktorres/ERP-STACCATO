@@ -102,7 +102,7 @@ void CadastroLoja::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 
   // -------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ void CadastroLoja::setupTables() {
 
   ui->tableConta->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableConta->resizeColumnsToContents();
+  ui->tableConta->setPersistentColumns({"desativado"});
 
   // -------------------------------------------------------------------------
 
@@ -286,10 +286,6 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   modelEnd.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
@@ -317,8 +313,6 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -330,8 +324,6 @@ void CadastroLoja::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroLoja::clearEndereco() {
@@ -378,10 +370,6 @@ bool CadastroLoja::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   const bool inativosConta = ui->checkBoxMostrarInativosConta->isChecked();
@@ -389,17 +377,11 @@ bool CadastroLoja::viewRegister() {
 
   if (not modelConta.select()) { return false; }
 
-  for (int row = 0; row < ui->tableConta->model()->rowCount(); ++row) { ui->tableConta->openPersistentEditor(row, "desativado"); }
-
-  ui->tableConta->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelPagamentos.setFilter("");
 
   if (not modelPagamentos.select()) { return false; }
-
-  ui->tablePagamentos->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -407,15 +389,11 @@ bool CadastroLoja::viewRegister() {
 
   if (not modelAssocia1.select()) { return false; }
 
-  ui->tableAssocia1->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelAssocia2.setFilter("idLoja = " + data("idLoja").toString());
 
   if (not modelAssocia2.select()) { return false; }
-
-  ui->tableAssocia2->resizeColumnsToContents();
 
   // -------------------------------------------------------------------------
 
@@ -505,8 +483,6 @@ bool CadastroLoja::cadastrarConta(const Tipo tipo) {
 
   if (not columnsToUpper(modelConta, currentRowConta)) { return false; }
 
-  ui->tableConta->resizeColumnsToContents();
-
   isDirty = true;
 
   return true;
@@ -518,8 +494,6 @@ void CadastroLoja::novaConta() {
   ui->pushButtonRemoverConta->hide();
   ui->tableConta->clearSelection();
   clearConta();
-
-  for (int row = 0; row < ui->tableConta->model()->rowCount(); ++row) { ui->tableConta->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroLoja::clearConta() {
@@ -552,8 +526,6 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
   modelConta.setFilter("idLoja = " + data("idLoja").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelConta.select()) { return; }
-
-  for (int row = 0; row < ui->tableConta->model()->rowCount(); ++row) { ui->tableConta->openPersistentEditor(row, "desativado"); }
 }
 
 bool CadastroLoja::adicionarPagamento() {
@@ -599,8 +571,6 @@ void CadastroLoja::on_tablePagamentos_clicked(const QModelIndex &index) {
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
   if (not modelTaxas.select()) { return; }
-
-  ui->tableTaxas->resizeColumnsToContents();
 
   mapperPagamento.setCurrentModelIndex(index);
 

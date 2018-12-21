@@ -39,8 +39,6 @@ void WidgetLogisticaRecebimento::updateTables() {
   }
 
   if (not modelViewRecebimento.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }
@@ -165,8 +163,6 @@ void WidgetLogisticaRecebimento::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelViewRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {

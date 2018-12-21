@@ -61,11 +61,7 @@ void WidgetCompraConfirmar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
-  ui->tableResumo->resizeColumnsToContents();
-
   if (not modelViewCompras.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraConfirmar::resetTables() { modelIsSet = false; }

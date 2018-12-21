@@ -164,8 +164,6 @@ void AnteciparRecebimento::montaFiltro() {
     modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%' AND idVenda LIKE '" + textLoja +
                                 "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
   }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void AnteciparRecebimento::on_comboBoxLoja_currentTextChanged(const QString &) { montaFiltro(); }

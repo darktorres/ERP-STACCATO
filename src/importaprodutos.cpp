@@ -159,9 +159,6 @@ bool ImportaProdutos::importar() {
 
   show();
 
-  ui->tableProdutos->resizeColumnsToContents();
-  ui->tableErro->resizeColumnsToContents();
-
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
 

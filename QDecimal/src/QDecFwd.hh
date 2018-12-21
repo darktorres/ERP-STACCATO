@@ -28,7 +28,7 @@ const int QDecNumDigits = DECNUMDIGITS;
 const int QDecSingleDigits = 7;
 
 //! Digits of decimal precision for QDecDouble, decDouble, decimal64
-const int QDecDoubleDigits = 16;
+const int QDecDoubleDigits = 8;
 
 //! Digits of decimal precision for QDecQuad, decQuad, decimal128
 const int QDecQuadDigits = 34;

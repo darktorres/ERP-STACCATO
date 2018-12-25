@@ -1097,7 +1097,7 @@ bool Venda::generateId() {
 
   if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
 
-  const auto idLoja = UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text());
+  const auto idLoja = UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text()); //TODO: V688 http://www.viva64.com/en/V688 The 'idLoja' local variable possesses the same name as one of the class members, which can result in a confusion.  const auto idLoja = UserSession::fromLoja("loja.idLoja", ui->itemBoxVendedor->text());
 
   if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!", this); }
 

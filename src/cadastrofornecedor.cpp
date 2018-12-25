@@ -225,7 +225,7 @@ void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
 
 void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço.", this); }
 
-bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) {
+bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();

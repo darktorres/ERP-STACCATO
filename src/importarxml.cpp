@@ -616,7 +616,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   return true;
 }
 
-bool ImportarXML::inserirItemModel(XML &xml) {
+bool ImportarXML::inserirItemModel(const XML &xml) {
   const auto idEstoque = buscarProximoIdEstoque();
 
   if (not idEstoque) { return false; }
@@ -694,8 +694,8 @@ bool ImportarXML::percorrerXml(XML &xml, const QStandardItem *item) {
 bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   const int idVendaProduto = modelCompra.data(rowCompra, "idVendaProduto").toInt();
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
-  const QString codCompra = modelCompra.data(rowCompra, "codComercial").toString();
-  const QString codEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
+  //  const QString codCompra = modelCompra.data(rowCompra, "codComercial").toString();
+  //  const QString codEstoque = modelEstoque.data(rowEstoque, "codComercial").toString();
 
   if (idVendaProduto == 0) { return true; }
 

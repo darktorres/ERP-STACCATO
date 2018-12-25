@@ -3,7 +3,7 @@
 
 XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(); }
 
-void XML::readChild(QDomElement &element, QStandardItem *elementItem) {
+void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
   QDomElement child = element.firstChildElement();
 
   for (; not child.isNull(); child = child.nextSiblingElement()) {

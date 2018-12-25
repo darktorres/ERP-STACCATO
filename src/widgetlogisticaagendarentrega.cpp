@@ -531,7 +531,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
 
   const double unCaixa = modelProdutos.data(0, "unCaixa").toDouble();
 
-  const double proporcao = double(quantAgendar) / quantTotal;
+  const double proporcao = double(quantAgendar) / quantTotal; //TODO: V2005 http://www.viva64.com/en/V2005 C-style explicit type casting is utilized. Consider using: static_cast/const_cast/reinterpret_cast.  const double proporcao = double(quantAgendar) / quantTotal;
   const double parcial = modelProdutos.data(0, "parcial").toDouble() * proporcao;
   const double parcialDesc = modelProdutos.data(0, "parcialDesc").toDouble() * proporcao;
   const double total = modelProdutos.data(0, "total").toDouble() * proporcao;
@@ -543,7 +543,7 @@ bool WidgetLogisticaAgendarEntrega::quebrarProduto(const int row, const int quan
   if (not modelProdutos.setData(0, "total", total)) { return false; }
 
   // alterar quant, precos, etc da linha nova
-  const double proporcaoNovo = double((quantTotal - quantAgendar)) / quantTotal;
+  const double proporcaoNovo = double((quantTotal - quantAgendar)) / quantTotal; //TODO: V2005 http://www.viva64.com/en/V2005 C-style explicit type casting is utilized. Consider using: static_cast/const_cast/reinterpret_cast.  const double proporcaoNovo = double((quantTotal - quantAgendar)) / quantTotal;
   const double parcialNovo = modelProdutos.data(newRow, "parcial").toDouble() * proporcaoNovo;
   const double parcialDescNovo = modelProdutos.data(newRow, "parcialDesc").toDouble() * proporcaoNovo;
   const double totalNovo = modelProdutos.data(newRow, "total").toDouble() * proporcaoNovo;

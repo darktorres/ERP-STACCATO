@@ -288,7 +288,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   if (not modelEnd.select()) { return; }
 }
 
-bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
+bool CadastroLoja::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
@@ -449,7 +449,7 @@ bool CadastroLoja::newRegister() {
   return true;
 }
 
-bool CadastroLoja::cadastrarConta(const Tipo tipo) {
+bool CadastroLoja::cadastrarConta(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroLoja::cadastrarConta(const Tipo tipo) {
   if (ui->lineEditBanco->text().isEmpty()) {
     qApp->enqueueError("Banco inválido!", this);
     ui->lineEditBanco->setFocus();

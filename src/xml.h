@@ -96,7 +96,7 @@ private:
   auto lerIPIProduto(const QStandardItem *child) -> void;
   auto lerPISProduto(const QStandardItem *child) -> void;
   auto lerTotais(const QStandardItem *child) -> void;
-  auto readChild(QDomElement &element, QStandardItem *elementItem) -> void;
+  auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
 };
 
 #endif // XML_H

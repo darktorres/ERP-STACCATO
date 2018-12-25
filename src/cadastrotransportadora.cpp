@@ -193,7 +193,7 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
 }
 
-bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
+bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
@@ -298,7 +298,7 @@ bool CadastroTransportadora::viewRegister() {
 
 void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!", this); }
 
-bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) {
+bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) {
   if (tipo == Tipo::Cadastrar) {
     currentRowVeiculo = modelVeiculo.rowCount();
     modelVeiculo.insertRow(currentRowVeiculo);

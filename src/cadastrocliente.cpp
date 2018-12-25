@@ -273,7 +273,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
   }
 }
 
-bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
+bool CadastroCliente::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();

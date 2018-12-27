@@ -98,6 +98,7 @@ void WidgetCompraPendentes::setupTables() {
 
   modelViewVendaProduto.setHeaderData("prazoEntrega", "Prazo Limite");
   modelViewVendaProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
+  modelViewVendaProduto.setHeaderData("dataFinanceiro", "Financeiro");
   modelViewVendaProduto.setHeaderData("idVenda", "Venda");
   modelViewVendaProduto.setHeaderData("fornecedor", "Fornecedor");
   modelViewVendaProduto.setHeaderData("produto", "Produto");

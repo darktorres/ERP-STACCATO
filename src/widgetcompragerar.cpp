@@ -202,6 +202,9 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   // email --------------------------------
 
+  // reload data after getDates
+  if (not modelProdutos.select()) { return; }
+
   const QString razaoSocial = modelProdutos.data(list.first().row(), "fornecedor").toString();
 
   const auto anexo = gerarExcel(list, oc, isRepresentacao.value());

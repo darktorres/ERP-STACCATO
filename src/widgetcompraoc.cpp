@@ -112,14 +112,12 @@ void WidgetCompraOC::on_pushButtonDanfe_clicked() {
   if (ACBr acbr; not acbr.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
-void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this should update produto_estoque.quant
+void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
-
-  const int idVendaConsumo = modelProduto.data(row, "idVendaProdutoEHC").toInt();
 
   const QString status = modelProduto.data(row, "statusVP").toString();
 
@@ -135,7 +133,7 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this shou
 
   if (not qApp->startTransaction()) { return; }
 
-  if (not desfazerConsumo(row, idVendaConsumo)) { return qApp->rollbackTransaction(); }
+  if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVenda)) { return; }
 
@@ -146,54 +144,31 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this shou
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool WidgetCompraOC::desvincularVenda(const int row) {
-  QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idPedido = :idPedido");
-  queryCompra.bindValue(":idPedido", modelProduto.data(row, "idPedido"));
-
-  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro alterando pf: " + queryCompra.lastError().text()); }
-
-  QSqlQuery queryVenda;
-  queryVenda.prepare(
-      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
-      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
-      "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
-  queryVenda.bindValue(":idVendaProduto", modelProduto.data(row, "idVendaProdutoPF"));
-
-  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro alterando vp: " + queryVenda.lastError().text()); }
-
-  return true;
-}
-
-bool WidgetCompraOC::desfazerConsumo(const int row, const int idVendaConsumo) {
-  // REFAC: pass this responsability to Estoque class?
-
-  if (idVendaConsumo == 0) { return desvincularVenda(row); }
-
+bool WidgetCompraOC::desfazerConsumo(const int row) {
   const int idVendaProduto = modelProduto.data(row, "idVendaProdutoPF").toInt();
 
-  // NOTE: estoque_has_consumo may have the same idVendaProduto in more than one row
-  if (idVendaConsumo != 0) {
-    QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-    // TODO: change this to idPedido?
-    queryDelete.bindValue(":idVendaProduto", idVendaConsumo);
+  // REFAC: pass this responsability to Estoque class?
 
-    if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
-  }
+  // NOTE: estoque_has_consumo may have the same idVendaProduto in more than one row
+  QSqlQuery queryDelete;
+  queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
+  // TODO: change this to idPedido?
+  queryDelete.bindValue(":idVendaProduto", idVendaProduto);
+
+  if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  queryCompra.bindValue(":idVendaProduto", idVendaProduto);
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idPedido = :idPedido AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryCompra.bindValue(":idVendaProduto", modelProduto.data(row, "idPedido"));
 
   if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), this); }
 
   QSqlQuery queryVenda;
   queryVenda.prepare(
-      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, dataPrevCompra = "
-      "NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
+      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
+      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
       "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryVenda.bindValue(":idVendaProduto", idVendaProduto);
 

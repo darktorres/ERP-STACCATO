@@ -27,8 +27,7 @@ private:
   SqlRelationalTableModel modelProduto;
   Ui::WidgetCompraOC *ui;
   // methods
-  auto desfazerConsumo(const int row, const int idVendaConsumo) -> bool;
-  auto desvincularVenda(const int row) -> bool;
+  auto desfazerConsumo(const int row) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonDanfe_clicked() -> void;

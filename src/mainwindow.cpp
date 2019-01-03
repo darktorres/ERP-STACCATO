@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     qApp->enqueueError("A chave 'hostname' não está configurada!", this);
   }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE LOJA") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->menuImportar_tabela_fornecedor->setDisabled(true);

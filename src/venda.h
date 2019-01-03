@@ -29,7 +29,6 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Venda *ui;
   // methods
-  auto atualizaQuantEstoque() -> bool;
   auto atualizarCredito() -> bool;
   auto cadastrar() -> bool final;
   auto calcPrecoGlobalTotal() -> void;

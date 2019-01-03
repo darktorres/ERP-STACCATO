@@ -161,7 +161,7 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
 
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idPedido = :idPedido AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  queryCompra.bindValue(":idVendaProduto", modelProduto.data(row, "idPedido"));
+  queryCompra.bindValue(":idPedido", modelProduto.data(row, "idPedido"));
 
   if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), this); }
 

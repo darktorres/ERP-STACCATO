@@ -125,7 +125,10 @@ void Estoque::setupTables() {
 
 void Estoque::calcularRestante() {
   double quantRestante = modelEstoque.data(0, "quant").toDouble();
-  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble(); //TODO: V656 http://www.viva64.com/en/V656 Variables 'quantRestante', 'quantComprometidoNaoEntregue' are initialized through the call to the same function. It's probably an error or un-optimized code. Consider inspecting the 'modelEstoque.data(0, "quant").toDouble()' expression. Check lines: 127, 128.  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
+  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
+  // TODO: V656 http://www.viva64.com/en/V656 Variables 'quantRestante', 'quantComprometidoNaoEntregue' are initialized through the call to the same
+  // function. It's probably an error or un-optimized code. Consider inspecting the 'modelEstoque.data(0, "quant").toDouble()' expression. Check lines:
+  // 127, 128.  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
 
   for (int row = 0; row < modelViewConsumo.rowCount(); ++row) {
     const double quant = modelViewConsumo.data(row, "quant").toDouble();

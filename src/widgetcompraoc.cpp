@@ -121,24 +121,21 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this shou
 
   const int idVendaConsumo = modelProduto.data(row, "idVendaProdutoEHC").toInt();
 
-  if (idVendaConsumo == 0) { return qApp->enqueueError("A linha não possui consumo associado!", this); }
-
   const QString status = modelProduto.data(row, "statusVP").toString();
 
   if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
 
-  QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
+  QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Continuar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
-  const int idVendaProduto = modelProduto.data(row, "idVendaProdutoPF").toInt();
 
   if (not qApp->startTransaction()) { return; }
 
-  if (not desfazerConsumo(idVendaProduto, idVendaConsumo)) { return qApp->rollbackTransaction(); }
+  if (not desfazerConsumo(row, idVendaConsumo)) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVenda)) { return; }
 
@@ -149,8 +146,31 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() { // TODO: this shou
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool WidgetCompraOC::desfazerConsumo(const int idVendaProduto, const int idVendaConsumo) {
+bool WidgetCompraOC::desvincularVenda(const int row) {
+  QSqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idPedido = :idPedido");
+  queryCompra.bindValue(":idPedido", modelProduto.data(row, "idPedido"));
+
+  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro alterando pf: " + queryCompra.lastError().text()); }
+
+  QSqlQuery queryVenda;
+  queryVenda.prepare(
+      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
+      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
+      "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto");
+  queryVenda.bindValue(":idVendaProduto", modelProduto.data(row, "idVendaProdutoPF"));
+
+  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro alterando vp: " + queryVenda.lastError().text()); }
+
+  return true;
+}
+
+bool WidgetCompraOC::desfazerConsumo(const int row, const int idVendaConsumo) {
   // REFAC: pass this responsability to Estoque class?
+
+  if (idVendaConsumo == 0) { return desvincularVenda(row); }
+
+  const int idVendaProduto = modelProduto.data(row, "idVendaProdutoPF").toInt();
 
   // NOTE: estoque_has_consumo may have the same idVendaProduto in more than one row
   if (idVendaConsumo != 0) {

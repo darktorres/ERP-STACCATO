@@ -976,27 +976,10 @@ bool Venda::cadastrar() {
     if (not estoque->criarConsumo(query.value("idVendaProduto").toInt(), query.value("quant").toDouble())) { return false; }
   }
 
-  if (not atualizaQuantEstoque()) { return false; }
-
   query.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
   query.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query.lastError().text(), this); }
-
-  return true;
-}
-
-bool Venda::atualizaQuantEstoque() {
-  QSqlQuery query;
-  query.prepare("UPDATE produto p, view_estoque2 v SET p.estoqueRestante = v.restante, descontinuado = IF(v.restante = 0, TRUE, FALSE) WHERE p.idEstoque = v.idEstoque AND p.idProduto = :idProduto");
-
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (modelItem.data(row, "estoque").toInt() > 0) {
-      query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
-
-      if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando quant. estoque: " + query.lastError().text(), this); }
-    }
-  }
 
   return true;
 }

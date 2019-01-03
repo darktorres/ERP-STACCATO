@@ -184,17 +184,6 @@ void Estoque::exibirNota() {
   }
 }
 
-bool Estoque::atualizaQuantEstoque() {
-  // NOTE: can this be simplified so no query is necessary?
-  QSqlQuery query;
-  query.prepare("UPDATE produto p, view_estoque2 v SET p.estoqueRestante = v.restante, descontinuado = IF(v.restante = 0, TRUE, FALSE) WHERE p.idEstoque = v.idEstoque AND v.idEstoque = :idEstoque");
-  query.bindValue(":idEstoque", modelEstoque.data(0, "idEstoque"));
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando quant. estoque: " + query.lastError().text(), this); }
-
-  return true;
-}
-
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   // TODO: verificar se as divisões de linha batem com a outra função criarConsumo
 
@@ -248,8 +237,6 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
-
-  if (not atualizaQuantEstoque()) { return false; }
 
   // -------------------------------------------------------------------------
   // copy lote to venda_has_produto

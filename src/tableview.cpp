@@ -59,7 +59,7 @@ void TableView::openPersistentEditor(const int row, const int column) { QTableVi
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(getColumnIndex(column), order); }
 
 void TableView::redoView() {
-  if (not isVisible()) { return; }
+  if (blockRedo) { return; }
 
   if (not persistentColumns.isEmpty()) {
     for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
@@ -106,6 +106,12 @@ void TableView::mousePressEvent(QMouseEvent *event) {
   if (not item.isValid()) { emit clicked(item); }
 
   QTableView::mousePressEvent(event);
+}
+
+void TableView::setBlockRedo(const bool value) {
+  blockRedo = value;
+
+  if (not blockRedo) { redoView(); }
 }
 
 void TableView::setPersistentColumns(const QStringList &value) { persistentColumns = value; }

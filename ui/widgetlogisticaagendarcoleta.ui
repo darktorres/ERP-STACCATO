@@ -346,7 +346,11 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QLineEdit" name="lineEditBusca"/>
+    <widget class="QLineEdit" name="lineEditBusca">
+     <property name="placeholderText">
+      <string>NFe/Produto/Venda/OC</string>
+     </property>
+    </widget>
    </item>
    <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">

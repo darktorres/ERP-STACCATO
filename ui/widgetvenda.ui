@@ -31,6 +31,9 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="placeholderText">
+        <string>Código/Vendedor/Cliente/Profissional</string>
+       </property>
       </widget>
      </item>
      <item row="2" column="0">

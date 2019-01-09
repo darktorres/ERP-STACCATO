@@ -32,6 +32,9 @@
      <property name="enabled">
       <bool>true</bool>
      </property>
+     <property name="placeholderText">
+      <string>Produto/Cód. Com./Fornecedor/Estoque</string>
+     </property>
     </widget>
    </item>
    <item row="1" column="1" rowspan="2" colspan="2">

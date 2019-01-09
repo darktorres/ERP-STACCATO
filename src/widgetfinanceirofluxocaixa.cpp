@@ -173,3 +173,4 @@ void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
 
 // TODO: 0nao agrupar contas no view_fluxo_resumo (apenas quando filtrado)
 // TODO: 0fazer delegate para reduzir tamanho da fonte
+// TODO: separar a tabela 'Futuro' em duas telas, uma 'vencidos' e a outra mantem igual a atual

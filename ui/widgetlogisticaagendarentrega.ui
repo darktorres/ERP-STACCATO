@@ -234,6 +234,9 @@
            <property name="enabled">
             <bool>true</bool>
            </property>
+           <property name="placeholderText">
+            <string>Venda/Bairro/Logradouro/Cidade</string>
+           </property>
           </widget>
          </item>
         </layout>

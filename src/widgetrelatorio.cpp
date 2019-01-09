@@ -66,8 +66,8 @@ void WidgetRelatorio::setupTables() {
   ui->tableRelatorio->setModel(&modelViewRelatorio);
 
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
-  ui->tableRelatorio->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
-  ui->tableRelatorio->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
+  ui->tableRelatorio->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
+  ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
 
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
@@ -79,8 +79,8 @@ void WidgetRelatorio::setupTables() {
   ui->tableTotalVendedor->setModel(&modelViewRelatorioVendedor);
 
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
 
   ui->tableTotalVendedor->hideColumn("idUsuario");
   ui->tableTotalVendedor->hideColumn("Mês");
@@ -92,8 +92,8 @@ void WidgetRelatorio::setupTables() {
   ui->tableTotalLoja->setModel(&modelViewRelatorioLoja);
 
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("Valor Comissão", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("% Comissão", new PorcentagemDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
 
   ui->tableTotalLoja->hideColumn("Mês");
@@ -106,8 +106,8 @@ void WidgetRelatorio::calcularTotalGeral() {
 
   for (int row = 0; row < modelViewRelatorioLoja.rowCount(); ++row) {
     totalGeral += modelViewRelatorioLoja.data(row, "Faturamento").toDouble();
-    comissao += modelViewRelatorioLoja.data(row, "Valor Comissão").toDouble();
-    porcentagem += modelViewRelatorioLoja.data(row, "% Comissão").toDouble();
+    comissao += modelViewRelatorioLoja.data(row, "Comissão").toDouble();
+    porcentagem += modelViewRelatorioLoja.data(row, "%").toDouble();
   }
 
   ui->doubleSpinBoxGeral->setValue(totalGeral);
@@ -120,8 +120,8 @@ void WidgetRelatorio::calcularTotalVendedor() {
   double porcentagem = 0;
 
   for (int row = 0; row < modelViewRelatorioVendedor.rowCount(); ++row) {
-    comissao += modelViewRelatorioVendedor.data(row, "Valor Comissão").toDouble();
-    porcentagem += modelViewRelatorioVendedor.data(row, "% Comissão").toDouble();
+    comissao += modelViewRelatorioVendedor.data(row, "Comissão").toDouble();
+    porcentagem += modelViewRelatorioVendedor.data(row, "%").toDouble();
   }
 
   ui->doubleSpinBoxValorComissao->setValue(comissao);
@@ -159,7 +159,6 @@ void WidgetRelatorio::updateTables() {
     if (tipo == "VENDEDOR" or tipo == "VENDEDOR ESPECIAL") {
       ui->labelTotalLoja->hide();
       ui->tableTotalLoja->hide();
-      ui->labelGeral->hide();
       ui->doubleSpinBoxGeral->hide();
       ui->groupBoxResumoOrcamento->hide();
     }
@@ -300,3 +299,4 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
 }
 
 // TODO: vendedor especial recebe 0,5% nas vendas como consultor
+// TODO: reimplement views as materialized views? https://www.fromdual.com/mysql-materialized-views

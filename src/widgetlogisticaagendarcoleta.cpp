@@ -423,6 +423,7 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
   //-------------------------------------
 
   const QString text = ui->lineEditBusca->text();
+  // TODO: OC não está aparecendo nessa tabela
   const QString filtroBusca = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";
 
   if (not text.isEmpty()) { filtros << filtroBusca; }

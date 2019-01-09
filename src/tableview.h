@@ -12,7 +12,6 @@ public:
   ~TableView() final = default;
   auto hideColumn(const QString &column) -> void;
   auto openPersistentEditor(const int row, const int column) -> void;
-  auto setBlockRedo(const bool value) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void final;
   auto setPersistentColumns(const QStringList &value) -> void;
@@ -26,7 +25,6 @@ protected:
 
 private:
   // attributes
-  bool blockRedo = false;
   bool autoResize = true;
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;

@@ -186,12 +186,13 @@ void Application::lightTheme() {
   UserSession::setSetting("User/tema", "claro");
 }
 
-bool Application::startTransaction() {
+bool Application::startTransaction(const bool delayMessages) {
   if (inTransaction) { return qApp->enqueueError(false, "Transação já em execução!"); }
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return qApp->enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
   inTransaction = true;
+  this->delayMessages = delayMessages;
 
   return true;
 }
@@ -202,6 +203,7 @@ bool Application::endTransaction() {
   if (QSqlQuery query; not query.exec("COMMIT")) { return qApp->enqueueError(false, "Erro no commit: " + query.lastError().text()); }
 
   inTransaction = false;
+  delayMessages = false;
 
   showMessages();
 
@@ -216,6 +218,7 @@ void Application::rollbackTransaction() {
   QSqlQuery("ROLLBACK").exec();
 
   inTransaction = false;
+  delayMessages = false;
 
   showMessages();
 }
@@ -251,7 +254,7 @@ void Application::setUpdating(const bool value) {
 bool Application::getUpdating() const { return updating; }
 
 void Application::showMessages() {
-  if (inTransaction or updating) { return; }
+  if (delayMessages and (inTransaction or updating)) { return; }
   if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) { return; }
 
   showingErrors = true;

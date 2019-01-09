@@ -51,7 +51,7 @@ void ImportaProdutos::importarTabela() {
   if (not readFile()) { return; }
   if (not readValidade()) { return; }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction(false)) { return; }
 
   if (not importar()) {
     qApp->rollbackTransaction();
@@ -157,9 +157,6 @@ bool ImportaProdutos::importar() {
 
   if (canceled) { return false; }
 
-  ui->tableProdutos->setBlockRedo(false);
-  ui->tableErro->setBlockRedo(false);
-
   show();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
@@ -236,7 +233,6 @@ void ImportaProdutos::setupTables() {
   modelProduto.setHeaderData("markup", "Markup");
 
   ui->tableProdutos->setModel(new ImportaProdutosProxyModel(&modelProduto, this));
-  ui->tableProdutos->setBlockRedo(true);
 
   for (int column = 0; column < modelProduto.columnCount(); ++column) {
     if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->tableProdutos->setColumnHidden(column, true); }
@@ -315,7 +311,6 @@ void ImportaProdutos::setupTables() {
   modelErro.setHeaderData("markup", "Markup");
 
   ui->tableErro->setModel(new ImportaProdutosProxyModel(&modelErro, this));
-  ui->tableErro->setBlockRedo(true);
 
   for (int column = 0; column < modelErro.columnCount(); ++column) {
     if (modelErro.record().fieldName(column).endsWith("Upd")) { ui->tableErro->setColumnHidden(column, true); }
@@ -764,8 +759,6 @@ void ImportaProdutos::closeEvent(QCloseEvent *event) {
 }
 
 void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
-  ui->tableProdutos->setBlockRedo(true);
-
   for (int row = 0, rowCount = modelProduto.rowCount(); row < rowCount; ++row) {
     if (not modelProduto.setData(row, "representacao", checked)) { return; }
   }

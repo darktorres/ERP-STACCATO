@@ -59,8 +59,6 @@ void TableView::openPersistentEditor(const int row, const int column) { QTableVi
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(getColumnIndex(column), order); }
 
 void TableView::redoView() {
-  if (blockRedo) { return; }
-
   if (not persistentColumns.isEmpty()) {
     for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
       for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
@@ -84,14 +82,15 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   //---------------------------------------
 
-  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
-  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
+  connect(baseModel, &QAbstractItemModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
 
   //---------------------------------------
 
   hideColumn("created");
   hideColumn("lastUpdated");
+
+  redoView();
 }
 
 void TableView::enterEvent(QEvent *event) {
@@ -106,12 +105,6 @@ void TableView::mousePressEvent(QMouseEvent *event) {
   if (not item.isValid()) { emit clicked(item); }
 
   QTableView::mousePressEvent(event);
-}
-
-void TableView::setBlockRedo(const bool value) {
-  blockRedo = value;
-
-  if (not blockRedo) { redoView(); }
 }
 
 void TableView::setPersistentColumns(const QStringList &value) { persistentColumns = value; }

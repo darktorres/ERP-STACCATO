@@ -157,6 +157,11 @@ bool ImportaProdutos::importar() {
 
   if (canceled) { return false; }
 
+  ui->tableProdutos->setAutoResize(true);
+  ui->tableErro->setAutoResize(true);
+
+  ui->tableProdutos->resizeColumnsToContents();
+
   show();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
@@ -233,6 +238,7 @@ void ImportaProdutos::setupTables() {
   modelProduto.setHeaderData("markup", "Markup");
 
   ui->tableProdutos->setModel(new ImportaProdutosProxyModel(&modelProduto, this));
+  ui->tableProdutos->setAutoResize(false);
 
   for (int column = 0; column < modelProduto.columnCount(); ++column) {
     if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->tableProdutos->setColumnHidden(column, true); }
@@ -311,6 +317,7 @@ void ImportaProdutos::setupTables() {
   modelErro.setHeaderData("markup", "Markup");
 
   ui->tableErro->setModel(new ImportaProdutosProxyModel(&modelErro, this));
+  ui->tableErro->setAutoResize(false);
 
   for (int column = 0; column < modelErro.columnCount(); ++column) {
     if (modelErro.record().fieldName(column).endsWith("Upd")) { ui->tableErro->setColumnHidden(column, true); }

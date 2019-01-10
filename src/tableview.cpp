@@ -82,7 +82,8 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   //---------------------------------------
 
-  connect(baseModel, &QAbstractItemModel::modelReset, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
 
   //---------------------------------------
@@ -106,6 +107,8 @@ void TableView::mousePressEvent(QMouseEvent *event) {
 
   QTableView::mousePressEvent(event);
 }
+
+void TableView::setAutoResize(const bool value) { autoResize = value; }
 
 void TableView::setPersistentColumns(const QStringList &value) { persistentColumns = value; }
 

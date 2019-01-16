@@ -5,7 +5,10 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-XML_Distance::XML_Distance(const QByteArray &fileContent, const int evento) : evento(evento), fileContent(fileContent) { montarArvore(); }
+XML_Distance::XML_Distance(const QByteArray &fileContent, const int evento, const int idVeiculo, const QString &modelo, const QDateTime &dataEvento)
+    : evento(evento), idVeiculo(idVeiculo), modelo(modelo), dataEvento(dataEvento), fileContent(fileContent) {
+  montarArvore();
+}
 
 void XML_Distance::readChild(const QDomElement &element, QStandardItem *elementItem) {
   QDomElement child = element.firstChildElement();
@@ -40,6 +43,11 @@ void XML_Distance::lerValores(const QStandardItem *item) {
       //      qDebug() << "parent: " << parentText << " -> " << text;
       //      if (parentText == "distance") { qDebug() << text; }
 
+      if (parentText == "duration" and text.left(5) == "value") {
+        duracao = text.remove(0, 8);
+        //        qDebug() << duracao;
+      }
+
       if (parentText == "distance" and text.left(5) == "value") {
         distancia = text.remove(0, 8);
         //        qDebug() << distancia;
@@ -53,11 +61,14 @@ void XML_Distance::lerValores(const QStandardItem *item) {
         endAddr = text.remove(0, 14).replace("'", "");
         //        qDebug() << endAddr;
 
-        legs << QStringList{startAddr, endAddr, distancia};
+        legs << QStringList{startAddr, endAddr, distancia, duracao};
 
         QSqlQuery query;
 
-        if (not query.exec("INSERT INTO temp_distancia (evento, origem, destino, distancia) VALUES (" + QString::number(evento) + ", '" + startAddr + "', '" + endAddr + "', " + distancia + ")")) {
+        if (not query.exec("INSERT INTO temp_distancia (idVeiculo, modelo, dataEvento, evento, origem, destino, distancia, duracao) "
+                           "VALUES (" +
+                           QString::number(idVeiculo) + ", '" + modelo + "', '" + dataEvento.toString("yyyy-MM-dd hh:mm") + "', " + QString::number(evento) + ", '" + startAddr + "', '" + endAddr +
+                           "', " + distancia + ", " + duracao + ")")) {
           qDebug() << "erro temp_distancia: " + query.lastError().text();
           qDebug() << "INSERT INTO temp_distancia (evento, origem, destino, distancia) VALUES (" + QString::number(evento) + ", '" + startAddr + "', '" + endAddr + "', " + distancia + ")";
         }

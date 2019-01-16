@@ -1,20 +1,25 @@
 #ifndef XML_H
 #define XML_H
 
+#include <QDateTime>
 #include <QDomElement>
 #include <QStandardItemModel>
 
 class XML_Distance final {
 
 public:
-  XML_Distance(const QByteArray &fileContent, const int evento);
+  XML_Distance(const QByteArray &fileContent, const int evento, const int idVeiculo, const QString &modelo, const QDateTime &dataEvento);
   auto lerValores(const QStandardItem *item) -> void;
 
   QVector<QStringList> legs;
   QString distancia;
   QString startAddr;
   QString endAddr;
-  int evento;
+  QString duracao;
+  const int evento;
+  const int idVeiculo;
+  const QString modelo;
+  const QDateTime dataEvento;
 
   const QByteArray fileContent;
   QStandardItemModel model;

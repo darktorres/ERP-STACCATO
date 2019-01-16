@@ -122,8 +122,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   //  qDebug() << "open: " << file.open(QFile::ReadOnly);
 
-  //  XML_Distance *xmlDistance = new XML_Distance(file.readAll());
+  //  XML_Distance *xmlDistance = new XML_Distance(file.readAll(), 1, 5, "Carro ABC", QDateTime(QDate(2019, 01, 05), QTime(10, 5)));
   //  qDebug() << "legs: " << xmlDistance->legs;
+
+  //  return;
 
   QSqlQuery queryEndereco;
   if (not queryEndereco.exec(
@@ -141,19 +143,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   auto *manager = new QNetworkAccessManager(this);
 
-  connect(manager, &QNetworkAccessManager::finished, this, [&](QNetworkReply *reply) {
-    if (reply->error()) {
-      qDebug() << "error reply: " << reply->errorString();
-      return;
-    }
-
-    QString answer = reply->readAll();
-
-    qDebug() << "reply: " << answer.left(200);
-
-    XML_Distance *xmlDistance = new XML_Distance(answer.toUtf8(), ++evento);
-    qDebug() << "legs: " << xmlDistance->legs;
-  });
+  int evento = 0;
 
   while (queryEndereco.next()) {
     const QString destinoTemp = queryEndereco.value("endereco").toString();
@@ -161,18 +151,36 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     const QString destino = destinos.first();
     destinos.removeFirst();
 
+    const int idVeiculo = queryEndereco.value("idVeiculo").toInt();
+    const QString modelo = queryEndereco.value("modelo").toString();
+    const QDateTime dataEvento = queryEndereco.value("data").toDateTime();
+
+    qDebug() << idVeiculo;
+    qDebug() << modelo;
+    qDebug() << dataEvento;
+
     for (const auto &origem : origens) {
       const QUrl url = QString("https://maps.googleapis.com/maps/api/directions/xml?origin=%1&destination=%2&waypoints=optimize:true|%3&key=AIzaSyCg0K1TwMY4PEQ0ZAXIfrUXXQw5tKOEVLw")
                            .arg(origem)
                            .arg(destino)
                            .arg(destinos.join("|"));
 
-      qDebug() << url;
+      //      qDebug() << url;
 
-      manager->get(QNetworkRequest(url));
+      auto *reply = manager->get(QNetworkRequest(url));
+
+      while (not reply->isFinished()) {
+        // wait
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+      }
+
+      QString answer = reply->readAll();
+
+      qDebug() << "reply: " << answer.left(200);
+
+      XML_Distance *xmlDistance = new XML_Distance(answer.toUtf8(), ++evento, idVeiculo, modelo, dataEvento);
+      qDebug() << "legs: " << xmlDistance->legs;
     }
-
-    QThread::msleep(100);
   }
 
   //------------------------------------------------

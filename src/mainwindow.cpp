@@ -20,6 +20,7 @@
 #include "userconfig.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
+#include "xmlDistanceAPI.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
@@ -109,6 +110,72 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(8, true); }
 
   //  gerarEnviarRelatorio();
+
+  //---------------------------------------------------------------------------
+
+  QStringList origens;
+  origens << "Rua+Salesópolis,27,Barueri,SP";
+  origens << "Rua+Ceara,157,Barueri,SP";
+  origens << "Av.+Santa+Marina,+2716+-+Vila+Albertina,+São+Paulo+-+SP";
+
+  //  QFile file("C:/temp/distance_waypoints.xml");
+
+  //  qDebug() << "open: " << file.open(QFile::ReadOnly);
+
+  //  XML_Distance *xmlDistance = new XML_Distance(file.readAll());
+  //  qDebug() << "legs: " << xmlDistance->legs;
+
+  QSqlQuery queryEndereco;
+  if (not queryEndereco.exec(
+          "SELECT idVeiculo, modelo, data, GROUP_CONCAT(distinct idVenda SEPARATOR '|') AS idVenda, GROUP_CONCAT(distinct endereco SEPARATOR '|') AS endereco FROM (SELECT vhp.idVenda, thv.modelo, "
+          "vhp.idVeiculo, vhp.data, REPLACE(CONCAT(che.logradouro, ',', che.numero, ',', che.cidade, ',', che.uf), ' ', '+') AS endereco FROM veiculo_has_produto vhp LEFT JOIN "
+          "transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN venda v ON vhp.idVenda = v.idVenda LEFT JOIN cliente_has_endereco che ON che.idEndereco = v.idEnderecoEntrega "
+          "WHERE vhp.idVenda IN (SELECT idVenda FROM venda WHERE created > '2018-06-01') AND vhp.idVeiculo <> 11 AND che.idEndereco <> 1 GROUP BY vhp.idVenda , vhp.data , vhp.idVeiculo) x GROUP BY "
+          "x.idVeiculo , x.data ORDER BY data , idVeiculo")) {
+    qDebug() << "error: " << queryEndereco.lastError().text();
+    return;
+  }
+
+  //  qDebug() << queryEndereco.size();
+  //  return;
+
+  auto *manager = new QNetworkAccessManager(this);
+
+  connect(manager, &QNetworkAccessManager::finished, this, [&](QNetworkReply *reply) {
+    if (reply->error()) {
+      qDebug() << "error reply: " << reply->errorString();
+      return;
+    }
+
+    QString answer = reply->readAll();
+
+    qDebug() << "reply: " << answer.left(200);
+
+    XML_Distance *xmlDistance = new XML_Distance(answer.toUtf8(), ++evento);
+    qDebug() << "legs: " << xmlDistance->legs;
+  });
+
+  while (queryEndereco.next()) {
+    const QString destinoTemp = queryEndereco.value("endereco").toString();
+    QStringList destinos = destinoTemp.split("|");
+    const QString destino = destinos.first();
+    destinos.removeFirst();
+
+    for (const auto &origem : origens) {
+      const QUrl url = QString("https://maps.googleapis.com/maps/api/directions/xml?origin=%1&destination=%2&waypoints=optimize:true|%3&key=AIzaSyCg0K1TwMY4PEQ0ZAXIfrUXXQw5tKOEVLw")
+                           .arg(origem)
+                           .arg(destino)
+                           .arg(destinos.join("|"));
+
+      qDebug() << url;
+
+      manager->get(QNetworkRequest(url));
+    }
+
+    QThread::msleep(100);
+  }
+
+  //------------------------------------------------
 }
 
 MainWindow::~MainWindow() { delete ui; }

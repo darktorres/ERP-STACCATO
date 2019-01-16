@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QNetworkReply>
 #include <QPushButton>
 
 namespace Ui {
@@ -20,6 +21,7 @@ private:
   // attributes
   Ui::MainWindow *ui;
   QPushButton *pushButtonStatus;
+  int evento = 0;
   // methods
   auto event(QEvent *event) -> bool;
   //  auto gerarEnviarRelatorio() -> void;

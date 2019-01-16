@@ -194,6 +194,7 @@ SOURCES += \
     src/widgetrelatorio.cpp \
     src/widgetvenda.cpp \
     src/xml.cpp \
+    src/xmlDistanceAPI.cpp \
     src/xml_viewer.cpp
 
 HEADERS  += \
@@ -306,6 +307,7 @@ HEADERS  += \
     src/widgetrelatorio.h \
     src/widgetvenda.h \
     src/xml.h \
+    src/xmlDistanceAPI.h \
     src/xml_viewer.h
 
 FORMS += \

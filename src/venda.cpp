@@ -691,8 +691,8 @@ void Venda::montarFluxoCaixa() {
       const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : QDate::currentDate();
 
       for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
-        const int row = modelFluxoCaixa.rowCount();
-        modelFluxoCaixa.insertRow(row);
+        const int row = modelFluxoCaixa.insertRowAtEnd();
+
         if (not modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text())) { return; }
         if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
         if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
@@ -730,8 +730,7 @@ void Venda::montarFluxoCaixa() {
 
         if (modelFluxoCaixa.data(0, "observacao").toString() == "FRETE") { valorAjustado = valorComissao * taxaComissao; }
 
-        const int row = modelFluxoCaixa2.rowCount();
-        modelFluxoCaixa2.insertRow(row);
+        const int row = modelFluxoCaixa2.insertRowAtEnd();
 
         if (not modelFluxoCaixa2.setData(row, "contraParte", modelItem.data(0, "fornecedor"))) { return; }
         if (not modelFluxoCaixa2.setData(row, "dataEmissao", dataEmissao)) { return; }
@@ -764,8 +763,8 @@ void Venda::montarFluxoCaixa() {
 
         const double taxa = query.value("taxa").toDouble() / 100;
 
-        const int row = modelFluxoCaixa2.rowCount();
-        modelFluxoCaixa2.insertRow(row);
+        const int row = modelFluxoCaixa2.insertRowAtEnd();
+
         if (not modelFluxoCaixa2.setData(row, "contraParte", "Administradora Cartão")) { return; }
         if (not modelFluxoCaixa2.setData(row, "dataEmissao", dataEmissao)) { return; }
         if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
@@ -908,8 +907,7 @@ bool Venda::cadastrar() {
   if (tipo == Tipo::Cadastrar) {
     if (not generateId()) { return false; }
 
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
+    currentRow = model.insertRowAtEnd();
   }
 
   if (not savingProcedures()) { return false; }
@@ -918,25 +916,25 @@ bool Venda::cadastrar() {
 
   // inserir rt em contas_pagar
 
-  QSqlQuery query;
+  QSqlQuery query1;
 
   if (ui->checkBoxPontuacaoPadrao->isChecked()) {
     const QDate date = ui->dateTimeEdit->date();
     const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
 
-    query.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
-                  ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
-    query.bindValue(":dataEmissao", date);
-    query.bindValue(":contraParte", ui->itemBoxProfissional->text());
-    query.bindValue(":idLoja", idLoja);
-    query.bindValue(":centroCusto", idLoja);
-    query.bindValue(":valor", valor);
-    query.bindValue(":tipo", "1. Dinheiro");
+    query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
+                   ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+    query1.bindValue(":dataEmissao", date);
+    query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
+    query1.bindValue(":idLoja", idLoja);
+    query1.bindValue(":centroCusto", idLoja);
+    query1.bindValue(":valor", valor);
+    query1.bindValue(":tipo", "1. Dinheiro");
     // 01-15 paga dia 30, 16-30 paga prox dia 15
-    query.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
-    query.bindValue(":grupo", "RT's");
+    query1.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
+    query1.bindValue(":grupo", "RT's");
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
   }
   // -------------------------------------------------------------------------
 
@@ -964,22 +962,23 @@ bool Venda::cadastrar() {
 
   if (not modelItem.submitAll()) { return false; }
 
-  // TODO: dont reuse query
-  query.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p on p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
-  query.bindValue(":idVenda", ui->lineEditVenda->text());
+  QSqlQuery query2;
+  query2.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p ON p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
+  query2.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query.lastError().text(), this); }
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query2.lastError().text(), this); }
 
-  while (query.next()) {
-    auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
+  while (query2.next()) {
+    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
 
-    if (not estoque->criarConsumo(query.value("idVendaProduto").toInt(), query.value("quant").toDouble())) { return false; }
+    if (not estoque->criarConsumo(query2.value("idVendaProduto").toInt(), query2.value("quant").toDouble())) { return false; }
   }
 
-  query.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
-  query.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
+  QSqlQuery query3;
+  query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
+  query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query.lastError().text(), this); }
+  if (not query3.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
 
   return true;
 }
@@ -1280,8 +1279,7 @@ bool Venda::copiaProdutosOrcamento() {
   if (not queryProdutos.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + queryProdutos.lastError().text(), this); }
 
   while (queryProdutos.next()) {
-    const int rowItem = modelItem.rowCount();
-    modelItem.insertRow(rowItem);
+    const int rowItem = modelItem.insertRowAtEnd();
 
     for (int column = 0, columnCount = queryProdutos.record().count(); column < columnCount; ++column) {
       const QString field = queryProdutos.record().fieldName(column);

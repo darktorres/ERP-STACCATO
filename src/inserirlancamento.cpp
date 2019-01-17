@@ -79,8 +79,7 @@ void InserirLancamento::setupTables() {
 }
 
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
-  const int newRow = modelContaPagamento.rowCount();
-  modelContaPagamento.insertRow(newRow);
+  const int newRow = modelContaPagamento.insertRowAtEnd();
 
   if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
   if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) { return; }
@@ -121,9 +120,7 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Deve selecionar uma linha primeiro!", this); }
 
   const int row = list.first().row();
-  const int newRow = modelContaPagamento.rowCount();
-
-  modelContaPagamento.insertRow(newRow);
+  const int newRow = modelContaPagamento.insertRowAtEnd();
 
   for (int col = 0; col < modelContaPagamento.columnCount(); ++col) {
     if (modelContaPagamento.fieldIndex("valor") == col) { continue; }

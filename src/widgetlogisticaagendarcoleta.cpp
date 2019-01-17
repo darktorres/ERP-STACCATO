@@ -309,8 +309,7 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
     const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
     const double peso = kg * caixa;
 
-    const int row = modelTranspAtual.rowCount();
-    modelTranspAtual.insertRow(row);
+    const int row = modelTranspAtual.insertRowAtEnd();
 
     if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) { return false; }
     if (not modelTranspAtual.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) { return false; }

@@ -181,10 +181,7 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 }
 
 bool CadastroUsuario::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
   if (not savingProcedures()) { return false; }
 
@@ -212,8 +209,7 @@ bool CadastroUsuario::cadastrar() {
 
     // -------------------------------------------------------------------------
 
-    const int row2 = modelPermissoes.rowCount();
-    modelPermissoes.insertRow(row2);
+    const int row2 = modelPermissoes.insertRowAtEnd();
 
     if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
     if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }

@@ -299,8 +299,7 @@ void Devolucao::on_doubleSpinBoxQuant_valueChanged(double) {
 void Devolucao::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant->setValue(ui->doubleSpinBoxCaixas->value() * ui->doubleSpinBoxQuant->singleStep()); }
 
 bool Devolucao::criarDevolucao() {
-  const int newRow = modelVenda.rowCount();
-  if (not modelVenda.insertRow(newRow)) { return false; }
+  const int newRow = modelVenda.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
     if (modelVenda.fieldIndex("idVendaBase") == column) { continue; }
@@ -336,8 +335,7 @@ bool Devolucao::inserirItens(const int currentRow) {
   const QDecDouble step = ui->doubleSpinBoxQuant->singleStep();
 
   // copiar linha para devolucao
-  const int rowDevolucao = modelDevolvidos.rowCount();
-  if (not modelDevolvidos.insertRow(rowDevolucao)) { return false; }
+  const int rowDevolucao = modelDevolvidos.insertRowAtEnd();
 
   for (int column = 0; column < modelProdutos.columnCount(); ++column) {
     if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
@@ -371,9 +369,8 @@ bool Devolucao::inserirItens(const int currentRow) {
   //------------------------------------
 
   if (restante > 0) {
-    const int newRowRestante = modelProdutos.rowCount();
+    const int newRowRestante = modelProdutos.insertRowAtEnd();
     // NOTE: *quebralinha venda_produto/pedido_fornecedor
-    if (not modelProdutos.insertRow(newRowRestante)) { return false; }
 
     for (int column = 0; column < modelProdutos.columnCount(); ++column) {
       if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }
@@ -441,8 +438,7 @@ bool Devolucao::criarContas() {
   // TODO: 0considerar a 'conta cliente' e ajustar as telas do financeiro para poder visualizar/trabalhar os dois fluxos
   // de contas
 
-  const int newRowPag = modelPagamentos.rowCount();
-  if (not modelPagamentos.insertRow(newRowPag)) { return false; }
+  const int newRowPag = modelPagamentos.insertRowAtEnd();
 
   if (not modelPagamentos.setData(newRowPag, "contraParte", modelCliente.data(0, "nome_razao"))) { return false; }
   if (not modelPagamentos.setData(newRowPag, "dataEmissao", QDate::currentDate())) { return false; }

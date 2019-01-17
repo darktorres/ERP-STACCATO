@@ -43,6 +43,13 @@ bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVarian
 
 Qt::DropActions SqlRelationalTableModel::supportedDropActions() const { return Qt::MoveAction; }
 
+int SqlRelationalTableModel::insertRowAtEnd() {
+  const int row = rowCount();
+  insertRow(row);
+
+  return row;
+}
+
 bool SqlRelationalTableModel::submitAll() {
   if (not QSqlTableModel::submitAll()) { return qApp->enqueueError(false, "Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 

@@ -360,8 +360,7 @@ bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
 bool ProdutosPendentes::dividirVenda(const QDecDouble quantSeparar, const QDecDouble quantVenda, const int rowProduto) {
   if (not Log::createLog("idVendaProduto '" + modelProdutos.data(rowProduto, "idVendaProduto").toString() + "': linha dividida para consumo parcial de estoque.")) { return false; }
 
-  const int newRow = modelProdutos.rowCount();
-  modelProdutos.insertRow(newRow);
+  const int newRow = modelProdutos.insertRowAtEnd();
 
   // copiar colunas
   for (int column = 0, columnCount = modelProdutos.columnCount(); column < columnCount; ++column) {

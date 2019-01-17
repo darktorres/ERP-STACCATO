@@ -228,10 +228,7 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
   if (not savingProcedures()) { return false; }
 

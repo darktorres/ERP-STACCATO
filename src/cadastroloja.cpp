@@ -288,17 +288,15 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   if (not modelEnd.select()) { return; }
 }
 
-bool CadastroLoja::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
+bool CadastroLoja::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result
+                                                        // in a confusion.bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) {
-    currentRowEnd = modelEnd.rowCount();
-    modelEnd.insertRow(currentRowEnd);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -403,10 +401,7 @@ bool CadastroLoja::viewRegister() {
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
 bool CadastroLoja::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
   if (not savingProcedures()) { return false; }
 
@@ -449,7 +444,8 @@ bool CadastroLoja::newRegister() {
   return true;
 }
 
-bool CadastroLoja::cadastrarConta(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroLoja::cadastrarConta(const Tipo tipo) {
+bool CadastroLoja::cadastrarConta(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a
+                                                     // confusion.bool CadastroLoja::cadastrarConta(const Tipo tipo) {
   if (ui->lineEditBanco->text().isEmpty()) {
     qApp->enqueueError("Banco inválido!", this);
     ui->lineEditBanco->setFocus();
@@ -468,10 +464,7 @@ bool CadastroLoja::cadastrarConta(const Tipo tipo) { //TODO: V688 http://www.viv
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) {
-    currentRowConta = modelConta.rowCount();
-    modelConta.insertRow(currentRowConta);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
 
   if (not modelConta.setData(currentRowConta, "banco", ui->lineEditBanco->text())) { return false; }
   if (not modelConta.setData(currentRowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
@@ -525,8 +518,7 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
 }
 
 bool CadastroLoja::adicionarPagamento() {
-  const int row = modelPagamentos.rowCount();
-  if (not modelPagamentos.insertRow(row)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + model.lastError().text(), this); }
+  const int row = modelPagamentos.insertRowAtEnd();
 
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
@@ -536,8 +528,7 @@ bool CadastroLoja::adicionarPagamento() {
   const int id = modelPagamentos.query().lastInsertId().toInt();
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
-    const int rowTaxas = modelTaxas.rowCount();
-    if (not modelTaxas.insertRow(rowTaxas)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelTaxas.lastError().text(), this); }
+    const int rowTaxas = modelTaxas.insertRowAtEnd();
 
     if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) { return false; }
     if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
@@ -614,8 +605,7 @@ bool CadastroLoja::atualizarPagamento() {
   //--------------------------------------
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
-    const int rowTaxas = modelTaxas.rowCount();
-    if (not modelTaxas.insertRow(rowTaxas)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelTaxas.lastError().text(), this); }
+    const int rowTaxas = modelTaxas.insertRowAtEnd();
 
     if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(rowTaxas, "idPagamento"))) { return false; }
     if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }

@@ -593,8 +593,7 @@ bool ImportaProdutos::camposForaDoPadrao() {
 }
 
 bool ImportaProdutos::insereEmErro() {
-  const int row = modelErro.rowCount();
-  if (not modelErro.insertRow(row)) { return false; }
+  const int row = modelErro.insertRowAtEnd();
 
   const auto keys = variantMap.keys();
 
@@ -630,9 +629,7 @@ bool ImportaProdutos::insereEmErro() {
 }
 
 bool ImportaProdutos::insereEmOk() {
-  const int row = modelProduto.rowCount();
-
-  if (not modelProduto.insertRow(row)) { return false; }
+  const int row = modelProduto.insertRowAtEnd();
 
   const auto keys = variantMap.keys();
 

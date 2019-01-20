@@ -69,7 +69,7 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
 }
 
 bool RegisterDialog::setForeignKey(SqlRelationalTableModel &secondaryModel) {
-  for (int row = 0; row < secondaryModel.rowCount(); ++row) {
+  for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) {
     if (not secondaryModel.setData(row, primaryKey, primaryId)) { return false; }
   }
 
@@ -77,7 +77,7 @@ bool RegisterDialog::setForeignKey(SqlRelationalTableModel &secondaryModel) {
 }
 
 bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &someModel, const int row) {
-  for (int column = 0; column < someModel.columnCount(); ++column) {
+  for (int column = 0, columnCount = someModel.columnCount(); column < columnCount; ++column) {
     const QVariant dado = someModel.data(row, column);
 
     if (dado.type() == QVariant::String) {

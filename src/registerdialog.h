@@ -34,7 +34,7 @@ protected:
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
   auto closeEvent(QCloseEvent *event) -> void final;
-  auto columnsToUpper(SqlRelationalTableModel &model, const int row) -> bool;
+  auto columnsToUpper(SqlRelationalTableModel &someModel, const int row) -> bool;
   auto confirmationMessage() -> bool;
   auto data(const QString &key) -> QVariant;
   auto data(const int row, const QString &key) -> QVariant;
@@ -43,7 +43,7 @@ protected:
   auto remove() -> void;
   auto requiredStyle() -> QString;
   auto setData(const QString &key, const QVariant &value) -> bool;
-  auto setForeignKey(SqlRelationalTableModel &model) -> bool;
+  auto setForeignKey(SqlRelationalTableModel &secondaryModel) -> bool;
   auto setTextKeys(const QStringList &value) -> void;
   auto validaCNPJ(const QString &text) -> bool;
   auto validaCPF(const QString &text) -> bool;

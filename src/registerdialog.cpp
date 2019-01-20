@@ -68,20 +68,20 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   return true;
 }
 
-bool RegisterDialog::setForeignKey(SqlRelationalTableModel &model) { //TODO: V688 http://www.viva64.com/en/V688 The 'model' function argument possesses the same name as one of the class members, which can result in a confusion.bool RegisterDialog::setForeignKey(SqlRelationalTableModel &model) {
-  for (int row = 0; row < model.rowCount(); ++row) {
-    if (not model.setData(row, primaryKey, primaryId)) { return false; }
+bool RegisterDialog::setForeignKey(SqlRelationalTableModel &secondaryModel) {
+  for (int row = 0; row < secondaryModel.rowCount(); ++row) {
+    if (not secondaryModel.setData(row, primaryKey, primaryId)) { return false; }
   }
 
   return true;
 }
 
-bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &model, const int row) { //TODO: V688 http://www.viva64.com/en/V688 The 'model' function argument possesses the same name as one of the class members, which can result in a confusion.bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &model, const int row) {
-  for (int column = 0; column < model.columnCount(); ++column) {
-    const QVariant dado = model.data(row, column);
+bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &someModel, const int row) {
+  for (int column = 0; column < someModel.columnCount(); ++column) {
+    const QVariant dado = someModel.data(row, column);
 
     if (dado.type() == QVariant::String) {
-      if (not model.setData(row, column, dado.toString().toUpper())) { return false; }
+      if (not someModel.setData(row, column, dado.toString().toUpper())) { return false; }
     }
   }
 

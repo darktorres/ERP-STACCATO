@@ -49,7 +49,8 @@ void SearchDialog::setupTables(const QString &table) {
 
   setFilter(filter);
 
-  ui->table->setModel(new SearchDialogProxyModel(&model, this));
+  proxyModel = new SearchDialogProxyModel(&model, this);
+  ui->table->setModel(proxyModel);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
@@ -87,7 +88,7 @@ void SearchDialog::sendUpdateMessage() {
 
   if (selection.isEmpty()) { return; }
 
-  emit itemSelected(model.data(selection.first().row(), primaryKey).toString());
+  emit itemSelected(proxyModel->data(proxyModel->index(selection.first().row(), model.fieldIndex(primaryKey)), Qt::DisplayRole));
 }
 
 bool SearchDialog::prepare_show() {
@@ -138,7 +139,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
 
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
-    const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
+    const bool isEstoque = proxyModel->data(proxyModel->index(selection.first().row(), model.fieldIndex("estoque")), Qt::DisplayRole).toBool();
 
     if (not silent and not selection.isEmpty() and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }
@@ -411,4 +412,7 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepres
 
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 
-void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); } //TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+void SearchDialog::on_radioButtonProdDesc_toggled(const bool) {
+  on_lineEditBusca_textChanged(QString());
+} // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
+  // SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }

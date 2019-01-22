@@ -61,7 +61,9 @@ void XML_Distance::lerValores(const QStandardItem *item) {
         endAddr = text.remove(0, 14).replace("'", "");
         //        qDebug() << endAddr;
 
-        legs << QStringList{startAddr, endAddr, distancia, duracao};
+//        legs << QStringList{startAddr, endAddr, distancia, duracao};
+//        legs << QStringList{startAddr, endAddr};
+        if(route.isEmpty()){ route << startAddr << endAddr;} else{route << endAddr;}
 
         QSqlQuery query;
 

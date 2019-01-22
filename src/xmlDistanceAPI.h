@@ -12,6 +12,7 @@ public:
   auto lerValores(const QStandardItem *item) -> void;
 
   QVector<QStringList> legs;
+  QStringList route;
   QString distancia;
   QString startAddr;
   QString endAddr;

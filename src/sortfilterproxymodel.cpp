@@ -23,7 +23,7 @@ QVariant SortFilterProxyModel::data(const int row, const QString &column, int ro
     const int indexOf = queryModel->record().indexOf(column);
 
     if (indexOf == -1) {
-      qApp->enqueueError("Coluna '" + column + "' não encontada na tabela!");
+      qApp->enqueueError("Coluna '" + column + "' não encontrada na tabela!");
       return QVariant();
     }
 

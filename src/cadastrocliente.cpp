@@ -273,7 +273,8 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
   }
 }
 
-bool CadastroCliente::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a confusion.bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
+bool CadastroCliente::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can
+                                                           // result in a confusion.bool CadastroCliente::cadastrarEndereco(const Tipo tipo) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
@@ -286,10 +287,7 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://w
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) {
-    currentRowEnd = modelEnd.rowCount();
-    modelEnd.insertRow(currentRowEnd);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -310,10 +308,7 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipo) { //TODO: V688 http://w
 }
 
 bool CadastroCliente::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
-  }
+  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
   if (not savingProcedures()) { return false; }
 

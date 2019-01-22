@@ -97,8 +97,11 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     if (dia > diasMes) { dia = 1; }
   }
 
+  for (int col = 0; col < ui->tableWidget->columnCount(); ++col) { ui->tableWidget->setColumnHidden(col, true); }
+  for (int row = 0; row < ui->tableWidget->rowCount(); ++row) { ui->tableWidget->setRowHidden(row, true); }
+
   QSqlQuery query;
-  query.prepare("SELECT * FROM view_calendario WHERE data BETWEEN :start AND :end");
+  query.prepare("SELECT * FROM view_calendario2 WHERE data BETWEEN :start AND :end");
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
 
@@ -122,39 +125,53 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     auto *widget = ui->tableWidget->cellWidget(row, diaSemana) ? static_cast<CollapsibleWidget *>(ui->tableWidget->cellWidget(row, diaSemana)) : new CollapsibleWidget(this);
 
-    const QString oldText = widget->getHtml();
+    QStringList enderecos = query.value("endereco").toString().replace("+", " ").replace(",", ", ").split("|");
+    QString enderecosList;
 
-    QString text = oldText.isEmpty() ? "" : oldText + R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>
-                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">-----------------------------------------</p>
-                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>)";
+    for (auto &endereco : enderecos) { enderecosList += QString(R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%1</p>)").arg(endereco); }
 
-    QStringList produtos = query.value("produtos").toString().split("/");
-    QString produtosList;
+    //    const QString oldText = widget->getHtml();
 
-    for (auto &produto : produtos) { produtosList += QString(R"(<li style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%1</li>)").arg(produto); }
+    //    QString text = oldText.isEmpty() ? "" : oldText + R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>
+    //                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">-----------------------------------------</p>
+    //                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>)";
 
-    const QString destino = query.value("logradouro").toString().replace(" ", "+") + "," + query.value("numero").toString().replace(" ", "+") + "," +
-                            query.value("cidade").toString().replace(" ", "+") + "," + query.value("uf").toString().replace(" ", "+");
+    QString text;
+
+    //    QStringList produtos = query.value("produtos").toString().split("/");
+    //    QString produtosList;
+
+    //    for (auto &produto : produtos) { produtosList += QString(R"(<li style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%1</li>)").arg(produto); }
+
+    //    const QString destino = query.value("logradouro").toString().replace(" ", "+") + "," + query.value("numero").toString().replace(" ", "+") + "," +
+    //                            query.value("cidade").toString().replace(" ", "+") + "," + query.value("uf").toString().replace(" ", "+");
+
+    QString origem = "Rua+Sales&oacute;polis,27,Barueri,SP";
+    QString destinos = query.value("endereco").toString();
+    //    QString destino = destinosList.takeFirst();
 
     // TODO: colocar origem como 'arg'
 
     text += QString(R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">10:00 Kg: %1, Cx.: %2</p>
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%3</p>
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%4</p>
-           <ul>
-           %5
-           </ul>
-           <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">Status: %6</p>
+           <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">Status: %5</p>
            <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">
-           <a href="https://www.google.com/maps/dir/?api=1&amp;origin=Rua+Sales&oacute;polis,27,Barueri,SP&amp;destination=%7&amp;
-           travelmode=driving" target="_blank" rel="noopener">Google Maps</a></p>)")
+           <a href="https://www.google.com/maps/dir/?api=1&amp;origin=%6&amp;destination=%6&amp;waypoints=%7
+           &amp;travelmode=driving" target="_blank" rel="noopener">Google Maps</a></p>)")
                 .arg(query.value("kg").toString())
                 .arg(query.value("caixas").toString())
-                .arg(query.value("idVenda").toString())
-                .arg(query.value("bairro").toString() + " - " + query.value("cidade").toString())
-                .arg(produtosList)
+                .arg(query.value("idVenda").toString().replace("|", "/"))
+                .arg(enderecosList)
+                //                .arg(query.value("bairro").toString() + " - " + query.value("cidade").toString())
+                //                .arg(produtosList)
                 .arg(query.value("status").toString())
-                .arg(destino);
+                .arg(origem)
+                .arg(destinos);
+    //                .arg(destinosList.join("|"));
+
+    ui->tableWidget->setRowHidden(row, false);
+    ui->tableWidget->setColumnHidden(diaSemana, false);
 
     widget->setHtml(text);
     ui->tableWidget->setCellWidget(row, diaSemana, widget);

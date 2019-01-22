@@ -113,19 +113,37 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   //---------------------------------------------------------------------------
 
+  return;
+
   QStringList origens;
   origens << "Rua+Salesópolis,27,Barueri,SP";
   origens << "Rua+Ceara,157,Barueri,SP";
   origens << "Av.+Santa+Marina,+2716+-+Vila+Albertina,+São+Paulo+-+SP";
 
   //  QFile file("C:/temp/distance_waypoints.xml");
+  QFile file("distance.xml");
 
-  //  qDebug() << "open: " << file.open(QFile::ReadOnly);
+  qDebug() << "open: " << file.open(QFile::ReadOnly);
 
-  //  XML_Distance *xmlDistance = new XML_Distance(file.readAll(), 1, 5, "Carro ABC", QDateTime(QDate(2019, 01, 05), QTime(10, 5)));
+  XML_Distance *xmlDistance = new XML_Distance(file.readAll(), 1, 5, "Carro ABC", QDateTime(QDate(2019, 01, 05), QTime(10, 5)));
   //  qDebug() << "legs: " << xmlDistance->legs;
+  qDebug() << "route: " << xmlDistance->route;
 
-  //  return;
+  QStringList route = xmlDistance->route;
+  const QString origin = route.takeFirst().replace(" ", "+");
+  const QString destin = route.takeLast().replace(" ", "+");
+
+  const QString waypoints = route.join("|").replace(" ", "+");
+
+  qDebug() << "origin: " << origin;
+  qDebug() << "destin: " << destin;
+  qDebug() << "waypoints: " << waypoints;
+
+  const QString url = "https://www.google.com/maps/dir/?api=1&origin=%1&destination=%2&waypoints=%3&travelmode=driving";
+
+  qDebug() << url.arg(origin).arg(destin).arg(waypoints);
+
+  return;
 
   QSqlQuery queryEndereco;
   if (not queryEndereco.exec(

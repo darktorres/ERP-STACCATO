@@ -128,18 +128,26 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   //-----------------------------------------------------------------------------
 
   QSqlQuery query5;
-  query5.prepare("DELETE FROM estoque WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
+  query5.prepare("DELETE FROM produto WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
   query5.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query5.exec()) { return qApp->enqueueError(false, "Erro removendo estoque: " + query5.lastError().text(), this); }
+  if (not query5.exec()) { return qApp->enqueueError(false, "Erro removendo produto estoque: " + query5.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
   QSqlQuery query6;
-  query6.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+  query6.prepare("DELETE FROM estoque WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
   query6.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query6.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query6.lastError().text(), this); }
+  if (not query6.exec()) { return qApp->enqueueError(false, "Erro removendo estoque: " + query6.lastError().text(), this); }
+
+  //-----------------------------------------------------------------------------
+
+  QSqlQuery query7;
+  query7.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+  query7.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not query7.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query7.lastError().text(), this); }
 
   return true;
 }

@@ -154,8 +154,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!", this); }
 
-      const int newRow = modelConsumo.rowCount();
-      modelConsumo.insertRow(newRow);
+      const int newRow = modelConsumo.insertRowAtEnd();
 
       for (int column = 0; column < modelConsumo.columnCount(); ++column) {
         if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }

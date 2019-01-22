@@ -493,8 +493,7 @@ bool ImportarXML::associarItens(const int rowCompra, const int rowEstoque, doubl
   if (not modelEstoque.setData(rowEstoque, "quantUpd", static_cast<int>(qFuzzyCompare(estoqueConsumido, quantEstoque) ? FieldColors::Green : FieldColors::Yellow))) { return false; }
   if (not modelEstoque.setData(rowEstoque, "idProduto", modelCompra.data(rowCompra, "idProduto"))) { return false; }
 
-  const int rowEstoque_compra = modelEstoque_compra.rowCount();
-  modelEstoque_compra.insertRow(rowEstoque_compra);
+  const int rowEstoque_compra = modelEstoque_compra.insertRowAtEnd();
 
   if (not modelEstoque_compra.setData(rowEstoque_compra, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
   if (not modelEstoque_compra.setData(rowEstoque_compra, "idCompra", modelCompra.data(rowCompra, "idCompra"))) { return false; }
@@ -556,8 +555,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   xml.idNFe++;
 
-  const int row = modelNFe.rowCount();
-  if (not modelNFe.insertRow(row)) { return false; }
+  const int row = modelNFe.insertRowAtEnd();
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
   if (not modelNFe.setData(row, "tipo", "ENTRADA")) { return false; }
@@ -621,9 +619,7 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
 
   if (not idEstoque) { return false; }
 
-  const int newRow = modelEstoque.rowCount();
-
-  if (not modelEstoque.insertRow(newRow)) { return qApp->enqueueError(false, "Erro inserindo linha na tabela: " + modelEstoque.lastError().text(), this); }
+  const int newRow = modelEstoque.insertRowAtEnd();
 
   if (not modelEstoque.setData(newRow, "idEstoque", idEstoque.value())) { return false; }
   if (not modelEstoque.setData(newRow, "idNFe", xml.idNFe)) { return false; }
@@ -699,8 +695,9 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   if (idVendaProduto == 0) { return true; }
 
-  const int rowConsumo = modelConsumo.rowCount();
-  modelConsumo.insertRow(rowConsumo);
+  // -------------------------------------
+
+  const int rowConsumo = modelConsumo.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelEstoque.columnCount(); column < columnCount; ++column) {
     const QString field = modelEstoque.record().fieldName(column);

@@ -881,6 +881,8 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->doubleSpinBoxQuant->setValue(0.);
   ui->doubleSpinBoxCaixas->setValue(0.);
   ui->doubleSpinBoxDesconto->setValue(0.);
+
+  on_doubleSpinBoxCaixas_valueChanged(ui->doubleSpinBoxCaixas->value());
 }
 
 void Orcamento::on_itemBoxCliente_textChanged(const QString &) {

@@ -59,14 +59,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+    ui->actionCadastrarFornecedor->setDisabled(true);
+    ui->actionCadastrarProdutos->setDisabled(true);
+    ui->actionCadastrarUsuario->setDisabled(true);
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
-    ui->menuImportar_tabela_fornecedor->setDisabled(true);
-    ui->actionCadastrarUsuario->setDisabled(true);
-    ui->actionProdutos->setDisabled(true);
-    ui->actionCadastrarProfissional->setDisabled(true);
-    ui->actionCadastrarFornecedor->setDisabled(true);
     ui->actionGerenciar_preco_estoque->setDisabled(true);
+    ui->actionProdutos->setDisabled(true);
+    ui->menuImportar_tabela_fornecedor->setDisabled(true);
   }
 
   // -------------------------------------------------------------------------

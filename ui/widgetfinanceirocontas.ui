@@ -343,9 +343,6 @@
          <property name="enabled">
           <bool>true</bool>
          </property>
-         <property name="placeholderText">
-          <string>Venda/Contraparte</string>
-         </property>
         </widget>
        </item>
       </layout>

@@ -76,11 +76,16 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     QStringList temp = child->text().split(" / ");
 
-    list << "Manhã\n" + temp.at(0) + "\n" + temp.at(1);
-    list << "Tarde\n" + temp.at(0) + "\n" + temp.at(1);
+    list << temp.at(0) + "\n" + temp.at(1);
+
+    //    list << "Manhã\n" + temp.at(0) + "\n" + temp.at(1);
+    //    list << "Tarde\n" + temp.at(0) + "\n" + temp.at(1);
   }
 
-  ui->tableWidget->setRowCount(veiculos * 2); // manha/tarde
+  qDebug() << list;
+
+  //  ui->tableWidget->setRowCount(veiculos * 2); // manha/tarde
+  ui->tableWidget->setRowCount(veiculos);
   ui->tableWidget->setVerticalHeaderLabels(list);
 
   ui->tableWidget->setColumnCount(7); // dias
@@ -101,6 +106,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   for (int row = 0; row < ui->tableWidget->rowCount(); ++row) { ui->tableWidget->setRowHidden(row, true); }
 
   QSqlQuery query;
+  // TODO: estou agrupando por horario mas a tabela separa por manha/tarde, arrumar isso
   query.prepare("SELECT * FROM view_calendario2 WHERE data BETWEEN :start AND :end");
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
@@ -114,7 +120,11 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     for (int i = 0; i < list.size(); ++i) {
       if (list.at(i).contains(transportadora)) {
-        row = query.value("data").toTime().hour() < 12 ? i : i + 1; // manha/tarde
+        //        qDebug() << list.at(i) << " - " << i;
+        //        qDebug() << transportadora;
+        //        ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
+        //        row = query.value("data").toTime().hour() < 12 ? i : i + 1; // manha/tarde
+        row = i;
         break;
       }
     }
@@ -123,60 +133,76 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     const int diaSemana = query.value("data").toDate().dayOfWeek();
 
-    auto *widget = ui->tableWidget->cellWidget(row, diaSemana) ? static_cast<CollapsibleWidget *>(ui->tableWidget->cellWidget(row, diaSemana)) : new CollapsibleWidget(this);
+    // TODO: make a column of CollapsibleWidgets in each cell
+
+    qDebug() << query.value("data");
+
+    const QString hora = query.value("data").toDateTime().toString("hh:mm") + " - " + query.value("status").toString();
+
+    qDebug() << hora;
+
+    auto *cell = ui->tableWidget->cellWidget(row, diaSemana);
+    //    auto *widget = new CollapsibleWidget(hora, this);
+
+    if (cell) {
+      //      QFrame *frame = static_cast<QFrame *>(cell);
+      //      frame->layout()->addWidget(widget);
+      //      qDebug() << "a: " << frame->sizeHint();
+      //      frame->adjustSize();
+      //      qDebug() << "b: " << frame->sizeHint();
+      auto *widget = static_cast<CollapsibleWidget *>(cell);
+      widget->addButton();
+    } else {
+      //      auto *frame = new QFrame(this);
+      //      frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+      //      auto *layout = new QVBoxLayout(frame);
+      //      scrollLayout->setSizeConstraint(QLayout::SetFixedSize);
+      //      layout->addWidget(widget);
+      //      ui->tableWidget->setCellWidget(row, diaSemana, frame);
+      auto *newWidget = new CollapsibleWidget(hora, this);
+      ui->tableWidget->setCellWidget(row, diaSemana, newWidget);
+    }
+
+    //    auto *widget = ui->tableWidget->cellWidget(row, diaSemana) ? static_cast<CollapsibleWidget *>(ui->tableWidget->cellWidget(row, diaSemana)) : new CollapsibleWidget(hora, this);
 
     QStringList enderecos = query.value("endereco").toString().replace("+", " ").replace(",", ", ").split("|");
     QString enderecosList;
 
     for (auto &endereco : enderecos) { enderecosList += QString(R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%1</p>)").arg(endereco); }
 
-    //    const QString oldText = widget->getHtml();
-
-    //    QString text = oldText.isEmpty() ? "" : oldText + R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>
-    //                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">-----------------------------------------</p>
-    //                                                         <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">&nbsp;</p>)";
-
     QString text;
 
-    //    QStringList produtos = query.value("produtos").toString().split("/");
-    //    QString produtosList;
-
-    //    for (auto &produto : produtos) { produtosList += QString(R"(<li style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%1</li>)").arg(produto); }
-
-    //    const QString destino = query.value("logradouro").toString().replace(" ", "+") + "," + query.value("numero").toString().replace(" ", "+") + "," +
-    //                            query.value("cidade").toString().replace(" ", "+") + "," + query.value("uf").toString().replace(" ", "+");
-
+    // TODO: get this from loja_has_endereco
     QString origem = "Rua+Sales&oacute;polis,27,Barueri,SP";
     QString destinos = query.value("endereco").toString();
-    //    QString destino = destinosList.takeFirst();
 
-    // TODO: colocar origem como 'arg'
+    //    widget->setDestinos(destinos);
 
-    text += QString(R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">10:00 Kg: %1, Cx.: %2</p>
-           <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%3</p>
-           <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%4</p>
-           <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">Status: %5</p>
-           <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">
-           <a href="https://www.google.com/maps/dir/?api=1&amp;origin=%6&amp;destination=%6&amp;waypoints=%7
-           &amp;travelmode=driving" target="_blank" rel="noopener">Google Maps</a></p>)")
+    // TODO: rota deve ser pushButton pois vai enviar requisição, não é URL pronta
+    // TODO: enviar rota para a Directions API para otimização
+    //       com o resultado, montar a URL Maps API
+
+    text += QString(R"(<p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">Kg: %1, Cx.: %2</p>
+                       <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">%3</p>
+                       <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">Status: %4</p>
+                       <p style="-qt-block-indent: 0; text-indent: 0px; margin: 0px;">
+                       <a href="https://www.google.com/maps/dir/?api=1&amp;origin=%6&amp;destination=%5&amp;waypoints=%6
+                       &amp;travelmode=driving" target="_blank" rel="noopener">Google Maps</a></p>)")
                 .arg(query.value("kg").toString())
                 .arg(query.value("caixas").toString())
                 .arg(query.value("idVenda").toString().replace("|", "/"))
-                .arg(enderecosList)
-                //                .arg(query.value("bairro").toString() + " - " + query.value("cidade").toString())
-                //                .arg(produtosList)
+                //                .arg(enderecosList)
                 .arg(query.value("status").toString())
                 .arg(origem)
                 .arg(destinos);
-    //                .arg(destinosList.join("|"));
 
     ui->tableWidget->setRowHidden(row, false);
     ui->tableWidget->setColumnHidden(diaSemana, false);
 
-    widget->setHtml(text);
-    ui->tableWidget->setCellWidget(row, diaSemana, widget);
-    connect(widget, &CollapsibleWidget::toggled, ui->tableWidget, &QTableWidget::resizeColumnsToContents);
-    connect(widget, &CollapsibleWidget::toggled, ui->tableWidget, &QTableWidget::resizeRowsToContents);
+    //    widget->setHtml(text);
+    //    ui->tableWidget->setCellWidget(row, diaSemana, widget);
+    //    connect(widget, &CollapsibleWidget::toggled, ui->tableWidget, &QTableWidget::resizeColumnsToContents);
+    //    connect(widget, &CollapsibleWidget::toggled, ui->tableWidget, &QTableWidget::resizeRowsToContents);
   }
 
   ui->tableWidget->resizeColumnsToContents();

@@ -181,7 +181,10 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 }
 
 bool CadastroUsuario::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  if (tipo == Tipo::Cadastrar) {
+    currentRow = model.rowCount();
+    model.insertRow(currentRow);
+  }
 
   if (not savingProcedures()) { return false; }
 
@@ -209,7 +212,8 @@ bool CadastroUsuario::cadastrar() {
 
     // -------------------------------------------------------------------------
 
-    const int row2 = modelPermissoes.insertRowAtEnd();
+    const int row2 = modelPermissoes.rowCount();
+    modelPermissoes.insertRow(row2);
 
     if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
     if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
@@ -246,3 +250,4 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)
+// TODO: mudar nome 'Remover' para 'Bloquear'

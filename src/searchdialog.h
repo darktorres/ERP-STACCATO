@@ -3,6 +3,7 @@
 
 #include <QDialog>
 
+#include "searchdialogproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
@@ -50,6 +51,7 @@ private:
   bool isSet = false;
   QString filter;
   QString fornecedorRep;
+  SearchDialogProxyModel *proxyModel;
   SqlRelationalTableModel model;
   Ui::SearchDialog *ui;
   // methods

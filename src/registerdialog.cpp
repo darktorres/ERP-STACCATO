@@ -197,11 +197,7 @@ bool RegisterDialog::save(const bool silent) {
 
   if (not qApp->startTransaction()) { return false; }
 
-  if (not cadastrar()) {
-    model.revertAll();
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not cadastrar()) { return false; }
 
   if (not qApp->endTransaction()) { return false; }
 

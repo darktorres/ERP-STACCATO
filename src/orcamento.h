@@ -17,6 +17,7 @@ public:
 
 private:
   // attributes
+  QList<QSqlRecord> backupItem;
   int currentRowItem = -1;
   bool isReadOnly = false;
   int currentItemIsEstoque = 0;
@@ -27,7 +28,7 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  auto adicionarItem(const Tipo tipo = Tipo::Cadastrar) -> void;
+  auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
   auto atualizaReplica() -> bool;
   auto atualizarItem() -> void;
   auto buscarCadastrarConsultor() -> bool;

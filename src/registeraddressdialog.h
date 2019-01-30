@@ -3,6 +3,8 @@
 
 #include "registerdialog.h"
 
+#include <QSqlRecord>
+
 class RegisterAddressDialog : public RegisterDialog {
 
 public:
@@ -10,6 +12,7 @@ public:
 
 protected:
   // attributes
+  QList<QSqlRecord> backupEndereco;
   int currentRowEnd = -1;
   QDataWidgetMapper mapperEnd;
   SqlRelationalTableModel modelEnd;

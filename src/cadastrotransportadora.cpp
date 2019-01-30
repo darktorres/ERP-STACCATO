@@ -193,15 +193,14 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
 }
 
-bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which
-                                                                  // can result in a confusion.bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
+bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
+  if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -215,6 +214,8 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) { // TODO: V688 
   if (not setDataEnd("desativado", false)) { return false; }
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+
+  if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 
@@ -296,9 +297,8 @@ bool CadastroTransportadora::viewRegister() {
 
 void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!", this); }
 
-bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can
-                                                                 // result in a confusion.bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) {
-  if (tipo == Tipo::Cadastrar) { currentRowVeiculo = modelVeiculo.insertRowAtEnd(); }
+bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
+  if (tipoVeiculo == Tipo::Cadastrar) { currentRowVeiculo = modelVeiculo.insertRowAtEnd(); }
 
   if (not modelVeiculo.setData(currentRowVeiculo, "modelo", ui->lineEditModelo->text())) { return false; }
   if (not modelVeiculo.setData(currentRowVeiculo, "capacidade", ui->lineEditCarga->text().toInt())) { return false; }
@@ -310,6 +310,8 @@ bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) { // TODO: V688 h
   if (not modelVeiculo.setData(currentRowVeiculo, "ufPlaca", ui->lineEditUfPlaca->text())) { return false; }
 
   if (not columnsToUpper(modelVeiculo, currentRowVeiculo)) { return false; }
+
+  if (tipoVeiculo == Tipo::Cadastrar) { backupVeiculo.append(modelVeiculo.record(currentRowVeiculo)); }
 
   isDirty = true;
 
@@ -350,29 +352,46 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-  if (not savingProcedures()) { return false; }
+    if (not savingProcedures()) { return false; }
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+    if (not columnsToUpper(model, currentRow)) { return false; }
 
-  if (not model.submitAll()) { return false; }
+    if (not model.submitAll()) { return false; }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  if (not setForeignKey(modelEnd)) { return false; }
+    if (not setForeignKey(modelEnd)) { return false; }
 
-  if (not modelEnd.submitAll()) { return false; }
+    if (not modelEnd.submitAll()) { return false; }
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  if (not setForeignKey(modelVeiculo)) { return false; }
+    if (not setForeignKey(modelVeiculo)) { return false; }
 
-  return modelVeiculo.submitAll();
+    return modelVeiculo.submitAll();
+  }();
+
+  if (success) {
+    backupEndereco.clear();
+    backupVeiculo.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelEnd.select());
+    void(modelVeiculo.select());
+
+    for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
+    for (auto &record : backupVeiculo) { modelVeiculo.insertRecord(-1, record); }
+  }
+
+  return success;
 }
 
 void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool checked) {

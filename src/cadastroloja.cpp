@@ -288,15 +288,14 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
   if (not modelEnd.select()) { return; }
 }
 
-bool CadastroLoja::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result
-                                                        // in a confusion.bool CadastroLoja::cadastrarEndereco(const Tipo tipo) {
+bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
+  if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -310,6 +309,8 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www
   if (not setDataEnd("desativado", false)) { return false; }
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+
+  if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 
@@ -401,29 +402,48 @@ bool CadastroLoja::viewRegister() {
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
 bool CadastroLoja::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-  if (not savingProcedures()) { return false; }
+    if (not savingProcedures()) { return false; }
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+    if (not columnsToUpper(model, currentRow)) { return false; }
 
-  if (not model.submitAll()) { return false; }
+    if (not model.submitAll()) { return false; }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  if (not setForeignKey(modelEnd)) { return false; }
+    if (not setForeignKey(modelEnd)) { return false; }
 
-  if (not modelEnd.submitAll()) { return false; }
+    if (not modelEnd.submitAll()) { return false; }
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  if (not setForeignKey(modelConta)) { return false; }
+    if (not setForeignKey(modelConta)) { return false; }
 
-  return modelConta.submitAll();
+    if (not modelConta.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (success) {
+    backupEndereco.clear();
+    backupConta.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelEnd.select());
+    void(modelConta.select());
+
+    for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
+    for (auto &record : backupConta) { modelConta.insertRecord(-1, record); }
+  }
+
+  return success;
 }
 
 void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {
@@ -444,8 +464,7 @@ bool CadastroLoja::newRegister() {
   return true;
 }
 
-bool CadastroLoja::cadastrarConta(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can result in a
-                                                     // confusion.bool CadastroLoja::cadastrarConta(const Tipo tipo) {
+bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
   if (ui->lineEditBanco->text().isEmpty()) {
     qApp->enqueueError("Banco inválido!", this);
     ui->lineEditBanco->setFocus();
@@ -464,13 +483,15 @@ bool CadastroLoja::cadastrarConta(const Tipo tipo) { // TODO: V688 http://www.vi
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
+  if (tipoConta == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
 
   if (not modelConta.setData(currentRowConta, "banco", ui->lineEditBanco->text())) { return false; }
   if (not modelConta.setData(currentRowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
   if (not modelConta.setData(currentRowConta, "conta", ui->lineEditConta->text())) { return false; }
 
   if (not columnsToUpper(modelConta, currentRowConta)) { return false; }
+
+  if (tipoConta == Tipo::Cadastrar) { backupConta.append(modelConta.record(currentRowConta)); }
 
   isDirty = true;
 

@@ -904,83 +904,110 @@ bool Venda::atualizarCredito() {
 }
 
 bool Venda::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    if (not generateId()) { return false; }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) {
+      if (not generateId()) { return false; }
 
-    currentRow = model.insertRowAtEnd();
+      currentRow = model.insertRowAtEnd();
+    }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not atualizarCredito()) { return false; }
+
+    // inserir rt em contas_pagar
+
+    QSqlQuery query1;
+
+    if (ui->checkBoxPontuacaoPadrao->isChecked()) {
+      const QDate date = ui->dateTimeEdit->date();
+      const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
+
+      query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
+                     ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+      query1.bindValue(":dataEmissao", date);
+      query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
+      query1.bindValue(":idLoja", idLoja);
+      query1.bindValue(":centroCusto", idLoja);
+      query1.bindValue(":valor", valor);
+      query1.bindValue(":tipo", "1. Dinheiro");
+      // 01-15 paga dia 30, 16-30 paga prox dia 15
+      query1.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
+      query1.bindValue(":grupo", "RT's");
+
+      if (not query1.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
+    }
+
+    // -------------------------------------------------------------------------
+
+    if (not model.submitAll()) { return false; }
+
+    // -------------------------------------------------------------------------
+
+    primaryId = ui->lineEditVenda->text();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+
+    // -------------------------------------------------------------------------
+
+    for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
+      if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
+    }
+
+    if (not modelFluxoCaixa.submitAll()) { return false; }
+
+    // -------------------------------------------------------------------------
+
+    for (int row = 0; row < modelFluxoCaixa2.rowCount(); ++row) {
+      if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
+    }
+
+    if (not modelFluxoCaixa2.submitAll()) { return false; }
+
+    // -------------------------------------------------------------------------
+
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      if (not modelItem.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
+    }
+
+    if (not modelItem.submitAll()) { return false; }
+
+    // -------------------------------------------------------------------------
+
+    QSqlQuery query2;
+    query2.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p ON p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
+    query2.bindValue(":idVenda", ui->lineEditVenda->text());
+
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query2.lastError().text(), this); }
+
+    while (query2.next()) {
+      auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
+
+      if (not estoque->criarConsumo(query2.value("idVendaProduto").toInt(), query2.value("quant").toDouble())) { return false; }
+    }
+
+    // -------------------------------------------------------------------------
+
+    QSqlQuery query3;
+    query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
+    query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
+
+    return true;
+  }();
+
+  if (success) {
+    backupItem.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelItem.select());
+
+    for (auto &record : backupItem) { modelItem.insertRecord(-1, record); }
   }
 
-  if (not savingProcedures()) { return false; }
-
-  if (not atualizarCredito()) { return false; }
-
-  // inserir rt em contas_pagar
-
-  QSqlQuery query1;
-
-  if (ui->checkBoxPontuacaoPadrao->isChecked()) {
-    const QDate date = ui->dateTimeEdit->date();
-    const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
-
-    query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
-                   ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
-    query1.bindValue(":dataEmissao", date);
-    query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
-    query1.bindValue(":idLoja", idLoja);
-    query1.bindValue(":centroCusto", idLoja);
-    query1.bindValue(":valor", valor);
-    query1.bindValue(":tipo", "1. Dinheiro");
-    // 01-15 paga dia 30, 16-30 paga prox dia 15
-    query1.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
-    query1.bindValue(":grupo", "RT's");
-
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
-  }
-  // -------------------------------------------------------------------------
-
-  if (not model.submitAll()) { return false; }
-
-  primaryId = ui->lineEditVenda->text();
-
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
-
-  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-    if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
-  }
-
-  if (not modelFluxoCaixa.submitAll()) { return false; }
-
-  for (int row = 0; row < modelFluxoCaixa2.rowCount(); ++row) {
-    if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
-  }
-
-  if (not modelFluxoCaixa2.submitAll()) { return false; }
-
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (not modelItem.setData(row, "idVenda", ui->lineEditVenda->text())) { return false; }
-  }
-
-  if (not modelItem.submitAll()) { return false; }
-
-  QSqlQuery query2;
-  query2.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p ON p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
-  query2.bindValue(":idVenda", ui->lineEditVenda->text());
-
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query2.lastError().text(), this); }
-
-  while (query2.next()) {
-    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
-
-    if (not estoque->criarConsumo(query2.value("idVendaProduto").toInt(), query2.value("quant").toDouble())) { return false; }
-  }
-
-  QSqlQuery query3;
-  query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
-  query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
-
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
-
-  return true;
+  return success;
 }
 
 bool Venda::cancelamento() {

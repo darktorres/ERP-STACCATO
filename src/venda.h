@@ -18,6 +18,7 @@ public:
 
 private:
   // attributes
+  QList<QSqlRecord> backupItem;
   bool financeiro = false;
   bool correcao = false;
   int idLoja;

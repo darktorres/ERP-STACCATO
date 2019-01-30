@@ -484,7 +484,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (modelProdutosAgrupado.rowCount() > 20) { return qApp->enqueueError("Mais produtos do que cabe no modelo do Excel!", this); }
+  if (modelProdutosAgrupado.rowCount() > 60) { return qApp->enqueueError("Mais produtos do que cabe no modelo do Excel!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -550,6 +550,8 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString());               // quant
     xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                                   // caixas
   }
+
+  for (int row = 27 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
 
   if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this); }
 

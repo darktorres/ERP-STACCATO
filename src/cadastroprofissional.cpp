@@ -162,23 +162,37 @@ bool CadastroProfissional::viewRegister() {
 }
 
 bool CadastroProfissional::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-  if (not savingProcedures()) { return false; }
+    if (not savingProcedures()) { return false; }
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+    if (not columnsToUpper(model, currentRow)) { return false; }
 
-  if (not model.submitAll()) { return false; }
+    if (not model.submitAll()) { return false; }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  if (not setForeignKey(modelEnd)) { return false; }
+    if (not setForeignKey(modelEnd)) { return false; }
 
-  return modelEnd.submitAll();
+    return modelEnd.submitAll();
+  }();
+
+  if (success) {
+    backupEndereco.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelEnd.select());
+
+    for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
+  }
+
+  return success;
 }
 
 bool CadastroProfissional::verifyFields() {
@@ -280,15 +294,14 @@ void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) {
   ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "" : "color: rgb(255, 0, 0)");
 }
 
-bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can
-                                                                // result in a confusion.bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) {
+bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
+  if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -302,6 +315,8 @@ bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) { // TODO: V688 ht
   if (not setDataEnd("desativado", false)) { return false; }
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+
+  if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 

@@ -17,6 +17,8 @@ public:
 
 private:
   // attributes
+  QList<QSqlRecord> backupConta;
+  // TODO: make backup for Pagamentos/Taxas records
   int currentRowConta = -1;
   QDataWidgetMapper mapperConta;
   QDataWidgetMapper mapperPagamento;
@@ -31,8 +33,8 @@ private:
   auto adicionarPagamento() -> bool;
   auto atualizarPagamento() -> bool;
   auto cadastrar() -> bool final;
-  auto cadastrarConta(const Tipo tipo = Tipo::Cadastrar) -> bool;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarConta(const Tipo tipoConta = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearConta() -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;

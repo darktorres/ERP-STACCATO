@@ -708,7 +708,7 @@ void Orcamento::setupTables() {
 
 void Orcamento::atualizarItem() { adicionarItem(Tipo::Atualizar); }
 
-void Orcamento::adicionarItem(const Tipo tipo) {
+void Orcamento::adicionarItem(const Tipo tipoItem) {
   unsetConnections();
 
   [=] {
@@ -716,7 +716,7 @@ void Orcamento::adicionarItem(const Tipo tipo) {
 
     if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Quantidade inválida!", this); }
 
-    if (tipo == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
+    if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
 
     if (not modelItem.setData(currentRowItem, "idProduto", ui->itemBoxProduto->getId().toInt())) { return; }
     if (not modelItem.setData(currentRowItem, "fornecedor", ui->lineEditFornecedor->text())) { return; }
@@ -740,6 +740,8 @@ void Orcamento::adicionarItem(const Tipo tipo) {
     if (not modelItem.setData(currentRowItem, "mostrarDesconto", mostrarDesconto)) { return; }
 
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(currentRowItem, "fornecedor").toString()); }
+
+    if (tipoItem == Tipo::Cadastrar) { backupItem.append(modelItem.record(currentRowItem)); }
 
     isDirty = true;
     ui->checkBoxRepresentacao->setDisabled(true);
@@ -935,21 +937,37 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 }
 
 bool Orcamento::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    if (not generateId()) { return false; }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) {
+      if (not generateId()) { return false; }
 
-    currentRow = model.insertRowAtEnd();
+      currentRow = model.insertRowAtEnd();
+    }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not model.submitAll()) { return false; }
+
+    primaryId = ui->lineEditOrcamento->text();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+
+    if (not modelItem.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (success) {
+    backupItem.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelItem.select());
+
+    for (auto &record : backupItem) { modelItem.insertRecord(-1, record); }
   }
 
-  if (not savingProcedures()) { return false; }
-
-  if (not model.submitAll()) { return false; }
-
-  primaryId = ui->lineEditOrcamento->text();
-
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
-
-  return modelItem.submitAll();
+  return success;
 }
 
 bool Orcamento::verificaCadastroCliente() {

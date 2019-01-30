@@ -228,19 +228,28 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-  if (not savingProcedures()) { return false; }
+    if (not savingProcedures()) { return false; }
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+    if (not columnsToUpper(model, currentRow)) { return false; }
 
-  if (not model.submitAll()) { return false; }
+    if (not model.submitAll()) { return false; }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
-  return true;
+    return true;
+  }();
+
+  if (not success) {
+    qApp->rollbackTransaction();
+    void(model.select());
+  }
+
+  return success;
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos

@@ -1,25 +1,26 @@
 language: cpp
 compiler: gcc
-sudo: false
-dist: trusty
+dist: xenial
 cache: ccache
 
 addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:beineri/opt-qt-5.10.1-trusty'
+    - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
     packages:
-    - gcc-7
-    - g++-7
-    - qt510base
-    - qt510charts-no-lgpl
-    - qt510script
-    - qt510tools
+    - gcc-8
+    - g++-8
+    - qt512base
+    - qt512charts-no-lgpl
+    - qt512script
+    - qt512tools
+    - mesa-common-dev
+    - libgl1-mesa-dev
     
 script:
-  - source /opt/qt510/bin/qt510-env.sh
-  - /opt/qt510/bin/qmake Loja.pro
+  - source /opt/qt512/bin/qt512-env.sh
+  - /opt/qt512/bin/qmake Loja.pro
   - make -j4
   
 before_cache:

@@ -1,6 +1,5 @@
 language: cpp
 compiler: gcc
-sudo: false
 dist: xenial
 cache: ccache
 
@@ -8,20 +7,20 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:beineri/opt-qt-5.11.2-xenial'
+    - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
     packages:
-    - gcc-7
-    - g++-7
-    - qt511base
-    - qt511charts-no-lgpl
-    - qt511script
-    - qt511tools
+    - gcc-8
+    - g++-8
+    - qt512base
+    - qt512charts-no-lgpl
+    - qt512script
+    - qt512tools
     - mesa-common-dev
     - libgl1-mesa-dev
     
 script:
-  - source /opt/qt511/bin/qt511-env.sh
-  - /opt/qt511/bin/qmake Loja.pro
+  - source /opt/qt512/bin/qt512-env.sh
+  - /opt/qt512/bin/qmake Loja.pro
   - make -j4
   
 before_cache:

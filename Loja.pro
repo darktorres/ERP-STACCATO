@@ -61,8 +61,8 @@ win32-g++{
 }
 
 linux-g++{
-    QMAKE_CC = ccache gcc-7
-    QMAKE_CXX = ccache g++-7
+    QMAKE_CC = ccache gcc-8
+    QMAKE_CXX = ccache g++-8
 
     QMAKE_LFLAGS *= -fuse-ld=gold
 

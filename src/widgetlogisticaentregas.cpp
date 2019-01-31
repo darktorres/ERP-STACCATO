@@ -551,7 +551,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                                   // caixas
   }
 
-  for (int row = 27 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
+  for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
 
   if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this); }
 

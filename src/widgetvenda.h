@@ -23,7 +23,6 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  // REFAC: convert this to constructor enum/bool?
   bool financeiro = false;
   SqlRelationalTableModel modelViewVenda;
   Ui::WidgetVenda *ui;

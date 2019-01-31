@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.33");
+  setApplicationVersion("0.6.44");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -77,7 +77,7 @@ bool Application::setDatabase() {
 
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
-  db.setPassword("12345");
+  db.setPassword("123456");
   db.setDatabaseName("mydb");
   db.setPort(3306);
 
@@ -186,12 +186,13 @@ void Application::lightTheme() {
   UserSession::setSetting("User/tema", "claro");
 }
 
-bool Application::startTransaction() {
+bool Application::startTransaction(const bool delayMessages) {
   if (inTransaction) { return qApp->enqueueError(false, "Transação já em execução!"); }
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return qApp->enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
   inTransaction = true;
+  this->delayMessages = delayMessages;
 
   return true;
 }
@@ -202,6 +203,7 @@ bool Application::endTransaction() {
   if (QSqlQuery query; not query.exec("COMMIT")) { return qApp->enqueueError(false, "Erro no commit: " + query.lastError().text()); }
 
   inTransaction = false;
+  delayMessages = false;
 
   showMessages();
 
@@ -216,6 +218,7 @@ void Application::rollbackTransaction() {
   QSqlQuery("ROLLBACK").exec();
 
   inTransaction = false;
+  delayMessages = false;
 
   showMessages();
 }
@@ -251,7 +254,7 @@ void Application::setUpdating(const bool value) {
 bool Application::getUpdating() const { return updating; }
 
 void Application::showMessages() {
-  if (inTransaction or updating) { return; }
+  if (delayMessages and (inTransaction or updating)) { return; }
   if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) { return; }
 
   showingErrors = true;

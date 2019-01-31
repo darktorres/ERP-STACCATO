@@ -143,6 +143,7 @@ QDateTime InputDialogFinanceiro::getNextDate() const { return ui->dateEditProxim
 void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
 
+  modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
@@ -256,12 +257,13 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         const double resto = static_cast<double>(valor - (parcela * parcelas));
 
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
-          const int row = modelFluxoCaixa.rowCount();
-          modelFluxoCaixa.insertRow(row);
+          const int row = modelFluxoCaixa.insertRowAtEnd();
+
           if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
           if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
           if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
           if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
+
           const QString currentText = ui->widgetPgts->listComboData.at(i)->currentText();
           const QDate currentDate = ui->widgetPgts->listDatePgt.at(i)->date();
           const QDate dataPgt =
@@ -276,8 +278,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     }
 
     if (ui->doubleSpinBoxFrete->value() > 0) {
-      const int row = modelFluxoCaixa.rowCount();
-      modelFluxoCaixa.insertRow(row);
+      const int row = modelFluxoCaixa.insertRowAtEnd();
+
       if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
       if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
@@ -325,8 +327,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     // TODO: 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos
 
     if (stForn > 0) {
-      const int row = modelFluxoCaixa.rowCount();
-      modelFluxoCaixa.insertRow(row);
+      const int row = modelFluxoCaixa.insertRowAtEnd();
 
       if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
@@ -340,8 +341,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     }
 
     if (stLoja > 0) {
-      const int row = modelFluxoCaixa.rowCount();
-      modelFluxoCaixa.insertRow(row);
+      const int row = modelFluxoCaixa.insertRowAtEnd();
 
       if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
@@ -353,8 +353,6 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
       if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
     }
-
-    ui->tableFluxoCaixa->resizeColumnsToContents();
   }();
 
   setConnections();
@@ -411,14 +409,10 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   if (not modelPedidoFornecedor.select()) { return false; }
 
-  ui->table->resizeColumnsToContents();
-
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
 
     if (not modelFluxoCaixa.select()) { return false; }
-
-    ui->tableFluxoCaixa->resizeColumnsToContents();
 
     ui->checkBoxMarcarTodos->setChecked(true);
   }

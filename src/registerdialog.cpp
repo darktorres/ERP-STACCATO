@@ -23,6 +23,11 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, 
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
+  if (model.tableName() == "profissional" and id == "1") {
+    newRegister();
+    return false;
+  }
+
   primaryId = id.toString();
 
   if (primaryId.isEmpty()) { return qApp->enqueueError(false, "primaryId vazio!", this); }
@@ -63,20 +68,20 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   return true;
 }
 
-bool RegisterDialog::setForeignKey(SqlRelationalTableModel &model) {
-  for (int row = 0; row < model.rowCount(); ++row) {
-    if (not model.setData(row, primaryKey, primaryId)) { return false; }
+bool RegisterDialog::setForeignKey(SqlRelationalTableModel &secondaryModel) {
+  for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) {
+    if (not secondaryModel.setData(row, primaryKey, primaryId)) { return false; }
   }
 
   return true;
 }
 
-bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &model, const int row) {
-  for (int column = 0; column < model.columnCount(); ++column) {
-    const QVariant dado = model.data(row, column);
+bool RegisterDialog::columnsToUpper(SqlRelationalTableModel &someModel, const int row) {
+  for (int column = 0, columnCount = someModel.columnCount(); column < columnCount; ++column) {
+    const QVariant dado = someModel.data(row, column);
 
     if (dado.type() == QVariant::String) {
-      if (not model.setData(row, column, dado.toString().toUpper())) { return false; }
+      if (not someModel.setData(row, column, dado.toString().toUpper())) { return false; }
     }
   }
 
@@ -192,11 +197,7 @@ bool RegisterDialog::save(const bool silent) {
 
   if (not qApp->startTransaction()) { return false; }
 
-  if (not cadastrar()) {
-    model.revertAll();
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not cadastrar()) { return false; }
 
   if (not qApp->endTransaction()) { return false; }
 

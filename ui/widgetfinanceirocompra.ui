@@ -32,6 +32,9 @@
      <property name="enabled">
       <bool>true</bool>
      </property>
+     <property name="placeholderText">
+      <string>OC/Código</string>
+     </property>
     </widget>
    </item>
    <item row="0" column="0" colspan="2">

@@ -34,8 +34,6 @@ void WidgetCompraDevolucao::updateTables() {
   }
 
   if (not modelVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraDevolucao::setupTables() {
@@ -156,8 +154,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!", this); }
 
-      const int newRow = modelConsumo.rowCount();
-      modelConsumo.insertRow(newRow);
+      const int newRow = modelConsumo.insertRowAtEnd();
 
       for (int column = 0; column < modelConsumo.columnCount(); ++column) {
         if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
@@ -211,6 +208,4 @@ void WidgetCompraDevolucao::montaFiltro() {
   ui->pushButtonRetornarEstoque->setEnabled(isPendente);
 
   modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
-
-  ui->table->resizeColumnsToContents();
 }

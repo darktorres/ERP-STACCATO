@@ -164,8 +164,6 @@ void AnteciparRecebimento::montaFiltro() {
     modelContaReceber.setFilter("tipo LIKE '%" + textTipo + "%' AND idVenda LIKE '" + textLoja +
                                 "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE ORDER BY dataPagamento");
   }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void AnteciparRecebimento::on_comboBoxLoja_currentTextChanged(const QString &) { montaFiltro(); }
@@ -210,9 +208,6 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   if (not modelContaReceber.submitAll()) { return false; }
 
-  const int newRow = modelContaReceber.rowCount();
-  if (not modelContaReceber.insertRow(newRow)) { return false; }
-
   //----------------------------------
 
   SqlRelationalTableModel modelContaPagar;
@@ -225,8 +220,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando 'banco': " + query.lastError().text(), this); }
 
   if (ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value() > 0) {
-    const int rowPagar1 = modelContaPagar.rowCount();
-    if (not modelContaPagar.insertRow(rowPagar1)) { return false; }
+    const int rowPagar1 = modelContaPagar.insertRowAtEnd();
 
     if (not modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "idLoja", 1)) { return false; }
@@ -248,8 +242,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   //
 
   if (ui->doubleSpinBoxIOF->value() > 0) {
-    const int rowPagar2 = modelContaPagar.rowCount();
-    if (not modelContaPagar.insertRow(rowPagar2)) { return false; }
+    const int rowPagar2 = modelContaPagar.insertRowAtEnd();
 
     if (not modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "idLoja", 1)) { return false; }

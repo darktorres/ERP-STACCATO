@@ -33,7 +33,7 @@ public:
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto showMessages() -> void;
-  auto startTransaction() -> bool;
+  auto startTransaction(const bool delayMessages = true) -> bool;
   auto updater() -> void;
 
 private:
@@ -47,6 +47,7 @@ private:
   QVector<Message> errorQueue;
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;
+  bool delayMessages = false;
   bool inTransaction = false;
   bool isConnected = false;
   bool showingErrors = false;

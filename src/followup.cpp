@@ -91,8 +91,6 @@ void FollowUp::setupTables() {
   ui->table->setModel(new FollowUpProxyModel(&modelViewFollowup, this));
 
   ui->table->hideColumn("semaforo");
-
-  ui->table->resizeColumnsToContents();
 }
 
 void FollowUp::on_dateFollowup_dateChanged(const QDate &date) {

@@ -776,7 +776,7 @@ bool CadastrarNFe::calculaDigitoVerificador(QString &chave) {
 
   for (const auto &i : std::as_const(chave)) {
     soma += i.digitValue() * mult--;
-    mult = mult == 1 ? 9 : mult;
+    mult = (mult == 1) ? 9 : mult;
   }
 
   const int resto = soma % 11;
@@ -1169,7 +1169,9 @@ void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(
+    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicms_valueChanged' function is fully equivalent to the body of
+                    // 'on_doubleSpinBoxICMSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1209,7 +1211,9 @@ void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(
+    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxPISppis_valueChanged' function is fully equivalent to the body of
+                    // 'on_doubleSpinBoxPISvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1249,7 +1253,9 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(
+    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxCOFINSpcofins_valueChanged' function is fully equivalent to the body of
+                    // 'on_doubleSpinBoxCOFINSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1558,7 +1564,9 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(
+    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicmsst_valueChanged' function is fully equivalent to the body of
+                    // 'on_doubleSpinBoxICMSvbcst_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }

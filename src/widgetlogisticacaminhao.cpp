@@ -47,11 +47,7 @@ void WidgetLogisticaCaminhao::updateTables() {
 
   if (not modelCaminhao.select()) { return; }
 
-  ui->table->resizeColumnsToContents();
-
   if (not modelCarga.select()) { return; }
-
-  ui->tableCarga->resizeColumnsToContents();
 }
 
 void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }
@@ -60,6 +56,4 @@ void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
   modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString() + " ORDER BY data DESC");
-
-  ui->tableCarga->resizeColumnsToContents();
 }

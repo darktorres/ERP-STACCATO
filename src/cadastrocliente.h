@@ -22,7 +22,7 @@ private:
   Ui::CadastroCliente *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;

@@ -1,5 +1,4 @@
 #include <QDate>
-#include <QDebug>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
@@ -59,7 +58,7 @@ void CadastroFornecedor::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
 void CadastroFornecedor::setupUi() {
@@ -87,8 +86,6 @@ void CadastroFornecedor::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 bool CadastroFornecedor::verifyFields() {
@@ -180,26 +177,39 @@ void CadastroFornecedor::updateMode() {
 }
 
 bool CadastroFornecedor::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not columnsToUpper(model, currentRow)) { return false; }
+
+    if (not model.submitAll()) { return false; }
+
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+
+    // -------------------------------------------------------------------------
+
+    if (not setForeignKey(modelEnd)) { return false; }
+
+    if (not modelEnd.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (success) {
+    backupEndereco.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelEnd.select());
+
+    for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
   }
 
-  if (not savingProcedures()) { return false; }
-
-  if (not columnsToUpper(model, currentRow)) { return false; }
-
-  if (not model.submitAll()) { return false; }
-
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
-
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
-
-  // -------------------------------------------------------------------------
-
-  if (not setForeignKey(modelEnd)) { return false; }
-
-  return modelEnd.submitAll();
+  return success;
 }
 
 void CadastroFornecedor::on_pushButtonCadastrar_clicked() { save(); }
@@ -227,17 +237,14 @@ void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
 
 void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço.", this); }
 
-bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) {
+bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) {
-    currentRowEnd = modelEnd.rowCount();
-    modelEnd.insertRow(currentRowEnd);
-  }
+  if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
@@ -252,7 +259,7 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
+  if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 
@@ -294,10 +301,6 @@ bool CadastroFornecedor::viewRegister() {
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return false; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 
   //---------------------------------------------------
 
@@ -375,10 +378,6 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
 // TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)

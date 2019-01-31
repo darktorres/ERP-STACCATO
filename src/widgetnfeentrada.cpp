@@ -15,7 +15,7 @@ WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
 void WidgetNfeEntrada::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonCancelarNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked);
+  connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
 }
 
@@ -32,8 +32,6 @@ void WidgetNfeEntrada::updateTables() {
   }
 
   if (not modelViewNFeEntrada.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
@@ -65,19 +63,17 @@ void WidgetNfeEntrada::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
-
-  ui->table->resizeColumnsToContents();
 }
 
-void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
+void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   // TODO: bloquear se a nota estiver coletada?
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
+  QMessageBox msgBox(QMessageBox::Question, "Remover?", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
+  msgBox.setButtonText(QMessageBox::Yes, "Remover");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
@@ -91,7 +87,7 @@ void WidgetNfeEntrada::on_pushButtonCancelarNFe_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Cancelado com sucesso!", this);
+  qApp->enqueueInformation("Removido com sucesso!", this);
 }
 
 bool WidgetNfeEntrada::cancelar(const int row) {
@@ -132,18 +128,26 @@ bool WidgetNfeEntrada::cancelar(const int row) {
   //-----------------------------------------------------------------------------
 
   QSqlQuery query5;
-  query5.prepare("DELETE FROM estoque WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
+  query5.prepare("DELETE FROM produto WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
   query5.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query5.exec()) { return qApp->enqueueError(false, "Erro removendo estoque: " + query5.lastError().text(), this); }
+  if (not query5.exec()) { return qApp->enqueueError(false, "Erro removendo produto estoque: " + query5.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
   QSqlQuery query6;
-  query6.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+  query6.prepare("DELETE FROM estoque WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
   query6.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query6.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query6.lastError().text(), this); }
+  if (not query6.exec()) { return qApp->enqueueError(false, "Erro removendo estoque: " + query6.lastError().text(), this); }
+
+  //-----------------------------------------------------------------------------
+
+  QSqlQuery query7;
+  query7.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+  query7.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not query7.exec()) { return qApp->enqueueError(false, "Erro cancelando nota: " + query7.lastError().text(), this); }
 
   return true;
 }

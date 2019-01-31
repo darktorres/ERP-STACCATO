@@ -20,7 +20,7 @@ public:
 
 private:
   // attributes
-  const QString idEstoque;
+  const QString idEstoque; // TODO: change this to int?
   SqlRelationalTableModel modelEstoque;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelViewConsumo;
@@ -36,7 +36,6 @@ private:
   };
 
   // methods
-  auto atualizaQuantEstoque() -> bool;
   auto calcularRestante() -> void;
   auto desfazerConsumo() -> bool;
   auto dividirCompra(const int idVendaProduto, const double quant) -> std::optional<int>;

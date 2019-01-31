@@ -44,8 +44,6 @@ void InserirLancamento::setupTables() {
 
   ui->table->setModel(&modelContaPagamento);
 
-  ui->table->setItemDelegate(new DoubleDelegate(this));
-
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
   ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
@@ -56,6 +54,8 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
+
+  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});
 
   ui->table->hideColumn("nfe");
   ui->table->hideColumn("taxa");
@@ -78,22 +78,11 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("desativado");
 }
 
-void InserirLancamento::openPersistentEditor() {
-  for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
-    ui->table->openPersistentEditor(row, "idLoja");
-    ui->table->openPersistentEditor(row, "tipo");
-    ui->table->openPersistentEditor(row, "grupo");
-  }
-}
-
 void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
-  const int newRow = modelContaPagamento.rowCount();
-  modelContaPagamento.insertRow(newRow);
+  const int newRow = modelContaPagamento.insertRowAtEnd();
 
   if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
   if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) { return; }
-
-  openPersistentEditor();
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
@@ -131,9 +120,7 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Deve selecionar uma linha primeiro!", this); }
 
   const int row = list.first().row();
-  const int newRow = modelContaPagamento.rowCount();
-
-  modelContaPagamento.insertRow(newRow);
+  const int newRow = modelContaPagamento.insertRowAtEnd();
 
   for (int col = 0; col < modelContaPagamento.columnCount(); ++col) {
     if (modelContaPagamento.fieldIndex("valor") == col) { continue; }
@@ -145,6 +132,4 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 
     if (not modelContaPagamento.setData(newRow, col, value)) { return; }
   }
-
-  openPersistentEditor();
 }

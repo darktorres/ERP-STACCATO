@@ -67,7 +67,7 @@ void CadastroTransportadora::setupTables() {
 
   ui->tableVeiculo->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableVeiculo->resizeColumnsToContents();
+  ui->tableVeiculo->setPersistentColumns({"desativado"});
 
   // -------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ void CadastroTransportadora::setupTables() {
 
   ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
 
-  ui->tableEndereco->resizeColumnsToContents();
+  ui->tableEndereco->setPersistentColumns({"desativado"});
 }
 
 void CadastroTransportadora::clearFields() {
@@ -154,10 +154,7 @@ void CadastroTransportadora::on_pushButtonCadastrar_clicked() { save(); }
 
 void CadastroTransportadora::on_pushButtonAtualizar_clicked() { save(); }
 
-void CadastroTransportadora::on_pushButtonNovoCad_clicked() {
-  newRegister();
-  modelVeiculo.setFilter("0");
-}
+void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
 
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 
@@ -194,23 +191,16 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
   if (currentRow == -1) { return; }
 
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
 }
 
-bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
+bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) {
-    currentRowEnd = modelEnd.rowCount();
-    modelEnd.insertRow(currentRowEnd);
-  }
+  if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -225,7 +215,7 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipo) {
 
   if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
-  ui->tableEndereco->resizeColumnsToContents();
+  if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 
@@ -238,8 +228,6 @@ void CadastroTransportadora::novoEndereco() {
   ui->pushButtonRemoverEnd->hide();
   ui->tableEndereco->clearSelection();
   clearEndereco();
-
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroTransportadora::clearEndereco() {
@@ -297,10 +285,6 @@ bool CadastroTransportadora::viewRegister() {
 
   if (not modelEnd.select()) { return false; }
 
-  for (int row = 0; row < ui->tableEndereco->model()->rowCount(); ++row) { ui->tableEndereco->openPersistentEditor(row, "desativado"); }
-
-  ui->tableEndereco->resizeColumnsToContents();
-
   //---------------------------------------------------
 
   const bool inativosVeiculo = ui->checkBoxMostrarInativosVeiculo->isChecked();
@@ -308,20 +292,13 @@ bool CadastroTransportadora::viewRegister() {
 
   if (not modelVeiculo.select()) { return false; }
 
-  for (int row = 0; row < ui->tableVeiculo->model()->rowCount(); ++row) { ui->tableVeiculo->openPersistentEditor(row, "desativado"); }
-
-  ui->tableVeiculo->resizeColumnsToContents();
-
   return true;
 }
 
 void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Transportadora cadastrada com sucesso!", this); }
 
-bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) {
-  if (tipo == Tipo::Cadastrar) {
-    currentRowVeiculo = modelVeiculo.rowCount();
-    modelVeiculo.insertRow(currentRowVeiculo);
-  }
+bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
+  if (tipoVeiculo == Tipo::Cadastrar) { currentRowVeiculo = modelVeiculo.insertRowAtEnd(); }
 
   if (not modelVeiculo.setData(currentRowVeiculo, "modelo", ui->lineEditModelo->text())) { return false; }
   if (not modelVeiculo.setData(currentRowVeiculo, "capacidade", ui->lineEditCarga->text().toInt())) { return false; }
@@ -334,7 +311,7 @@ bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipo) {
 
   if (not columnsToUpper(modelVeiculo, currentRowVeiculo)) { return false; }
 
-  ui->tableVeiculo->resizeColumnsToContents();
+  if (tipoVeiculo == Tipo::Cadastrar) { backupVeiculo.append(modelVeiculo.record(currentRowVeiculo)); }
 
   isDirty = true;
 
@@ -351,8 +328,6 @@ void CadastroTransportadora::novoVeiculo() {
   ui->pushButtonRemoverVeiculo->hide();
   ui->tableVeiculo->clearSelection();
   clearVeiculo();
-
-  for (int row = 0; row < ui->tableVeiculo->model()->rowCount(); ++row) { ui->tableVeiculo->openPersistentEditor(row, "desativado"); }
 }
 
 void CadastroTransportadora::clearVeiculo() {
@@ -377,42 +352,52 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not columnsToUpper(model, currentRow)) { return false; }
+
+    if (not model.submitAll()) { return false; }
+
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+
+    // -------------------------------------------------------------------------
+
+    if (not setForeignKey(modelEnd)) { return false; }
+
+    if (not modelEnd.submitAll()) { return false; }
+
+    // -------------------------------------------------------------------------
+
+    if (not setForeignKey(modelVeiculo)) { return false; }
+
+    return modelVeiculo.submitAll();
+  }();
+
+  if (success) {
+    backupEndereco.clear();
+    backupVeiculo.clear();
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelEnd.select());
+    void(modelVeiculo.select());
+
+    for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
+    for (auto &record : backupVeiculo) { modelVeiculo.insertRecord(-1, record); }
   }
 
-  if (not savingProcedures()) { return false; }
-
-  if (not columnsToUpper(model, currentRow)) { return false; }
-
-  if (not model.submitAll()) { return false; }
-
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
-
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
-
-  // -------------------------------------------------------------------------
-
-  if (not setForeignKey(modelEnd)) { return false; }
-
-  if (not modelEnd.submitAll()) { return false; }
-
-  // -------------------------------------------------------------------------
-
-  if (not setForeignKey(modelVeiculo)) { return false; }
-
-  return modelVeiculo.submitAll();
+  return success;
 }
 
 void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool checked) {
   if (currentRow == -1) { return; }
 
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (checked ? "" : " AND desativado = FALSE"));
-
-  for (int row = 0; row < ui->tableVeiculo->model()->rowCount(); ++row) { ui->tableVeiculo->openPersistentEditor(row, "desativado"); }
-
-  ui->tableVeiculo->resizeColumnsToContents();
 }
 
 void CadastroTransportadora::on_tableVeiculo_clicked(const QModelIndex &index) {

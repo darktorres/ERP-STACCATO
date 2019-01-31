@@ -53,8 +53,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   if (not modelViewProdutos.select()) { return; }
 
-  ui->tableProdutos->resizeColumnsToContents();
-
   double quant = 0;
 
   for (int row = 0; row < modelViewProdutos.rowCount(); ++row) { quant += modelViewProdutos.data(row, "quant").toDouble(); }
@@ -97,7 +95,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   ui->tableEstoque->setModel(&modelEstoque);
   ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
-  ui->tableEstoque->resizeColumnsToContents();
 
   //-----------------------------------------------
 
@@ -174,7 +171,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
 
-  InputDialog inputDlg(InputDialog::Tipo::Carrinho);
+  InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
   if (not qApp->startTransaction()) { return; }
@@ -363,8 +360,7 @@ bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
 bool ProdutosPendentes::dividirVenda(const QDecDouble quantSeparar, const QDecDouble quantVenda, const int rowProduto) {
   if (not Log::createLog("idVendaProduto '" + modelProdutos.data(rowProduto, "idVendaProduto").toString() + "': linha dividida para consumo parcial de estoque.")) { return false; }
 
-  const int newRow = modelProdutos.rowCount();
-  modelProdutos.insertRow(newRow);
+  const int newRow = modelProdutos.insertRowAtEnd();
 
   // copiar colunas
   for (int column = 0, columnCount = modelProdutos.columnCount(); column < columnCount; ++column) {

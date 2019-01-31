@@ -21,6 +21,7 @@ public:
   auto setSort(const QString &column, Qt::SortOrder order) -> void;
   auto setTable(const QString &tableName) -> void final;
   auto supportedDropActions() const -> Qt::DropActions final;
+  auto insertRowAtEnd() -> int;
 
 private:
   using QSqlRelationalTableModel::data;

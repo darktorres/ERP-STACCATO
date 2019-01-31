@@ -34,18 +34,13 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  sdProduto = SearchDialog::produto(true, true, this);
+  sdProduto = SearchDialog::produto(true, true, true, this);
   connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
 
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->pushButtonRemover->setDisabled(true); }
-
-  if (UserSession::tipoUsuario() == "VENDEDOR") {
-    ui->pushButtonCadastrar->setVisible(false);
-    ui->pushButtonNovoCad->setVisible(false);
-  }
 
   ui->groupBox->hide();
   ui->groupBox_4->hide();
@@ -233,22 +228,28 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not columnsToUpper(model, currentRow)) { return false; }
+
+    if (not model.submitAll()) { return false; }
+
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+
+    return true;
+  }();
+
+  if (not success) {
+    qApp->rollbackTransaction();
+    void(model.select());
   }
 
-  if (not savingProcedures()) { return false; }
-
-  if (not columnsToUpper(model, currentRow)) { return false; }
-
-  if (not model.submitAll()) { return false; }
-
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
-
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
-
-  return true;
+  return success;
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos

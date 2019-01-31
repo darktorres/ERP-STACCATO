@@ -67,8 +67,6 @@ void WidgetNfeSaida::updateTables() {
   }
 
   if (not modelViewNFeSaida.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
@@ -130,8 +128,6 @@ void WidgetNfeSaida::montaFiltro() {
   //-------------------------------------
 
   modelViewNFeSaida.setFilter(filtros.join(" AND "));
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {

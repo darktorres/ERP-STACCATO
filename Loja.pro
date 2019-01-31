@@ -45,7 +45,6 @@ contains(CONFIG, deploy){
 
 win32-g++{
     PRECOMPILED_HEADER = pch.h
-
     CONFIG *= precompile_header
 }
 
@@ -103,6 +102,7 @@ SOURCES += \
     src/charttooltip.cpp \
     src/chartview.cpp \
     src/checkboxdelegate.cpp \
+    src/collapsiblewidget.cpp \
     src/combobox.cpp \
     src/comboboxdelegate.cpp \
     src/contas.cpp \
@@ -215,6 +215,7 @@ HEADERS  += \
     src/charttooltip.h \
     src/chartview.h \
     src/checkboxdelegate.h \
+    src/collapsiblewidget.h \
     src/combobox.h \
     src/comboboxdelegate.h \
     src/contas.h \
@@ -320,6 +321,7 @@ FORMS += \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
+    ui/collapsiblewidget.ui \
     ui/contas.ui \
     ui/devolucao.ui \
     ui/estoque.ui \

@@ -43,6 +43,13 @@ bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVarian
 
 Qt::DropActions SqlRelationalTableModel::supportedDropActions() const { return Qt::MoveAction; }
 
+int SqlRelationalTableModel::insertRowAtEnd() {
+  const int row = rowCount();
+  insertRow(row);
+
+  return row;
+}
+
 bool SqlRelationalTableModel::submitAll() {
   if (not QSqlTableModel::submitAll()) { return qApp->enqueueError(false, "Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 
@@ -68,6 +75,8 @@ bool SqlRelationalTableModel::select() {
 void SqlRelationalTableModel::setFilter(const QString &filter) {
   //  qDebug() << "table: " << tableName();
   //  qDebug() << "filter: " << filter << "\n";
+
+  // NOTE: use model()->query()->isActive() to know if the filter will be applied now or later
 
   QSqlRelationalTableModel::setFilter(filter);
 }

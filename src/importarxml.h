@@ -47,7 +47,7 @@ private:
   auto cadastrarProdutoEstoque(const QVector<std::tuple<int, int, double>> &tuples) -> bool;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
   auto importar() -> bool;
-  auto inserirItemModel(XML &xml) -> bool;
+  auto inserirItemModel(const XML &xml) -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
   auto mapTuples() -> QVector<std::tuple<int, int, double>>;
@@ -60,6 +60,7 @@ private:
   auto perguntarLocal(XML &xml) -> bool;
   auto produtoCompativel(const int rowCompra, const QString &codComercialEstoque) -> bool;
   auto reparear(const QModelIndex &index) -> bool;
+  auto salvarLoteNaVenda() -> bool;
   auto setupTables() -> void;
   auto verificaCNPJ(const XML &xml) -> bool;
   auto verificaExiste(const XML &xml) -> bool;

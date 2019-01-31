@@ -23,12 +23,6 @@ PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoE
 
 PrecoEstoque::~PrecoEstoque() { delete ui; }
 
-void PrecoEstoque::show() {
-  QWidget::show();
-
-  ui->table->resizeColumnsToContents();
-}
-
 void PrecoEstoque::setupTables() {
   modelProduto.setTable("produto");
 
@@ -105,6 +99,4 @@ void PrecoEstoque::on_pushButtonCancelar_clicked() { close(); }
 void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
   modelProduto.setFilter(text.isEmpty() ? "estoque = TRUE AND estoqueRestante > 0"
                                         : "MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('+" + text + "*' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
-
-  ui->table->resizeColumnsToContents();
 }

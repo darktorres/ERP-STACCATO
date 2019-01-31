@@ -51,7 +51,7 @@ void ImportaProdutos::importarTabela() {
   if (not readFile()) { return; }
   if (not readValidade()) { return; }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction(false)) { return; }
 
   if (not importar()) {
     qApp->rollbackTransaction();
@@ -157,10 +157,12 @@ bool ImportaProdutos::importar() {
 
   if (canceled) { return false; }
 
-  show();
+  ui->tableProdutos->setAutoResize(true);
+  ui->tableErro->setAutoResize(true);
 
   ui->tableProdutos->resizeColumnsToContents();
-  ui->tableErro->resizeColumnsToContents();
+
+  show();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
@@ -236,6 +238,7 @@ void ImportaProdutos::setupTables() {
   modelProduto.setHeaderData("markup", "Markup");
 
   ui->tableProdutos->setModel(new ImportaProdutosProxyModel(&modelProduto, this));
+  ui->tableProdutos->setAutoResize(false);
 
   for (int column = 0; column < modelProduto.columnCount(); ++column) {
     if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->tableProdutos->setColumnHidden(column, true); }
@@ -314,6 +317,7 @@ void ImportaProdutos::setupTables() {
   modelErro.setHeaderData("markup", "Markup");
 
   ui->tableErro->setModel(new ImportaProdutosProxyModel(&modelErro, this));
+  ui->tableErro->setAutoResize(false);
 
   for (int column = 0; column < modelErro.columnCount(); ++column) {
     if (modelErro.record().fieldName(column).endsWith("Upd")) { ui->tableErro->setColumnHidden(column, true); }
@@ -589,8 +593,7 @@ bool ImportaProdutos::camposForaDoPadrao() {
 }
 
 bool ImportaProdutos::insereEmErro() {
-  const int row = modelErro.rowCount();
-  if (not modelErro.insertRow(row)) { return false; }
+  const int row = modelErro.insertRowAtEnd();
 
   const auto keys = variantMap.keys();
 
@@ -626,9 +629,7 @@ bool ImportaProdutos::insereEmErro() {
 }
 
 bool ImportaProdutos::insereEmOk() {
-  const int row = modelProduto.rowCount();
-
-  if (not modelProduto.insertRow(row)) { return false; }
+  const int row = modelProduto.insertRowAtEnd();
 
   const auto keys = variantMap.keys();
 

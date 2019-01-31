@@ -204,8 +204,6 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 
   if (not modelVeiculo.select()) { return false; }
 
-  ui->tableLogistica->resizeColumnsToContents();
-
   ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
   return true;
@@ -219,8 +217,6 @@ bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebi
   modelEstoque.setFilter(filter);
 
   if (not modelEstoque.select()) { return false; }
-
-  ui->tableLogistica->resizeColumnsToContents();
 
   setWindowTitle("Estoque: " + ids.join(", "));
 
@@ -384,8 +380,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   // copiar linha com quantDefeito
 
-  const int rowQuebrado = modelVeiculo.rowCount();
-  modelVeiculo.insertRow(rowQuebrado);
+  const int rowQuebrado = modelVeiculo.insertRowAtEnd();
 
   for (int col = 0; col < modelVeiculo.columnCount(); ++col) {
     if (modelVeiculo.fieldIndex("id") == col) { continue; }
@@ -418,9 +413,8 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   if (not modelVendaProduto.setData(0, "caixas", caixas - caixasDefeito)) { return false; }
   if (not modelVendaProduto.setData(0, "quant", (caixas - caixasDefeito) * unCaixa)) { return false; }
 
-  const int rowQuebrado2 = modelVendaProduto.rowCount();
+  const int rowQuebrado2 = modelVendaProduto.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto/pedido_fornecedor
-  modelVendaProduto.insertRow(rowQuebrado2);
 
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
     if (modelVendaProduto.fieldIndex("idVendaProduto") == col) { continue; }
@@ -488,9 +482,8 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 }
 
 bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
-  const int newRow = modelVendaProduto.rowCount();
+  const int newRow = modelVendaProduto.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto/pedido_fornecedor
-  modelVendaProduto.insertRow(newRow);
 
   // copiar linha com quantidade quebrada
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
@@ -542,8 +535,7 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
 
   // copiar linha com defeito
 
-  const int rowQuebrado = modelEstoque.rowCount();
-  modelEstoque.insertRow(rowQuebrado);
+  const int rowQuebrado = modelEstoque.insertRowAtEnd();
 
   for (int col = 0; col < modelEstoque.columnCount(); ++col) {
     if (modelEstoque.fieldIndex("idEstoque") == col) { continue; }

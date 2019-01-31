@@ -38,8 +38,7 @@ void InserirTransferencia::on_pushButtonSalvar_clicked() {
 bool InserirTransferencia::cadastrar() {
   // lancamento 'de'
 
-  const int rowDe = modelDe.rowCount();
-  modelDe.insertRow(rowDe);
+  const int rowDe = modelDe.insertRowAtEnd();
 
   if (not modelDe.setData(rowDe, "status", "PAGO")) { return false; }
   if (not modelDe.setData(rowDe, "dataEmissao", ui->dateEdit->date())) { return false; }
@@ -59,8 +58,7 @@ bool InserirTransferencia::cadastrar() {
 
   // lancamento 'para'
 
-  const int rowPara = modelPara.rowCount();
-  modelPara.insertRow(rowPara);
+  const int rowPara = modelPara.insertRowAtEnd();
 
   if (not modelPara.setData(rowPara, "status", "RECEBIDO")) { return false; }
   if (not modelPara.setData(rowPara, "dataEmissao", ui->dateEdit->date())) { return false; }

@@ -276,7 +276,11 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEditBusca"/>
+       <widget class="QLineEdit" name="lineEditBusca">
+        <property name="placeholderText">
+         <string>Venda/Fornecedor/Produto/Cód. Com</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0" colspan="2">
        <widget class="TableView" name="table">

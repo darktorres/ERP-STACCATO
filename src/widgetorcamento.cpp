@@ -130,8 +130,6 @@ void WidgetOrcamento::updateTables() {
   }
 
   if (not modelViewOrcamento.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetOrcamento::resetTables() { modelIsSet = false; }
@@ -206,8 +204,6 @@ void WidgetOrcamento::montaFiltro() {
   //-------------------------------------
 
   modelViewOrcamento.setFilter(filtros.join(" AND "));
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetOrcamento::on_pushButtonFollowup_clicked() {

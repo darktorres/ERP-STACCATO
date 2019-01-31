@@ -17,6 +17,8 @@ public:
 
 private:
   // attributes
+  QList<QSqlRecord> backupItem;
+  int currentRowItem = -1;
   bool isReadOnly = false;
   int currentItemIsEstoque = 0;
   bool currentItemIsPromocao = false;
@@ -26,7 +28,7 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  auto adicionarItem(const bool isUpdate = false) -> void; // REFAC: refac this to enum
+  auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
   auto atualizaReplica() -> bool;
   auto atualizarItem() -> void;
   auto buscarCadastrarConsultor() -> bool;
@@ -48,7 +50,7 @@ private:
   auto on_doubleSpinBoxTotalItem_valueChanged(const double) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxCliente_textChanged(const QString &) -> void;
-  auto on_itemBoxProduto_valueChanged(const QVariant &) -> void;
+  auto on_itemBoxProduto_idChanged(const QVariant &) -> void;
   auto on_itemBoxVendedor_textChanged(const QString &) -> void;
   auto on_pushButtonAdicionarItem_clicked() -> void;
   auto on_pushButtonApagarOrc_clicked() -> void;

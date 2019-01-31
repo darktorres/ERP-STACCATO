@@ -181,49 +181,55 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 }
 
 bool CadastroUsuario::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not columnsToUpper(model, currentRow)) { return false; }
+
+    if (not model.submitAll()) { return false; }
+
+    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+
+    if (tipo == Tipo::Cadastrar) {
+      QSqlQuery query;
+      query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
+      query.bindValue(":user", ui->lineEditUser->text().toLower());
+
+      if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+
+      query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
+      query.bindValue(":user", ui->lineEditUser->text().toLower());
+
+      if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
+
+      if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
+
+      // -------------------------------------------------------------------------
+
+      const int row2 = modelPermissoes.insertRowAtEnd();
+
+      if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
+      if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
+      if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
+      if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
+    }
+
+    if (not modelPermissoes.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (not success) {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelPermissoes.select());
   }
 
-  if (not savingProcedures()) { return false; }
-
-  if (not columnsToUpper(model, currentRow)) { return false; }
-
-  if (not model.submitAll()) { return false; }
-
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
-
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
-
-  if (tipo == Tipo::Cadastrar) {
-    QSqlQuery query;
-    query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
-    query.bindValue(":user", ui->lineEditUser->text().toLower());
-
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
-
-    query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
-    query.bindValue(":user", ui->lineEditUser->text().toLower());
-
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
-
-    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
-
-    // -------------------------------------------------------------------------
-
-    const int row2 = modelPermissoes.rowCount();
-    modelPermissoes.insertRow(row2);
-
-    if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
-    if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
-    if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
-    if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
-  }
-
-  if (not modelPermissoes.submitAll()) { return false; }
-
-  return true;
+  return success;
 }
 
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }

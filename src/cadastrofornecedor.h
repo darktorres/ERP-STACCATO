@@ -23,7 +23,7 @@ private:
   // methods
   auto ajustarValidade(const int novaValidade) -> bool;
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;

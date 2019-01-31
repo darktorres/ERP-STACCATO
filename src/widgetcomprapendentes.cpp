@@ -72,7 +72,7 @@ void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
     setConnections();
 
-    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, this));
+    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, this));
     ui->itemBoxProduto->setRepresentacao(false);
 
     connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
@@ -87,8 +87,6 @@ void WidgetCompraPendentes::updateTables() {
   }
 
   if (not modelViewVendaProduto.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
@@ -100,6 +98,7 @@ void WidgetCompraPendentes::setupTables() {
 
   modelViewVendaProduto.setHeaderData("prazoEntrega", "Prazo Limite");
   modelViewVendaProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
+  modelViewVendaProduto.setHeaderData("dataFinanceiro", "Financeiro");
   modelViewVendaProduto.setHeaderData("idVenda", "Venda");
   modelViewVendaProduto.setHeaderData("fornecedor", "Fornecedor");
   modelViewVendaProduto.setHeaderData("produto", "Produto");
@@ -177,8 +176,6 @@ void WidgetCompraPendentes::montaFiltro() {
   filtros << "quant > 0";
 
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
@@ -186,7 +183,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   if (qFuzzyIsNull(ui->doubleSpinBoxQuantAvulso->value())) { return qApp->enqueueError("Deve escolher uma quantidade!", this); }
 
-  InputDialog inputDlg(InputDialog::Tipo::Carrinho);
+  InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
 
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 

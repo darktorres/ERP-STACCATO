@@ -88,23 +88,17 @@ void WidgetFinanceiroContas::updateTables() {
 
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
 
-  ui->table->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelVencidos.setQuery(modelVencidos.query().executedQuery());
 
   if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
-  ui->tableVencidos->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   modelVencer.setQuery(modelVencer.query().executedQuery());
 
   if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
-
-  ui->tableVencer->resizeColumnsToContents();
 }
 
 void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
@@ -259,8 +253,6 @@ void WidgetFinanceiroContas::montaFiltro() {
   ui->table->hideColumn("idLoja");
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
@@ -285,9 +277,13 @@ void WidgetFinanceiroContas::setTipo(const Tipo &value) {
   if (tipo == Tipo::Pagar) {
     ui->pushButtonAdiantarRecebimento->hide();
     ui->radioButtonRecebido->hide();
+    ui->lineEditBusca->setPlaceholderText("OC/Contraparte/NFe/Venda");
   }
 
-  if (tipo == Tipo::Receber) { ui->radioButtonPago->hide(); }
+  if (tipo == Tipo::Receber) {
+    ui->radioButtonPago->hide();
+    ui->lineEditBusca->setPlaceholderText("Venda/Contraparte");
+  }
 }
 
 void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {

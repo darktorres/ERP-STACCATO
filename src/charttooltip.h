@@ -6,7 +6,7 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-class ChartTooltip : public QGraphicsItem {
+class ChartTooltip final : public QGraphicsItem {
 public:
   explicit ChartTooltip(QChart *chart);
 
@@ -14,12 +14,12 @@ public:
   auto setAnchor(const QPointF point) -> void;
   auto updateGeometry() -> void;
 
-  virtual auto boundingRect() const -> QRectF override;
-  virtual auto paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) -> void override;
+  auto boundingRect() const -> QRectF final;
+  auto paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) -> void final;
 
 protected:
-  virtual auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void override;
-  virtual auto mouseMoveEvent(QGraphicsSceneMouseEvent *event) -> void override;
+  auto mousePressEvent(QGraphicsSceneMouseEvent *event) -> void final;
+  auto mouseMoveEvent(QGraphicsSceneMouseEvent *event) -> void final;
 
 private:
   QRectF m_textRect;

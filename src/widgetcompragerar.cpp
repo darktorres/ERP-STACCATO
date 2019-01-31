@@ -72,6 +72,7 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableProdutos->hideColumn("ordemRepresentacao");
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("statusFinanceiro");
   ui->tableProdutos->hideColumn("selecionado");
@@ -120,13 +121,9 @@ void WidgetCompraGerar::updateTables() {
 
   if (not modelResumo.select()) { return; }
 
-  ui->tableResumo->resizeColumnsToContents();
-
   if (not selection.isEmpty()) { ui->tableResumo->selectRow(selection.first().row()); }
 
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
@@ -204,6 +201,9 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   const auto [dataCompra, dataPrevista] = dates.value();
 
   // email --------------------------------
+
+  // reload data after getDates
+  if (not modelProdutos.select()) { return; }
 
   const QString razaoSocial = modelProdutos.data(list.first().row(), "fornecedor").toString();
 
@@ -293,7 +293,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
 
       if (choice == QMessageBox::Yes) { break; }
 
-      if (choice != QMessageBox::Yes) {
+      if (choice != QMessageBox::Yes) { // TODO: V547 http://www.viva64.com/en/V547 Expression 'choice != QMessageBox::Yes' is always true.      if (choice != QMessageBox::Yes) {
         bool ok2;
         oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 99999, 1, &ok2);
         if (not ok2) { return {}; }
@@ -321,6 +321,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
 
   if (isRepresentacao) {
     if (modelProdutos.data(row, "idVenda").toString().isEmpty()) {
+      // TODO: verificar quando a loja precisar comprar avulso
       qApp->enqueueError("'Venda' vazio!", this);
       return {};
     }
@@ -459,8 +460,6 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
   const QString fornecedor = modelResumo.data(index.row(), "fornecedor").toString();
 
   modelProdutos.setFilter("fornecedor = '" + fornecedor + "' AND status = 'PENDENTE'");
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {

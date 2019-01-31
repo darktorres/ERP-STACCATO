@@ -217,7 +217,7 @@ bool Excel::setQuerys() {
 
   //------------------------------------------------------------------------
 
-  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados dos produtos: " + query.lastError().text()); }
+  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados dos produtos: " + query.lastError().text()); } //TODO: V778 http://www.viva64.com/en/V778 Two similar code fragments were found. Perhaps, this is a typo and 'queryProduto' variable should be used instead of 'query'.  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados dos produtos: " + query.lastError().text()); }
 
   //------------------------------------------------------------------------
 

@@ -18,6 +18,7 @@ public:
 
 private:
   // attributes
+  QList<QSqlRecord> backupItem;
   bool financeiro = false;
   bool correcao = false;
   int idLoja;
@@ -29,7 +30,6 @@ private:
   SqlRelationalTableModel modelItem;
   Ui::Venda *ui;
   // methods
-  auto atualizaQuantEstoque() -> bool;
   auto atualizarCredito() -> bool;
   auto cadastrar() -> bool final;
   auto calcPrecoGlobalTotal() -> void;

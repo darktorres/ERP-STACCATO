@@ -38,8 +38,6 @@ void WidgetLogisticaColeta::updateTables() {
   }
 
   if (not modelViewColeta.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor) {
@@ -89,7 +87,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   for (const auto &index : list) { idVendas << modelViewColeta.data(index.row(), "idVenda").toString(); }
 
-  InputDialog input(InputDialog::Tipo::Coleta);
+  InputDialog input(InputDialog::Tipo::Coleta, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
@@ -157,8 +155,6 @@ void WidgetLogisticaColeta::montaFiltro() {
   const QString textoBusca = ui->lineEditBusca->text();
 
   modelViewColeta.setFilter("(numeroNFe LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR idVenda LIKE '%" + textoBusca + "%' OR ordemCompra LIKE '%" + textoBusca + "%')");
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
@@ -166,7 +162,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarColeta);
+  InputDialog input(InputDialog::Tipo::AgendarColeta, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 

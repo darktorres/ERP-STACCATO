@@ -26,7 +26,6 @@ private:
   auto on_pushButtonCriarLancamento_clicked() -> void;
   auto on_pushButtonDuplicarLancamento_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto openPersistentEditor() -> void;
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };

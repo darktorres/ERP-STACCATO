@@ -22,7 +22,11 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QLineEdit" name="lineEditBuscar"/>
+    <widget class="QLineEdit" name="lineEditBuscar">
+     <property name="placeholderText">
+      <string>Venda</string>
+     </property>
+    </widget>
    </item>
    <item row="0" column="0" colspan="2">
     <widget class="QSplitter" name="splitter">

@@ -132,12 +132,11 @@ void Contas::setupTables() {
 
   ui->tablePendentes->setModel(&modelPendentes);
 
-  ui->tablePendentes->setItemDelegate(new DoubleDelegate(this));
-
+  ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataEmissao", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
-  //  ui->tablePendentes->setItemDelegateForColumn("valor", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
   // TODO: 3dateEditDelegate para vencimento
@@ -148,26 +147,19 @@ void Contas::setupTables() {
   if (tipo == Tipo::Receber) {
     //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraParteReceber, this));
     ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-    //    ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Grupo, this));
   }
 
   if (tipo == Tipo::Pagar) {
     //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
     ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusPagar, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Conta, false, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-    //    ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Loja, false, this));
-    //    ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Grupo, this));
   }
 
-  //  ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
+
+  ui->tablePendentes->setPersistentColumns({"status", "contaDestino", "centroCusto"});
 
   ui->tablePendentes->hideColumn("idCompra");
   ui->tablePendentes->hideColumn("representacao");
@@ -205,12 +197,15 @@ void Contas::setupTables() {
 
   ui->tableProcessados->setModel(&modelProcessados);
 
-  ui->tableProcessados->setItemDelegate(new DoubleDelegate(this));
+  ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
 
   ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
+
+  ui->tableProcessados->setPersistentColumns({"contaDestino", "centroCusto"});
 
   ui->tableProcessados->hideColumn("representacao");
   ui->tableProcessados->hideColumn("idPagamento");
@@ -291,24 +286,9 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
   if (not modelPendentes.select()) { return; }
 
-  for (int row = 0, rowCount = modelPendentes.rowCount(); row < rowCount; ++row) {
-    ui->tablePendentes->openPersistentEditor(row, "status");
-    ui->tablePendentes->openPersistentEditor(row, "contaDestino"); // FIXME: slow
-    ui->tablePendentes->openPersistentEditor(row, "centroCusto");  // FIXME: slow
-  }
-
-  ui->tablePendentes->resizeColumnsToContents();
-
   // -------------------------------------------------------------------------
 
   if (not modelProcessados.select()) { return; }
-
-  for (int row = 0, rowCount = modelProcessados.rowCount(); row < rowCount; ++row) {
-    ui->tableProcessados->openPersistentEditor(row, "contaDestino");
-    ui->tableProcessados->openPersistentEditor(row, "centroCusto");
-  }
-
-  ui->tableProcessados->resizeColumnsToContents();
 }
 
 // TODO: 5adicionar coluna 'boleto' para dizer onde foi pago

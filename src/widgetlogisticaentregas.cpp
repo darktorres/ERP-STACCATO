@@ -60,21 +60,15 @@ void WidgetLogisticaEntregas::updateTables() {
 
   if (not modelCalendario.select()) { return; }
 
-  ui->tableCalendario->resizeColumnsToContents();
-
   // -----------------------------------------------------------------
 
   if (not modelCarga.select()) { return; }
-
-  ui->tableCarga->resizeColumnsToContents();
 
   // -----------------------------------------------------------------
 
   if (modelCarga.rowCount() == 0) { modelProdutos.setFilter("0"); }
 
   if (not modelProdutos.select()) { return; }
-
-  ui->tableProdutos->resizeColumnsToContents();
 }
 
 void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }
@@ -147,7 +141,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  InputDialog input(InputDialog::Tipo::AgendarEntrega);
+  InputDialog input(InputDialog::Tipo::AgendarEntrega, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
@@ -220,8 +214,6 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   modelCarga.setFilter("CAST(dataPrevEnt AS DATE) = '" + data + "' AND idVeiculo = " + veiculo);
 
-  ui->tableCarga->resizeColumnsToContents();
-
   //--------------------------------------
 
   modelProdutos.setFilter("0");
@@ -242,8 +234,6 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   const QString idEvento = modelCarga.data(index.row(), "idEvento").toString();
 
   modelProdutos.setFilter("idVenda = '" + idVenda + "' AND idEvento = " + idEvento);
-
-  ui->tableProdutos->resizeColumnsToContents();
 
   const QString status = modelCarga.data(index.row(), "status").toString();
   const QString nfeStatus = modelCarga.data(index.row(), "NFe Status").toString();
@@ -354,8 +344,6 @@ void WidgetLogisticaEntregas::montaFiltro() {
   const QString text = ui->lineEditBuscar->text();
 
   modelCarga.setFilter(text.isEmpty() ? "0" : "idVenda LIKE '%" + text + "%'");
-
-  ui->tableCarga->resizeColumnsToContents();
 
   //--------------------------------------
 
@@ -496,7 +484,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (modelProdutosAgrupado.rowCount() > 20) { return qApp->enqueueError("Mais produtos do que cabe no modelo do Excel!", this); }
+  if (modelProdutosAgrupado.rowCount() > 60) { return qApp->enqueueError("Mais produtos do que cabe no modelo do Excel!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -562,6 +550,8 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString());               // quant
     xlsx.write("AC" + QString::number(row), modelProdutosAgrupado.data(index, "caixas"));                                                                                   // caixas
   }
+
+  for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
 
   if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this); }
 

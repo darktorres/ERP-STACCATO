@@ -169,11 +169,7 @@ void WidgetLogisticaAgendarColeta::updateTables() {
 
   if (not modelEstoque.select()) { return; }
 
-  ui->tableEstoque->resizeColumnsToContents();
-
   if (not modelTranspAgend.select()) { return; }
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::tableFornLogistica_clicked(const QString &fornecedor) {
@@ -313,8 +309,7 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
     const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
     const double peso = kg * caixa;
 
-    const int row = modelTranspAtual.rowCount();
-    modelTranspAtual.insertRow(row);
+    const int row = modelTranspAtual.insertRowAtEnd();
 
     if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) { return false; }
     if (not modelTranspAtual.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) { return false; }
@@ -350,8 +345,6 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
   }
 
   if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
-
-  ui->tableTranspAtual->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
@@ -390,8 +383,6 @@ void WidgetLogisticaAgendarColeta::on_dateTimeEdit_dateChanged(const QDate &date
   if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
-
-  ui->tableTranspAgend->resizeColumnsToContents();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
@@ -431,6 +422,7 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
   //-------------------------------------
 
   const QString text = ui->lineEditBusca->text();
+  // TODO: OC não está aparecendo nessa tabela
   const QString filtroBusca = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";
 
   if (not text.isEmpty()) { filtros << filtroBusca; }
@@ -438,8 +430,6 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
   //-------------------------------------
 
   modelEstoque.setFilter(filtros.join(" AND "));
-
-  ui->tableEstoque->resizeColumnsToContents();
 }
 
 // TODO: 5importar nota de amostra nesta tela dizendo para qual loja ela vai e no final do fluxo gerar nota de

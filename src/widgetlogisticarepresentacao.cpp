@@ -30,8 +30,6 @@ void WidgetLogisticaRepresentacao::updateTables() {
   }
 
   if (not modelViewLogisticaRepresentacao.select()) { return; }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {
@@ -40,8 +38,6 @@ void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &for
   const QString filtro = fornecedor.isEmpty() ? "" : "fornecedor = '" + fornecedor + "'";
 
   modelViewLogisticaRepresentacao.setFilter(filtro);
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetLogisticaRepresentacao::resetTables() { modelIsSet = false; }
@@ -114,10 +110,6 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
   return true;
 }
 
-void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) {
-  modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')");
-
-  ui->table->resizeColumnsToContents();
-}
+void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) { modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')"); }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)

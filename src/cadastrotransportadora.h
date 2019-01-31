@@ -17,6 +17,7 @@ public:
 
 private:
   // attributes
+  QList<QSqlRecord> backupVeiculo;
   int currentRowVeiculo = -1;
   QDataWidgetMapper mapperVeiculo;
   SearchDialog *sdTransportadora;
@@ -24,8 +25,8 @@ private:
   Ui::CadastroTransportadora *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
-  auto cadastrarVeiculo(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarVeiculo(const Tipo tipoVeiculo = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto clearVeiculo() -> void;

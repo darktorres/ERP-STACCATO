@@ -126,6 +126,9 @@ void Estoque::setupTables() {
 void Estoque::calcularRestante() {
   double quantRestante = modelEstoque.data(0, "quant").toDouble();
   double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
+  // TODO: V656 http://www.viva64.com/en/V656 Variables 'quantRestante', 'quantComprometidoNaoEntregue' are initialized through the call to the same
+  // function. It's probably an error or un-optimized code. Consider inspecting the 'modelEstoque.data(0, "quant").toDouble()' expression. Check lines:
+  // 127, 128.  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
 
   for (int row = 0; row < modelViewConsumo.rowCount(); ++row) {
     const double quant = modelViewConsumo.data(row, "quant").toDouble();
@@ -152,15 +155,11 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   if (not modelEstoque.select()) { return false; }
 
-  ui->tableEstoque->resizeColumnsToContents();
-
   //--------------------------------------
 
   modelViewConsumo.setFilter("idEstoque = " + idEstoque);
 
   if (not modelViewConsumo.select()) { return false; }
-
-  ui->tableConsumo->resizeColumnsToContents();
 
   //--------------------------------------
 
@@ -186,17 +185,6 @@ void Estoque::exibirNota() {
     auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
     viewer->setAttribute(Qt::WA_DeleteOnClose);
   }
-}
-
-bool Estoque::atualizaQuantEstoque() {
-  // NOTE: can this be simplified so no query is necessary?
-  QSqlQuery query;
-  query.prepare("UPDATE produto p, view_estoque2 v SET p.estoqueRestante = v.restante, descontinuado = IF(v.restante = 0, TRUE, FALSE) WHERE p.idEstoque = v.idEstoque AND v.idEstoque = :idEstoque");
-  query.bindValue(":idEstoque", modelEstoque.data(0, "idEstoque"));
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando quant. estoque: " + query.lastError().text(), this); }
-
-  return true;
 }
 
 bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
@@ -252,8 +240,6 @@ bool Estoque::criarConsumo(const int idVendaProduto, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
-
-  if (not atualizaQuantEstoque()) { return false; }
 
   // -------------------------------------------------------------------------
   // copy lote to venda_has_produto
@@ -332,9 +318,9 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
     modelCompra.insertRow(newRow);
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
-      if (modelCompra.fieldIndex("idPedido") == column) { continue; }
-      if (modelCompra.fieldIndex("created") == column) { continue; }
-      if (modelCompra.fieldIndex("lastUpdated") == column) { continue; }
+      if (column == modelCompra.fieldIndex("idPedido")) { continue; }
+      if (column == modelCompra.fieldIndex("created")) { continue; }
+      if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
       const QVariant value = modelCompra.data(row, column);
 

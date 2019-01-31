@@ -85,8 +85,6 @@ void WidgetEstoque::updateTables() {
   model.setQuery(model.query().executedQuery());
 
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text(), this); }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetEstoque::resetTables() { modelIsSet = false; }
@@ -129,8 +127,6 @@ void WidgetEstoque::montaFiltro() {
       filtroContabil);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text(), this); }
-
-  ui->table->resizeColumnsToContents();
 }
 
 void WidgetEstoque::on_pushButtonRelatorio_clicked() {
@@ -148,11 +144,11 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   SqlQueryModel modelContabil;
   modelContabil.setQuery(
-      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, p.fornecedor, e.descricao, e.quant + coalesce(e2.consumoEst, 0) + ajuste AS contabil, "
-      "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), "
-      "((e.quant + coalesce(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo "
-      "AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS custo, p.precoVenda * (e.quant + coalesce(e2.consumoEst, 0) + ajuste) AS precoVenda "
-      "FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + coalesce(sum(consumo.quant), 0) AS "
+      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + ajuste AS contabil, "
+      "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), "
+      "((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo "
+      "AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + COALESCE(e2.consumoEst, 0) + ajuste) AS custo, p.precoVenda * (e.quant + COALESCE(e2.consumoEst, 0) + ajuste) AS precoVenda "
+      "FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + COALESCE(SUM(consumo.quant), 0) AS "
       "restante, SUM(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque "
       "WHERE e.status = 'ESTOQUE' AND e.created < '" +
       data +

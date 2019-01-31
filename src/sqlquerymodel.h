@@ -8,16 +8,15 @@ class SqlQueryModel final : public QSqlQueryModel {
 
 public:
   explicit SqlQueryModel(QObject *parent = nullptr);
+  auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant final;
   auto data(const int row, const QString &column) const -> QVariant;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
-  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant override;
+  auto setQuery(const QString &query, const QSqlDatabase &db = QSqlDatabase()) -> bool;
 
 private:
   using QSqlQueryModel::data;
   using QSqlQueryModel::setHeaderData;
-
-  // REFAC: overload 'setQuery' to verify if it errored and emit the error, and use a bool to indicate failure/success
-  // bool setQuery(...);
+  using QSqlQueryModel::setQuery;
 };
 
 #endif // SQLQUERYMODEL_H

@@ -7,6 +7,8 @@
 #include <QSqlRecord>
 
 #include "application.h"
+#include "sqlquerymodel.h"
+#include "sqlrelationaltablemodel.h"
 #include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
@@ -56,8 +58,14 @@ void TableView::openPersistentEditor(const int row, const int column) { QTableVi
 
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(getColumnIndex(column), order); }
 
-void TableView::resizeColumnsToContents() {
-  if (autoResize) { QTableView::resizeColumnsToContents(); }
+void TableView::redoView() {
+  if (not persistentColumns.isEmpty()) {
+    for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
+      for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
+    }
+  }
+
+  if (autoResize) { resizeColumnsToContents(); }
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
@@ -74,8 +82,16 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   //---------------------------------------
 
+  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
+
+  //---------------------------------------
+
   hideColumn("created");
   hideColumn("lastUpdated");
+
+  redoView();
 }
 
 void TableView::enterEvent(QEvent *event) {
@@ -91,6 +107,10 @@ void TableView::mousePressEvent(QMouseEvent *event) {
 
   QTableView::mousePressEvent(event);
 }
+
+void TableView::setAutoResize(const bool value) { autoResize = value; }
+
+void TableView::setPersistentColumns(const QStringList &value) { persistentColumns = value; }
 
 void TableView::keyPressEvent(QKeyEvent *event) {
   if (event->matches(QKeySequence::Copy)) {

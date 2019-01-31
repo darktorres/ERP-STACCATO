@@ -80,6 +80,9 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="placeholderText">
+        <string>NFe/Produto/Venda/OC</string>
+       </property>
       </widget>
      </item>
     </layout>

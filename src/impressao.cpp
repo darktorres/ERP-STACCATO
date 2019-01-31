@@ -26,7 +26,7 @@ void Impressao::print() {
 
   if (not setQuerys()) { return; }
 
-  auto *report = new LimeReport::ReportEngine();
+  auto *report = new LimeReport::ReportEngine(); // TODO: memory leak, gotta delete this
 
   auto dataManager = report->dataManager();
 

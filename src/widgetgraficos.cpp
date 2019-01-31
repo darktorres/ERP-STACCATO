@@ -96,7 +96,7 @@ void WidgetGraficos::updateTables() {
     return;
   }
 
-  if (isSet) {
+  if (isSet) { //TODO: V547 http://www.viva64.com/en/V547 Expression 'isSet' is always true.  if (isSet) {
     series12.clear();
     series11.clear();
     series10.clear();

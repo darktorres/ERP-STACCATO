@@ -365,8 +365,9 @@ void InputDialogFinanceiro::calcularTotal() {
     double total = 0;
 
     const auto list = ui->table->selectionModel()->selectedRows();
+    const auto proxyModel = ui->table->model();
 
-    for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
+    for (const auto &item : list) { total += proxyModel->data(proxyModel->index(item.row(), modelPedidoFornecedor.fieldIndex("preco"))).toDouble(); }
 
     ui->doubleSpinBoxTotal->setValue(total);
   }();

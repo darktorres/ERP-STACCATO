@@ -54,6 +54,7 @@ void ImportaProdutos::importarTabela() {
   if (not qApp->startTransaction(false)) { return; }
 
   if (not importar()) {
+    db.close();
     qApp->rollbackTransaction();
     close();
   }
@@ -433,6 +434,14 @@ void ImportaProdutos::consistenciaDados() {
   for (const auto &key : keys) {
     if (variantMap.value(key).toString().contains("*")) { variantMap.insert(key, variantMap.value(key).toString().remove("*")); }
   }
+
+  variantMap.insert("m2cx", variantMap.value("m2cx").toString().replace(",", ".").toDouble());
+  variantMap.insert("pccx", variantMap.value("pccx").toString().replace(",", ".").toDouble());
+  variantMap.insert("kgcx", variantMap.value("kgcx").toString().replace(",", ".").toDouble());
+  variantMap.insert("minimo", variantMap.value("minimo").toString().replace(",", ".").toDouble());
+  variantMap.insert("qtdPallet", variantMap.value("qtdPallet").toString().replace(",", ".").toDouble());
+  variantMap.insert("custo", variantMap.value("custo").toString().replace(",", ".").toDouble());
+  variantMap.insert("precoVenda", variantMap.value("precoVenda").toString().replace(",", ".").toDouble());
 
   if (variantMap.value("ui").isNull()) { variantMap.insert("ui", 0); }
 

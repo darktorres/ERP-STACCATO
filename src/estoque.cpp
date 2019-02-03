@@ -50,7 +50,9 @@ void Estoque::setupTables() {
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("bloco", "Bloco");
 
-  ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
+  modelEstoque.proxyModel = new EstoqueProxyModel(&modelEstoque, this);
+
+  ui->tableEstoque->setModel(&modelEstoque);
 
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
 
@@ -114,7 +116,9 @@ void Estoque::setupTables() {
   modelViewConsumo.setHeaderData("dataRealEnt", "Entrega");
   modelViewConsumo.setHeaderData("created", "Criado");
 
-  ui->tableConsumo->setModel(new EstoqueProxyModel(&modelViewConsumo, this));
+  modelViewConsumo.proxyModel = new EstoqueProxyModel(&modelViewConsumo, this);
+
+  ui->tableConsumo->setModel(&modelViewConsumo);
 
   ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
 

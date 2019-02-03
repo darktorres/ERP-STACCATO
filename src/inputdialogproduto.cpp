@@ -92,7 +92,9 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
 
-  ui->table->setModel(new SortFilterProxyModel(&modelPedidoFornecedor, this));
+  modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
+
+  ui->table->setModel(&modelPedidoFornecedor);
 
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");

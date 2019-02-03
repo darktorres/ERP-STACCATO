@@ -48,7 +48,9 @@ void ImportarXML::setupTables() {
   modelEstoque.setHeaderData("valor", "R$");
   modelEstoque.setHeaderData("vICMSST", "ST");
 
-  ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
+  modelEstoque.proxyModel = new EstoqueProxyModel(&modelEstoque, this);
+
+  ui->tableEstoque->setModel(&modelEstoque);
 
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
 
@@ -117,7 +119,9 @@ void ImportarXML::setupTables() {
   modelConsumo.setHeaderData("valorUnid", "R$ Unid.");
   modelConsumo.setHeaderData("valor", "R$");
 
-  ui->tableConsumo->setModel(new EstoqueProxyModel(&modelConsumo, this));
+  modelConsumo.proxyModel = new EstoqueProxyModel(&modelConsumo, this);
+
+  ui->tableConsumo->setModel(&modelConsumo);
 
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
 
@@ -192,7 +196,9 @@ void ImportarXML::setupTables() {
 
   if (not modelCompra.select()) { return; }
 
-  ui->tableCompra->setModel(new EstoqueProxyModel(&modelCompra, this));
+  modelCompra.proxyModel = new EstoqueProxyModel(&modelCompra, this);
+
+  ui->tableCompra->setModel(&modelCompra);
 
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
 

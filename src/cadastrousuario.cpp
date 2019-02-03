@@ -55,13 +55,13 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
 
-  auto *proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
+  modelPermissoes.proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
 
-  ui->table->setModel(proxyModel);
+  ui->table->setModel(&modelPermissoes);
 
-  ui->table->hideRow(0);                          // idUsuario
-  ui->table->hideRow(proxyModel->rowCount() - 1); // created
-  ui->table->hideRow(proxyModel->rowCount() - 2); // lastUpdated
+  ui->table->hideRow(0);                                          // idUsuario
+  ui->table->hideRow(modelPermissoes.proxyModel->rowCount() - 1); // created
+  ui->table->hideRow(modelPermissoes.proxyModel->rowCount() - 2); // lastUpdated
 
   ui->table->setItemDelegate(new CheckBoxDelegate(this));
 

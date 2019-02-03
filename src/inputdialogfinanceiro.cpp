@@ -112,16 +112,18 @@ void InputDialogFinanceiro::unsetConnections() {
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double aliquota) {
+  // FIXME: porcentagem esta limitado a 20% mas valor nao
+
   unsetConnections();
 
   double total = 0;
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &item : list) {
-    if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", aliquota)) { return; }
+  for (const auto &index : list) {
+    if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", aliquota)) { return; }
 
-    total += modelPedidoFornecedor.data(item.row(), "preco").toDouble();
+    total += modelPedidoFornecedor.data(index.row(), "preco").toDouble();
   }
 
   const double valueSt = total * (aliquota / 100);
@@ -161,7 +163,9 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
 
-  ui->table->setModel(new SortFilterProxyModel(&modelPedidoFornecedor, this));
+  modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
+
+  ui->table->setModel(&modelPedidoFornecedor);
 
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto");
@@ -365,9 +369,8 @@ void InputDialogFinanceiro::calcularTotal() {
     double total = 0;
 
     const auto list = ui->table->selectionModel()->selectedRows();
-    const auto proxyModel = ui->table->model();
 
-    for (const auto &item : list) { total += proxyModel->data(proxyModel->index(item.row(), modelPedidoFornecedor.fieldIndex("preco"))).toDouble(); }
+    for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
 
     ui->doubleSpinBoxTotal->setValue(total);
   }();
@@ -649,9 +652,9 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "st", text)) { return; }
-      if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
+    for (const auto &index : list) {
+      if (not modelPedidoFornecedor.setData(index.row(), "st", text)) { return; }
+      if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
     }
   }();
 

@@ -60,7 +60,9 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setHeaderData("local", "Local");
   modelEstoque.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  ui->tableEstoque->setModel(new EstoquePrazoProxyModel(&modelEstoque, this));
+  modelEstoque.proxyModel = new EstoquePrazoProxyModel(&modelEstoque, this);
+
+  ui->tableEstoque->setModel(&modelEstoque);
 
   ui->tableEstoque->setItemDelegate(new DoubleDelegate(this));
 

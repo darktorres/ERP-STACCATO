@@ -6,6 +6,8 @@
 
 SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 
+QVariant SqlQueryModel::data(const QModelIndex &index, int role) const { return QSqlQueryModel::data(index, role); }
+
 QVariant SqlQueryModel::data(const int row, const QString &column) const {
   const int index = QSqlQueryModel::record().indexOf(column);
 
@@ -13,6 +15,8 @@ QVariant SqlQueryModel::data(const int row, const QString &column) const {
     qApp->enqueueError("Coluna '" + column + "' não encontrada na tabela!");
     return QVariant();
   }
+
+  if (proxyModel) { return proxyModel->data(proxyModel->index(row, index)); }
 
   return QSqlQueryModel::data(QSqlQueryModel::index(row, index));
 }
@@ -34,5 +38,3 @@ bool SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
 
   return true;
 }
-
-QVariant SqlQueryModel::data(const QModelIndex &index, int role) const { return QSqlQueryModel::data(index, role); }

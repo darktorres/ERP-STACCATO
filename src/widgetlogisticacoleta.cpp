@@ -72,7 +72,9 @@ void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
   modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  ui->table->setModel(new EstoquePrazoProxyModel(&modelViewColeta, this));
+  modelViewColeta.proxyModel = new EstoquePrazoProxyModel(&modelViewColeta, this);
+
+  ui->table->setModel(&modelViewColeta);
 
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("ordemCompra");

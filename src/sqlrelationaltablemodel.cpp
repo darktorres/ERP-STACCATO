@@ -7,18 +7,30 @@
 
 SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *parent) : QSqlRelationalTableModel(parent), limit(limit) {}
 
-QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column)); }
+QVariant SqlRelationalTableModel::data(const int row, const int column) const {
+  if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
+
+  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column));
+}
 
 QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
-  if (QSqlTableModel::fieldIndex(column) == -1) {
+  const int columnIndex = QSqlTableModel::fieldIndex(column);
+
+  if (columnIndex == -1) {
     qApp->enqueueError("Chave '" + column + "' não encontrada na tabela " + QSqlTableModel::tableName());
     return QVariant();
   }
 
-  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)));
+  if (proxyModel) { return proxyModel->data(proxyModel->index(row, columnIndex)); }
+
+  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, columnIndex));
 }
 
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
+  if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
+
+  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), value); }
+
   if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), value)) {
     return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
   }
@@ -29,9 +41,13 @@ bool SqlRelationalTableModel::setData(const int row, const int column, const QVa
 bool SqlRelationalTableModel::setData(const int row, const QString &column, const QVariant &value) {
   if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
 
-  if (QSqlTableModel::fieldIndex(column) == -1) { return qApp->enqueueError(false, "Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName()); }
+  const int columnIndex = QSqlTableModel::fieldIndex(column);
 
-  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, QSqlTableModel::fieldIndex(column)), value)) {
+  if (columnIndex == -1) { return qApp->enqueueError(false, "Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName()); }
+
+  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, columnIndex), value); }
+
+  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, columnIndex), value)) {
     return qApp->enqueueError(false, "Erro inserindo '" + column + "' na tabela '" + tableName() + "': " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) +
                                          " - valor: " + value.toString());
   }

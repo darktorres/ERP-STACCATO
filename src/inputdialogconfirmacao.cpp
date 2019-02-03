@@ -120,7 +120,9 @@ void InputDialogConfirmacao::setupTables() {
     modelEstoque.setHeaderData("lote", "Lote");
     modelEstoque.setHeaderData("bloco", "Bloco");
 
-    ui->tableLogistica->setModel(new SortFilterProxyModel(&modelEstoque, this));
+    modelEstoque.proxyModel = new SortFilterProxyModel(&modelEstoque, this);
+
+    ui->tableLogistica->setModel(&modelEstoque);
 
     ui->tableLogistica->hideColumn("idEstoque");
     ui->tableLogistica->hideColumn("idNFe");
@@ -180,7 +182,9 @@ void InputDialogConfirmacao::setupTables() {
     modelVeiculo.setHeaderData("codComercial", "Cód. Com.");
     modelVeiculo.setHeaderData("formComercial", "Form. Com.");
 
-    ui->tableLogistica->setModel(new SortFilterProxyModel(&modelVeiculo, this));
+    modelVeiculo.proxyModel = new SortFilterProxyModel(&modelVeiculo, this);
+
+    ui->tableLogistica->setModel(&modelVeiculo);
 
     ui->tableLogistica->hideColumn("id");
     ui->tableLogistica->hideColumn("data");

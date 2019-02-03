@@ -30,7 +30,7 @@ private:
   QSqlQueryModel *baseModel = nullptr;
   QStringList persistentColumns;
   // methods
-  auto getColumnIndex(const QString &column) -> int;
+  auto getColumnIndex(const QString &column) const -> int;
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto redoView() -> void;
   auto showContextMenu(const QPoint &pos) -> void;

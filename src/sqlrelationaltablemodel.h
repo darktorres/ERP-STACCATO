@@ -1,6 +1,7 @@
 #ifndef SQLTABLEMODEL_H
 #define SQLTABLEMODEL_H
 
+#include <QAbstractProxyModel>
 #include <QSqlRelationalTableModel>
 
 class SqlRelationalTableModel final : public QSqlRelationalTableModel {
@@ -22,6 +23,8 @@ public:
   auto setTable(const QString &tableName) -> void final;
   auto supportedDropActions() const -> Qt::DropActions final;
   auto insertRowAtEnd() -> int;
+
+  QAbstractProxyModel *proxyModel = nullptr;
 
 private:
   using QSqlRelationalTableModel::data;

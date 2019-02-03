@@ -49,8 +49,9 @@ void SearchDialog::setupTables(const QString &table) {
 
   setFilter(filter);
 
-  proxyModel = new SearchDialogProxyModel(&model, this);
-  ui->table->setModel(proxyModel);
+  model.proxyModel = new SearchDialogProxyModel(&model, this);
+
+  ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
@@ -88,7 +89,7 @@ void SearchDialog::sendUpdateMessage() {
 
   if (selection.isEmpty()) { return; }
 
-  emit itemSelected(proxyModel->data(proxyModel->index(selection.first().row(), model.fieldIndex(primaryKey)), Qt::DisplayRole));
+  emit itemSelected(model.data(selection.first().row(), primaryKey));
 }
 
 bool SearchDialog::prepare_show() {
@@ -139,7 +140,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
 
   if (model.tableName() == "produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
-    const bool isEstoque = proxyModel->data(proxyModel->index(selection.first().row(), model.fieldIndex("estoque")), Qt::DisplayRole).toBool();
+    const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
 
     if (not silent and not selection.isEmpty() and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }

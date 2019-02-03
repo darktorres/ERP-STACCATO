@@ -683,7 +683,9 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("desconto", "Desc. %");
   modelItem.setHeaderData("parcialDesc", "Total");
 
-  ui->tableProdutos->setModel(new SearchDialogProxyModel(&modelItem, this));
+  modelItem.proxyModel = new SearchDialogProxyModel(&modelItem, this);
+
+  ui->tableProdutos->setModel(&modelItem);
 
   ui->tableProdutos->hideColumn("idOrcamentoProduto");
   ui->tableProdutos->hideColumn("idProduto");

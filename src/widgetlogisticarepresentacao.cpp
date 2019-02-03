@@ -60,7 +60,9 @@ void WidgetLogisticaRepresentacao::setupTables() {
 
   modelViewLogisticaRepresentacao.setSort("prazoEntrega", Qt::AscendingOrder);
 
-  ui->table->setModel(new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this));
+  modelViewLogisticaRepresentacao.proxyModel = new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this);
+
+  ui->table->setModel(&modelViewLogisticaRepresentacao);
 
   ui->table->hideColumn("idPedido");
   ui->table->hideColumn("fornecedor");

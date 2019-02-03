@@ -1,6 +1,7 @@
 #ifndef SQLQUERYMODEL_H
 #define SQLQUERYMODEL_H
 
+#include <QAbstractProxyModel>
 #include <QSqlQueryModel>
 
 class SqlQueryModel final : public QSqlQueryModel {
@@ -12,6 +13,8 @@ public:
   auto data(const int row, const QString &column) const -> QVariant;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setQuery(const QString &query, const QSqlDatabase &db = QSqlDatabase()) -> bool;
+
+  QAbstractProxyModel *proxyModel = nullptr;
 
 private:
   using QSqlQueryModel::data;

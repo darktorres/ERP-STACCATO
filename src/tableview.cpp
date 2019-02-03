@@ -38,7 +38,7 @@ void TableView::showContextMenu(const QPoint &pos) {
 
 void TableView::toggleAutoResize() { autoResize = not autoResize; }
 
-int TableView::getColumnIndex(const QString &column) {
+int TableView::getColumnIndex(const QString &column) const {
   int columnIndex = -1;
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
@@ -69,14 +69,17 @@ void TableView::redoView() {
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  QTableView::setModel(model);
+  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
+    QTableView::setModel(temp->proxyModel);
+  } else {
+    if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
+      QTableView::setModel(temp2->proxyModel);
+    } else {
+      QTableView::setModel(model);
+    }
+  }
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
-
-  if (not baseModel) {
-    auto proxyModel = qobject_cast<QAbstractProxyModel *>(QTableView::model());
-    if (proxyModel) { baseModel = qobject_cast<QSqlQueryModel *>(proxyModel->sourceModel()); }
-  }
 
   if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
 

@@ -88,7 +88,9 @@ void FollowUp::setupTables() {
 
   if (not modelViewFollowup.select()) { return; }
 
-  ui->table->setModel(new FollowUpProxyModel(&modelViewFollowup, this));
+  modelViewFollowup.proxyModel = new FollowUpProxyModel(&modelViewFollowup, this);
+
+  ui->table->setModel(&modelViewFollowup);
 
   ui->table->hideColumn("semaforo");
 }

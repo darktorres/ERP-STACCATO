@@ -108,7 +108,9 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");
 
-  ui->tableProdutos->setModel(new SortFilterProxyModel(&modelProdutos, this));
+  modelProdutos.proxyModel = new SortFilterProxyModel(&modelProdutos, this);
+
+  ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataPrevEnt");

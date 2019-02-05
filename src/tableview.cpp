@@ -81,13 +81,13 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
 
-  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
-
   //---------------------------------------
 
-  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
-  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
-  connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
+  if (baseModel) {
+    connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
+    //    connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
+    connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
+  }
 
   //---------------------------------------
 

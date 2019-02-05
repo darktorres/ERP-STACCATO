@@ -381,6 +381,12 @@ bool CadastroTransportadora::cadastrar() {
   if (success) {
     backupEndereco.clear();
     backupVeiculo.clear();
+
+    model.setFilter(primaryKey + " = '" + primaryId + "'");
+
+    modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
+
+    modelVeiculo.setFilter(primaryKey + " = '" + primaryId + "'");
   } else {
     qApp->rollbackTransaction();
     void(model.select());

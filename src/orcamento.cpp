@@ -963,6 +963,10 @@ bool Orcamento::cadastrar() {
 
   if (success) {
     backupItem.clear();
+
+    model.setFilter(primaryKey + " = '" + primaryId + "'");
+
+    modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
   } else {
     qApp->rollbackTransaction();
     void(model.select());

@@ -433,6 +433,10 @@ bool CadastroLoja::cadastrar() {
   if (success) {
     backupEndereco.clear();
     backupConta.clear();
+
+    model.setFilter(primaryKey + " = '" + primaryId + "'");
+
+    modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
   } else {
     qApp->rollbackTransaction();
     void(model.select());

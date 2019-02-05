@@ -29,7 +29,11 @@ QVariant SqlRelationalTableModel::data(const int row, const QString &column) con
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
   if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
 
-  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), value); }
+  if (proxyModel) {
+    if (not proxyModel->setData(proxyModel->index(row, column), value)) {
+      return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
+    }
+  }
 
   if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), value)) {
     return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());

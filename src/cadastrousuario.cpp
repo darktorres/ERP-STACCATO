@@ -79,7 +79,7 @@ void CadastroUsuario::modificarUsuario() {
   ui->comboBoxTipo->setDisabled(true);
 }
 
-bool CadastroUsuario::verifyFields() {
+bool CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
   const auto children = ui->tab->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
@@ -195,6 +195,7 @@ bool CadastroUsuario::cadastrar() {
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
     if (tipo == Tipo::Cadastrar) {
+      // NOTE: those query's below commit transaction so rollback won't work
       QSqlQuery query;
       query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
       query.bindValue(":user", ui->lineEditUser->text().toLower());

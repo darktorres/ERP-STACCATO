@@ -184,6 +184,10 @@ bool CadastroProfissional::cadastrar() {
 
   if (success) {
     backupEndereco.clear();
+
+    model.setFilter(primaryKey + " = '" + primaryId + "'");
+
+    modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
   } else {
     qApp->rollbackTransaction();
     void(model.select());

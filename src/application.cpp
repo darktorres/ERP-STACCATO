@@ -215,8 +215,6 @@ void Application::rollbackTransaction() {
 
   if (QSqlQuery query; not query.exec("ROLLBACK")) { return qApp->enqueueError("Erro rollback: " + query.lastError().text()); }
 
-  QSqlQuery("ROLLBACK").exec();
-
   inTransaction = false;
   delayMessages = false;
 

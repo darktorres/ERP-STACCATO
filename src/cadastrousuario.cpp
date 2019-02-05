@@ -54,18 +54,6 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_estoque", "Ver Estoque?");
   modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
-
-  modelPermissoes.proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
-
-  ui->table->setModel(&modelPermissoes);
-
-  ui->table->hideRow(0);                                          // idUsuario
-  ui->table->hideRow(modelPermissoes.proxyModel->rowCount() - 1); // created
-  ui->table->hideRow(modelPermissoes.proxyModel->rowCount() - 2); // lastUpdated
-
-  ui->table->setItemDelegate(new CheckBoxDelegate(this));
-
-  ui->table->horizontalHeader()->setVisible(false);
 }
 
 void CadastroUsuario::modificarUsuario() {
@@ -148,6 +136,16 @@ bool CadastroUsuario::viewRegister() {
   modelPermissoes.setFilter("idUsuario = " + data("idUsuario").toString());
 
   if (not modelPermissoes.select()) { return false; }
+
+  ui->table->setModel(new HorizontalProxyModel(&modelPermissoes, this));
+
+  ui->table->hideRow(0);                                  // idUsuario
+  ui->table->hideRow(ui->table->model()->rowCount() - 1); // created
+  ui->table->hideRow(ui->table->model()->rowCount() - 2); // lastUpdated
+
+  ui->table->setItemDelegate(new CheckBoxDelegate(this));
+
+  ui->table->horizontalHeader()->setVisible(false);
 
   for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
 

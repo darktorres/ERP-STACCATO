@@ -352,84 +352,7 @@
        </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout_8">
-         <item row="1" column="0" colspan="2">
-          <widget class="WidgetPagamentos" name="widgetPgts" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QPushButton" name="pushButtonAdicionarPagamento">
-           <property name="minimumSize">
-            <size>
-             <width>650</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Adicionar pagamento</string>
-           </property>
-           <property name="autoDefault">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0" colspan="2">
-          <widget class="QFrame" name="framePgtTotal">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QPushButton" name="pushButtonLimparPag">
-              <property name="text">
-               <string>Limpar pagamentos</string>
-              </property>
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="labelRestante">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Total Pagamentos:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBoxTotalPag">
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-              <property name="buttonSymbols">
-               <enum>QAbstractSpinBox::NoButtons</enum>
-              </property>
-              <property name="showGroupSeparator" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="prefix">
-               <string>R$ </string>
-              </property>
-              <property name="maximum">
-               <double>999999.989999999990687</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="3" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="labelRestante_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -445,7 +368,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="doubleSpinBoxTotal">
            <property name="readOnly">
             <bool>true</bool>
@@ -461,6 +384,16 @@
            </property>
            <property name="maximum">
             <double>999999.989999999990687</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="WidgetPagamentos" name="widgetPgts" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
           </widget>
          </item>

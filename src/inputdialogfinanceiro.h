@@ -39,14 +39,9 @@ private:
   auto on_dateEditPgtSt_dateChanged(const QDate &) -> void;
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(double) -> void;
-  auto on_doubleSpinBoxPgt_valueChanged() -> void;
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
-  auto on_doubleSpinBoxTotalPag_valueChanged(double) -> void;
-  auto on_pushButtonAdicionarPagamento_clicked() -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
-  auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto resetarPagamentos() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

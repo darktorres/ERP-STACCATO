@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -10,14 +11,22 @@
 #include "usersession.h"
 #include "widgetpagamentos.h"
 
-WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QScrollArea(parent), ui(new Ui::WidgetPagamentos) {
+WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamentos) {
   ui->setupUi(this);
-  setWidgetResizable(true);
+
+  //---------------------------------------------------
+
+  ui->scrollArea->setWidgetResizable(true);
 
   auto *frame = new QFrame(this);
   auto *scrollLayout = new QVBoxLayout(frame);
   scrollLayout->setSizeConstraint(QLayout::SetMinimumSize);
-  setWidget(frame);
+  ui->scrollArea->setWidget(frame);
+
+  //---------------------------------------------------
+
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked);
+  connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonLimparPag_clicked);
 }
 
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
@@ -30,7 +39,7 @@ bool WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   frame->setLayout(layout);
   // label
   auto *labelPagamento = new QLabel(this);
-  labelPagamento->setText("Pgt." + QString::number(widget()->children().size()));
+  labelPagamento->setText("Pgt." + QString::number(ui->scrollArea->widget()->children().size()));
   layout->addWidget(labelPagamento);
   // combobox pgt
   auto *comboBoxPgt = new QComboBox(this);
@@ -75,11 +84,12 @@ bool WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   doubleSpinBoxPgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   doubleSpinBoxPgt->setMinimumWidth(80);
   doubleSpinBoxPgt->setPrefix("R$ ");
-  doubleSpinBoxPgt->setMaximum(restante);
+  //  doubleSpinBoxPgt->setMaximum(restante);
+  doubleSpinBoxPgt->setMaximum(total);
   doubleSpinBoxPgt->setValue(restante);
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
   layout->addWidget(doubleSpinBoxPgt);
-  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::valueChanged);
+  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
   listDoubleSpinPgt << doubleSpinBoxPgt;
   // dateedit
   auto *dateEditPgt = new QDateEdit(this);
@@ -97,7 +107,7 @@ bool WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   layout->addWidget(lineEditPgt);
   listLinePgt << lineEditPgt;
   //
-  widget()->layout()->addWidget(frame);
+  ui->scrollArea->widget()->layout()->addWidget(frame);
 
   return true;
 }
@@ -107,7 +117,7 @@ bool WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   frame->setLayout(new QHBoxLayout(frame));
   // label
   auto *labelPagamento = new QLabel(frame);
-  labelPagamento->setText("Pgt." + QString::number(widget()->children().size()));
+  labelPagamento->setText("Pgt." + QString::number(ui->scrollArea->widget()->children().size()));
   frame->layout()->addWidget(labelPagamento);
   // checkbox
   auto *checkboxRep = new QCheckBox(frame);
@@ -162,7 +172,7 @@ bool WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   doubleSpinBoxPgt->setValue(restante);
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
   frame->layout()->addWidget(doubleSpinBoxPgt);
-  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::valueChanged);
+  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
   listDoubleSpinPgt << doubleSpinBoxPgt;
   // dateedit
   auto *dateEditPgt = new QDateEdit(frame);
@@ -181,7 +191,7 @@ bool WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   listLinePgt << lineEditPgt;
   //
 
-  widget()->layout()->addWidget(frame);
+  ui->scrollArea->widget()->layout()->addWidget(frame);
 
   return true;
 }
@@ -240,7 +250,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 }
 
 void WidgetPagamentos::resetarPagamentos() {
-  for (auto item : widget()->children()) {
+  for (auto item : ui->scrollArea->widget()->children()) {
     if (qobject_cast<QFrame *>(item)) { delete item; }
   }
 
@@ -251,4 +261,69 @@ void WidgetPagamentos::resetarPagamentos() {
   listDatePgt.clear();
   listDoubleSpinPgt.clear();
   listLinePgt.clear();
+
+  ui->doubleSpinBoxTotalPag->setValue(0);
+
+  emit montarFluxoCaixa();
 }
+
+void WidgetPagamentos::setTipo(const Tipo &value) {
+  tipo = value;
+
+  if (tipo == Tipo::Compra) {
+    ui->label_4->hide();
+    ui->doubleSpinBoxCreditoTotal->hide();
+    ui->pushButtonFreteLoja->hide();
+    ui->pushButtonPgtLoja->hide();
+  }
+}
+
+void WidgetPagamentos::calcularTotal() {
+  double sum = 0;
+
+  for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum += spinbox->value(); }
+
+  ui->doubleSpinBoxTotalPag->setValue(sum);
+
+  // 699
+  // 0
+
+  // 697
+  // 1
+
+  //---------------------------------------------------
+
+  auto lastSpinBox = listDoubleSpinPgt.last();
+  sum -= lastSpinBox->value();
+
+  const double leftOver = total - sum;
+
+  qDebug() << "total: " << total;
+  qDebug() << "sum: " << sum;
+
+  qDebug() << (qAbs(total - sum) < 0.1);
+  if (qAbs(total - sum) < 1) { return; }
+
+  qDebug() << "leftover: " << leftOver;
+
+  if (leftOver < 0) { return; }
+
+  lastSpinBox->setMaximum(total);
+  lastSpinBox->setValue(leftOver);
+}
+
+void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
+  if (tipo == Tipo::Compra) { adicionarPagamentoCompra(total - ui->doubleSpinBoxTotalPag->value()); }
+
+  if (tipo == Tipo::Venda) { adicionarPagamentoVenda(false, "", 0, 0); }
+
+  //---------------------------------------------------
+
+  calcularTotal();
+
+  //---------------------------------------------------
+
+  emit montarFluxoCaixa();
+}
+
+void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }

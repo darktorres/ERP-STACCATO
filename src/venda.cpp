@@ -32,6 +32,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   setupTables();
 
+  ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Venda);
+
   ui->itemBoxCliente->setRegisterDialog(new CadastroCliente(this));
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
@@ -1287,7 +1289,7 @@ void Venda::on_pushButtonAdicionarPagamento_clicked() {
   }
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, this, &Venda::montarFluxoCaixa);
-  connect(ui->widgetPgts, &WidgetPagamentos::valueChanged, this, &Venda::on_doubleSpinBoxPgt_valueChanged);
+  //  connect(ui->widgetPgts, &WidgetPagamentos::valueChanged, this, &Venda::on_doubleSpinBoxPgt_valueChanged);
 
   on_doubleSpinBoxPgt_valueChanged();
 }

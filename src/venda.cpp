@@ -1082,6 +1082,24 @@ bool Venda::cancelamento() {
 void Venda::on_pushButtonCancelamento_clicked() {
   // TODO: perguntar e salvar motivo do cancelamento
 
+  // caso pedido nao seja do mes atual, bloquear se nao estiver no primeiro dia util
+  const QDate dataVenda = data("data").toDate();
+  const QDate dataAtual = QDate::currentDate();
+
+  if (dataVenda.month() != dataAtual.month()) {
+    const int diaSemana = dataAtual.dayOfWeek();
+    const int dia = dataAtual.day();
+
+    bool allowed = false;
+
+    if (dia == 1) { allowed = true; }
+    if (diaSemana == 1 and dia < 4) { allowed = true; }
+
+    if (not allowed) { return qApp->enqueueError("Não está no primeiro dia útil do mês!", this); }
+  }
+
+  // -------------------------------------------------------------------------
+
   bool ok = true;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1093,11 +1111,15 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   if (not ok) { return qApp->enqueueError("Um ou mais produtos não estão pendentes!", this); }
 
+  // -------------------------------------------------------------------------
+
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar venda");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() != QMessageBox::Yes) { return; }
+
+  // -------------------------------------------------------------------------
 
   if (not qApp->startTransaction()) { return; }
 

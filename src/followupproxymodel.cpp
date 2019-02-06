@@ -3,7 +3,7 @@
 #include "followupproxymodel.h"
 #include "usersession.h"
 
-FollowUpProxyModel::FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->fieldIndex("semaforo")) { setSourceModel(model); }
+FollowUpProxyModel::FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->fieldIndex("semaforo", true)) { setSourceModel(model); }
 
 QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (semaforoColumn != -1) {

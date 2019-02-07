@@ -1,12 +1,9 @@
-#include <QDebug>
-#include <QHBoxLayout>
-#include <QLabel>
 #include <QLineEdit>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QVBoxLayout>
 
 #include "application.h"
+#include "logindialog.h"
 #include "ui_widgetpagamentos.h"
 #include "usersession.h"
 #include "widgetpagamentos.h"
@@ -27,21 +24,75 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui
 
   connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked);
   connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonLimparPag_clicked);
+  connect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonPgtLoja_clicked);
+  connect(ui->pushButtonFreteLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonFreteLoja_clicked);
 }
 
 WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 
-bool WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
-  // REFAC: refactor this with the other adicionarPagamento
-
-  auto *frame = new QFrame(this);
-  auto *layout = new QHBoxLayout(frame);
-  frame->setLayout(layout);
-  // label
+void WidgetPagamentos::labelPagamento(QHBoxLayout *layout) {
   auto *labelPagamento = new QLabel(this);
   labelPagamento->setText("Pgt." + QString::number(ui->scrollArea->widget()->children().size()));
   layout->addWidget(labelPagamento);
-  // combobox pgt
+}
+
+void WidgetPagamentos::lineEditPgt(QHBoxLayout *layout) {
+  auto *lineEditPgt = new QLineEdit(this);
+  lineEditPgt->setPlaceholderText("Observação");
+  connect(lineEditPgt, &QLineEdit::textChanged, this, &WidgetPagamentos::montarFluxoCaixa);
+  layout->addWidget(lineEditPgt);
+  listLinePgt << lineEditPgt;
+}
+
+void WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
+  auto *dateEditPgt = new QDateEdit(this);
+  dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  dateEditPgt->setDisplayFormat("dd/MM/yy");
+  dateEditPgt->setCalendarPopup(true);
+  dateEditPgt->setDate(QDate::currentDate());
+  connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
+  layout->addWidget(dateEditPgt);
+  listDatePgt << dateEditPgt;
+}
+
+void WidgetPagamentos::doubleSpinBoxPgt(QHBoxLayout *layout) {
+  const double restante = total - ui->doubleSpinBoxTotalPag->value();
+
+  auto *doubleSpinBoxPgt = new QDoubleSpinBox(this);
+  doubleSpinBoxPgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  doubleSpinBoxPgt->setMinimumWidth(80);
+  doubleSpinBoxPgt->setPrefix("R$ ");
+  doubleSpinBoxPgt->setMaximum(total);
+  doubleSpinBoxPgt->setValue(restante);
+  doubleSpinBoxPgt->setGroupSeparatorShown(true);
+  layout->addWidget(doubleSpinBoxPgt);
+  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+  listDoubleSpinPgt << doubleSpinBoxPgt;
+}
+
+void WidgetPagamentos::comboBoxParc(QHBoxLayout *layout) {
+  auto *comboboxPgtParc = new QComboBox(this);
+  comboboxPgtParc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  comboboxPgtParc->setMaximumWidth(45);
+  connect(comboboxPgtParc, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
+  layout->addWidget(comboboxPgtParc);
+  listComboParc << comboboxPgtParc;
+}
+
+void WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
+  auto *comboBoxData = new QComboBox(this);
+  comboBoxData->insertItem(0, "Data Mês");
+  comboBoxData->insertItem(1, "Data + 1 Mês");
+  comboBoxData->insertItem(2, "14");
+  comboBoxData->insertItem(3, "20");
+  comboBoxData->insertItem(4, "28");
+  comboBoxData->insertItem(5, "30");
+  layout->addWidget(comboBoxData);
+  connect(comboBoxData, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
+  listComboData << comboBoxData;
+}
+
+bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   auto *comboBoxPgt = new QComboBox(this);
   comboBoxPgt->setMinimumWidth(140);
 
@@ -61,76 +112,26 @@ bool WidgetPagamentos::adicionarPagamentoCompra(const double restante) {
   layout->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listComboPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listComboPgt << comboBoxPgt;
-  // combobox data
-  auto *comboBoxData = new QComboBox(this);
-  comboBoxData->insertItem(0, "Data Mês");
-  comboBoxData->insertItem(1, "Data + 1 Mês");
-  comboBoxData->insertItem(2, "14");
-  comboBoxData->insertItem(3, "20");
-  comboBoxData->insertItem(4, "28");
-  comboBoxData->insertItem(5, "30");
-  layout->addWidget(comboBoxData);
-  connect(comboBoxData, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  listComboData << comboBoxData;
-  // combobox parc
-  auto *comboboxPgtParc = new QComboBox(this);
-  comboboxPgtParc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-  comboboxPgtParc->setMaximumWidth(45);
-  connect(comboboxPgtParc, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  layout->addWidget(comboboxPgtParc);
-  listComboParc << comboboxPgtParc;
-  // doublespinbox
-  auto *doubleSpinBoxPgt = new QDoubleSpinBox(this);
-  doubleSpinBoxPgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  doubleSpinBoxPgt->setMinimumWidth(80);
-  doubleSpinBoxPgt->setPrefix("R$ ");
-  //  doubleSpinBoxPgt->setMaximum(restante);
-  doubleSpinBoxPgt->setMaximum(total);
-  doubleSpinBoxPgt->setValue(restante);
-  doubleSpinBoxPgt->setGroupSeparatorShown(true);
-  layout->addWidget(doubleSpinBoxPgt);
-  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
-  listDoubleSpinPgt << doubleSpinBoxPgt;
-  // dateedit
-  auto *dateEditPgt = new QDateEdit(this);
-  dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-  dateEditPgt->setDisplayFormat("dd/MM/yy");
-  dateEditPgt->setCalendarPopup(true);
-  dateEditPgt->setDate(QDate::currentDate());
-  connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  layout->addWidget(dateEditPgt);
-  listDatePgt << dateEditPgt;
-  // lineedit
-  auto *lineEditPgt = new QLineEdit(this);
-  lineEditPgt->setPlaceholderText("Observação");
-  connect(lineEditPgt, &QLineEdit::textChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  layout->addWidget(lineEditPgt);
-  listLinePgt << lineEditPgt;
-  //
-  ui->scrollArea->widget()->layout()->addWidget(frame);
 
   return true;
 }
 
-bool WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const QString &idOrcamento, const double creditoTotal, const double restante) {
-  auto *frame = new QFrame(this);
-  frame->setLayout(new QHBoxLayout(frame));
-  // label
-  auto *labelPagamento = new QLabel(frame);
-  labelPagamento->setText("Pgt." + QString::number(ui->scrollArea->widget()->children().size()));
-  frame->layout()->addWidget(labelPagamento);
-  // checkbox
+void WidgetPagamentos::checkBoxRep(QFrame *frame, QHBoxLayout *layout) {
   auto *checkboxRep = new QCheckBox(frame);
   checkboxRep->setText("Fornecedor");
   checkboxRep->setVisible(representacao);
   checkboxRep->setChecked(representacao);
   checkboxRep->setEnabled(false);
   connect(checkboxRep, &QCheckBox::stateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(checkboxRep);
+  layout->addWidget(checkboxRep);
   listCheckBoxRep << checkboxRep;
-  // combo
+}
+
+bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
   auto *comboBoxPgt = new QComboBox(frame);
   comboBoxPgt->setMinimumWidth(140);
+
+  if (idOrcamento.isEmpty()) { return qApp->enqueueError(false, "Orçamento vazio!", this); }
 
   QSqlQuery queryOrc;
   queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioConsultor, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, "
@@ -152,82 +153,26 @@ bool WidgetPagamentos::adicionarPagamentoVenda(const bool representacao, const Q
   }());
 
   comboBoxPgt->insertItems(0, list);
-  if (creditoTotal > 0) { comboBoxPgt->addItem("Conta Cliente"); }
-  frame->layout()->addWidget(comboBoxPgt);
-  connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listComboPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText(), creditoTotal); });
+  if (credito > 0) { comboBoxPgt->addItem("Conta Cliente"); }
+  layout->addWidget(comboBoxPgt);
+  connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listComboPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listComboPgt << comboBoxPgt;
-  // combo
-  auto *comboboxPgtParc = new QComboBox(frame);
-  comboboxPgtParc->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-  comboboxPgtParc->setMaximumWidth(45);
-  connect(comboboxPgtParc, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(comboboxPgtParc);
-  listComboParc << comboboxPgtParc;
-  // doublespinbox
-  auto *doubleSpinBoxPgt = new QDoubleSpinBox(frame);
-  doubleSpinBoxPgt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  doubleSpinBoxPgt->setMinimumWidth(80);
-  doubleSpinBoxPgt->setPrefix("R$ ");
-  doubleSpinBoxPgt->setMaximum(restante);
-  doubleSpinBoxPgt->setValue(restante);
-  doubleSpinBoxPgt->setGroupSeparatorShown(true);
-  frame->layout()->addWidget(doubleSpinBoxPgt);
-  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
-  listDoubleSpinPgt << doubleSpinBoxPgt;
-  // dateedit
-  auto *dateEditPgt = new QDateEdit(frame);
-  dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-  dateEditPgt->setDisplayFormat("dd/MM/yy");
-  dateEditPgt->setCalendarPopup(true);
-  dateEditPgt->setDate(QDate::currentDate());
-  connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(dateEditPgt);
-  listDatePgt << dateEditPgt;
-  // lineedit
-  auto *lineEditPgt = new QLineEdit(frame);
-  lineEditPgt->setPlaceholderText("Observação");
-  connect(lineEditPgt, &QLineEdit::textChanged, this, &WidgetPagamentos::montarFluxoCaixa);
-  frame->layout()->addWidget(lineEditPgt);
-  listLinePgt << lineEditPgt;
-  //
-
-  ui->scrollArea->widget()->layout()->addWidget(frame);
 
   return true;
 }
 
-void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text, const double creditoTotal) {
+void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
   if (text == "Escolha uma opção!") { return; }
 
   if (text == "Conta Cliente") {
-    listDoubleSpinPgt.at(index)->setMaximum(creditoTotal);
+    listDoubleSpinPgt.at(index)->setMaximum(credito);
     listComboParc.at(index)->clear();
     listComboParc.at(index)->addItem("1x");
     emit montarFluxoCaixa();
     return;
   }
 
-  QSqlQuery query;
-  query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
-  query.bindValue(":pagamento", listComboPgt.at(index)->currentText());
-
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
-
-  const int parcelas = query.value("parcelas").toInt();
-
-  listComboParc.at(index)->clear();
-
-  for (int i = 0; i < parcelas; ++i) { listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
-
-  listComboParc.at(index)->setEnabled(true);
-
-  listDatePgt.at(index)->setEnabled(true);
-
-  emit montarFluxoCaixa();
-}
-
-void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
-  if (text == "Escolha uma opção!") { return; }
+  listDoubleSpinPgt.at(index)->setMaximum(total);
 
   QSqlQuery query;
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
@@ -267,6 +212,22 @@ void WidgetPagamentos::resetarPagamentos() {
   emit montarFluxoCaixa();
 }
 
+double WidgetPagamentos::getTotalPag() { return ui->doubleSpinBoxTotalPag->value(); }
+
+void WidgetPagamentos::setCredito(const double creditoCliente) {
+  credito = creditoCliente;
+  ui->doubleSpinBoxCreditoTotal->setValue(creditoCliente);
+}
+
+void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
+  representacao = isRepresentacao;
+
+  if (not isRepresentacao) {
+    ui->pushButtonFreteLoja->hide();
+    ui->pushButtonPgtLoja->hide();
+  }
+}
+
 void WidgetPagamentos::setTipo(const Tipo &value) {
   tipo = value;
 
@@ -278,52 +239,110 @@ void WidgetPagamentos::setTipo(const Tipo &value) {
   }
 }
 
+void WidgetPagamentos::setTotal(double value) { total = value; }
+
+void WidgetPagamentos::setFrete(double value) { frete = value; }
+
+void WidgetPagamentos::setIdOrcamento(const QString &value) { idOrcamento = value; }
+
+double WidgetPagamentos::getCredito() const { return credito; }
+
 void WidgetPagamentos::calcularTotal() {
   double sum = 0;
 
   for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum += spinbox->value(); }
 
-  ui->doubleSpinBoxTotalPag->setValue(sum);
-
-  // 699
-  // 0
-
-  // 697
-  // 1
-
-  //---------------------------------------------------
-
   auto lastSpinBox = listDoubleSpinPgt.last();
+
+  disconnect(lastSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+
   sum -= lastSpinBox->value();
 
   const double leftOver = total - sum;
 
-  qDebug() << "total: " << total;
-  qDebug() << "sum: " << sum;
-
-  qDebug() << (qAbs(total - sum) < 0.1);
-  if (qAbs(total - sum) < 1) { return; }
-
-  qDebug() << "leftover: " << leftOver;
-
-  if (leftOver < 0) { return; }
-
-  lastSpinBox->setMaximum(total);
   lastSpinBox->setValue(leftOver);
-}
 
-void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
-  if (tipo == Tipo::Compra) { adicionarPagamentoCompra(total - ui->doubleSpinBoxTotalPag->value()); }
+  connect(lastSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
 
-  if (tipo == Tipo::Venda) { adicionarPagamentoVenda(false, "", 0, 0); }
-
-  //---------------------------------------------------
-
-  calcularTotal();
-
-  //---------------------------------------------------
+  ui->doubleSpinBoxTotalPag->setValue(sum + leftOver);
 
   emit montarFluxoCaixa();
 }
 
+void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
+  auto *frame = new QFrame(this);
+  auto *layout = new QHBoxLayout(frame);
+  frame->setLayout(layout);
+
+  labelPagamento(layout);
+
+  if (tipo == Tipo::Venda) {
+    checkBoxRep(frame, layout);
+    if (not comboBoxPgtVenda(frame, layout)) { return; }
+  }
+
+  if (tipo == Tipo::Compra) {
+    if (not comboBoxPgtCompra(layout)) { return; }
+    comboBoxData(layout);
+  }
+
+  comboBoxParc(layout);
+  doubleSpinBoxPgt(layout);
+  dateEditPgt(layout);
+  lineEditPgt(layout);
+
+  ui->scrollArea->widget()->layout()->addWidget(frame);
+
+  //---------------------------------------------------
+
+  calcularTotal();
+}
+
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
+
+void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
+  LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+  if (dialog.exec() == QDialog::Rejected) { return; }
+
+  for (auto item : std::as_const(listCheckBoxRep)) { item->setChecked(false); }
+}
+
+void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
+  if (qFuzzyIsNull(frete)) { return qApp->enqueueError("Não há frete!", this); }
+
+  resetarPagamentos();
+
+  on_pushButtonAdicionarPagamento_clicked();
+  on_pushButtonAdicionarPagamento_clicked();
+
+  listCheckBoxRep.at(0)->setChecked(false);
+  listLinePgt.at(0)->setText("Frete");
+  listLinePgt.at(0)->setReadOnly(true);
+  listDoubleSpinPgt.at(0)->setValue(frete);
+  listDoubleSpinPgt.at(0)->setReadOnly(true);
+}
+
+bool WidgetPagamentos::verifyFields() {
+  for (int i = 0; i < listCheckBoxRep.size(); ++i) {
+    if (listComboPgt.at(i)->currentText() != "Escolha uma opção!" and listLinePgt.at(i)->text().isEmpty()) {
+      qApp->enqueueError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
+      listLinePgt.at(i)->setFocus();
+      return false;
+    }
+
+    if (listDoubleSpinPgt.at(i)->value() > 0 and listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
+      qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
+      listComboPgt.at(i)->setFocus();
+      return false;
+    }
+
+    if (qFuzzyIsNull(listDoubleSpinPgt.at(i)->value()) and listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
+      qApp->enqueueError("Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
+      listDoubleSpinPgt.at(i)->setFocus();
+      return false;
+    }
+  }
+
+  return true;
+}

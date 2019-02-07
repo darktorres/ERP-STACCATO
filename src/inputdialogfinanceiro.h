@@ -33,7 +33,6 @@ private:
   auto calcularTotal() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
-  auto on_comboBoxPgt_currentTextChanged(const int index, const QString &text) -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
   auto on_dateEditPgtSt_dateChanged(const QDate &) -> void;

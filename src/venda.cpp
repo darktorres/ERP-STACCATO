@@ -339,6 +339,8 @@ bool Venda::verifyFields() {
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
 
+  if (ui->widgetPgts->isHidden()) { return true; }
+
   if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
 
   if (not ui->widgetPgts->verifyFields()) { return false; }

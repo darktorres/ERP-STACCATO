@@ -4,7 +4,6 @@
 #include <QSqlQuery>
 
 #include "application.h"
-#include "checkboxdelegate.h"
 #include "comboboxdelegate.h"
 #include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
@@ -24,14 +23,12 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
   ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Compra);
 
-  //  ui->pushButtonAdicionarPagamento->hide();
   ui->widgetPgts->hide();
 
   ui->frameData->hide();
   ui->frameDataPreco->hide();
   ui->checkBoxMarcarTodos->hide();
   ui->groupBoxFinanceiro->hide();
-  //  ui->framePgtTotal->hide();
 
   ui->labelAliquota->hide();
   ui->doubleSpinBoxAliquota->hide();
@@ -47,12 +44,10 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
     ui->frameDataPreco->show();
     ui->frameFrete->show();
     ui->checkBoxMarcarTodos->show();
-    //    ui->framePgtTotal->show();
 
     ui->labelEvento->setText("Data confirmação:");
     ui->labelProximoEvento->setText("Data prevista faturamento:");
 
-    //    ui->pushButtonAdicionarPagamento->show();
     ui->widgetPgts->show();
   }
 
@@ -65,7 +60,7 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
   setConnections();
 
-  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { this->montarFluxoCaixa(); });
+  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(); });
 
   show();
 }
@@ -354,6 +349,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     }
   }();
 
+  ui->tableFluxoCaixa->resizeColumnsToContents();
+
   setConnections();
 }
 
@@ -368,7 +365,7 @@ void InputDialogFinanceiro::calcularTotal() {
     for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
 
     ui->doubleSpinBoxTotal->setValue(total);
-    ui->widgetPgts->total = total;
+    ui->widgetPgts->setTotal(total);
   }();
 
   setConnections();
@@ -401,7 +398,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (not modelPedidoFornecedor.select()) { return false; }
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
-    modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra);
+    modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra + " AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");
 
     if (not modelFluxoCaixa.select()) { return false; }
 
@@ -422,6 +419,8 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   representacao = query.value("representacao").toBool();
 
   if (representacao) { ui->framePagamentos->hide(); }
+
+  ui->widgetPgts->setRepresentacao(representacao);
 
   setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
 
@@ -461,22 +460,9 @@ bool InputDialogFinanceiro::verifyFields() {
   if (ui->table->selectionModel()->selectedRows().isEmpty()) { return qApp->enqueueError(false, "Nenhum item selecionado!", this); }
 
   if (not representacao) {
-    //    if (not qFuzzyCompare(ui->doubleSpinBoxTotalPag->value(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Soma dos pagamentos difere do total! Favor verificar!", this);
-    //    }
+    if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { return qApp->enqueueError(false, "Soma dos pagamentos difere do total! Favor verificar!", this); }
 
-    for (int i = 0; i < ui->widgetPgts->listComboPgt.size(); ++i) {
-      if (ui->widgetPgts->listDoubleSpinPgt.at(i)->value() > 0 and ui->widgetPgts->listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
-        qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
-        ui->widgetPgts->listComboPgt.at(i)->setFocus();
-        return false;
-      }
-
-      if (qFuzzyIsNull(ui->widgetPgts->listDoubleSpinPgt.at(i)->value()) and ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
-        qApp->enqueueError("Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
-        ui->widgetPgts->listDoubleSpinPgt.at(i)->setFocus();
-        return false;
-      }
-    }
+    if (not ui->widgetPgts->verifyFields()) { return false; }
   }
 
   return true;
@@ -527,27 +513,6 @@ void InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked() {
 void InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged(double) {
   calcularTotal();
   ui->widgetPgts->resetarPagamentos();
-}
-
-void InputDialogFinanceiro::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
-  if (text == "Escolha uma opção!") { return; }
-
-  QSqlQuery query;
-  query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
-  query.bindValue(":pagamento", ui->widgetPgts->listComboPgt.at(index)->currentText());
-
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
-
-  const int parcelas = query.value("parcelas").toInt();
-
-  ui->widgetPgts->listComboParc.at(index)->clear();
-
-  for (int i = 0; i < parcelas; ++i) { ui->widgetPgts->listComboParc.at(index)->addItem(QString::number(i + 1) + "x"); }
-
-  ui->widgetPgts->listComboParc.at(index)->setEnabled(true);
-  ui->widgetPgts->listDatePgt.at(index)->setEnabled(true);
-
-  montarFluxoCaixa();
 }
 
 void InputDialogFinanceiro::on_dateEditPgtSt_dateChanged(const QDate &) { montarFluxoCaixa(false); }

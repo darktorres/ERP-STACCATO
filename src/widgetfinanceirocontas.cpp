@@ -247,6 +247,8 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("status", "Status");
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
+  model.proxyModel = new SortFilterProxyModel(&model, this);
+
   ui->table->setModel(&model);
   ui->table->hideColumn("representacao");
   ui->table->hideColumn("idPagamento");

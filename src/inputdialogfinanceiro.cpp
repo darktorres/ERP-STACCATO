@@ -56,6 +56,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
     ui->groupBoxFinanceiro->show();
 
     ui->frameAdicionais->hide();
+
+    ui->table->setSelectionMode(QTableView::NoSelection);
   }
 
   setConnections();
@@ -77,11 +79,9 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
+  connect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    connect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
-    connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
-  }
+  if (tipo == Tipo::ConfirmarCompra) { connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal); }
 }
 
 void InputDialogFinanceiro::unsetConnections() {
@@ -94,11 +94,9 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
+  disconnect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    disconnect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
-    disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal);
-  }
+  if (tipo == Tipo::ConfirmarCompra) { disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal); }
 }
 
 void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double aliquota) {
@@ -152,6 +150,7 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor.setHeaderData("obs", "Obs.");
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
+  modelPedidoFornecedor.setHeaderData("status", "Status");
 
   modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
 
@@ -167,7 +166,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");
-  ui->table->hideColumn("status");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
   ui->table->hideColumn("dataPrevConf");
@@ -362,7 +360,13 @@ void InputDialogFinanceiro::calcularTotal() {
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
+    if (tipo == Tipo::ConfirmarCompra) {
+      for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
+    }
+
+    if (tipo == Tipo::Financeiro) {
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+    }
 
     ui->doubleSpinBoxTotal->setValue(total);
     ui->widgetPgts->setTotal(total);

@@ -105,6 +105,16 @@ void XML::lerIPIProduto(const QStandardItem *child) {
 
   if (child->parent()->text() == "IPI") {
     if (text.left(6) == "cEnq -") { cEnq = text.remove(0, 7).toInt(); }
+  }
+
+  if (child->parent()->text() == "IPITrib") {
+    if (text.left(5) == "CST -") { cstIPI = text.remove(0, 6).toInt(); }
+    if (text.left(5) == "vBC -") { vBCIPI = text.remove(0, 6).toDouble(); }
+    if (text.left(6) == "pIPI -") { pIPI = text.remove(0, 7).toDouble(); }
+    if (text.left(6) == "vIPI -") { vIPI = text.remove(0, 7).toDouble(); }
+  }
+
+  if (child->parent()->text() == "IPINT") {
     if (text.left(5) == "CST -") { cstIPI = text.remove(0, 6).toInt(); }
   }
 }

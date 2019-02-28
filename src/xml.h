@@ -56,6 +56,9 @@ public:
   // ipi
   int cEnq = 0;
   int cstIPI = 0;
+  double vBCIPI = 0;
+  double pIPI = 0;
+  double vIPI = 0;
   // pis
   int cstPIS = 0;
   double vBCPIS = 0;

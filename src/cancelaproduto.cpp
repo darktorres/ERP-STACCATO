@@ -102,7 +102,7 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
     QSqlQuery queryCompra;
     queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido = :idPedido");
 
-    const QString status = tipo == Tipo::CompraConfirmar ? "EM COMPRA" : "EM FATURAMENTO";
+    const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 
     QSqlQuery queryVenda;
     queryVenda.prepare(
@@ -110,6 +110,7 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
         "= NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
         "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
         status + "' AND idVendaProduto = :idVendaProduto");
+    // TODO: bind status?
 
     QStringList idVendas;
 

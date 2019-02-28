@@ -93,6 +93,9 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("pICMSST");
   ui->tableEstoque->hideColumn("cEnq");
   ui->tableEstoque->hideColumn("cstIPI");
+  ui->tableEstoque->hideColumn("vBCIPI");
+  ui->tableEstoque->hideColumn("pIPI");
+  ui->tableEstoque->hideColumn("vIPI");
   ui->tableEstoque->hideColumn("cstPIS");
   ui->tableEstoque->hideColumn("vBCPIS");
   ui->tableEstoque->hideColumn("pPIS");
@@ -101,6 +104,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   // -------------------------------------------------------------------------
 
@@ -570,6 +574,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) { return false; }
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
+  if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
 
   return true;
 }
@@ -638,8 +643,8 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "codComercial", xml.codProd)) { return false; }
   if (not modelEstoque.setData(newRow, "ncm", xml.ncm)) { return false; }
   if (not modelEstoque.setData(newRow, "cfop", xml.cfop)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorUnid", xml.valorUnid)) { return false; }
-  if (not modelEstoque.setData(newRow, "valor", xml.valor)) { return false; }
+  if (not modelEstoque.setData(newRow, "valorUnid", (xml.valor + xml.vIPI) / xml.quant)) { return false; }
+  if (not modelEstoque.setData(newRow, "valor", xml.valor + xml.vIPI)) { return false; }
   if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) { return false; }
@@ -662,6 +667,9 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "vICMSST", xml.vICMSST)) { return false; }
   if (not modelEstoque.setData(newRow, "cEnq", xml.cEnq)) { return false; }
   if (not modelEstoque.setData(newRow, "cstIPI", xml.cstIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "vBCIPI", xml.vBCIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "pIPI", xml.pIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "vIPI", xml.vIPI)) { return false; }
   if (not modelEstoque.setData(newRow, "cstPIS", xml.cstPIS)) { return false; }
   if (not modelEstoque.setData(newRow, "vBCPIS", xml.vBCPIS)) { return false; }
   if (not modelEstoque.setData(newRow, "pPIS", xml.pPIS)) { return false; }

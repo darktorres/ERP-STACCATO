@@ -86,6 +86,9 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vICMSST");
   ui->tableEstoque->hideColumn("cEnq");
   ui->tableEstoque->hideColumn("cstIPI");
+  ui->tableEstoque->hideColumn("vBCIPI");
+  ui->tableEstoque->hideColumn("pIPI");
+  ui->tableEstoque->hideColumn("vIPI");
   ui->tableEstoque->hideColumn("cstPIS");
   ui->tableEstoque->hideColumn("vBCPIS");
   ui->tableEstoque->hideColumn("pPIS");
@@ -94,6 +97,7 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   //--------------------------------------------------------------------
 

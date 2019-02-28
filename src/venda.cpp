@@ -571,6 +571,8 @@ bool Venda::viewRegister() {
     ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
 
+    ui->splitter_2->hide();
+
     return true;
   }();
 
@@ -1160,6 +1162,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
 
   if (not data("representacao").toBool()) { ui->tableFluxoCaixa->hideColumn("representacao"); }
 
+  ui->splitter_2->show();
   ui->widgetPgts->show();
   ui->widgetPgts->resetarPagamentos();
 

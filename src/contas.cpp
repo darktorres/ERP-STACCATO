@@ -141,8 +141,8 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
   // TODO: 3dateEditDelegate para vencimento
   //  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateEditDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(this));
+  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(QDate::currentDate().addDays(-1), this));
+  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(QDate::currentDate().addDays(-1), this));
 
   if (tipo == Tipo::Receber) {
     //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraParteReceber, this));

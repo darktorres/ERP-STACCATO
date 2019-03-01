@@ -57,12 +57,12 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
     ui->frameAdicionais->hide();
 
-    ui->table->setSelectionMode(QTableView::NoSelection);
+    //    ui->table->setSelectionMode(QTableView::NoSelection);
   }
 
   setConnections();
 
-  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(); });
+  connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(true); });
 
   show();
 }
@@ -285,15 +285,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
     // set st date
     if (updateDate) {
-      QDate date = modelFluxoCaixa.data(0, "dataPagamento").toDate();
-
-      for (int row = 1; row < modelFluxoCaixa.rowCount(); ++row) {
-        const QDate current = modelFluxoCaixa.data(row, "dataPagamento").toDate();
-
-        if (current < date) { date = current; }
-      }
-
-      ui->dateEditPgtSt->setDate(date);
+      if (not ui->widgetPgts->listDatePgt.isEmpty()) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDatePgt.at(0)->date()); }
     }
 
     //----------------------------------------------

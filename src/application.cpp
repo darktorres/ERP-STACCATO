@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.49");
+  setApplicationVersion("0.6.50");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -81,7 +81,8 @@ bool Application::setDatabase() {
   db.setDatabaseName("mydb");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
+  db.setConnectOptions("CLIENT_COMPRESS=1");
+  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
 
   return true;
 }

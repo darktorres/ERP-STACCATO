@@ -125,9 +125,11 @@ void WidgetVenda::setPermissions() {
   if (tipoUsuario == "GERENTE LOJA") {
     ui->groupBoxLojas->hide();
 
+    ui->comboBoxVendedores->clear();
+
     QSqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()))) { return; }
+    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) { return; }
 
     ui->comboBoxVendedores->addItem("");
 
@@ -179,7 +181,6 @@ void WidgetVenda::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro);
   connect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
   connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
-  connect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
   connect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
@@ -212,16 +213,15 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->pushButtonFollowup, &QPushButton::clicked, this, &WidgetVenda::on_pushButtonFollowup_clicked);
   disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->radioButtonProprios, &QRadioButton::toggled, this, &WidgetVenda::on_radioButtonProprios_toggled);
   disconnect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->table, &TableView::activated, this, &WidgetVenda::on_table_activated);
 }
 
 void WidgetVenda::updateTables() {
   if (not isSet) {
+    on_comboBoxLojas_currentIndexChanged();
     setPermissions();
     setConnections();
-    on_comboBoxLojas_currentIndexChanged(0);
     isSet = true;
   }
 
@@ -241,24 +241,35 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
 }
 
-void WidgetVenda::on_radioButtonProprios_toggled(const bool checked) {
-  if (UserSession::tipoUsuario() == "VENDEDOR") { checked ? ui->groupBoxLojas->show() : ui->groupBoxLojas->hide(); }
-}
-
-void WidgetVenda::on_comboBoxLojas_currentIndexChanged(const int) {
+void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
   unsetConnections();
 
-  ui->comboBoxVendedores->clear();
+  [&] {
+    ui->comboBoxVendedores->clear();
 
-  const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
+    const QString filtroLoja = ui->comboBoxLojas->currentText().isEmpty() ? "" : " AND idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
 
-  QSqlQuery query;
+    QSqlQuery query;
 
-  if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" + filtroLoja + " ORDER BY nome")) { return; }
+    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo = 'VENDEDOR'" + filtroLoja + " ORDER BY nome")) { return; }
 
-  ui->comboBoxVendedores->addItem("");
+    ui->comboBoxVendedores->addItem("");
 
-  while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+    while (query.next()) { ui->comboBoxVendedores->addItem(query.value("nome").toString(), query.value("idUsuario")); }
+
+    const QString tipoUsuario = UserSession::tipoUsuario();
+
+    if (tipoUsuario == "VENDEDOR") {
+      const int currentLoja = UserSession::idLoja();
+
+      if (currentLoja != ui->comboBoxLojas->getCurrentValue()) {
+        ui->radioButtonTodos->setDisabled(true);
+        ui->radioButtonProprios->setChecked(true);
+      } else {
+        ui->radioButtonTodos->setEnabled(true);
+      }
+    }
+  }();
 
   setConnections();
 }

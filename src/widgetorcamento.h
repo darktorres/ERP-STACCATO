@@ -26,7 +26,7 @@ private:
   Ui::WidgetOrcamento *ui;
   // methods
   auto montaFiltro() -> void;
-  auto on_comboBoxLojas_currentIndexChanged(const int) -> void;
+  auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCriarOrc_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;

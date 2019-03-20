@@ -85,6 +85,7 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   if (baseModel) {
     connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
+    // TODO: readd this
     //    connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
     connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
   }

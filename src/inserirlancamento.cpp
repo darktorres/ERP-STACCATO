@@ -52,7 +52,7 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
-  ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(QDate::currentDate(), this));
+  ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
 
   ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});

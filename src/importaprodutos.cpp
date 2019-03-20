@@ -270,7 +270,7 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->hideColumn("promocao");
   ui->tableProdutos->hideColumn("idProdutoRelacionado");
 
-  ui->tableProdutos->setItemDelegateForColumn("validade", new DateFormatDelegate(QDate::currentDate(), this));
+  ui->tableProdutos->setItemDelegateForColumn("validade", new DateFormatDelegate(this));
 
   auto *doubledelegate = new DoubleDelegate(this, 4);
   ui->tableProdutos->setItemDelegateForColumn("m2cx", doubledelegate);
@@ -350,7 +350,7 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->hideColumn("promocao");
   ui->tableErro->hideColumn("idProdutoRelacionado");
 
-  ui->tableErro->setItemDelegateForColumn("validade", new DateFormatDelegate(QDate::currentDate(), this));
+  ui->tableErro->setItemDelegateForColumn("validade", new DateFormatDelegate(this));
 
   ui->tableErro->setItemDelegateForColumn("m2cx", doubledelegate);
   ui->tableErro->setItemDelegateForColumn("kgcx", doubledelegate);

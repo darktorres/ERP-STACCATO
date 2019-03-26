@@ -24,8 +24,6 @@ void WidgetOrcamento::setPermissions() {
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
-    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
-
     ui->groupBoxMes->setChecked(true);
   }
 
@@ -58,6 +56,8 @@ void WidgetOrcamento::setPermissions() {
   } else {
     ui->radioButtonTodos->click();
   }
+
+  ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
 
   ui->dateEdit->setDate(QDate::currentDate());
 }

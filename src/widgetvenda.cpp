@@ -118,8 +118,6 @@ void WidgetVenda::setPermissions() {
     if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
-
-    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
   }
 
   if (tipoUsuario == "GERENTE LOJA") {
@@ -149,6 +147,8 @@ void WidgetVenda::setPermissions() {
   } else {
     ui->radioButtonTodos->click();
   }
+
+  ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
 
   ui->dateEdit->setDate(QDate::currentDate());
 }

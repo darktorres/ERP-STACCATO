@@ -119,7 +119,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto");
 
   for (const auto &item : list) {
-    const QString status = modelVendaProduto.data(item.row(), "status").toString();
+    const QString status = modelVendaProduto.data(item.row(), "statusOriginal").toString();
 
     if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
 

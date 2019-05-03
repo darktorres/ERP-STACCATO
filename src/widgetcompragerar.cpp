@@ -251,7 +251,7 @@ std::optional<std::tuple<QDateTime, QDateTime>> WidgetCompraGerar::getDates(cons
 
   for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido").toString(); }
 
-  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra, this);
   if (not inputDlg.setFilter(ids)) { return {}; }
 
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return {}; }
@@ -359,7 +359,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   idVendas.removeDuplicates();
 
-  const QString idVenda = idVendas.join(", ");
+  const QString idVenda = (fornecedor == "QUARTZOBRAS") ? "" : idVendas.join(", ");
 
   const QString arquivoModelo = "modelo compras.xlsx";
 

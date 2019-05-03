@@ -161,7 +161,7 @@ bool ImportaProdutos::importar() {
   ui->tableProdutos->setAutoResize(true);
   ui->tableErro->setAutoResize(true);
 
-  ui->tableProdutos->resizeColumnsToContents();
+  //  ui->tableProdutos->resizeColumnsToContents();
 
   show();
 
@@ -230,6 +230,8 @@ void ImportaProdutos::setupTables() {
   modelProduto.setHeaderData("custo", "Custo");
   modelProduto.setHeaderData("ipi", "IPI");
   modelProduto.setHeaderData("st", "ST");
+  modelProduto.setHeaderData("sticms", "ST ICMS");
+  modelProduto.setHeaderData("mva", "MVA");
   modelProduto.setHeaderData("precoVenda", "Preço Venda");
   modelProduto.setHeaderData("comissao", "Comissão");
   modelProduto.setHeaderData("observacoes", "Obs.");
@@ -265,7 +267,7 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->hideColumn("icms");
   ui->tableProdutos->hideColumn("cst");
   ui->tableProdutos->hideColumn("ipi");
-  ui->tableProdutos->hideColumn("st");
+  //  ui->tableProdutos->hideColumn("st");
   ui->tableProdutos->hideColumn("estoque");
   ui->tableProdutos->hideColumn("promocao");
   ui->tableProdutos->hideColumn("idProdutoRelacionado");
@@ -284,6 +286,8 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("ipi", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("markup", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("st", porcDelegate);
+  ui->tableProdutos->setItemDelegateForColumn("sticms", porcDelegate);
+  ui->tableProdutos->setItemDelegateForColumn("mva", porcDelegate);
 
   //-------------------------------------------------------------//
 
@@ -311,6 +315,8 @@ void ImportaProdutos::setupTables() {
   modelErro.setHeaderData("custo", "Custo");
   modelErro.setHeaderData("ipi", "IPI");
   modelErro.setHeaderData("st", "ST");
+  modelErro.setHeaderData("sticms", "ST ICMS");
+  modelErro.setHeaderData("mva", "MVA");
   modelErro.setHeaderData("precoVenda", "Preço Venda");
   modelErro.setHeaderData("comissao", "Comissão");
   modelErro.setHeaderData("observacoes", "Obs.");
@@ -362,6 +368,8 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->setItemDelegateForColumn("ipi", porcDelegate);
   ui->tableErro->setItemDelegateForColumn("markup", porcDelegate);
   ui->tableErro->setItemDelegateForColumn("st", porcDelegate);
+  ui->tableErro->setItemDelegateForColumn("sticms", porcDelegate);
+  ui->tableErro->setItemDelegateForColumn("mva", porcDelegate);
 }
 
 void ImportaProdutos::setVariantMap() {
@@ -382,6 +390,9 @@ void ImportaProdutos::setVariantMap() {
   variantMap.insert("precoVenda", QVariant(QVariant::Double));
   variantMap.insert("ui", QVariant(QVariant::String));
   variantMap.insert("un2", QVariant(QVariant::String));
+  variantMap.insert("mva", QVariant(QVariant::Double));
+  variantMap.insert("st", QVariant(QVariant::Double));
+  variantMap.insert("sticms", QVariant(QVariant::Double));
 }
 
 bool ImportaProdutos::cadastraFornecedores() {

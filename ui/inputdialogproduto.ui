@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>691</width>
-    <height>428</height>
+    <width>787</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -160,6 +160,13 @@
            </property>
            <property name="maximum">
             <double>999999.989999999990687</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEditCodRep">
+           <property name="placeholderText">
+            <string>Cód. Rep.</string>
            </property>
           </widget>
          </item>

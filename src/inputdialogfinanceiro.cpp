@@ -70,18 +70,20 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 InputDialogFinanceiro::~InputDialogFinanceiro() { delete ui; }
 
 void InputDialogFinanceiro::setConnections() {
-  connect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled);
-  connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged);
-  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged);
-  connect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged);
-  connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
-  connect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
-  connect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
-  connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
-  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
-  connect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  if (tipo == Tipo::ConfirmarCompra) { connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal); }
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::toggled, this, &InputDialogFinanceiro::on_checkBoxMarcarTodos_toggled, connectionType);
+  connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogFinanceiro::on_comboBoxST_currentTextChanged, connectionType);
+  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->dateEditPgtSt, &QDateEdit::dateChanged, this, &InputDialogFinanceiro::on_dateEditPgtSt_dateChanged, connectionType);
+  connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxFrete, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged, connectionType);
+  connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked, connectionType);
+  connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked, connectionType);
+  connect(modelPedidoFornecedor.proxyModel, &QAbstractProxyModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
+
+  if (tipo == Tipo::ConfirmarCompra) { connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal, connectionType); }
 }
 
 void InputDialogFinanceiro::unsetConnections() {
@@ -94,7 +96,7 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->doubleSpinBoxSt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
-  disconnect(&modelPedidoFornecedor, &SqlRelationalTableModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
+  disconnect(modelPedidoFornecedor.proxyModel, &QAbstractProxyModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
 
   if (tipo == Tipo::ConfirmarCompra) { disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal); }
 }
@@ -104,22 +106,24 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
 
   unsetConnections();
 
-  double total = 0;
+  [&] {
+    double total = 0;
 
-  const auto list = ui->table->selectionModel()->selectedRows();
+    const auto list = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &index : list) {
-    if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", aliquota)) { return; }
+    for (const auto &index : list) {
+      if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", aliquota)) { return; }
 
-    total += modelPedidoFornecedor.data(index.row(), "preco").toDouble();
-  }
+      total += modelPedidoFornecedor.data(index.row(), "preco").toDouble();
+    }
 
-  const double valueSt = total * (aliquota / 100);
+    const double valueSt = total * (aliquota / 100);
 
-  ui->doubleSpinBoxSt->setValue(valueSt);
+    ui->doubleSpinBoxSt->setValue(valueSt);
 
-  // TODO: adicionar frete/adicionais
-  ui->doubleSpinBoxTotal->setValue(total);
+    // TODO: adicionar frete/adicionais
+    ui->doubleSpinBoxTotal->setValue(total);
+  }();
 
   setConnections();
 
@@ -258,8 +262,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
           const QString currentText = ui->widgetPgts->listComboData.at(i)->currentText();
           const QDate currentDate = ui->widgetPgts->listDatePgt.at(i)->date();
-          const QDate dataPgt =
-              (currentText == "Data + 1 Mês" ? currentDate.addMonths(x + 1) : currentText == "Data Mês" ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x + 1)));
+          const QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : currentText == "Data Mês" ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+
           if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
           if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
           if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) { return; }
@@ -368,18 +372,24 @@ void InputDialogFinanceiro::calcularTotal() {
 }
 
 void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
-  const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
-  const int row = topLeft.row();
+  unsetConnections();
 
-  if (header == "Quant." or header == "$ Unit.") {
-    const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
-    if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
-  }
+  [&] {
+    const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
+    const int row = topLeft.row();
 
-  if (header == "Total") {
-    const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
-    if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
-  }
+    if (header == "Quant." or header == "$ Unit.") {
+      const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
+      if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
+    }
+
+    if (header == "Total") {
+      const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
+      if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
+    }
+  }();
+
+  setConnections();
 
   calcularTotal();
   ui->widgetPgts->resetarPagamentos();

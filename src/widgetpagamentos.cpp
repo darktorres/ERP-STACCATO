@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QLineEdit>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -44,7 +45,7 @@ void WidgetPagamentos::lineEditPgt(QHBoxLayout *layout) {
   listLinePgt << lineEditPgt;
 }
 
-void WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
+QDateEdit *WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
   auto *dateEditPgt = new QDateEdit(this);
   dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   dateEditPgt->setDisplayFormat("dd/MM/yy");
@@ -53,6 +54,8 @@ void WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
   connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
   layout->addWidget(dateEditPgt);
   listDatePgt << dateEditPgt;
+
+  return dateEditPgt;
 }
 
 void WidgetPagamentos::doubleSpinBoxPgt(QHBoxLayout *layout) {
@@ -79,7 +82,7 @@ void WidgetPagamentos::comboBoxParc(QHBoxLayout *layout) {
   listComboParc << comboboxPgtParc;
 }
 
-void WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
+QComboBox *WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
   auto *comboBoxData = new QComboBox(this);
   comboBoxData->insertItem(0, "Data Mês");
   comboBoxData->insertItem(1, "Data + 1 Mês");
@@ -90,6 +93,19 @@ void WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
   layout->addWidget(comboBoxData);
   connect(comboBoxData, &QComboBox::currentTextChanged, this, &WidgetPagamentos::montarFluxoCaixa);
   listComboData << comboBoxData;
+
+  // connect this comboBoxData to the equivalent dateEditPgt
+
+  // listComboData with 0 elements: size 0
+  // listComboData with 1 elements: size 1; first element at [0]
+
+  //  const auto dateEditPair = listDatePgt.at(listComboData.size());
+
+  //  connect(comboBoxData, &QComboBox::currentTextChanged, listDatePgt.at(listComboData.size()), );
+
+  // TODO: quando alterar dataPgt para 14/20/28/30 alterar a data no dateEdit e não apenas no fluxo
+
+  return comboBoxData;
 }
 
 bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
@@ -276,6 +292,8 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
 
   labelPagamento(layout);
 
+  QComboBox *comboBox = nullptr;
+
   if (tipo == Tipo::Venda) {
     checkBoxRep(frame, layout);
     if (not comboBoxPgtVenda(frame, layout)) { return; }
@@ -283,13 +301,31 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
 
   if (tipo == Tipo::Compra) {
     if (not comboBoxPgtCompra(layout)) { return; }
-    comboBoxData(layout);
+    comboBox = comboBoxData(layout);
   }
 
   comboBoxParc(layout);
   doubleSpinBoxPgt(layout);
-  dateEditPgt(layout);
+  auto dateEdit = dateEditPgt(layout);
   lineEditPgt(layout);
+
+  if (tipo == Tipo::Compra) {
+    connect(comboBox, &QComboBox::currentTextChanged, [=] {
+      const QString currentText = comboBox->currentText();
+      const QDate currentDate = QDate::currentDate();
+      QDate dataPgt;
+
+      if (currentText == "Data + 1 Mês") {
+        dataPgt = currentDate.addMonths(1);
+      } else if (currentText == "Data Mês") {
+        dataPgt = currentDate;
+      } else {
+        dataPgt = currentDate.addDays(currentText.toInt());
+      }
+
+      dateEdit->setDate(dataPgt);
+    });
+  }
 
   ui->scrollArea->widget()->layout()->addWidget(frame);
 

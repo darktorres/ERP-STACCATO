@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.50");
+  setApplicationVersion("0.6.63");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -75,9 +75,15 @@ bool Application::setDatabase() {
 
   db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
 
+  QFile file("mysql.txt");
+
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
+
+  const QString password = file.readAll();
+
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
-  db.setPassword("123456");
+  db.setPassword(password);
   db.setDatabaseName("mydb");
   db.setPort(3306);
 

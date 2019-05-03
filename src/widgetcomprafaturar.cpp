@@ -112,7 +112,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!", this); }
 
-  InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento, this);
   if (not inputDlg.setFilter(idsCompra)) { return; }
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 

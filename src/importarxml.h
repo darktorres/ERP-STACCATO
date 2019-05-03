@@ -61,7 +61,10 @@ private:
   auto produtoCompativel(const int rowCompra, const QString &codComercialEstoque) -> bool;
   auto reparear(const QModelIndex &index) -> bool;
   auto salvarLoteNaVenda() -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
+  auto updateTableData(const QModelIndex &topLeft) -> void;
   auto verificaCNPJ(const XML &xml) -> bool;
   auto verificaExiste(const XML &xml) -> bool;
   auto verificaValido(const XML &xml) -> bool;

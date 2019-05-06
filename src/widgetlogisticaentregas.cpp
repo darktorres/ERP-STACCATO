@@ -309,7 +309,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
 
-  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega);
+  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega, this);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }

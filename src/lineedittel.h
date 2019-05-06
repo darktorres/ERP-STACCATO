@@ -7,7 +7,7 @@ class LineEditTel final : public QLineEdit {
   Q_OBJECT
 
 public:
-  explicit LineEditTel(QWidget *parent);
+  explicit LineEditTel(QWidget *parent = nullptr);
   ~LineEditTel() = default;
 
 private:

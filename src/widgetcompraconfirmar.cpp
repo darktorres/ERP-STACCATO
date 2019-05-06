@@ -78,7 +78,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QString idCompra = modelViewCompras.data(row, "Compra").toString();
   const QString idVenda = modelViewCompras.data(row, "Venda").toString();
 
-  InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra);
+  InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
   if (not inputDlg.setFilter(idCompra)) { return; }
 
   if (inputDlg.exec() != InputDialogFinanceiro::Accepted) { return; }

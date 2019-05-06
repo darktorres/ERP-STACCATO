@@ -7,7 +7,7 @@ class ItemBoxDelegate final : public QStyledItemDelegate {
 
 public:
   enum class Tipo { Loja, Conta };
-  ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent);
+  ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent = nullptr);
   ~ItemBoxDelegate() final = default;
 
 private:

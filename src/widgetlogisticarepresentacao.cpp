@@ -74,7 +74,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao);
+  InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao, this);
 
   if (input.exec() != InputDialogConfirmacao::Accepted) { return; }
 

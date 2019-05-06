@@ -137,7 +137,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
     idVendas << modelViewRecebimento.data(item.row(), "idVenda").toString();
   }
 
-  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento);
+  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento, this);
   inputDlg.setFilterRecebe(ids);
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }

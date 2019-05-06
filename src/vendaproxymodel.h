@@ -8,7 +8,7 @@
 class VendaProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit VendaProxyModel(SqlRelationalTableModel *model, QObject *parent);
+  explicit VendaProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~VendaProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

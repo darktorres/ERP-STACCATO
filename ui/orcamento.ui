@@ -1090,7 +1090,7 @@
                <number>4</number>
               </property>
               <property name="minimum">
-               <double>-10000.000000000000000</double>
+               <double>-100000000.000000000000000</double>
               </property>
               <property name="maximum">
                <double>100.000000000000000</double>

@@ -4,6 +4,7 @@
 #include <QIcon>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QSqlDriver>
 #include <QSqlError>
 #include <QStyle>
 #include <QTimer>
@@ -16,7 +17,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.63");
+  setApplicationVersion("0.6.66");
   setStyle("Fusion");
 
   readSettingsFile();

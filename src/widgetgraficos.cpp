@@ -96,7 +96,7 @@ void WidgetGraficos::updateTables() {
     return;
   }
 
-  if (isSet) { //TODO: V547 http://www.viva64.com/en/V547 Expression 'isSet' is always true.  if (isSet) {
+  if (isSet) { // TODO: V547 http://www.viva64.com/en/V547 Expression 'isSet' is always true.  if (isSet) {
     series12.clear();
     series11.clear();
     series10.clear();
@@ -184,3 +184,5 @@ void WidgetGraficos::on_pushButtonCleanTooltips_clicked() { chartView->removeToo
 // fazer o mes atual com a linha em bold
 // fazer o mesmo mes do ano anterior em bold
 // fazer uma linha diferente com a media
+
+// TODO: hover está pegando o valor do pixel, passando o mouse por baixo sai um valor diferente de passar por cima, verificar se dá para pegar o valor da Series em vez do valor no gráfico

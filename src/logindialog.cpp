@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
+#include <QVersionNumber>
 
 #include "application.h"
 #include "logindialog.h"
@@ -83,8 +84,8 @@ bool LoginDialog::verificaVersao() {
 
   if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueError(false, "Erro verificando versão atual: " + query.lastError().text()); }
 
-  const int currentVersion = qApp->applicationVersion().replace(".", "").toInt();
-  const int serverVersion = query.value("versaoAtual").toString().replace(".", "").toInt();
+  QVersionNumber currentVersion = QVersionNumber::fromString(qApp->applicationVersion());
+  QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());
 
   if (currentVersion < serverVersion) {
     return qApp->enqueueError(false, "Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString());

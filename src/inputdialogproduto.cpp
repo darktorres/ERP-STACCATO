@@ -23,6 +23,7 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
   ui->doubleSpinBoxAliquota->hide();
   ui->labelST->hide();
   ui->doubleSpinBoxST->hide();
+  ui->lineEditCodRep->hide();
 
   ui->dateEditEvento->setDate(QDate::currentDate());
   ui->dateEditProximo->setDate(QDate::currentDate());
@@ -163,7 +164,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
 
-  if (not query.value("representacao").toBool()) { ui->lineEditCodRep->hide(); }
+  if (query.value("representacao").toBool() and tipo == Tipo::Faturamento) { ui->lineEditCodRep->show(); }
 
   if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário.", this); }
 

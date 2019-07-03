@@ -1061,8 +1061,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1041</width>
-                   <height>337</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
@@ -1528,8 +1528,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>134</width>
-                   <height>98</height>
+                   <width>98</width>
+                   <height>92</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1678,8 +1678,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>192</width>
-                   <height>163</height>
+                   <width>161</width>
+                   <height>151</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -1992,8 +1992,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>223</width>
-                   <height>163</height>
+                   <width>183</width>
+                   <height>151</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2305,8 +2305,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>498</width>
-                   <height>290</height>
+                   <width>380</width>
+                   <height>266</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">

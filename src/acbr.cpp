@@ -82,16 +82,20 @@ bool ACBr::gerarDanfe(const int idNFe) {
 }
 
 std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  const auto respostaSaveXml = enviarComando(R"(NFE.SaveToFile(xml.xml,")" + fileContent + R"(")", true);
+  QFile file("xml.xml");
 
-  if (not respostaSaveXml) { return {}; }
-
-  if (not respostaSaveXml->contains("OK")) {
-    qApp->enqueueError("Erro salvando XML: " + respostaSaveXml.value());
+  if (not file.open(QFile::WriteOnly)) {
+    qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString());
     return {};
   }
 
-  auto respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(xml.xml)", true);
+  file.write(fileContent);
+
+  file.close();
+
+  QFileInfo info(file);
+
+  auto respostaSavePdf = enviarComando("NFE.ImprimirDANFEPDF(" + info.absoluteFilePath() + ")", true);
 
   if (not respostaSavePdf) { return {}; }
 
@@ -119,11 +123,12 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  const auto resposta1 = enviarComando("NFE.SaveToFile(C:\\ACBrMonitorPLUS\\temp\\nfe.xml, \"" + query.value("xml").toString() + "\")");
+  QFile file("C:\\ACBrMonitorPLUS\\temp\\nfe.xml");
 
-  if (not resposta1) { return {}; }
-
-  qDebug() << "resposta1: " << resposta1.value();
+  if (not file.open(QFile::WriteOnly)) {
+    qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString());
+    return {};
+  }
 
   const auto resposta2 = enviarComando("NFE.ConsultarNFe(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
 

@@ -604,6 +604,8 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   //
 
+  const bool mesmaUf = ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text();
+
   // TODO: verificar na nota futura qual transportadora preencher
   if (tipo == Tipo::Normal) {
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
@@ -611,7 +613,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
         if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
       }
 
-      if (not modelViewProdutoEstoque.setData(row, "cfop", "5403")) { return; }
+      if (not modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5403" : "6403")) { return; }
 
       if (not modelViewProdutoEstoque.setData(row, "tipoICMS", "ICMS60")) { return; }
       if (not modelViewProdutoEstoque.setData(row, "cstICMS", "60")) { return; }
@@ -925,26 +927,15 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
-      qDebug() << "a: " << modelViewProdutoEstoque.data(row, "vBCPIS").toString();
-      qDebug() << "b: " << modelViewProdutoEstoque.data(row, "total").toDouble() + frete;
-      qDebug() << "c: " << frete;
-      //      const double vBCUFDest = modelViewProdutoEstoque.data(row, "total").toDouble() + frete;
       stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl; // TODO: should be valorProduto + frete + ipi + outros - desconto
-                                                                                                 //      stream << "vBCUFDest = " + QString::number(vBCUFDest) << endl;
-      stream << "pFCPUFDest = 2" << endl;                                                        // REFAC: depende do estado
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
       stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() << endl;
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
       const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
-      //      const double difal = vBCUFDest * diferencaICMS;
 
-      // REFAC: o valor depende do ano atual; a partir de 2019 é 100% para o estado de destino
-      stream << "pICMSInterPart = 80" << endl;
-      stream << "vFCPUFDest = " + QString::number(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * 0.02, 'f', 2) << endl; // 2% FCP
-      //      stream << "vFCPUFDest = " + QString::number(vBCUFDest * 0.02, 'f', 2) << endl; // 2% FCP
-      stream << "vICMSUFDest = " + QString::number(difal * 0.8, 'f', 2) << endl;
-      stream << "vICMSUFRemet = " + QString::number(difal * 0.2, 'f', 2) << endl;
+      stream << "pICMSInterPart = 100" << endl;
+      stream << "vICMSUFDest = " + QString::number(difal, 'f', 2) << endl;
     }
 
     //    http://www.asseinfo.com.br/blog/difal-diferencial-de-aliquota-icms/
@@ -963,32 +954,26 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
 
   // PARTILHA ICMS
-
   if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
-    double totalFcp = 0;
     double totalIcmsDest = 0;
-    double totalIcmsOrig = 0;
 
     const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      totalFcp += modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * 0.02;
-
       const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
-      totalIcmsDest += difal * 0.8;
-      totalIcmsOrig += difal * 0.2;
+      totalIcmsDest += QString::number(difal, 'f', 2).toDouble();
     }
 
-    stream << "vFCPUFDest = " + QString::number(totalFcp, 'f', 2) << endl;
     stream << "vICMSUFDest = " + QString::number(totalIcmsDest, 'f', 2) << endl;
-    stream << "vICMSUFRemet = " + QString::number(totalIcmsOrig, 'f', 2) << endl;
   }
 }
 
 void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
   stream << "[Transportador]" << endl;
   stream << "FretePorConta = " << ui->comboBoxFreteConta->currentText().left(1) << endl;
+
+  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) { return; }
 
   // TODO: se for 'CARRO EXTRA' não preencher CNPJ/Insc.
   if (ui->lineEditTransportadorRazaoSocial->text() != "RETIRA") {

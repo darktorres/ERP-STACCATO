@@ -452,7 +452,7 @@ bool CadastrarNFe::preencherNumeroNFe() {
   const int numeroNFe = queryNfe.value("numeroNFe").toInt();
 
   ui->lineEditNumero->setText(QString("%1").arg(numeroNFe, 9, 10, QChar('0')));
-  ui->lineEditCodigo->setText(QString("%1").arg(numeroNFe, 8, 10, QChar('0')));
+  ui->lineEditCodigo->setText("12121212");
 
   return true;
 }

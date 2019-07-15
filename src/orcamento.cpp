@@ -1255,3 +1255,4 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
 // TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
+// TODO: limitar validade para o fim do mes

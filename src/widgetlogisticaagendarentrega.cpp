@@ -514,7 +514,7 @@ bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caix
   if (not modelProdutosTemp.select()) { return false; }
 
   const int newRow = modelProdutosTemp.insertRowAtEnd();
-  // NOTE: *quebralinha venda_produto/pedido_fornecedor
+  // NOTE: *quebralinha venda_produto
 
   // copiar colunas
   for (int column = 0, columnCount = modelProdutosTemp.columnCount(); column < columnCount; ++column) {

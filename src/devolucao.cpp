@@ -370,7 +370,7 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   if (restante > 0) {
     const int newRowRestante = modelProdutos.insertRowAtEnd();
-    // NOTE: *quebralinha venda_produto/pedido_fornecedor
+    // NOTE: *quebralinha venda_produto
 
     for (int column = 0; column < modelProdutos.columnCount(); ++column) {
       if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }

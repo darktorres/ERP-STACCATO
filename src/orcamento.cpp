@@ -357,7 +357,7 @@ void Orcamento::registerMode() {
   ui->pushButtonGerarExcel->setDisabled(true);
   ui->pushButtonImprimir->setDisabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
-  ui->itemBoxEndereco->setDisabled(true);
+  //  ui->itemBoxEndereco->setDisabled(true);
 }
 
 void Orcamento::updateMode() {
@@ -606,7 +606,7 @@ void Orcamento::clearFields() {
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") { ui->itemBoxVendedor->setId(UserSession::idUsuario()); }
 
-  ui->itemBoxEndereco->setEnabled(false);
+  //  ui->itemBoxEndereco->setDisabled(true);
 }
 
 void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }

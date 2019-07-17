@@ -1014,7 +1014,9 @@ void CadastrarNFe::writeVolume(QTextStream &stream) const {
 }
 
 void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
-  const QString field = modelViewProdutoEstoque.record().fieldName(index.column());
+  Q_UNUSED(index)
+
+  //  const QString field = modelViewProdutoEstoque.record().fieldName(index.column());
 
   //  qDebug() << "field: " << field;
 

@@ -14,7 +14,7 @@ class Estoque final : public QDialog {
 
 public:
   // REFAC: turn showWindow into a enum
-  Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
+  explicit Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
   auto criarConsumo(const int idVendaProduto, const double quant = 0) -> bool;
 

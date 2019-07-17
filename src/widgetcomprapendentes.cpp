@@ -250,7 +250,7 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  Impressao impressao(idVenda, Impressao::Tipo::Venda);
+  Impressao impressao(idVenda, Impressao::Tipo::Venda, this);
   impressao.print();
 }
 

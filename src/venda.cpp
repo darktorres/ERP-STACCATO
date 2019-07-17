@@ -806,7 +806,7 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
 }
 
 void Venda::on_pushButtonImprimir_clicked() {
-  Impressao impressao(data("idVenda").toString(), Impressao::Tipo::Venda);
+  Impressao impressao(data("idVenda").toString(), Impressao::Tipo::Venda, this);
   impressao.print();
 }
 

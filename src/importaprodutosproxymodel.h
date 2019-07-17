@@ -8,7 +8,7 @@
 class ImportaProdutosProxyModel final : public QIdentityProxyModel {
 
 public:
-  ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  explicit ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~ImportaProdutosProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

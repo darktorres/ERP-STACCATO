@@ -7,7 +7,7 @@
 class XML final {
 
 public:
-  XML(const QByteArray &fileContent, const QString &fileName = QString());
+  explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
   auto lerValores(const QStandardItem *item) -> void;
 
   const QByteArray fileContent;

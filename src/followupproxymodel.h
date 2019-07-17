@@ -8,7 +8,7 @@
 class FollowUpProxyModel final : public QIdentityProxyModel {
 
 public:
-  FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  explicit FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~FollowUpProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 

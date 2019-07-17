@@ -220,3 +220,4 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
 // TODO: [Conrado] colocar filtro/tela para buscar por pedido e mostrar os estoques em que foi consumido
 // TODO: arrumar 'estoque contabil'
 // TODO: fix fulltext indexes (put match against inside subquery)
+// TODO: update estoque.status based on consumo

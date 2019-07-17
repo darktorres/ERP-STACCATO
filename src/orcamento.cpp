@@ -664,7 +664,7 @@ void Orcamento::calcPrecoGlobalTotal() {
 }
 
 void Orcamento::on_pushButtonImprimir_clicked() {
-  Impressao impressao(data("idOrcamento").toString(), Impressao::Tipo::Orcamento);
+  Impressao impressao(data("idOrcamento").toString(), Impressao::Tipo::Orcamento, this);
   impressao.print();
 }
 

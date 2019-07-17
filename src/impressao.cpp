@@ -9,7 +9,7 @@
 #include "impressao.h"
 #include "usersession.h"
 
-Impressao::Impressao(const QString &id, const Tipo tipo) : tipo(tipo), id(id) {
+Impressao::Impressao(const QString &id, const Tipo tipo, QObject *parent) : tipo(tipo), id(id), parent(parent) {
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
@@ -26,7 +26,7 @@ void Impressao::print() {
 
   if (not setQuerys()) { return; }
 
-  auto *report = new LimeReport::ReportEngine(); // TODO: memory leak, gotta delete this
+  auto *report = new LimeReport::ReportEngine(parent);
 
   auto dataManager = report->dataManager();
 

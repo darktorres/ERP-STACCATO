@@ -104,9 +104,6 @@
 #include <QRegularExpression>
 #include <QResource>
 #include <QScopedPointer>
-#include <QScriptEngine>
-#include <QScriptValueIterator>
-#include <QScriptable>
 #include <QScrollBar>
 #include <QSet>
 #include <QSettings>

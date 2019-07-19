@@ -332,6 +332,12 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     ui->itemBoxConsultor->show();
   }
 
+  // -------------------------------------------------------------------------
+
+  on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
+
+  // -------------------------------------------------------------------------
+
   setConnections();
 }
 
@@ -488,7 +494,7 @@ void Venda::updateMode() {
   ui->doubleSpinBoxTotal->setReadOnly(true);
   ui->doubleSpinBoxTotal->setFrame(false);
   ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
-  ui->checkBoxFreteManual->hide();
+  ui->checkBoxFreteManual->setDisabled(true);
 }
 
 bool Venda::viewRegister() {
@@ -540,6 +546,8 @@ bool Venda::viewRegister() {
 
     ui->pushButtonCancelamento->show();
     ui->pushButtonDevolucao->show();
+
+    on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
 
     if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
       ui->pushButtonCancelamento->hide();
@@ -725,18 +733,21 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
   unsetConnections();
 
-  ui->doubleSpinBoxDescontoGlobal->setValue((liq + frete - total) / liq * 100);
-  ui->doubleSpinBoxDescontoGlobalReais->setValue(liq + frete - total);
+  {
+    ui->doubleSpinBoxDescontoGlobal->setValue((liq + frete - total) / liq * 100);
+    ui->doubleSpinBoxDescontoGlobalReais->setValue(liq + frete - total);
 
-  ui->widgetPgts->resetarPagamentos();
+    ui->widgetPgts->resetarPagamentos();
+  }
 
   setConnections();
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
-  ui->doubleSpinBoxFrete->setFrame(checked);
   ui->doubleSpinBoxFrete->setReadOnly(not checked);
   ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
+
+  if (checked) { return; }
 
   ui->doubleSpinBoxFrete->setValue(ui->checkBoxFreteManual->isChecked() ? ui->doubleSpinBoxFrete->value() : qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
 }
@@ -747,8 +758,10 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
-  ui->widgetPgts->setFrete(frete);
+  {
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
+    ui->widgetPgts->setFrete(frete);
+  }
 
   setConnections();
 }

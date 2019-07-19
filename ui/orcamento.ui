@@ -530,7 +530,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sub-total bruto é o total do valor dos itens, &lt;span style=&quot; font-weight:600;&quot;&gt;sem nenhum desconto&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="frame">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -561,7 +561,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sub-total líq. do orçamento é o subtotal dos itens com desconto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="frame">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -614,7 +614,7 @@
              <bool>false</bool>
             </property>
             <property name="frame">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="readOnly">
              <bool>true</bool>

@@ -8,6 +8,7 @@
 #include "checkboxdelegate.h"
 #include "devolucao.h"
 #include "doubledelegate.h"
+#include "editdelegate.h"
 #include "estoque.h"
 #include "excel.h"
 #include "impressao.h"
@@ -17,7 +18,6 @@
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
-#include "singleeditdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "ui_venda.h"
 #include "usersession.h"
@@ -213,7 +213,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
   ui->tableFluxoCaixa->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
-  ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new SingleEditDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
   ui->tableFluxoCaixa->setPersistentColumns({"representacao"});

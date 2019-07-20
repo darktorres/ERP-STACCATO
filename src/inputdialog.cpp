@@ -7,7 +7,7 @@
 #include "inputdialog.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "singleeditdelegate.h"
+#include "editdelegate.h"
 #include "ui_inputdialog.h"
 #include "usersession.h"
 

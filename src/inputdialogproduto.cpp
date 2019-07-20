@@ -8,7 +8,7 @@
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "singleeditdelegate.h"
+#include "editdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogproduto.h"
 
@@ -133,10 +133,10 @@ void InputDialogProduto::setupTables() {
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
-    ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
+    ui->table->setItemDelegateForColumn("quant", new EditDelegate(this));
   }
 
-  if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new SingleEditDelegate(this)); }
+  if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this)); }
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {

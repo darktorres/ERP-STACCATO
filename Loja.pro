@@ -109,6 +109,7 @@ SOURCES += \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
     src/doubledelegate.cpp \
+    src/editdelegate.cpp \
     src/estoque.cpp \
     src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
@@ -150,7 +151,6 @@ SOURCES += \
     src/searchdialog.cpp \
     src/searchdialogproxymodel.cpp \
     src/sendmail.cpp \
-    src/singleeditdelegate.cpp \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
@@ -222,6 +222,7 @@ HEADERS  += \
     src/dateformatdelegate.h \
     src/devolucao.h \
     src/doubledelegate.h \
+    src/editdelegate.h \
     src/estoque.h \
     src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
@@ -262,7 +263,6 @@ HEADERS  += \
     src/searchdialog.h \
     src/searchdialogproxymodel.h \
     src/sendmail.h \
-    src/singleeditdelegate.h \
     src/smtp.h \
     src/sortfilterproxymodel.h \
     src/sql.h \

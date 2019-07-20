@@ -1,5 +1,4 @@
-#ifndef CONTAS_H
-#define CONTAS_H
+#pragma once
 
 #include <QDialog>
 
@@ -31,5 +30,3 @@ private:
   auto validarData(const QModelIndex &index) -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // CONTAS_H

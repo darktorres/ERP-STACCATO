@@ -1,5 +1,4 @@
-#ifndef WIDGETPAGAMENTOS_H
-#define WIDGETPAGAMENTOS_H
+#pragma once
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -67,5 +66,3 @@ private:
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
 };
-
-#endif // WIDGETPAGAMENTOS_H

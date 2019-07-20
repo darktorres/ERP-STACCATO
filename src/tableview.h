@@ -1,5 +1,4 @@
-#ifndef TABLEVIEW_H
-#define TABLEVIEW_H
+#pragma once
 
 #include <QSqlQueryModel>
 #include <QTableView>
@@ -36,5 +35,3 @@ private:
   auto showContextMenu(const QPoint &pos) -> void;
   auto toggleAutoResize() -> void;
 };
-
-#endif // TABLEVIEW_H

@@ -1,5 +1,4 @@
-#ifndef CADASTROPROFISSIONAL_H
-#define CADASTROPROFISSIONAL_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -56,5 +55,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROPROFISSIONAL_H

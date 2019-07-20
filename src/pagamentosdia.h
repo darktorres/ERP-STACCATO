@@ -1,5 +1,4 @@
-#ifndef PAGAMENTOSDIA_H
-#define PAGAMENTOSDIA_H
+#pragma once
 
 #include <QDialog>
 
@@ -23,5 +22,3 @@ private:
   //
   auto setupTables() -> void;
 };
-
-#endif // PAGAMENTOSDIA_H

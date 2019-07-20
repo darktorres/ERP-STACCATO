@@ -1,5 +1,4 @@
-#ifndef CALCULOFRETE_H
-#define CALCULOFRETE_H
+#pragma once
 
 #include <QDialog>
 #include <QNetworkAccessManager>
@@ -27,5 +26,3 @@ private:
   void on_itemBoxCliente_textChanged(const QString &);
   void on_pushButton_clicked();
 };
-
-#endif // CALCULOFRETE_H

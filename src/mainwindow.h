@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -45,5 +44,3 @@ private:
   auto resetTables() -> void;
   auto verifyDb() -> void;
 };
-
-#endif // MAINWINDOW_H

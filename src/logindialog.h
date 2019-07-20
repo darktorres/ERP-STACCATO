@@ -1,5 +1,4 @@
-#ifndef LOGINDIALOG_H
-#define LOGINDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -27,5 +26,3 @@ private:
   auto setComboBox() -> void;
   auto verificaVersao() -> bool;
 };
-
-#endif // LOGINDIALOG_H

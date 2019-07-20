@@ -1,5 +1,4 @@
-#ifndef SQL_H
-#define SQL_H
+#pragma once
 
 #include <QString>
 
@@ -12,5 +11,3 @@ public:
 private:
   static auto runQuerys(const QString &idVenda) -> bool;
 };
-
-#endif // SQL_H

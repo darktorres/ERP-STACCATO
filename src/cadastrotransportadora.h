@@ -1,5 +1,4 @@
-#ifndef CADASTROTRANSPORTADORA_H
-#define CADASTROTRANSPORTADORA_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -60,5 +59,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROTRANSPORTADORA_H

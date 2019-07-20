@@ -1,5 +1,4 @@
-#ifndef LINEEDITDECIMAL_H
-#define LINEEDITDECIMAL_H
+#pragma once
 
 #include <QLineEdit>
 
@@ -16,5 +15,3 @@ private:
   int decimais = 2;
   // methods
 };
-
-#endif // LINEEDITDECIMAL_H

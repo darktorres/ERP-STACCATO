@@ -1,5 +1,4 @@
-#ifndef SINGLEEDITDELEGATE_H
-#define SINGLEEDITDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -10,5 +9,3 @@ public:
   explicit SingleEditDelegate(QObject *parent = nullptr);
   auto displayText(const QVariant &value, const QLocale &locale) const -> QString final;
 };
-
-#endif // SINGLEEDITDELEGATE_H

@@ -1,5 +1,4 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include <QApplication>
 #include <QPalette>
@@ -60,5 +59,3 @@ private:
   auto startSqlPing() -> void;
   auto storeSelection() -> void;
 };
-
-#endif // APPLICATION_H

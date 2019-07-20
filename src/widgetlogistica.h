@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICA_H
-#define WIDGETLOGISTICA_H
+#pragma once
 
 #include <QWidget>
 
@@ -27,5 +26,3 @@ private:
   auto on_tableForn_clicked(const QModelIndex &index) -> void;
   auto on_tabWidgetLogistica_currentChanged(const int) -> void;
 };
-
-#endif // WIDGETLOGISTICA_H

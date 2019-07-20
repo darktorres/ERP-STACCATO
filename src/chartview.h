@@ -1,5 +1,4 @@
-#ifndef CHARTVIEW_H
-#define CHARTVIEW_H
+#pragma once
 
 #include <QGraphicsView>
 #include <QtCharts>
@@ -26,5 +25,3 @@ private:
   ChartTooltip *m_tooltip = nullptr;
   QList<ChartTooltip *> m_tooltips;
 };
-
-#endif // CHARTVIEW_H

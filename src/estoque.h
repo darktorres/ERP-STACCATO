@@ -1,5 +1,4 @@
-#ifndef ESTOQUE_H
-#define ESTOQUE_H
+#pragma once
 
 #include <QDialog>
 
@@ -44,5 +43,3 @@ private:
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
 };
-
-#endif // ESTOQUE_H

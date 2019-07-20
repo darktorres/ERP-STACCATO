@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICAAGENDARCOLETA_H
-#define WIDGETLOGISTICAAGENDARCOLETA_H
+#pragma once
 
 #include <QWidget>
 
@@ -47,5 +46,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICAAGENDARCOLETA_H

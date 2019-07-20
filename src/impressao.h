@@ -1,5 +1,4 @@
-#ifndef IMPRESSAO_H
-#define IMPRESSAO_H
+#pragma once
 
 #include <QSqlQuery>
 
@@ -32,5 +31,3 @@ private:
   // methods
   auto setQuerys() -> bool;
 };
-
-#endif // IMPRESSAO_H

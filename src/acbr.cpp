@@ -26,23 +26,15 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
 }
 
 void ACBr::error() {
-  //  qDebug() << "error";
   qApp->enqueueError("Erro socket: " + socket.errorString());
   progressDialog->cancel();
 }
 
-void ACBr::write() {
-  //  qDebug() << "writen";
-  enviado = true;
-}
+void ACBr::write() { enviado = true; }
 
-void ACBr::setConnected() {
-  //  qDebug() << "conectado";
-  conectado = true;
-}
+void ACBr::setConnected() { conectado = true; }
 
 void ACBr::setDisconnected() {
-  //  qDebug() << "desconectado";
   pronto = false;
   conectado = false;
   recebido = false;
@@ -53,17 +45,13 @@ void ACBr::readSocket() {
   const auto stream = socket.readAll();
   resposta += stream;
 
-  //  qDebug() << "answer: " << stream;
-
   if (resposta.endsWith(welcome)) {
-    //    qDebug() << "pronto";
     pronto = true;
     resposta.clear();
     return;
   }
 
   if (resposta.endsWith("\u0003")) {
-    //    qDebug() << "recebido";
     resposta.remove("\u0003");
     recebido = true;
   }
@@ -203,7 +191,6 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   if (socket.state() != QTcpSocket::ConnectedState) {
     conectado = false;
     pronto = false;
-    //    qDebug() << "conectando";
 
     const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
     const auto porta = UserSession::getSetting("User/portaACBr");
@@ -223,8 +210,6 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   while (not enviado and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
 
   while (not recebido and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
-
-  //  qDebug() << "resposta: " << resposta;
 
   progressDialog->cancel();
 

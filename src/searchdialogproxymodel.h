@@ -8,7 +8,6 @@ class SearchDialogProxyModel final : public SortFilterProxyModel {
 public:
   explicit SearchDialogProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
   ~SearchDialogProxyModel() final = default;
-  // TODO: copy the helper 'data' function with 'row, column'
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
 private:

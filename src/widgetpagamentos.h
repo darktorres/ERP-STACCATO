@@ -28,7 +28,7 @@ public:
   auto setTotal(double value) -> void;
   auto verifyFields() -> bool;
 
-  // REFAC: make this private
+  // attributes
   QList<QCheckBox *> listCheckBoxRep;
   QList<QComboBox *> listComboData;
   QList<QComboBox *> listComboParc;

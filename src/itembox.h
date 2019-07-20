@@ -1,5 +1,4 @@
-#ifndef ITEMBOX_H
-#define ITEMBOX_H
+#pragma once
 
 #include <QLineEdit>
 #include <QPushButton>
@@ -44,5 +43,3 @@ private:
   auto search() -> void;
   auto setIcons() -> void;
 };
-
-#endif // ITEMBOX_H

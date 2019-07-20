@@ -1,5 +1,4 @@
-#ifndef ACBR_H
-#define ACBR_H
+#pragma once
 
 #include <QObject>
 #include <QProgressDialog>
@@ -36,5 +35,3 @@ private:
   auto setDisconnected() -> void;
   auto write() -> void;
 };
-
-#endif // ACBR_H

@@ -1,5 +1,4 @@
-#ifndef ESTOQUEPRAZOPROXYMODEL_H
-#define ESTOQUEPRAZOPROXYMODEL_H
+#pragma once
 
 #include <QIdentityProxyModel>
 
@@ -15,5 +14,3 @@ public:
 private:
   const int prazoEntregaColumn;
 };
-
-#endif // ESTOQUEPRAZOPROXYMODEL_H

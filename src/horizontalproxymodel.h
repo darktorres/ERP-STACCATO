@@ -1,5 +1,4 @@
-#ifndef HORIZONTALPROXYMODEL_H
-#define HORIZONTALPROXYMODEL_H
+#pragma once
 
 #include <QIdentityProxyModel>
 
@@ -18,5 +17,3 @@ public:
   auto parent(const QModelIndex &child = QModelIndex()) const -> QModelIndex final;
   auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int final;
 };
-
-#endif // HORIZONTALPROXYMODEL_H

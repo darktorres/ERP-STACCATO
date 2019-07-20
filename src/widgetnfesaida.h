@@ -1,5 +1,4 @@
-#ifndef WIDGETNFESAIDA_H
-#define WIDGETNFESAIDA_H
+#pragma once
 
 #include <QWidget>
 
@@ -39,5 +38,3 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };
-
-#endif // WIDGETNFESAIDA_H

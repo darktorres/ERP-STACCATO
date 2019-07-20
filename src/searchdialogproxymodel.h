@@ -1,5 +1,4 @@
-#ifndef SEARCHDIALOGPROXY_H
-#define SEARCHDIALOGPROXY_H
+#pragma once
 
 #include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
@@ -18,5 +17,3 @@ private:
   const int descontinuadoColumn;
   const int validadeColumn;
 };
-
-#endif // SEARCHDIALOGPROXY_H

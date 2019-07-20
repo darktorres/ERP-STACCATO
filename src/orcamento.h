@@ -1,5 +1,4 @@
-#ifndef ORCAMENTO_H
-#define ORCAMENTO_H
+#pragma once
 
 #include "registerdialog.h"
 
@@ -80,5 +79,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // ORCAMENTO_H

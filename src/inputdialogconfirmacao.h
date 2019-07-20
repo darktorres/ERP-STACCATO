@@ -1,5 +1,4 @@
-#ifndef INPUTDIALOGCONFIRMACAO_H
-#define INPUTDIALOGCONFIRMACAO_H
+#pragma once
 
 #include <QDialog>
 
@@ -46,5 +45,3 @@ private:
   auto quebrarRecebimento(const int row, const double caixasDefeito, const double unCaixa) -> bool;
   auto setupTables() -> void;
 };
-
-#endif // INPUTDIALOGCONFIRMACAO_H

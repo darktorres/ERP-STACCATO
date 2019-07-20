@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICAENTREGUES_H
-#define WIDGETLOGISTICAENTREGUES_H
+#pragma once
 
 #include <QWidget>
 
@@ -34,5 +33,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICAENTREGUES_H

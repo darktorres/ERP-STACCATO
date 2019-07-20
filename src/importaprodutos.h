@@ -1,5 +1,4 @@
-#ifndef IMPORTAPRODUTOS_H
-#define IMPORTAPRODUTOS_H
+#pragma once
 
 #include <QProgressDialog>
 
@@ -80,5 +79,3 @@ private:
   auto verificaSeRepresentacao() -> bool;
   auto verificaTabela(const QSqlRecord &record) -> bool;
 };
-
-#endif // IMPORTAPRODUTOS_H

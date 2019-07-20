@@ -1,5 +1,4 @@
-#ifndef REGISTERDIALOG_H
-#define REGISTERDIALOG_H
+#pragma once
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -61,5 +60,3 @@ protected:
   virtual auto verifyRequiredField(QLineEdit *line, const bool silent = false) -> bool;
   virtual auto viewRegister() -> bool;
 };
-
-#endif // REGISTERDIALOG_H

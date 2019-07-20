@@ -1,5 +1,4 @@
-#ifndef XML_H
-#define XML_H
+#pragma once
 
 #include <QDomElement>
 #include <QStandardItemModel>
@@ -101,5 +100,3 @@ private:
   auto lerTotais(const QStandardItem *child) -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
 };
-
-#endif // XML_H

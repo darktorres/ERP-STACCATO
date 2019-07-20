@@ -1,5 +1,4 @@
-#ifndef CADASTROFORNECEDOR_H
-#define CADASTROFORNECEDOR_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -51,5 +50,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROFORNECEDOR_H

@@ -1,5 +1,4 @@
-#ifndef FINANCEIROPROXYMODEL_H
-#define FINANCEIROPROXYMODEL_H
+#pragma once
 
 #include <QIdentityProxyModel>
 
@@ -17,5 +16,3 @@ private:
   const int prazoEntrega;
   const int novoPrazoEntrega;
 };
-
-#endif // FINANCEIROPROXYMODEL_H

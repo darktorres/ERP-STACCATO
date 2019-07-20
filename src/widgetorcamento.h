@@ -1,5 +1,4 @@
-#ifndef WIDGETORCAMENTO_H
-#define WIDGETORCAMENTO_H
+#pragma once
 
 #include <QWidget>
 
@@ -36,5 +35,3 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };
-
-#endif // WIDGETORCAMENTO_H

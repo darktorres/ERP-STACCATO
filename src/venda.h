@@ -1,5 +1,4 @@
-#ifndef VENDA_H
-#define VENDA_H
+#pragma once
 
 #include "registerdialog.h"
 
@@ -69,5 +68,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // VENDA_H

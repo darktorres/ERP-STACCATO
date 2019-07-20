@@ -1,5 +1,4 @@
-#ifndef IMPORTARXML_H
-#define IMPORTARXML_H
+#pragma once
 
 #include <QDataWidgetMapper>
 #include <QDate>
@@ -70,5 +69,3 @@ private:
   auto verificaValido(const XML &xml) -> bool;
   auto verifyFields() -> bool;
 };
-
-#endif // IMPORTARXML_H

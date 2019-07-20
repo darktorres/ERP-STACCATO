@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRARESUMO_H
-#define WIDGETCOMPRARESUMO_H
+#pragma once
 
 #include <QWidget>
 
@@ -26,5 +25,3 @@ private:
   // methods
   auto setupTables() -> void;
 };
-
-#endif // WIDGETCOMPRARESUMO_H

@@ -1,5 +1,4 @@
-#ifndef PRODUTOSPENDENTES_H
-#define PRODUTOSPENDENTES_H
+#pragma once
 
 #include <QDialog>
 
@@ -39,5 +38,3 @@ private:
   auto setupTables() -> void;
   auto viewProduto(const QString &codComercial, const QString &idVenda) -> void;
 };
-
-#endif // PRODUTOSPENDENTES_H

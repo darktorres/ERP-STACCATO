@@ -1,5 +1,4 @@
-#ifndef INPUTDIALOGFINANCEIRO_H
-#define INPUTDIALOGFINANCEIRO_H
+#pragma once
 
 #include <QDialog>
 
@@ -47,5 +46,3 @@ private:
   auto updateTableData(const QModelIndex &topLeft) -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // INPUTDIALOGFINANCEIRO_H

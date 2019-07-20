@@ -1,5 +1,4 @@
-#ifndef XML_VIEWER_H
-#define XML_VIEWER_H
+#pragma once
 
 #include <QDialog>
 #include <QStandardItemModel>
@@ -25,5 +24,3 @@ private:
   // methods
   auto on_pushButtonDanfe_clicked() -> void;
 };
-
-#endif // XML_VIEWER_H

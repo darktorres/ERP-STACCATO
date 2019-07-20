@@ -1,5 +1,4 @@
-#ifndef DEVOLUCAO_H
-#define DEVOLUCAO_H
+#pragma once
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -47,5 +46,3 @@ private:
   auto salvarCredito() -> bool;
   auto setupTables() -> void;
 };
-
-#endif // DEVOLUCAO_H

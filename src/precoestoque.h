@@ -1,5 +1,4 @@
-#ifndef PRECOESTOQUE_H
-#define PRECOESTOQUE_H
+#pragma once
 
 #include <QDialog>
 
@@ -26,5 +25,3 @@ private:
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;
 };
-
-#endif // PRECOESTOQUE_H

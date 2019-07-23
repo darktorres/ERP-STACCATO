@@ -28,7 +28,7 @@ private:
   // methods
   auto cancelarEntrega(const QModelIndexList &list) -> bool;
   auto confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) -> bool;
-  auto consultarNFe(const int idNFe, const QString &xml) -> bool;
+  auto processarConsultaNFe(const int idNFe, const QString &xml) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBuscar_textChanged(const QString &) -> void;
   auto on_pushButtonCancelarEntrega_clicked() -> void;

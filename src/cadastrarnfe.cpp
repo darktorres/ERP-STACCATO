@@ -182,13 +182,13 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
 
   if (tipo == Tipo::Normal or tipo == Tipo::NormalAposFutura) {
     QSqlQuery query1;
-    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
 
     QSqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status = 'ENTREGA AGEND.'");
+    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
 
     QSqlQuery query3;
-    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
@@ -215,19 +215,19 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
   const bool remover = [&] {
     QSqlQuery query2a;
-    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
     query2a.bindValue(":idNFeSaida", idNFe);
 
     if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text(), this); }
 
     QSqlQuery query3a;
-    query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
     query3a.bindValue(":idNFeSaida", idNFe);
 
     if (not query3a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text(), this); }
 
     QSqlQuery query1a;
-    query1a.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+    query1a.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.' WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query1a.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
@@ -371,7 +371,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
 bool CadastrarNFe::cadastrar(const int &idNFe) {
   QSqlQuery queryNFe;
-  queryNFe.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  queryNFe.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE status = 'NOTA PENDENTE' AND idNFe = :idNFe");
   queryNFe.bindValue(":xml", xml);
   queryNFe.bindValue(":idNFe", idNFe);
 
@@ -379,7 +379,7 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
 
   if (tipo == Tipo::Futura) {
     QSqlQuery query;
-    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query.bindValue(":idNFeFutura", idNFe);

@@ -155,6 +155,8 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
+  // FIXME: ao voltar vp para ESTOQUE permite que o usuario eventualmente gere outra nota e a primeira vai ficar perdida no limbo
+
   QSqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
 

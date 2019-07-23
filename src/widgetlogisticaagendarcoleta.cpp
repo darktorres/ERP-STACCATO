@@ -234,16 +234,13 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
   QSqlQuery queryTemp;
   queryTemp.prepare("SELECT codComercial FROM estoque WHERE idEstoque = :idEstoque");
 
-  QSqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'EM COLETA' WHERE idEstoque = :idEstoque");
-
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
-                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare(
+      "UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
-                 "AND status = 'EM COLETA'");
+  query3.prepare(
+      "UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   for (const auto &item : list) {
     int idEstoque;
@@ -270,10 +267,6 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
       idEstoque = modelEstoque.data(item.row(), "idEstoque").toInt();
       codComercial = modelEstoque.data(item.row(), "codComercial").toString();
     }
-
-    query1.bindValue(":idEstoque", idEstoque);
-
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no estoque: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);

@@ -382,7 +382,7 @@ bool ImportarXML::importar() {
 
 bool ImportarXML::atualizaDados() {
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO'");
+  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
     const int idVendaProduto = modelCompra.data(row, "idVendaProduto").toInt();
@@ -400,7 +400,7 @@ bool ImportarXML::atualizaDados() {
   }
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra AND quantUpd = 1");
 
   for (const auto &idCompra : idsCompra) {
     query2.bindValue(":dataRealFat", dataReal);

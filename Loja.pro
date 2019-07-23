@@ -71,10 +71,10 @@ linux-g++{
 }
 
 linux-clang{
-    QMAKE_CC = ccache clang-7
-    QMAKE_CXX = ccache clang++-7
+    QMAKE_CC = ccache clang-8
+    QMAKE_CXX = ccache clang++-8
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-7
+    QMAKE_LFLAGS *= -fuse-ld=lld-8
 
     #QMAKE_CXXFLAGS *= -flto=thin
     #QMAKE_LFLAGS *= -flto=thin

@@ -1242,6 +1242,8 @@ bool Venda::copiaProdutosOrcamento() {
     if (not modelItem.setData(rowItem, "status", modelItem.data(rowItem, "estoque").toBool() ? "ESTOQUE" : "PENDENTE")) { return false; }
   }
 
+  for (int row = 0; row < modelItem.rowCount(); ++row) { backupItem.append(modelItem.record(row)); }
+
   return true;
 }
 

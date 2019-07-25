@@ -6,11 +6,11 @@
 #include "application.h"
 #include "comboboxdelegate.h"
 #include "doubledelegate.h"
+#include "editdelegate.h"
 #include "inputdialogfinanceiro.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "editdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogfinanceiro.h"
 

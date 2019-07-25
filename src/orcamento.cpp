@@ -1259,3 +1259,4 @@ void Orcamento::on_dataEmissao_dateChanged(const QDate &date) { ui->spinBoxValid
 // TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
 // TODO: limitar validade para o fim do mes
+// FIXME: adicionar novamente botao para limpar selecao para quando a tabela de itens está cheia e não tem como clicar no espaço vazio

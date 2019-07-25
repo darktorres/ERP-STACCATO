@@ -19,7 +19,6 @@ public:
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
 
 protected:
-  auto enterEvent(QEvent *event) -> void final;
   auto keyPressEvent(QKeyEvent *event) -> void final;
   auto mousePressEvent(QMouseEvent *event) -> void final;
 
@@ -33,5 +32,4 @@ private:
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto redoView() -> void;
   auto showContextMenu(const QPoint &pos) -> void;
-  auto toggleAutoResize() -> void;
 };

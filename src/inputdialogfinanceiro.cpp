@@ -343,8 +343,6 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     }
   }();
 
-  ui->tableFluxoCaixa->resizeColumnsToContents();
-
   setConnections();
 }
 

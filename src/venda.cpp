@@ -722,9 +722,6 @@ void Venda::montarFluxoCaixa() {
       }
     }
   }
-
-  ui->tableFluxoCaixa->resizeColumnsToContents();
-  ui->tableFluxoCaixa2->resizeColumnsToContents();
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {

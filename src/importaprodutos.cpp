@@ -161,8 +161,6 @@ bool ImportaProdutos::importar() {
   ui->tableProdutos->setAutoResize(true);
   ui->tableErro->setAutoResize(true);
 
-  //  ui->tableProdutos->resizeColumnsToContents();
-
   show();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +

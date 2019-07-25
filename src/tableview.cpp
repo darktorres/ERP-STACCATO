@@ -65,14 +65,12 @@ void TableView::redoView() {
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
-    QTableView::setModel(temp->proxyModel);
+  if (auto sqlQuery = qobject_cast<SqlQueryModel *>(model); sqlQuery and sqlQuery->proxyModel) {
+    QTableView::setModel(sqlQuery->proxyModel);
+  } else if (auto sqlRelat = qobject_cast<SqlRelationalTableModel *>(model); sqlRelat and sqlRelat->proxyModel) {
+    QTableView::setModel(sqlRelat->proxyModel);
   } else {
-    if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
-      QTableView::setModel(temp2->proxyModel);
-    } else {
-      QTableView::setModel(model);
-    }
+    QTableView::setModel(model);
   }
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
@@ -96,6 +94,7 @@ void TableView::setModel(QAbstractItemModel *model) {
 void TableView::mousePressEvent(QMouseEvent *event) {
   const QModelIndex item = indexAt(event->pos());
 
+  // this enables clicking outside of lines to clear selection
   if (not item.isValid()) { emit clicked(item); }
 
   QTableView::mousePressEvent(event);

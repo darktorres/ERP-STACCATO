@@ -18,6 +18,7 @@ QT *= core gui sql network xml charts
 greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
+DEFINES += APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 CONFIG *= c++1z
 

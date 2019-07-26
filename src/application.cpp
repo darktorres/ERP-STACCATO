@@ -17,6 +17,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
+  setApplicationVersion(APP_VERSION);
   setStyle("Fusion");
 
   readSettingsFile();

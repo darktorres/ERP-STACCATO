@@ -15,6 +15,17 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QList<int> &items, cons
 
   setWindowFlags(Qt::Window);
 
+  ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
+
+  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
+
+  if (not lojaACBr) {
+    qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this);
+    return;
+  }
+
+  ui->itemBoxLoja->setId(lojaACBr.value());
+
   setupTables();
 
   mapper.setModel(&modelViewProdutoEstoque);
@@ -34,12 +45,6 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QList<int> &items, cons
   mapper.addMapping(ui->doubleSpinBoxCOFINSvbc, modelViewProdutoEstoque.fieldIndex("vBCCOFINS"));
   mapper.addMapping(ui->doubleSpinBoxCOFINSpcofins, modelViewProdutoEstoque.fieldIndex("pCOFINS"));
   mapper.addMapping(ui->doubleSpinBoxCOFINSvcofins, modelViewProdutoEstoque.fieldIndex("vCOFINS"));
-
-  ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-
-  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
-
-  lojaACBr ? ui->itemBoxLoja->setId(lojaACBr.value()) : qApp->enqueueError("A chave 'lojaACBr' não está configurada!", this);
 
   ui->lineEditModelo->setInputMask("99;_");
   ui->lineEditSerie->setInputMask("999;_");
@@ -77,9 +82,9 @@ void CadastrarNFe::setupTables() {
 
   const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
 
-  if (not lojaACBr) { return qApp->enqueueError("A chave 'lojaACBr' não está configurada!", this); }
+  if (not lojaACBr) { qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
 
-  modelLoja.setFilter("idLoja = " + lojaACBr.value().toString());
+  if (lojaACBr) { modelLoja.setFilter("idLoja = " + lojaACBr.value().toString()); }
 
   if (not modelLoja.select()) { return; }
 

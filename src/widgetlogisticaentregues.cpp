@@ -164,6 +164,10 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto "
                  "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
+  QSqlQuery query3;
+  query3.prepare(
+      "UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+
   for (const auto &item : list) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
@@ -172,6 +176,10 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
     query2.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
+
+    query3.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido_fornecedor: " + query3.lastError().text(), this); }
   }
 
   return true;

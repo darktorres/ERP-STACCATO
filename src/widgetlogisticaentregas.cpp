@@ -266,14 +266,14 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
 
 bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
   QSqlQuery query1;
-  query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
+  query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto = :idVendaProduto");
 
   QSqlQuery query3;
-  query3.prepare(
-      "UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
+  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND "
+                 "idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     const int idVendaProduto = modelProdutos.data(row, "idVendaProduto").toInt();

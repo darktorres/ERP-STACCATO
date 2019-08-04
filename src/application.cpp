@@ -74,7 +74,7 @@ bool Application::setDatabase() {
 
   if (not lastuser) { return false; }
 
-  db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
+  if (not QSqlDatabase::contains()) { db = QSqlDatabase::addDatabase("QMYSQL"); }
 
   QFile file("mysql.txt");
 

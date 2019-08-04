@@ -10,7 +10,7 @@
 #include "usersession.h"
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {
-  connect(&socket, QOverload<QTcpSocket::SocketError>::of(&QAbstractSocket::error), this, &ACBr::error);
+  connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error);
   connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
   connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
   connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket);

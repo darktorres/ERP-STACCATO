@@ -145,9 +145,7 @@ void FontEditorWidget::slotFontAttribsChanged(bool) {
 void FontEditorWidget::slotPropertyChanged(const QString &objectName, const QString &property, const QVariant &oldValue, const QVariant &newValue) {
   Q_UNUSED(oldValue)
   Q_UNUSED(newValue)
-  if (item() && (item()->objectName() == objectName) && (property == "font")) {
-    updateValues(item()->property("font").value<QFont>());
-  }
+  if (item() && (item()->objectName() == objectName) && (property == "font")) { updateValues(item()->property("font").value<QFont>()); }
 }
 
 } // namespace LimeReport

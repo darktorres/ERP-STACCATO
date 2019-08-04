@@ -244,7 +244,10 @@ bool Orcamento::viewRegister() {
 
     ui->plainTextEditObs->setPlainText(data("observacao").toString());
 
-    on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
+    const bool freteManual = ui->checkBoxFreteManual->isChecked();
+
+    ui->doubleSpinBoxFrete->setReadOnly(not freteManual);
+    ui->doubleSpinBoxFrete->setButtonSymbols(freteManual ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
 
     ui->doubleSpinBoxDescontoGlobalReais->setMaximum(ui->doubleSpinBoxSubTotalLiq->value());
 

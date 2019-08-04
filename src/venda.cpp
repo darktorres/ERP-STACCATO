@@ -547,7 +547,10 @@ bool Venda::viewRegister() {
     ui->pushButtonCancelamento->show();
     ui->pushButtonDevolucao->show();
 
-    on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
+    const bool freteManual = ui->checkBoxFreteManual->isChecked();
+
+    ui->doubleSpinBoxFrete->setReadOnly(not freteManual);
+    ui->doubleSpinBoxFrete->setButtonSymbols(freteManual ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
 
     if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
       ui->pushButtonCancelamento->hide();
@@ -746,7 +749,7 @@ void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
 
   if (checked) { return; }
 
-  ui->doubleSpinBoxFrete->setValue(ui->checkBoxFreteManual->isChecked() ? ui->doubleSpinBoxFrete->value() : qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+  ui->doubleSpinBoxFrete->setValue(qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
 }
 
 void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {

@@ -69,7 +69,7 @@ void WidgetPagamentos::doubleSpinBoxPgt(QHBoxLayout *layout) {
   doubleSpinBoxPgt->setValue(restante);
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
   layout->addWidget(doubleSpinBoxPgt);
-  connect(doubleSpinBoxPgt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+  connect(doubleSpinBoxPgt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
   listDoubleSpinPgt << doubleSpinBoxPgt;
 }
 
@@ -270,7 +270,7 @@ void WidgetPagamentos::calcularTotal() {
 
   auto lastSpinBox = listDoubleSpinPgt.last();
 
-  disconnect(lastSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+  disconnect(lastSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
 
   sum -= lastSpinBox->value();
 
@@ -278,7 +278,7 @@ void WidgetPagamentos::calcularTotal() {
 
   lastSpinBox->setValue(leftOver);
 
-  connect(lastSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+  connect(lastSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
 
   ui->doubleSpinBoxTotalPag->setValue(sum + leftOver);
 

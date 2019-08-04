@@ -8,7 +8,7 @@
 WidgetGraficos::WidgetGraficos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGraficos) {
   ui->setupUi(this);
   connect(ui->checkBox, &QCheckBox::toggled, this, &WidgetGraficos::on_checkBox_toggled);
-  connect(ui->comboBoxTheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WidgetGraficos::on_comboBox_currentIndexChanged);
+  connect(ui->comboBoxTheme, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetGraficos::on_comboBox_currentIndexChanged);
   connect(ui->pushButtonCleanTooltips, &QPushButton::clicked, this, &WidgetGraficos::on_pushButtonCleanTooltips_clicked);
 }
 

@@ -219,7 +219,7 @@ void CompleaterTextEditor::setCompleter(QCompleter *value) {
   m_compleater->setWidget(this);
   m_compleater->setCompletionMode(QCompleter::PopupCompletion);
   m_compleater->setCaseSensitivity(Qt::CaseInsensitive);
-  connect(m_compleater, QOverload<const QString &>::of(&QCompleter::activated), this, &CompleaterTextEditor::insertCompletion);
+  connect(m_compleater, qOverload<const QString &>(&QCompleter::activated), this, &CompleaterTextEditor::insertCompletion);
 }
 
 void CompleaterTextEditor::keyPressEvent(QKeyEvent *e) {

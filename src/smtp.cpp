@@ -29,7 +29,7 @@ Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const 
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
   connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Smtp::errorReceived);
+  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived);
   connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }

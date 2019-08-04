@@ -111,14 +111,20 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  QFile file("C:\\ACBrMonitorPLUS\\temp\\nfe.xml");
+  const QString filePath = "C:/ACBrMonitorPLUS/nfe.xml";
+
+  QFile file(filePath);
 
   if (not file.open(QFile::WriteOnly)) {
     qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString());
     return {};
   }
 
-  const auto resposta2 = enviarComando("NFE.ConsultarNFe(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
+  file.write(query.value("xml").toByteArray());
+
+  file.close();
+
+  const auto resposta2 = enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
   if (not resposta2) { return {}; }
 
@@ -135,7 +141,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  auto resposta3 = enviarComando("NFe.LoadfromFile(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
+  auto resposta3 = enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
   if (not resposta3) { return {}; }
 

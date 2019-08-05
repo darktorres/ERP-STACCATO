@@ -113,16 +113,11 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   const QString filePath = "C:/ACBrMonitorPLUS/nfe.xml";
 
-  QFile file(filePath);
+  const auto resposta1 = enviarComando("NFE.SaveToFile(" + filePath + ", \"" + query.value("xml").toString() + "\")");
 
-  if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString());
-    return {};
-  }
+  if (not resposta1) { return {}; }
 
-  file.write(query.value("xml").toByteArray());
-
-  file.close();
+  qDebug() << "resposta1: " << resposta1.value();
 
   const auto resposta2 = enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 

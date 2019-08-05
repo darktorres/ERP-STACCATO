@@ -30,6 +30,8 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   if (const auto key = UserSession::getSetting("Login/hostname"); key) { ui->lineEditHostname->setText(key.value().toString()); }
 
+  if (const auto key = UserSession::getSetting("Login/loja"); key) { ui->comboBoxLoja->setCurrentText(key.value().toString()); }
+
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();
   ui->comboBoxLoja->hide();
@@ -94,9 +96,12 @@ bool LoginDialog::verificaVersao() {
   return true;
 }
 
-void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) { ui->lineEditHostname->setText(qApp->getMapLojas().value(loja)); }
+void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) {
+  UserSession::setSetting("Login/loja", loja);
+  ui->lineEditHostname->setText(qApp->getMapLojas().value(loja));
+}
 
-void LoginDialog::on_lineEditHostname_textChanged(const QString &) {
-  UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
+void LoginDialog::on_lineEditHostname_textChanged(const QString &hostname) {
+  UserSession::setSetting("Login/hostname", hostname);
   qApp->updater();
 }

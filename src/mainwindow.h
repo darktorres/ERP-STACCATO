@@ -40,6 +40,7 @@ private:
   auto on_actionPromocao_triggered() -> void;
   auto on_actionSobre_triggered() -> void;
   auto on_tabWidget_currentChanged(const int) -> void;
+  auto reconnectDb() -> void;
   auto resetTables() -> void;
-  auto verifyDb() -> void;
+  auto verifyDb(const bool conectado) -> void;
 };

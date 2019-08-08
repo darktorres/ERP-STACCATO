@@ -16,7 +16,7 @@ public:
   Application(int &argc, char **argv, int = ApplicationFlags);
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
-  auto dbReconnect() -> bool;
+  auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> bool;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
@@ -34,6 +34,9 @@ public:
   auto showMessages() -> void;
   auto startTransaction(const bool delayMessages = true) -> bool;
   auto updater() -> void;
+
+signals:
+  void verifyDb(const bool conectado);
 
 private:
   struct Message {

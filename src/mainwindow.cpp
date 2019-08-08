@@ -24,6 +24,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb);
+
   connect(ui->actionCadastrarCliente, &QAction::triggered, this, &MainWindow::on_actionCadastrarCliente_triggered);
   connect(ui->actionCadastrarFornecedor, &QAction::triggered, this, &MainWindow::on_actionCadastrarFornecedor_triggered);
   connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered);
@@ -98,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->statusBar->addWidget(pushButtonStatus);
 
-  connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::verifyDb);
+  connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::reconnectDb);
 
   //---------------------------------------------------------------------------
 
@@ -111,10 +113,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
-// TODO: call this after sql error to see if still connected
-void MainWindow::verifyDb() {
+void MainWindow::reconnectDb() {
   const bool conectado = qApp->dbReconnect();
 
+  verifyDb(conectado);
+}
+
+void MainWindow::verifyDb(const bool conectado) {
   pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 

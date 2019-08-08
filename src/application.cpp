@@ -94,13 +94,12 @@ bool Application::setDatabase() {
   return true;
 }
 
-bool Application::dbReconnect() {
+bool Application::dbReconnect(const bool silent) {
   db.close();
 
-  if (not db.open()) {
-    isConnected = false;
-    return qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text());
-  }
+  isConnected = db.open();
+
+  if (not isConnected) { return (silent) ? false : qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text()); }
 
   return db.isOpen();
 }
@@ -265,9 +264,27 @@ void Application::showMessages() {
 
   showingErrors = true;
 
-  // TODO: deal with 'Lost connection to MySQL server'
+  for (const auto &error : std::as_const(errorQueue)) {
+    const QString error1 = "MySQL server has gone away";
+    const QString error2 = "Lost connection to MySQL server during query";
 
-  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+    const QString message = error.message;
+
+    if (message.contains(error1) or message.contains(error2)) {
+      const bool conectado = qApp->dbReconnect(true);
+
+      emit verifyDb(conectado);
+
+      if (conectado) {
+        continue;
+      } else {
+        QMessageBox::critical(error.widget, "Erro!", "Conexão com o servidor perdida!");
+      }
+    }
+
+    QMessageBox::critical(error.widget, "Erro!", error.message);
+  }
+
   for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
   for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
 

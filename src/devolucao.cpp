@@ -349,9 +349,12 @@ bool Devolucao::inserirItens(const int currentRow) {
   }
 
   if (not modelDevolvidos.setData(rowDevolucao, "idVenda", idDevolucao)) { return false; }
+  if (not modelDevolvidos.setData(rowDevolucao, "idRelacionado", modelProdutos.data(currentRow, "idVendaProduto"))) { return false; }
+
   const QDecDouble quantDevolvidaInvertida = quantDevolvida * -1;
   const QDecDouble parcialDevolvido = ui->doubleSpinBoxTotalItem->value() * -1;
   const QDecDouble prcUnitarioDevolvido = parcialDevolvido / quantDevolvidaInvertida;
+
   if (not modelDevolvidos.setData(rowDevolucao, "status", "PENDENTE DEV.")) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "statusOriginal", modelProdutos.data(currentRow, "status"))) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido.toDouble())) { return false; }

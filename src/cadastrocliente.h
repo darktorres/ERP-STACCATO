@@ -1,5 +1,4 @@
-#ifndef CADASTROCLIENTE_H
-#define CADASTROCLIENTE_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -53,5 +52,3 @@ private:
   auto viewRegister() -> bool final;
   auto setConnections() -> void;
 };
-
-#endif // CADASTROCLIENTE_H

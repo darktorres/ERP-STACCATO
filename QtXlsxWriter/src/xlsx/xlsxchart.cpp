@@ -307,29 +307,16 @@ void ChartPrivate::saveXmlChart(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("c:plotArea"));
   switch (chartType) {
   case Chart::CT_Pie:
-  case Chart::CT_Pie3D:
-    saveXmlPieChart(writer);
-    break;
+  case Chart::CT_Pie3D: saveXmlPieChart(writer); break;
   case Chart::CT_Bar:
-  case Chart::CT_Bar3D:
-    saveXmlBarChart(writer);
-    break;
+  case Chart::CT_Bar3D: saveXmlBarChart(writer); break;
   case Chart::CT_Line:
-  case Chart::CT_Line3D:
-    saveXmlLineChart(writer);
-    break;
-  case Chart::CT_Scatter:
-    saveXmlScatterChart(writer);
-    break;
+  case Chart::CT_Line3D: saveXmlLineChart(writer); break;
+  case Chart::CT_Scatter: saveXmlScatterChart(writer); break;
   case Chart::CT_Area:
-  case Chart::CT_Area3D:
-    saveXmlAreaChart(writer);
-    break;
-  case Chart::CT_Doughnut:
-    saveXmlDoughnutChart(writer);
-    break;
-  default:
-    break;
+  case Chart::CT_Area3D: saveXmlAreaChart(writer); break;
+  case Chart::CT_Doughnut: saveXmlDoughnutChart(writer); break;
+  default: break;
   }
   saveXmlAxes(writer);
   writer.writeEndElement(); // plotArea
@@ -550,38 +537,20 @@ void ChartPrivate::saveXmlAxes(QXmlStreamWriter &writer) const {
     XlsxAxis *axis = i.data();
     QString name;
     switch (axis->type) {
-    case XlsxAxis::T_Cat:
-      name = QStringLiteral("c:catAx");
-      break;
-    case XlsxAxis::T_Val:
-      name = QStringLiteral("c:valAx");
-      break;
-    case XlsxAxis::T_Ser:
-      name = QStringLiteral("c:serAx");
-      break;
-    case XlsxAxis::T_Date:
-      name = QStringLiteral("c:dateAx");
-      break;
-    default:
-      break;
+    case XlsxAxis::T_Cat: name = QStringLiteral("c:catAx"); break;
+    case XlsxAxis::T_Val: name = QStringLiteral("c:valAx"); break;
+    case XlsxAxis::T_Ser: name = QStringLiteral("c:serAx"); break;
+    case XlsxAxis::T_Date: name = QStringLiteral("c:dateAx"); break;
+    default: break;
     }
 
     QString pos;
     switch (axis->axisPos) {
-    case XlsxAxis::Top:
-      pos = QStringLiteral("t");
-      break;
-    case XlsxAxis::Bottom:
-      pos = QStringLiteral("b");
-      break;
-    case XlsxAxis::Left:
-      pos = QStringLiteral("l");
-      break;
-    case XlsxAxis::Right:
-      pos = QStringLiteral("r");
-      break;
-    default:
-      break;
+    case XlsxAxis::Top: pos = QStringLiteral("t"); break;
+    case XlsxAxis::Bottom: pos = QStringLiteral("b"); break;
+    case XlsxAxis::Left: pos = QStringLiteral("l"); break;
+    case XlsxAxis::Right: pos = QStringLiteral("r"); break;
+    default: break;
     }
 
     writer.writeStartElement(name);

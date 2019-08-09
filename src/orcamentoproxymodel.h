@@ -1,5 +1,4 @@
-#ifndef ORCAMENTOPROXYMODEL_H
-#define ORCAMENTOPROXYMODEL_H
+#pragma once
 
 #include <QIdentityProxyModel>
 
@@ -20,5 +19,3 @@ private:
 
   enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
 };
-
-#endif // ORCAMENTOPROXYMODEL_H

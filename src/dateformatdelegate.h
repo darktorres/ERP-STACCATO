@@ -1,5 +1,4 @@
-#ifndef DATEFORMATDELEGATE_H
-#define DATEFORMATDELEGATE_H
+#pragma once
 
 #include <QDate>
 #include <QStyledItemDelegate>
@@ -18,5 +17,3 @@ private:
   // methods
   auto displayText(const QVariant &value, const QLocale &) const -> QString final;
 };
-
-#endif // DATEFORMATDELEGATE_H

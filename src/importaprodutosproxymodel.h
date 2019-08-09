@@ -1,5 +1,4 @@
-#ifndef IMPORTAPRODUTOSPROXY_H
-#define IMPORTAPRODUTOSPROXY_H
+#pragma once
 
 #include <QIdentityProxyModel>
 
@@ -16,5 +15,3 @@ private:
   const int descontinuadoColumn;
   enum class Status { Novo = 1, Atualizado = 2, ForaPadrao = 3, Errado = 4 };
 };
-
-#endif // IMPORTAPRODUTOSPROXY_H

@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRAFATURAR_H
-#define WIDGETCOMPRAFATURAR_H
+#pragma once
 
 #include <QWidget>
 
@@ -35,5 +34,3 @@ private:
   auto setupTables() -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETCOMPRAFATURAR_H

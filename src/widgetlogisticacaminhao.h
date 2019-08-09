@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICACAMINHAO_H
-#define WIDGETLOGISTICACAMINHAO_H
+#pragma once
 
 #include <QWidget>
 
@@ -30,5 +29,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICACAMINHAO_H

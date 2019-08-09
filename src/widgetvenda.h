@@ -1,5 +1,4 @@
-#ifndef WIDGETVENDA_H
-#define WIDGETVENDA_H
+#pragma once
 
 #include <QWidget>
 
@@ -38,5 +37,3 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };
-
-#endif // WIDGETVENDA_H

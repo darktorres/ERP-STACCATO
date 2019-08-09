@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICACOLETA_H
-#define WIDGETLOGISTICACOLETA_H
+#pragma once
 
 #include <QWidget>
 
@@ -39,5 +38,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICACOLETA_H

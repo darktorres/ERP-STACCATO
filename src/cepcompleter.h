@@ -1,5 +1,4 @@
-#ifndef CEPCOMPLETER_H
-#define CEPCOMPLETER_H
+#pragma once
 
 #include <QString>
 
@@ -20,5 +19,3 @@ private:
   QString bairro;
   QString uf;
 };
-
-#endif // CEPCOMPLETER_H

@@ -1,5 +1,4 @@
-#ifndef INPUTDIALOGPRODUTO_H
-#define INPUTDIALOGPRODUTO_H
+#pragma once
 
 #include <QDialog>
 
@@ -40,5 +39,3 @@ private:
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
 };
-
-#endif // INPUTDIALOGPRODUTO_H

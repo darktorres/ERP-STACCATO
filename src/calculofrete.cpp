@@ -1,3 +1,4 @@
+#include <QFile>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
@@ -35,7 +36,11 @@ double CalculoFrete::getDistancia() {
 void CalculoFrete::on_pushButton_clicked() {
   ui->lineEditDistancia->clear();
 
-  const QString url = searchUrl.arg(ui->comboBoxOrigem->currentText().replace(" ", "+"), ui->comboBoxDestino->currentText().replace(" ", "+"));
+  QFile apiKeyFile("google_api.txt");
+
+  if (not apiKeyFile.open(QFile::ReadOnly)) { return qApp->enqueueError("Não conseguiu ler chave da API: " + apiKeyFile.errorString(), this); }
+
+  const QString url = searchUrl.arg(ui->comboBoxOrigem->currentText().replace(" ", "+"), ui->comboBoxDestino->currentText().replace(" ", "+"), apiKeyFile.readAll());
   qDebug() << "url: " << url;
   QNetworkRequest request;
   request.setSslConfiguration(QSslConfiguration::defaultConfiguration());

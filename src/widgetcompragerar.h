@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRAGERAR_H
-#define WIDGETCOMPRAGERAR_H
+#pragma once
 
 #include <QWidget>
 
@@ -41,5 +40,3 @@ private:
   auto setupTables() -> void;
   auto verificaRepresentacao(const QList<QModelIndex> &list) -> std::optional<bool>;
 };
-
-#endif // WIDGETCOMPRAGERAR_H

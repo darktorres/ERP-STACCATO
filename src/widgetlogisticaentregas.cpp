@@ -266,14 +266,14 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
 
 bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
   QSqlQuery query1;
-  query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status != 'QUEBRADO' AND idVendaProduto = :idVendaProduto");
+  query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto = :idVendaProduto");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE idVendaProduto = :idVendaProduto "
-                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND "
+                 "idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     const int idVendaProduto = modelProdutos.data(row, "idVendaProduto").toInt();
@@ -416,11 +416,9 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
     const auto [xml, resposta] = *tuple;
 
-    // TODO: se não autorizado deletar nota e remover vinculos? (tem que tomar cuidado para não pular o numero)
-
     if (not qApp->startTransaction()) { return; }
 
-    if (not consultarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
+    if (not processarConsultaNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
 
     if (not qApp->endTransaction()) { return; }
 
@@ -430,7 +428,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
   updateTables();
 }
 
-bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) {
+bool WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QString &xml) {
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
   query.bindValue(":xml", xml);
@@ -439,13 +437,13 @@ bool WidgetLogisticaEntregas::consultarNFe(const int idNFe, const QString &xml) 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text(), this); }
 
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));

@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.6.68
+VERSION = 0.6.76
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -18,6 +18,7 @@ QT *= core gui sql network xml charts
 greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
+DEFINES += APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 CONFIG *= c++1z
 
@@ -71,10 +72,10 @@ linux-g++{
 }
 
 linux-clang{
-    QMAKE_CC = ccache clang-7
-    QMAKE_CXX = ccache clang++-7
+    QMAKE_CC = ccache clang-8
+    QMAKE_CXX = ccache clang++-8
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-7
+    QMAKE_LFLAGS *= -fuse-ld=lld-8
 
     #QMAKE_CXXFLAGS *= -flto=thin
     #QMAKE_LFLAGS *= -flto=thin
@@ -109,6 +110,7 @@ SOURCES += \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
     src/doubledelegate.cpp \
+    src/editdelegate.cpp \
     src/estoque.cpp \
     src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
@@ -150,7 +152,6 @@ SOURCES += \
     src/searchdialog.cpp \
     src/searchdialogproxymodel.cpp \
     src/sendmail.cpp \
-    src/singleeditdelegate.cpp \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
@@ -222,6 +223,7 @@ HEADERS  += \
     src/dateformatdelegate.h \
     src/devolucao.h \
     src/doubledelegate.h \
+    src/editdelegate.h \
     src/estoque.h \
     src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
@@ -262,7 +264,6 @@ HEADERS  += \
     src/searchdialog.h \
     src/searchdialogproxymodel.h \
     src/sendmail.h \
-    src/singleeditdelegate.h \
     src/smtp.h \
     src/sortfilterproxymodel.h \
     src/sql.h \

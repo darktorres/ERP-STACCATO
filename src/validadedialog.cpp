@@ -5,7 +5,7 @@ ValidadeDialog::ValidadeDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Va
   ui->setupUi(this);
 
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &ValidadeDialog::on_pushButtonSalvar_clicked);
-  connect(ui->spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &ValidadeDialog::on_spinBox_valueChanged);
+  connect(ui->spinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ValidadeDialog::on_spinBox_valueChanged);
   connect(ui->dateEdit, &QDateEdit::dateChanged, this, &ValidadeDialog::on_dateEdit_dateChanged);
 
   ui->dateEdit->setDate(QDate::currentDate());

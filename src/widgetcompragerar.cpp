@@ -156,8 +156,8 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateT
   if (not modelProdutos.submitAll()) { return false; }
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto "
-                     "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE status = 'INICIADO' AND "
+                     "idVendaProduto = :idVendaProduto");
 
   for (const auto idVendaProduto : ids) {
     queryVenda.bindValue(":idCompra", idCompra);
@@ -464,9 +464,8 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
   QSqlQuery query;
-  query.prepare(
-      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE idVendaProduto = :idVendaProduto "
-      "AND status = 'INICIADO'");
+  query.prepare("UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
+                "idVendaProduto = :idVendaProduto");
 
   for (const auto &index : list) {
     if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) { return false; }

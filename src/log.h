@@ -1,5 +1,4 @@
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
 #include <QString>
 
@@ -9,5 +8,3 @@ public:
   Log() = delete;
   static auto createLog(const QString &message) -> bool;
 };
-
-#endif // LOG_H

@@ -87,28 +87,16 @@ void DataBrowser::slotAddConnection() {
 void DataBrowser::slotSQLEditingFinished(SQLEditResult result) {
   if (result.dialogMode == SQLEditDialog::AddMode) {
     switch (result.resultMode) {
-    case SQLEditResult::Query:
-      addQuery(result);
-      break;
-    case SQLEditResult::SubQuery:
-      addSubQuery(result);
-      break;
-    case SQLEditResult::SubProxy:
-      addProxy(result);
-      [[fallthrough]];
-    default:
-      break;
+    case SQLEditResult::Query: addQuery(result); break;
+    case SQLEditResult::SubQuery: addSubQuery(result); break;
+    case SQLEditResult::SubProxy: addProxy(result); [[fallthrough]];
+    default: break;
     }
   } else {
     switch (result.resultMode) {
-    case SQLEditResult::Query:
-      changeQuery(result);
-      break;
-    case SQLEditResult::SubQuery:
-      changeSubQuery(result);
-      break;
-    case SQLEditResult::SubProxy:
-      changeProxy(result);
+    case SQLEditResult::Query: changeQuery(result); break;
+    case SQLEditResult::SubQuery: changeSubQuery(result); break;
+    case SQLEditResult::SubProxy: changeProxy(result);
     }
   }
 
@@ -270,9 +258,7 @@ QTreeWidgetItem *DataBrowser::findByNameAndType(QString name, int itemType) {
   QList<QTreeWidgetItem *> items = ui->dataTree->findItems(name, Qt::MatchContains | Qt::MatchRecursive);
   if (!items.isEmpty()) {
     for (int i = 0; i < items.count(); i++) {
-      if ((items.at(i)->type() == itemType) /* && (items.at(0)->text(0)==name)*/) {
-        return items.at(i);
-      }
+      if ((items.at(i)->type() == itemType) /* && (items.at(0)->text(0)==name)*/) { return items.at(i); }
     }
   }
   return nullptr;
@@ -280,9 +266,7 @@ QTreeWidgetItem *DataBrowser::findByNameAndType(QString name, int itemType) {
 
 void DataBrowser::slotViewDatasource() {
   QString datasourceName = getDatasourceName();
-  if (!datasourceName.isEmpty()) {
-    showDataWindow(datasourceName);
-  }
+  if (!datasourceName.isEmpty()) { showDataWindow(datasourceName); }
 }
 
 QString DataBrowser::getDatasourceName() {
@@ -309,10 +293,8 @@ QString DataBrowser::getConnectionName(NameType nameType) {
     QTreeWidgetItem *ci = findConnectionItem(ui->dataTree->currentItem());
     if (ci) {
       switch (nameType) {
-      case NameForUser:
-        return ConnectionDesc::connectionNameForUser(ci->text(0));
-      case NameForReport:
-        return ConnectionDesc::connectionNameForReport(ci->text(0));
+      case NameForUser: return ConnectionDesc::connectionNameForUser(ci->text(0));
+      case NameForReport: return ConnectionDesc::connectionNameForReport(ci->text(0));
       }
     } else
       return QString();
@@ -376,9 +358,7 @@ void DataBrowser::initConnections() {
 
   QStringList connections = QSqlDatabase::connectionNames();
   for (QString connectionName : m_report->dataManager()->connectionNames()) {
-    if (!connections.contains(connectionName, Qt::CaseInsensitive)) {
-      connections.append(connectionName);
-    }
+    if (!connections.contains(connectionName, Qt::CaseInsensitive)) { connections.append(connectionName); }
   }
   std::sort(connections.begin(), connections.end());
   for (QString connectionName : connections) {
@@ -430,12 +410,8 @@ QDockWidget *DataBrowser::createDataWindow(QString datasourceName) {
     IDataSourceHolder *holder = m_report->dataManager()->dataSourceHolder(datasourceName);
     if (holder) holder->update();
     IDataSource *datasource = m_report->dataManager()->dataSource(datasourceName);
-    if (datasource) {
-      tableView->setModel(datasource->model());
-    }
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+    if (datasource) { tableView->setModel(datasource->model()); }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 
   window->setWidget(tableView);
   window->setAttribute(Qt::WA_DeleteOnClose);
@@ -463,9 +439,7 @@ void DataBrowser::setMainWindow(QMainWindow *mainWindow) { m_mainWindow = mainWi
 void DataBrowser::slotDataWindowClosed() {
   if (isClosingWindows()) return;
   for (int i = 0; i < m_dataWindows.count(); i++) {
-    if (m_dataWindows.values().at(i) == sender()) {
-      m_dataWindows.remove(m_dataWindows.keys().at(i));
-    }
+    if (m_dataWindows.values().at(i) == sender()) { m_dataWindows.remove(m_dataWindows.keys().at(i)); }
   }
 }
 
@@ -506,9 +480,7 @@ void DataBrowser::slotChangeConnectionState() {
 void DataBrowser::slotVariableEditorAccept(const QString &variable) {
   updateVariablesTree();
   QList<QTreeWidgetItem *> items = ui->variablesTree->findItems(variable, Qt::MatchContains | Qt::MatchRecursive);
-  if (!items.isEmpty()) {
-    ui->variablesTree->setCurrentItem(items.at(0));
-  }
+  if (!items.isEmpty()) { ui->variablesTree->setCurrentItem(items.at(0)); }
 }
 
 void DataBrowser::showDataWindow(QString datasourceName) {
@@ -531,52 +503,40 @@ void DataBrowser::removeDatasource(QString datasourceName) {
 void DataBrowser::addQuery(SQLEditResult result) {
   try {
     m_report->dataManager()->addQuery(result.datasourceName, result.sql, result.connectionName);
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 }
 
 void DataBrowser::changeQuery(SQLEditResult result) {
   try {
     m_report->dataManager()->removeDatasource(result.oldDatasourceName);
     m_report->dataManager()->addQuery(result.datasourceName, result.sql, result.connectionName);
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 }
 
 void DataBrowser::addSubQuery(SQLEditResult result) {
   try {
     m_report->dataManager()->addSubQuery(result.datasourceName, result.sql, result.connectionName, result.masterDatasource);
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 }
 
 void DataBrowser::changeSubQuery(SQLEditResult result) {
   try {
     m_report->dataManager()->removeDatasource(result.oldDatasourceName);
     m_report->dataManager()->addSubQuery(result.datasourceName, result.sql, result.connectionName, result.masterDatasource);
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 }
 
 void DataBrowser::addProxy(SQLEditResult result) {
   try {
     m_report->dataManager()->addProxy(result.datasourceName, result.masterDatasource, result.childDataSource, result.fieldMap);
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 }
 
 void DataBrowser::changeProxy(SQLEditResult result) {
   try {
     m_report->dataManager()->removeDatasource(result.oldDatasourceName);
     m_report->dataManager()->addProxy(result.datasourceName, result.masterDatasource, result.childDataSource, result.fieldMap);
-  } catch (ReportError &exception) {
-    qDebug() << exception.what();
-  }
+  } catch (ReportError &exception) { qDebug() << exception.what(); }
 }
 
 void DataBrowser::addConnectionDesc(ConnectionDesc *connection) {

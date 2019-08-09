@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRAPENDENTES_H
-#define WIDGETCOMPRAPENDENTES_H
+#pragma once
 
 #include <QWidget>
 
@@ -38,5 +37,3 @@ private:
   auto setarDadosAvulso() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETCOMPRAPENDENTES_H

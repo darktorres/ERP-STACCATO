@@ -98,13 +98,11 @@ void WidgetEstoque::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetEstoque::montaFiltro() {
-  // FIXME: digitar hifen causa erro na pesquisa
-
   const bool contabil = ui->radioButtonEstoqueContabil->isChecked();
 
   contabil ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
 
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().replace("-", " ").replace("(", "").replace(")", "");
 
   const QString match = text.isEmpty() ? ""
                                        : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +

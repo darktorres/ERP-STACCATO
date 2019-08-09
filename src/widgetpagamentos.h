@@ -1,5 +1,4 @@
-#ifndef WIDGETPAGAMENTOS_H
-#define WIDGETPAGAMENTOS_H
+#pragma once
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -29,7 +28,7 @@ public:
   auto setTotal(double value) -> void;
   auto verifyFields() -> bool;
 
-  // REFAC: make this private
+  // attributes
   QList<QCheckBox *> listCheckBoxRep;
   QList<QComboBox *> listComboData;
   QList<QComboBox *> listComboParc;
@@ -67,5 +66,3 @@ private:
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
 };
-
-#endif // WIDGETPAGAMENTOS_H

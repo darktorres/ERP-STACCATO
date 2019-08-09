@@ -1,5 +1,4 @@
-#ifndef SQLTABLEMODEL_H
-#define SQLTABLEMODEL_H
+#pragma once
 
 #include <QAbstractProxyModel>
 #include <QSqlRelationalTableModel>
@@ -39,5 +38,3 @@ protected:
   // methods
   auto selectStatement() const -> QString final;
 };
-
-#endif // SQLTABLEMODEL_H

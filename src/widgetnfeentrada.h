@@ -1,5 +1,4 @@
-#ifndef WIDGETNFEENTRADA_H
-#define WIDGETNFEENTRADA_H
+#pragma once
 
 #include <QWidget>
 
@@ -33,5 +32,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETNFEENTRADA_H

@@ -1,5 +1,4 @@
-#ifndef REGISTERADDRESSDIALOG_H
-#define REGISTERADDRESSDIALOG_H
+#pragma once
 
 #include "registerdialog.h"
 
@@ -24,5 +23,3 @@ protected:
 private:
   auto setupTables(const QString &table) -> void;
 };
-
-#endif // REGISTERADDRESSDIALOG_H

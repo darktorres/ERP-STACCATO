@@ -7,11 +7,11 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "editdelegate.h"
 #include "estoqueproxymodel.h"
 #include "importarxml.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
@@ -92,12 +92,12 @@ void ImportarXML::setupTables() {
 
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableEstoque->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("lote", new SingleEditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("bloco", new SingleEditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("codComercial", new EditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("lote", new EditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("bloco", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
-  ui->tableEstoque->setItemDelegateForColumn("un", new SingleEditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("un", new EditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("descricao", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
@@ -244,8 +244,8 @@ void ImportarXML::setupTables() {
 
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableCompra->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
-  ui->tableCompra->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
+  ui->tableCompra->setItemDelegateForColumn("codComercial", new EditDelegate(this));
+  ui->tableCompra->setItemDelegateForColumn("descricao", new EditDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
@@ -382,7 +382,7 @@ bool ImportarXML::importar() {
 
 bool ImportarXML::atualizaDados() {
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO'");
+  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
     const int idVendaProduto = modelCompra.data(row, "idVendaProduto").toInt();
@@ -400,7 +400,7 @@ bool ImportarXML::atualizaDados() {
   }
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra AND quantUpd = 1");
 
   for (const auto &idCompra : idsCompra) {
     query2.bindValue(":dataRealFat", dataReal);

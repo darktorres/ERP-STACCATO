@@ -79,7 +79,7 @@ void FontEditorWidget::initEditor() {
   m_fontSizeEditor = new QComboBox(this);
   m_fontSizeEditor->setModel(&m_fontSizeModel);
   m_fontSizeEditor->setEditable(true);
-  connect(m_fontSizeEditor, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &FontEditorWidget::slotFontSizeChanged);
+  connect(m_fontSizeEditor, qOverload<const QString &>(&QComboBox::currentTextChanged), this, &FontEditorWidget::slotFontSizeChanged);
   addWidget(m_fontSizeEditor);
 
   addSeparator();

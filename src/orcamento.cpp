@@ -924,6 +924,8 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {
+  // FIXME: produtos que estavam validos mas agora expirados são adicionados na réplica como se ainda estivessem valendo (verificar o que fazer)
+
   auto *replica = new Orcamento(parentWidget());
 
   replica->ui->pushButtonReplicar->hide();

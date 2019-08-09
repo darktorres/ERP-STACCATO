@@ -132,5 +132,5 @@ private:
 
   bool m_emptyFormatAdded;
 };
-}
+} // namespace QXlsx
 #endif // XLSXSTYLES_H

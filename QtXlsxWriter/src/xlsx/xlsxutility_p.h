@@ -62,8 +62,7 @@ XLSX_AUTOTEST_EXPORT QString unescapeSheetName(const QString &sheetName);
 
 XLSX_AUTOTEST_EXPORT bool isSpaceReserveNeeded(const QString &string);
 
-XLSX_AUTOTEST_EXPORT QString convertSharedFormula(const QString &rootFormula, const CellReference &rootCell,
-                                                  const CellReference &cell);
+XLSX_AUTOTEST_EXPORT QString convertSharedFormula(const QString &rootFormula, const CellReference &rootCell, const CellReference &cell);
 
-} // QXlsx
+} // namespace QXlsx
 #endif // XLSXUTILITY_H

@@ -273,25 +273,13 @@ public:
   static QScriptValue constructorQFont(QScriptContext *context, QScriptEngine *engine) {
     QFont font;
     switch (context->argumentCount()) {
-    case 5:
-      font.setUnderline(qscriptvalue_cast<bool>(context->argument(4)));
-      [[fallthrough]];
-    case 4:
-      font.setBold(qscriptvalue_cast<bool>(context->argument(3)));
-      [[fallthrough]];
-    case 3:
-      font.setItalic(qscriptvalue_cast<bool>(context->argument(2)));
-      [[fallthrough]];
-    case 2:
-      font.setPointSize(qscriptvalue_cast<int>(context->argument(1)));
-      [[fallthrough]];
-    case 1:
-      font.setFamily(qscriptvalue_cast<QString>(context->argument(0)));
-      [[fallthrough]];
-    case 0:
-      break;
-    default:
-      break;
+    case 5: font.setUnderline(qscriptvalue_cast<bool>(context->argument(4))); [[fallthrough]];
+    case 4: font.setBold(qscriptvalue_cast<bool>(context->argument(3))); [[fallthrough]];
+    case 3: font.setItalic(qscriptvalue_cast<bool>(context->argument(2))); [[fallthrough]];
+    case 2: font.setPointSize(qscriptvalue_cast<int>(context->argument(1))); [[fallthrough]];
+    case 1: font.setFamily(qscriptvalue_cast<QString>(context->argument(0))); [[fallthrough]];
+    case 0: break;
+    default: break;
     }
     return qScriptValueFromValue<QFont>(engine, font);
   }

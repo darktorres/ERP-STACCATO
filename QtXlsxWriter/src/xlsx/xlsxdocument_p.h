@@ -62,6 +62,6 @@ public:
   QSharedPointer<Workbook> workbook;
   QSharedPointer<ContentTypes> contentTypes;
 };
-}
+} // namespace QXlsx
 
 #endif // XLSXDOCUMENT_P_H

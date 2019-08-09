@@ -59,5 +59,5 @@ public:
 private:
   QMap<QString, QString> m_properties;
 };
-}
+} // namespace QXlsx
 #endif // XLSXDOCPROPSCORE_H

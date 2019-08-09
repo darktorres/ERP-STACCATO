@@ -53,5 +53,5 @@ public:
 
   QByteArray xmlData;
 };
-}
+} // namespace QXlsx
 #endif // XLSXSIMPLEOOXMLFILE_H

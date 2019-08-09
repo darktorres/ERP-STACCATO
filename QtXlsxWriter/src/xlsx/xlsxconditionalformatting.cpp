@@ -41,26 +41,13 @@ void ConditionalFormattingPrivate::writeCfVo(QXmlStreamWriter &writer, const Xls
   writer.writeEmptyElement(QStringLiteral("cfvo"));
   QString type;
   switch (cfvo.type) {
-  case ConditionalFormatting::VOT_Formula:
-    type = QStringLiteral("formula");
-    break;
-  case ConditionalFormatting::VOT_Max:
-    type = QStringLiteral("max");
-    break;
-  case ConditionalFormatting::VOT_Min:
-    type = QStringLiteral("min");
-    break;
-  case ConditionalFormatting::VOT_Num:
-    type = QStringLiteral("num");
-    break;
-  case ConditionalFormatting::VOT_Percent:
-    type = QStringLiteral("percent");
-    break;
-  case ConditionalFormatting::VOT_Percentile:
-    type = QStringLiteral("percentile");
-    break;
-  default:
-    break;
+  case ConditionalFormatting::VOT_Formula: type = QStringLiteral("formula"); break;
+  case ConditionalFormatting::VOT_Max: type = QStringLiteral("max"); break;
+  case ConditionalFormatting::VOT_Min: type = QStringLiteral("min"); break;
+  case ConditionalFormatting::VOT_Num: type = QStringLiteral("num"); break;
+  case ConditionalFormatting::VOT_Percent: type = QStringLiteral("percent"); break;
+  case ConditionalFormatting::VOT_Percentile: type = QStringLiteral("percentile"); break;
+  default: break;
   }
   writer.writeAttribute(QStringLiteral("type"), type);
   writer.writeAttribute(QStringLiteral("val"), cfvo.value);
@@ -171,32 +158,15 @@ bool ConditionalFormatting::addHighlightCellsRule(HighlightRuleType type, const 
     cfRule->attrs[XlsxCfRuleData::A_type] = QStringLiteral("cellIs");
     QString op;
     switch (type) {
-    case Highlight_Between:
-      op = QStringLiteral("between");
-      break;
-    case Highlight_Equal:
-      op = QStringLiteral("equal");
-      break;
-    case Highlight_GreaterThan:
-      op = QStringLiteral("greaterThan");
-      break;
-    case Highlight_GreaterThanOrEqual:
-      op = QStringLiteral("greaterThanOrEqual");
-      break;
-    case Highlight_LessThan:
-      op = QStringLiteral("lessThan");
-      break;
-    case Highlight_LessThanOrEqual:
-      op = QStringLiteral("lessThanOrEqual");
-      break;
-    case Highlight_NotBetween:
-      op = QStringLiteral("notBetween");
-      break;
-    case Highlight_NotEqual:
-      op = QStringLiteral("notEqual");
-      break;
-    default:
-      break;
+    case Highlight_Between: op = QStringLiteral("between"); break;
+    case Highlight_Equal: op = QStringLiteral("equal"); break;
+    case Highlight_GreaterThan: op = QStringLiteral("greaterThan"); break;
+    case Highlight_GreaterThanOrEqual: op = QStringLiteral("greaterThanOrEqual"); break;
+    case Highlight_LessThan: op = QStringLiteral("lessThan"); break;
+    case Highlight_LessThanOrEqual: op = QStringLiteral("lessThanOrEqual"); break;
+    case Highlight_NotBetween: op = QStringLiteral("notBetween"); break;
+    case Highlight_NotEqual: op = QStringLiteral("notEqual"); break;
+    default: break;
     }
     cfRule->attrs[XlsxCfRuleData::A_operator] = op;
   } else if (type >= Highlight_ContainsText and type <= Highlight_EndsWith) {

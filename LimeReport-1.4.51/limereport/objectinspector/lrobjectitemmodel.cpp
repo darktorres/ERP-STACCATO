@@ -253,8 +253,7 @@ QVariant QObjectPropertyModel::data(const QModelIndex &index, int role) const {
       return node->iconValue();
     } else
       return QIcon();
-  default:
-    return QVariant();
+  default: return QVariant();
   }
 }
 
@@ -274,9 +273,7 @@ QModelIndex QObjectPropertyModel::index(int row, int column, const QModelIndex &
   if (childItem) {
     QModelIndex modelIndex = createIndex(row, column, childItem);
     if (column == 1) {
-      if (childItem->modelIndex() != modelIndex) {
-        childItem->setModelIndex(modelIndex);
-      }
+      if (childItem->modelIndex() != modelIndex) { childItem->setModelIndex(modelIndex); }
     }
     return modelIndex;
   } else
@@ -325,9 +322,7 @@ CreatePropItem QObjectPropertyModel::propertyItemCreator(QMetaProperty prop) {
       }
     }
     creator = ObjectPropFactory::instance().objectCreator(APropIdent(prop.typeName(), ""));
-    if (!creator) {
-      qDebug() << "Editor for propperty name = \"" << prop.name() << "\" & property type =\"" << prop.typeName() << "\" not found!";
-    }
+    if (!creator) { qDebug() << "Editor for propperty name = \"" << prop.name() << "\" & property type =\"" << prop.typeName() << "\" not found!"; }
   }
   return creator;
 }

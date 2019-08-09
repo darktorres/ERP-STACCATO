@@ -50,8 +50,7 @@ namespace QXlsx {
 
 struct XlsxDefineNameData {
   XlsxDefineNameData() : sheetId(-1) {}
-  XlsxDefineNameData(const QString &name, const QString &formula, const QString &comment, int sheetId = -1)
-      : name(name), formula(formula), comment(comment), sheetId(sheetId) {}
+  XlsxDefineNameData(const QString &name, const QString &formula, const QString &comment, int sheetId = -1) : name(name), formula(formula), comment(comment), sheetId(sheetId) {}
   QString name;
   QString formula;
   QString comment;
@@ -94,6 +93,6 @@ public:
   int last_chartsheet_index;
   int last_sheet_id;
 };
-}
+} // namespace QXlsx
 
 #endif // XLSXWORKBOOK_P_H

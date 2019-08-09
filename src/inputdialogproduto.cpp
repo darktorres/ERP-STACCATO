@@ -4,11 +4,11 @@
 #include <QSqlQuery>
 
 #include "application.h"
+#include "editdelegate.h"
 #include "inputdialogproduto.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "editdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogproduto.h"
 

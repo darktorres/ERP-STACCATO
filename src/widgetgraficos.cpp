@@ -173,7 +173,8 @@ void WidgetGraficos::toggleMarker(QLegendMarker *marker) {
 
     break;
   }
-  default: { break; }
+
+  default: break;
   }
 }
 

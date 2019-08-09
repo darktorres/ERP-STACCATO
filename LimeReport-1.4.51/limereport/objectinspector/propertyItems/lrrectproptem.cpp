@@ -70,12 +70,8 @@ QRectF modifyRect(QRectF rect, const QString &name, qreal itemValue) {
     rect.setY(itemValue);
     rect.setHeight(heigh);
   }
-  if (name == "height") {
-    rect.setHeight(itemValue);
-  }
-  if (name == "width") {
-    rect.setWidth(itemValue);
-  }
+  if (name == "height") { rect.setHeight(itemValue); }
+  if (name == "width") { rect.setWidth(itemValue); }
 
   return rect;
 }
@@ -92,12 +88,9 @@ LimeReport::RectPropItem::RectPropItem(QObject *object, ObjectsList *objects, co
 
 QString LimeReport::RectPropItem::displayValue() const {
   switch (propertyValue().type()) {
-  case QVariant::Rect:
-    return rectToString(propertyValue().toRect());
-  case QVariant::RectF:
-    return rectToString(propertyValue().toRect());
-  default:
-    return ObjectPropItem::displayValue();
+  case QVariant::Rect: return rectToString(propertyValue().toRect());
+  case QVariant::RectF: return rectToString(propertyValue().toRect());
+  default: return ObjectPropItem::displayValue();
   }
 }
 

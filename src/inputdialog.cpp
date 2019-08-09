@@ -4,10 +4,10 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "editdelegate.h"
 #include "inputdialog.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "editdelegate.h"
 #include "ui_inputdialog.h"
 #include "usersession.h"
 

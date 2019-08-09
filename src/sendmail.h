@@ -1,5 +1,4 @@
-#ifndef SENDMAIL_H
-#define SENDMAIL_H
+#pragma once
 
 #include <QProgressDialog>
 
@@ -29,5 +28,3 @@ private:
   auto on_pushButtonEnviar_clicked() -> void;
   auto successStatus() -> void;
 };
-
-#endif // SENDMAIL_H

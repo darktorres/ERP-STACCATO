@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICAENTREGAS_H
-#define WIDGETLOGISTICAENTREGAS_H
+#pragma once
 
 #include <QWidget>
 
@@ -29,7 +28,7 @@ private:
   // methods
   auto cancelarEntrega(const QModelIndexList &list) -> bool;
   auto confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) -> bool;
-  auto consultarNFe(const int idNFe, const QString &xml) -> bool;
+  auto processarConsultaNFe(const int idNFe, const QString &xml) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBuscar_textChanged(const QString &) -> void;
   auto on_pushButtonCancelarEntrega_clicked() -> void;
@@ -45,5 +44,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICAENTREGAS_H

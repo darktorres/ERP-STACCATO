@@ -58,5 +58,5 @@ public:
   AbstractSheet::SheetState sheetState;
   AbstractSheet::SheetType type;
 };
-}
+} // namespace QXlsx
 #endif // XLSXABSTRACTSHEET_P_H

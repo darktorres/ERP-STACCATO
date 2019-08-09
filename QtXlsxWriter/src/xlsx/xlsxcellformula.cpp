@@ -31,8 +31,7 @@
 
 QT_BEGIN_NAMESPACE_XLSX
 
-CellFormulaPrivate::CellFormulaPrivate(const QString &formula_, const CellRange &ref_, CellFormula::FormulaType type_)
-    : formula(formula_), type(type_), reference(ref_), ca(false), si(0) {
+CellFormulaPrivate::CellFormulaPrivate(const QString &formula_, const CellRange &ref_, CellFormula::FormulaType type_) : formula(formula_), type(type_), reference(ref_), ca(false), si(0) {
   // Remove the formula '=' sign if exists
   if (formula.startsWith(QLatin1String("=")))
     formula.remove(0, 1);
@@ -40,8 +39,7 @@ CellFormulaPrivate::CellFormulaPrivate(const QString &formula_, const CellRange 
     formula = formula.mid(2, formula.length() - 3);
 }
 
-CellFormulaPrivate::CellFormulaPrivate(const CellFormulaPrivate &other)
-    : QSharedData(other), formula(other.formula), type(other.type), reference(other.reference), ca(other.ca), si(other.si) {}
+CellFormulaPrivate::CellFormulaPrivate(const CellFormulaPrivate &other) : QSharedData(other), formula(other.formula), type(other.type), reference(other.reference), ca(other.ca), si(other.si) {}
 
 /*!
   \class CellFormula
@@ -132,14 +130,9 @@ bool CellFormula::saveToXml(QXmlStreamWriter &writer) const {
   writer.writeStartElement(QStringLiteral("f"));
   QString t;
   switch (d->type) {
-  case CellFormula::ArrayType:
-    t = QStringLiteral("array");
-    break;
-  case CellFormula::SharedType:
-    t = QStringLiteral("shared");
-    break;
-  default:
-    break;
+  case CellFormula::ArrayType: t = QStringLiteral("array"); break;
+  case CellFormula::SharedType: t = QStringLiteral("shared"); break;
+  default: break;
   }
   if (not t.isEmpty()) writer.writeAttribute(QStringLiteral("t"), t);
   if (d->reference.isValid()) writer.writeAttribute(QStringLiteral("ref"), d->reference.toString());

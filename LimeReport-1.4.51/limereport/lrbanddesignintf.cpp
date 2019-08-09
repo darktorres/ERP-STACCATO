@@ -159,7 +159,7 @@ void BandDesignIntf::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     QFontMetrics fontMetrics(font);
 
     QVector<QRectF> bandNameRects;
-    bandNameRects.push_back(QRectF(8, 8, fontMetrics.width(" " + bandText + " "), fontMetrics.height()));
+    bandNameRects.push_back(QRectF(8, 8, fontMetrics.horizontalAdvance(" " + bandText + " "), fontMetrics.height()));
     // bandNameRects.push_back(QRectF(width()-fontMetrics.width(" "+bandText+" "),2,fontMetrics.width(" "+bandText+" "),fontMetrics.height()));
     // bandNameRects.push_back(QRectF(2,height()-fontMetrics.height(),fontMetrics.width(" "+bandText+" "),fontMetrics.height()));
     // bandNameRects.push_back(QRectF(width()-fontMetrics.width(" "+bandText+" "),height()-fontMetrics.height(),fontMetrics.width(" "+bandText+" "),fontMetrics.height()));
@@ -751,7 +751,7 @@ void BandNameLabel::updateLabel(const QString &bandName) {
   QFont font("Arial", 7 * Const::fontFACTOR, -1, true);
   QFontMetrics fontMetrics(font);
   prepareGeometryChange();
-  m_rect = QRectF(m_band->pos().x() + 10, m_band->pos().y() - (fontMetrics.height() + 10), fontMetrics.width(bandName) + 20, fontMetrics.height() + 10);
+  m_rect = QRectF(m_band->pos().x() + 10, m_band->pos().y() - (fontMetrics.height() + 10), fontMetrics.horizontalAdvance(bandName) + 20, fontMetrics.height() + 10);
   update();
 }
 

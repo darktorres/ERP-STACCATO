@@ -89,9 +89,7 @@ void TextItemEditor::moveEvent(QMoveEvent *) {
 }
 
 void TextItemEditor::on_pbOk_clicked() {
-  if (m_textItem->content() != m_teContent->toPlainText()) {
-    m_textItem->setContent(m_teContent->toPlainText());
-  }
+  if (m_textItem->content() != m_teContent->toPlainText()) { m_textItem->setContent(m_teContent->toPlainText()); }
   close();
 }
 
@@ -113,24 +111,18 @@ void TextItemEditor::initUI() {
     ui->twScriptEngine->setModel(se.model());
 
     for (const QString &dsName : dm->dataSourceNames()) {
-      for (const QString &field : dm->fieldNames(dsName)) {
-        dataWords << dsName + "." + field;
-      }
+      for (const QString &field : dm->fieldNames(dsName)) { dataWords << dsName + "." + field; }
     }
   } else {
     ui->tabWidget->setVisible(false);
   }
 
-  for (LimeReport::ScriptFunctionDesc functionDesc : se.functionsDescriber()) {
-    dataWords << functionDesc.name;
-  }
+  for (LimeReport::ScriptFunctionDesc functionDesc : se.functionsDescriber()) { dataWords << functionDesc.name; }
 
   m_completer->setModel(new QStringListModel(dataWords, m_completer));
   ui->gbSettings->setVisible(false);
 
-  if (ui->twScriptEngine->selectionModel()) {
-    connect(ui->twScriptEngine->selectionModel(), &QItemSelectionModel::currentChanged, this, &TextItemEditor::slotScriptItemsSelectionChanged);
-  }
+  if (ui->twScriptEngine->selectionModel()) { connect(ui->twScriptEngine->selectionModel(), &QItemSelectionModel::currentChanged, this, &TextItemEditor::slotScriptItemsSelectionChanged); }
 
   BandDesignIntf *band = findParentBand();
   if (band && ui->twData->model() && !band->datasourceName().isEmpty()) {
@@ -145,9 +137,7 @@ void TextItemEditor::initUI() {
 QStringListModel *TextItemEditor::getDataSources() {
   LimeReport::DataSourceManager *dm = m_page->datasourceManager();
   QStringList dataSources;
-  for (QString dsName : dm->dataSourceNames()) {
-    dataSources << dsName;
-  }
+  for (QString dsName : dm->dataSourceNames()) { dataSources << dsName; }
   return new QStringListModel(dataSources, m_completer);
 }
 
@@ -161,9 +151,7 @@ QStringListModel *TextItemEditor::getPrefixes() {
 QStringListModel *TextItemEditor::getColumns(QString datasource) {
   QStringList fields;
   LimeReport::DataSourceManager *dm = m_page->datasourceManager();
-  for (QString field : dm->fieldNames(datasource)) {
-    fields << field;
-  }
+  for (QString field : dm->fieldNames(datasource)) { fields << field; }
   return new QStringListModel(fields, m_completer);
 }
 
@@ -181,13 +169,9 @@ void TextItemEditor::readSetting() {
 
   settings()->beginGroup("TextItemEditor");
   QVariant v = settings()->value("Geometry");
-  if (v.isValid()) {
-    restoreGeometry(v.toByteArray());
-  }
+  if (v.isValid()) { restoreGeometry(v.toByteArray()); }
   v = settings()->value("State");
-  if (v.isValid()) {
-    ui->splitter->restoreState(v.toByteArray());
-  }
+  if (v.isValid()) { ui->splitter->restoreState(v.toByteArray()); }
 
   QVariant fontName = settings()->value("FontName");
   if (fontName.isValid()) {
@@ -219,7 +203,7 @@ void CompleaterTextEditor::setCompleter(QCompleter *value) {
   m_compleater->setWidget(this);
   m_compleater->setCompletionMode(QCompleter::PopupCompletion);
   m_compleater->setCaseSensitivity(Qt::CaseInsensitive);
-  connect(m_compleater, QOverload<const QString &>::of(&QCompleter::activated), this, &CompleaterTextEditor::insertCompletion);
+  connect(m_compleater, qOverload<const QString &>(&QCompleter::activated), this, &CompleaterTextEditor::insertCompletion);
 }
 
 void CompleaterTextEditor::keyPressEvent(QKeyEvent *e) {
@@ -229,11 +213,8 @@ void CompleaterTextEditor::keyPressEvent(QKeyEvent *e) {
     case Qt::Key_Return:
     case Qt::Key_Escape:
     case Qt::Key_Tab:
-    case Qt::Key_Backtab:
-      e->ignore();
-      return;
-    default:
-      break;
+    case Qt::Key_Backtab: e->ignore(); return;
+    default: break;
     }
   }
 
@@ -287,20 +268,14 @@ void CompleaterTextEditor::insertCompletion(const QString &completion) {
 void TextItemEditor::on_twData_doubleClicked(const QModelIndex &index) {
   if (!index.isValid()) return;
   LimeReport::DataNode *node = static_cast<LimeReport::DataNode *>(index.internalPointer());
-  if (node->type() == LimeReport::DataNode::Field) {
-    m_teContent->insertPlainText(QString("$D{%1.%2}").arg(node->parent()->name()).arg(node->name()));
-  }
-  if (node->type() == LimeReport::DataNode::Variable) {
-    m_teContent->insertPlainText(QString("$V{%1}").arg(node->name()));
-  }
+  if (node->type() == LimeReport::DataNode::Field) { m_teContent->insertPlainText(QString("$D{%1.%2}").arg(node->parent()->name()).arg(node->name())); }
+  if (node->type() == LimeReport::DataNode::Variable) { m_teContent->insertPlainText(QString("$V{%1}").arg(node->name())); }
 }
 
 void TextItemEditor::on_twScriptEngine_doubleClicked(const QModelIndex &index) {
   if (!index.isValid()) return;
   LimeReport::ScriptEngineNode *node = static_cast<LimeReport::ScriptEngineNode *>(index.internalPointer());
-  if (node->type() == LimeReport::ScriptEngineNode::Function) {
-    m_teContent->insertPlainText(node->name() + "()");
-  }
+  if (node->type() == LimeReport::ScriptEngineNode::Function) { m_teContent->insertPlainText(node->name() + "()"); }
 }
 
 void TextItemEditor::on_splitter_splitterMoved(int, int) {
@@ -333,16 +308,12 @@ void TextItemEditor::on_toolButton_clicked(bool checked) { ui->gbSettings->setVi
 
 void TextItemEditor::on_twScriptEngine_activated(const QModelIndex &index) {
   LimeReport::ScriptEngineNode *node = static_cast<LimeReport::ScriptEngineNode *>(index.internalPointer());
-  if (node->type() == LimeReport::ScriptEngineNode::Function) {
-    ui->lblDescription->setText(node->name());
-  }
+  if (node->type() == LimeReport::ScriptEngineNode::Function) { ui->lblDescription->setText(node->name()); }
 }
 
 void TextItemEditor::slotScriptItemsSelectionChanged(const QModelIndex &to, const QModelIndex) {
   LimeReport::ScriptEngineNode *node = static_cast<LimeReport::ScriptEngineNode *>(to.internalPointer());
-  if (node->type() == LimeReport::ScriptEngineNode::Function) {
-    ui->lblDescription->setText(node->description());
-  }
+  if (node->type() == LimeReport::ScriptEngineNode::Function) { ui->lblDescription->setText(node->description()); }
 }
 
 BandDesignIntf *TextItemEditor::findParentBand() {

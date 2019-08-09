@@ -4,11 +4,11 @@
 #include <QSqlQuery>
 
 #include "application.h"
+#include "editdelegate.h"
 #include "inputdialogproduto.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "singleeditdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogproduto.h"
 
@@ -61,8 +61,8 @@ void InputDialogProduto::setConnections() {
 
   connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged, connectionType);
   connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged, connectionType);
-  connect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged, connectionType);
-  connect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxST, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->lineEditCodRep, &QLineEdit::textEdited, this, &InputDialogProduto::on_lineEditCodRep_textEdited, connectionType);
 }
@@ -70,8 +70,8 @@ void InputDialogProduto::setConnections() {
 void InputDialogProduto::unsetConnections() {
   disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
   disconnect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
-  disconnect(ui->doubleSpinBoxAliquota, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
-  disconnect(ui->doubleSpinBoxST, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
+  disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
+  disconnect(ui->doubleSpinBoxST, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
   disconnect(ui->lineEditCodRep, &QLineEdit::textEdited, this, &InputDialogProduto::on_lineEditCodRep_textEdited);
 }
@@ -133,10 +133,10 @@ void InputDialogProduto::setupTables() {
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
-    ui->table->setItemDelegateForColumn("quant", new SingleEditDelegate(this));
+    ui->table->setItemDelegateForColumn("quant", new EditDelegate(this));
   }
 
-  if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new SingleEditDelegate(this)); }
+  if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this)); }
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {

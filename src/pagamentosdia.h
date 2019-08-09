@@ -1,5 +1,4 @@
-#ifndef PAGAMENTOSDIA_H
-#define PAGAMENTOSDIA_H
+#pragma once
 
 #include <QDialog>
 
@@ -18,10 +17,9 @@ public:
   auto setFilter(const QDate &date, const QString &idConta) -> bool;
 
 private:
+  // attributes
   SqlRelationalTableModel modelViewFluxoCaixa;
   Ui::PagamentosDia *ui;
-  //
+  // methods
   auto setupTables() -> void;
 };
-
-#endif // PAGAMENTOSDIA_H

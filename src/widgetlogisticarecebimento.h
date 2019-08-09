@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICARECEBIMENTO_H
-#define WIDGETLOGISTICARECEBIMENTO_H
+#pragma once
 
 #include <QWidget>
 
@@ -39,5 +38,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICARECEBIMENTO_H

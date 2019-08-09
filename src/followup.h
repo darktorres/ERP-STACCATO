@@ -1,5 +1,4 @@
-#ifndef FOLLOWUP_H
-#define FOLLOWUP_H
+#pragma once
 
 #include <QDialog>
 
@@ -30,5 +29,3 @@ private:
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // FOLLOWUP_H

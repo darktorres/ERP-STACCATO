@@ -1,5 +1,4 @@
-#ifndef ANTECIPARRECEBIMENTO_H
-#define ANTECIPARRECEBIMENTO_H
+#pragma once
 
 #include <QDialog>
 
@@ -32,5 +31,3 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };
-
-#endif // ANTECIPARRECEBIMENTO_H

@@ -1,5 +1,4 @@
-#ifndef ITEMBOXDELEGATE_H
-#define ITEMBOXDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -21,5 +20,3 @@ private:
   auto updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const -> void final;
   auto commitEditor() -> void;
 };
-
-#endif // ITEMBOXDELEGATE_H

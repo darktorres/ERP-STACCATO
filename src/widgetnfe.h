@@ -1,5 +1,4 @@
-#ifndef WIDGETNFE_H
-#define WIDGETNFE_H
+#pragma once
 
 #include <QWidget>
 
@@ -23,5 +22,3 @@ private:
   auto setConnections() -> void;
   auto on_tabWidgetNfe_currentChanged(const int) -> void;
 };
-
-#endif // WIDGETNFE_H

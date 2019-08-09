@@ -1,5 +1,4 @@
-#ifndef LINEEDITDELEGATE_H
-#define LINEEDITDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -17,5 +16,3 @@ public:
 private:
   const Tipo tipo;
 };
-
-#endif // LINEEDITDELEGATE_H

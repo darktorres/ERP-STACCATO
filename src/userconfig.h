@@ -1,5 +1,4 @@
-#ifndef USERCONFIG_H
-#define USERCONFIG_H
+#pragma once
 
 #include <QDialog>
 
@@ -26,5 +25,3 @@ private:
   auto on_pushButtonSalvar_clicked() -> void;
   auto on_pushButtonVendasFolder_clicked() -> void;
 };
-
-#endif // USERCONFIG_H

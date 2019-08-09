@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRA_H
-#define WIDGETCOMPRA_H
+#pragma once
 
 #include <QWidget>
 
@@ -23,5 +22,3 @@ private:
   auto on_tabWidget_currentChanged(const int &) -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETCOMPRA_H

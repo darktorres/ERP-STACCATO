@@ -1,5 +1,4 @@
-#ifndef LINEEDITCEP_H
-#define LINEEDITCEP_H
+#pragma once
 
 #include <QLineEdit>
 
@@ -15,5 +14,3 @@ private:
   auto getValue() const -> QString;
   auto setValue(const QString &value) -> void;
 };
-
-#endif // LINEEDITCEP_H

@@ -1,5 +1,4 @@
-#ifndef COLLAPSIBLEWIDGET_H
-#define COLLAPSIBLEWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -25,5 +24,3 @@ private:
   // methods
   void on_pushButton_clicked();
 };
-
-#endif // COLLAPSIBLEWIDGET_H

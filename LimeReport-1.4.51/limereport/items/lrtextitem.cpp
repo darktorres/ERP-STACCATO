@@ -373,19 +373,15 @@ QString TextItem::formatFieldValue() {
       value = (bOk ? QVariant(dbl) : m_varValue);
     }
       [[fallthrough]];
-    default:
-      break;
+    default: break;
     }
   }
 
   switch (value.type()) {
   case QVariant::Date:
-  case QVariant::DateTime:
-    return formatDateTime(value.toDateTime());
-  case QVariant::Double:
-    return formatNumber(value.toDouble());
-  default:
-    return value.toString();
+  case QVariant::DateTime: return formatDateTime(value.toDateTime());
+  case QVariant::Double: return formatNumber(value.toDouble());
+  default: return value.toString();
   }
 }
 
@@ -581,9 +577,7 @@ void TextItem::expandContent(DataSourceManager *dataManager, RenderPass pass) {
     context = expandScripts(context, dataManager);
     context = expandDataFields(context, expandType, dataManager);
     break;
-  case SecondPass:;
-    context = expandUserVariables(context, pass, expandType, dataManager);
-    context = expandScripts(context, dataManager);
+  case SecondPass:; context = expandUserVariables(context, pass, expandType, dataManager); context = expandScripts(context, dataManager);
   }
 
   if (expandType == NoEscapeSymbols && !m_varValue.isNull() && m_valueType != Default) {

@@ -79,7 +79,7 @@ void FontEditorWidget::initEditor() {
   m_fontSizeEditor = new QComboBox(this);
   m_fontSizeEditor->setModel(&m_fontSizeModel);
   m_fontSizeEditor->setEditable(true);
-  connect(m_fontSizeEditor, QOverload<const QString &>::of(&QComboBox::currentIndexChanged), this, &FontEditorWidget::slotFontSizeChanged);
+  connect(m_fontSizeEditor, qOverload<const QString &>(&QComboBox::currentTextChanged), this, &FontEditorWidget::slotFontSizeChanged);
   addWidget(m_fontSizeEditor);
 
   addSeparator();
@@ -145,9 +145,7 @@ void FontEditorWidget::slotFontAttribsChanged(bool) {
 void FontEditorWidget::slotPropertyChanged(const QString &objectName, const QString &property, const QVariant &oldValue, const QVariant &newValue) {
   Q_UNUSED(oldValue)
   Q_UNUSED(newValue)
-  if (item() && (item()->objectName() == objectName) && (property == "font")) {
-    updateValues(item()->property("font").value<QFont>());
-  }
+  if (item() && (item()->objectName() == objectName) && (property == "font")) { updateValues(item()->property("font").value<QFont>()); }
 }
 
 } // namespace LimeReport

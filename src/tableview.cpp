@@ -21,7 +21,7 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
 
   verticalHeader()->setDefaultSectionSize(20);
 
-  setMouseTracking(true);
+  horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
 void TableView::showContextMenu(const QPoint &pos) {
@@ -30,13 +30,11 @@ void TableView::showContextMenu(const QPoint &pos) {
   QAction action("Autodimensionar", this);
   action.setCheckable(true);
   action.setChecked(autoResize);
-  connect(&action, &QAction::triggered, this, &TableView::toggleAutoResize);
+  connect(&action, &QAction::triggered, this, &TableView::setAutoResize);
   contextMenu.addAction(&action);
 
   contextMenu.exec(mapToGlobal(pos));
 }
-
-void TableView::toggleAutoResize() { autoResize = not autoResize; }
 
 int TableView::getColumnIndex(const QString &column) const {
   int columnIndex = -1;
@@ -64,19 +62,15 @@ void TableView::redoView() {
       for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
     }
   }
-
-  if (autoResize) { resizeColumnsToContents(); }
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
-    QTableView::setModel(temp->proxyModel);
+  if (auto sqlQuery = qobject_cast<SqlQueryModel *>(model); sqlQuery and sqlQuery->proxyModel) {
+    QTableView::setModel(sqlQuery->proxyModel);
+  } else if (auto sqlRelat = qobject_cast<SqlRelationalTableModel *>(model); sqlRelat and sqlRelat->proxyModel) {
+    QTableView::setModel(sqlRelat->proxyModel);
   } else {
-    if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
-      QTableView::setModel(temp2->proxyModel);
-    } else {
-      QTableView::setModel(model);
-    }
+    QTableView::setModel(model);
   }
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
@@ -85,8 +79,7 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   if (baseModel) {
     connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
-    // TODO: readd this
-    //    connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
+    connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
     connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
   }
 
@@ -98,21 +91,20 @@ void TableView::setModel(QAbstractItemModel *model) {
   redoView();
 }
 
-void TableView::enterEvent(QEvent *event) {
-  if (autoResize) { resizeColumnsToContents(); }
-
-  QTableView::enterEvent(event);
-}
-
 void TableView::mousePressEvent(QMouseEvent *event) {
   const QModelIndex item = indexAt(event->pos());
 
+  // this enables clicking outside of lines to clear selection
   if (not item.isValid()) { emit clicked(item); }
 
   QTableView::mousePressEvent(event);
 }
 
-void TableView::setAutoResize(const bool value) { autoResize = value; }
+void TableView::setAutoResize(const bool value) {
+  autoResize = value;
+
+  horizontalHeader()->setSectionResizeMode(autoResize ? QHeaderView::ResizeToContents : QHeaderView::Interactive);
+}
 
 void TableView::setPersistentColumns(const QStringList &value) { persistentColumns = value; }
 

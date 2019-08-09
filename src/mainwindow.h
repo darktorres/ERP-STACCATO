@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -22,7 +21,6 @@ private:
   QPushButton *pushButtonStatus;
   // methods
   auto event(QEvent *event) -> bool;
-  //  auto gerarEnviarRelatorio() -> void;
   auto on_actionCadastrarCliente_triggered() -> void;
   auto on_actionCadastrarFornecedor_triggered() -> void;
   auto on_actionCadastrarProdutos_triggered() -> void;
@@ -42,8 +40,7 @@ private:
   auto on_actionPromocao_triggered() -> void;
   auto on_actionSobre_triggered() -> void;
   auto on_tabWidget_currentChanged(const int) -> void;
+  auto reconnectDb() -> void;
   auto resetTables() -> void;
-  auto verifyDb() -> void;
+  auto verifyDb(const bool conectado) -> void;
 };
-
-#endif // MAINWINDOW_H

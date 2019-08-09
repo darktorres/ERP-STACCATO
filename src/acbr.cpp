@@ -10,7 +10,7 @@
 #include "usersession.h"
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {
-  connect(&socket, QOverload<QTcpSocket::SocketError>::of(&QAbstractSocket::error), this, &ACBr::error);
+  connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error);
   connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
   connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
   connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket);
@@ -26,23 +26,15 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
 }
 
 void ACBr::error() {
-  //  qDebug() << "error";
   qApp->enqueueError("Erro socket: " + socket.errorString());
   progressDialog->cancel();
 }
 
-void ACBr::write() {
-  //  qDebug() << "writen";
-  enviado = true;
-}
+void ACBr::write() { enviado = true; }
 
-void ACBr::setConnected() {
-  //  qDebug() << "conectado";
-  conectado = true;
-}
+void ACBr::setConnected() { conectado = true; }
 
 void ACBr::setDisconnected() {
-  //  qDebug() << "desconectado";
   pronto = false;
   conectado = false;
   recebido = false;
@@ -53,17 +45,13 @@ void ACBr::readSocket() {
   const auto stream = socket.readAll();
   resposta += stream;
 
-  //  qDebug() << "answer: " << stream;
-
   if (resposta.endsWith(welcome)) {
-    //    qDebug() << "pronto";
     pronto = true;
     resposta.clear();
     return;
   }
 
   if (resposta.endsWith("\u0003")) {
-    //    qDebug() << "recebido";
     resposta.remove("\u0003");
     recebido = true;
   }
@@ -123,14 +111,15 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  QFile file("C:\\ACBrMonitorPLUS\\temp\\nfe.xml");
+  const QString filePath = "C:/ACBrMonitorPLUS/nfe.xml";
 
-  if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString());
-    return {};
-  }
+  const auto resposta1 = enviarComando("NFE.SaveToFile(" + filePath + ", \"" + query.value("xml").toString() + "\")");
 
-  const auto resposta2 = enviarComando("NFE.ConsultarNFe(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
+  if (not resposta1) { return {}; }
+
+  qDebug() << "resposta1: " << resposta1.value();
+
+  const auto resposta2 = enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
   if (not resposta2) { return {}; }
 
@@ -147,7 +136,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  auto resposta3 = enviarComando("NFe.LoadfromFile(C:\\ACBrMonitorPLUS\\temp\\nfe.xml)");
+  auto resposta3 = enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
   if (not resposta3) { return {}; }
 
@@ -203,7 +192,6 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   if (socket.state() != QTcpSocket::ConnectedState) {
     conectado = false;
     pronto = false;
-    //    qDebug() << "conectando";
 
     const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
     const auto porta = UserSession::getSetting("User/portaACBr");
@@ -223,8 +211,6 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   while (not enviado and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
 
   while (not recebido and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
-
-  //  qDebug() << "resposta: " << resposta;
 
   progressDialog->cancel();
 

@@ -66,7 +66,7 @@ CadastroLoja::~CadastroLoja() { delete ui; }
 
 void CadastroLoja::setupUi() {
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
-  ui->lineEditSIGLA->setInputMask(">AANN;_");
+  ui->lineEditSIGLA->setInputMask(">XXXX;_");
   ui->lineEditCEP->setInputMask("99999-999;_");
   ui->lineEditUF->setInputMask(">AA;_");
 }

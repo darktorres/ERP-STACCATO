@@ -78,10 +78,18 @@ void WidgetGraficos::updateTables() {
     chart.setTitle("Acumulado mensal");
     chart.legend()->setAlignment(Qt::AlignBottom);
     chart.setLocalizeNumbers(true);
-    static_cast<QValueAxis *>(chart.axisY())->setLabelFormat("R$ %.0f"); // NOTE: axis X/Y is deprecated
-    static_cast<QValueAxis *>(chart.axisX())->setLabelFormat("%.0f");
-    static_cast<QValueAxis *>(chart.axisY())->setTickCount(10);
-    static_cast<QValueAxis *>(chart.axisX())->setTickCount(31);
+
+    auto axes = chart.axes();
+
+    if (not axes.isEmpty()) {
+      auto axisX = static_cast<QValueAxis *>(axes.at(0));
+      auto axisY = static_cast<QValueAxis *>(axes.at(1));
+
+      axisX->setLabelFormat("%.0f");
+      axisY->setLabelFormat("R$ %.0f");
+      axisX->setTickCount(31);
+      axisY->setTickCount(10);
+    }
 
     const auto markers = chart.legend()->markers();
 

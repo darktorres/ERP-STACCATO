@@ -10,7 +10,7 @@ VERSION = 0.6.76
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.5.2/limereport/limereport.pri)
+include(LimeReport-1.5.8/limereport/limereport.pri)
 include(QDecimal/qdecimal.pri)
 
 QT *= core gui sql network xml charts

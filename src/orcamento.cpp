@@ -924,7 +924,33 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {
-  // FIXME: produtos que estavam validos mas agora expirados são adicionados na réplica como se ainda estivessem valendo (verificar o que fazer)
+  // passar por cada produto verificando sua validade/descontinuado
+  QStringList produtos;
+  QVector<int> skipRows;
+
+  QSqlQuery queryProduto;
+  queryProduto.prepare("SELECT (descontinuado OR desativado) AS invalido FROM produto WHERE idProduto = :idProduto");
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    const int idProduto = modelItem.data(row, "idProduto").toInt();
+
+    queryProduto.bindValue(":idProduto", idProduto);
+
+    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
+
+    if (queryProduto.value("invalido").toBool()) {
+      produtos << QString::number(row) + " - " + modelItem.data(row, "produto").toString();
+      skipRows << row;
+    }
+  }
+
+  if (not produtos.isEmpty()) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n" + produtos.join("\n"), QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+    if (msgBox.exec() != QMessageBox::Yes) { return; }
+  }
 
   auto *replica = new Orcamento(parentWidget());
 
@@ -941,6 +967,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   replica->ui->plainTextEditObs->setPlainText(data("observacao").toString());
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (skipRows.contains(row)) { continue; }
+
     replica->ui->itemBoxProduto->setId(modelItem.data(row, "idProduto"));
     replica->ui->doubleSpinBoxQuant->setValue(modelItem.data(row, "quant").toDouble());
     replica->ui->doubleSpinBoxDesconto->setValue(modelItem.data(row, "desconto").toDouble());

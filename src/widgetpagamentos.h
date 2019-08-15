@@ -46,10 +46,12 @@ private:
   double frete = 0;
   double total = 0;
   double credito = 0;
+  double creditoRestante = 0;
   QString idOrcamento;
   Tipo tipo;
   Ui::WidgetPagamentos *ui;
   // methods
+  auto calculaCreditoRestante() -> void;
   auto calcularTotal() -> void;
   auto checkBoxRep(QFrame *frame, QHBoxLayout *layout) -> void;
   auto comboBoxData(QHBoxLayout *layout) -> QComboBox *;
@@ -61,6 +63,7 @@ private:
   auto labelPagamento(QHBoxLayout *layout) -> void;
   auto lineEditPgt(QHBoxLayout *layout) -> void;
   auto on_comboBoxPgt_currentTextChanged(const int index, const QString &text) -> void;
+  auto on_doubleSpinBoxPgt_valueChanged(const int index) -> void;
   auto on_pushButtonAdicionarPagamento_clicked() -> void;
   auto on_pushButtonFreteLoja_clicked() -> void;
   auto on_pushButtonLimparPag_clicked() -> void;

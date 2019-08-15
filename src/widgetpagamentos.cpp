@@ -58,6 +58,23 @@ QDateEdit *WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
   return dateEditPgt;
 }
 
+void WidgetPagamentos::on_doubleSpinBoxPgt_valueChanged(const int index) {
+  if (listComboPgt.at(index)->currentText() == "Conta Cliente") { calculaCreditoRestante(); }
+
+  calcularTotal();
+}
+
+void WidgetPagamentos::calculaCreditoRestante() {
+  double creditoUsado = 0;
+
+  for (int i = 0; i < listComboPgt.size(); ++i) {
+    if (listComboPgt.at(i)->currentText() == "Conta Cliente") { creditoUsado += listDoubleSpinPgt.at(i)->value(); }
+  }
+
+  creditoRestante = credito - creditoUsado;
+  ui->doubleSpinBoxCreditoDisponivel->setValue(creditoRestante);
+}
+
 void WidgetPagamentos::doubleSpinBoxPgt(QHBoxLayout *layout) {
   const double restante = total - ui->doubleSpinBoxTotalPag->value();
 
@@ -69,7 +86,7 @@ void WidgetPagamentos::doubleSpinBoxPgt(QHBoxLayout *layout) {
   doubleSpinBoxPgt->setValue(restante);
   doubleSpinBoxPgt->setGroupSeparatorShown(true);
   layout->addWidget(doubleSpinBoxPgt);
-  connect(doubleSpinBoxPgt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+  connect(doubleSpinBoxPgt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [=] { on_doubleSpinBoxPgt_valueChanged(listDoubleSpinPgt.indexOf(doubleSpinBoxPgt)); });
   listDoubleSpinPgt << doubleSpinBoxPgt;
 }
 
@@ -181,7 +198,15 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   if (text == "Escolha uma opção!") { return; }
 
   if (text == "Conta Cliente") {
-    listDoubleSpinPgt.at(index)->setMaximum(credito);
+    if (qFuzzyIsNull(ui->doubleSpinBoxCreditoDisponivel->value())) {
+      listComboPgt.at(index)->setCurrentIndex(0);
+      return qApp->enqueueError("Não há saldo cliente restante!", this);
+    }
+
+    double currentValue = listDoubleSpinPgt.at(index)->value();
+    double newValue = qMin(currentValue, creditoRestante);
+    calculaCreditoRestante();
+    listDoubleSpinPgt.at(index)->setMaximum(newValue);
     listComboParc.at(index)->clear();
     listComboParc.at(index)->addItem("1x");
     emit montarFluxoCaixa();
@@ -207,6 +232,8 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
   listDatePgt.at(index)->setEnabled(true);
 
+  calculaCreditoRestante();
+
   emit montarFluxoCaixa();
 }
 
@@ -225,6 +252,8 @@ void WidgetPagamentos::resetarPagamentos() {
 
   ui->doubleSpinBoxTotalPag->setValue(0);
 
+  calculaCreditoRestante();
+
   emit montarFluxoCaixa();
 }
 
@@ -232,7 +261,9 @@ double WidgetPagamentos::getTotalPag() { return ui->doubleSpinBoxTotalPag->value
 
 void WidgetPagamentos::setCredito(const double creditoCliente) {
   credito = creditoCliente;
+  creditoRestante = creditoCliente;
   ui->doubleSpinBoxCreditoTotal->setValue(creditoCliente);
+  ui->doubleSpinBoxCreditoDisponivel->setValue(creditoRestante);
 }
 
 void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
@@ -270,17 +301,23 @@ void WidgetPagamentos::calcularTotal() {
 
   auto lastSpinBox = listDoubleSpinPgt.last();
 
-  disconnect(lastSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
-
   sum -= lastSpinBox->value();
 
   const double leftOver = total - sum;
 
+  lastSpinBox->blockSignals(true);
   lastSpinBox->setValue(leftOver);
+  lastSpinBox->blockSignals(false);
 
-  connect(lastSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetPagamentos::calcularTotal);
+  // ----------------------------------------
 
-  ui->doubleSpinBoxTotalPag->setValue(sum + leftOver);
+  double sum2 = 0;
+
+  for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum2 += spinbox->value(); }
+
+  ui->doubleSpinBoxTotalPag->setValue(sum2);
+
+  // ----------------------------------------
 
   emit montarFluxoCaixa();
 }
@@ -337,6 +374,8 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
 
 void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
+  if (listCheckBoxRep.isEmpty()) { return qApp->enqueueError("Preencha os pagamentos primeiro!", this); }
+
   LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
   if (dialog.exec() == QDialog::Rejected) { return; }

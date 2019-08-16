@@ -70,7 +70,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
   QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 
-  if (model.tableName() == "produto") {
+  if (model.tableName() == "view_produto") {
     const QString descontinuado = " AND descontinuado = " + QString(ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE");
     const QString representacao = showAllProdutos ? "" : (isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE");
 
@@ -138,7 +138,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
     return qApp->enqueueError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this);
   }
 
-  if (model.tableName() == "produto") {
+  if (model.tableName() == "view_produto") {
     const auto selection = ui->table->selectionModel()->selection().indexes();
     const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
 
@@ -225,7 +225,7 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, QWidget *parent) {
   // TODO: 3nao mostrar promocao vencida no descontinuado
-  SearchDialog *sdProd = new SearchDialog("Buscar Produto", "produto", "idProduto", {"descricao"}, "fornecedor, descricao, colecao, codcomercial", "idProduto = 0", parent);
+  SearchDialog *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, "fornecedor, descricao, colecao, codcomercial", "idProduto = 0", parent);
 
   sdProd->permitirDescontinuados = permitirDescontinuados;
   sdProd->silent = silent;
@@ -240,6 +240,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   }
 
   sdProd->setHeaderData("fornecedor", "Fornecedor");
+  sdProd->setHeaderData("statusEstoque", "Estoque");
   sdProd->setHeaderData("descricao", "Descrição");
   sdProd->setHeaderData("estoqueRestante", "Estoque Disp.");
   sdProd->setHeaderData("un", "Un.");

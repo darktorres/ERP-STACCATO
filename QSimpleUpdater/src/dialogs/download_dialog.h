@@ -24,7 +24,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include <math.h>
+#include <cmath>
 
 namespace Ui {
 class DownloadDialog;
@@ -42,17 +42,16 @@ private:
   // attributes
   Ui::DownloadDialog *ui;
   QString m_path;
-  bool m_download_paused;
   QNetworkReply *m_reply;
   QNetworkAccessManager *m_manager;
   QDateTime m_start_time;
-  double roundNumber(const double &input);
   // methods
   auto cancelDownload() -> void;
   auto downloadFinished() -> void;
   auto ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) -> void;
   auto installUpdate() -> void;
   auto openDownload() -> void;
+  auto roundNumber(const double &input)->double;
   auto updateProgress(qint64 received, qint64 total) -> void;
 };
 

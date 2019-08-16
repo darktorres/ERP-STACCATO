@@ -138,7 +138,10 @@ bool CadastroUsuario::viewRegister() {
 
   if (not modelPermissoes.select()) { return false; }
 
-  ui->table->setModel(new HorizontalProxyModel(&modelPermissoes, this));
+//  ui->table->setModel(new HorizontalProxyModel(&modelPermissoes, this));
+  auto *transpose = new QTransposeProxyModel(this);
+  transpose->setSourceModel(&modelPermissoes);
+  ui->table->setModel(transpose);
 
   ui->table->hideRow(0);                                  // idUsuario
   ui->table->hideRow(ui->table->model()->rowCount() - 1); // created

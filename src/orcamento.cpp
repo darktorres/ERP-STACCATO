@@ -719,13 +719,13 @@ void Orcamento::setupTables() {
 void Orcamento::atualizarItem() { adicionarItem(Tipo::Atualizar); }
 
 void Orcamento::adicionarItem(const Tipo tipoItem) {
+  if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Item inválido!", this); }
+
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Quantidade inválida!", this); }
+
   unsetConnections();
 
   [=] {
-    if (ui->itemBoxProduto->text().isEmpty()) { return qApp->enqueueError("Item inválido!", this); }
-
-    if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Quantidade inválida!", this); }
-
     if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
 
     if (not modelItem.setData(currentRowItem, "idProduto", ui->itemBoxProduto->getId().toInt())) { return; }

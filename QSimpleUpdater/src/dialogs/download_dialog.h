@@ -45,7 +45,7 @@ private:
   bool m_download_paused;
   QNetworkReply *m_reply;
   QNetworkAccessManager *m_manager;
-  uint m_start_time;
+  QDateTime m_start_time;
   double roundNumber(const double &input);
   // methods
   auto cancelDownload() -> void;

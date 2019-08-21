@@ -399,6 +399,8 @@ bool ImportarXML::atualizaDados() {
     if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query.lastError().text(), this); }
   }
 
+  // FIXME: os produtos que estiverem marcados 'quantUpd = 2' (quant não bate) separar a linha em dois, a quant. que veio segue e a que faltou continua em faturamento
+
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra AND quantUpd = 1");
 

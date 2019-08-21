@@ -7,7 +7,7 @@
 #if defined(qApp)
 #undef qApp
 #endif
-#define qApp (dynamic_cast<Application *>(QCoreApplication::instance()))
+#define qApp (static_cast<Application *>(QCoreApplication::instance()))
 
 class Application : public QApplication {
   Q_OBJECT

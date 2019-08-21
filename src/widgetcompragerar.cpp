@@ -510,3 +510,5 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 // TODO: avulso
 // TODO: no caso da quartzobras se for mais de um pedido deixar o campo 'PEDIDO DE VENDA NR.' vazio
 // TODO: no caso da quartzobras ordenar por cod. produto em vez de por pedido
+
+// TODO: ao confirmar email voltar tela para pendentes

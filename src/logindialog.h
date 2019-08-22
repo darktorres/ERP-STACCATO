@@ -1,5 +1,4 @@
-#ifndef LOGINDIALOG_H
-#define LOGINDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -21,11 +20,9 @@ private:
   Ui::LoginDialog *ui;
   // methods
   auto on_comboBoxLoja_currentTextChanged(const QString &loja) -> void;
-  auto on_lineEditHostname_textChanged(const QString &) -> void;
+  auto on_lineEditHostname_textChanged(const QString &hostname) -> void;
   auto on_pushButtonConfig_clicked() -> void;
   auto on_pushButtonLogin_clicked() -> void;
   auto setComboBox() -> void;
   auto verificaVersao() -> bool;
 };
-
-#endif // LOGINDIALOG_H

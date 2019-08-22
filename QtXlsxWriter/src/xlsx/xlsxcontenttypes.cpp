@@ -133,9 +133,7 @@ bool ContentTypes::loadFromXmlFile(QIODevice *device) {
       }
     }
 
-    if (reader.hasError()) {
-      qDebug() << reader.errorString();
-    }
+    if (reader.hasError()) { qDebug() << reader.errorString(); }
   }
   return true;
 }

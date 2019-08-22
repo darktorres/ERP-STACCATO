@@ -7,27 +7,65 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "editdelegate.h"
 #include "estoqueproxymodel.h"
 #include "importarxml.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "singleeditdelegate.h"
 #include "ui_importarxml.h"
 
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
-  connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
-  connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
+  setupTables();
+
+  setConnections();
 
   setWindowFlags(Qt::Window);
-
-  setupTables();
 }
 
 ImportarXML::~ImportarXML() { delete ui; }
+
+void ImportarXML::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked, connectionType);
+  connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked, connectionType);
+  connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled, connectionType);
+  connect(modelEstoque.proxyModel, &SqlRelationalTableModel::dataChanged, this, &ImportarXML::updateTableData, connectionType);
+}
+
+void ImportarXML::unsetConnections() {
+  disconnect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
+  disconnect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
+  disconnect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
+  disconnect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
+  disconnect(modelEstoque.proxyModel, &SqlRelationalTableModel::dataChanged, this, &ImportarXML::updateTableData);
+}
+
+void ImportarXML::updateTableData(const QModelIndex &topLeft) {
+  unsetConnections();
+
+  [&] {
+    const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
+    const int row = topLeft.row();
+
+    if (header == "Quant." or header == "R$ Unid.") {
+      const double preco = modelEstoque.data(row, "quant").toDouble() * modelEstoque.data(row, "valorUnid").toDouble();
+      if (not modelEstoque.setData(row, "valor", preco)) { return; }
+    }
+
+    if (header == "R$") {
+      const double prcUnitario = modelEstoque.data(row, "valor").toDouble() / modelEstoque.data(row, "quant").toDouble();
+      if (not modelEstoque.setData(row, "valorUnid", prcUnitario)) { return; }
+    }
+  }();
+
+  reparear(topLeft);
+
+  setConnections();
+}
 
 void ImportarXML::setupTables() {
   modelEstoque.setTable("estoque");
@@ -54,12 +92,12 @@ void ImportarXML::setupTables() {
 
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableEstoque->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("lote", new SingleEditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("bloco", new SingleEditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("codComercial", new EditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("lote", new EditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("bloco", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
-  ui->tableEstoque->setItemDelegateForColumn("un", new SingleEditDelegate(this));
-  ui->tableEstoque->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("un", new EditDelegate(this));
+  ui->tableEstoque->setItemDelegateForColumn("descricao", new EditDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableEstoque->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
@@ -93,6 +131,9 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("pICMSST");
   ui->tableEstoque->hideColumn("cEnq");
   ui->tableEstoque->hideColumn("cstIPI");
+  ui->tableEstoque->hideColumn("vBCIPI");
+  ui->tableEstoque->hideColumn("pIPI");
+  ui->tableEstoque->hideColumn("vIPI");
   ui->tableEstoque->hideColumn("cstPIS");
   ui->tableEstoque->hideColumn("vBCPIS");
   ui->tableEstoque->hideColumn("pPIS");
@@ -101,6 +142,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   // -------------------------------------------------------------------------
 
@@ -202,8 +244,8 @@ void ImportarXML::setupTables() {
 
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableCompra->setItemDelegateForColumn("codComercial", new SingleEditDelegate(this));
-  ui->tableCompra->setItemDelegateForColumn("descricao", new SingleEditDelegate(this));
+  ui->tableCompra->setItemDelegateForColumn("codComercial", new EditDelegate(this));
+  ui->tableCompra->setItemDelegateForColumn("descricao", new EditDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
@@ -248,9 +290,9 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<std::tuple<int, int, dou
       "INSERT INTO produto SELECT NULL, p.idProdutoUpd, :idEstoque, p.idFornecedor, p.idFornecedorUpd, p.fornecedor, p.fornecedorUpd, CONCAT(p.descricao, ' (ESTOQUE)'), p.descricaoUpd, "
       ":estoqueRestante, p.estoqueRestanteUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, p.multiploUpd, p.m2cx, p.m2cxUpd, "
       "p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, p.ncmEx, p.ncmExUpd, p.cfop, "
-      "p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, p.custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, "
-      "p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, '2020-12-31', p.validadeUpd, :descontinuado, p.descontinuadoUpd, "
-      "p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
+      "p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, p.custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, p.mvaUpd, p.precoVenda, "
+      "p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, '2020-12-31', p.validadeUpd, "
+      ":descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
 
   for (const auto &tuple : tuples) {
     const auto [idProduto, idEstoque, estoqueRestante] = tuple;
@@ -340,7 +382,7 @@ bool ImportarXML::importar() {
 
 bool ImportarXML::atualizaDados() {
   QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idVendaProduto = :idVendaProduto AND status = 'EM FATURAMENTO'");
+  query.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idVendaProduto = :idVendaProduto");
 
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
     const int idVendaProduto = modelCompra.data(row, "idVendaProduto").toInt();
@@ -357,8 +399,10 @@ bool ImportarXML::atualizaDados() {
     if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query.lastError().text(), this); }
   }
 
+  // FIXME: os produtos que estiverem marcados 'quantUpd = 2' (quant não bate) separar a linha em dois, a quant. que veio segue e a que faltou continua em faturamento
+
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND quantUpd = 1 AND status = 'EM FATURAMENTO'");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra AND quantUpd = 1");
 
   for (const auto &idCompra : idsCompra) {
     query2.bindValue(":dataRealFat", dataReal);
@@ -398,15 +442,24 @@ bool ImportarXML::verifyFields() {
 void ImportarXML::on_pushButtonImportar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not qApp->startTransaction()) { return; }
+  unsetConnections();
 
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
+  const auto ok = [&] {
+    if (not qApp->startTransaction()) { return false; }
 
-  if (not importar()) { return qApp->rollbackTransaction(); }
+    if (not importar()) {
+      qApp->rollbackTransaction();
+      return false;
+    }
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
+    if (not qApp->endTransaction()) { return false; }
 
-  if (not qApp->endTransaction()) { return; }
+    return true;
+  }();
+
+  setConnections();
+
+  if (not ok) { return; }
 
   QDialog::accept();
   close();
@@ -434,7 +487,7 @@ bool ImportarXML::limparAssociacoes() {
 }
 
 void ImportarXML::on_pushButtonProcurar_clicked() {
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
+  unsetConnections();
 
   [&] {
     if (not lerXML()) { return; }
@@ -453,7 +506,7 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
     if (ok) { ui->pushButtonProcurar->setDisabled(true); }
   }();
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
+  setConnections();
 }
 
 std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
@@ -570,6 +623,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) { return false; }
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
+  if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
 
   return true;
 }
@@ -638,8 +692,8 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "codComercial", xml.codProd)) { return false; }
   if (not modelEstoque.setData(newRow, "ncm", xml.ncm)) { return false; }
   if (not modelEstoque.setData(newRow, "cfop", xml.cfop)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorUnid", xml.valorUnid)) { return false; }
-  if (not modelEstoque.setData(newRow, "valor", xml.valor)) { return false; }
+  if (not modelEstoque.setData(newRow, "valorUnid", (xml.valor + xml.vIPI) / xml.quant)) { return false; }
+  if (not modelEstoque.setData(newRow, "valor", xml.valor + xml.vIPI)) { return false; }
   if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) { return false; }
@@ -662,6 +716,9 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "vICMSST", xml.vICMSST)) { return false; }
   if (not modelEstoque.setData(newRow, "cEnq", xml.cEnq)) { return false; }
   if (not modelEstoque.setData(newRow, "cstIPI", xml.cstIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "vBCIPI", xml.vBCIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "pIPI", xml.pIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "vIPI", xml.vIPI)) { return false; }
   if (not modelEstoque.setData(newRow, "cstPIS", xml.cstPIS)) { return false; }
   if (not modelEstoque.setData(newRow, "vBCPIS", xml.vBCPIS)) { return false; }
   if (not modelEstoque.setData(newRow, "pPIS", xml.pPIS)) { return false; }
@@ -763,7 +820,9 @@ void ImportarXML::on_pushButtonCancelar_clicked() { close(); }
 bool ImportarXML::produtoCompativel(const int rowCompra, const QString &codComercialEstoque) {
   if (modelCompra.data(rowCompra, "status").toString() != "EM FATURAMENTO") { return false; }
   if (modelCompra.data(rowCompra, "quantUpd").toInt() == static_cast<int>(FieldColors::Green)) { return false; }
+
   const QString codComercialCompra = modelCompra.data(rowCompra, "codComercial").toString();
+
   if (codComercialCompra != codComercialEstoque) { return false; }
 
   return true;
@@ -776,7 +835,7 @@ bool ImportarXML::reparear(const QModelIndex &index) {
 }
 
 bool ImportarXML::parear() {
-  disconnect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
+  unsetConnections();
 
   const auto parear2 = [&] {
     if (not limparAssociacoes()) { return false; }
@@ -821,7 +880,7 @@ bool ImportarXML::parear() {
     return true;
   }();
 
-  connect(&modelEstoque, &QSqlTableModel::dataChanged, this, &ImportarXML::reparear);
+  setConnections();
 
   return parear2;
 }

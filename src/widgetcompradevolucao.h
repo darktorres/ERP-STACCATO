@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRADEVOLUCAO_H
-#define WIDGETCOMPRADEVOLUCAO_H
+#pragma once
 
 #include <QWidget>
 
@@ -34,5 +33,3 @@ private:
   auto setupTables() -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETCOMPRADEVOLUCAO_H

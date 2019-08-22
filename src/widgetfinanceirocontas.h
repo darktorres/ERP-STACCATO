@@ -1,5 +1,4 @@
-#ifndef WIDGETFINANCEIROCONTAS_H
-#define WIDGETFINANCEIROCONTAS_H
+#pragma once
 
 #include <QWidget>
 
@@ -46,5 +45,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETFINANCEIROCONTAS_H

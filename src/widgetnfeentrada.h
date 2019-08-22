@@ -1,5 +1,4 @@
-#ifndef WIDGETNFEENTRADA_H
-#define WIDGETNFEENTRADA_H
+#pragma once
 
 #include <QWidget>
 
@@ -25,7 +24,7 @@ private:
   SqlRelationalTableModel modelViewNFeEntrada;
   Ui::WidgetNfeEntrada *ui;
   // methods
-  auto cancelar(const int row) -> bool;
+  auto remover(const int row) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonRemoverNFe_clicked() -> void;
@@ -33,5 +32,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETNFEENTRADA_H

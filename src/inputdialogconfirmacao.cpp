@@ -414,11 +414,22 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   if (not modelVendaProduto.select()) { return false; }
 
-  if (not modelVendaProduto.setData(0, "caixas", caixas - caixasDefeito)) { return false; }
-  if (not modelVendaProduto.setData(0, "quant", (caixas - caixasDefeito) * unCaixa)) { return false; }
+  const double caixasRestante = caixas - caixasDefeito;
+  const double quantRestante = caixasRestante * unCaixa;
+
+  if (not modelVendaProduto.setData(0, "caixas", caixasRestante)) { return false; }
+  if (not modelVendaProduto.setData(0, "quant", quantRestante)) { return false; }
+
+  const double prcUnitario = modelVendaProduto.data(0, "prcUnitario").toDouble();
+  const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
+  const double descGlobal = modelVendaProduto.data(0, "descGlobal").toDouble() / 100;
+
+  if (not modelVendaProduto.setData(0, "parcial", quantRestante * prcUnitario)) { return false; }
+  if (not modelVendaProduto.setData(0, "parcialDesc", quantRestante * descUnitario)) { return false; }
+  if (not modelVendaProduto.setData(0, "total", quantRestante * descUnitario * (1 - descGlobal))) { return false; }
 
   const int rowQuebrado2 = modelVendaProduto.insertRowAtEnd();
-  // NOTE: *quebralinha venda_produto/pedido_fornecedor
+  // NOTE: *quebralinha venda_produto
 
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
     if (modelVendaProduto.fieldIndex("idVendaProduto") == col) { continue; }
@@ -444,9 +455,15 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
     if (not modelVendaProduto.setData(rowQuebrado2, col, value)) { return false; }
   }
 
+  const double quantDefeito = caixasDefeito * unCaixa;
+
   if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "quant", caixasDefeito * unCaixa)) { return false; }
+  if (not modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito)) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
+
+  if (not modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario)) { return false; }
+  if (not modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario)) { return false; }
+  if (not modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal))) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -487,7 +504,7 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 
 bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
   const int newRow = modelVendaProduto.insertRowAtEnd();
-  // NOTE: *quebralinha venda_produto/pedido_fornecedor
+  // NOTE: *quebralinha venda_produto
 
   // copiar linha com quantidade quebrada
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {

@@ -1,5 +1,6 @@
 #include <QCheckBox>
 #include <QDebug>
+#include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -193,9 +194,15 @@ bool CadastroUsuario::cadastrar() {
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
     if (tipo == Tipo::Cadastrar) {
+      QFile file("mysql.txt");
+
+      if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
+
+      const QString password = file.readAll();
+
       // NOTE: those query's below commit transaction so rollback won't work
       QSqlQuery query;
-      query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
+      query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
       query.bindValue(":user", ui->lineEditUser->text().toLower());
 
       if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
@@ -255,3 +262,4 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)
+// FIXME: quando o usuario é alterado o usuario do MySql não é, fazendo com que o login não funcione mais

@@ -1,5 +1,4 @@
-#ifndef INSERIRTRANSFERENCIA_H
-#define INSERIRTRANSFERENCIA_H
+#pragma once
 
 #include <QDialog>
 
@@ -28,5 +27,3 @@ private:
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // INSERIRTRANSFERENCIA_H

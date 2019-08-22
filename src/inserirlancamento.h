@@ -1,5 +1,4 @@
-#ifndef INSERIRLANCAMENTO_H
-#define INSERIRLANCAMENTO_H
+#pragma once
 
 #include <QDialog>
 
@@ -29,5 +28,3 @@ private:
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // INSERIRLANCAMENTO_H

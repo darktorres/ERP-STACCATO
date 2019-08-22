@@ -1,5 +1,4 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include <QApplication>
 #include <QPalette>
@@ -8,7 +7,7 @@
 #if defined(qApp)
 #undef qApp
 #endif
-#define qApp (dynamic_cast<Application *>(QCoreApplication::instance()))
+#define qApp (static_cast<Application *>(QCoreApplication::instance()))
 
 class Application : public QApplication {
   Q_OBJECT
@@ -17,7 +16,7 @@ public:
   Application(int &argc, char **argv, int = ApplicationFlags);
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
-  auto dbReconnect() -> bool;
+  auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> bool;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
@@ -35,6 +34,9 @@ public:
   auto showMessages() -> void;
   auto startTransaction(const bool delayMessages = true) -> bool;
   auto updater() -> void;
+
+signals:
+  void verifyDb(const bool conectado);
 
 private:
   struct Message {
@@ -60,5 +62,3 @@ private:
   auto startSqlPing() -> void;
   auto storeSelection() -> void;
 };
-
-#endif // APPLICATION_H

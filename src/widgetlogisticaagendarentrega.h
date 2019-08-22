@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICAAGENDARENTREGA_H
-#define WIDGETLOGISTICAAGENDARENTREGA_H
+#pragma once
 
 #include <QWidget>
 
@@ -52,5 +51,3 @@ private:
   auto setupTables() -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETLOGISTICAAGENDARENTREGA_H

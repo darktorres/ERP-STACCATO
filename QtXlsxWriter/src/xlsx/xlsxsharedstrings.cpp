@@ -38,12 +38,12 @@
 namespace QXlsx {
 
 /*
-*Note that, when we open an existing .xlsx file (broken file?),
-*duplicated string items may exist in the shared string table.
-*
-*In such case, the size of stringList will larger than stringTable.
-*Duplicated items can be removed once we loaded all the worksheets.
-*/
+ *Note that, when we open an existing .xlsx file (broken file?),
+ *duplicated string items may exist in the shared string table.
+ *
+ *In such case, the size of stringList will larger than stringTable.
+ *Duplicated items can be removed once we loaded all the worksheets.
+ */
 
 SharedStrings::SharedStrings(CreateFlag flag) : AbstractOOXmlFile(flag) { m_stringCount = 0; }
 
@@ -78,13 +78,13 @@ void SharedStrings::incRefByStringIndex(int idx) {
 }
 
 /*
-*Broken, don't use.
-*/
+ *Broken, don't use.
+ */
 void SharedStrings::removeSharedString(const QString &string) { removeSharedString(RichString(string)); }
 
 /*
-*Broken, don't use.
-*/
+ *Broken, don't use.
+ */
 void SharedStrings::removeSharedString(const RichString &string) {
   if (not m_stringTable.contains(string)) return;
 
@@ -351,4 +351,4 @@ bool SharedStrings::loadFromXmlFile(QIODevice *device) {
   return true;
 }
 
-} // namespace
+} // namespace QXlsx

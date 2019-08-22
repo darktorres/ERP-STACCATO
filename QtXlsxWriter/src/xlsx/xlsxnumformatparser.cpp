@@ -60,8 +60,7 @@ bool NumFormatParser::isDateTime(const QString &formatCode) {
 
     // date/time can only be positive number,
     // so only the first section of the format make sense.
-    case ';':
-      return false;
+    case ';': return false;
 
     // days
     case 'D':
@@ -77,11 +76,9 @@ bool NumFormatParser::isDateTime(const QString &formatCode) {
     case 's':
     // minutes or months, depending on context
     case 'M':
-    case 'm':
-      return true;
+    case 'm': return true;
 
-    default:
-      break;
+    default: break;
     }
   }
   return false;

@@ -1,5 +1,4 @@
-#ifndef XML_H
-#define XML_H
+#pragma once
 
 #include <QDomElement>
 #include <QStandardItemModel>
@@ -7,7 +6,7 @@
 class XML final {
 
 public:
-  XML(const QByteArray &fileContent, const QString &fileName = QString());
+  explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
   auto lerValores(const QStandardItem *item) -> void;
 
   const QByteArray fileContent;
@@ -56,6 +55,9 @@ public:
   // ipi
   int cEnq = 0;
   int cstIPI = 0;
+  double vBCIPI = 0;
+  double pIPI = 0;
+  double vIPI = 0;
   // pis
   int cstPIS = 0;
   double vBCPIS = 0;
@@ -98,5 +100,3 @@ private:
   auto lerTotais(const QStandardItem *child) -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
 };
-
-#endif // XML_H

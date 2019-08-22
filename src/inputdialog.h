@@ -1,5 +1,4 @@
-#ifndef INPUTDIALOG_H
-#define INPUTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -29,5 +28,3 @@ private:
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
 };
-
-#endif // INPUTDIALOG_H

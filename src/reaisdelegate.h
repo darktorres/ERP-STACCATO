@@ -1,5 +1,4 @@
-#ifndef REAISDELEGATE_H
-#define REAISDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -13,5 +12,3 @@ public:
 private:
   const int decimais;
 };
-
-#endif // REAISDELEGATE_H

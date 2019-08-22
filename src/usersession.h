@@ -1,5 +1,4 @@
-#ifndef USERSESSION_H
-#define USERSESSION_H
+#pragma once
 
 #include <QSettings>
 #include <QSqlQuery>
@@ -26,5 +25,3 @@ private:
   // methods
   static auto initializeQuery() -> void;
 };
-
-#endif // USERSESSION_H

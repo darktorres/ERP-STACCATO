@@ -1,5 +1,4 @@
-#ifndef ITEMBOX_H
-#define ITEMBOX_H
+#pragma once
 
 #include <QLineEdit>
 #include <QPushButton>
@@ -11,7 +10,7 @@ class ItemBox final : public QLineEdit {
   Q_OBJECT
 
 public:
-  explicit ItemBox(QWidget *parent);
+  explicit ItemBox(QWidget *parent = nullptr);
   ~ItemBox() = default;
   auto changeItem(const QVariant &newId) -> void;
   auto clear() -> void;
@@ -44,5 +43,3 @@ private:
   auto search() -> void;
   auto setIcons() -> void;
 };
-
-#endif // ITEMBOX_H

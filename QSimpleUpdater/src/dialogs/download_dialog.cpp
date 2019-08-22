@@ -57,7 +57,7 @@ void DownloadDialog::beginDownload(const QUrl &url) {
 
   // Begin the download
   m_reply = m_manager->get(QNetworkRequest(url));
-  m_start_time = QDateTime::currentDateTime().toTime_t();
+  m_start_time = QDateTime::currentDateTime();
 
   // Update the progress bar value automatically
   connect(m_reply, &QNetworkReply::downloadProgress, this, &DownloadDialog::updateProgress);
@@ -164,11 +164,11 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
 
     ui->downloadLabel->setText(tr("Baixando atualizações") + " (" + _received_string + " " + tr("de") + " " + _total_string + ")");
 
-    const uint _diff = QDateTime::currentDateTime().toTime_t() - m_start_time;
+    const qint64 _elapsed = m_start_time.secsTo(QDateTime::currentDateTime());
 
-    if (_diff > 0) {
+    if (_elapsed > 0) {
       QString _time_string;
-      double _time_remaining = total / (received / _diff);
+      qint64 _time_remaining = (total - received) / (received / _elapsed);
 
       if (_time_remaining > 7200) {
         _time_remaining /= 3600;

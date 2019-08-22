@@ -24,7 +24,7 @@ bool UserSession::login(const QString &user, const QString &password, Tipo tipo)
     return queryAutorizar.first();
   }
 
-  initializeQuery();
+  initializeQuery(); // TODO: move this to top of function?
 
   query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
   query->bindValue(":user", user);

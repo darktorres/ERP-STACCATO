@@ -1,5 +1,4 @@
-#ifndef ESTOQUEPROXYMODEL_H
-#define ESTOQUEPROXYMODEL_H
+#pragma once
 
 #include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
@@ -15,5 +14,3 @@ private:
   const int quantUpdIndex;
   enum class Status { Ok = 1, QuantDifere = 2, NaoEncontrado = 3, Consumo = 4, Devolucao = 5 };
 };
-
-#endif // ESTOQUEPROXYMODEL_H

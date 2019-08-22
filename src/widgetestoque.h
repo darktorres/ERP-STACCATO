@@ -1,5 +1,4 @@
-#ifndef WIDGETESTOQUE_H
-#define WIDGETESTOQUE_H
+#pragma once
 
 #include <QWidget>
 
@@ -33,5 +32,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETESTOQUE_H

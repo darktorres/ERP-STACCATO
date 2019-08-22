@@ -17,10 +17,10 @@
 Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
-  connect(ui->doubleSpinBoxCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
+  connect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
   connect(ui->doubleSpinBoxQuant, &QDoubleSpinBox::editingFinished, this, &Devolucao::on_doubleSpinBoxQuant_editingFinished);
-  connect(ui->doubleSpinBoxQuant, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
-  connect(ui->doubleSpinBoxTotalItem, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxTotalItem_valueChanged);
+  connect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
+  connect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxTotalItem_valueChanged);
   connect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked);
   connect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked);
 
@@ -349,9 +349,12 @@ bool Devolucao::inserirItens(const int currentRow) {
   }
 
   if (not modelDevolvidos.setData(rowDevolucao, "idVenda", idDevolucao)) { return false; }
+  if (not modelDevolvidos.setData(rowDevolucao, "idRelacionado", modelProdutos.data(currentRow, "idVendaProduto"))) { return false; }
+
   const QDecDouble quantDevolvidaInvertida = quantDevolvida * -1;
   const QDecDouble parcialDevolvido = ui->doubleSpinBoxTotalItem->value() * -1;
   const QDecDouble prcUnitarioDevolvido = parcialDevolvido / quantDevolvidaInvertida;
+
   if (not modelDevolvidos.setData(rowDevolucao, "status", "PENDENTE DEV.")) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "statusOriginal", modelProdutos.data(currentRow, "status"))) { return false; }
   if (not modelDevolvidos.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
@@ -370,7 +373,7 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   if (restante > 0) {
     const int newRowRestante = modelProdutos.insertRowAtEnd();
-    // NOTE: *quebralinha venda_produto/pedido_fornecedor
+    // NOTE: *quebralinha venda_produto
 
     for (int column = 0; column < modelProdutos.columnCount(); ++column) {
       if (modelProdutos.fieldIndex("idVendaProduto") == column) { continue; }

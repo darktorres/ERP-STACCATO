@@ -1,5 +1,4 @@
-#ifndef REGISTERDIALOG_H
-#define REGISTERDIALOG_H
+#pragma once
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -11,7 +10,7 @@ class RegisterDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
+  explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr);
   ~RegisterDialog() override = default;
 
   auto marcarDirty() -> void;
@@ -61,5 +60,3 @@ protected:
   virtual auto verifyRequiredField(QLineEdit *line, const bool silent = false) -> bool;
   virtual auto viewRegister() -> bool;
 };
-
-#endif // REGISTERDIALOG_H

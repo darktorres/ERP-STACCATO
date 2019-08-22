@@ -1,5 +1,4 @@
-#ifndef WIDGETRELATORIO_H
-#define WIDGETRELATORIO_H
+#pragma once
 
 #include <QWidget>
 
@@ -40,5 +39,3 @@ private:
   auto setResumoOrcamento() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETRELATORIO_H

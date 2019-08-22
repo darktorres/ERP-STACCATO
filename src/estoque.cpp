@@ -86,6 +86,9 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vICMSST");
   ui->tableEstoque->hideColumn("cEnq");
   ui->tableEstoque->hideColumn("cstIPI");
+  ui->tableEstoque->hideColumn("vBCIPI");
+  ui->tableEstoque->hideColumn("pIPI");
+  ui->tableEstoque->hideColumn("vIPI");
   ui->tableEstoque->hideColumn("cstPIS");
   ui->tableEstoque->hideColumn("vBCPIS");
   ui->tableEstoque->hideColumn("pPIS");
@@ -94,6 +97,7 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   //--------------------------------------------------------------------
 
@@ -318,7 +322,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
 
   if (dividir) {
     const int newRow = modelCompra.rowCount();
-    // NOTE: *quebralinha venda_produto/pedido_fornecedor
+    // NOTE: *quebralinha pedido_fornecedor
     modelCompra.insertRow(newRow);
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {

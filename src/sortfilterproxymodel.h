@@ -1,5 +1,4 @@
-#ifndef SORTFILTERPROXYMODEL_H
-#define SORTFILTERPROXYMODEL_H
+#pragma once
 
 #include <QSortFilterProxyModel>
 
@@ -13,5 +12,3 @@ public:
 private:
   using QSortFilterProxyModel::data;
 };
-
-#endif // SORTFILTERPROXYMODEL_H

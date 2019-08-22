@@ -50,5 +50,5 @@ public:
 
   Chart *chart;
 };
-}
+} // namespace QXlsx
 #endif // XLSXCHARTSHEET_P_H

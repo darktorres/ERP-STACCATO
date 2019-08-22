@@ -1,5 +1,4 @@
-#ifndef WIDGETFINANCEIRO_H
-#define WIDGETFINANCEIRO_H
+#pragma once
 
 #include <QWidget>
 
@@ -22,5 +21,3 @@ private:
   // methods
   auto setConnections() -> void;
 };
-
-#endif // WIDGETFINANCEIRO_H

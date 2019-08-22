@@ -1,5 +1,4 @@
-#ifndef SEARCHDIALOG_H
-#define SEARCHDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -67,5 +66,3 @@ private:
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table) -> void;
 };
-
-#endif // SEARCHDIALOG_H

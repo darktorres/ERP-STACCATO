@@ -1,5 +1,4 @@
-#ifndef ESTOQUE_H
-#define ESTOQUE_H
+#pragma once
 
 #include <QDialog>
 
@@ -14,7 +13,7 @@ class Estoque final : public QDialog {
 
 public:
   // REFAC: turn showWindow into a enum
-  Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
+  explicit Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
   auto criarConsumo(const int idVendaProduto, const double quant = 0) -> bool;
 
@@ -44,5 +43,3 @@ private:
   auto setupTables() -> void;
   auto viewRegisterById(const bool showWindow) -> bool;
 };
-
-#endif // ESTOQUE_H

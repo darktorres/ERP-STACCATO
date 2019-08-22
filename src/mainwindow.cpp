@@ -24,6 +24,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+  connect(qApp, &Application::verifyDb, this, &MainWindow::verifyDb);
+
   connect(ui->actionCadastrarCliente, &QAction::triggered, this, &MainWindow::on_actionCadastrarCliente_triggered);
   connect(ui->actionCadastrarFornecedor, &QAction::triggered, this, &MainWindow::on_actionCadastrarFornecedor_triggered);
   connect(ui->actionCadastrarProdutos, &QAction::triggered, this, &MainWindow::on_actionCadastrarProdutos_triggered);
@@ -98,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->statusBar->addWidget(pushButtonStatus);
 
-  connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::verifyDb);
+  connect(pushButtonStatus, &QPushButton::clicked, this, &MainWindow::reconnectDb);
 
   //---------------------------------------------------------------------------
 
@@ -107,126 +109,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   const QString nomeUsuario = UserSession::nome();
 
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(8, true); }
-
-  //  gerarEnviarRelatorio();
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
-// TODO: call this after sql error to see if still connected
-void MainWindow::verifyDb() {
+void MainWindow::reconnectDb() {
   const bool conectado = qApp->dbReconnect();
 
+  verifyDb(conectado);
+}
+
+void MainWindow::verifyDb(const bool conectado) {
   pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }
 }
-
-// REFAC: put this in a class
-// void MainWindow::gerarEnviarRelatorio() {
-//  // REFAC: 0finish
-//  // verificar em que etapa eu guardo a linha do dia seguinte no BD
-
-//  QSqlQuery query;
-//  // TODO: replace *
-//  query.prepare("SELECT * FROM jobs WHERE dataReferente = :dataReferente AND status = 'PENDENTE'");
-//  query.bindValue(":dataAgendado", QDate::currentDate());
-
-//  if (not query.exec()) { return qApp->enqueueError("Erro buscando relatórios agendados: " + query.lastError().text()); }
-
-//  while (query.next()) {
-//    const QString relatorioPagar = "C:/temp/pagar.xlsx";     // guardar direto no servidor?
-//    const QString relatorioReceber = "C:/temp/receber.xlsx"; // e se o computador nao tiver o servidor mapeado?
-
-//    // -------------------------------------------------------------------------
-
-//    QXlsx::Document xlsxPagar(relatorioPagar);
-
-//    //    xlsx.currentWorksheet()->setFitToPage(true);
-//    //    xlsx.currentWorksheet()->setFitToHeight(true);
-//    //    xlsx.currentWorksheet()->setOrientationVertical(false);
-
-//    QSqlQuery queryView;
-
-//    if (not queryView.exec("SELECT * FROM view_relatorio_pagar")) { return qApp->enqueueError("Erro lendo relatorio pagar: " + queryView.lastError().text()); }
-
-//    xlsxPagar.write("A1", "Data Emissão");
-//    xlsxPagar.write("B1", "Data Realizado");
-//    xlsxPagar.write("C1", "Valor R$");
-//    xlsxPagar.write("D1", "Conta");
-//    xlsxPagar.write("E1", "Obs.");
-//    xlsxPagar.write("F1", "Contraparte");
-//    xlsxPagar.write("G1", "Grupo");
-//    xlsxPagar.write("H1", "Subgrupo");
-
-//    int row = 1;
-
-//    while (queryView.next()) {
-//      xlsxPagar.write("A" + QString::number(row), queryView.value("dataEmissao"));
-//      xlsxPagar.write("B" + QString::number(row), queryView.value("dataRealizado"));
-//      xlsxPagar.write("C" + QString::number(row), queryView.value("valorReal"));
-//      xlsxPagar.write("D" + QString::number(row), queryView.value("Conta"));
-//      xlsxPagar.write("E" + QString::number(row), queryView.value("observacao"));
-//      xlsxPagar.write("F" + QString::number(row), queryView.value("contraParte"));
-//      xlsxPagar.write("G" + QString::number(row), queryView.value("grupo"));
-//      xlsxPagar.write("H" + QString::number(row), queryView.value("subGrupo"));
-
-//      ++row;
-//    }
-
-//    // -------------------------------------------------------------------------
-
-//    QXlsx::Document xlsxReceber(relatorioReceber);
-
-//    //    xlsx.currentWorksheet()->setFitToPage(true);
-//    //    xlsx.currentWorksheet()->setFitToHeight(true);
-//    //    xlsx.currentWorksheet()->setOrientationVertical(false);
-
-//    if (not queryView.exec("SELECT * FROM view_relatorio_receber")) { return qApp->enqueueError("Erro lendo relatorio receber: " + queryView.lastError().text()); }
-
-//    xlsxReceber.write("A1", "dataEmissao");
-//    xlsxReceber.write("B1", "dataRealizado");
-//    xlsxReceber.write("C1", "valorReal");
-//    xlsxReceber.write("D1", "Conta");
-//    xlsxReceber.write("E1", "observacao");
-//    xlsxReceber.write("F1", "contraParte");
-//    xlsxReceber.write("G1", "grupo");
-//    xlsxReceber.write("H1", "subGrupo");
-
-//    row = 1;
-
-//    while (queryView.next()) {
-//      xlsxReceber.write("A" + QString::number(row), queryView.value("dataEmissao"));
-//      xlsxReceber.write("B" + QString::number(row), queryView.value("dataRealizado"));
-//      xlsxReceber.write("C" + QString::number(row), queryView.value("valorReal"));
-//      xlsxReceber.write("D" + QString::number(row), queryView.value("Conta"));
-//      xlsxReceber.write("E" + QString::number(row), queryView.value("observacao"));
-//      xlsxReceber.write("F" + QString::number(row), queryView.value("contraParte"));
-//      xlsxReceber.write("G" + QString::number(row), queryView.value("grupo"));
-//      xlsxReceber.write("H" + QString::number(row), queryView.value("subGrupo"));
-
-//      ++row;
-//    }
-
-//    // -------------------------------------------------------------------------
-
-//    QSqlQuery query2;
-//    query2.prepare("INSERT INTO jobs (dataEnviado, dataReferente, status) VALUES (:dataEnviado, :dataReferente, 'ENVIADO')");
-
-//    const int diaSemana = QDate::currentDate().dayOfWeek();
-
-//    query2.bindValue(":dataReferente", QDate::currentDate().addDays(diaSemana < 4 ? 5 : diaSemana - 3));
-//    query2.bindValue(":dataEnviado", QDate::currentDate());
-
-//    if (not query2.exec()) { return qApp->enqueueError("Erro guardando relatórios financeiro: " + query2.lastError().text()); }
-
-//    //    SendMail *mail = new SendMail(this, anexo, fornecedor);
-//    //    mail->setAttribute(Qt::WA_DeleteOnClose);
-
-//    //    mail->exec();
-//  }
-//}
 
 void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);

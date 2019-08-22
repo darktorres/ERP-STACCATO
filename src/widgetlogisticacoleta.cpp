@@ -107,19 +107,19 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
 bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) {
   QSqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'EM RECEBIMENTO' WHERE idEstoque = :idEstoque");
+  query1.prepare("UPDATE estoque SET status = 'EM RECEBIMENTO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idPedido IN (SELECT idPedido FROM "
-                 "estoque_has_compra WHERE idEstoque = :idEstoque) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE status = 'EM COLETA' AND idPedido IN "
+                 "(SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query3;
   // salvar status na venda
-  query3.prepare("UPDATE venda_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM "
-                 "estoque_has_consumo WHERE idEstoque = :idEstoque) AND status = 'EM COLETA'");
+  query3.prepare("UPDATE venda_has_produto SET status = 'EM RECEBIMENTO', dataRealColeta = :dataRealColeta, dataPrevReceb = :dataPrevReceb WHERE status = 'EM COLETA' AND idVendaProduto IN (SELECT "
+                 "idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query4;
-  query4.prepare("UPDATE veiculo_has_produto SET status = 'COLETADO' WHERE idEstoque = :idEstoque AND status = 'EM COLETA'");
+  query4.prepare("UPDATE veiculo_has_produto SET status = 'COLETADO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &item : list) {
     query1.bindValue(":idEstoque", modelViewColeta.data(item.row(), "idEstoque"));
@@ -188,7 +188,7 @@ bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &
                  "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE idEstoque = :idEstoque AND status = 'EM COLETA'");
+  query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &item : list) {
     const int idEstoque = modelViewColeta.data(item.row(), "idEstoque").toInt();
@@ -244,7 +244,7 @@ bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
                  "('CANCELADO', 'DEVOLVIDO')");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE veiculo_has_produto SET data = NULL WHERE idEstoque = :idEstoque AND status = 'EM COLETA'");
+  query3.prepare("UPDATE veiculo_has_produto SET data = NULL WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
   for (const auto &item : list) {
     const int idEstoque = modelViewColeta.data(item.row(), "idEstoque").toInt();

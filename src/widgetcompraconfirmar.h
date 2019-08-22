@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRACONFIRMAR_H
-#define WIDGETCOMPRACONFIRMAR_H
+#pragma once
 
 #include <QWidget>
 
@@ -32,5 +31,3 @@ private:
   auto setupTables() -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETCOMPRACONFIRMAR_H

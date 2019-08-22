@@ -4,6 +4,7 @@
 #include <QIcon>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QSqlDriver>
 #include <QSqlError>
 #include <QStyle>
 #include <QTimer>
@@ -16,7 +17,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.6.44");
+  setApplicationVersion(APP_VERSION);
   setStyle("Fusion");
 
   readSettingsFile();
@@ -73,26 +74,32 @@ bool Application::setDatabase() {
 
   if (not lastuser) { return false; }
 
-  db = QSqlDatabase::contains() ? QSqlDatabase::database() : QSqlDatabase::addDatabase("QMYSQL");
+  if (not QSqlDatabase::contains()) { db = QSqlDatabase::addDatabase("QMYSQL"); }
+
+  QFile file("mysql.txt");
+
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
+
+  const QString password = file.readAll();
 
   db.setHostName(hostname.value().toString());
   db.setUserName(lastuser.value().toString().toLower());
-  db.setPassword("123456");
+  db.setPassword(password);
   db.setDatabaseName("mydb");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
+  db.setConnectOptions("CLIENT_COMPRESS=1");
+  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
 
   return true;
 }
 
-bool Application::dbReconnect() {
+bool Application::dbReconnect(const bool silent) {
   db.close();
 
-  if (not db.open()) {
-    isConnected = false;
-    return qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text());
-  }
+  isConnected = db.open();
+
+  if (not isConnected) { return (silent) ? false : qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text()); }
 
   return db.isOpen();
 }
@@ -257,9 +264,27 @@ void Application::showMessages() {
 
   showingErrors = true;
 
-  // TODO: deal with 'Lost connection to MySQL server'
+  for (const auto &error : std::as_const(errorQueue)) {
+    const QString error1 = "MySQL server has gone away";
+    const QString error2 = "Lost connection to MySQL server during query";
 
-  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+    const QString message = error.message;
+
+    if (message.contains(error1) or message.contains(error2)) {
+      const bool conectado = qApp->dbReconnect(true);
+
+      emit verifyDb(conectado);
+
+      if (conectado) {
+        continue;
+      } else {
+        QMessageBox::critical(error.widget, "Erro!", "Conexão com o servidor perdida!");
+      }
+    }
+
+    QMessageBox::critical(error.widget, "Erro!", error.message);
+  }
+
   for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
   for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
 

@@ -1,5 +1,4 @@
-#ifndef WIDGETFINANCEIROFLUXOCAIXA_H
-#define WIDGETFINANCEIROFLUXOCAIXA_H
+#pragma once
 
 #include <QWidget>
 
@@ -35,5 +34,3 @@ private:
   auto on_tableCaixa_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETFINANCEIROFLUXOCAIXA_H

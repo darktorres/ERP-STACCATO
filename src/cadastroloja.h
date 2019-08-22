@@ -1,5 +1,4 @@
-#ifndef CADASTROLOJA_H
-#define CADASTROLOJA_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -76,5 +75,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROLOJA_H

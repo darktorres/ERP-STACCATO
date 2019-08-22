@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRAOC_H
-#define WIDGETCOMPRAOC_H
+#pragma once
 
 #include <QWidget>
 
@@ -36,5 +35,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETCOMPRAOC_H

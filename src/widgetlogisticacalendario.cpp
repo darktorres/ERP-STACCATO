@@ -62,6 +62,9 @@ void WidgetLogisticaCalendario::updateFilter() {
 void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   ui->tableWidget->clearContents();
 
+  ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+  ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+
   int veiculos = 0;
   const int start = startDate.day();
 
@@ -162,8 +165,8 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     connect(widget, &CollapsibleWidget::toggled, ui->tableWidget, &QTableWidget::resizeRowsToContents);
   }
 
-  ui->tableWidget->resizeColumnsToContents();
-  ui->tableWidget->resizeRowsToContents();
+  ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   const QString range = startDate.toString("dd-MM-yyyy") + " - " + startDate.addDays(6).toString("dd-MM-yyyy");
 

@@ -8,7 +8,7 @@
 WidgetGraficos::WidgetGraficos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGraficos) {
   ui->setupUi(this);
   connect(ui->checkBox, &QCheckBox::toggled, this, &WidgetGraficos::on_checkBox_toggled);
-  connect(ui->comboBoxTheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WidgetGraficos::on_comboBox_currentIndexChanged);
+  connect(ui->comboBoxTheme, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetGraficos::on_comboBox_currentIndexChanged);
   connect(ui->pushButtonCleanTooltips, &QPushButton::clicked, this, &WidgetGraficos::on_pushButtonCleanTooltips_clicked);
 }
 
@@ -78,10 +78,18 @@ void WidgetGraficos::updateTables() {
     chart.setTitle("Acumulado mensal");
     chart.legend()->setAlignment(Qt::AlignBottom);
     chart.setLocalizeNumbers(true);
-    static_cast<QValueAxis *>(chart.axisY())->setLabelFormat("R$ %.0f"); // NOTE: axis X/Y is deprecated
-    static_cast<QValueAxis *>(chart.axisX())->setLabelFormat("%.0f");
-    static_cast<QValueAxis *>(chart.axisY())->setTickCount(10);
-    static_cast<QValueAxis *>(chart.axisX())->setTickCount(31);
+
+    auto axes = chart.axes();
+
+    if (not axes.isEmpty()) {
+      auto axisX = static_cast<QValueAxis *>(axes.at(0));
+      auto axisY = static_cast<QValueAxis *>(axes.at(1));
+
+      axisX->setLabelFormat("%.0f");
+      axisY->setLabelFormat("R$ %.0f");
+      axisX->setTickCount(31);
+      axisY->setTickCount(10);
+    }
 
     const auto markers = chart.legend()->markers();
 
@@ -96,7 +104,7 @@ void WidgetGraficos::updateTables() {
     return;
   }
 
-  if (isSet) { //TODO: V547 http://www.viva64.com/en/V547 Expression 'isSet' is always true.  if (isSet) {
+  if (isSet) { // TODO: V547 http://www.viva64.com/en/V547 Expression 'isSet' is always true.  if (isSet) {
     series12.clear();
     series11.clear();
     series10.clear();
@@ -165,7 +173,8 @@ void WidgetGraficos::toggleMarker(QLegendMarker *marker) {
 
     break;
   }
-  default: { break; }
+
+  default: break;
   }
 }
 
@@ -184,3 +193,5 @@ void WidgetGraficos::on_pushButtonCleanTooltips_clicked() { chartView->removeToo
 // fazer o mes atual com a linha em bold
 // fazer o mesmo mes do ano anterior em bold
 // fazer uma linha diferente com a media
+
+// TODO: hover está pegando o valor do pixel, passando o mouse por baixo sai um valor diferente de passar por cima, verificar se dá para pegar o valor da Series em vez do valor no gráfico

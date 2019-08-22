@@ -1,5 +1,4 @@
-#ifndef INPUTDIALOGFINANCEIRO_H
-#define INPUTDIALOGFINANCEIRO_H
+#pragma once
 
 #include <QDialog>
 
@@ -33,25 +32,17 @@ private:
   auto calcularTotal() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
-  auto on_comboBoxPgt_currentTextChanged(const int index, const QString &text) -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
   auto on_dateEditPgtSt_dateChanged(const QDate &) -> void;
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(double) -> void;
-  auto on_doubleSpinBoxPgt_valueChanged() -> void;
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
-  auto on_doubleSpinBoxTotalPag_valueChanged(double) -> void;
-  auto on_pushButtonAdicionarPagamento_clicked() -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
-  auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto resetarPagamentos() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // INPUTDIALOGFINANCEIRO_H

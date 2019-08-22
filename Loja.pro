@@ -19,7 +19,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
 
-CONFIG *= c++1z
+versionAtLeast(QT_VERSION, 5.12){
+    CONFIG *= c++17
+    } else {
+    CONFIG *= c++1z
+    }
 
 message($$QMAKESPEC)
 

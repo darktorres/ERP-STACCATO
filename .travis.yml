@@ -15,8 +15,8 @@ addons:
     - qt512charts-no-lgpl
     - qt512script
     - qt512tools
-#    - mesa-common-dev
-#    - libgl1-mesa-dev
+    - mesa-common-dev
+    - libgl1-mesa-dev
     
 script:
   - source /opt/qt512/bin/qt512-env.sh

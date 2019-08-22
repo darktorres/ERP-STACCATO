@@ -48,37 +48,38 @@ win32-g++{
     CONFIG *= precompile_header
 }
 
-*-g++{
-    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
-    QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
-}
+#*-g++{
+#    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
+#    QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
+#    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
+#}
 
-*-clang{
-#    QMAKE_CXXFLAGS *= -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
-#    QMAKE_CXXFLAGS *= -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
-#    QMAKE_CXXFLAGS *= -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
-#    QMAKE_CXXFLAGS *= -Wno-shadow -Wno-shadow-field
-}
+#*-clang{
+##    QMAKE_CXXFLAGS *= -Weverything -Wno-reserved-id-macro -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-undef -Wno-padded -Wno-sign-conversion -Wno-deprecated -Wno-covered-switch-default
+##    QMAKE_CXXFLAGS *= -Wno-undefined-reinterpret-cast -Wno-weak-vtables -Wno-exit-time-destructors -Wno-used-but-marked-unused -Wno-inconsistent-missing-destructor-override -Wno-redundant-parens
+##    QMAKE_CXXFLAGS *= -Wno-shift-sign-overflow -Wno-non-virtual-dtor -Wno-conversion -Wno-global-constructors -Wno-switch-enum -Wno-missing-prototypes -Wno-shadow-field-in-constructor
+##    QMAKE_CXXFLAGS *= -Wno-shadow -Wno-shadow-field
+#}
 
-linux-g++{
-    QMAKE_CC = ccache gcc-9
-    QMAKE_CXX = ccache g++-9
+#linux-g++{
+#    QMAKE_CC = ccache gcc-9
+#    QMAKE_CXX = ccache g++-9
 
-    QMAKE_LFLAGS *= -fuse-ld=gold
+#    QMAKE_LFLAGS *= -fuse-ld=gold
 
-    #QMAKE_CXXFLAGS *= -flto
-    #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
-}
+#    #QMAKE_CXXFLAGS *= -flto
+#    #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
+#}
 
-linux-clang{
-    QMAKE_CC = ccache clang-8
-    QMAKE_CXX = ccache clang++-8
+#linux-clang{
+#    QMAKE_CC = ccache clang-8
+#    QMAKE_CXX = ccache clang++-8
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-8
+#    QMAKE_LFLAGS *= -fuse-ld=lld-8
 
-    #QMAKE_CXXFLAGS *= -flto=thin
-    #QMAKE_LFLAGS *= -flto=thin
-}
+#    #QMAKE_CXXFLAGS *= -flto=thin
+#    #QMAKE_LFLAGS *= -flto=thin
+#}
 
 RESOURCES += \
     qrs/resources.qrc

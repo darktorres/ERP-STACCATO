@@ -26,6 +26,8 @@ versionAtLeast(QT_VERSION, 5.12){
     CONFIG *= c++1z
     }
 
+message($$CONFIG)
+
 message($$QMAKESPEC)
 
 win32{

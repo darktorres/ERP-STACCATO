@@ -1,5 +1,4 @@
-#ifndef EXCEL_H
-#define EXCEL_H
+#pragma once
 
 #include <QSqlQuery>
 #include <QWidget>
@@ -32,5 +31,3 @@ private:
   auto hideUnusedRows(QXlsx::Document &xlsx) -> void;
   auto setQuerys() -> bool;
 };
-
-#endif // EXCEL_H

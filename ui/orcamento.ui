@@ -530,7 +530,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sub-total bruto é o total do valor dos itens, &lt;span style=&quot; font-weight:600;&quot;&gt;sem nenhum desconto&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="frame">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -561,7 +561,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sub-total líq. do orçamento é o subtotal dos itens com desconto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="frame">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -614,7 +614,7 @@
              <bool>false</bool>
             </property>
             <property name="frame">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -794,7 +794,7 @@
                 <item>
                  <widget class="QSpinBox" name="spinBoxValidade">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Validade em dias do orçamento, contando a partir de hoje&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Validade em dias do orçamento, contando a partir de hoje (limitado ao fim do mês)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="suffix">
                    <string> dias</string>
@@ -816,7 +816,7 @@
                <widget class="ItemBox" name="itemBoxProfissional"/>
               </item>
               <item row="0" column="0">
-               <widget class="QDateTimeEdit" name="dateTimeEdit">
+               <widget class="QDateTimeEdit" name="dataEmissao">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data/hora em que o orçamento foi criado pela primeira vez&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -1090,7 +1090,7 @@
                <number>4</number>
               </property>
               <property name="minimum">
-               <double>-10000.000000000000000</double>
+               <double>-100000000.000000000000000</double>
               </property>
               <property name="maximum">
                <double>100.000000000000000</double>
@@ -1501,7 +1501,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>itemBoxVendedor</tabstop>
   <tabstop>itemBoxConsultor</tabstop>
   <tabstop>itemBoxCliente</tabstop>
-  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>dataEmissao</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
   <tabstop>spinBoxValidade</tabstop>

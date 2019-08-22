@@ -29,12 +29,15 @@ Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const 
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
   connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Smtp::errorReceived);
+  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived);
   connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
 
-void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) { // FIXME: shadows //TODO: V688 http://www.viva64.com/en/V688 The 'from' function argument possesses the same name as one of the class members, which can result in a confusion.void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) { // FIXME: shadows
+void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files,
+                    const QString &assinatura) { // FIXME: shadows //TODO: V688 http://www.viva64.com/en/V688 The 'from' function argument possesses the same name as one of the class members, which
+                                                 // can result in a confusion.void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString
+                                                 // &body, const QStringList &files, const QString &assinatura) { // FIXME: shadows
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
   message.append("From: " + from + "\n");

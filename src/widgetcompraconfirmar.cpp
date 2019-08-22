@@ -78,7 +78,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QString idCompra = modelViewCompras.data(row, "Compra").toString();
   const QString idVenda = modelViewCompras.data(row, "Venda").toString();
 
-  InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra);
+  InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
   if (not inputDlg.setFilter(idCompra)) { return; }
 
   if (inputDlg.exec() != InputDialogFinanceiro::Accepted) { return; }
@@ -106,12 +106,12 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
   if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + querySelect.lastError().text(), this); }
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE idPedido = :idPedido "
-                      "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
+                      "AND idPedido = :idPedido");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE idVendaProduto = :idVendaProduto "
-                     "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.prepare(
+      "UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto = :idVendaProduto");
 
   while (querySelect.next()) {
     queryCompra.bindValue(":dataRealConf", dataConf);

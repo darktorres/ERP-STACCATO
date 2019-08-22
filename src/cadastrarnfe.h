@@ -1,5 +1,4 @@
-#ifndef CADASTRARNFE_H
-#define CADASTRARNFE_H
+#pragma once
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -99,5 +98,3 @@ private:
   auto writeTransportadora(QTextStream &stream) const -> void;
   auto writeVolume(QTextStream &stream) const -> void;
 };
-
-#endif // CADASTRARNFE_H

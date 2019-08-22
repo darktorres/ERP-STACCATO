@@ -1,5 +1,4 @@
-#ifndef CHARTTOOLTIP_H
-#define CHARTTOOLTIP_H
+#pragma once
 
 #include <QGraphicsItem>
 #include <QtCharts>
@@ -29,5 +28,3 @@ private:
   QChart *m_chart;
   QString m_text;
 };
-
-#endif // CHARTTOOLTIP_H

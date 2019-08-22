@@ -58,8 +58,8 @@ void WidgetCompraPendentes::setConnections() {
   connect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->doubleSpinBoxQuantAvulso, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged);
-  connect(ui->doubleSpinBoxQuantAvulsoCaixas, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged);
+  connect(ui->doubleSpinBoxQuantAvulso, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged);
+  connect(ui->doubleSpinBoxQuantAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
@@ -250,7 +250,7 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  Impressao impressao(idVenda, Impressao::Tipo::Venda);
+  Impressao impressao(idVenda, Impressao::Tipo::Venda, this);
   impressao.print();
 }
 

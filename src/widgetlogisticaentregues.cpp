@@ -155,12 +155,18 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
+  // FIXME: ao voltar vp para ESTOQUE permite que o usuario eventualmente gere outra nota e a primeira vai ficar perdida no limbo
+
   QSqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE idVendaProduto = :idVendaProduto");
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', entregou = NULL, recebeu = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto "
                  "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+
+  QSqlQuery query3;
+  query3.prepare(
+      "UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
   for (const auto &item : list) {
     query1.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
@@ -170,6 +176,10 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
     query2.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
+
+    query3.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido_fornecedor: " + query3.lastError().text(), this); }
   }
 
   return true;

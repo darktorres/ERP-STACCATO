@@ -1,5 +1,4 @@
-#ifndef WIDGETVENDA_H
-#define WIDGETVENDA_H
+#pragma once
 
 #include <QWidget>
 
@@ -28,16 +27,13 @@ private:
   Ui::WidgetVenda *ui;
   // methods
   auto montaFiltro() -> void;
-  auto on_comboBoxLojas_currentIndexChanged(const int) -> void;
+  auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatusFinanceiro_toggled(const bool enabled) -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonFollowup_clicked() -> void;
-  auto on_radioButtonProprios_toggled(const bool checked) -> void;
   auto on_table_activated(const QModelIndex index) -> void;
   auto setConnections() -> void;
   auto setPermissions() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };
-
-#endif // WIDGETVENDA_H

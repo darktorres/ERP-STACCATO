@@ -99,13 +99,9 @@ bool ButtonLineEditor::eventFilter(QObject *target, QEvent *event) {
   if (target == m_lineEdit) {
     if (event->type() == QEvent::FocusOut) {
       switch (static_cast<QFocusEvent *>(event)->reason()) {
-      case Qt::TabFocusReason:
-        m_overButton = true;
-        break;
-      case Qt::MouseFocusReason:
-        break;
-      default:
-        m_overButton = false;
+      case Qt::TabFocusReason: m_overButton = true; break;
+      case Qt::MouseFocusReason: break;
+      default: m_overButton = false;
       }
     }
   }

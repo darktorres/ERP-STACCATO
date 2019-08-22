@@ -1,5 +1,4 @@
-#ifndef WIDGETGRAFICOS_H
-#define WIDGETGRAFICOS_H
+#pragma once
 
 #include <QSqlQuery>
 #include <QWidget>
@@ -49,5 +48,3 @@ private:
   auto on_pushButtonCleanTooltips_clicked() -> void;
   auto toggleMarker(QLegendMarker *marker) -> void;
 };
-
-#endif // WIDGETGRAFICOS_H

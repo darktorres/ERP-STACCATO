@@ -53,10 +53,6 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
 
   if (not modelViewProdutos.select()) { return; }
 
-  double quant = 0;
-
-  for (int row = 0; row < modelViewProdutos.rowCount(); ++row) { quant += modelViewProdutos.data(row, "quant").toDouble(); }
-
   ui->doubleSpinBoxQuantTotal->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
   ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
 

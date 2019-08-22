@@ -1,6 +1,7 @@
-AllowShortIfStatementsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
 ColumnLimit: 200

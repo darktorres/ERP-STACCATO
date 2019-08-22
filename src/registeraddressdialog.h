@@ -1,5 +1,4 @@
-#ifndef REGISTERADDRESSDIALOG_H
-#define REGISTERADDRESSDIALOG_H
+#pragma once
 
 #include "registerdialog.h"
 
@@ -8,7 +7,7 @@
 class RegisterAddressDialog : public RegisterDialog {
 
 public:
-  explicit RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent);
+  explicit RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr);
 
 protected:
   // attributes
@@ -24,5 +23,3 @@ protected:
 private:
   auto setupTables(const QString &table) -> void;
 };
-
-#endif // REGISTERADDRESSDIALOG_H

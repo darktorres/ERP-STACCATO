@@ -33,7 +33,7 @@ void ChartTooltip::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
   Q_UNUSED(widget)
 
   QPainterPath path;
-  path.addRoundRect(m_rect, 5, 5);
+  path.addRoundedRect(m_rect, 5, 5, Qt::RelativeSize);
 
   const QPointF anchor = mapFromParent(m_chart->mapToPosition(m_anchor));
 

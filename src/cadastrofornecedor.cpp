@@ -335,7 +335,7 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = data("razaoSocial").toString();
 
   QSqlQuery query;
-  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = 0 WHERE fornecedor = :fornecedor AND validade = :oldValidade");
+  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = FALSE WHERE fornecedor = :fornecedor AND validade = :oldValidade");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
   query.bindValue(":oldValidade", data("validadeProdutos"));
@@ -386,3 +386,4 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
 
 // TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)
 // TODO: 5poder alterar na tela 'comissao'
+// TODO: quando for novo cadastro permitir marcar flag de representacao

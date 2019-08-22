@@ -1,5 +1,4 @@
-#ifndef DOUBLEDELEGATE_H
-#define DOUBLEDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -14,5 +13,3 @@ public:
 private:
   const int decimais;
 };
-
-#endif // DOUBLEDELEGATE_H

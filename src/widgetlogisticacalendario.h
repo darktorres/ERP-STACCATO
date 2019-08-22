@@ -1,5 +1,4 @@
-#ifndef WIDGETLOGISTICACALENDARIO_H
-#define WIDGETLOGISTICACALENDARIO_H
+#pragma once
 
 #include <QWidget>
 
@@ -31,5 +30,3 @@ private:
   auto updateCalendar(const QDate &startDate) -> void;
   auto updateFilter() -> void;
 };
-
-#endif // WIDGETLOGISTICACALENDARIO_H

@@ -1,5 +1,4 @@
-#ifndef CANCELAPRODUTO_H
-#define CANCELAPRODUTO_H
+#pragma once
 
 #include <QDialog>
 
@@ -29,5 +28,3 @@ private:
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;
 };
-
-#endif // CANCELAPRODUTO_H

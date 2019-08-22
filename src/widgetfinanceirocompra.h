@@ -1,5 +1,4 @@
-#ifndef WIDGETFINANCEIROCOMPRA_H
-#define WIDGETFINANCEIROCOMPRA_H
+#pragma once
 
 #include <QWidget>
 
@@ -31,5 +30,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETFINANCEIROCOMPRA_H

@@ -80,5 +80,5 @@ private:
 
   QList<XlsxRelationship> m_relationships;
 };
-}
+} // namespace QXlsx
 #endif // XLSXRELATIONSHIPS_H

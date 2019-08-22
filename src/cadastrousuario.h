@@ -1,5 +1,4 @@
-#ifndef CADASTRARUSUARIO_H
-#define CADASTRARUSUARIO_H
+#pragma once
 
 #include "registerdialog.h"
 #include "searchdialog.h"
@@ -41,5 +40,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTRARUSUARIO_H

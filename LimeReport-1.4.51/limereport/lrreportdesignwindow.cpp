@@ -629,13 +629,11 @@ bool ReportDesignWindow::checkNeedToSave() {
     QMessageBox::StandardButton button =
         QMessageBox::question(this, "", tr("Report has been modified! Do you want save the report?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
     switch (button) {
-    case QMessageBox::Cancel:
-      break;
+    case QMessageBox::Cancel: break;
     case QMessageBox::Yes:
       if (!m_reportDesignWidget->save()) break;
       [[fallthrough]];
-    default:
-      return true;
+    default: return true;
     }
     return false;
   }
@@ -912,23 +910,12 @@ void ReportDesignWindow::slotItemActionCliked() {
 void ReportDesignWindow::slotBandAdded(PageDesignIntf *, BandDesignIntf *band) {
   if (band->isUnique()) {
     switch (band->bandType()) {
-    case BandDesignIntf::PageHeader:
-      m_newPageHeader->setDisabled(true);
-      break;
-    case BandDesignIntf::PageFooter:
-      m_newPageFooter->setDisabled(true);
-      break;
-    case BandDesignIntf::ReportHeader:
-      m_newReportHeader->setDisabled(true);
-      break;
-    case BandDesignIntf::ReportFooter:
-      m_newReportFooter->setDisabled(true);
-      break;
-    case BandDesignIntf::TearOffBand:
-      m_newTearOffBand->setDisabled(true);
-      break;
-    default:
-      break;
+    case BandDesignIntf::PageHeader: m_newPageHeader->setDisabled(true); break;
+    case BandDesignIntf::PageFooter: m_newPageFooter->setDisabled(true); break;
+    case BandDesignIntf::ReportHeader: m_newReportHeader->setDisabled(true); break;
+    case BandDesignIntf::ReportFooter: m_newReportFooter->setDisabled(true); break;
+    case BandDesignIntf::TearOffBand: m_newTearOffBand->setDisabled(true); break;
+    default: break;
     }
   }
 }
@@ -936,23 +923,12 @@ void ReportDesignWindow::slotBandAdded(PageDesignIntf *, BandDesignIntf *band) {
 void ReportDesignWindow::slotBandDeleted(PageDesignIntf *, BandDesignIntf *band) {
   if (band->isUnique()) {
     switch (band->bandType()) {
-    case BandDesignIntf::PageHeader:
-      m_newPageHeader->setEnabled(true);
-      break;
-    case BandDesignIntf::PageFooter:
-      m_newPageFooter->setEnabled(true);
-      break;
-    case BandDesignIntf::ReportHeader:
-      m_newReportHeader->setEnabled(true);
-      break;
-    case BandDesignIntf::ReportFooter:
-      m_newReportFooter->setEnabled(true);
-      [[fallthrough]];
-    case BandDesignIntf::TearOffBand:
-      m_newTearOffBand->setEnabled(true);
-      [[fallthrough]];
-    default:
-      break;
+    case BandDesignIntf::PageHeader: m_newPageHeader->setEnabled(true); break;
+    case BandDesignIntf::PageFooter: m_newPageFooter->setEnabled(true); break;
+    case BandDesignIntf::ReportHeader: m_newReportHeader->setEnabled(true); break;
+    case BandDesignIntf::ReportFooter: m_newReportFooter->setEnabled(true); [[fallthrough]];
+    case BandDesignIntf::TearOffBand: m_newTearOffBand->setEnabled(true); [[fallthrough]];
+    default: break;
     }
   }
 }
@@ -968,23 +944,12 @@ void ReportDesignWindow::updateAvaibleBands() {
 
   for (BandDesignIntf *band : m_reportDesignWidget->activePage()->pageItem()->bands()) {
     switch (band->bandType()) {
-    case BandDesignIntf::PageHeader:
-      m_newPageHeader->setEnabled(false);
-      break;
-    case BandDesignIntf::PageFooter:
-      m_newPageFooter->setEnabled(false);
-      break;
-    case BandDesignIntf::ReportHeader:
-      m_newReportHeader->setEnabled(false);
-      break;
-    case BandDesignIntf::ReportFooter:
-      m_newReportFooter->setEnabled(false);
-      [[fallthrough]];
-    case BandDesignIntf::TearOffBand:
-      m_newTearOffBand->setEnabled(false);
-      [[fallthrough]];
-    default:
-      break;
+    case BandDesignIntf::PageHeader: m_newPageHeader->setEnabled(false); break;
+    case BandDesignIntf::PageFooter: m_newPageFooter->setEnabled(false); break;
+    case BandDesignIntf::ReportHeader: m_newReportHeader->setEnabled(false); break;
+    case BandDesignIntf::ReportFooter: m_newReportFooter->setEnabled(false); [[fallthrough]];
+    case BandDesignIntf::TearOffBand: m_newTearOffBand->setEnabled(false); [[fallthrough]];
+    default: break;
     }
   }
 }

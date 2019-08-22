@@ -81,21 +81,20 @@ void WidgetLogisticaRecebimento::setupTables() {
 }
 
 bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) {
-  // TODO: 4aqui e na funcao de cancelar verificar se é possivel trocar 'IN ()' por idVendaProduto
   QSqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', recebidoPor = :recebidoPor WHERE idEstoque = :idEstoque");
+  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
   QSqlQuery query2;
   query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO' WHERE status = 'PRÉ-CONSUMO' AND idEstoque = :idEstoque");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE "
-                 "idEstoque = :idEstoque) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
+                 "idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query4;
   // salvar status na venda
-  query4.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo "
-                 "WHERE idEstoque = :idEstoque) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query4.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
+                 "idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   for (const auto &item : list) {
     query1.bindValue(":recebidoPor", recebidoPor);
@@ -137,7 +136,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
     idVendas << modelViewRecebimento.data(item.row(), "idVenda").toString();
   }
 
-  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento);
+  InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento, this);
   inputDlg.setFilterRecebe(ids);
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
@@ -263,15 +262,15 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
 bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
   QSqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'EM COLETA' WHERE idEstoque = :idEstoque");
+  query1.prepare("UPDATE estoque SET status = 'EM COLETA' WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE "
-                 "idEstoque = :idEstoque) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idPedido IN (SELECT idPedido FROM "
+                 "estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo "
-                 "WHERE idEstoque = :idEstoque) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query3.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idVendaProduto IN (SELECT idVendaProduto FROM "
+                 "estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   for (const auto &item : list) {
     const int idEstoque = modelViewRecebimento.data(item.row(), "idEstoque").toInt();

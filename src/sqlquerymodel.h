@@ -1,5 +1,4 @@
-#ifndef SQLQUERYMODEL_H
-#define SQLQUERYMODEL_H
+#pragma once
 
 #include <QAbstractProxyModel>
 #include <QSqlQueryModel>
@@ -21,5 +20,3 @@ private:
   using QSqlQueryModel::setHeaderData;
   using QSqlQueryModel::setQuery;
 };
-
-#endif // SQLQUERYMODEL_H

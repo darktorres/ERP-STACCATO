@@ -1,5 +1,4 @@
-#ifndef COMBOBOXDELEGATE_H
-#define COMBOBOXDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -19,5 +18,3 @@ private:
   auto setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const -> void final;
   auto updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const -> void final;
 };
-
-#endif // COMBOBOXDELEGATE_H

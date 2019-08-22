@@ -156,8 +156,8 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateT
   if (not modelProdutos.submitAll()) { return false; }
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto "
-                     "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE status = 'INICIADO' AND "
+                     "idVendaProduto = :idVendaProduto");
 
   for (const auto idVendaProduto : ids) {
     queryVenda.bindValue(":idCompra", idCompra);
@@ -251,7 +251,7 @@ std::optional<std::tuple<QDateTime, QDateTime>> WidgetCompraGerar::getDates(cons
 
   for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido").toString(); }
 
-  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra, this);
   if (not inputDlg.setFilter(ids)) { return {}; }
 
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return {}; }
@@ -359,7 +359,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   idVendas.removeDuplicates();
 
-  const QString idVenda = idVendas.join(", ");
+  const QString idVenda = (fornecedor == "QUARTZOBRAS") ? "" : idVendas.join(", ");
 
   const QString arquivoModelo = "modelo compras.xlsx";
 
@@ -464,9 +464,8 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
   QSqlQuery query;
-  query.prepare(
-      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE idVendaProduto = :idVendaProduto "
-      "AND status = 'INICIADO'");
+  query.prepare("UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
+                "idVendaProduto = :idVendaProduto");
 
   for (const auto &index : list) {
     if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) { return false; }
@@ -511,3 +510,5 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 // TODO: avulso
 // TODO: no caso da quartzobras se for mais de um pedido deixar o campo 'PEDIDO DE VENDA NR.' vazio
 // TODO: no caso da quartzobras ordenar por cod. produto em vez de por pedido
+
+// TODO: ao confirmar email voltar tela para pendentes

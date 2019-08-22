@@ -74,10 +74,10 @@ void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
 bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) {
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE idCompra = :idCompra AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE idCompra = :idCompra AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   for (const auto &idCompra : idsCompra) {
     queryCompra.bindValue(":dataRealFat", dataReal);
@@ -112,7 +112,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!", this); }
 
-  InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento, this);
   if (not inputDlg.setFilter(idsCompra)) { return; }
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
@@ -167,10 +167,10 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const QDate dataPrevista = input.getNextDate();
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryVenda.prepare("UPDATE venda_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   for (const auto &item : list) {
     const int idCompra = modelViewFaturamento.data(item.row(), "idCompra").toInt();

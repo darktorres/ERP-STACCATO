@@ -56,7 +56,6 @@ win32-g++{
 *-g++{
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
     QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
-    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 }
 
 *-clang{
@@ -71,6 +70,8 @@ linux-g++{
     QMAKE_CXX = g++-9
 
     QMAKE_LFLAGS *= -fuse-ld=gold
+
+    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 
     #QMAKE_CXXFLAGS *= -flto
     #QMAKE_LFLAGS *= -flto -fuse-linker-plugin

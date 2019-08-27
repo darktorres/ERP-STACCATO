@@ -17,6 +17,9 @@ public:
   auto resetTables() -> void;
   auto updateTables() -> void;
 
+signals:
+  void finished();
+
 private:
   // attributes
   bool isSet = false;

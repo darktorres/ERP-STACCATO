@@ -18,7 +18,7 @@ QT *= core gui sql network xml charts
 greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
-DEFINES += APP_VERSION=\"\\\"$${VERSION}\\\"\"
+DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 versionAtLeast(QT_VERSION, 5.12){
     CONFIG *= c++17
@@ -39,6 +39,7 @@ win32{
 
 contains(CONFIG, deploy){
     message(deploy)
+    DEFINES *= DEPLOY
     QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
     QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
 } else{

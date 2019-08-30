@@ -231,6 +231,8 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   updateTables();
   qApp->enqueueInformation("Compra gerada com sucesso!", this);
+
+  emit finished();
 }
 
 void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &anexo) {

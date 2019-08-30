@@ -96,8 +96,6 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   updateTables();
   qApp->enqueueInformation("Compra confirmada!", this);
-
-  emit finished();
 }
 
 bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {

@@ -34,6 +34,6 @@ void WidgetCompra::updateTables() {
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }
 
 void WidgetCompra::setConnections() {
-  connect(ui->widgetConfirmar, &WidgetCompraConfirmar::finished, this, [&] { ui->tabWidget->setCurrentWidget(ui->tabPendentes); });
+  connect(ui->widgetGerar, &WidgetCompraGerar::finished, this, [&] { ui->tabWidget->setCurrentWidget(ui->tabPendentes); });
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetCompra::on_tabWidget_currentChanged);
 }

@@ -41,3 +41,4 @@ qrs/Thumbs.db
 *.srctrldb
 *.xml
 *.sql
+*.log

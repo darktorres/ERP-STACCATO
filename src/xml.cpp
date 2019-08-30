@@ -17,7 +17,7 @@ void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
     QString attributes = child.nodeName();
 
     if (map.size() > 0) {
-      for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + R"(=")" + map.item(i).nodeValue() + R"(")"; }
+      for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + "=\"" + map.item(i).nodeValue() + "\""; }
     }
 
     auto *childItem = new QStandardItem(attributes);
@@ -176,7 +176,7 @@ void XML::montarArvore() {
   QString attributes = root.nodeName();
 
   if (map.size() > 0) {
-    for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + R"(=")" + map.item(i).nodeValue() + R"(")"; }
+    for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + "=\"" + map.item(i).nodeValue() + "\""; }
   }
 
   auto *rootItem = new QStandardItem(attributes);

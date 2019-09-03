@@ -121,6 +121,16 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabRh">
+       <attribute name="title">
+        <string>RH</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="WidgetRh" name="widgetRh" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -368,6 +378,12 @@
    <class>WidgetGraficos</class>
    <extends>QWidget</extends>
    <header>src/widgetgraficos.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetRh</class>
+   <extends>QWidget</extends>
+   <header>src/widgetrh.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabEstoque), query.value("view_tab_estoque").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), query.value("view_tab_financeiro").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
     qApp->enqueueError("Erro lendo permissões: " + query.lastError().text(), this);
   }
@@ -199,6 +200,7 @@ void MainWindow::updateTables() {
   if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
   if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
+  if (currentText == "RH") { ui->widgetRh->updateTables(); }
 
   qApp->setUpdating(false);
 }

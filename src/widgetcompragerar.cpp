@@ -295,11 +295,9 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
 
       if (choice == QMessageBox::Yes) { break; }
 
-      if (choice != QMessageBox::Yes) { // TODO: V547 http://www.viva64.com/en/V547 Expression 'choice != QMessageBox::Yes' is always true.      if (choice != QMessageBox::Yes) {
-        bool ok2;
-        oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 99999, 1, &ok2);
-        if (not ok2) { return {}; }
-      }
+      bool ok2;
+      oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 99999, 1, &ok2);
+      if (not ok2) { return {}; }
     }
   }
 

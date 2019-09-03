@@ -212,6 +212,7 @@ SOURCES += \
     src/widgetorcamento.cpp \
     src/widgetpagamentos.cpp \
     src/widgetrelatorio.cpp \
+    src/widgetrh.cpp \
     src/widgetvenda.cpp \
     src/xml.cpp \
     src/xml_viewer.cpp
@@ -324,6 +325,7 @@ HEADERS  += \
     src/widgetorcamento.h \
     src/widgetpagamentos.h \
     src/widgetrelatorio.h \
+    src/widgetrh.h \
     src/widgetvenda.h \
     src/xml.h \
     src/xml_viewer.h
@@ -395,5 +397,6 @@ FORMS += \
     ui/widgetorcamento.ui \
     ui/widgetpagamentos.ui \
     ui/widgetrelatorio.ui \
+    ui/widgetrh.ui \
     ui/widgetvenda.ui \
     ui/xml_viewer.ui

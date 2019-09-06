@@ -19,7 +19,7 @@
      <property name="currentIndex">
       <number>2</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabDevolucao">
       <attribute name="title">
        <string>Devoluções</string>
       </attribute>
@@ -29,7 +29,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tabResumo">
       <attribute name="title">
        <string>Resumo</string>
       </attribute>
@@ -39,7 +39,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="tabPendentes">
       <attribute name="title">
        <string>Pendentes</string>
       </attribute>
@@ -49,7 +49,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
+     <widget class="QWidget" name="tabComprar">
       <attribute name="title">
        <string>Gerar Compra</string>
       </attribute>
@@ -59,7 +59,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_6">
+     <widget class="QWidget" name="tabConfirmar">
       <attribute name="title">
        <string>Confirmar Compra</string>
       </attribute>
@@ -69,7 +69,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_7">
+     <widget class="QWidget" name="tabFaturamento">
       <attribute name="title">
        <string>Faturamento</string>
       </attribute>
@@ -79,7 +79,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="tabCompras">
       <attribute name="title">
        <string>Compras</string>
       </attribute>

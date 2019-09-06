@@ -28,7 +28,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabCadastro">
       <attribute name="title">
        <string>Cadastrar loja</string>
       </attribute>
@@ -652,7 +652,7 @@ color: rgb(0, 0, 0);</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="tabParametros">
       <attribute name="title">
        <string>Parâmetros</string>
       </attribute>
@@ -845,7 +845,7 @@ color: rgb(0, 0, 0);</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="tabPagamentos">
       <attribute name="title">
        <string>Pagamentos</string>
       </attribute>
@@ -855,7 +855,7 @@ color: rgb(0, 0, 0);</string>
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="tab_5">
+         <widget class="QWidget" name="tabCadastrarPag">
           <attribute name="title">
            <string>Cadastrar pagamentos</string>
           </attribute>
@@ -977,7 +977,7 @@ color: rgb(0, 0, 0);</string>
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_6">
+         <widget class="QWidget" name="tabAssociarPag">
           <attribute name="title">
            <string>Associar loja-pagamento</string>
           </attribute>

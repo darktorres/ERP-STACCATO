@@ -163,9 +163,9 @@
 #include <QtMath>
 #include <QtXml>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <limits>
-#include <math.h>
 #include <memory>
 #include <optional>
 #include <private/qzipreader_p.h>

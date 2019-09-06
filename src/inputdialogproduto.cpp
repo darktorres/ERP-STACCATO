@@ -214,7 +214,7 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
     msgBox.setButtonText(QMessageBox::Yes, "Salvar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-    if (msgBox.exec() != QMessageBox::Yes) { return; }
+    if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
   if (not cadastrar()) { return; }

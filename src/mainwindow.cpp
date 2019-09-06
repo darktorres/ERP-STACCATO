@@ -78,15 +78,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   query.bindValue(":idUsuario", UserSession::idUsuario());
 
   if (query.exec() and query.first()) {
-    // REFAC: dont harcode numbers
-    ui->tabWidget->setTabEnabled(0, query.value("view_tab_orcamento").toBool());
-    ui->tabWidget->setTabEnabled(1, query.value("view_tab_venda").toBool());
-    ui->tabWidget->setTabEnabled(2, query.value("view_tab_compra").toBool());
-    ui->tabWidget->setTabEnabled(3, query.value("view_tab_logistica").toBool());
-    ui->tabWidget->setTabEnabled(4, query.value("view_tab_nfe").toBool());
-    ui->tabWidget->setTabEnabled(5, query.value("view_tab_estoque").toBool());
-    ui->tabWidget->setTabEnabled(6, query.value("view_tab_financeiro").toBool());
-    ui->tabWidget->setTabEnabled(7, query.value("view_tab_relatorio").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), query.value("view_tab_orcamento").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabVendas), query.value("view_tab_venda").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabCompras), query.value("view_tab_compra").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabLogistica), query.value("view_tab_logistica").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabNFe), query.value("view_tab_nfe").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabEstoque), query.value("view_tab_estoque").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), query.value("view_tab_financeiro").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
     qApp->enqueueError("Erro lendo permissões: " + query.lastError().text(), this);
   }
@@ -104,11 +104,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   //---------------------------------------------------------------------------
 
-  ui->tabWidget->setTabEnabled(8, false); // graficos
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), false);
 
   const QString nomeUsuario = UserSession::nome();
 
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(8, true); }
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true); }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -200,6 +200,7 @@ void MainWindow::updateTables() {
   if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
   if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
+  if (currentText == "RH") { ui->widgetRh->updateTables(); }
 
   qApp->setUpdating(false);
 }

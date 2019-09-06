@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.6.78
+VERSION = 0.7.0
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -18,7 +18,7 @@ QT *= core gui sql network xml charts
 greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
-DEFINES += APP_VERSION=\"\\\"$${VERSION}\\\"\"
+DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 versionAtLeast(QT_VERSION, 5.12){
     CONFIG *= c++17
@@ -26,7 +26,11 @@ versionAtLeast(QT_VERSION, 5.12){
     CONFIG *= c++1z
     }
 
-message($$CONFIG)
+versionAtLeast(QT_VERSION, 5.13){
+    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
+} else {
+    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.0-Win32 -llibeay32
+}
 
 message($$QMAKESPEC)
 
@@ -41,6 +45,7 @@ win32{
 
 contains(CONFIG, deploy){
     message(deploy)
+    DEFINES *= DEPLOY
     QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
     QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
 } else{
@@ -58,7 +63,6 @@ win32-g++{
 *-g++{
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
     QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
-    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 }
 
 *-clang{
@@ -73,6 +77,8 @@ linux-g++{
     QMAKE_CXX = g++-9
 
     QMAKE_LFLAGS *= -fuse-ld=gold
+
+    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 
     #QMAKE_CXXFLAGS *= -flto
     #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
@@ -212,6 +218,7 @@ SOURCES += \
     src/widgetorcamento.cpp \
     src/widgetpagamentos.cpp \
     src/widgetrelatorio.cpp \
+    src/widgetrh.cpp \
     src/widgetvenda.cpp \
     src/xml.cpp \
     src/xml_viewer.cpp
@@ -324,6 +331,7 @@ HEADERS  += \
     src/widgetorcamento.h \
     src/widgetpagamentos.h \
     src/widgetrelatorio.h \
+    src/widgetrh.h \
     src/widgetvenda.h \
     src/xml.h \
     src/xml_viewer.h
@@ -395,5 +403,6 @@ FORMS += \
     ui/widgetorcamento.ui \
     ui/widgetpagamentos.ui \
     ui/widgetrelatorio.ui \
+    ui/widgetrh.ui \
     ui/widgetvenda.ui \
     ui/xml_viewer.ui

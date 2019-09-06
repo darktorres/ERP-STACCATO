@@ -33,7 +33,7 @@
 #include <QScriptEngine>
 #include <QTextLayout>
 #include <QtGui>
-#include <math.h>
+#include <cmath>
 
 #include "lrdatasourcemanager.h"
 #include "lrdesignelementsfactory.h"

@@ -20,19 +20,6 @@ OTHER_FILES += $$PWD/src/QSimpleUpdater
 
 INCLUDEPATH += $$PWD/src
 
-#unix:!android {
-#    LIBS += -lcrypto -lssl
-#}
-
-#mac{
-# LIBS += -L/opt/local/lib -lcrypto -lssl
-#}
-
-win32* {
-    gcc:LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-Win32 -llibeay32
-    msvc:LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-Win64/lib -llibeay32
-}
-
 RESOURCES += $$PWD/res/qsu_resources.qrc
 
 FORMS += $$PWD/src/dialogs/download_dialog.ui \

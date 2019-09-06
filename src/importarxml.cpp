@@ -572,7 +572,7 @@ bool ImportarXML::verificaCNPJ(const XML &xml) {
     msgBox.setButtonText(QMessageBox::Yes, "Continuar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-    return msgBox.exec() == QMessageBox::Yes;
+    return (msgBox.exec() == QMessageBox::Yes);
   }
 
   return true;

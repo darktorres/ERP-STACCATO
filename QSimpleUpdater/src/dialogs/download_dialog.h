@@ -48,10 +48,9 @@ private:
   // methods
   auto cancelDownload() -> void;
   auto downloadFinished() -> void;
-  auto ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) -> void;
   auto installUpdate() -> void;
   auto openDownload() -> void;
-  auto roundNumber(const double &input)->double;
+  auto roundNumber(const double &input) -> double;
   auto updateProgress(qint64 received, qint64 total) -> void;
 };
 

@@ -1,8 +1,12 @@
-#include "widgetrh.h"
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
+
 #include "application.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "ui_widgetrh.h"
+#include "widgetrh.h"
 
 WidgetRh::WidgetRh(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRh) { ui->setupUi(this); }
 

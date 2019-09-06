@@ -26,12 +26,6 @@ versionAtLeast(QT_VERSION, 5.12){
     CONFIG *= c++1z
     }
 
-versionAtLeast(QT_VERSION, 5.13){
-    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
-} else {
-    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.0-Win32 -llibeay32
-}
-
 message($$QMAKESPEC)
 
 win32{
@@ -41,6 +35,12 @@ win32{
     QMAKE_TARGET_COPYRIGHT = Rodrigo Torres
 
     RC_ICONS = Staccato.ico
+
+    versionAtLeast(QT_VERSION, 5.13){
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
+    } else {
+        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.0-Win32 -llibeay32
+    }
 }
 
 contains(CONFIG, deploy){

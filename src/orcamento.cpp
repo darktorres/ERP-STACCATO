@@ -949,7 +949,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
     msgBox.setButtonText(QMessageBox::Yes, "Continuar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-    if (msgBox.exec() != QMessageBox::Yes) { return; }
+    if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
   auto *replica = new Orcamento(parentWidget());

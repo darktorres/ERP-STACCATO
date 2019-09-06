@@ -376,14 +376,10 @@ void QSimpleUpdater::checkDownloadedVersion(QNetworkReply *reply) {
   } else {
     m_latest_version = _reply;
 
-    QStringList _download = m_latest_version.split(".");
-    QStringList _installed = m_installed_version.split(".");
+    QVersionNumber download = QVersionNumber::fromString(m_latest_version);
+    QVersionNumber installed = QVersionNumber::fromString(m_installed_version);
 
-    for (int i = 0, size = qMin(_installed.size(), _download.size()); i < size; ++i) {
-      if (_download.at(i).toInt() == _installed.at(i).toInt()) { continue; }
-      if (_download.at(i).toInt() > _installed.at(i).toInt()) _new_update = true;
-      if (_download.at(i).toInt() < _installed.at(i).toInt()) break;
-    }
+    if (installed < download) { _new_update = true; }
   }
 
   m_new_version_available = _new_update;

@@ -35,41 +35,6 @@
  * \o Navigate to the Example folder and open example.pro with Qt Creator.
  * \o Compile the project and play with it :)
  * \endlist
- *
- * \chapter Warnings
- * Many websites today use the HTTP Secure protocol, which means that you will need SSL
- * in order to communicate with them.
- * If your project needs to access such a webiste (for example GitHub),
- * you will need to carefully read the following information in order to ensure that
- * QSimpleUpdater works with those websites (both in your machine and in the final users' machine).
- *
- * This section is extremely important for any developers wishing to deploy their applications under
- * the Windows platform, because the application will depend on the OpenSSL libaries in order to work.
- *
- * \bold {Linux}
- *
- * Make sure that you have installed the following libraries in your system:
- *
- * \list
- * \o lssl
- * \o lcrypto
- * \endlist
- *
- * \bold {Mac OS X}
- *
- * The libraries required by QSimpleUpdater are the same as Linux, however, these libraries
- * are installed by default in most Mac OS X installations.
- *
- * \bold {Microsoft Windows}
- *
- * QSimpleUpdater makes use of the OpenSSL-Win32 project, make sure that have it installed
- * and that the project knows where to find them (the default location is C:/OpenSSL-Win32).
- * Finally, deploy the following libraries with your compiled project:
- *
- * \list
- * \o libeay32.dll
- * \o ssleay32.dll
- * \endlist
  */
 
 /*! \fn QSimpleUpdater::checkingFinished ()
@@ -89,7 +54,6 @@ QSimpleUpdater::QSimpleUpdater(QObject *parent) : QObject(parent), m_new_version
 
   m_manager = new QNetworkAccessManager(this);
   connect(m_manager, &QNetworkAccessManager::finished, this, &QSimpleUpdater::checkDownloadedVersion);
-  connect(m_manager, &QNetworkAccessManager::sslErrors, this, &QSimpleUpdater::ignoreSslErrors);
 
   connect(m_progressDialog, &ProgressDialog::cancelClicked, this, &QSimpleUpdater::cancel);
   connect(this, &QSimpleUpdater::checkingFinished, this, &QSimpleUpdater::onCheckingFinished);
@@ -388,7 +352,6 @@ void QSimpleUpdater::checkDownloadedVersion(QNetworkReply *reply) {
     auto *_manager = new QNetworkAccessManager(this);
 
     connect(_manager, &QNetworkAccessManager::finished, this, &QSimpleUpdater::processDownloadedChangelog);
-    connect(_manager, &QNetworkAccessManager::sslErrors, this, &QSimpleUpdater::ignoreSslErrors);
 
     _manager->get(QNetworkRequest(m_changelog_url));
   } else {
@@ -408,19 +371,4 @@ void QSimpleUpdater::processDownloadedChangelog(QNetworkReply *reply) {
   if (not _reply.isEmpty()) { m_changelog = _reply; }
 
   emit checkingFinished();
-}
-
-/*! \internal
- * Allows the download process to continue even if there are SSL errors.
- *
- * \sa checkForUpdates()
- */
-
-void QSimpleUpdater::ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) {
-#if SUPPORTS_SSL
-  reply->ignoreSslErrors(error);
-#else
-  Q_UNUSED(reply);
-  Q_UNUSED(error);
-#endif
 }

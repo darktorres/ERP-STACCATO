@@ -25,7 +25,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tabCadastro">
       <attribute name="title">
        <string>Novo cadastro</string>
       </attribute>
@@ -827,7 +827,7 @@ color: rgb(0, 0, 0);</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="tabBancario">
       <attribute name="title">
        <string>Dados bancários</string>
       </attribute>

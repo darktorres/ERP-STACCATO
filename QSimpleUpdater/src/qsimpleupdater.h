@@ -16,10 +16,6 @@
 #ifndef Q_SIMPLE_UPDATER_H
 #define Q_SIMPLE_UPDATER_H
 
-#if !defined(Q_OS_IOS)
-#define SUPPORTS_SSL 1
-#endif
-
 #include <QApplication>
 #include <QDesktopServices>
 #include <QIcon>
@@ -29,12 +25,6 @@
 #include <QNetworkRequest>
 #include <QPixmap>
 #include <QUrl>
-
-#if SUPPORTS_SSL
-#include <QSsl>
-#include <QSslConfiguration>
-#include <QSslError>
-#endif
 
 #include "dialogs/download_dialog.h"
 #include "dialogs/progress_dialog.h"
@@ -82,7 +72,6 @@ private:
   // methods
   auto cancel() -> void;
   auto checkDownloadedVersion(QNetworkReply *reply) -> void;
-  auto ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) -> void;
   auto onCheckingFinished() -> void;
   auto processDownloadedChangelog(QNetworkReply *reply) -> void;
   auto showErrorMessage() -> void;

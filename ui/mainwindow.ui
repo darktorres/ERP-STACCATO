@@ -61,7 +61,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabEntregas">
+      <widget class="QWidget" name="tabLogistica">
        <attribute name="title">
         <string>Logística</string>
        </attribute>
@@ -91,7 +91,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabContas">
+      <widget class="QWidget" name="tabFinanceiro">
        <attribute name="title">
         <string>Financeiro</string>
        </attribute>
@@ -101,7 +101,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tabRelatorios">
        <attribute name="title">
         <string>Relatórios</string>
        </attribute>
@@ -111,13 +111,23 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabGraficos">
        <attribute name="title">
         <string>Gráfico</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
          <widget class="WidgetGraficos" name="widgetGraficos" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabRh">
+       <attribute name="title">
+        <string>RH</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="WidgetRh" name="widgetRh" native="true"/>
         </item>
        </layout>
       </widget>
@@ -136,7 +146,7 @@
      <x>0</x>
      <y>0</y>
      <width>764</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOpcoes">
@@ -368,6 +378,12 @@
    <class>WidgetGraficos</class>
    <extends>QWidget</extends>
    <header>src/widgetgraficos.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetRh</class>
+   <extends>QWidget</extends>
+   <header>src/widgetrh.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

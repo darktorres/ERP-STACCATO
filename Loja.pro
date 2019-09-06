@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.6.78
+VERSION = 0.7.0
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -18,13 +18,19 @@ QT *= core gui sql network xml charts
 greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
-DEFINES += APP_VERSION=\"\\\"$${VERSION}\\\"\"
+DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
 versionAtLeast(QT_VERSION, 5.12){
     CONFIG *= c++17
     } else {
     CONFIG *= c++1z
     }
+
+versionAtLeast(QT_VERSION, 5.13){
+    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
+} else {
+    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.0-Win32 -llibeay32
+}
 
 message($$QMAKESPEC)
 
@@ -39,6 +45,7 @@ win32{
 
 contains(CONFIG, deploy){
     message(deploy)
+    DEFINES *= DEPLOY
     QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
     QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
 } else{
@@ -66,23 +73,37 @@ win32-g++{
 }
 
 linux-g++{
-    QMAKE_CC = ccache gcc-8
-    QMAKE_CXX = ccache g++-8
+    QMAKE_CC = gcc-9
+    QMAKE_CXX = g++-9
 
     QMAKE_LFLAGS *= -fuse-ld=gold
+
+    QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 
     #QMAKE_CXXFLAGS *= -flto
     #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
-    QMAKE_CC = ccache clang-8
-    QMAKE_CXX = ccache clang++-8
+    QMAKE_CC = clang-8
+    QMAKE_CXX = clang++-8
 
     QMAKE_LFLAGS *= -fuse-ld=lld-8
 
     #QMAKE_CXXFLAGS *= -flto=thin
     #QMAKE_LFLAGS *= -flto=thin
+}
+
+linux{
+    CCACHE_BIN = $$system(which ccache)
+
+    !isEmpty(CCACHE_BIN){
+        message("using ccache")
+        QMAKE_CC = ccache $$QMAKE_CC
+        QMAKE_CXX = ccache $$QMAKE_CXX
+        message($$QMAKE_CC)
+        message($$QMAKE_CXX)
+    }
 }
 
 RESOURCES += \
@@ -197,6 +218,7 @@ SOURCES += \
     src/widgetorcamento.cpp \
     src/widgetpagamentos.cpp \
     src/widgetrelatorio.cpp \
+    src/widgetrh.cpp \
     src/widgetvenda.cpp \
     src/xml.cpp \
     src/xml_viewer.cpp
@@ -309,6 +331,7 @@ HEADERS  += \
     src/widgetorcamento.h \
     src/widgetpagamentos.h \
     src/widgetrelatorio.h \
+    src/widgetrh.h \
     src/widgetvenda.h \
     src/xml.h \
     src/xml_viewer.h
@@ -380,5 +403,6 @@ FORMS += \
     ui/widgetorcamento.ui \
     ui/widgetpagamentos.ui \
     ui/widgetrelatorio.ui \
+    ui/widgetrh.ui \
     ui/widgetvenda.ui \
     ui/xml_viewer.ui

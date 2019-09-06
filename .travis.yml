@@ -1,16 +1,16 @@
 language: cpp
 compiler: gcc
-dist: xenial
+dist: bionic
 cache: ccache
 
 addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
+    - sourceline: 'ppa:beineri/opt-qt-5.12.3-bionic'
     packages:
-    - gcc-8
-    - g++-8
+    - gcc-9
+    - g++-9
     - qt512base
     - qt512charts-no-lgpl
     - qt512script
@@ -21,7 +21,7 @@ addons:
 script:
   - source /opt/qt512/bin/qt512-env.sh
   - /opt/qt512/bin/qmake Loja.pro
-  - make -j4
+  - make -j2
   
 before_cache:
   - ccache --show-stats

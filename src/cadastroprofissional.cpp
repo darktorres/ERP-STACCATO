@@ -52,7 +52,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
-    ui->tabWidget->setTabEnabled(1, false);
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false);
     ui->pushButtonRemover->setDisabled(true);
   }
 }

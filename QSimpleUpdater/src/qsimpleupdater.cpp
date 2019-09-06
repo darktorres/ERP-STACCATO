@@ -44,6 +44,8 @@
 
 #include "qsimpleupdater.h"
 
+#include <QVersionNumber>
+
 /*! \internal
  * Initializes and configures the class.
  */

@@ -73,7 +73,7 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab_3">
+      <widget class="QWidget" name="tabAgendarColeta">
        <attribute name="title">
         <string>Agendar Coleta</string>
        </attribute>
@@ -83,7 +83,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_8">
+      <widget class="QWidget" name="tabColeta">
        <attribute name="title">
         <string>Coleta</string>
        </attribute>
@@ -93,7 +93,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_6">
+      <widget class="QWidget" name="tabRecebimento">
        <attribute name="title">
         <string>Recebimento</string>
        </attribute>
@@ -103,7 +103,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
+      <widget class="QWidget" name="tabAgendarEntrega">
        <attribute name="title">
         <string>Agendar Entrega</string>
        </attribute>
@@ -113,7 +113,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_7">
+      <widget class="QWidget" name="tabEntregas">
        <attribute name="title">
         <string>Entregas</string>
        </attribute>
@@ -123,7 +123,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tabCaminhoes">
        <attribute name="title">
         <string>Caminhões</string>
        </attribute>
@@ -133,7 +133,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabRepresentacao">
        <attribute name="title">
         <string>Representação</string>
        </attribute>
@@ -143,7 +143,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_5">
+      <widget class="QWidget" name="tabEntregues">
        <attribute name="title">
         <string>Entregues</string>
        </attribute>
@@ -153,7 +153,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_9">
+      <widget class="QWidget" name="tabCalendario">
        <attribute name="title">
         <string>Calendário</string>
        </attribute>

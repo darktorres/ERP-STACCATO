@@ -39,9 +39,6 @@ DownloadDialog::DownloadDialog(QWidget *parent) : QWidget(parent), ui(new Ui::Do
 
   // Initialize the network access manager
   m_manager = new QNetworkAccessManager(this);
-
-  // Avoid SSL issues
-  connect(m_manager, &QNetworkAccessManager::sslErrors, this, &DownloadDialog::ignoreSslErrors);
 }
 
 DownloadDialog::~DownloadDialog() { delete ui; }
@@ -188,15 +185,6 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
     ui->downloadLabel->setText(tr("Baixando atualizações"));
     ui->timeLabel->setText(tr("Tempo restante") + ": " + tr("desconhecido"));
   }
-}
-
-void DownloadDialog::ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) {
-#ifndef Q_OS_IOS
-  reply->ignoreSslErrors(error);
-#else
-  Q_UNUSED(reply);
-  Q_UNUSED(error);
-#endif
 }
 
 double DownloadDialog::roundNumber(const double &input) { return round(input * 100) / 100; }

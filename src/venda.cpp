@@ -1061,7 +1061,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar venda");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() != QMessageBox::Yes) { return; }
+  if (msgBox.exec() == QMessageBox::No) { return; }
 
   // -------------------------------------------------------------------------
 

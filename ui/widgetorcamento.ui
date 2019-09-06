@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>744</width>
-    <height>666</height>
+    <height>787</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,7 +96,7 @@
         <x>0</x>
         <y>0</y>
         <width>141</width>
-        <height>521</height>
+        <height>642</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_7">
@@ -128,6 +128,50 @@
             </property>
            </widget>
           </item>
+          <item row="8" column="1">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>309</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="5" column="1">
+           <widget class="QGroupBox" name="groupBoxMes">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="title">
+             <string>Mês</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="0">
+              <widget class="QDateEdit" name="dateEdit">
+               <property name="currentSection">
+                <enum>QDateTimeEdit::MonthSection</enum>
+               </property>
+               <property name="displayFormat">
+                <string>MM/yy</string>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="1" column="1">
            <widget class="QRadioButton" name="radioButtonProprios">
             <property name="enabled">
@@ -140,19 +184,6 @@
              <bool>false</bool>
             </property>
            </widget>
-          </item>
-          <item row="7" column="1">
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>309</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item row="4" column="1">
            <widget class="QGroupBox" name="groupBoxVendedores">
@@ -271,32 +302,34 @@
             </layout>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QGroupBox" name="groupBoxMes">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
+          <item row="7" column="1">
+           <widget class="QGroupBox" name="groupBoxFollowup">
             <property name="title">
-             <string>Mês</string>
+             <string>Followup</string>
             </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_5">
+            <layout class="QGridLayout" name="gridLayout_8">
              <item row="0" column="0">
-              <widget class="QDateEdit" name="dateEdit">
-               <property name="currentSection">
-                <enum>QDateTimeEdit::MonthSection</enum>
-               </property>
-               <property name="displayFormat">
-                <string>MM/yy</string>
-               </property>
-               <property name="calendarPopup">
-                <bool>true</bool>
-               </property>
+              <widget class="ComboBox" name="comboBoxFollowup">
+               <item>
+                <property name="text">
+                 <string/>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Quente</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Morno</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Frio</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>

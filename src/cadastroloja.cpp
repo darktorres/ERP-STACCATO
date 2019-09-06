@@ -195,9 +195,8 @@ void CadastroLoja::registerMode() {
 
   ui->pushButtonRemoverConta->hide();
 
-  ui->tabWidget->setTabEnabled(1, false);
-  ui->tabWidget->setTabEnabled(2, false);
-  ui->tabWidget->setTabEnabled(3, false);
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabParametros), false);
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabPagamentos), false);
 }
 
 void CadastroLoja::updateMode() {
@@ -392,9 +391,8 @@ bool CadastroLoja::viewRegister() {
 
   // -------------------------------------------------------------------------
 
-  ui->tabWidget->setTabEnabled(1, true);
-  ui->tabWidget->setTabEnabled(2, true);
-  ui->tabWidget->setTabEnabled(3, true);
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabParametros), true);
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabPagamentos), true);
 
   return true;
 }

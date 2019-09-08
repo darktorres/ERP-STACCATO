@@ -57,7 +57,6 @@ private:
   auto closeEvent(QCloseEvent *event) -> void final;
   auto consistenciaDados() -> void;
   auto contaProdutos() -> void;
-  auto expiraPrecosAntigos() -> bool;
   auto importar() -> bool;
   auto insereEmErro() -> bool;
   auto insereEmOk() -> bool;

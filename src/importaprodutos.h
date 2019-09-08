@@ -41,7 +41,7 @@ private:
   QSqlDatabase db;
   QString file;
   QString fornecedor;
-  QStringList idsFornecedor;
+  QString idsFornecedor;
   QVariantMap variantMap;
   SqlRelationalTableModel modelProduto;
   SqlRelationalTableModel modelErro;
@@ -63,7 +63,7 @@ private:
   auto leituraProduto(const QSqlQuery &query, const QSqlRecord &record) -> void;
   auto marcaProdutoNaoDescontinuado() -> bool;
   auto marcaTodosProdutosDescontinuados() -> bool;
-  auto mostraApenasEstesFornecedores() -> void;
+  auto mostraApenasEstesFornecedores() -> bool;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto pintarCamposForaDoPadrao(const int row) -> bool;

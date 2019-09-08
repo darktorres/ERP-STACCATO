@@ -29,22 +29,6 @@ ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(par
 
 ImportaProdutos::~ImportaProdutos() { delete ui; }
 
-bool ImportaProdutos::expiraPrecosAntigos() {
-  QStringList idsProdutos;
-
-  for (int row = 0, rowCount = modelProduto.rowCount(); row < rowCount; ++row) { idsProdutos << modelProduto.data(row, "idProduto").toString(); }
-
-  if (idsProdutos.isEmpty()) { return true; }
-
-  QSqlQuery query;
-
-  if (not query.exec("UPDATE produto_has_preco SET expirado = TRUE WHERE idProduto IN (" + idsProdutos.join(",") + ")")) {
-    return qApp->enqueueError(false, "Erro expirando preços antigos: " + query.lastError().text(), this);
-  }
-
-  return true;
-}
-
 void ImportaProdutos::importarTabela() {
   if (not readFile()) { return; }
   if (not readValidade()) { return; }
@@ -105,7 +89,6 @@ bool ImportaProdutos::importar() {
 
   if (not modelProduto.select()) { return false; }
 
-  if (not expiraPrecosAntigos()) { return false; }
 
   const QString red = QString::number(static_cast<int>(FieldColors::Red));
 

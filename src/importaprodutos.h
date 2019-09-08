@@ -50,7 +50,7 @@ private:
   // methods
   auto atualizaCamposProduto() -> bool;
   auto atualizaProduto() -> bool;
-  auto buscarCadastrarFornecedor(const QString &fornecedor) -> std::optional<int>;
+  auto buscarCadastrarFornecedor() -> std::optional<int>;
   auto cadastraFornecedores() -> bool;
   auto cadastraProduto() -> bool;
   auto camposForaDoPadrao() -> bool;

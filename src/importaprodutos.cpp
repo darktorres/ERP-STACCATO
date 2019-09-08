@@ -702,7 +702,7 @@ bool ImportaProdutos::insereEmOk() {
 
 bool ImportaProdutos::cadastraProduto() { return insereEmOk(); }
 
-std::optional<int> ImportaProdutos::buscarCadastrarFornecedor(const QString &fornecedor) { // FIXME: shadows
+std::optional<int> ImportaProdutos::buscarCadastrarFornecedor() {
   QSqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);

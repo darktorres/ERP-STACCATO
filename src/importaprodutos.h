@@ -12,7 +12,7 @@ class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 }; // FIX: tipo não é mais 0/1/2 e sim colunas separadas
+  enum class Tipo { Produto = 0, Promocao = 1, StaccatoOFF = 2 };
   explicit ImportaProdutos(const Tipo tipo, QWidget *parent = nullptr);
   ~ImportaProdutos();
   auto importarTabela() -> void;
@@ -45,7 +45,6 @@ private:
   QVariantMap variantMap;
   SqlRelationalTableModel modelProduto;
   SqlRelationalTableModel modelErro;
-  // REFAC: a tabela no BD nao usa mais uma unica coluna, nao é mais (1,2,3) e sim 3 colunas separadas
   const Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods

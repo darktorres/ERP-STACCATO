@@ -335,10 +335,9 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = data("razaoSocial").toString();
 
   QSqlQuery query;
-  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = FALSE WHERE fornecedor = :fornecedor AND validade = :oldValidade");
+  query.prepare("UPDATE produto SET validade = :novaValidade WHERE fornecedor = :fornecedor AND descontinuado = FALSE AND estoque = FALSE AND promocao = FALSE");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
-  query.bindValue(":oldValidade", data("validadeProdutos"));
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
 

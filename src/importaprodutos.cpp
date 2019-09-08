@@ -46,8 +46,6 @@ bool ImportaProdutos::expiraPrecosAntigos() {
 }
 
 void ImportaProdutos::importarTabela() {
-  if (tipo == Tipo::Estoque) { return qApp->enqueueError("Temporariamente desativado!", this); }
-
   if (not readFile()) { return; }
   if (not readValidade()) { return; }
 
@@ -662,7 +660,7 @@ bool ImportaProdutos::insereEmOk() {
 
   if (not modelProduto.setData(row, "promocao", static_cast<int>(tipo))) { return false; }
 
-  if (tipo == Tipo::Estoque or tipo == Tipo::Promocao) {
+  if (tipo == Tipo::Promocao or tipo == Tipo::StaccatoOFF) {
     QSqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE idFornecedor = :idFornecedor AND codComercial = :codComercial AND promocao = FALSE AND estoque = FALSE");
     query.bindValue(":idFornecedor", fornecedores.value(variantMap.value("fornecedor").toString()));

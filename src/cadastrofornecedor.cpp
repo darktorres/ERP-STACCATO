@@ -348,7 +348,6 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query.lastError().text(), this); }
 
-  if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text(), this); }
 
   return true;
 }

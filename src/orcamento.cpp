@@ -51,7 +51,6 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   if (UserSession::tipoUsuario() == "ADMINISTRADOR") {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
-    ui->checkBoxFreteManual->show();
   }
 
   if (UserSession::tipoUsuario() == "VENDEDOR") { buscarParametrosFrete(); }
@@ -915,6 +914,17 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
 }
 
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
+  if (not canChangeFrete) {
+    LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+    if (dialog.exec() == QDialog::Rejected) {
+      ui->checkBoxFreteManual->setChecked(not checked);
+      return;
+    }
+
+    canChangeFrete = true;
+  }
+
   ui->doubleSpinBoxFrete->setReadOnly(not checked);
   ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
 

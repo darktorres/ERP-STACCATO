@@ -730,15 +730,25 @@ void Venda::montarFluxoCaixa() {
 }
 
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
-  const double liq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double frete = ui->doubleSpinBoxFrete->value();
-
   unsetConnections();
 
   {
-    ui->doubleSpinBoxDescontoGlobal->setValue((liq + frete - total) / liq * 100);
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(liq + frete - total);
+    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+    const double frete = ui->doubleSpinBoxFrete->value();
+    const double descontoReais = subTotalLiq + frete - total;
+    const double descontoPorc = descontoReais / subTotalLiq;
 
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      if (not modelItem.setData(row, "descGlobal", descontoPorc * 100)) { return; }
+
+      const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
+      if (not modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc))) { return; }
+    }
+
+    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
+
+    ui->widgetPgts->setTotal(total);
     ui->widgetPgts->resetarPagamentos();
   }
 
@@ -774,57 +784,59 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
   {
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
     ui->widgetPgts->setFrete(frete);
+    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+    ui->widgetPgts->resetarPagamentos();
   }
 
   setConnections();
 }
 
-void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
+void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
   [=]() {
+    const double descontoPorc2 = descontoPorc / 100;
+
     for (int row = 0; row < modelItem.rowCount(); ++row) {
-      if (not modelItem.setData(row, "descGlobal", desconto)) { return; }
+      if (not modelItem.setData(row, "descGlobal", descontoPorc)) { return; }
 
       const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      if (not modelItem.setData(row, "total", parcialDesc * (1 - (desconto / 100)))) { return; }
+      if (not modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2))) { return; }
     }
 
-    calcPrecoGlobalTotal();
-
-    const double liq = ui->doubleSpinBoxSubTotalLiq->value();
+    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(liq * desconto / 100);
-    ui->doubleSpinBoxTotal->setValue(liq * (1 - (desconto / 100)) + frete);
+    ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
 
+    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
   }();
 
   setConnections();
 }
 
-void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) {
+void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
-  [=]() { // REFAC: put this on totalChanged too
-    const double liq = ui->doubleSpinBoxSubTotalLiq->value();
+  [=]() {
+    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+    const double descontoPorc = descontoReais / subTotalLiq;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
-      if (not modelItem.setData(row, "descGlobal", desconto / liq * 100)) { return; }
+      if (not modelItem.setData(row, "descGlobal", descontoPorc * 100)) { return; }
 
       const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      if (not modelItem.setData(row, "total", parcialDesc * (1 - (desconto / liq)))) { return; }
+      if (not modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc))) { return; }
     }
 
-    calcPrecoGlobalTotal();
-
-    const double liq2 = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(desconto / liq2 * 100);
-    ui->doubleSpinBoxTotal->setValue(liq2 - desconto + frete);
+    ui->doubleSpinBoxDescontoGlobal->setValue(descontoReais / subTotalLiq * 100);
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
 
+    ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
   }();
 

@@ -286,6 +286,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->doubleSpinBoxSubTotalBruto->setValue(queryOrc.value("subTotalBru").toDouble());
   ui->doubleSpinBoxSubTotalLiq->setValue(queryOrc.value("subTotalLiq").toDouble());
   ui->doubleSpinBoxFrete->setValue(queryOrc.value("frete").toDouble());
+  silentFrete = true;
   ui->checkBoxFreteManual->setChecked(queryOrc.value("freteManual").toBool());
   ui->doubleSpinBoxDescontoGlobal->setValue(queryOrc.value("descontoPorc").toDouble());
   ui->doubleSpinBoxDescontoGlobalReais->setValue(queryOrc.value("descontoReais").toDouble());
@@ -335,6 +336,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   // -------------------------------------------------------------------------
 
   on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
+  silentFrete = false;
 
   // -------------------------------------------------------------------------
 
@@ -744,6 +746,17 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
+  if (not silentFrete and not canChangeFrete) {
+    LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+    if (dialog.exec() == QDialog::Rejected) {
+      ui->checkBoxFreteManual->setChecked(not checked);
+      return;
+    }
+
+    canChangeFrete = true;
+  }
+
   ui->doubleSpinBoxFrete->setReadOnly(not checked);
   ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
 

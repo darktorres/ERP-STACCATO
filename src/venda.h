@@ -22,6 +22,8 @@ private:
   bool correcao = false;
   int idLoja;
   bool representacao;
+  bool silentFrete = false;
+  bool canChangeFrete = false;
   double minimoFrete;
   double porcFrete;
   SqlRelationalTableModel modelFluxoCaixa;

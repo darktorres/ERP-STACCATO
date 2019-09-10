@@ -21,6 +21,7 @@ private:
   bool isReadOnly = false;
   int currentItemIsEstoque = 0;
   bool currentItemIsPromocao = false;
+  bool canChangeFrete = false;
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;

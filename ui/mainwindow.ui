@@ -127,7 +127,11 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <widget class="WidgetRh" name="widgetRh" native="true"/>
+         <widget class="WidgetRh" name="widgetRh" native="true">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

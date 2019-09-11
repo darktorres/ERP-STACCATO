@@ -70,7 +70,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
   if (not verificaVersao()) { return; }
 
-  if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
+  if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
     qApp->enqueueError("Login inválido!", this);
     ui->lineEditPass->setFocus();
     return;

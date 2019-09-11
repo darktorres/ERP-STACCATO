@@ -11,8 +11,8 @@ int UserSession::idUsuario() { return (query->value("idUsuario").toInt()); }
 
 QString UserSession::nome() { return (query->value("nome").toString()); }
 
-bool UserSession::login(const QString &user, const QString &password, Tipo tipo) {
-  if (tipo == Tipo::Autorizacao) {
+bool UserSession::login(const QString &user, const QString &password, LoginDialog::Tipo tipo) {
+  if (tipo == LoginDialog::Tipo::Autorizacao) {
     QSqlQuery queryAutorizar;
     queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND (tipo LIKE '%GERENTE%' OR tipo IN "
                            "('ADMINISTRADOR', 'DIRETOR'))");

@@ -46,6 +46,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 }
 
 void WidgetCompraPendentes::setConnections() {
+  connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -172,6 +173,10 @@ void WidgetCompraPendentes::montaFiltro() {
   const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR fornecedor LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR `codComercial` LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
+
+  //-------------------------------------
+
+  if (not ui->checkBoxAtelier->isChecked()) { filtros << "fornecedor <> 'ATELIER STACCATO'"; }
 
   //-------------------------------------
 

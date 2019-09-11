@@ -83,6 +83,7 @@ bool Application::setDatabase() {
   const QString password = file.readAll();
 
   db.setHostName(hostname.value().toString());
+  // TODO: to avoid getting blocked by fail2ban always login with same user?
   db.setUserName(lastuser.value().toString().toLower());
   db.setPassword(password);
   db.setDatabaseName("mydb");

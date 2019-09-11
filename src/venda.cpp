@@ -757,7 +757,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
   if (not silentFrete and not canChangeFrete) {
-    qApp->enqueueInformation("Necessário autorização!", this);
+    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 

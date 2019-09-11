@@ -37,6 +37,7 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->comboBoxLoja->hide();
 
   if (tipo == Tipo::Autorizacao) {
+    ui->pushButtonLogin->setText("Autorizar");
     ui->pushButtonConfig->hide();
     ui->lineEditUser->clear();
     ui->lineEditUser->setFocus();

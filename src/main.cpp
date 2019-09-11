@@ -49,3 +49,4 @@ int main(int argc, char *argv[]) {
 // REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?
 // REFAC: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
 // REFAC: use initializer lists?
+// TODO: verificar doubles comparados com zero (>/>=) e trocar por qFuzzy

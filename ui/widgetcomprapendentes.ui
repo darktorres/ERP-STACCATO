@@ -194,10 +194,24 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="checkBoxAtelier">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Atelier</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
      <zorder>pushButtonPDF</zorder>
      <zorder>groupBoxStatus</zorder>
      <zorder>pushButtonExcel</zorder>
+     <zorder>checkBoxAtelier</zorder>
     </widget>
    </item>
    <item row="1" column="1">

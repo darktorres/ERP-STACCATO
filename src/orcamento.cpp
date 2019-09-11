@@ -915,6 +915,8 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
 
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
   if (not canChangeFrete) {
+    qApp->enqueueInformation("Necessário autorização!", this);
+
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
     if (dialog.exec() == QDialog::Rejected) {

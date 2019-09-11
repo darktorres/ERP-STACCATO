@@ -915,7 +915,7 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
 
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
   if (not canChangeFrete) {
-    qApp->enqueueInformation("Necessário autorização!", this);
+    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 

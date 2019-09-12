@@ -322,3 +322,5 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 // valor presente = R$ 98 - (R$ 98 * 10%) = R$ 88,2
 
 // TODO: 1para recebiveis diferentes de cartao calcular IOF
+
+// TODO: fazer uma tela igual para dar baixa em lote nos recebimentos

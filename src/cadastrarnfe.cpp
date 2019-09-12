@@ -278,7 +278,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
   // reread the file now authorized
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    auto resposta2 = acbr.enviarComando("NFe.LoadfromFile(" + filePath + ")");
+    auto resposta2 = acbr.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
     if (not resposta2) { return false; }
 

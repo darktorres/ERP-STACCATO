@@ -43,8 +43,8 @@ private:
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_dataEmissao_dateChanged(const QDate &date) -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
-  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
-  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;
   auto on_doubleSpinBoxDesconto_valueChanged(const double desconto) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;

@@ -835,7 +835,7 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
 
     const double frete = ui->doubleSpinBoxFrete->value();
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(descontoReais / subTotalLiq * 100);
+    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
 
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());

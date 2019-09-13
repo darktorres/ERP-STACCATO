@@ -114,7 +114,13 @@ bool Application::dbConnect() {
 
     isConnected = false;
 
-    return qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text());
+    const QString error = db.lastError().text();
+
+    QString message = "Erro conectando no banco de dados: " + error;
+
+    if (error.contains("Access denied for user")) { message = "Login inválido!"; }
+
+    return qApp->enqueueError(false, message);
   }
 
   isConnected = true;

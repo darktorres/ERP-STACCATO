@@ -15,10 +15,8 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QGraphicsView(new QGraphi
 
   m_coordX = new QGraphicsSimpleTextItem(m_chart);
   m_coordX->setPos(m_chart->size().width() / 2 - 50, m_chart->size().height());
-  m_coordX->setText("X: ");
   m_coordY = new QGraphicsSimpleTextItem(m_chart);
   m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height());
-  m_coordY->setText("Y: ");
 
   const auto series = chart->series();
 
@@ -69,8 +67,8 @@ void ChartView::resizeEvent(QResizeEvent *event) {
   if (scene()) {
     scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
     m_chart->resize(event->size());
-    m_coordX->setPos(m_chart->size().width() / 2 - 50, m_chart->size().height() - 20);
-    m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height() - 20);
+    m_coordX->setPos(m_chart->size().width() / 2 - 50, m_chart->size().height() - 30);
+    m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height() - 30);
     const auto tooltips = m_tooltips;
     for (auto *tooltip : tooltips) { tooltip->updateGeometry(); }
   }

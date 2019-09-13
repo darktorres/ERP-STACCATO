@@ -57,8 +57,10 @@ void ChartView::removeTooltips() {
 }
 
 void ChartView::mouseMoveEvent(QMouseEvent *event) {
-  m_coordX->setText(QString("X: %1").arg(m_chart->mapToValue(event->pos()).x()));
-  m_coordY->setText(QString("Y: %1").arg(m_chart->mapToValue(event->pos()).y()));
+  const auto point = m_chart->mapToValue(event->pos());
+
+  m_coordX->setText("Dia: " + QString::number(point.x(), 'f', 0));
+  m_coordY->setText("R$: " + QLocale(QLocale::Portuguese).toString(point.y(), 'f', 0));
 
   QGraphicsView::mouseMoveEvent(event);
 }

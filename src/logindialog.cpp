@@ -64,8 +64,10 @@ void LoginDialog::on_pushButtonConfig_clicked() {
 }
 
 void LoginDialog::on_pushButtonLogin_clicked() {
-  UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
-  UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+  if (tipo == Tipo::Login) {
+    UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
+    UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+  }
 
   if (not qApp->dbConnect()) { return; }
 
@@ -78,8 +80,6 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   }
 
   accept();
-
-  if (tipo == Tipo::Login) { UserSession::setSetting("User/lastuser", ui->lineEditUser->text()); }
 }
 
 bool LoginDialog::verificaVersao() {

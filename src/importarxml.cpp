@@ -652,7 +652,7 @@ bool ImportarXML::lerXML() {
 bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD')")) { return qApp->enqueueError(false, "Erro buscando lojas: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) { return qApp->enqueueError(false, "Erro buscando lojas: " + query.lastError().text(), this); }
 
   QStringList lojas{"CD"};
 

@@ -115,7 +115,7 @@ void WidgetVenda::setPermissions() {
   if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
   }
@@ -137,7 +137,7 @@ void WidgetVenda::setPermissions() {
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 

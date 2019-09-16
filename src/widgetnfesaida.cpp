@@ -122,10 +122,10 @@ void WidgetNfeSaida::montaFiltro() {
   const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
   for (const auto &child : children) {
-    if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
 
   //-------------------------------------
 

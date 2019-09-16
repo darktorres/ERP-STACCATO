@@ -20,11 +20,11 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QGraphicsView(new QGraphi
 
   const auto series = chart->series();
 
-  for (const auto &AbstractSerie : series) {
-    auto serie = static_cast<QLineSeries *>(AbstractSerie);
-    connect(serie, &QLineSeries::clicked, this, &ChartView::keepTooltip);
-    connect(serie, &QLineSeries::hovered, this, &ChartView::tooltip);
-  }
+  //  for (const auto &AbstractSerie : series) {
+  //    auto serie = static_cast<QLineSeries *>(AbstractSerie);
+  //    connect(serie, &QLineSeries::clicked, this, &ChartView::keepTooltip);
+  //    connect(serie, &QLineSeries::hovered, this, &ChartView::tooltip);
+  //  }
 
   setMouseTracking(true);
 }

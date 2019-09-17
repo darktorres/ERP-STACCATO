@@ -533,6 +533,8 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
 
   if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) { return false; }
   if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "prcUnitario", 0)) { return false; }
+  if (not modelVendaProduto.setData(newRow, "descUnitario", 0)) { return false; }
   if (not modelVendaProduto.setData(newRow, "parcial", 0)) { return false; }
   if (not modelVendaProduto.setData(newRow, "desconto", 0)) { return false; }
   if (not modelVendaProduto.setData(newRow, "parcialDesc", 0)) { return false; }

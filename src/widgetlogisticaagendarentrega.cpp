@@ -502,8 +502,6 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
 }
 
 bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caixasAgendar, const int caixasTotal) {
-  // TODO: rename this to 'dividirProduto'
-  // TODO: marcar idRelacionado
   // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
 
   SqlRelationalTableModel modelProdutosTemp;
@@ -549,6 +547,7 @@ bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caix
   const QDecDouble parcialDescNovo = QDecDouble(modelProdutosTemp.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
   const QDecDouble totalNovo = QDecDouble(modelProdutosTemp.data(newRow, "total").toDouble()) * proporcaoNovo;
 
+  if (not modelProdutosTemp.setData(newRow, "idRelacionado", modelProdutosTemp.data(0, "idVendaProduto"))) { return false; }
   if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * unCaixa).toDouble())) { return false; }
   if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal2 - caixasAgendar2).toDouble())) { return false; }
   if (not modelProdutosTemp.setData(newRow, "parcial", parcialNovo.toDouble())) { return false; }

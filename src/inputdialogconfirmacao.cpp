@@ -457,6 +457,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   const double quantDefeito = caixasDefeito * unCaixa;
 
+  if (not modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto"))) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito)) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
@@ -531,6 +532,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
     if (not modelVendaProduto.setData(newRow, col, value)) { return false; }
   }
 
+  if (not modelVendaProduto.setData(newRow, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto"))) { return false; }
   if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) { return false; }
   if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) { return false; }
   if (not modelVendaProduto.setData(newRow, "prcUnitario", 0)) { return false; }

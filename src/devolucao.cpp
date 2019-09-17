@@ -385,6 +385,7 @@ bool Devolucao::inserirItens(const int currentRow) {
       if (not modelProdutos.setData(newRowRestante, column, value)) { return false; }
     }
 
+    if (not modelProdutos.setData(newRowRestante, "idRelacionado", modelProdutos.data(currentRow, "idVendaProduto"))) { return false; }
     if (not modelProdutos.setData(newRowRestante, "caixas", (restante / step).toDouble())) { return false; }
     if (not modelProdutos.setData(newRowRestante, "quant", restante.toDouble())) { return false; }
 

@@ -20,7 +20,7 @@ void WidgetOrcamento::setPermissions() {
   if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricaox")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 

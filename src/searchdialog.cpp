@@ -417,7 +417,7 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepres
 
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 
-void SearchDialog::on_radioButtonProdDesc_toggled(const bool) {
-  on_lineEditBusca_textChanged(QString());
-} // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
-  // SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+// TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is
+// fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
+// SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }

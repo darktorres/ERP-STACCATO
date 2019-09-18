@@ -175,4 +175,5 @@ void WidgetGraficos::on_pushButtonCleanTooltips_clicked() { chartView->removeToo
 // fazer o mesmo mes do ano anterior em bold
 // fazer uma linha diferente com a media
 
-// TODO: hover está pegando o valor do pixel, passando o mouse por baixo sai um valor diferente de passar por cima, verificar se dá para pegar o valor da Series em vez do valor no gráfico
+// TODO: hover está pegando o valor do pixel, passando o mouse por baixo sai um valor diferente de passar por cima,
+// verificar se dá para pegar o valor da Series em vez do valor no gráfico

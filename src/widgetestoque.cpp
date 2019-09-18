@@ -18,10 +18,7 @@
 #include "xlsxdocument.h"
 #include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
-  ui->setupUi(this);
-  // TODO: se 'vendedor' esconder filtros para mostar apenas os estoques disponiveis
-}
+WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 

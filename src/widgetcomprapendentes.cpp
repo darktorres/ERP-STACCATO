@@ -259,5 +259,6 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   impressao.print();
 }
 
-// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para o Conrado confirmar, apenas com um botão de ok ou cancelar.
+// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para
+// o Conrado confirmar, apenas com um botão de ok ou cancelar.
 // TODO: pegar a tableResumo e colocar em uma aba separada no widgetCompra

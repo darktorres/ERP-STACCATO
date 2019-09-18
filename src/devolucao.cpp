@@ -26,33 +26,42 @@ Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent),
 
   setWindowFlags(Qt::Window);
 
-  determinarIdDevolucao();
-
   setupTables();
 }
 
 Devolucao::~Devolucao() { delete ui; }
 
-void Devolucao::determinarIdDevolucao() {
+std::optional<bool> Devolucao::determinarIdDevolucao() {
   QSqlQuery query;
   query.prepare("SELECT MAX(idVenda) AS id FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = :month HAVING MAX(idVenda) IS NOT NULL");
   query.bindValue(":idVenda", idVenda + "D%");
   query.bindValue(":month", QDate::currentDate().month());
 
-  if (not query.exec()) { return qApp->enqueueError("Erro verificando se existe devolução: " + query.lastError().text(), this); }
+  if (not query.exec()) {
+    qApp->enqueueError("Erro verificando se existe devolução: " + query.lastError().text(), this);
+    return {};
+  }
+
+  bool createNewId;
 
   if (query.first()) {
     idDevolucao = query.value("id").toString();
+    createNewId = false;
   } else {
     QSqlQuery query2;
     query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
     query2.bindValue(":idVenda", idVenda + "D%");
 
-    if (not query2.exec() or not query2.first()) { qApp->enqueueError("Erro determinando próximo id: " + query2.lastError().text(), this); }
+    if (not query2.exec() or not query2.first()) {
+      qApp->enqueueError("Erro determinando próximo id: " + query2.lastError().text(), this);
+      return {};
+    }
 
     idDevolucao = idVenda + "D" + query2.value("number").toString();
     createNewId = true;
   }
+
+  return createNewId;
 }
 
 void Devolucao::setupTables() {
@@ -138,7 +147,7 @@ void Devolucao::setupTables() {
   modelDevolvidos.setHeaderData("formComercial", "Form. Com.");
   modelDevolvidos.setHeaderData("total", "Total");
 
-  modelDevolvidos.setFilter("idVenda = '" + idDevolucao + "'");
+  modelDevolvidos.setFilter("idVenda LIKE '" + idVenda + "D%'");
 
   if (not modelDevolvidos.select()) { return; }
 
@@ -194,7 +203,7 @@ void Devolucao::setupTables() {
   modelPagamentos.setHeaderData("status", "Status");
   modelPagamentos.setHeaderData("representacao", "Representação");
 
-  modelPagamentos.setFilter("idVenda = '" + idDevolucao + "'");
+  modelPagamentos.setFilter("idVenda LIKE '" + idVenda + "D%'");
 
   if (not modelPagamentos.select()) { return; }
 
@@ -442,6 +451,8 @@ bool Devolucao::criarContas() {
   // TODO: 0considerar a 'conta cliente' e ajustar as telas do financeiro para poder visualizar/trabalhar os dois fluxos
   // de contas
 
+  if (qFuzzyIsNull(ui->doubleSpinBoxCredito->value())) { return true; }
+
   const int newRowPag = modelPagamentos.insertRowAtEnd();
 
   if (not modelPagamentos.setData(newRowPag, "contraParte", modelCliente.data(0, "nome_razao"))) { return false; }
@@ -505,6 +516,8 @@ bool Devolucao::criarContas() {
 }
 
 bool Devolucao::salvarCredito() {
+  if (qFuzzyIsNull(ui->doubleSpinBoxCredito->value())) { return true; }
+
   const double credito = modelCliente.data(0, "credito").toDouble() + ui->doubleSpinBoxCredito->value();
 
   if (not modelCliente.setData(0, "credito", credito)) { return false; }
@@ -514,7 +527,7 @@ bool Devolucao::salvarCredito() {
   return true;
 }
 
-bool Devolucao::devolverItem(const int currentRow) {
+bool Devolucao::devolverItem(const int currentRow, const bool createNewId) {
   if (createNewId and not criarDevolucao()) { return false; }
 
   // REFAC: move submitAll outside those functions?
@@ -545,9 +558,13 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Não selecionou quantidade!", this); }
 
+  const auto createNewId = determinarIdDevolucao();
+
+  if (not createNewId) { return qApp->enqueueError("Não foi possível determinar o código da devolução!", this); }
+
   if (not qApp->startTransaction()) { return; }
 
-  if (not devolverItem(list.first().row())) { return qApp->rollbackTransaction(); }
+  if (not devolverItem(list.first().row(), createNewId.value())) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

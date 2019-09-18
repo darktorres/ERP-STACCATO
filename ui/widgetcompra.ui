@@ -81,11 +81,21 @@
      </widget>
      <widget class="QWidget" name="tabCompras">
       <attribute name="title">
-       <string>Compras</string>
+       <string>Consumos</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="0">
         <widget class="WidgetCompraOC" name="widgetOC" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Histórico</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0">
+        <widget class="WidgetHistoricoCompra" name="widgetHistorico" native="true"/>
        </item>
       </layout>
      </widget>
@@ -134,6 +144,12 @@
    <class>WidgetCompraResumo</class>
    <extends>QWidget</extends>
    <header>src/widgetcompraresumo.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetHistoricoCompra</class>
+   <extends>QWidget</extends>
+   <header>src/widgethistoricocompra.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

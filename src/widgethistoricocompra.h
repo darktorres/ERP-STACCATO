@@ -8,19 +8,22 @@ namespace Ui {
 class WidgetFinanceiroCompra;
 }
 
-class WidgetFinanceiroCompra final : public QWidget {
+class WidgetHistoricoCompra final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiroCompra(QWidget *parent = nullptr);
-  ~WidgetFinanceiroCompra();
+  enum class Tipo { Compra, Financeiro };
+  explicit WidgetHistoricoCompra(QWidget *parent = nullptr);
+  ~WidgetHistoricoCompra();
   auto resetTables() -> void;
   auto updateTables() -> void;
+  auto setTipo(const Tipo novotipo) -> void;
 
 private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  Tipo tipo;
   SqlRelationalTableModel modelViewComprasFinanceiro;
   Ui::WidgetFinanceiroCompra *ui;
   // methods

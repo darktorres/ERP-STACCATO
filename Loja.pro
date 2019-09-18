@@ -198,10 +198,10 @@ SOURCES += \
     src/widgetcompraresumo.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
-    src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
     src/widgetgraficos.cpp \
+    src/widgethistoricocompra.cpp \
     src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
@@ -311,10 +311,10 @@ HEADERS  += \
     src/widgetcompraresumo.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
-    src/widgetfinanceirocompra.h\
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
     src/widgetgraficos.h \
+    src/widgethistoricocompra.h \
     src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \

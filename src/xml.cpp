@@ -164,7 +164,7 @@ void XML::lerTotais(const QStandardItem *child) {
 }
 
 void XML::montarArvore() {
-  if (fileContent.isEmpty()) { return; }
+  if (fileContent.isEmpty()) { return qApp->enqueueError("XML vazio!"); }
 
   QDomDocument document;
   QString error;

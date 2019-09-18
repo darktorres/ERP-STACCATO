@@ -60,6 +60,14 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
     //    ui->table->setSelectionMode(QTableView::NoSelection);
   }
 
+  if (tipo == Tipo::Historico) {
+    ui->frameDataPreco->show();
+
+    ui->framePagamentos->hide();
+    ui->frameAdicionais->hide();
+    ui->pushButtonSalvar->hide();
+  }
+
   setConnections();
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(true); });
@@ -396,8 +404,11 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (idCompra.isEmpty()) { return qApp->enqueueError(false, "IdCompra vazio!", this); }
 
-  if (tipo == Tipo::ConfirmarCompra) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra + " AND status = 'EM COMPRA'"); }
-  if (tipo == Tipo::Financeiro) { modelPedidoFornecedor.setFilter("idCompra = " + idCompra); }
+  QString filtro = "idCompra = " + idCompra;
+
+  if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
+
+  modelPedidoFornecedor.setFilter(filtro);
 
   if (not modelPedidoFornecedor.select()) { return false; }
 

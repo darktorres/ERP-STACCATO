@@ -25,7 +25,7 @@ void WidgetGraficos::updateTables() {
     } else {
       QSqlQuery query;
 
-      if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
+      if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
       while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
     }

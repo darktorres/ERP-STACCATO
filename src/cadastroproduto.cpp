@@ -34,7 +34,7 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  sdProduto = SearchDialog::produto(true, true, true, this);
+  sdProduto = SearchDialog::produto(true, true, true, false, this);
   connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
 

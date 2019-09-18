@@ -36,7 +36,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, this));
+  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, false, this));
   ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));

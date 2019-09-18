@@ -371,7 +371,8 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
 }
 
 bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
+  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a
+  // nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
 
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");

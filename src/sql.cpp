@@ -41,4 +41,5 @@ bool Sql::runQuerys(const QString &idVenda) {
   return true;
 }
 
-// FIXME: recebimento de estoque altera os consumos que por sua vez altera venda_has_produto mas depende do pedido_fornecedor_has_produto ter vp.idVenda preenchido para esta função funcionar
+// FIXME: recebimento de estoque altera os consumos que por sua vez altera venda_has_produto mas depende do
+// pedido_fornecedor_has_produto ter vp.idVenda preenchido para esta função funcionar

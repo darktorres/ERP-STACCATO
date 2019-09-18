@@ -278,7 +278,8 @@ void MainWindow::on_actionCalcular_frete_triggered() {
 // TODO: logistica da devolucao
 
 // TASK: cancelamento de nfe: terminar de arrumar formato do email
-// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
+// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na
+// tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
 // autorizacao e os status)
 // TASK: verificar porque os estoques 10649, 10650 e 10651 nao mudaram de status (pararam em 'em coleta')
 // TASK: anotar alteracoes que Anderson pediu nos audios do whats

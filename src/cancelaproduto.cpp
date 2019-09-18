@@ -136,5 +136,5 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
 }
 
 // TODO: 5verificar como tratar conta_a_pagar_has_pagamento
-// TODO: alterar a funcao de cancelar por uma tela de SAC onde o usuario indica as operacoes necessarias (troca de nfe, produto nao disponivel etc) e realiza as mudanças necessarias, bem como
-// alteracoes no fluxo de pagamento se necessario
+// TODO: alterar a funcao de cancelar por uma tela de SAC onde o usuario indica as operacoes necessarias (troca de nfe, produto nao disponivel etc) e
+// realiza as mudanças necessarias, bem como alteracoes no fluxo de pagamento se necessario

@@ -255,9 +255,6 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  QSqlQuery query;
-  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
-
   const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
 
   if (not folderKeyXml) { return qApp->enqueueError("Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!", this); }
@@ -265,6 +262,9 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   const auto folderKeyPdf = UserSession::getSetting("User/EntregasPdfFolder");
 
   if (not folderKeyPdf) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
+
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
   const QString xmlFolder = folderKeyXml.value().toString();
   const QString pdfFolder = folderKeyPdf.value().toString();

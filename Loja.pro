@@ -143,7 +143,6 @@ SOURCES += \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
-    src/horizontalproxymodel.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
@@ -256,7 +255,6 @@ HEADERS  += \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
-    src/horizontalproxymodel.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \

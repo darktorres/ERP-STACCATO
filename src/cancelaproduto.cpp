@@ -111,8 +111,6 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
                      "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
                      status + "' AND idVendaProduto = :idVendaProduto");
 
-  QStringList idVendas;
-
   for (const auto &index : list) {
     const int row = index.row();
 
@@ -123,11 +121,7 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
     queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
 
     if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
-
-    idVendas << model.data(row, "idVenda").toString();
   }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return false; }
 
   return true;
 }

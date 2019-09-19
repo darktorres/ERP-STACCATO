@@ -6,7 +6,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "sortfilterproxymodel.h"
-#include "sql.h"
 #include "ui_widgetlogisticaentregues.h"
 #include "usersession.h"
 #include "vendaproxymodel.h"
@@ -130,10 +129,6 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
     if (status != "ENTREGUE") { return qApp->enqueueError("Produto não marcado como 'ENTREGUE'!", this); }
   }
 
-  QStringList idVendas;
-
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
-
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
@@ -145,8 +140,6 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   if (not qApp->startTransaction()) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

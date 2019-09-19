@@ -11,7 +11,6 @@
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
-#include "sql.h"
 #include "ui_widgetcompragerar.h"
 #include "usersession.h"
 #include "widgetcompragerar.h"
@@ -215,13 +214,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
-  QStringList idVendas;
-
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
-
   if (not gerarCompra(list, dataCompra, dataPrevista, oc)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -489,15 +482,9 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  QStringList idVendas;
-
-  for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
-
   if (not qApp->startTransaction()) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

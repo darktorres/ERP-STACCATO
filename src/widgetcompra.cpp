@@ -4,6 +4,8 @@
 WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompra) {
   ui->setupUi(this);
 
+  ui->widgetHistorico->setTipo(WidgetHistoricoCompra::Tipo::Compra);
+
   setConnections();
 }
 
@@ -28,7 +30,8 @@ void WidgetCompra::updateTables() {
   if (currentText == "Gerar Compra") { ui->widgetGerar->updateTables(); }
   if (currentText == "Confirmar Compra") { ui->widgetConfirmar->updateTables(); }
   if (currentText == "Faturamento") { ui->widgetFaturar->updateTables(); }
-  if (currentText == "Compras") { ui->widgetOC->updateTables(); }
+  if (currentText == "Consumos") { ui->widgetOC->updateTables(); }
+  if (currentText == "Histórico") { ui->widgetHistorico->updateTables(); }
 }
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }

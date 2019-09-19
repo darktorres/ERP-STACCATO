@@ -9,8 +9,8 @@ QString DoubleDelegate::displayText(const QVariant &value, const QLocale &locale
 }
 
 QWidget *DoubleDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
-  Q_UNUSED(option);
-  Q_UNUSED(index);
+  Q_UNUSED(option)
+  Q_UNUSED(index)
 
   auto *editor = new QDoubleSpinBox(parent);
 

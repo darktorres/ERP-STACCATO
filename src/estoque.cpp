@@ -342,6 +342,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto, const double
     const double proporcaoNovo = quant / quantOriginal;
     const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
 
+    if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(row, "idPedido"))) { return {}; }
     if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return {}; }
     if (not modelCompra.setData(newRow, "idVendaProduto", idVendaProduto)) { return {}; }
     if (not modelCompra.setData(newRow, "quant", quant)) { return {}; }

@@ -18,7 +18,6 @@ public:
 
 private:
   // attributes
-  bool createNewId = false; // REFAC: make this a local variable
   const QString idVenda;
   QDataWidgetMapper mapperItem;
   QString idDevolucao;
@@ -33,8 +32,8 @@ private:
   auto calcPrecoItemTotal() -> void;
   auto criarContas() -> bool;
   auto criarDevolucao() -> bool;
-  auto determinarIdDevolucao() -> void;
-  auto devolverItem(const int currentRow) -> bool;
+  auto determinarIdDevolucao() -> std::optional<bool>;
+  auto devolverItem(const int currentRow, const bool createNewId) -> bool;
   auto inserirItens(const int currentRow) -> bool;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;

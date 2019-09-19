@@ -46,14 +46,15 @@ void ACBr::readSocket() {
   resposta += stream;
 
   if (resposta.endsWith(welcome)) {
-    pronto = true;
     resposta.clear();
+    pronto = true;
     return;
   }
 
   if (resposta.endsWith("\u0003")) {
     resposta.remove("\u0003");
     recebido = true;
+    return;
   }
 }
 

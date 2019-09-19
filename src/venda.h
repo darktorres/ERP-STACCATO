@@ -22,6 +22,8 @@ private:
   bool correcao = false;
   int idLoja;
   bool representacao;
+  bool silentFrete = false;
+  bool canChangeFrete = false;
   double minimoFrete;
   double porcFrete;
   SqlRelationalTableModel modelFluxoCaixa;
@@ -43,8 +45,8 @@ private:
   auto on_checkBoxPontuacaoPadrao_toggled(bool checked) -> void;
   auto on_checkBoxRT_toggled(bool checked) -> void;
   auto on_dateTimeEdit_dateTimeChanged(const QDateTime &) -> void;
-  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
-  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxProfissional_textChanged(const QString &) -> void;

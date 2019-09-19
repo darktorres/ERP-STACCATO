@@ -127,7 +127,11 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <widget class="WidgetRh" name="widgetRh" native="true"/>
+         <widget class="WidgetRh" name="widgetRh" native="true">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -165,8 +169,8 @@
       <string>Importar tabela fornecedor</string>
      </property>
      <addaction name="actionProdutos"/>
-     <addaction name="actionEstoque"/>
      <addaction name="actionPromocao"/>
+     <addaction name="actionStaccatoOFF"/>
     </widget>
     <addaction name="menuImportar_tabela_fornecedor"/>
     <addaction name="menuTema"/>
@@ -303,9 +307,9 @@
     <string>Produtos</string>
    </property>
   </action>
-  <action name="actionEstoque">
+  <action name="actionStaccatoOFF">
    <property name="text">
-    <string>Estoque</string>
+    <string>StaccatoOFF</string>
    </property>
   </action>
   <action name="actionPromocao">

@@ -46,6 +46,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 }
 
 void WidgetCompraPendentes::setConnections() {
+  connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
   connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
@@ -72,7 +73,7 @@ void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
     setConnections();
 
-    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, this));
+    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, true, this));
     ui->itemBoxProduto->setRepresentacao(false);
 
     connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
@@ -175,6 +176,10 @@ void WidgetCompraPendentes::montaFiltro() {
 
   //-------------------------------------
 
+  if (not ui->checkBoxAtelier->isChecked()) { filtros << "fornecedor <> 'ATELIER STACCATO'"; }
+
+  //-------------------------------------
+
   filtros << "quant > 0";
 
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
@@ -254,5 +259,6 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   impressao.print();
 }
 
-// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para o Conrado confirmar, apenas com um botão de ok ou cancelar.
+// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para
+// o Conrado confirmar, apenas com um botão de ok ou cancelar.
 // TODO: pegar a tableResumo e colocar em uma aba separada no widgetCompra

@@ -8,7 +8,6 @@
 #include "cancelaproduto.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
-#include "sql.h"
 #include "ui_widgetcompraconfirmar.h"
 #include "widgetcompraconfirmar.h"
 
@@ -76,7 +75,6 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const int row = list.first().row();
 
   const QString idCompra = modelViewCompras.data(row, "Compra").toString();
-  const QString idVenda = modelViewCompras.data(row, "Venda").toString();
 
   InputDialogFinanceiro inputDlg(InputDialogFinanceiro::Tipo::ConfirmarCompra, this);
   if (not inputDlg.setFilter(idCompra)) { return; }
@@ -89,8 +87,6 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   if (not qApp->startTransaction()) { return; }
 
   if (not confirmarCompra(idCompra, dataPrevista, dataConf)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

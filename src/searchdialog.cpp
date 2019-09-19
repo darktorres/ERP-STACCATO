@@ -73,8 +73,9 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   if (model.tableName() == "view_produto") {
     const QString descontinuado = " AND descontinuado = " + QString(ui->radioButtonProdAtivos->isChecked() ? "FALSE" : "TRUE");
     const QString representacao = showAllProdutos ? "" : (isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE");
+    const QString showEstoque = compraAvulsa ? " AND estoque = FALSE AND promocao <= 1" : "";
 
-    model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + fornecedorRep);
+    model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
 
     return;
   }
@@ -223,13 +224,14 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   return sdLoja;
 }
 
-SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, QWidget *parent) {
+SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {
   // TODO: 3nao mostrar promocao vencida no descontinuado
   SearchDialog *sdProd = new SearchDialog("Buscar Produto", "view_produto", "idProduto", {"descricao"}, "fornecedor, descricao, colecao, codcomercial", "idProduto = 0", parent);
 
   sdProd->permitirDescontinuados = permitirDescontinuados;
   sdProd->silent = silent;
   sdProd->showAllProdutos = showAllProdutos;
+  sdProd->compraAvulsa = compraAvulsa;
 
   sdProd->hideColumns(
       {"idEstoque", "atualizarTabelaPreco", "cfop", "codBarras", "comissao", "cst",   "custo",       "desativado", "descontinuado", "estoque",       "promocao", "icms",   "idFornecedor",
@@ -243,6 +245,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->setHeaderData("statusEstoque", "Estoque");
   sdProd->setHeaderData("descricao", "Descrição");
   sdProd->setHeaderData("estoqueRestante", "Estoque Disp.");
+  sdProd->setHeaderData("lote", "Lote");
   sdProd->setHeaderData("un", "Un.");
   sdProd->setHeaderData("un2", "Un.2");
   sdProd->setHeaderData("colecao", "Coleção");
@@ -414,7 +417,7 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepres
 
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 
-void SearchDialog::on_radioButtonProdDesc_toggled(const bool) {
-  on_lineEditBusca_textChanged(QString());
-} // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
-  // SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
+// TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is
+// fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
+// SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }

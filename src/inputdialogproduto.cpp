@@ -101,6 +101,7 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor);
 
+  ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
@@ -144,8 +145,8 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   QString filter;
 
-  if (tipo == Tipo::GerarCompra) { filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'"; }
-  if (tipo == Tipo::Faturamento) { filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'"; }
+  if (tipo == Tipo::GerarCompra) { filter = "idPedido IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
+  if (tipo == Tipo::Faturamento) { filter = "idCompra IN (" + ids.join(", ") + ") AND status = 'EM FATURAMENTO'"; }
 
   if (filter.isEmpty()) { return qApp->enqueueError(false, "Filtro vazio!", this); }
 

@@ -122,10 +122,10 @@ void WidgetNfeSaida::montaFiltro() {
   const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
   for (const auto &child : children) {
-    if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
 
   //-------------------------------------
 
@@ -255,9 +255,6 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  QSqlQuery query;
-  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
-
   const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
 
   if (not folderKeyXml) { return qApp->enqueueError("Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!", this); }
@@ -265,6 +262,9 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   const auto folderKeyPdf = UserSession::getSetting("User/EntregasPdfFolder");
 
   if (not folderKeyPdf) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
+
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
   const QString xmlFolder = folderKeyXml.value().toString();
   const QString pdfFolder = folderKeyPdf.value().toString();
@@ -371,7 +371,8 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
 }
 
 bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
+  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a
+  // nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
 
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");

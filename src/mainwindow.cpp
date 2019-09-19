@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionConfiguracoes, &QAction::triggered, this, &MainWindow::on_actionConfiguracoes_triggered);
   connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
   connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
-  connect(ui->actionEstoque, &QAction::triggered, this, &MainWindow::on_actionEstoque_triggered);
+  connect(ui->actionStaccatoOFF, &QAction::triggered, this, &MainWindow::on_actionStaccatoOFF_triggered);
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
@@ -108,7 +108,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   const QString nomeUsuario = UserSession::nome();
 
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true); }
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or UserSession::tipoUsuario() == "GERENTE LOJA") {
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true);
+  }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -245,8 +247,8 @@ void MainWindow::on_actionProdutos_triggered() {
   importa->importarTabela();
 }
 
-void MainWindow::on_actionEstoque_triggered() {
-  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Estoque, this);
+void MainWindow::on_actionStaccatoOFF_triggered() {
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::StaccatoOFF, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
   importa->importarTabela();
 }
@@ -276,7 +278,8 @@ void MainWindow::on_actionCalcular_frete_triggered() {
 // TODO: logistica da devolucao
 
 // TASK: cancelamento de nfe: terminar de arrumar formato do email
-// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
+// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na
+// tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
 // autorizacao e os status)
 // TASK: verificar porque os estoques 10649, 10650 e 10651 nao mudaram de status (pararam em 'em coleta')
 // TASK: anotar alteracoes que Anderson pediu nos audios do whats

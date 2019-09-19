@@ -162,7 +162,7 @@ bool CadastroUsuario::viewRegister() {
 void CadastroUsuario::fillCombobox() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja")) { return; }
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 

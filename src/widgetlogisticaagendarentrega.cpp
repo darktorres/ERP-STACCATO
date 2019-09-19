@@ -13,7 +13,6 @@
 #include "followup.h"
 #include "inputdialog.h"
 #include "sortfilterproxymodel.h"
-#include "sql.h"
 #include "ui_widgetlogisticaagendarentrega.h"
 #include "usersession.h"
 #include "widgetlogisticaagendarentrega.h"
@@ -253,15 +252,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 
   if (modelTranspAtual.rowCount() == 0) { return qApp->enqueueError("Carga vazia!", this); }
 
-  QStringList idVendas;
-
-  for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { idVendas << modelTranspAtual.data(row, "idVenda").toString(); }
-
   if (not qApp->startTransaction()) { return; }
 
   if (not processRows()) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -502,8 +495,6 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
 }
 
 bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caixasAgendar, const int caixasTotal) {
-  // TODO: rename this to 'dividirProduto'
-  // TODO: marcar idRelacionado
   // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
 
   SqlRelationalTableModel modelProdutosTemp;
@@ -549,6 +540,7 @@ bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caix
   const QDecDouble parcialDescNovo = QDecDouble(modelProdutosTemp.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
   const QDecDouble totalNovo = QDecDouble(modelProdutosTemp.data(newRow, "total").toDouble()) * proporcaoNovo;
 
+  if (not modelProdutosTemp.setData(newRow, "idRelacionado", modelProdutosTemp.data(0, "idVendaProduto"))) { return false; }
   if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * unCaixa).toDouble())) { return false; }
   if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal2 - caixasAgendar2).toDouble())) { return false; }
   if (not modelProdutosTemp.setData(newRow, "parcial", parcialNovo.toDouble())) { return false; }

@@ -144,6 +144,8 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
+
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
   cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "OC").toString());

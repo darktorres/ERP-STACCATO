@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
-#include "sql.h"
 #include "ui_cancelaproduto.h"
 
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {

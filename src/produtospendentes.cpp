@@ -13,7 +13,6 @@
 #include "log.h"
 #include "produtospendentes.h"
 #include "reaisdelegate.h"
-#include "sql.h"
 #include "ui_produtospendentes.h"
 
 ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
@@ -165,16 +164,12 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   if (qFuzzyIsNull(ui->doubleSpinBoxComprar->value())) { return qApp->enqueueError("Quantidade 0!", this); }
 
-  const QString idVenda = modelViewProdutos.data(list.first().row(), "idVenda").toString();
-
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
   if (not qApp->startTransaction()) { return; }
 
   if (not comprar(list, inputDlg.getNextDate())) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -249,15 +244,12 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   const double quantConsumir =
       QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
-  if (not ok) { return; }
 
-  const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
+  if (not ok) { return; }
 
   if (not qApp->startTransaction()) { return; }
 
   if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

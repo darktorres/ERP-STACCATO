@@ -10,7 +10,6 @@
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
 #include "reaisdelegate.h"
-#include "sql.h"
 #include "ui_widgetcomprafaturar.h"
 #include "widgetcomprafaturar.h"
 
@@ -100,12 +99,10 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   QStringList idsCompra;
   QStringList fornecedores;
-  QStringList idVendas;
 
   for (const auto &item : list) {
     idsCompra << modelViewFaturamento.data(item.row(), "idCompra").toString();
     fornecedores << modelViewFaturamento.data(item.row(), "fornecedor").toString();
-    idVendas << modelViewFaturamento.data(item.row(), "Código").toString();
   }
 
   const int size = fornecedores.size();
@@ -131,10 +128,6 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
     if (import->exec() != QDialog::Accepted) { return; }
   }
-
-  if (not qApp->startTransaction()) { return; }
-  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
-  if (not qApp->endTransaction()) { return; }
 
   updateTables();
   qApp->enqueueInformation("Confirmado faturamento!", this);

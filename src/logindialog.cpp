@@ -37,6 +37,7 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->comboBoxLoja->hide();
 
   if (tipo == Tipo::Autorizacao) {
+    ui->pushButtonLogin->setText("Autorizar");
     ui->pushButtonConfig->hide();
     ui->lineEditUser->clear();
     ui->lineEditUser->setFocus();
@@ -63,22 +64,22 @@ void LoginDialog::on_pushButtonConfig_clicked() {
 }
 
 void LoginDialog::on_pushButtonLogin_clicked() {
-  UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
-  UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+  if (tipo == Tipo::Login) {
+    UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
+    UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+  }
 
   if (not qApp->dbConnect()) { return; }
 
   if (not verificaVersao()) { return; }
 
-  if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo == Tipo::Autorizacao ? UserSession::Tipo::Autorizacao : UserSession::Tipo::Padrao)) {
+  if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
     qApp->enqueueError("Login inválido!", this);
     ui->lineEditPass->setFocus();
     return;
   }
 
   accept();
-
-  if (tipo == Tipo::Login) { UserSession::setSetting("User/lastuser", ui->lineEditUser->text()); }
 }
 
 bool LoginDialog::verificaVersao() {

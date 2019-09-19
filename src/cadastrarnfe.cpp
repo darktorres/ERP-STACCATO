@@ -278,7 +278,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
   // reread the file now authorized
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    auto resposta2 = acbr.enviarComando("NFe.LoadfromFile(" + filePath + ")");
+    auto resposta2 = acbr.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
     if (not resposta2) { return false; }
 
@@ -382,6 +382,7 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
 
   if (not queryNFe.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + queryNFe.lastError().text(), this); }
 
+  // TODO: verificar porque nota futura só é vinculada após enquanto as outras são vinculadas no pré-cadastro
   if (tipo == Tipo::Futura) {
     QSqlQuery query;
     query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto");
@@ -1161,9 +1162,9 @@ void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(
-    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicms_valueChanged' function is fully equivalent to the body of
-                    // 'on_doubleSpinBoxICMSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
+  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicms_valueChanged' function is fully equivalent to the body of
+  // 'on_doubleSpinBoxICMSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1203,9 +1204,9 @@ void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(
-    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxPISppis_valueChanged' function is fully equivalent to the body of
-                    // 'on_doubleSpinBoxPISvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
+  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxPISppis_valueChanged' function is fully equivalent to the body of
+  // 'on_doubleSpinBoxPISvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1245,9 +1246,9 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(
-    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxCOFINSpcofins_valueChanged' function is fully equivalent to the body of
-                    // 'on_doubleSpinBoxCOFINSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
+  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxCOFINSpcofins_valueChanged' function is fully equivalent to the body of
+  // 'on_doubleSpinBoxCOFINSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1556,9 +1557,9 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) {
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(
-    const double) { // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicmsst_valueChanged' function is fully equivalent to the body of
-                    // 'on_doubleSpinBoxICMSvbcst_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
+  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicmsst_valueChanged' function is fully equivalent to the body of
+  // 'on_doubleSpinBoxICMSvbcst_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1947,6 +1948,6 @@ void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &
 // TODO: testar a função de pré-gravar nota e consultar (não está salvando o idVenda e portanto na tela de logistica nao esta vinculando)
 // TODO: verificar notas pendentes soltas no sistema
 // TODO: replace 'endl' with newline and flush on end?
-// TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e precisa detalhar a partilha no complemento bem como origem e
-// destino
+// TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
+// precisa detalhar a partilha no complemento bem como origem e destino
 // TODO: na importacao verificar se a nota está autorizada

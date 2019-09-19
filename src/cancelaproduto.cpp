@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
-#include "sql.h"
 #include "ui_cancelaproduto.h"
 
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
@@ -50,6 +49,7 @@ void CancelaProduto::setupTables() {
 
   ui->table->setModel(&model);
 
+  ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
@@ -98,43 +98,34 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 void CancelaProduto::on_pushButtonCancelar_clicked() { close(); }
 
 bool CancelaProduto::cancelar(const QModelIndexList &list) {
-  if (tipo == Tipo::CompraConfirmar or tipo == Tipo::CompraFaturamento) {
-    QSqlQuery queryCompra;
-    queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido = :idPedido");
+  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueError(false, "Não implementado!", this); }
 
-    const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
+  QSqlQuery queryCompra;
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido = :idPedido");
 
-    QSqlQuery queryVenda;
-    queryVenda.prepare("UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
-                       "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
-                       "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
-                       status + "' AND idVendaProduto = :idVendaProduto");
-    // TODO: bind status?
+  const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 
-    QStringList idVendas;
+  QSqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
+                     "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
+                     "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
+                     status + "' AND idVendaProduto = :idVendaProduto");
 
-    for (const auto &index : list) {
-      const int row = index.row();
+  for (const auto &index : list) {
+    const int row = index.row();
 
-      queryCompra.bindValue(":idPedido", model.data(row, "idPedido"));
+    queryCompra.bindValue(":idPedido", model.data(row, "idPedido"));
 
-      if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
 
-      queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
+    queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
 
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
-
-      idVendas << model.data(row, "idVenda").toString();
-    }
-
-    if (not Sql::updateVendaStatus(idVendas)) { return false; }
-  } else {
-    return qApp->enqueueError(false, "Não implementado!", this);
+    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
   }
 
   return true;
 }
 
 // TODO: 5verificar como tratar conta_a_pagar_has_pagamento
-// TODO: alterar a funcao de cancelar por uma tela de SAC onde o usuario indica as operacoes necessarias (troca de nfe, produto nao disponivel etc) e realiza as mudanças necessarias, bem como
-// alteracoes no fluxo de pagamento se necessario
+// TODO: alterar a funcao de cancelar por uma tela de SAC onde o usuario indica as operacoes necessarias (troca de nfe, produto nao disponivel etc) e
+// realiza as mudanças necessarias, bem como alteracoes no fluxo de pagamento se necessario

@@ -36,7 +36,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxCliente->setSearchDialog(SearchDialog::cliente(this));
   ui->itemBoxConsultor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxEndereco->setSearchDialog(SearchDialog::enderecoCliente(this));
-  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, this));
+  ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, false, false, false, this));
   ui->itemBoxProfissional->setRegisterDialog(new CadastroProfissional(this));
   ui->itemBoxProfissional->setSearchDialog(SearchDialog::profissional(true, this));
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
@@ -51,7 +51,6 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   if (UserSession::tipoUsuario() == "ADMINISTRADOR") {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
-    ui->checkBoxFreteManual->show();
   }
 
   if (UserSession::tipoUsuario() == "VENDEDOR") { buscarParametrosFrete(); }
@@ -915,6 +914,19 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
 }
 
 void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
+  if (not canChangeFrete) {
+    qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
+
+    LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
+
+    if (dialog.exec() == QDialog::Rejected) {
+      ui->checkBoxFreteManual->setChecked(not checked);
+      return;
+    }
+
+    canChangeFrete = true;
+  }
+
   ui->doubleSpinBoxFrete->setReadOnly(not checked);
   ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
 
@@ -1097,22 +1109,24 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   setConnections();
 }
 
-void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) {
-  const double liq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double frete = ui->doubleSpinBoxFrete->value();
-
+void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
   [=] {
+    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+    const double descontoPorc = descontoReais / subTotalLiq;
+
     for (int row = 0; row < modelItem.rowCount(); ++row) {
-      if (not modelItem.setData(row, "descGlobal", desconto / liq * 100)) { return; }
+      if (not modelItem.setData(row, "descGlobal", descontoPorc * 100)) { return; }
 
       const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      if (not modelItem.setData(row, "total", parcialDesc * (1 - (desconto / liq)))) { return; }
+      if (not modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc))) { return; }
     }
 
-    ui->doubleSpinBoxDescontoGlobal->setValue(desconto / liq * 100);
-    ui->doubleSpinBoxTotal->setValue(liq - desconto + frete);
+    const double frete = ui->doubleSpinBoxFrete->value();
+
+    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq - descontoReais + frete);
   }();
 
   setConnections();
@@ -1158,43 +1172,47 @@ bool Orcamento::buscarParametrosFrete() {
   return true;
 }
 
-void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) {
-  const double liq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double frete = ui->doubleSpinBoxFrete->value();
-
+void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
   [=] {
+    const double descontoPorc2 = descontoPorc / 100;
+
     for (int row = 0; row < modelItem.rowCount(); ++row) {
-      if (not modelItem.setData(row, "descGlobal", desconto)) { return; }
+      if (not modelItem.setData(row, "descGlobal", descontoPorc)) { return; }
 
       const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      if (not modelItem.setData(row, "total", parcialDesc * (1 - (desconto / 100)))) { return; }
+      if (not modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc2))) { return; }
     }
 
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(liq * desconto / 100);
-    ui->doubleSpinBoxTotal->setValue(liq * (1 - (desconto / 100)) + frete);
+    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+    const double frete = ui->doubleSpinBoxFrete->value();
+
+    ui->doubleSpinBoxDescontoGlobalReais->setValue(subTotalLiq * descontoPorc2);
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq * (1 - descontoPorc2) + frete);
   }();
 
   setConnections();
 }
 
 void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
-  const double liq = ui->doubleSpinBoxSubTotalLiq->value();
-  const double frete = ui->doubleSpinBoxFrete->value();
-
   unsetConnections();
 
   [=] {
+    const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
+    const double frete = ui->doubleSpinBoxFrete->value();
+    const double descontoReais = subTotalLiq + frete - total;
+    const double descontoPorc = descontoReais / subTotalLiq;
+
     for (int row = 0; row < modelItem.rowCount(); ++row) {
-      if (not modelItem.setData(row, "descGlobal", (liq - (total - frete)) / liq * 100)) { return; }
+      if (not modelItem.setData(row, "descGlobal", descontoPorc * 100)) { return; }
 
       const double parcialDesc = modelItem.data(row, "parcialDesc").toDouble();
-      if (not modelItem.setData(row, "total", parcialDesc * (1 - ((liq - (total - frete)) / liq)))) { return; }
+      if (not modelItem.setData(row, "total", parcialDesc * (1 - descontoPorc))) { return; }
     }
 
-    ui->doubleSpinBoxDescontoGlobal->setValue((liq - (total - frete)) / liq * 100);
-    ui->doubleSpinBoxDescontoGlobalReais->setValue(liq - (total - frete));
+    ui->doubleSpinBoxDescontoGlobal->setValue(descontoPorc * 100);
+    ui->doubleSpinBoxDescontoGlobalReais->setValue(descontoReais);
   }();
 
   setConnections();

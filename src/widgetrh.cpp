@@ -55,7 +55,7 @@ void WidgetRh::setupTables() {
 
   // -------------------------------------------------------------------------
 
-  modelTotal.setTable("view_relatorio_vendedor2");
+  modelTotal.setTable("view_relatorio_vendedor");
 
   ui->tableTotal->setModel(&modelTotal);
 

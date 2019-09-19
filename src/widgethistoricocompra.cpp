@@ -4,18 +4,18 @@
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "ui_widgetfinanceirocompra.h"
-#include "widgetfinanceirocompra.h"
+#include "widgethistoricocompra.h"
 
-WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
+WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 
-WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
+WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
 
-void WidgetFinanceiroCompra::setConnections() {
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged);
-  connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated);
+void WidgetHistoricoCompra::setConnections() {
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged);
+  connect(ui->table, &TableView::activated, this, &WidgetHistoricoCompra::on_table_activated);
 }
 
-void WidgetFinanceiroCompra::updateTables() {
+void WidgetHistoricoCompra::updateTables() {
   if (not isSet) {
     setConnections();
     isSet = true;
@@ -30,9 +30,11 @@ void WidgetFinanceiroCompra::updateTables() {
   if (not modelViewComprasFinanceiro.select()) { return; }
 }
 
-void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
+void WidgetHistoricoCompra::setTipo(const WidgetHistoricoCompra::Tipo novotipo) { tipo = novotipo; }
 
-void WidgetFinanceiroCompra::setupTables() {
+void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
+
+void WidgetHistoricoCompra::setupTables() {
   modelViewComprasFinanceiro.setTable("view_compras_financeiro");
 
   ui->table->setModel(&modelViewComprasFinanceiro);
@@ -40,16 +42,18 @@ void WidgetFinanceiroCompra::setupTables() {
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
 }
 
-void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
-  InputDialogFinanceiro input(InputDialogFinanceiro::Tipo::Financeiro, this);
+void WidgetHistoricoCompra::on_table_activated(const QModelIndex &index) {
+  const auto tipoFinanceiro = (tipo == Tipo::Compra) ? InputDialogFinanceiro::Tipo::Historico : InputDialogFinanceiro::Tipo::Financeiro;
+
+  InputDialogFinanceiro input(tipoFinanceiro, this);
   input.setFilter(modelViewComprasFinanceiro.data(index.row(), "Compra").toString());
 
   if (input.exec() != InputDialogFinanceiro::Accepted) { return; }
 }
 
-void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
-void WidgetFinanceiroCompra::montaFiltro() {
+void WidgetHistoricoCompra::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 

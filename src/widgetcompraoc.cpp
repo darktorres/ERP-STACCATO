@@ -6,7 +6,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
-#include "sql.h"
 #include "ui_widgetcompraoc.h"
 #include "widgetcompraoc.h"
 
@@ -129,13 +128,9 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  const QString idVenda = modelProduto.data(row, "idVenda").toString();
-
   if (not qApp->startTransaction()) { return; }
 
   if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
-
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
 
   if (not qApp->endTransaction()) { return; }
 

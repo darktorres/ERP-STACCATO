@@ -249,6 +249,7 @@ void ImportarXML::setupTables() {
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableCompra->hideColumn("idRelacionado");
   ui->tableCompra->hideColumn("ordemRepresentacao");
   ui->tableCompra->hideColumn("idVendaProduto");
   ui->tableCompra->hideColumn("selecionado");
@@ -285,13 +286,12 @@ void ImportarXML::setupTables() {
 
 bool ImportarXML::cadastrarProdutoEstoque(const QVector<std::tuple<int, int, double>> &tuples) {
   QSqlQuery query;
-  // TODO: change hardcoded 'validade'
   query.prepare(
       "INSERT INTO produto SELECT NULL, p.idProdutoUpd, :idEstoque, p.idFornecedor, p.idFornecedorUpd, p.fornecedor, p.fornecedorUpd, CONCAT(p.descricao, ' (ESTOQUE)'), p.descricaoUpd, "
       ":estoqueRestante, p.estoqueRestanteUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, p.multiploUpd, p.m2cx, p.m2cxUpd, "
       "p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, p.ncmEx, p.ncmExUpd, p.cfop, "
       "p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, p.custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, p.mvaUpd, p.precoVenda, "
-      "p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, '2020-12-31', p.validadeUpd, "
+      "p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, NULL, p.validadeUpd, "
       ":descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
 
   for (const auto &tuple : tuples) {
@@ -399,7 +399,8 @@ bool ImportarXML::atualizaDados() {
     if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + query.lastError().text(), this); }
   }
 
-  // FIXME: os produtos que estiverem marcados 'quantUpd = 2' (quant não bate) separar a linha em dois, a quant. que veio segue e a que faltou continua em faturamento
+  // FIXME: os produtos que estiverem marcados 'quantUpd = 2' (quant não bate) separar a linha em dois,
+  // a quant. que veio segue e a que faltou continua em faturamento
 
   QSqlQuery query2;
   query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra AND quantUpd = 1");
@@ -653,7 +654,7 @@ bool ImportarXML::lerXML() {
 bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD')")) { return qApp->enqueueError(false, "Erro buscando lojas: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) { return qApp->enqueueError(false, "Erro buscando lojas: " + query.lastError().text(), this); }
 
   QStringList lojas{"CD"};
 

@@ -221,7 +221,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando 'banco': " + query.lastError().text(), this); }
 
-  if (ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value() > 0) {
+  if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
     const int rowPagar1 = modelContaPagar.insertRowAtEnd();
 
     if (not modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date())) { return false; }
@@ -243,7 +243,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   //
 
-  if (ui->doubleSpinBoxIOF->value() > 0) {
+  if (not qFuzzyIsNull(ui->doubleSpinBoxIOF->value())) {
     const int rowPagar2 = modelContaPagar.insertRowAtEnd();
 
     if (not modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date())) { return false; }
@@ -322,3 +322,5 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 // valor presente = R$ 98 - (R$ 98 * 10%) = R$ 88,2
 
 // TODO: 1para recebiveis diferentes de cartao calcular IOF
+
+// TODO: fazer uma tela igual para dar baixa em lote nos recebimentos

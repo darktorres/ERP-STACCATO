@@ -189,8 +189,8 @@ void QObjectPropertyModel::slotObjectDestroyed(QObject *obj) {
 }
 
 void QObjectPropertyModel::slotPropertyChanged(const QString &propertyName, const QVariant &oldValue, const QVariant &newValue) {
-  Q_UNUSED(oldValue);
-  Q_UNUSED(newValue);
+  Q_UNUSED(oldValue)
+  Q_UNUSED(newValue)
   if (m_object) updateProperty(propertyName);
 }
 

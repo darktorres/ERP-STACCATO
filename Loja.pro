@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.7.0
+VERSION = 0.7.4
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -179,7 +179,6 @@ SOURCES += \
     src/sendmail.cpp \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
-    src/sql.cpp \
     src/sqlquerymodel.cpp \
     src/sqlrelationaltablemodel.cpp \
     src/tableview.cpp \
@@ -198,10 +197,10 @@ SOURCES += \
     src/widgetcompraresumo.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
-    src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
     src/widgetgraficos.cpp \
+    src/widgethistoricocompra.cpp \
     src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
@@ -292,7 +291,6 @@ HEADERS  += \
     src/sendmail.h \
     src/smtp.h \
     src/sortfilterproxymodel.h \
-    src/sql.h \
     src/sqlquerymodel.h \
     src/sqlrelationaltablemodel.h \
     src/tableview.h \
@@ -311,10 +309,10 @@ HEADERS  += \
     src/widgetcompraresumo.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
-    src/widgetfinanceirocompra.h\
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
     src/widgetgraficos.h \
+    src/widgethistoricocompra.h \
     src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \

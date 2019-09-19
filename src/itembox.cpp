@@ -116,7 +116,7 @@ void ItemBox::setIcons() {
 
   int left, top, bottom;
   getTextMargins(&left, &top, nullptr, &bottom);
-  setTextMargins(left, top, rect().right() - x + 4, bottom);
+  setTextMargins(left, top, rect().right() - x, bottom);
 }
 
 void ItemBox::setRepresentacao(const bool isRepresentacao) { searchDialog->setRepresentacao(isRepresentacao); }

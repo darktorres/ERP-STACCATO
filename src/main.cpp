@@ -42,10 +42,12 @@ int main(int argc, char *argv[]) {
 // -------------------------------------------------
 
 // TODO: test changing table header to resizeToContents
-// TODO: criar uma branch 'audit' para criar um log para cada operacao feita pelo usuario, com data e hora, um para cada funcao basicamente e salvar em um arquivo audit.log
+// TODO: criar uma branch 'audit' para criar um log para cada operacao feita pelo usuario, com data e hora,
+// um para cada funcao basicamente e salvar em um arquivo audit.log
 // TODO: sempre que precisar verificar se algo está dentro da validade pegar data do servidor e desconsiderar data do pc
 // REFAC: evitar divisoes por zero
 // REFAC: pesquisar selects/submits sem verificacao
 // REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?
 // REFAC: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
 // REFAC: use initializer lists?
+// TODO: verificar doubles comparados com zero (>/>=) e trocar por qFuzzy

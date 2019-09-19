@@ -20,7 +20,7 @@ void WidgetOrcamento::setPermissions() {
   if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -34,7 +34,9 @@ void WidgetOrcamento::setPermissions() {
 
     QSqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) { return; }
+    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) {
+      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+    }
 
     ui->comboBoxVendedores->addItem("");
 
@@ -44,7 +46,7 @@ void WidgetOrcamento::setPermissions() {
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -254,7 +256,9 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
     QSqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) { return; }
+    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+    }
 
     ui->comboBoxVendedores->addItem("");
 

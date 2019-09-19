@@ -335,27 +335,18 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = data("razaoSocial").toString();
 
   QSqlQuery query;
-  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = FALSE WHERE fornecedor = :fornecedor AND validade = :oldValidade");
+  query.prepare("UPDATE produto SET validade = :novaValidade WHERE fornecedor = :fornecedor AND descontinuado = FALSE AND estoque = FALSE AND promocao = FALSE");
   query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
-  query.bindValue(":oldValidade", data("validadeProdutos"));
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
 
-  query.prepare(
-      "UPDATE produto_has_preco php, produto p SET php.validadeFim = :novaValidade, expirado = FALSE WHERE php.idProduto = p.idProduto AND php.preco = p.precoVenda AND p.fornecedor = :fornecedor");
-  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
-  query.bindValue(":fornecedor", fornecedor);
+  QSqlQuery query2;
+  query2.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
+  query2.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
+  query2.bindValue(":fornecedor", fornecedor);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no preço/produto: " + query.lastError().text(), this); }
-
-  query.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
-  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
-  query.bindValue(":fornecedor", fornecedor);
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query.lastError().text(), this); }
-
-  if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text(), this); }
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query2.lastError().text(), this); }
 
   return true;
 }

@@ -12,7 +12,7 @@ class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Produto = 0, Estoque = 1, Promocao = 2 }; // FIX: tipo não é mais 0/1/2 e sim colunas separadas
+  enum class Tipo { Produto = 0, Promocao = 1, StaccatoOFF = 2 };
   explicit ImportaProdutos(const Tipo tipo, QWidget *parent = nullptr);
   ~ImportaProdutos();
   auto importarTabela() -> void;
@@ -41,31 +41,29 @@ private:
   QSqlDatabase db;
   QString file;
   QString fornecedor;
-  QStringList idsFornecedor;
+  QString idsFornecedor;
   QVariantMap variantMap;
   SqlRelationalTableModel modelProduto;
   SqlRelationalTableModel modelErro;
-  // REFAC: a tabela no BD nao usa mais uma unica coluna, nao é mais (1,2,3) e sim 3 colunas separadas
   const Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods
   auto atualizaCamposProduto() -> bool;
   auto atualizaProduto() -> bool;
-  auto buscarCadastrarFornecedor(const QString &fornecedor) -> std::optional<int>;
+  auto buscarCadastrarFornecedor() -> std::optional<int>;
   auto cadastraFornecedores() -> bool;
   auto cadastraProduto() -> bool;
   auto camposForaDoPadrao() -> bool;
   auto closeEvent(QCloseEvent *event) -> void final;
   auto consistenciaDados() -> void;
   auto contaProdutos() -> void;
-  auto expiraPrecosAntigos() -> bool;
   auto importar() -> bool;
   auto insereEmErro() -> bool;
   auto insereEmOk() -> bool;
   auto leituraProduto(const QSqlQuery &query, const QSqlRecord &record) -> void;
   auto marcaProdutoNaoDescontinuado() -> bool;
   auto marcaTodosProdutosDescontinuados() -> bool;
-  auto mostraApenasEstesFornecedores() -> void;
+  auto mostraApenasEstesFornecedores() -> bool;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto pintarCamposForaDoPadrao(const int row) -> bool;

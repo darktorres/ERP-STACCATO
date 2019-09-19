@@ -48,7 +48,7 @@ ModelHolder::ModelHolder(QAbstractItemModel *model, bool owned /*false*/) {
 ModelHolder::~ModelHolder() { delete m_dataSource; }
 
 IDataSource *ModelHolder::dataSource(IDataSource::DatasourceMode mode) {
-  Q_UNUSED(mode);
+  Q_UNUSED(mode)
   return m_dataSource;
 }
 
@@ -444,7 +444,7 @@ IDataSource *ProxyHolder::dataSource(IDataSource::DatasourceMode mode) {
 
 void ProxyHolder::invalidate(IDataSource::DatasourceMode mode, bool dbWillBeClosed) {
   Q_UNUSED(mode)
-  Q_UNUSED(dbWillBeClosed);
+  Q_UNUSED(dbWillBeClosed)
   if (m_model && m_model->isInvalid()) {
     m_invalid = true;
     m_lastError = tr("Datasource has been invalidated");

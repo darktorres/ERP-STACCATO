@@ -606,3 +606,4 @@ void Devolucao::on_doubleSpinBoxTotalItem_valueChanged(double value) {
 // TODO: testar devolver mais de uma linha
 // TODO: ao quebrar linha venda_has_produto em 2 ajustar os consumos de estoque para que fique devolvido<->devolvido e consumo<->consumo
 // em vez de ficar os 2 consumos apontando para a mesma linha (select * from view_estoque_consumo where status = 'CONSUMO' and statusProduto = 'DEVOLVIDO';)
+// TODO: verificar se o valor total de um produto e o valor creditado devem ser sempre iguais

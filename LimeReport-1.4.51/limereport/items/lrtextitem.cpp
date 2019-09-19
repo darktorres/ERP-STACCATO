@@ -108,8 +108,8 @@ void TextItem::processPopUpAction(QAction *action) {
 }
 
 void TextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *style, QWidget *widget) {
-  Q_UNUSED(widget);
-  Q_UNUSED(style);
+  Q_UNUSED(widget)
+  Q_UNUSED(style)
 
   TextPtr text = textDocument();
 

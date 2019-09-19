@@ -123,7 +123,7 @@ Smtp::~Smtp() {
   delete socket;
 }
 void Smtp::stateChanged(QAbstractSocket::SocketState socketState) {
-  Q_UNUSED(socketState);
+  Q_UNUSED(socketState)
   //  qDebug() << "stateChanged " << socketState;
 
   //  if (socketState == QAbstractSocket::UnconnectedState) { emit status("Não conseguiu conectar ao servidor SMTP!"); }

@@ -71,6 +71,7 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("ordemRepresentacao");
   ui->tableProdutos->hideColumn("idVendaProduto");
   ui->tableProdutos->hideColumn("statusFinanceiro");

@@ -36,11 +36,7 @@ win32{
 
     RC_ICONS = Staccato.ico
 
-    versionAtLeast(QT_VERSION, 5.13){
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
-    } else {
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.0-Win32 -llibeay32
-    }
+    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
 }
 
 contains(CONFIG, deploy){

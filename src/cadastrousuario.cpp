@@ -8,7 +8,6 @@
 #include "application.h"
 #include "cadastrousuario.h"
 #include "checkboxdelegate.h"
-#include "horizontalproxymodel.h"
 #include "searchdialog.h"
 #include "ui_cadastrousuario.h"
 #include "usersession.h"
@@ -139,7 +138,6 @@ bool CadastroUsuario::viewRegister() {
 
   if (not modelPermissoes.select()) { return false; }
 
-//  ui->table->setModel(new HorizontalProxyModel(&modelPermissoes, this));
   auto *transpose = new QTransposeProxyModel(this);
   transpose->setSourceModel(&modelPermissoes);
   ui->table->setModel(transpose);

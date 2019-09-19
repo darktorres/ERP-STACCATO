@@ -249,6 +249,7 @@ void ImportarXML::setupTables() {
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableCompra->hideColumn("idRelacionado");
   ui->tableCompra->hideColumn("ordemRepresentacao");
   ui->tableCompra->hideColumn("idVendaProduto");
   ui->tableCompra->hideColumn("selecionado");

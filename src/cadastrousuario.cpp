@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QTransposeProxyModel>
 
 #include "application.h"
 #include "cadastrousuario.h"

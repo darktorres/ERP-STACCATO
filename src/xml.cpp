@@ -26,6 +26,53 @@ void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
   }
 }
 
+void XML::limparValores() {
+  // produto
+  codProd = "";
+  codBarras = "";
+  descricao = "";
+  ncm = "";
+  cfop = "";
+  un = "";
+  quant = 0;
+  valorUnid = 0;
+  valor = 0;
+  codBarrasTrib = "";
+  unTrib = "";
+  quantTrib = 0;
+  valorTrib = 0;
+  desconto = 0;
+  compoeTotal = false;
+  numeroPedido = "";
+  itemPedido = 0;
+  // icms
+  tipoICMS = "";
+  orig = 0;
+  cstICMS = 0;
+  modBC = 0;
+  vBC = 0;
+  pICMS = 0;
+  vICMS = 0;
+  modBCST = 0;
+  pMVAST = 0;
+  vBCST = 0;
+  pICMSST = 0;
+  vICMSST = 0;
+  // ipi
+  cEnq = 0;
+  cstIPI = 0;
+  // pis
+  cstPIS = 0;
+  vBCPIS = 0;
+  pPIS = 0;
+  vPIS = 0;
+  // cofins
+  cstCOFINS = 0;
+  vBCCOFINS = 0;
+  pCOFINS = 0;
+  vCOFINS = 0;
+}
+
 void XML::lerValores(const QStandardItem *item) {
   for (int row = 0; row < item->rowCount(); ++row) {
     for (int col = 0; col < item->columnCount(); ++col) {

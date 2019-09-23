@@ -181,11 +181,11 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) {
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
-                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+                 "AND status = 'EM RECEBIMENTO'");
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
-                 "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+                 "AND status = 'EM RECEBIMENTO'");
 
   for (const auto &item : list) {
     const int idEstoque = modelViewRecebimento.data(item.row(), "idEstoque").toInt();

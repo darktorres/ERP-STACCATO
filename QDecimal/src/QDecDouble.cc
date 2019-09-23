@@ -66,7 +66,7 @@ QDecDouble &QDecDouble::fromWider(const QDecQuad &q, QDecContext *c) {
 double QDecDouble::toDouble() const {
   char str[MaxStrSize] = {0};
   decDoubleToString(&m_data, str);
-  return strtod(str, nullptr);
+  return QString(str).toDouble();
 }
 
 QDecSingle QDecDouble::toQDecSingle(QDecContext *c) const {

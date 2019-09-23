@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "xlsxdocument.h"
+#include "../../src/application.h"
 #include "xlsxchart.h"
 #include "xlsxcontenttypes_p.h"
 #include "xlsxdocpropsapp_p.h"
@@ -889,10 +890,7 @@ bool Document::save() const {
 bool Document::saveAs(const QString &name) const {
   QFile file(name);
 
-  if (not file.open(QIODevice::WriteOnly)) {
-    QMessageBox::critical(nullptr, "Erro!", "Erro abrindo arquivo: " + file.errorString());
-    return false;
-  }
+  if (not file.open(QIODevice::WriteOnly)) { return qApp->enqueueError(false, "Erro abrindo arquivo: " + file.errorString()); }
 
   return saveAs(&file);
 }

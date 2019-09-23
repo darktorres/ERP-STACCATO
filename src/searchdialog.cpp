@@ -85,13 +85,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   model.setFilter(searchFilter);
 }
 
-void SearchDialog::sendUpdateMessage() {
-  const auto selection = ui->table->selectionModel()->selection().indexes();
-
-  if (selection.isEmpty()) { return; }
-
-  emit itemSelected(model.data(selection.first().row(), primaryKey));
-}
+void SearchDialog::sendUpdateMessage(const int row) { emit itemSelected(model.data(row, primaryKey)); }
 
 bool SearchDialog::prepare_show() {
   model.setFilter(filter);
@@ -135,18 +129,23 @@ void SearchDialog::hideColumns(const QStringList &columns) {
 }
 
 void SearchDialog::on_pushButtonSelecionar_clicked() {
+  // TODO: if rowCount == 1 select first line with enter?
+
+  const auto selection = ui->table->selectionModel()->selection().indexes();
+
+  if (selection.isEmpty()) { return; }
+
   if (not permitirDescontinuados and ui->radioButtonProdDesc->isChecked()) {
     return qApp->enqueueError("Não pode selecionar produtos descontinuados!\nEntre em contato com o Dept. de Compras!", this);
   }
 
   if (model.tableName() == "view_produto") {
-    const auto selection = ui->table->selectionModel()->selection().indexes();
     const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
 
-    if (not silent and not selection.isEmpty() and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
+    if (not silent and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }
 
-  sendUpdateMessage();
+  sendUpdateMessage(selection.first().row());
   close();
 }
 

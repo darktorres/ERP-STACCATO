@@ -434,7 +434,7 @@ bool ImportarXML::verifyFields() {
   }
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    if (modelEstoque.data(row, "lote").toString().isEmpty()) { return qApp->enqueueError(false, "Lote vazio! Se não há coloque 'N/D'", this); }
+    if (modelEstoque.data(row, "lote").toString().isEmpty()) { return qApp->enqueueError(false, "Lote vazio! Se não há coloque 'N/D'!", this); }
   }
 
   return true;
@@ -516,7 +516,7 @@ std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
   query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
   if (not query.exec()) {
-    qApp->enqueueError(false, "Erro lendo tabela produto: " + query.lastError().text(), this);
+    qApp->enqueueError("Erro lendo tabela produto: " + query.lastError().text(), this);
     return {};
   }
 
@@ -740,6 +740,7 @@ bool ImportarXML::percorrerXml(XML &xml, const QStandardItem *item) {
       const QString text = child->text();
 
       if (text.mid(0, 10) == "det nItem=") {
+        xml.limparValores();
         xml.lerValores(child);
         if (not inserirItemModel(xml)) { return false; }
       }

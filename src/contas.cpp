@@ -13,6 +13,7 @@
 #include "lineeditdelegate.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
+#include "sortfilterproxymodel.h"
 #include "ui_contas.h"
 
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
@@ -130,6 +131,10 @@ void Contas::setupTables() {
   modelPendentes.setHeaderData("grupo", "Grupo");
   modelPendentes.setHeaderData("subGrupo", "SubGrupo");
 
+  modelPendentes.setSort("dataPagamento", Qt::AscendingOrder);
+
+  modelPendentes.proxyModel = new SortFilterProxyModel(&modelPendentes, this);
+
   ui->tablePendentes->setModel(&modelPendentes);
 
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
@@ -193,6 +198,8 @@ void Contas::setupTables() {
   modelProcessados.setHeaderData("centroCusto", "Centro Custo");
   modelProcessados.setHeaderData("grupo", "Grupo");
   modelProcessados.setHeaderData("subGrupo", "SubGrupo");
+
+  modelProcessados.proxyModel = new SortFilterProxyModel(&modelProcessados, this);
 
   ui->tableProcessados->setModel(&modelProcessados);
 

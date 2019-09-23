@@ -740,7 +740,6 @@ bool ImportarXML::percorrerXml(XML &xml, const QStandardItem *item) {
       const QString text = child->text();
 
       if (text.mid(0, 10) == "det nItem=") {
-        xml.limparValores();
         xml.lerValores(child);
         if (not inserirItemModel(xml)) { return false; }
       }

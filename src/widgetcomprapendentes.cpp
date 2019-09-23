@@ -176,7 +176,9 @@ void WidgetCompraPendentes::montaFiltro() {
 
   //-------------------------------------
 
-  if (not ui->checkBoxAtelier->isChecked()) { filtros << "fornecedor <> 'ATELIER STACCATO'"; }
+  const bool atelier = ui->checkBoxAtelier->isChecked();
+
+  filtros << (atelier ? "fornecedor = 'ATELIER STACCATO'" : "fornecedor <> 'ATELIER STACCATO'");
 
   //-------------------------------------
 

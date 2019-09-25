@@ -198,17 +198,26 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
 
-      if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do pedido_fornecedor: " + query1.lastError().text(), this); }
+      if (not query1.exec()) {
+        qApp->enqueueError("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text(), this);
+        return {};
+      }
 
       query2.bindValue(":idNFeSaida", id);
       query2.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
 
-      if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query2.lastError().text(), this); }
+      if (not query2.exec()) {
+        qApp->enqueueError("Erro salvando NFe nos produtos: " + query2.lastError().text(), this);
+        return {};
+      }
 
       query3.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
       query3.bindValue(":idNFeSaida", id);
 
-      if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando carga veiculo: " + query3.lastError().text(), this); }
+      if (not query3.exec()) {
+        qApp->enqueueError("Erro atualizando carga veiculo: " + query3.lastError().text(), this);
+        return {};
+      }
     }
   }
 

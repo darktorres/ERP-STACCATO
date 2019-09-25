@@ -47,6 +47,7 @@ private:
   auto criarChaveAcesso() -> bool;
   auto gerarNota() -> QString;
   auto listarCfop() -> bool;
+  auto on_checkBoxFrete_toggled(bool checked) -> void;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) -> void;

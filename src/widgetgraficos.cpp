@@ -66,7 +66,7 @@ void WidgetGraficos::updateTables() {
 
     axisX->setLabelFormat("%.0f");
     axisY->setLabelFormat("R$ %.0f");
-    axisX->setTickCount(31);
+    axisX->setTickCount(33);
     axisY->setTickCount(10);
 
     const auto markers = chart.legend()->markers();

@@ -129,7 +129,7 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
 
   ui->tableItens->hideColumn("idProduto");
-  ui->tableItens->hideColumn("idVendaProduto");
+  ui->tableItens->hideColumn("idVendaProduto2");
   ui->tableItens->hideColumn("numeroPedido");
   ui->tableItens->hideColumn("itemPedido");
 }
@@ -187,28 +187,37 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
 
   if (tipo == Tipo::Normal or tipo == Tipo::NormalAposFutura) {
     QSqlQuery query1;
-    query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+    query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
     QSqlQuery query2;
-    query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+    query2.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
     QSqlQuery query3;
-    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+    query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      query1.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query1.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
 
-      if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do pedido_fornecedor: " + query1.lastError().text(), this); }
+      if (not query1.exec()) {
+        qApp->enqueueError("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text(), this);
+        return {};
+      }
 
       query2.bindValue(":idNFeSaida", id);
-      query2.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query2.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
 
-      if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query2.lastError().text(), this); }
+      if (not query2.exec()) {
+        qApp->enqueueError("Erro salvando NFe nos produtos: " + query2.lastError().text(), this);
+        return {};
+      }
 
-      query3.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query3.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
       query3.bindValue(":idNFeSaida", id);
 
-      if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando carga veiculo: " + query3.lastError().text(), this); }
+      if (not query3.exec()) {
+        qApp->enqueueError("Erro atualizando carga veiculo: " + query3.lastError().text(), this);
+        return {};
+      }
     }
   }
 
@@ -220,7 +229,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
 
   const bool remover = [&] {
     QSqlQuery query2a;
-    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
+    query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
     query2a.bindValue(":idNFeSaida", idNFe);
 
     if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text(), this); }
@@ -232,10 +241,10 @@ void CadastrarNFe::removerNota(const int idNFe) {
     if (not query3a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text(), this); }
 
     QSqlQuery query1a;
-    query1a.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGA AGEND.' WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
+    query1a.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGA AGEND.' WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      query1a.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query1a.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
 
       if (not query1a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da compra: " + query1a.lastError().text(), this); }
     }
@@ -385,11 +394,11 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
   // TODO: verificar porque nota futura só é vinculada após enquanto as outras são vinculadas no pré-cadastro
   if (tipo == Tipo::Futura) {
     QSqlQuery query;
-    query.prepare("UPDATE venda_has_produto SET idNFeFutura = :idNFeFutura WHERE idVendaProduto = :idVendaProduto");
+    query.prepare("UPDATE venda_has_produto2 SET idNFeFutura = :idNFeFutura WHERE `idVendaProduto2` = :idVendaProduto2");
 
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
       query.bindValue(":idNFeFutura", idNFe);
-      query.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(row, "idVendaProduto"));
+      query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(row, "idVendaProduto2"));
 
       if (not query.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query.lastError().text(), this); }
     }
@@ -469,13 +478,13 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   for (const auto &item : items) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT NULL FROM estoque_has_consumo WHERE idVendaProduto = " + QString::number(item)) or not query.first()) {
-      return qApp->enqueueError("Erro buscando idVendaProduto " + QString::number(item), this);
+    if (not query.exec("SELECT NULL FROM estoque_has_consumo WHERE `idVendaProduto2` = " + QString::number(item)) or not query.first()) {
+      return qApp->enqueueError("Erro buscando idVendaProduto2 " + QString::number(item), this);
     }
 
     //--------------------------------------
 
-    filter += QString(filter.isEmpty() ? "" : " OR ") + "idVendaProduto = " + QString::number(item);
+    filter += QString(filter.isEmpty() ? "" : " OR ") + "`idVendaProduto2` = " + QString::number(item);
   }
 
   modelViewProdutoEstoque.setFilter(filter);
@@ -641,8 +650,8 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     queryTransp.prepare(
         "SELECT t.cnpj, t.razaoSocial, t.inscEstadual, the.logradouro, the.numero, the.complemento, the.bairro, the.cidade, the.uf, thv.placa, thv.ufPlaca, t.antt FROM "
         "veiculo_has_produto vhp LEFT JOIN transportadora_has_veiculo thv ON vhp.idVeiculo = thv.idVeiculo LEFT JOIN transportadora t ON thv.idTransportadora = t.idTransportadora LEFT "
-        "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE idVendaProduto = :idVendaProduto");
-    queryTransp.bindValue(":idVendaProduto", items.first());
+        "JOIN transportadora_has_endereco the ON t.idTransportadora = the.idTransportadora WHERE `idVendaProduto2` = :idVendaProduto2");
+    queryTransp.bindValue(":idVendaProduto2", items.first());
 
     if (not queryTransp.exec() or not queryTransp.first()) { return qApp->enqueueError("Erro buscando dados da transportadora: " + queryTransp.lastError().text(), this); }
 
@@ -812,8 +821,8 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
 
   if (tipo == Tipo::NormalAposFutura) {
     QSqlQuery query;
-    query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto WHERE idVendaProduto = :idVendaProduto)");
-    query.bindValue(":idVendaProduto", modelViewProdutoEstoque.data(0, "idVendaProduto"));
+    query.prepare("SELECT chaveAcesso FROM nfe WHERE idNFe = (SELECT idNFeFutura FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2)");
+    query.bindValue(":idVendaProduto2", modelViewProdutoEstoque.data(0, "idVendaProduto2"));
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando NFe referenciada!", this); }
 

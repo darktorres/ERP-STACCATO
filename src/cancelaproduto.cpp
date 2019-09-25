@@ -29,7 +29,7 @@ void CancelaProduto::setFilter(const QString &ordemCompra) {
 }
 
 void CancelaProduto::setupTables() {
-  model.setTable("pedido_fornecedor_has_produto");
+  model.setTable("pedido_fornecedor_has_produto2");
 
   model.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   model.setHeaderData("idVenda", "Código");
@@ -51,14 +51,14 @@ void CancelaProduto::setupTables() {
 
   ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantConsumida");
   ui->table->hideColumn("idNfe");
   ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("quantUpd");
-  ui->table->hideColumn("idPedido");
+  ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");
@@ -101,24 +101,24 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
   if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueError(false, "Não implementado!", this); }
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido = :idPedido");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE `idPedido2` = :idPedido2");
 
   const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, "
                      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
                      "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
-                     status + "' AND idVendaProduto = :idVendaProduto");
+                     status + "' AND `idVendaProduto2` = :idVendaProduto2");
 
   for (const auto &index : list) {
     const int row = index.row();
 
-    queryCompra.bindValue(":idPedido", model.data(row, "idPedido"));
+    queryCompra.bindValue(":idPedido2", model.data(row, "idPedido2"));
 
     if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
 
-    queryVenda.bindValue(":idVendaProduto", model.data(row, "idVendaProduto"));
+    queryVenda.bindValue(":idVendaProduto2", model.data(row, "idVendaProduto2"));
 
     if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
   }

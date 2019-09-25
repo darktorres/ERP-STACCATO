@@ -64,9 +64,9 @@ void WidgetLogisticaRepresentacao::setupTables() {
 
   ui->table->setModel(&modelViewLogisticaRepresentacao);
 
-  ui->table->hideColumn("idPedido");
+  ui->table->hideColumn("idPedido1");
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("idVendaProduto2");
 }
 
 void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
@@ -90,19 +90,19 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
 bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) {
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
+  query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE status = 'EM ENTREGA' AND idVendaProduto = :idVendaProduto");
+  query2.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
   for (const auto &item : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);
-    query1.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
+    query1.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto2"));
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
-    query2.bindValue(":idVendaProduto", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto"));
+    query2.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto2"));
     query2.bindValue(":recebeu", recebeu);
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }

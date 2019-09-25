@@ -382,7 +382,7 @@ bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 
   const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
 
-  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
+  query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo NFe da venda_produto: " + query.lastError().text(), this); }

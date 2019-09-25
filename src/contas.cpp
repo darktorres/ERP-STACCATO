@@ -272,7 +272,7 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
   if (tipo == Tipo::Pagar) {
     QSqlQuery query;
-    query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN pedido_fornecedor_has_produto pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
+    query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN pedido_fornecedor_has_produto2 pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }

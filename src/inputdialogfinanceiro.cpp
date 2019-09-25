@@ -143,42 +143,44 @@ QDateTime InputDialogFinanceiro::getDate() const { return ui->dateEditEvento->da
 QDateTime InputDialogFinanceiro::getNextDate() const { return ui->dateEditProximo->dateTime(); }
 
 void InputDialogFinanceiro::setupTables() {
-  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
+  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2");
 
+  modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
+  modelPedidoFornecedor.setHeaderData("st", "ST");
+  modelPedidoFornecedor.setHeaderData("status", "Status");
   modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor.setHeaderData("descricao", "Produto");
+  modelPedidoFornecedor.setHeaderData("obs", "Obs.");
   modelPedidoFornecedor.setHeaderData("colecao", "Coleção");
-  modelPedidoFornecedor.setHeaderData("caixas", "Caixas");
-  modelPedidoFornecedor.setHeaderData("prcUnitario", "$ Unit.");
+  modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
   modelPedidoFornecedor.setHeaderData("quant", "Quant.");
-  modelPedidoFornecedor.setHeaderData("preco", "Total");
   modelPedidoFornecedor.setHeaderData("un", "Un.");
   modelPedidoFornecedor.setHeaderData("un2", "Un.2");
+  modelPedidoFornecedor.setHeaderData("caixas", "Caixas");
+  modelPedidoFornecedor.setHeaderData("prcUnitario", "$ Unit.");
+  modelPedidoFornecedor.setHeaderData("preco", "Total");
   modelPedidoFornecedor.setHeaderData("kgcx", "Kg./Cx.");
   modelPedidoFornecedor.setHeaderData("formComercial", "Formato");
-  modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
-  modelPedidoFornecedor.setHeaderData("obs", "Obs.");
-  modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
-  modelPedidoFornecedor.setHeaderData("st", "ST");
-  modelPedidoFornecedor.setHeaderData("status", "Status");
 
   modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
 
   ui->table->setModel(&modelPedidoFornecedor);
 
-  ui->table->hideColumn("idRelacionado");
+  ui->table->hideColumn("idPedido1");
+  ui->table->hideColumn("idPedido2");
+  ui->table->hideColumn("idPedidoFK");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idVendaProduto");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
-  ui->table->hideColumn("quantConsumida");
-  ui->table->hideColumn("quantUpd");
-  ui->table->hideColumn("idPedido");
-  ui->table->hideColumn("idProduto");
-  ui->table->hideColumn("codBarras");
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idCompra");
+  ui->table->hideColumn("idProduto");
+  ui->table->hideColumn("quantUpd");
+  ui->table->hideColumn("quantConsumida");
+  ui->table->hideColumn("idPedido");
+  ui->table->hideColumn("codBarras");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
   ui->table->hideColumn("dataPrevConf");
@@ -427,7 +429,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   }
 
   QSqlQuery query;
-  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE idCompra = :idCompra");
+  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto2 pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }

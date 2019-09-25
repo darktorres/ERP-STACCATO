@@ -84,16 +84,16 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   query1.prepare("UPDATE estoque SET status = 'ESTOQUE', recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO' WHERE status = 'PRÉ-CONSUMO' AND idEstoque = :idEstoque");
+  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO' WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
-                 "idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
+  query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
+                 "idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query4;
   // salvar status na venda
-  query4.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
-                 "idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+  query4.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
+                 "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   for (const auto &item : list) {
     query1.bindValue(":recebidoPor", recebidoPor);
@@ -180,11 +180,11 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
 bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) {
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
+  query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevReceb = :dataPrevReceb WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM RECEBIMENTO'");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET dataPrevReceb = :dataPrevReceb WHERE idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
+  query2.prepare("UPDATE venda_has_produto2 SET dataPrevReceb = :dataPrevReceb WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM RECEBIMENTO'");
 
   for (const auto &item : list) {
@@ -252,11 +252,11 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
   query1.prepare("UPDATE estoque SET status = 'EM COLETA' WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idPedido IN (SELECT idPedido FROM "
+  query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idPedido2 IN (SELECT idPedido2 FROM "
                  "estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idVendaProduto IN (SELECT idVendaProduto FROM "
+  query3.prepare("UPDATE venda_has_produto2 SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM "
                  "estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   for (const auto &item : list) {

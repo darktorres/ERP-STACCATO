@@ -124,7 +124,7 @@ void WidgetCompraPendentes::setupTables() {
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
   const QString status = modelViewVendaProduto.data(index.row(), "status").toString();
 
-  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está PENDENTE!", this); }
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
   const QString financeiro = modelViewVendaProduto.data(index.row(), "statusFinanceiro").toString();
   const QString codComercial = modelViewVendaProduto.data(index.row(), "codComercial").toString();
@@ -264,3 +264,4 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para
 // o Conrado confirmar, apenas com um botão de ok ou cancelar.
 // TODO: pegar a tableResumo e colocar em uma aba separada no widgetCompra
+// TODO: não listar produto_estoque no SearchDialog da compra avulsa

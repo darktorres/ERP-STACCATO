@@ -27,6 +27,7 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->pushButtonExibirNfe->hide(); }
 
+  // TODO: why is this hidden?
   ui->labelRestante_2->hide();
   ui->doubleSpinBoxComprometidoNaoEntregue->hide();
 }

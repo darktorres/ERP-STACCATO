@@ -73,10 +73,10 @@ void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
 bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) {
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   for (const auto &idCompra : idsCompra) {
     queryCompra.bindValue(":dataRealFat", dataReal);
@@ -162,10 +162,10 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const QDate dataPrevista = input.getNextDate();
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   for (const auto &item : list) {
     const int idCompra = modelViewFaturamento.data(item.row(), "idCompra").toInt();
@@ -178,7 +178,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     queryVenda.bindValue(":dataPrevFat", dataPrevista);
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

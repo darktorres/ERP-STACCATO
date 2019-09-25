@@ -60,7 +60,8 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("recebeu");
   ui->table->hideColumn("entregou");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("idVendaProduto1");
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idNFeSaida");
   ui->table->hideColumn("idNFeFutura");
@@ -116,7 +117,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   QSqlQuery query;
   // TODO: add quant too?
   // TODO: e se tiver varios consumos?
-  query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto");
+  query.prepare("SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda AND idProduto = :idProduto");
 
   for (const auto &item : list) {
     const QString status = modelVendaProduto.data(item.row(), "statusOriginal").toString();
@@ -142,13 +143,13 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       query.bindValue(":idVenda", modelVendaProduto.data(item.row(), "idVenda").toString().left(11));
       query.bindValue(":idProduto", modelVendaProduto.data(item.row(), "idProduto"));
 
-      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto: " + query.lastError().text(), this); }
+      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto2: " + query.lastError().text(), this); }
 
-      const QString idVendaProduto = query.value("idVendaProduto").toString();
+      const QString idVendaProduto2 = query.value("idVendaProduto2").toString();
 
       SqlRelationalTableModel modelConsumo;
       modelConsumo.setTable("estoque_has_consumo");
-      modelConsumo.setFilter("idVendaProduto = " + idVendaProduto);
+      modelConsumo.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
       if (not modelConsumo.select()) { return false; }
 
@@ -168,7 +169,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       }
 
       // TODO: update other fields
-      if (not modelConsumo.setData(newRow, "idVendaProduto", modelVendaProduto.data(item.row(), "idVendaProduto"))) { return false; }
+      if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(item.row(), "idVendaProduto2"))) { return false; }
       if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
       if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(item.row(), "caixas").toDouble() * -1)) { return false; }
       if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) { return false; }

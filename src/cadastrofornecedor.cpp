@@ -177,6 +177,8 @@ void CadastroFornecedor::updateMode() {
 }
 
 bool CadastroFornecedor::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -200,6 +202,8 @@ bool CadastroFornecedor::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupEndereco.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");

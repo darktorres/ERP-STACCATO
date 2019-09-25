@@ -95,31 +95,33 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 }
 
 bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {
+  // TODO: merge querySelect and QueryVenda
+
   QSqlQuery querySelect;
-  querySelect.prepare("SELECT idPedido, idVendaProduto FROM pedido_fornecedor_has_produto WHERE idCompra = :idCompra AND selecionado = TRUE");
+  querySelect.prepare("SELECT `idPedido2`, `idVendaProduto2` FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE");
   querySelect.bindValue(":idCompra", idCompra);
 
   if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + querySelect.lastError().text(), this); }
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
-                      "AND idPedido = :idPedido");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
+                      "AND idPedido2 = :idPedido2");
 
   QSqlQuery queryVenda;
   queryVenda.prepare(
-      "UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto = :idVendaProduto");
+      "UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto2 = :idVendaProduto2");
 
   while (querySelect.next()) {
     queryCompra.bindValue(":dataRealConf", dataConf);
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
-    queryCompra.bindValue(":idPedido", querySelect.value("idPedido"));
+    queryCompra.bindValue(":idPedido2", querySelect.value("idPedido2"));
 
     if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
 
-    if (querySelect.value("idVendaProduto").toInt() != 0) {
+    if (querySelect.value("idVendaProduto2").toInt() != 0) {
       queryVenda.bindValue(":dataRealConf", dataConf);
       queryVenda.bindValue(":dataPrevFat", dataPrevista);
-      queryVenda.bindValue(":idVendaProduto", querySelect.value("idVendaProduto"));
+      queryVenda.bindValue(":idVendaProduto2", querySelect.value("idVendaProduto2"));
 
       if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
     }

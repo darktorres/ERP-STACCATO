@@ -166,6 +166,7 @@ SOURCES += \
     src/porcentagemdelegate.cpp \
     src/precoestoque.cpp \
     src/produtospendentes.cpp \
+    src/qtreeviewgriddelegate.cpp \
     src/reaisdelegate.cpp \
     src/registeraddressdialog.cpp \
     src/registerdialog.cpp \
@@ -176,6 +177,7 @@ SOURCES += \
     src/sortfilterproxymodel.cpp \
     src/sqlquerymodel.cpp \
     src/sqlrelationaltablemodel.cpp \
+    src/sqltreemodel.cpp \
     src/tableview.cpp \
     src/userconfig.cpp \
     src/usersession.cpp \
@@ -277,6 +279,7 @@ HEADERS  += \
     src/porcentagemdelegate.h \
     src/precoestoque.h \
     src/produtospendentes.h \
+    src/qtreeviewgriddelegate.h \
     src/reaisdelegate.h \
     src/registeraddressdialog.h \
     src/registerdialog.h \
@@ -287,6 +290,7 @@ HEADERS  += \
     src/sortfilterproxymodel.h \
     src/sqlquerymodel.h \
     src/sqlrelationaltablemodel.h \
+    src/sqltreemodel.h \
     src/tableview.h \
     src/userconfig.h \
     src/usersession.h \

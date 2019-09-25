@@ -77,7 +77,8 @@ void InputDialogProduto::unsetConnections() {
 }
 
 void InputDialogProduto::setupTables() {
-  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
+  if (tipo == Tipo::GerarCompra) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto"); }
+  if (tipo == Tipo::Faturamento) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2"); }
 
   modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
@@ -101,8 +102,7 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor);
 
-  ui->table->hideColumn("idRelacionado");
-  ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantConsumida");
@@ -110,7 +110,9 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idPedido");
+  ui->table->hideColumn("idPedido1");
+  ui->table->hideColumn("idPedido2");
+  ui->table->hideColumn("idPedidoFK");
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");
@@ -145,7 +147,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   QString filter;
 
-  if (tipo == Tipo::GerarCompra) { filter = "idPedido IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
+  if (tipo == Tipo::GerarCompra) { filter = "`idPedido1` IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
   if (tipo == Tipo::Faturamento) { filter = "idCompra IN (" + ids.join(", ") + ") AND status = 'EM FATURAMENTO'"; }
 
   if (filter.isEmpty()) { return qApp->enqueueError(false, "Filtro vazio!", this); }

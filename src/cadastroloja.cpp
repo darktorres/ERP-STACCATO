@@ -400,6 +400,8 @@ bool CadastroLoja::viewRegister() {
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
 bool CadastroLoja::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -429,6 +431,8 @@ bool CadastroLoja::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupEndereco.clear();
     backupConta.clear();
 

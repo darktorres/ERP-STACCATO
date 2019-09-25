@@ -352,6 +352,8 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -379,6 +381,8 @@ bool CadastroTransportadora::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupEndereco.clear();
     backupVeiculo.clear();
 

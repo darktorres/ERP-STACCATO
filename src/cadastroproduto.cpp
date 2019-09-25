@@ -228,6 +228,8 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -244,7 +246,9 @@ bool CadastroProduto::cadastrar() {
     return true;
   }();
 
-  if (not success) {
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+  } else {
     qApp->rollbackTransaction();
     void(model.select());
   }

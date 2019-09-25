@@ -153,7 +153,7 @@ void ACBr::removerNota(const int idNFe) {
 
   const bool remover = [&] {
     QSqlQuery query2a;
-    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
     query2a.bindValue(":idNFeSaida", idNFe);
 
     if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }

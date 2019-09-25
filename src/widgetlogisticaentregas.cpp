@@ -129,7 +129,7 @@ void WidgetLogisticaEntregas::setupTables() {
   ui->tableProdutos->setModel(&modelProdutos);
 
   ui->tableProdutos->hideColumn("idEvento");
-  ui->tableProdutos->hideColumn("idVendaProduto");
+  ui->tableProdutos->hideColumn("idVendaProduto2");
 
   ui->tableProdutos->setItemDelegateForColumn("kg", new DoubleDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this));
@@ -156,10 +156,10 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
 bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) {
   QSqlQuery query1;
-  query1.prepare("UPDATE venda_has_produto SET dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query1.prepare("UPDATE venda_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevEnt = :dataPrevEnt WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevEnt = :dataPrevEnt WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   QSqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE idEvento = :idEvento");
@@ -167,12 +167,12 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
   for (const auto &item : list) {
     for (int row = 0; row < modelProdutos.rowCount(); ++row) {
       query1.bindValue(":dataPrevEnt", dataPrevEnt);
-      query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+      query1.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
       if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando data venda: " + query1.lastError().text(), this); }
 
       query2.bindValue(":dataPrevEnt", dataPrevEnt);
-      query2.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+      query2.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
       if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando data pedido_fornecedor: " + query2.lastError().text(), this); }
     }
@@ -195,7 +195,7 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   QList<int> lista;
 
-  for (int row = 0; row < modelProdutos.rowCount(); ++row) { lista.append(modelProdutos.data(row, "idVendaProduto").toInt()); }
+  for (int row = 0; row < modelProdutos.rowCount(); ++row) { lista.append(modelProdutos.data(row, "idVendaProduto2").toInt()); }
 
   const CadastrarNFe::Tipo tipo = modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0 ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
 
@@ -265,31 +265,31 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
 
 bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
   QSqlQuery query1;
-  query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto = :idVendaProduto");
+  query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto2 = :idVendaProduto2");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto = :idVendaProduto");
+  query2.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto2 = :idVendaProduto2");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE venda_has_produto SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND "
-                 "idVendaProduto = :idVendaProduto");
+  query3.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGUE', entregou = :entregou, recebeu = :recebeu, dataRealEnt = :dataRealEnt WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND "
+                 "idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-    const int idVendaProduto = modelProdutos.data(row, "idVendaProduto").toInt();
+    const int idVendaProduto2 = modelProdutos.data(row, "idVendaProduto2").toInt();
 
-    query1.bindValue(":idVendaProduto", idVendaProduto);
+    query1.bindValue(":idVendaProduto2", idVendaProduto2);
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando veiculo_has_produto: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataRealEnt", dataRealEnt);
-    query2.bindValue(":idVendaProduto", idVendaProduto);
+    query2.bindValue(":idVendaProduto2", idVendaProduto2);
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando pedido_fornecedor: " + query2.lastError().text(), this); }
 
     query3.bindValue(":entregou", entregou);
     query3.bindValue(":recebeu", recebeu);
     query3.bindValue(":dataRealEnt", dataRealEnt);
-    query3.bindValue(":idVendaProduto", idVendaProduto);
+    query3.bindValue(":idVendaProduto2", idVendaProduto2);
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando venda_produto: " + query3.lastError().text(), this); }
   }
@@ -367,23 +367,24 @@ bool WidgetLogisticaEntregas::cancelarEntrega(const QModelIndexList &list) {
   const int idEvento = modelCarga.data(list.first().row(), "idEvento").toInt();
 
   QSqlQuery query;
-  query.prepare("SELECT idVendaProduto FROM veiculo_has_produto WHERE idEvento = :idEvento");
+  query.prepare("SELECT `idVendaProduto2` FROM veiculo_has_produto WHERE idEvento = :idEvento");
   query.bindValue(":idEvento", idEvento);
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + query.lastError().text(), this); }
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query3.prepare(
+      "UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataPrevEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
 
   while (query.next()) {
-    query2.bindValue(":idVendaProduto", query.value("idVendaProduto"));
+    query2.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro voltando status produto: " + query2.lastError().text(), this); }
 
-    query3.bindValue(":idVendaProduto", query.value("idVendaProduto"));
+    query3.bindValue(":idVendaProduto2", query.value("idVendaProduto2"));
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro voltando status produto compra: " + query3.lastError().text(), this); }
   }
@@ -430,25 +431,25 @@ bool WidgetLogisticaEntregas::processarConsultaNFe(const int idNFe, const QStrin
   if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text(), this); }
 
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+  query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+  query2.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
   QSqlQuery query3;
-  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto2 = :idVendaProduto2");
 
   for (int row = 0; row < modelProdutos.rowCount(); ++row) {
-    query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query1.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idNFeSaida", idNFe);
-    query2.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query2.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando NFe nos produtos: " + query2.lastError().text(), this); }
 
-    query3.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query3.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
     query3.bindValue(":idNFeSaida", idNFe);
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando carga veiculo: " + query3.lastError().text(), this); }

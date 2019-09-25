@@ -93,7 +93,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAtual->hideColumn("id");
   ui->tableTranspAtual->hideColumn("idEvento");
   ui->tableTranspAtual->hideColumn("idVeiculo");
-  ui->tableTranspAtual->hideColumn("idVendaProduto");
+  ui->tableTranspAtual->hideColumn("idVendaProduto2");
   ui->tableTranspAtual->hideColumn("idCompra");
   ui->tableTranspAtual->hideColumn("idNFeSaida");
   ui->tableTranspAtual->hideColumn("fornecedor");
@@ -124,7 +124,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAgend->hideColumn("id");
   ui->tableTranspAgend->hideColumn("idEvento");
   ui->tableTranspAgend->hideColumn("idVeiculo");
-  ui->tableTranspAgend->hideColumn("idVendaProduto");
+  ui->tableTranspAgend->hideColumn("idVendaProduto2");
   ui->tableTranspAgend->hideColumn("idCompra");
   ui->tableTranspAgend->hideColumn("idNFeSaida");
   ui->tableTranspAgend->hideColumn("fornecedor");
@@ -236,11 +236,11 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
   QSqlQuery query2;
   query2.prepare(
-      "UPDATE pedido_fornecedor_has_produto SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
+      "UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query3;
-  query3.prepare(
-      "UPDATE venda_has_produto SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+  query3.prepare("UPDATE venda_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = "
+                 ":idEstoque)");
 
   for (const auto &item : list) {
     int idEstoque;

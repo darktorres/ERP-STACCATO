@@ -992,6 +992,8 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 }
 
 bool Orcamento::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) {
       if (not generateId()) { return false; }
@@ -1013,6 +1015,8 @@ bool Orcamento::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupItem.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");

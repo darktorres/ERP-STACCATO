@@ -195,11 +195,7 @@ bool RegisterDialog::newRegister() {
 bool RegisterDialog::save(const bool silent) {
   if (not verifyFields()) { return false; }
 
-  if (not qApp->startTransaction()) { return false; }
-
   if (not cadastrar()) { return false; }
-
-  if (not qApp->endTransaction()) { return false; }
 
   isDirty = false;
 

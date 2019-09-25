@@ -188,6 +188,8 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 }
 
 bool CadastroUsuario::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -209,6 +211,7 @@ bool CadastroUsuario::cadastrar() {
       const QString password = file.readAll();
 
       // NOTE: those query's below commit transaction so rollback won't work
+      // TODO: do these after success->endTransaction
       QSqlQuery query;
       query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
       query.bindValue(":user", ui->lineEditUser->text().toLower());
@@ -237,7 +240,9 @@ bool CadastroUsuario::cadastrar() {
     return true;
   }();
 
-  if (not success) {
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+  } else {
     qApp->rollbackTransaction();
     void(model.select());
     void(modelPermissoes.select());

@@ -65,7 +65,7 @@ std::optional<bool> Devolucao::determinarIdDevolucao() {
 }
 
 void Devolucao::setupTables() {
-  modelProdutos.setTable("venda_has_produto");
+  modelProdutos.setTable("venda_has_produto2");
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -129,7 +129,7 @@ void Devolucao::setupTables() {
 
   //--------------------------------------------------------------
 
-  modelDevolvidos.setTable("venda_has_produto");
+  modelDevolvidos.setTable("venda_has_produto2");
 
   modelDevolvidos.setHeaderData("selecionado", "");
   modelDevolvidos.setHeaderData("status", "Status");
@@ -338,6 +338,25 @@ bool Devolucao::criarDevolucao() {
 }
 
 bool Devolucao::inserirItens(const int currentRow) {
+  // TODO: quando for devolucao parcial precisa separar o consumo em 2
+
+  // consumo 10cx
+  // devolveu 3cx
+
+  // vp
+  // entregue 7cx
+  // devolvido 3cx
+  // devolucao est. -3cx
+
+  // ehc
+  // consumo -7cx
+  // consumo -3cx
+  // devolvido 3cx
+
+  // pf
+  // ???
+  // ???
+
   const QDecDouble quant = modelProdutos.data(mapperItem.currentIndex(), "quant").toDouble();
   const QDecDouble quantDevolvida = ui->doubleSpinBoxQuant->value();
   const QDecDouble restante = quant - quantDevolvida;
@@ -416,6 +435,10 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   // ------------------------------------
 
+  // TODO: manter o restante na linha original para manter o vinculo vp<->consumo?
+  // *Deve deixar a devolucao numa linha nova para seguir a ordem das operações
+  // *Operações devem ficar na ordem que aconteceram
+
   const QDecDouble prcUnitario = modelProdutos.data(currentRow, "prcUnitario").toDouble();
   const QDecDouble desconto = modelProdutos.data(currentRow, "desconto").toDouble();
   const QDecDouble descGlobal = modelProdutos.data(currentRow, "descGlobal").toDouble();
@@ -437,6 +460,7 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   const QDecDouble totalRestante = parcialDescRestante * (1 - (descGlobal / 100).toDouble());
 
+  // TODO: guardar status original nessa linha?
   if (not modelProdutos.setData(currentRow, "total", totalRestante.toDouble())) { return false; }
   if (not modelProdutos.setData(currentRow, "status", "DEVOLVIDO")) { return false; }
 
@@ -575,7 +599,7 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
 bool Devolucao::atualizarDevolucao() {
   QSqlQuery query;
-  query.prepare("SELECT SUM(parcial) AS parcial, SUM(parcialDesc) AS parcialDesc FROM venda_has_produto WHERE idVenda = :idVenda");
+  query.prepare("SELECT SUM(parcial) AS parcial, SUM(parcialDesc) AS parcialDesc FROM venda_has_produto2 WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idDevolucao);
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados da devolução: " + query.lastError().text(), this); }

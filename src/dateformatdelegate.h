@@ -6,14 +6,14 @@
 class DateFormatDelegate final : public QStyledItemDelegate {
 
 public:
-  explicit DateFormatDelegate(const QString defaultDateColumn, QObject *parent = nullptr);
+  explicit DateFormatDelegate(const int vencimentoColumn, QObject *parent = nullptr);
   explicit DateFormatDelegate(QObject *parent = nullptr);
   ~DateFormatDelegate() = default;
   auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * final;
 
 private:
   // attributes
-  const QString defaultDateColumn;
+  const int vencimentoColumn = -1;
   // methods
   auto displayText(const QVariant &value, const QLocale &) const -> QString final;
 };

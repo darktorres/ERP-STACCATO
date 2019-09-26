@@ -4,6 +4,7 @@
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QScrollBar>
 #include <QSqlRecord>
 
 #include "application.h"
@@ -15,6 +16,10 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
   connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
+
+  connect(this->verticalScrollBar(), &QScrollBar::valueChanged, this, [&] {
+    if (autoResize) { resizeColumnsToContents(); }
+  });
 
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);

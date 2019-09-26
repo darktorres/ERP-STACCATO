@@ -347,6 +347,8 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo creio eu porem em diversas linhas eles tem valores diferentes
 
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
+  // TODO: verificar se precisa limpar os campos que foram preenchidos
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }

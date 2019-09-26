@@ -55,88 +55,81 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
 void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroFluxoCaixa::montaFiltro() {
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "`Data` IS NOT NULL AND DATE_FORMAT(`Data`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`Data` IS NOT NULL";
+  const QString filtroData =
+      ui->groupBoxMes->isChecked() ? "`dataRealizado` IS NOT NULL AND DATE_FORMAT(`dataRealizado`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "`dataRealizado` IS NOT NULL";
 
-  const QString filtroConta = ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid() ? "idConta = " + ui->itemBoxCaixa1->getId().toString() : "";
+  const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa1->getId().toString() + " AND " : "";
 
   // TODO: see if the outer select can be removed
-  if (filtroConta.isEmpty()) {
-    modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS "
-                        "NOT NULL ORDER BY Data, idConta) x WHERE " +
-                        filtroData);
-  } else {
-    modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo2 v JOIN (SELECT @running_total := 0) r WHERE " +
-                        filtroConta + " AND `Data` IS NOT NULL ORDER BY Data) x WHERE " + filtroData);
-  }
+  modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
+                      "WHERE " +
+                      filtroConta + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);
+
+  modelCaixa.setHeaderData("dataRealizado", "Data Realizado");
 
   ui->tableCaixa->setModel(&modelCaixa);
+
   ui->tableCaixa->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));
   ui->tableCaixa->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
   ui->tableCaixa->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableCaixa->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
-  ui->tableCaixa->showColumn("SAIDA");
-
-  ui->tableCaixa->hideColumn("Conta");
+  ui->tableCaixa->hideColumn("contaDestino");
   ui->tableCaixa->hideColumn("idConta");
-  ui->tableCaixa->hideColumn("Data Pag");
 
   // calcular saldo
 
   QSqlQuery query;
 
-  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text(), this); }
+  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
 
   // ----------------------------------------------------------------------------------------------------------
 
-  const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid() ? "idConta = " + ui->itemBoxCaixa2->getId().toString() : "";
+  const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid() ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
 
-  if (filtroConta2.isEmpty()) {
-    modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo v JOIN (SELECT @running_total := 0) r WHERE `Data` IS "
-                         "NOT NULL ORDER BY Data, idConta) x WHERE " +
-                         filtroData);
-  } else {
-    modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo2 v JOIN (SELECT @running_total := 0) r WHERE " +
-                         filtroConta2 + " AND `Data` IS NOT NULL ORDER BY Data) x WHERE " + filtroData);
-  }
+  modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
+                       "WHERE " +
+                       filtroConta2 + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);
+
+  modelCaixa2.setHeaderData("dataRealizado", "Data Realizado");
+  modelCaixa2.setHeaderData("contaDestino", "Conta");
 
   ui->tableCaixa2->setModel(&modelCaixa2);
+
   ui->tableCaixa2->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));
   ui->tableCaixa2->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
   ui->tableCaixa2->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableCaixa2->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
-  ui->tableCaixa2->showColumn("SAIDA");
-
-  ui->tableCaixa2->hideColumn("Conta");
+  filtroConta2.isEmpty() ? ui->tableCaixa2->showColumn("contaDestino") : ui->tableCaixa2->hideColumn("contaDestino");
   ui->tableCaixa2->hideColumn("idConta");
-  ui->tableCaixa2->hideColumn("Data Pag");
 
   // calcular saldo
 
-  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY DATA DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text(), this); }
+  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
 
   // ----------------------------------------------------------------------------------------------------------
 
-  modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo3 v JOIN (SELECT @running_total := 0) r");
+  modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_pendente v JOIN (SELECT @running_total := 0) r");
 
   if (modelFuturo.lastError().isValid()) { return qApp->enqueueError("Erro buscando dados futuros: " + modelFuturo.lastError().text(), this); }
 
+  modelFuturo.setHeaderData("dataPagamento", "Data Pag.");
+
   ui->tableFuturo->setModel(&modelFuturo);
+
   ui->tableFuturo->setItemDelegateForColumn("SAIDA", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("ENTRADA", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableFuturo->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
-
-  // ----------------------------------------------------------------------------------------------------------
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &index) {
-  const QDate date = modelCaixa2.data(index.row(), "Data").toDate();
+  const QDate date = modelCaixa2.data(index.row(), "dataRealizado").toDate();
   const QString idConta = modelCaixa2.data(index.row(), "idConta").toString();
 
   auto *dia = new PagamentosDia(this);
@@ -145,7 +138,7 @@ void WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated(const QModelIndex &ind
 }
 
 void WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated(const QModelIndex &index) {
-  const QDate date = modelCaixa.data(index.row(), "Data").toDate();
+  const QDate date = modelCaixa.data(index.row(), "dataRealizado").toDate();
   const QString idConta = modelCaixa.data(index.row(), "idConta").toString();
 
   auto *dia = new PagamentosDia(this);

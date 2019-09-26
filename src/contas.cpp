@@ -145,8 +145,8 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
   // TODO: 3dateEditDelegate para vencimento
-  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate("dataPagamento", this));
-  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate("dataPagamento", this));
+  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
+  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
 
   if (tipo == Tipo::Receber) {
     //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraParteReceber, this));

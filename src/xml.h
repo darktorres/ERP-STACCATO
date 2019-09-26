@@ -8,6 +8,7 @@ class XML final {
 public:
   explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
   auto lerValores(const QStandardItem *item) -> void;
+  auto limparValores() -> void;
 
   const QByteArray fileContent;
   const QString fileName;
@@ -97,7 +98,6 @@ private:
   auto lerIPIProduto(const QStandardItem *child) -> void;
   auto lerPISProduto(const QStandardItem *child) -> void;
   auto lerTotais(const QStandardItem *child) -> void;
-  auto limparValores() -> void;
   auto montarArvore() -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
 };

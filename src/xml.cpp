@@ -74,8 +74,6 @@ void XML::limparValores() {
 }
 
 void XML::lerValores(const QStandardItem *item) {
-  limparValores();
-
   for (int row = 0; row < item->rowCount(); ++row) {
     for (int col = 0; col < item->columnCount(); ++col) {
       const QStandardItem *child = item->child(row, col);

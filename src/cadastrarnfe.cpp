@@ -903,7 +903,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     stream << "ValorUnitario = " + QString::number(total / quant, 'f', 10) << endl;
     stream << "ValorTotal = " + QString::number(total, 'f', 2) << endl;
     const double proporcao = total / ui->doubleSpinBoxValorProdutos->value();
-    const double frete = ui->doubleSpinBoxValorFrete->value() * proporcao;
+    const double frete = ui->checkBoxFrete->isChecked() ? ui->doubleSpinBoxValorFrete->value() * proporcao : 0;
     sumFrete += QString::number(frete, 'f', 2).toDouble();
 
     if (sumFrete > ui->doubleSpinBoxValorFrete->value()) {
@@ -965,7 +965,7 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value(), 'f', 2) << endl;
   stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value(), 'f', 2) << endl;
   stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value(), 'f', 2) << endl;
-  stream << "ValorFrete = " + QString::number(ui->doubleSpinBoxValorFrete->value(), 'f', 2) << endl;
+  stream << "ValorFrete = " + QString::number(ui->checkBoxFrete->isChecked() ? ui->doubleSpinBoxValorFrete->value() : 0, 'f', 2) << endl;
   stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
 
   // PARTILHA ICMS
@@ -1857,6 +1857,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 void CadastrarNFe::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxFrete, &QCheckBox::toggled, this, &CadastrarNFe::on_checkBoxFrete_toggled, connectionType);
   connect(ui->comboBoxCOFINScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged, connectionType);
   connect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged, connectionType);
   connect(ui->comboBoxDestinoOperacao, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged, connectionType);
@@ -1892,6 +1893,7 @@ void CadastrarNFe::setConnections() {
 }
 
 void CadastrarNFe::unsetConnections() {
+  disconnect(ui->checkBoxFrete, &QCheckBox::toggled, this, &CadastrarNFe::on_checkBoxFrete_toggled);
   disconnect(ui->comboBoxCOFINScst, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged);
   disconnect(ui->comboBoxCfop, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxCfop_currentTextChanged);
   disconnect(ui->comboBoxDestinoOperacao, &QComboBox::currentTextChanged, this, &CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged);
@@ -1947,6 +1949,16 @@ bool CadastrarNFe::listarCfop() {
 }
 
 void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) { ui->tabWidget_4->setTabEnabled(4, text == "2 Operação interestadual"); }
+
+void CadastrarNFe::on_checkBoxFrete_toggled(bool checked) {
+  ui->doubleSpinBoxValorFrete->setEnabled(checked);
+
+  const double frete = ui->doubleSpinBoxValorFrete->value();
+  const double total = ui->doubleSpinBoxValorNota->value();
+
+  if (checked) { ui->doubleSpinBoxValorNota->setValue(total + frete); }
+  if (not checked) { ui->doubleSpinBoxValorNota->setValue(total - frete); }
+}
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo
 // TODO: 3criar logo para nota

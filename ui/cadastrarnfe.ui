@@ -1678,7 +1678,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>161</width>
+                   <width>155</width>
                    <height>151</height>
                   </rect>
                  </property>
@@ -1992,7 +1992,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>183</width>
+                   <width>177</width>
                    <height>151</height>
                   </rect>
                  </property>
@@ -2305,7 +2305,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>380</width>
+                   <width>374</width>
                    <height>266</height>
                   </rect>
                  </property>
@@ -2508,6 +2508,32 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
        <string>Totais</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_34">
+       <item row="0" column="2">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="0" column="0">
         <layout class="QGridLayout" name="gridLayout_33">
          <item row="0" column="0">
@@ -2768,8 +2794,36 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
          </item>
          <item row="0" column="2">
           <layout class="QGridLayout" name="gridLayout_32">
-           <item row="0" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseICMS">
+           <item row="2" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorPIS">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>9999999.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorProdutos">
              <property name="wrapping">
               <bool>false</bool>
              </property>
@@ -2824,8 +2878,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorPIS">
+           <item row="0" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseICMS">
              <property name="wrapping">
               <bool>false</bool>
              </property>
@@ -2908,34 +2962,6 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorProdutos">
-             <property name="wrapping">
-              <bool>false</bool>
-             </property>
-             <property name="frame">
-              <bool>false</bool>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="buttonSymbols">
-              <enum>QAbstractSpinBox::NoButtons</enum>
-             </property>
-             <property name="correctionMode">
-              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-             </property>
-             <property name="showGroupSeparator" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="prefix">
-              <string>R$ </string>
-             </property>
-             <property name="maximum">
-              <double>9999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
            <item row="6" column="0">
             <widget class="QDoubleSpinBox" name="doubleSpinBoxValorFrete">
              <property name="wrapping">
@@ -2992,35 +3018,22 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
              </property>
             </widget>
            </item>
+           <item row="6" column="1">
+            <widget class="QCheckBox" name="checkBoxFrete">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
-       </item>
-       <item row="0" column="1">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0">
-        <spacer name="verticalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

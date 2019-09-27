@@ -86,7 +86,7 @@ bool Application::setDatabase() {
   // TODO: to avoid getting blocked by fail2ban always login with same user?
   db.setUserName(lastuser.value().toString().toLower());
   db.setPassword(password);
-  db.setDatabaseName("mydb");
+  db.setDatabaseName("develop");
   db.setPort(3306);
 
   db.setConnectOptions("CLIENT_COMPRESS=1");

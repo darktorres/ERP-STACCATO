@@ -76,7 +76,7 @@ void WidgetLogisticaEntregues::montaFiltro() {
 void WidgetLogisticaEntregues::setupTables() {
   modelVendas.setTable("view_entrega");
 
-  modelVendas.setSort("prazoEntrega", Qt::AscendingOrder);
+  modelVendas.setSort("prazoEntrega");
 
   modelVendas.setHeaderData("idVenda", "Venda");
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");

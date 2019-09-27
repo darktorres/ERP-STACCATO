@@ -57,28 +57,28 @@ void WidgetLogisticaRecebimento::tableFornLogistica_clicked(const QString &forne
 void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setTable("view_recebimento");
 
+  modelViewRecebimento.setSort("prazoEntrega");
+
+  modelViewRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelViewRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
   modelViewRecebimento.setHeaderData("idEstoque", "Estoque");
   modelViewRecebimento.setHeaderData("lote", "Lote");
   modelViewRecebimento.setHeaderData("local", "Local");
   modelViewRecebimento.setHeaderData("bloco", "Bloco");
   modelViewRecebimento.setHeaderData("numeroNFe", "NFe");
+  modelViewRecebimento.setHeaderData("idVenda", "Venda");
+  modelViewRecebimento.setHeaderData("ordemCompra", "OC");
   modelViewRecebimento.setHeaderData("produto", "Produto");
+  modelViewRecebimento.setHeaderData("codComercial", "Cód. Com.");
   modelViewRecebimento.setHeaderData("quant", "Quant.");
   modelViewRecebimento.setHeaderData("un", "Un.");
   modelViewRecebimento.setHeaderData("caixas", "Caixas");
-  modelViewRecebimento.setHeaderData("idVenda", "Venda");
-  modelViewRecebimento.setHeaderData("codComercial", "Cód. Com.");
-  modelViewRecebimento.setHeaderData("ordemCompra", "OC");
-  modelViewRecebimento.setHeaderData("local", "Local");
-  modelViewRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
-  modelViewRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
 
   modelViewRecebimento.proxyModel = new EstoquePrazoProxyModel(&modelViewRecebimento, this);
 
   ui->table->setModel(&modelViewRecebimento);
 
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("ordemCompra");
 }
 
 bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) {

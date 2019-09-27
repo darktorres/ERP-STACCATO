@@ -60,7 +60,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
   modelViewLogisticaRepresentacao.setHeaderData("ordemCompra", "OC");
   modelViewLogisticaRepresentacao.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  modelViewLogisticaRepresentacao.setSort("prazoEntrega", Qt::AscendingOrder);
+  modelViewLogisticaRepresentacao.setSort("prazoEntrega");
 
   modelViewLogisticaRepresentacao.proxyModel = new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this);
 

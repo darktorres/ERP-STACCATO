@@ -131,7 +131,7 @@ void Contas::setupTables() {
   modelPendentes.setHeaderData("grupo", "Grupo");
   modelPendentes.setHeaderData("subGrupo", "SubGrupo");
 
-  modelPendentes.setSort("dataPagamento", Qt::AscendingOrder);
+  modelPendentes.setSort("dataPagamento");
 
   modelPendentes.proxyModel = new SortFilterProxyModel(&modelPendentes, this);
 

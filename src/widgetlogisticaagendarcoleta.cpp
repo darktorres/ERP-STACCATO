@@ -42,25 +42,23 @@ void WidgetLogisticaAgendarColeta::setConnections() {
 void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setTable("view_agendar_coleta");
 
-  modelEstoque.setSort("prazoEntrega", Qt::AscendingOrder);
+  modelEstoque.setSort("prazoEntrega");
 
+  modelEstoque.setHeaderData("prazoEntrega", "Prazo Limite");
   modelEstoque.setHeaderData("dataRealFat", "Data Faturado");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("local", "Local");
   modelEstoque.setHeaderData("bloco", "Bloco");
-  modelEstoque.setHeaderData("codComercial", "Cód. Com.");
-  modelEstoque.setHeaderData("fornecedor", "Fornecedor");
   modelEstoque.setHeaderData("numeroNFe", "NFe");
+  modelEstoque.setHeaderData("idVenda", "Venda");
+  modelEstoque.setHeaderData("ordemCompra", "OC");
   modelEstoque.setHeaderData("produto", "Produto");
+  modelEstoque.setHeaderData("codComercial", "Cód. Com.");
   modelEstoque.setHeaderData("quant", "Quant.");
   modelEstoque.setHeaderData("un", "Un.");
   modelEstoque.setHeaderData("caixas", "Cx.");
   modelEstoque.setHeaderData("kgcx", "Kg./Cx.");
-  modelEstoque.setHeaderData("idVenda", "Venda");
-  modelEstoque.setHeaderData("ordemCompra", "OC");
-  modelEstoque.setHeaderData("local", "Local");
-  modelEstoque.setHeaderData("prazoEntrega", "Prazo Limite");
 
   modelEstoque.proxyModel = new EstoquePrazoProxyModel(&modelEstoque, this);
 
@@ -73,7 +71,6 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableEstoque->hideColumn("formComercial");
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("idNFe");
-  ui->tableEstoque->hideColumn("ordemCompra");
 
   connect(ui->tableEstoque->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetLogisticaAgendarColeta::calcularPeso);
 
@@ -111,8 +108,8 @@ void WidgetLogisticaAgendarColeta::setupTables() {
 
   modelTranspAgend.setTable("veiculo_has_produto");
 
-  modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("data", "Agendado");
+  modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("status", "Status");
   modelTranspAgend.setHeaderData("produto", "Produto");
   modelTranspAgend.setHeaderData("caixas", "Cx.");

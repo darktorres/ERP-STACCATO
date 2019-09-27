@@ -33,6 +33,8 @@ void WidgetCompraConfirmar::setupTables() {
 
   modelViewCompras.setFilter("");
 
+  modelViewCompras.setSort("OC");
+
   modelViewCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
 
   ui->table->setModel(&modelViewCompras);

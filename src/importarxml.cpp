@@ -825,9 +825,7 @@ bool ImportarXML::produtoCompativel(const int rowCompra, const QString &codComer
 
   const QString codComercialCompra = modelCompra.data(rowCompra, "codComercial").toString();
 
-  if (codComercialCompra != codComercialEstoque) { return false; }
-
-  return true;
+  return (codComercialCompra == codComercialEstoque);
 }
 
 bool ImportarXML::reparear(const QModelIndex &index) {

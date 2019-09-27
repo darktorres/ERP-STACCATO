@@ -56,29 +56,29 @@ void WidgetLogisticaColeta::resetTables() { modelIsSet = false; }
 void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setTable("view_coleta");
 
+  modelViewColeta.setSort("prazoEntrega");
+
+  modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
   modelViewColeta.setHeaderData("idEstoque", "Estoque");
   modelViewColeta.setHeaderData("lote", "Lote");
   modelViewColeta.setHeaderData("local", "Local");
   modelViewColeta.setHeaderData("bloco", "Bloco");
   modelViewColeta.setHeaderData("numeroNFe", "NFe");
+  modelViewColeta.setHeaderData("idVenda", "Venda");
+  modelViewColeta.setHeaderData("ordemCompra", "OC");
   modelViewColeta.setHeaderData("produto", "Produto");
   modelViewColeta.setHeaderData("codComercial", "Cód. Com.");
   modelViewColeta.setHeaderData("quant", "Quant.");
   modelViewColeta.setHeaderData("un", "Un.");
   modelViewColeta.setHeaderData("caixas", "Caixas");
   modelViewColeta.setHeaderData("kgcx", "Kg./Cx.");
-  modelViewColeta.setHeaderData("idVenda", "Venda");
-  modelViewColeta.setHeaderData("ordemCompra", "OC");
-  modelViewColeta.setHeaderData("local", "Local");
-  modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
-  modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
 
   modelViewColeta.proxyModel = new EstoquePrazoProxyModel(&modelViewColeta, this);
 
   ui->table->setModel(&modelViewColeta);
 
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("ordemCompra");
 }
 
 void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {

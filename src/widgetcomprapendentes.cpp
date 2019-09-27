@@ -97,7 +97,7 @@ void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
 void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setTable("view_venda_produto");
 
-  modelViewVendaProduto.setSort("idVenda", Qt::AscendingOrder);
+  modelViewVendaProduto.setSort("idVenda");
 
   modelViewVendaProduto.setHeaderData("prazoEntrega", "Prazo Limite");
   modelViewVendaProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");

@@ -41,7 +41,7 @@ void WidgetCompraDevolucao::updateTables() {
 void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setTable("venda_has_produto");
 
-  modelVendaProduto.setSort("idVenda", Qt::AscendingOrder);
+  modelVendaProduto.setSort("idVenda");
 
   modelVendaProduto.setHeaderData("status", "Status");
   modelVendaProduto.setHeaderData("statusOriginal", "Status Original");

@@ -33,6 +33,8 @@ void WidgetCompraFaturar::setupTables() {
 
   modelViewFaturamento.setTable("view_faturamento");
 
+  modelViewFaturamento.setSort("OC");
+
   modelViewFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
 
   ui->table->setModel(&modelViewFaturamento);

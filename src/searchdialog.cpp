@@ -343,7 +343,7 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, "nome, tipo", filtro + filtroLoja + filtroAdmin, parent);
 
-  sdVendedor->model.setSort("nome", Qt::AscendingOrder);
+  sdVendedor->model.setSort("nome");
 
   sdVendedor->hideColumns({"idUsuario", "idLoja", "user", "passwd", "especialidade", "desativado"});
 

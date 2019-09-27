@@ -19,5 +19,4 @@ private:
   // attributes
   Ui::WidgetFinanceiro *ui;
   // methods
-  auto setConnections() -> void;
 };

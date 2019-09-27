@@ -24,13 +24,13 @@ WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
 void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setTable("view_entrega_pendente");
 
-  modelVendas.setSort("prazoEntrega", Qt::AscendingOrder);
+  modelVendas.setSort("prazoEntrega");
 
-  modelVendas.setHeaderData("idVenda", "Venda");
-  modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
   modelVendas.setHeaderData("novoPrazoEntrega", "Novo Prazo");
   modelVendas.setHeaderData("dataRealReceb", "Receb.");
+  modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
+  modelVendas.setHeaderData("idVenda", "Venda");
 
   modelVendas.proxyModel = new FinanceiroProxyModel(&modelVendas, this);
 
@@ -44,9 +44,11 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   modelProdutos.setTable("view_agendar_entrega");
 
+  modelProdutos.setHeaderData("dataPrevEnt", "Prev. Ent.");
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
+  modelProdutos.setHeaderData("idNFeFutura", "NFe Futura");
   modelProdutos.setHeaderData("produto", "Produto");
   modelProdutos.setHeaderData("idEstoque", "Estoque");
   modelProdutos.setHeaderData("lote", "Lote");
@@ -58,7 +60,6 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("unCaixa", "Un./Cx.");
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
-  modelProdutos.setHeaderData("dataPrevEnt", "Prev. Ent.");
 
   ui->tableProdutos->setModel(&modelProdutos);
 
@@ -75,14 +76,14 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   modelTranspAtual.setHeaderData("idVenda", "Venda");
   modelTranspAtual.setHeaderData("status", "Status");
+  modelTranspAtual.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAtual.setHeaderData("produto", "Produto");
   modelTranspAtual.setHeaderData("caixas", "Cx.");
   modelTranspAtual.setHeaderData("kg", "Kg.");
   modelTranspAtual.setHeaderData("quant", "Quant.");
   modelTranspAtual.setHeaderData("un", "Un.");
-  modelTranspAtual.setHeaderData("codComercial", "Cód. Com.");
-  modelTranspAtual.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAtual.setHeaderData("unCaixa", "Un./Cx.");
+  modelTranspAtual.setHeaderData("codComercial", "Cód. Com.");
   modelTranspAtual.setHeaderData("formComercial", "Form. Com.");
 
   ui->tableTranspAtual->setModel(&modelTranspAtual);
@@ -103,18 +104,18 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   modelTranspAgend.setTable("veiculo_has_produto");
 
+  modelTranspAgend.setHeaderData("data", "Agendado");
   modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("idVenda", "Venda");
-  modelTranspAgend.setHeaderData("data", "Agendado");
   modelTranspAgend.setHeaderData("status", "Status");
+  modelTranspAgend.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAgend.setHeaderData("produto", "Produto");
   modelTranspAgend.setHeaderData("caixas", "Cx.");
   modelTranspAgend.setHeaderData("kg", "Kg.");
   modelTranspAgend.setHeaderData("quant", "Quant.");
   modelTranspAgend.setHeaderData("un", "Un.");
-  modelTranspAgend.setHeaderData("codComercial", "Cód. Com.");
-  modelTranspAgend.setHeaderData("fornecedor", "Fornecedor");
   modelTranspAgend.setHeaderData("unCaixa", "Un./Cx.");
+  modelTranspAgend.setHeaderData("codComercial", "Cód. Com.");
   modelTranspAgend.setHeaderData("formComercial", "Form. Com.");
 
   ui->tableTranspAgend->setModel(&modelTranspAgend);
@@ -154,21 +155,23 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 }
 
 void WidgetLogisticaAgendarEntrega::setConnections() {
-  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged);
-  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
-  connect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked);
-  connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked);
-  connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked);
-  connect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked);
-  connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
-  connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked);
-  connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
-  connect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
-  connect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
-  connect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
-  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked);
-  connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged, connectionType);
+  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked, connectionType);
+  connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked, connectionType);
+  connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked, connectionType);
+  connect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked, connectionType);
+  connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked, connectionType);
+  connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked, connectionType);
+  connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked, connectionType);
+  connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked, connectionType);
 }
 
 void WidgetLogisticaAgendarEntrega::updateTables() {

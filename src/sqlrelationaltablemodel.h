@@ -18,7 +18,7 @@ public:
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto setFilter(const QString &filter) -> void final;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
-  auto setSort(const QString &column, Qt::SortOrder order) -> void;
+  auto setSort(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
   auto setTable(const QString &tableName) -> void final;
   auto supportedDropActions() const -> Qt::DropActions final;
   auto insertRowAtEnd() -> int;

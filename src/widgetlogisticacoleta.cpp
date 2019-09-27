@@ -16,12 +16,14 @@ WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent),
 WidgetLogisticaColeta::~WidgetLogisticaColeta() { delete ui; }
 
 void WidgetLogisticaColeta::setConnections() {
-  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaColeta::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked);
-  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonReagendar_clicked);
-  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonVenda_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaColeta::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonMarcarColetado, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked, connectionType);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonReagendar_clicked, connectionType);
+  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaColeta::on_pushButtonVenda_clicked, connectionType);
 }
 
 void WidgetLogisticaColeta::updateTables() {
@@ -54,29 +56,29 @@ void WidgetLogisticaColeta::resetTables() { modelIsSet = false; }
 void WidgetLogisticaColeta::setupTables() {
   modelViewColeta.setTable("view_coleta");
 
+  modelViewColeta.setSort("prazoEntrega");
+
+  modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
   modelViewColeta.setHeaderData("idEstoque", "Estoque");
   modelViewColeta.setHeaderData("lote", "Lote");
   modelViewColeta.setHeaderData("local", "Local");
   modelViewColeta.setHeaderData("bloco", "Bloco");
   modelViewColeta.setHeaderData("numeroNFe", "NFe");
+  modelViewColeta.setHeaderData("idVenda", "Venda");
+  modelViewColeta.setHeaderData("ordemCompra", "OC");
   modelViewColeta.setHeaderData("produto", "Produto");
   modelViewColeta.setHeaderData("codComercial", "Cód. Com.");
   modelViewColeta.setHeaderData("quant", "Quant.");
   modelViewColeta.setHeaderData("un", "Un.");
   modelViewColeta.setHeaderData("caixas", "Caixas");
   modelViewColeta.setHeaderData("kgcx", "Kg./Cx.");
-  modelViewColeta.setHeaderData("idVenda", "Venda");
-  modelViewColeta.setHeaderData("ordemCompra", "OC");
-  modelViewColeta.setHeaderData("local", "Local");
-  modelViewColeta.setHeaderData("dataPrevColeta", "Data Prev. Col.");
-  modelViewColeta.setHeaderData("prazoEntrega", "Prazo Limite");
 
   modelViewColeta.proxyModel = new EstoquePrazoProxyModel(&modelViewColeta, this);
 
   ui->table->setModel(&modelViewColeta);
 
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("ordemCompra");
 }
 
 void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {

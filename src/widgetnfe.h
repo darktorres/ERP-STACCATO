@@ -19,6 +19,5 @@ private:
   // attributes
   Ui::WidgetNfe *ui;
   // methods
-  auto setConnections() -> void;
   auto on_tabWidgetNfe_currentChanged(const int) -> void;
 };

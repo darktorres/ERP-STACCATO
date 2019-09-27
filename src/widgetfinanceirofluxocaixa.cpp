@@ -15,14 +15,16 @@ WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidge
 WidgetFinanceiroFluxoCaixa::~WidgetFinanceiroFluxoCaixa() { delete ui; }
 
 void WidgetFinanceiroFluxoCaixa::setConnections() {
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-  connect(ui->groupBoxCaixa1, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled);
-  connect(ui->groupBoxCaixa2, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled);
-  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-  connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-  connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro);
-  connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated);
-  connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->groupBoxCaixa1, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa1_toggled, connectionType);
+  connect(ui->groupBoxCaixa2, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled, connectionType);
+  connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->itemBoxCaixa1, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->itemBoxCaixa2, &ItemBox::textChanged, this, &WidgetFinanceiroFluxoCaixa::montaFiltro, connectionType);
+  connect(ui->tableCaixa, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa_activated, connectionType);
+  connect(ui->tableCaixa2, &TableView::activated, this, &WidgetFinanceiroFluxoCaixa::on_tableCaixa2_activated, connectionType);
 }
 
 void WidgetFinanceiroFluxoCaixa::updateTables() {

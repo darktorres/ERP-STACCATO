@@ -17,12 +17,14 @@ WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidge
 WidgetLogisticaRecebimento::~WidgetLogisticaRecebimento() { delete ui; }
 
 void WidgetLogisticaRecebimento::setConnections() {
-  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked);
-  connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked);
-  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked);
-  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonVenda_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaRecebimento::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked, connectionType);
+  connect(ui->pushButtonMarcarRecebido, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked, connectionType);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked, connectionType);
+  connect(ui->pushButtonVenda, &QPushButton::clicked, this, &WidgetLogisticaRecebimento::on_pushButtonVenda_clicked, connectionType);
 }
 
 void WidgetLogisticaRecebimento::updateTables() {
@@ -55,28 +57,28 @@ void WidgetLogisticaRecebimento::tableFornLogistica_clicked(const QString &forne
 void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setTable("view_recebimento");
 
+  modelViewRecebimento.setSort("prazoEntrega");
+
+  modelViewRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
+  modelViewRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
   modelViewRecebimento.setHeaderData("idEstoque", "Estoque");
   modelViewRecebimento.setHeaderData("lote", "Lote");
   modelViewRecebimento.setHeaderData("local", "Local");
   modelViewRecebimento.setHeaderData("bloco", "Bloco");
   modelViewRecebimento.setHeaderData("numeroNFe", "NFe");
+  modelViewRecebimento.setHeaderData("idVenda", "Venda");
+  modelViewRecebimento.setHeaderData("ordemCompra", "OC");
   modelViewRecebimento.setHeaderData("produto", "Produto");
+  modelViewRecebimento.setHeaderData("codComercial", "Cód. Com.");
   modelViewRecebimento.setHeaderData("quant", "Quant.");
   modelViewRecebimento.setHeaderData("un", "Un.");
   modelViewRecebimento.setHeaderData("caixas", "Caixas");
-  modelViewRecebimento.setHeaderData("idVenda", "Venda");
-  modelViewRecebimento.setHeaderData("codComercial", "Cód. Com.");
-  modelViewRecebimento.setHeaderData("ordemCompra", "OC");
-  modelViewRecebimento.setHeaderData("local", "Local");
-  modelViewRecebimento.setHeaderData("dataPrevReceb", "Data Prev. Rec.");
-  modelViewRecebimento.setHeaderData("prazoEntrega", "Prazo Limite");
 
   modelViewRecebimento.proxyModel = new EstoquePrazoProxyModel(&modelViewRecebimento, this);
 
   ui->table->setModel(&modelViewRecebimento);
 
   ui->table->hideColumn("fornecedor");
-  ui->table->hideColumn("ordemCompra");
 }
 
 bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) {

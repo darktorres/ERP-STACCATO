@@ -11,8 +11,10 @@ WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent),
 WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
 
 void WidgetHistoricoCompra::setConnections() {
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged);
-  connect(ui->table, &TableView::activated, this, &WidgetHistoricoCompra::on_table_activated);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetHistoricoCompra::on_table_activated, connectionType);
 }
 
 void WidgetHistoricoCompra::updateTables() {

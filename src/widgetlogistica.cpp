@@ -20,8 +20,10 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
 WidgetLogistica::~WidgetLogistica() { delete ui; }
 
 void WidgetLogistica::setConnections() {
-  connect(ui->tableForn, &TableView::clicked, this, &WidgetLogistica::on_tableForn_clicked);
-  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->tableForn, &TableView::clicked, this, &WidgetLogistica::on_tableForn_clicked, connectionType);
+  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged, connectionType);
 }
 
 void WidgetLogistica::resetTables() {

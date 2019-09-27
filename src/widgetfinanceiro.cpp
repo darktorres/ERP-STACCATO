@@ -10,7 +10,7 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
   ui->widgetVenda->setFinanceiro();
 
-  setConnections();
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);
 }
 
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
@@ -32,8 +32,6 @@ void WidgetFinanceiro::resetTables() {
   ui->widgetVenda->resetTables();
   ui->widgetCompra->resetTables();
 }
-
-void WidgetFinanceiro::setConnections() { connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables); }
 
 // TODO: 0a cada dia colocar em 'maintenance' um job para enviar o relatorio das financas de 3 dias antes
 

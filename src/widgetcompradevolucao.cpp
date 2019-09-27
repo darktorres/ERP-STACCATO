@@ -15,10 +15,12 @@ WidgetCompraDevolucao::~WidgetCompraDevolucao() { delete ui; }
 void WidgetCompraDevolucao::resetTables() { modelIsSet = false; }
 
 void WidgetCompraDevolucao::setConnections() {
-  connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked);
-  connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked);
-  connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked);
-  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked, connectionType);
+  connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked, connectionType);
+  connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked, connectionType);
+  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked, connectionType);
 }
 
 void WidgetCompraDevolucao::updateTables() {
@@ -39,7 +41,7 @@ void WidgetCompraDevolucao::updateTables() {
 void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setTable("venda_has_produto");
 
-  modelVendaProduto.setSort("idVenda", Qt::AscendingOrder);
+  modelVendaProduto.setSort("idVenda");
 
   modelVendaProduto.setHeaderData("status", "Status");
   modelVendaProduto.setHeaderData("statusOriginal", "Status Original");

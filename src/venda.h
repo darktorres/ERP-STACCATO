@@ -1,6 +1,7 @@
 #pragma once
 
 #include "registerdialog.h"
+#include "sqltreemodel.h"
 
 namespace Ui {
 class Venda;
@@ -29,6 +30,8 @@ private:
   SqlRelationalTableModel modelFluxoCaixa;
   SqlRelationalTableModel modelFluxoCaixa2;
   SqlRelationalTableModel modelItem;
+  SqlRelationalTableModel modelItem2;
+  SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods
   auto atualizarCredito() -> bool;
@@ -58,9 +61,11 @@ private:
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonImprimir_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
+  auto on_treeView_entered() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
   auto setConnections() -> void;
+  auto setTreeView() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
@@ -69,4 +74,5 @@ private:
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
+  auto criarConsumos() -> void;
 };

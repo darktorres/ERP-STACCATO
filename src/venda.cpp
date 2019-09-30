@@ -1,7 +1,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-#include <QSqlRecord>
 
 #include "application.h"
 #include "cadastrocliente.h"
@@ -16,9 +15,8 @@
 #include "noeditdelegate.h"
 #include "orcamento.h"
 #include "porcentagemdelegate.h"
+#include "qtreeviewgriddelegate.h"
 #include "reaisdelegate.h"
-#include "searchdialogproxymodel.h"
-#include "sortfilterproxymodel.h"
 #include "ui_venda.h"
 #include "usersession.h"
 #include "venda.h"
@@ -64,6 +62,83 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
 Venda::~Venda() { delete ui; }
 
+void Venda::setTreeView() {
+  modelTree.appendModel(&modelItem);
+  modelTree.appendModel(&modelItem2);
+
+  modelTree.updateData();
+
+  modelTree.setHeaderData(modelTree.fieldIndex("status"), Qt::Horizontal, "Status");
+  modelTree.setHeaderData(modelTree.fieldIndex("fornecedor"), Qt::Horizontal, "Fornecedor");
+  modelTree.setHeaderData(modelTree.fieldIndex("produto"), Qt::Horizontal, "Produto");
+  modelTree.setHeaderData(modelTree.fieldIndex("obs"), Qt::Horizontal, "Obs.");
+  modelTree.setHeaderData(modelTree.fieldIndex("lote"), Qt::Horizontal, "Lote");
+  modelTree.setHeaderData(modelTree.fieldIndex("prcUnitario"), Qt::Horizontal, "Preço/Un");
+  modelTree.setHeaderData(modelTree.fieldIndex("caixas"), Qt::Horizontal, "Caixas");
+  modelTree.setHeaderData(modelTree.fieldIndex("quant"), Qt::Horizontal, "Quant.");
+  modelTree.setHeaderData(modelTree.fieldIndex("un"), Qt::Horizontal, "Un.");
+  modelTree.setHeaderData(modelTree.fieldIndex("unCaixa"), Qt::Horizontal, "Un./Cx.");
+  modelTree.setHeaderData(modelTree.fieldIndex("codComercial"), Qt::Horizontal, "Código");
+  modelTree.setHeaderData(modelTree.fieldIndex("formComercial"), Qt::Horizontal, "Formato");
+  modelTree.setHeaderData(modelTree.fieldIndex("parcial"), Qt::Horizontal, "Subtotal");
+  modelTree.setHeaderData(modelTree.fieldIndex("desconto"), Qt::Horizontal, "Desc. %");
+  modelTree.setHeaderData(modelTree.fieldIndex("parcialDesc"), Qt::Horizontal, "Desc. Parc.");
+  modelTree.setHeaderData(modelTree.fieldIndex("descGlobal"), Qt::Horizontal, "Desc. Glob. %");
+  modelTree.setHeaderData(modelTree.fieldIndex("total"), Qt::Horizontal, "Total");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevCompra"), Qt::Horizontal, "Prev. Compra");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataRealCompra"), Qt::Horizontal, "Data Compra");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevConf"), Qt::Horizontal, "Prev. Confirm.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataRealConf"), Qt::Horizontal, "Data Confirm.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevFat"), Qt::Horizontal, "Prev. Fat.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataRealFat"), Qt::Horizontal, "Data Fat.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevColeta"), Qt::Horizontal, "Prev. Coleta");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataRealColeta"), Qt::Horizontal, "Data Coleta");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevReceb"), Qt::Horizontal, "Prev. Receb.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataRealReceb"), Qt::Horizontal, "Data Receb.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevEnt"), Qt::Horizontal, "Prev. Ent.");
+  modelTree.setHeaderData(modelTree.fieldIndex("dataRealEnt"), Qt::Horizontal, "Data Ent.");
+
+  ui->treeView->setModel(new SearchDialogProxyModel(&modelTree, this));
+
+  connect(ui->treeView, &QTreeView::expanded, this, [&] {
+    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
+  });
+
+  connect(ui->treeView, &QTreeView::collapsed, this, [&] {
+    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
+  });
+
+  ui->treeView->hideColumn(modelTree.fieldIndex("selecionado"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idRelacionado"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("statusOriginal"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("recebeu"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("entregou"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("descUnitario"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("estoque"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("promocao"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idCompra"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idNFeSaida"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idNFeFutura"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idVenda"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idLoja"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("idProduto"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("reposicaoEntrega"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("reposicaoReceb"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("mostrarDesconto"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("created"));
+  ui->treeView->hideColumn(modelTree.fieldIndex("lastUpdated"));
+
+  ui->treeView->setItemDelegate(new QTreeViewGridDelegate(this));
+
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("quant"), new DoubleDelegate(this, 4, true));
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("prcUnitario"), new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("parcial"), new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("parcialDesc"), new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("desconto"), new PorcentagemDelegate(this, true));
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("descGlobal"), new PorcentagemDelegate(this, true));
+  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("total"), new ReaisDelegate(this, 2, true));
+}
+
 void Venda::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
@@ -85,6 +160,7 @@ void Venda::setConnections() {
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Venda::on_pushButtonImprimir_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
+  connect(ui->treeView, &QTreeView::entered, this, &Venda::on_treeView_entered, connectionType);
 }
 
 void Venda::unsetConnections() {
@@ -106,74 +182,15 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Venda::on_pushButtonImprimir_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
+  disconnect(ui->treeView, &QTreeView::entered, this, &Venda::on_treeView_entered);
 }
 
 void Venda::setupTables() {
   modelItem.setTable("venda_has_produto");
 
-  modelItem.setHeaderData("fornecedor", "Fornecedor");
-  modelItem.setHeaderData("produto", "Produto");
-  modelItem.setHeaderData("obs", "Obs.");
-  modelItem.setHeaderData("lote", "Lote");
-  modelItem.setHeaderData("prcUnitario", "Preço/Un");
-  modelItem.setHeaderData("caixas", "Caixas");
-  modelItem.setHeaderData("quant", "Quant.");
-  modelItem.setHeaderData("un", "Un.");
-  modelItem.setHeaderData("unCaixa", "Un./Cx.");
-  modelItem.setHeaderData("codComercial", "Código");
-  modelItem.setHeaderData("formComercial", "Formato");
-  modelItem.setHeaderData("parcial", "Subtotal");
-  modelItem.setHeaderData("desconto", "Desc. %");
-  modelItem.setHeaderData("parcialDesc", "Desc. Parc.");
-  modelItem.setHeaderData("descGlobal", "Desc. Glob. %");
-  modelItem.setHeaderData("total", "Total");
-  modelItem.setHeaderData("status", "Status");
-  modelItem.setHeaderData("dataPrevCompra", "Prev. Compra");
-  modelItem.setHeaderData("dataRealCompra", "Data Compra");
-  modelItem.setHeaderData("dataPrevConf", "Prev. Confirm.");
-  modelItem.setHeaderData("dataRealConf", "Data Confirm.");
-  modelItem.setHeaderData("dataPrevFat", "Prev. Fat.");
-  modelItem.setHeaderData("dataRealFat", "Data Fat.");
-  modelItem.setHeaderData("dataPrevColeta", "Prev. Coleta");
-  modelItem.setHeaderData("dataRealColeta", "Data Coleta");
-  modelItem.setHeaderData("dataPrevReceb", "Prev. Receb.");
-  modelItem.setHeaderData("dataRealReceb", "Data Receb.");
-  modelItem.setHeaderData("dataPrevEnt", "Prev. Ent.");
-  modelItem.setHeaderData("dataRealEnt", "Data Ent.");
+  //-----------------------------------------------------------------
 
-  modelItem.proxyModel = new SearchDialogProxyModel(&modelItem, this);
-
-  ui->tableProdutos->setModel(&modelItem);
-
-  ui->tableProdutos->hideColumn("idRelacionado");
-  ui->tableProdutos->hideColumn("statusOriginal");
-  ui->tableProdutos->hideColumn("recebeu");
-  ui->tableProdutos->hideColumn("entregou");
-  ui->tableProdutos->hideColumn("descUnitario");
-  ui->tableProdutos->hideColumn("estoque");
-  ui->tableProdutos->hideColumn("promocao");
-  ui->tableProdutos->hideColumn("idCompra");
-  ui->tableProdutos->hideColumn("idNFeSaida");
-  ui->tableProdutos->hideColumn("idNFeFutura");
-  ui->tableProdutos->hideColumn("idVendaProduto");
-  ui->tableProdutos->hideColumn("selecionado");
-  ui->tableProdutos->hideColumn("idVenda");
-  ui->tableProdutos->hideColumn("idLoja");
-  ui->tableProdutos->hideColumn("idProduto");
-  ui->tableProdutos->hideColumn("comissao");
-  ui->tableProdutos->hideColumn("reposicaoEntrega");
-  ui->tableProdutos->hideColumn("reposicaoReceb");
-  ui->tableProdutos->hideColumn("mostrarDesconto");
-
-  ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
-
-  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
-  ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("total", new ReaisDelegate(this));
+  modelItem2.setTable("venda_has_produto2");
 
   //-----------------------------------------------------------------
 
@@ -264,6 +281,8 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
 
   if (not copiaProdutosOrcamento()) { return; }
+
+  setTreeView();
 
   // -------------------------------------------------------------------------
 
@@ -482,7 +501,7 @@ void Venda::registerMode() {
 }
 
 void Venda::updateMode() {
-  ui->widgetPgts->hide();
+  ui->splitter_2->hide();
   ui->pushButtonGerarExcel->show();
   ui->pushButtonImprimir->show();
   ui->pushButtonCadastrarPedido->hide();
@@ -510,6 +529,12 @@ bool Venda::viewRegister() {
     modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
 
     if (not modelItem.select()) { return false; }
+
+    modelItem2.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
+
+    if (not modelItem2.select()) { return false; }
+
+    setTreeView();
 
     calcPrecoGlobalTotal();
 
@@ -585,6 +610,8 @@ bool Venda::viewRegister() {
     ui->widgetPgts->setRepresentacao(representacao);
     ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
+
+    for (int col = 0; col < ui->treeView->model()->columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
 
     ui->splitter_2->hide();
 
@@ -881,6 +908,8 @@ bool Venda::atualizarCredito() {
 }
 
 bool Venda::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) {
       if (not generateId()) { return false; }
@@ -951,16 +980,19 @@ bool Venda::cadastrar() {
 
     // -------------------------------------------------------------------------
 
-    QSqlQuery query2;
-    query2.prepare("SELECT p.idEstoque, vp.idVendaProduto, vp.quant FROM venda_has_produto vp LEFT JOIN produto p ON p.idProduto = vp.idProduto WHERE vp.idVenda = :idVenda AND vp.estoque > 0");
-    query2.bindValue(":idVenda", ui->lineEditVenda->text());
+    QSqlQuery queryCopy;
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query2.lastError().text(), this); }
-
-    while (query2.next()) {
-      auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
-
-      if (not estoque->criarConsumo(query2.value("idVendaProduto").toInt(), query2.value("quant").toDouble())) { return false; }
+    if (not queryCopy.exec(
+            "INSERT INTO venda_has_produto2 (idVendaProdutoFK, idRelacionado, selecionado, entregou, recebeu, status, statusOriginal, idCompra, idNFeSaida, idNFeFutura, fornecedor, idVenda, idLoja, "
+            "idProduto, produto, obs, lote, prcUnitario, descUnitario, caixas, quant, un, unCaixa, codComercial, formComercial, parcial, desconto, parcialDesc, descGlobal, total, mostrarDesconto, "
+            "estoque, promocao, reposicaoEntrega, reposicaoReceb, dataPrevCompra, dataRealCompra, dataPrevConf, dataRealConf, dataPrevFat, dataRealFat, dataPrevColeta, dataRealColeta, dataPrevReceb, "
+            "dataRealReceb, dataPrevEnt, dataRealEnt) SELECT idVendaProduto1, idRelacionado, selecionado, entregou, recebeu, status, statusOriginal, idCompra, idNFeSaida, idNFeFutura, fornecedor, "
+            "idVenda, idLoja, idProduto, produto, obs, lote, prcUnitario, descUnitario, caixas, quant, un, unCaixa, codComercial, formComercial, parcial, desconto, parcialDesc, descGlobal, total, "
+            "mostrarDesconto, estoque, promocao, reposicaoEntrega, reposicaoReceb, dataPrevCompra, dataRealCompra, dataPrevConf, dataRealConf, dataPrevFat, dataRealFat, dataPrevColeta, "
+            "dataRealColeta, "
+            "dataPrevReceb, dataRealReceb, dataPrevEnt, dataRealEnt FROM venda_has_produto WHERE idVenda = '" +
+            ui->lineEditVenda->text() + "'")) {
+      return qApp->enqueueError(false, "Erro copiando dados: " + queryCopy.lastError().text(), this);
     }
 
     // -------------------------------------------------------------------------
@@ -975,6 +1007,8 @@ bool Venda::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupItem.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");
@@ -982,6 +1016,8 @@ bool Venda::cadastrar() {
     modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE");
+
+    criarConsumos();
   } else {
     qApp->rollbackTransaction();
     void(model.select());
@@ -991,6 +1027,23 @@ bool Venda::cadastrar() {
   }
 
   return success;
+}
+
+void Venda::criarConsumos() {
+  QSqlQuery query2;
+  query2.prepare(
+      "SELECT p.idEstoque, vp2.idVendaProduto2, pf2.idPedido2, vp2.quant FROM venda_has_produto2 vp2 LEFT JOIN produto p ON vp2.idProduto = p.idProduto LEFT JOIN estoque e ON p.idEstoque = "
+      "e.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc.idPedido2 WHERE vp2.idVenda = :idVenda AND "
+      "vp2.estoque > 0");
+  query2.bindValue(":idVenda", ui->lineEditVenda->text());
+
+  if (not query2.exec()) { return qApp->enqueueError("Erro buscando produtos estoque: " + query2.lastError().text(), this); }
+
+  while (query2.next()) {
+    //    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
+
+    //    if (not estoque->criarConsumo(query2.value("idVendaProduto2").toInt(), query2.value("idPedido2").toInt(), query2.value("quant").toDouble())) { return; }
+  }
 }
 
 bool Venda::cancelamento() {
@@ -1014,15 +1067,16 @@ bool Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
-  query.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto IN (SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda) AND "
-                "status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query.prepare(
+      "UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, `idVendaProduto2` = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda) AND "
+      "status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo vínculo da compra: " + query.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
-  query.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query.prepare("UPDATE venda_has_produto2 SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query.lastError().text(), this); }
@@ -1144,6 +1198,10 @@ void Venda::on_pushButtonDevolucao_clicked() {
   devolucao->show();
 }
 
+void Venda::on_treeView_entered() {
+  for (int col = 0; col < ui->treeView->model()->columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
+}
+
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { ui->widgetPgts->resetarPagamentos(); }
 
 void Venda::setFinanceiro() {
@@ -1219,10 +1277,15 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando pontuação: " + query.lastError().text(), this); }
 
+    double comissao = query.value("comissao").toDouble();
+
     ui->checkBoxPontuacaoIsento->setChecked(false);
-    ui->doubleSpinBoxPontuacao->setMaximum(query.value("comissao").toDouble());
-    ui->doubleSpinBoxPontuacao->setValue(query.value("comissao").toDouble());
     ui->doubleSpinBoxPontuacao->setEnabled(true);
+
+    if (qFuzzyIsNull(comissao)) { comissao = 5; }
+
+    ui->doubleSpinBoxPontuacao->setMaximum(comissao);
+    ui->doubleSpinBoxPontuacao->setValue(comissao);
   }
 
   // TODO: 5criar linha em contas_pagar de comissao/rt
@@ -1288,3 +1351,11 @@ bool Venda::copiaProdutosOrcamento() {
 // REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
 // TODO: usar coluna 'idRelacionado' para vincular a linha quebrada/reposicao com a correspondente
 // TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao
+
+// NOTE: for coloring childs:
+//      QTreeView::item:!has-children
+//      {
+//      	background-color: rgb(255, 85, 0);
+//      }
+
+// TODO: implement proxyModel for treeView to color lines if estoque/promocao

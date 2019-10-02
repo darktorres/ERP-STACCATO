@@ -322,7 +322,13 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   //
 
-  if (not validar()) { return; }
+  if (not validar()) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Validação apresentou problemas! Deseja continuar mesmo assim?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+    if (msgBox.exec() == QMessageBox::No) { return; }
+  }
 
   if (not criarChaveAcesso()) { return; }
 
@@ -757,7 +763,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
     if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) { ui->comboBoxDestinoOperacao->setCurrentIndex(1); }
   }
 
-  if (not validar()) { return; }
+  validar();
 
   //
 
@@ -1636,61 +1642,112 @@ bool CadastrarNFe::validar() {
 
   // TODO: 5recalcular todos os valores dos itens para verificar se os dados batem (usar o 174058 de referencia)
 
+  bool ok = true;
+
   // -------------------------------------------------------------------------
 
   if (ui->itemBoxLoja->text().isEmpty()) {
     // assume no certificate in acbr
-    return qApp->enqueueError(false, "Escolha um certificado para o ACBr!", this);
+    qApp->enqueueError("Escolha um certificado para o ACBr!", this);
+    ok = false;
   }
 
   // [Emitente]
 
-  if (clearStr(modelLoja.data(0, "cnpj").toString()).isEmpty()) { return qApp->enqueueError(false, "CNPJ emitente vazio!", this); }
+  if (clearStr(modelLoja.data(0, "cnpj").toString()).isEmpty()) {
+    qApp->enqueueError("CNPJ emitente vazio!", this);
+    ok = false;
+  }
 
-  if (modelLoja.data(0, "razaoSocial").toString().isEmpty()) { return qApp->enqueueError(false, "Razão Social emitente vazio!", this); }
+  if (modelLoja.data(0, "razaoSocial").toString().isEmpty()) {
+    qApp->enqueueError("Razão Social emitente vazio!", this);
+    ok = false;
+  }
 
-  if (modelLoja.data(0, "nomeFantasia").toString().isEmpty()) { return qApp->enqueueError(false, "Nome Fantasia emitente vazio!", this); }
+  if (modelLoja.data(0, "nomeFantasia").toString().isEmpty()) {
+    qApp->enqueueError("Nome Fantasia emitente vazio!", this);
+    ok = false;
+  }
 
-  if (modelLoja.data(0, "tel").toString().isEmpty()) { return qApp->enqueueError(false, "Telefone emitente vazio!", this); }
+  if (modelLoja.data(0, "tel").toString().isEmpty()) {
+    qApp->enqueueError("Telefone emitente vazio!", this);
+    ok = false;
+  }
 
   // -------------------------------------------------------------------------
 
   queryLojaEnd.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", modelLoja.data(0, "idLoja"));
 
-  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { return qApp->enqueueError(false, "Erro lendo tabela de endereços da loja: " + queryLojaEnd.lastError().text(), this); }
+  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) {
+    qApp->enqueueError("Erro lendo tabela de endereços da loja: " + queryLojaEnd.lastError().text(), this);
+    ok = false;
+  }
 
-  if (clearStr(queryLojaEnd.value("CEP").toString()).isEmpty()) { return qApp->enqueueError(false, "CEP vazio!", this); }
+  if (clearStr(queryLojaEnd.value("CEP").toString()).isEmpty()) {
+    qApp->enqueueError("CEP vazio!", this);
+    ok = false;
+  }
 
-  if (queryLojaEnd.value("logradouro").toString().isEmpty()) { return qApp->enqueueError(false, "Logradouro vazio!", this); }
+  if (queryLojaEnd.value("logradouro").toString().isEmpty()) {
+    qApp->enqueueError("Logradouro vazio!", this);
+    ok = false;
+  }
 
-  if (queryLojaEnd.value("numero").toString().isEmpty()) { return qApp->enqueueError(false, "Número vazio!", this); }
+  if (queryLojaEnd.value("numero").toString().isEmpty()) {
+    qApp->enqueueError("Número vazio!", this);
+    ok = false;
+  }
 
-  if (queryLojaEnd.value("bairro").toString().isEmpty()) { return qApp->enqueueError(false, "Bairro vazio!", this); }
+  if (queryLojaEnd.value("bairro").toString().isEmpty()) {
+    qApp->enqueueError("Bairro vazio!", this);
+    ok = false;
+  }
 
-  if (queryLojaEnd.value("cidade").toString().isEmpty()) { return qApp->enqueueError(false, "Cidade vazio!", this); }
+  if (queryLojaEnd.value("cidade").toString().isEmpty()) {
+    qApp->enqueueError("Cidade vazio!", this);
+    ok = false;
+  }
 
-  if (queryLojaEnd.value("uf").toString().isEmpty()) { return qApp->enqueueError(false, "UF vazio!", this); }
+  if (queryLojaEnd.value("uf").toString().isEmpty()) {
+    qApp->enqueueError("UF vazio!", this);
+    ok = false;
+  }
 
   // [Destinatario]
 
-  if (modelVenda.data(0, "idCliente").toString().isEmpty()) { return qApp->enqueueError(false, "idCliente vazio!", this); }
+  if (modelVenda.data(0, "idCliente").toString().isEmpty()) {
+    qApp->enqueueError("idCliente vazio!", this);
+    ok = false;
+  }
 
   // -------------------------------------------------------------------------
 
   queryCliente.prepare("SELECT nome_razao, pfpj, cpf, cnpj, inscEstadual, tel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", modelVenda.data(0, "idCliente"));
 
-  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro buscando endereço do destinatário: " + queryCliente.lastError().text(), this); }
+  if (not queryCliente.exec() or not queryCliente.first()) {
+    qApp->enqueueError("Erro buscando endereço do destinatário: " + queryCliente.lastError().text(), this);
+    ok = false;
+  }
 
-  if (queryCliente.value("nome_razao").toString().isEmpty()) { return qApp->enqueueError(false, "Nome/Razão vazio!", this); }
+  if (queryCliente.value("nome_razao").toString().isEmpty()) {
+    qApp->enqueueError("Nome/Razão vazio!", this);
+    ok = false;
+  }
 
   if (queryCliente.value("pfpj").toString() == "PF") {
-    if (clearStr(queryCliente.value("cpf").toString()).isEmpty()) { return qApp->enqueueError(false, "CPF vazio!", this); }
+    if (clearStr(queryCliente.value("cpf").toString()).isEmpty()) {
+      qApp->enqueueError("CPF vazio!", this);
+      ok = false;
+    }
   }
 
   if (queryCliente.value("pfpj").toString() == "PJ") {
-    if (clearStr(queryCliente.value("cnpj").toString()).isEmpty()) { return qApp->enqueueError(false, "CNPJ destinatário vazio!", this); }
+    if (clearStr(queryCliente.value("cnpj").toString()).isEmpty()) {
+      qApp->enqueueError("CNPJ destinatário vazio!", this);
+      ok = false;
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -1698,15 +1755,30 @@ bool CadastrarNFe::validar() {
   queryEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndereco.bindValue(":idEndereco", ui->itemBoxEnderecoFaturamento->getId());
 
-  if (not queryEndereco.exec() or not queryEndereco.first()) { return qApp->enqueueError(false, "Erro buscando endereço cliente: " + queryEndereco.lastError().text(), this); }
+  if (not queryEndereco.exec() or not queryEndereco.first()) {
+    qApp->enqueueError("Erro buscando endereço cliente: " + queryEndereco.lastError().text(), this);
+    ok = false;
+  }
 
-  if (queryEndereco.value("cep").toString().isEmpty()) { return qApp->enqueueError(false, "CEP cliente vazio!", this); }
+  if (queryEndereco.value("cep").toString().isEmpty()) {
+    qApp->enqueueError("CEP cliente vazio!", this);
+    ok = false;
+  }
 
-  if (queryEndereco.value("logradouro").toString().isEmpty()) { return qApp->enqueueError(false, "Logradouro cliente vazio!", this); }
+  if (queryEndereco.value("logradouro").toString().isEmpty()) {
+    qApp->enqueueError("Logradouro cliente vazio!", this);
+    ok = false;
+  }
 
-  if (queryEndereco.value("numero").toString().isEmpty()) { return qApp->enqueueError(false, "Número endereço do cliente vazio!", this); }
+  if (queryEndereco.value("numero").toString().isEmpty()) {
+    qApp->enqueueError("Número endereço do cliente vazio!", this);
+    ok = false;
+  }
 
-  if (queryEndereco.value("bairro").toString().isEmpty()) { return qApp->enqueueError(false, "Bairro do cliente vazio!", this); }
+  if (queryEndereco.value("bairro").toString().isEmpty()) {
+    qApp->enqueueError("Bairro do cliente vazio!", this);
+    ok = false;
+  }
 
   // -------------------------------------------------------------------------
 
@@ -1715,7 +1787,8 @@ bool CadastrarNFe::validar() {
   queryIBGEEmit.bindValue(":uf", queryLojaEnd.value("uf"));
 
   if (not queryIBGEEmit.exec() or not queryIBGEEmit.first()) {
-    return qApp->enqueueError(false, "Erro buscando código do munícipio, verifique se a cidade/estado estão cadastrados corretamente!", this);
+    qApp->enqueueError("Erro buscando código do munícipio, verifique se a cidade/estado estão cadastrados corretamente!", this);
+    ok = false;
   }
 
   // -------------------------------------------------------------------------
@@ -1725,14 +1798,21 @@ bool CadastrarNFe::validar() {
   queryIBGEDest.bindValue(":uf", queryEndereco.value("uf"));
 
   if (not queryIBGEDest.exec() or not queryIBGEDest.first()) {
-    return qApp->enqueueError(false, "Erro buscando código do munícipio, verifique se a cidade/estado estão cadastrados corretamente!", this);
+    qApp->enqueueError("Erro buscando código do munícipio, verifique se a cidade/estado estão cadastrados corretamente!", this);
+    ok = false;
   }
 
   // -------------------------------------------------------------------------
 
-  if (queryEndereco.value("cidade").toString().isEmpty()) { return qApp->enqueueError(false, "Cidade cliente vazio!", this); }
+  if (queryEndereco.value("cidade").toString().isEmpty()) {
+    qApp->enqueueError("Cidade cliente vazio!", this);
+    ok = false;
+  }
 
-  if (queryEndereco.value("uf").toString().isEmpty()) { return qApp->enqueueError(false, "UF cliente vazio!", this); }
+  if (queryEndereco.value("uf").toString().isEmpty()) {
+    qApp->enqueueError("UF cliente vazio!", this);
+    ok = false;
+  }
 
   // -------------------------------------------------------------------------
 
@@ -1740,7 +1820,10 @@ bool CadastrarNFe::validar() {
   queryPartilhaInter.bindValue(":origem", queryLojaEnd.value("uf"));
   queryPartilhaInter.bindValue(":destino", queryEndereco.value("uf"));
 
-  if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) { return qApp->enqueueError(false, "Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text(), this); }
+  if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) {
+    qApp->enqueueError("Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text(), this);
+    ok = false;
+  }
 
   // -------------------------------------------------------------------------
 
@@ -1748,7 +1831,10 @@ bool CadastrarNFe::validar() {
   queryPartilhaIntra.bindValue(":origem", queryEndereco.value("uf"));
   queryPartilhaIntra.bindValue(":destino", queryEndereco.value("uf"));
 
-  if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) { return qApp->enqueueError(false, "Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text(), this); }
+  if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) {
+    qApp->enqueueError("Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text(), this);
+    ok = false;
+  }
 
   // [Produto]
 
@@ -1763,7 +1849,7 @@ bool CadastrarNFe::validar() {
     if (modelViewProdutoEstoque.data(row, "total").toString().isEmpty()) { qApp->enqueueWarning("Total produto vazio!", this); }
   }
 
-  return true;
+  return ok;
 }
 
 void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {

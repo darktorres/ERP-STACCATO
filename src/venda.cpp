@@ -980,23 +980,6 @@ bool Venda::cadastrar() {
 
     // -------------------------------------------------------------------------
 
-    QSqlQuery queryCopy;
-
-    if (not queryCopy.exec(
-            "INSERT INTO venda_has_produto2 (idVendaProdutoFK, idRelacionado, selecionado, entregou, recebeu, status, statusOriginal, idCompra, idNFeSaida, idNFeFutura, fornecedor, idVenda, idLoja, "
-            "idProduto, produto, obs, lote, prcUnitario, descUnitario, caixas, quant, un, unCaixa, codComercial, formComercial, parcial, desconto, parcialDesc, descGlobal, total, mostrarDesconto, "
-            "estoque, promocao, reposicaoEntrega, reposicaoReceb, dataPrevCompra, dataRealCompra, dataPrevConf, dataRealConf, dataPrevFat, dataRealFat, dataPrevColeta, dataRealColeta, dataPrevReceb, "
-            "dataRealReceb, dataPrevEnt, dataRealEnt) SELECT idVendaProduto1, idRelacionado, selecionado, entregou, recebeu, status, statusOriginal, idCompra, idNFeSaida, idNFeFutura, fornecedor, "
-            "idVenda, idLoja, idProduto, produto, obs, lote, prcUnitario, descUnitario, caixas, quant, un, unCaixa, codComercial, formComercial, parcial, desconto, parcialDesc, descGlobal, total, "
-            "mostrarDesconto, estoque, promocao, reposicaoEntrega, reposicaoReceb, dataPrevCompra, dataRealCompra, dataPrevConf, dataRealConf, dataPrevFat, dataRealFat, dataPrevColeta, "
-            "dataRealColeta, "
-            "dataPrevReceb, dataRealReceb, dataPrevEnt, dataRealEnt FROM venda_has_produto WHERE idVenda = '" +
-            ui->lineEditVenda->text() + "'")) {
-      return qApp->enqueueError(false, "Erro copiando dados: " + queryCopy.lastError().text(), this);
-    }
-
-    // -------------------------------------------------------------------------
-
     QSqlQuery query3;
     query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
     query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());

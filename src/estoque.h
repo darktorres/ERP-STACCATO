@@ -15,7 +15,7 @@ public:
   // REFAC: turn showWindow into a enum
   explicit Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
-  auto criarConsumo(const int idVendaProduto, const double quant = 0) -> bool;
+  auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> bool;
 
 private:
   // attributes
@@ -37,7 +37,7 @@ private:
   // methods
   auto calcularRestante() -> void;
   auto desfazerConsumo() -> bool;
-  auto dividirCompra(const int idVendaProduto, const double quant) -> std::optional<int>;
+  auto dividirCompra(const int idVendaProduto2, const double quant) -> std::optional<int>;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto setupTables() -> void;

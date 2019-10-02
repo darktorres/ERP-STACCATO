@@ -56,7 +56,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
 
   QSqlQuery query;
-  query.prepare("SELECT unCaixa FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
+  query.prepare("SELECT unCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando unCaixa: " + query.lastError().text(), this); }
@@ -210,7 +210,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturada ainda
 
   auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
-  if (not estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto").toInt(), quantConsumir)) { return false; }
+  if (not estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt(), quantConsumir)) { return false; }
 
   if (quantConsumir < quantVenda) {
     if (not dividirVenda(quantConsumir, quantVenda, rowProduto)) { return false; }

@@ -1023,9 +1023,10 @@ void Venda::criarConsumos() {
   if (not query2.exec()) { return qApp->enqueueError("Erro buscando produtos estoque: " + query2.lastError().text(), this); }
 
   while (query2.next()) {
-    //    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
+    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
 
     //    if (not estoque->criarConsumo(query2.value("idVendaProduto2").toInt(), query2.value("idPedido2").toInt(), query2.value("quant").toDouble())) { return; }
+    if (not estoque->criarConsumo(query2.value("idVendaProduto2").toInt(), query2.value("quant").toDouble())) { return; }
   }
 }
 

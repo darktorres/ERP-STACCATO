@@ -46,6 +46,8 @@ int TableView::getColumnIndex(const QString &column) const {
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
+  if (columnIndex == -1 and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
+
   return columnIndex;
 }
 

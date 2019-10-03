@@ -1063,31 +1063,37 @@ bool Venda::cancelamento() {
   // -------------------------------------------------------------------------
 
   QSqlQuery query4;
-  query4.prepare("UPDATE venda_has_produto2 SET status = 'CANCELADO' WHERE idVenda = :idVenda AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
+  query4.prepare("UPDATE venda_has_produto2 SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query4.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query4.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query4.lastError().text(), this); }
+
+  QSqlQuery query5;
+  query5.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query5.bindValue(":idVenda", ui->lineEditVenda->text());
+
+  if (not query5.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query5.lastError().text(), this); }
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) {
       if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
 
-      QSqlQuery query5;
-      query5.prepare("UPDATE cliente SET credito = credito + :valor WHERE idCliente = :idCliente");
-      query5.bindValue(":valor", credito);
-      query5.bindValue(":idCliente", model.data(0, "idCliente"));
+      QSqlQuery query6;
+      query6.prepare("UPDATE cliente SET credito = credito + :valor WHERE idCliente = :idCliente");
+      query6.bindValue(":valor", credito);
+      query6.bindValue(":idCliente", model.data(0, "idCliente"));
 
-      if (not query5.exec()) { return qApp->enqueueError(false, "Erro voltando credito do cliente: " + query5.lastError().text(), this); }
+      if (not query6.exec()) { return qApp->enqueueError(false, "Erro voltando credito do cliente: " + query6.lastError().text(), this); }
     }
   }
 
   // TODO: 0nao deixar cancelar se tiver ocorrido algum evento de conta
-  QSqlQuery query6;
-  query6.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
-  query6.bindValue(":idVenda", ui->lineEditVenda->text());
+  QSqlQuery query7;
+  query7.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query7.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query6.exec()) { return qApp->enqueueError(false, "Erro marcando contas como canceladas: " + query6.lastError().text(), this); }
+  if (not query7.exec()) { return qApp->enqueueError(false, "Erro marcando contas como canceladas: " + query7.lastError().text(), this); }
 
   return true;
 }

@@ -501,7 +501,8 @@ void Venda::registerMode() {
 }
 
 void Venda::updateMode() {
-  ui->splitter_2->hide();
+  ui->tableFluxoCaixa2->hide();
+  ui->widgetPgts->hide();
   ui->pushButtonGerarExcel->show();
   ui->pushButtonImprimir->show();
   ui->pushButtonCadastrarPedido->hide();
@@ -613,7 +614,8 @@ bool Venda::viewRegister() {
 
     for (int col = 0; col < ui->treeView->model()->columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
 
-    ui->splitter_2->hide();
+    ui->tableFluxoCaixa2->hide();
+    ui->widgetPgts->hide();
 
     return true;
   }();
@@ -1256,7 +1258,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
 
   if (not data("representacao").toBool()) { ui->tableFluxoCaixa->hideColumn("representacao"); }
 
-  ui->splitter_2->show();
+  ui->tableFluxoCaixa2->show();
   ui->widgetPgts->show();
   ui->widgetPgts->resetarPagamentos();
 

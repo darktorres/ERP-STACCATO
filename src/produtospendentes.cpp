@@ -126,7 +126,9 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
 
   ui->tableProdutos->hideColumn("idVendaProduto2");
+  ui->tableProdutos->hideColumn("idVendaProdutoFK");
   ui->tableProdutos->hideColumn("idProduto");
+  ui->tableProdutos->hideColumn("idCompra");
 }
 
 bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {

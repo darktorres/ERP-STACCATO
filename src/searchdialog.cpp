@@ -208,12 +208,14 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->ui->table->setItemDelegateForColumn("porcentagemFrete", new PorcentagemDelegate(parent));
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
 
-  sdLoja->hideColumns({"idLoja", "codUF", "desativado"});
+  sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "custoTransporte1", "custoTransporte2",
+                       "custoFuncionario"});
 
   sdLoja->setHeaderData("descricao", "Descrição");
   sdLoja->setHeaderData("nomeFantasia", "Nome Fantasia");
   sdLoja->setHeaderData("razaoSocial", "Razão Social");
   sdLoja->setHeaderData("tel", "Tel.");
+  sdLoja->setHeaderData("tel2", "Tel. 2");
   sdLoja->setHeaderData("inscEstadual", "Insc. Est.");
   sdLoja->setHeaderData("sigla", "Sigla");
   sdLoja->setHeaderData("cnpj", "CNPJ");
@@ -232,9 +234,9 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->showAllProdutos = showAllProdutos;
   sdProd->compraAvulsa = compraAvulsa;
 
-  sdProd->hideColumns(
-      {"idEstoque", "atualizarTabelaPreco", "cfop", "codBarras", "comissao", "cst",   "custo",       "desativado", "descontinuado", "estoque",       "promocao", "icms",   "idFornecedor",
-       "idProduto", "idProdutoRelacionado", "ipi",  "markup",    "ncm",      "ncmEx", "observacoes", "origem",     "qtdPallet",     "representacao", "st",       "temLote"});
+  if (compraAvulsa) { sdProd->hideColumns({"statusEstoque", "estoqueRestante", "lote"}); }
+
+  sdProd->hideColumns({"desativado", "descontinuado", "estoque", "promocao", "idProduto", "representacao"});
 
   for (int column = 0, columnCount = sdProd->model.columnCount(); column < columnCount; ++column) {
     if (sdProd->model.record().fieldName(column).endsWith("Upd")) { sdProd->ui->table->setColumnHidden(column, true); }

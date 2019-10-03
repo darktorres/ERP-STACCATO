@@ -253,11 +253,13 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.proxyModel = new SortFilterProxyModel(&model, this);
 
   ui->table->setModel(&model);
-  ui->table->hideColumn("representacao");
-  ui->table->hideColumn("idPagamento");
-  ui->table->hideColumn("idLoja");
+
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
+
+  if (tipo == Tipo::Receber) { ui->table->hideColumn("representacao"); }
+  ui->table->hideColumn("idPagamento");
+  ui->table->hideColumn("idLoja");
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {

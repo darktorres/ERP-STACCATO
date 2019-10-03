@@ -79,6 +79,8 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("representacao");
   ui->table->hideColumn("st");
   ui->table->hideColumn("temLote");
+  ui->table->hideColumn("sticms");
+  ui->table->hideColumn("mva");
 
   for (int column = 0, columnCount = modelProduto.columnCount(); column < columnCount; ++column) {
     if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->table->setColumnHidden(column, true); }

@@ -29,7 +29,6 @@ void PagamentosDia::setupTables() {
   // TODO: 5colocar delegates
 
   ui->tableView->hideColumn("idConta");
-  ui->tableView->hideColumn("dataPagamento");
   ui->tableView->hideColumn("dataRealizado");
 
   ui->tableView->setItemDelegateForColumn("R$", new ReaisDelegate(this));

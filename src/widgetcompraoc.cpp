@@ -70,7 +70,6 @@ void WidgetCompraOC::setupTables() {
   ui->tableProduto->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
 
   ui->tableProduto->hideColumn("idVendaProdutoPF");
-  ui->tableProduto->hideColumn("idPedidoFK");
   ui->tableProduto->hideColumn("idCompra");
   ui->tableProduto->hideColumn("ordemCompra");
   ui->tableProduto->hideColumn("idPedido2");

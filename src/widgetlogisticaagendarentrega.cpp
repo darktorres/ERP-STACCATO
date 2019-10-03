@@ -63,7 +63,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   ui->tableProdutos->setModel(&modelProdutos);
 
-  ui->tableProdutos->hideColumn("idVendaProduto");
+  ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataRealEnt");
   ui->tableProdutos->hideColumn("idConsumo");
@@ -88,12 +88,12 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   ui->tableTranspAtual->setModel(&modelTranspAtual);
 
+  ui->tableTranspAtual->hideColumn("idVendaProduto2");
   ui->tableTranspAtual->hideColumn("id");
   ui->tableTranspAtual->hideColumn("idEstoque");
   ui->tableTranspAtual->hideColumn("idEvento");
   ui->tableTranspAtual->hideColumn("idVeiculo");
   ui->tableTranspAtual->hideColumn("idCompra");
-  ui->tableTranspAtual->hideColumn("idVendaProduto");
   ui->tableTranspAtual->hideColumn("idNFeSaida");
   ui->tableTranspAtual->hideColumn("idLoja");
   ui->tableTranspAtual->hideColumn("idProduto");
@@ -120,11 +120,11 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   ui->tableTranspAgend->setModel(&modelTranspAgend);
 
+  ui->tableTranspAgend->hideColumn("idVendaProduto2");
   ui->tableTranspAgend->hideColumn("id");
   ui->tableTranspAgend->hideColumn("idEvento");
   ui->tableTranspAgend->hideColumn("idVeiculo");
   ui->tableTranspAgend->hideColumn("idCompra");
-  ui->tableTranspAgend->hideColumn("idVendaProduto");
   ui->tableTranspAgend->hideColumn("idNFeSaida");
   ui->tableTranspAgend->hideColumn("idLoja");
   ui->tableTranspAgend->hideColumn("idProduto");

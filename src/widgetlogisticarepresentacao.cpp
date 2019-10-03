@@ -66,7 +66,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
 
   ui->table->setModel(&modelViewLogisticaRepresentacao);
 
-  ui->table->hideColumn("idPedido1");
+  ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("fornecedor");
   ui->table->hideColumn("idVendaProduto2");
 }

@@ -168,7 +168,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor);
 
-  ui->table->hideColumn("idPedido1");
+  ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("idPedidoFK");
   ui->table->hideColumn("selecionado");
@@ -179,7 +179,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("quantConsumida");
-  ui->table->hideColumn("idPedido");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");

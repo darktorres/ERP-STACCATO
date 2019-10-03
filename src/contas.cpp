@@ -159,21 +159,24 @@ void Contas::setupTables() {
   }
 
   ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
-  ui->tablePendentes->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->tablePendentes->setItemDelegateForColumn("grupo", new LineEditDelegate(LineEditDelegate::Tipo::Grupo, this));
 
   ui->tablePendentes->setPersistentColumns({"status", "contaDestino", "centroCusto"});
 
-  ui->tablePendentes->hideColumn("idCompra");
-  ui->tablePendentes->hideColumn("representacao");
+  if (tipo == Tipo::Receber) {
+    ui->tablePendentes->hideColumn("representacao");
+    ui->tablePendentes->hideColumn("idVenda");
+    ui->tablePendentes->hideColumn("comissao");
+    ui->tablePendentes->hideColumn("taxa");
+  }
+
+  if (tipo == Tipo::Pagar) { ui->tablePendentes->hideColumn("idCompra"); }
+
   ui->tablePendentes->hideColumn("idPagamento");
-  ui->tablePendentes->hideColumn("idVenda");
   ui->tablePendentes->hideColumn("idLoja");
   ui->tablePendentes->hideColumn("created");
   ui->tablePendentes->hideColumn("lastUpdated");
-  ui->tablePendentes->hideColumn("comissao");
-  ui->tablePendentes->hideColumn("taxa");
   ui->tablePendentes->hideColumn("desativado");
 
   // -------------------------------------------------------------------------
@@ -205,23 +208,25 @@ void Contas::setupTables() {
 
   ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-
   ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
-  ui->tableProcessados->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
 
   ui->tableProcessados->setPersistentColumns({"contaDestino", "centroCusto"});
 
-  ui->tableProcessados->hideColumn("representacao");
+  if (tipo == Tipo::Receber) {
+    ui->tableProcessados->hideColumn("representacao");
+    ui->tableProcessados->hideColumn("idVenda");
+    ui->tableProcessados->hideColumn("comissao");
+    ui->tableProcessados->hideColumn("taxa");
+  }
+
+  if (tipo == Tipo::Pagar) { ui->tableProcessados->hideColumn("idCompra"); }
+
   ui->tableProcessados->hideColumn("idPagamento");
-  ui->tableProcessados->hideColumn("idVenda");
-  ui->tableProcessados->hideColumn("idCompra");
   ui->tableProcessados->hideColumn("idLoja");
   ui->tableProcessados->hideColumn("created");
   ui->tableProcessados->hideColumn("lastUpdated");
-  ui->tableProcessados->hideColumn("comissao");
-  ui->tableProcessados->hideColumn("taxa");
   ui->tableProcessados->hideColumn("desativado");
 }
 

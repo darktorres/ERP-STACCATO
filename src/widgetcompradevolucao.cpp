@@ -49,6 +49,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("idVenda", "Venda");
   modelVendaProduto.setHeaderData("produto", "Produto");
   modelVendaProduto.setHeaderData("obs", "Obs.");
+  modelVendaProduto.setHeaderData("lote", "Lote");
   modelVendaProduto.setHeaderData("caixas", "Cx.");
   modelVendaProduto.setHeaderData("quant", "Quant.");
   modelVendaProduto.setHeaderData("un", "Un.");
@@ -63,7 +64,6 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("entregou");
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto1");
-  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idNFeSaida");
   ui->table->hideColumn("idNFeFutura");

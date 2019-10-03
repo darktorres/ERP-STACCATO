@@ -102,17 +102,16 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor);
 
-  ui->table->hideColumn("idVendaProduto2");
+  if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idRelacionado"); }
+  if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idVendaProduto1"); }
+  if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idVendaProduto2"); }
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantConsumida");
-  ui->table->hideColumn("idNfe");
-  ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idPedido1");
-  ui->table->hideColumn("idPedido2");
-  ui->table->hideColumn("idPedidoFK");
+  if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
+  if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idPedido2"); }
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");

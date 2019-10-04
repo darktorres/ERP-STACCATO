@@ -27,7 +27,7 @@ private:
   Ui::WidgetLogisticaEntregas *ui;
   // methods
   auto cancelarEntrega(const QModelIndexList &list) -> bool;
-  auto confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) -> bool;
+  auto confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) -> bool;
   auto processarConsultaNFe(const int idNFe, const QString &xml) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBuscar_textChanged(const QString &) -> void;

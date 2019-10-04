@@ -75,7 +75,7 @@ void WidgetCompraFaturar::updateTables() {
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) {
+bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
@@ -117,7 +117,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (not inputDlg.setFilter(idsCompra)) { return; }
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
-  const QDateTime dataReal = inputDlg.getDate();
+  const QDate dataReal = inputDlg.getDate();
 
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 

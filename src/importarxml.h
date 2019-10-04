@@ -15,12 +15,12 @@ class ImportarXML final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent = nullptr);
+  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent = nullptr);
   ~ImportarXML();
 
 private:
   // attributes
-  const QDateTime dataReal;
+  const QDate dataReal;
   const QStringList idsCompra;
   SqlRelationalTableModel modelCompra;
   SqlRelationalTableModel modelConsumo;

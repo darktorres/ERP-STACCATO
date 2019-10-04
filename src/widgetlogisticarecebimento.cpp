@@ -81,7 +81,7 @@ void WidgetLogisticaRecebimento::setupTables() {
   ui->table->hideColumn("fornecedor");
 }
 
-bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) {
+bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) {
   QSqlQuery query1;
   query1.prepare("UPDATE estoque SET status = 'ESTOQUE', recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
@@ -138,12 +138,9 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  const QDateTime dataReceb = inputDlg.getDateTime();
-  const QString recebidoPor = inputDlg.getRecebeu();
-
   if (not qApp->startTransaction()) { return; }
 
-  if (not processRows(list, dataReceb, recebidoPor)) { return qApp->rollbackTransaction(); }
+  if (not processRows(list, inputDlg.getDate(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

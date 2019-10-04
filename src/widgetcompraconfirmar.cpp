@@ -85,8 +85,8 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   if (inputDlg.exec() != InputDialogFinanceiro::Accepted) { return; }
 
-  const QDateTime dataPrevista = inputDlg.getDate();
-  const QDateTime dataConf = inputDlg.getNextDate();
+  const QDate dataPrevista = inputDlg.getDate();
+  const QDate dataConf = inputDlg.getNextDate();
 
   if (not qApp->startTransaction()) { return; }
 
@@ -98,8 +98,8 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   qApp->enqueueInformation("Compra confirmada!", this);
 }
 
-bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {
   // TODO: merge querySelect and QueryVenda
+bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) {
 
   QSqlQuery querySelect;
   querySelect.prepare("SELECT `idPedido2`, `idVendaProduto2` FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE");

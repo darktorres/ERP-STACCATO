@@ -82,7 +82,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
-  if (not processRows(list, input.getDateTime(), input.getRecebeu())) { return qApp->rollbackTransaction(); }
+  if (not processRows(list, input.getDate(), input.getRecebeu())) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -90,7 +90,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
   qApp->enqueueInformation("Atualizado!", this);
 }
 
-bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDateTime &dataEntrega, const QString &recebeu) {
+bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) {
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 

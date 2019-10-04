@@ -1,5 +1,6 @@
 #include <QDate>
 #include <QFile>
+#include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
 

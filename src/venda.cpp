@@ -1056,8 +1056,7 @@ bool Venda::cancelamento() {
 
   QSqlQuery query3;
   query3.prepare(
-      "UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, `idVendaProduto2` = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda) AND "
-      "status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
+      "UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, `idVendaProduto2` = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
   query3.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo vínculo da compra: " + query3.lastError().text(), this); }

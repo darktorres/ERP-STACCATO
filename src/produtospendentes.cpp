@@ -180,34 +180,6 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
   recarregarTabelas();
 }
 
-bool ProdutosPendentes::insere(const QDateTime &dataPrevista) {
-  QSqlQuery query;
-  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto2, fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
-                "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto2, :fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, "
-                ":formComercial, :codComercial, :codBarras, :dataPrevCompra)");
-  query.bindValue(":idVenda", modelViewProdutos.data(0, "idVenda"));
-  query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
-  query.bindValue(":fornecedor", modelViewProdutos.data(0, "fornecedor"));
-  query.bindValue(":idProduto", modelViewProdutos.data(0, "idProduto"));
-  query.bindValue(":descricao", modelViewProdutos.data(0, "produto"));
-  query.bindValue(":colecao", modelViewProdutos.data(0, "colecao"));
-  query.bindValue(":quant", ui->doubleSpinBoxComprar->value());
-  query.bindValue(":un", modelViewProdutos.data(0, "un"));
-  query.bindValue(":un2", modelViewProdutos.data(0, "un2"));
-  query.bindValue(":caixas", modelViewProdutos.data(0, "caixas"));
-  query.bindValue(":prcUnitario", modelViewProdutos.data(0, "custo").toDouble());
-  query.bindValue(":preco", modelViewProdutos.data(0, "custo").toDouble() * ui->doubleSpinBoxComprar->value());
-  query.bindValue(":kgcx", modelViewProdutos.data(0, "kgcx"));
-  query.bindValue(":formComercial", modelViewProdutos.data(0, "formComercial"));
-  query.bindValue(":codComercial", modelViewProdutos.data(0, "codComercial"));
-  query.bindValue(":codBarras", modelViewProdutos.data(0, "codBarras"));
-  query.bindValue(":dataPrevCompra", dataPrevista);
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
-
-  return true;
-}
-
 bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
   // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturada ainda
 
@@ -345,8 +317,6 @@ bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
 }
 
 bool ProdutosPendentes::dividirVenda(const QDecDouble quantSeparar, const QDecDouble quantVenda, const int rowProduto) {
-  if (not Log::createLog("idVendaProduto2 '" + modelProdutos.data(rowProduto, "idVendaProduto2").toString() + "': linha dividida para consumo parcial de estoque.")) { return false; }
-
   const int newRow = modelProdutos.insertRowAtEnd();
 
   // copiar colunas

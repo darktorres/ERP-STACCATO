@@ -142,7 +142,6 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   // TODO: 5refator this to start at 12
   int row = 0;
-  queryProduto.first();
 
   QSqlQuery queryUi; // TODO: put this query in 'setQuerys'?
   queryUi.prepare("SELECT ui FROM produto WHERE idProduto = :idProduto");

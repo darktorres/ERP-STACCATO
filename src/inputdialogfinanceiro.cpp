@@ -490,7 +490,6 @@ bool InputDialogFinanceiro::cadastrar() {
 
   if (tipo == Tipo::ConfirmarCompra) {
     for (const auto &item : list) {
-      // REFAC: setData already qApp->enqueueError internally, just set a return false everywhere
       if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) { return false; }
     }
   }

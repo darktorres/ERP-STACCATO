@@ -262,7 +262,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
   }
 
   bool ok;
-  int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 99999, 1, &ok);
+  int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
   if (not ok) { return {}; }
 
   QSqlQuery query2;
@@ -288,7 +288,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
       if (choice == QMessageBox::Yes) { break; }
 
       bool ok2;
-      oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 99999, 1, &ok2);
+      oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
       if (not ok2) { return {}; }
     }
   }

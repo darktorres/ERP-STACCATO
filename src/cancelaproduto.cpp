@@ -79,6 +79,8 @@ void CancelaProduto::setupTables() {
 }
 
 void CancelaProduto::on_pushButtonSalvar_clicked() {
+  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueError("Não implementado!", this); }
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
@@ -97,8 +99,6 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 void CancelaProduto::on_pushButtonCancelar_clicked() { close(); }
 
 bool CancelaProduto::cancelar(const QModelIndexList &list) {
-  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueError(false, "Não implementado!", this); }
-
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE `idPedido2` = :idPedido2");
 

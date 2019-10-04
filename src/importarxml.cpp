@@ -170,13 +170,11 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
-  ui->tableConsumo->hideColumn("idPedido");
+  ui->tableConsumo->hideColumn("idVendaProduto2");
+  ui->tableConsumo->hideColumn("idPedido2");
   ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("quantUpd");
-  ui->tableConsumo->hideColumn("idNFe");
   ui->tableConsumo->hideColumn("idEstoque");
-  ui->tableConsumo->hideColumn("idCompra");
-  ui->tableConsumo->hideColumn("idVendaProduto");
   ui->tableConsumo->hideColumn("idProduto");
   ui->tableConsumo->hideColumn("ncm");
   ui->tableConsumo->hideColumn("cfop");
@@ -249,16 +247,15 @@ void ImportarXML::setupTables() {
   ui->tableCompra->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableCompra->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableCompra->hideColumn("idPedido2");
+  ui->tableCompra->hideColumn("idPedidoFK");
+  ui->tableCompra->hideColumn("idVendaProduto2");
   ui->tableCompra->hideColumn("idRelacionado");
   ui->tableCompra->hideColumn("ordemRepresentacao");
-  ui->tableCompra->hideColumn("idVendaProduto");
   ui->tableCompra->hideColumn("selecionado");
   ui->tableCompra->hideColumn("statusFinanceiro");
   ui->tableCompra->hideColumn("quantUpd");
   ui->tableCompra->hideColumn("idCompra");
-  ui->tableCompra->hideColumn("idNFe");
-  ui->tableCompra->hideColumn("idEstoque");
-  ui->tableCompra->hideColumn("idPedido");
   ui->tableCompra->hideColumn("idProduto");
   ui->tableCompra->hideColumn("dataPrevCompra");
   ui->tableCompra->hideColumn("dataRealCompra");

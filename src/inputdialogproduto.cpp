@@ -111,7 +111,10 @@ void InputDialogProduto::setupTables() {
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("selecionado");
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
-  if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idPedido2"); }
+  if (tipo == Tipo::Faturamento) {
+    ui->table->hideColumn("idPedido2");
+    ui->table->hideColumn("idPedidoFK");
+  }
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");

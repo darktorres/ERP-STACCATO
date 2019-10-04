@@ -46,7 +46,6 @@ void WidgetCompraGerar::setupTables() {
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
 
-  modelProdutos.setHeaderData("selecionado", "");
   modelProdutos.setHeaderData("idVenda", "Código");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("descricao", "Descrição");

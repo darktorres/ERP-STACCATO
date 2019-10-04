@@ -132,7 +132,6 @@ void Devolucao::setupTables() {
 
   modelDevolvidos.setTable("venda_has_produto");
 
-  modelDevolvidos.setHeaderData("selecionado", "");
   modelDevolvidos.setHeaderData("status", "Status");
   modelDevolvidos.setHeaderData("statusOriginal", "Status Original");
   modelDevolvidos.setHeaderData("fornecedor", "Fornecedor");

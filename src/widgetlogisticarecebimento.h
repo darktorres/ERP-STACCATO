@@ -33,7 +33,7 @@ private:
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) -> bool;
+  auto processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) -> bool;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

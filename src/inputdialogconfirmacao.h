@@ -16,9 +16,9 @@ public:
 
   explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent = nullptr);
   ~InputDialogConfirmacao() final;
-  auto getDateTime() const -> QDateTime;
+  auto getDate() const -> QDate;
   auto getEntregou() const -> QString;
-  auto getNextDateTime() const -> QDateTime;
+  auto getNextDateTime() const -> QDate;
   auto getRecebeu() const -> QString;
   auto setFilterEntrega(const QString &id, const QString &idEvento) -> bool;
   auto setFilterRecebe(const QStringList &ids) -> bool;

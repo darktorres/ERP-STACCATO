@@ -129,7 +129,7 @@ void WidgetCompraGerar::updateTables() {
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateTime &dataCompra, const QDateTime &dataPrevista, const int oc) {
+bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) {
   QSqlQuery queryId;
 
   if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
@@ -241,7 +241,7 @@ void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &a
   }
 }
 
-std::optional<std::tuple<QDateTime, QDateTime>> WidgetCompraGerar::getDates(const QList<QModelIndex> &list) {
+std::optional<std::tuple<QDate, QDate>> WidgetCompraGerar::getDates(const QList<QModelIndex> &list) {
   QStringList ids;
 
   for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido1").toString(); }

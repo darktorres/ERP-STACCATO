@@ -13,7 +13,7 @@
 InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);
 
-  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogConfirmacao::on_dateEditEvento_dateChanged);
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogConfirmacao::on_dateEditEvento_dateChanged);
   connect(ui->pushButtonFaltando, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFaltando_clicked);
   connect(ui->pushButtonQuebrado, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebrado_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonSalvar_clicked);
@@ -22,8 +22,8 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
 
   setupTables();
 
-  ui->dateEditEvento->setDateTime(QDateTime::currentDateTime());
-  ui->dateEditProximo->setDateTime(QDateTime::currentDateTime());
+  ui->dateEditEvento->setDate(QDate::currentDate());
+  ui->dateEditProximo->setDate(QDate::currentDate());
 
   if (tipo == Tipo::Recebimento) {
     ui->labelProximoEvento->hide();
@@ -63,9 +63,9 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
 
 InputDialogConfirmacao::~InputDialogConfirmacao() { delete ui; }
 
-QDateTime InputDialogConfirmacao::getDateTime() const { return ui->dateEditEvento->dateTime(); }
+QDate InputDialogConfirmacao::getDate() const { return ui->dateEditEvento->date(); }
 
-QDateTime InputDialogConfirmacao::getNextDateTime() const { return ui->dateEditProximo->dateTime(); }
+QDate InputDialogConfirmacao::getNextDateTime() const { return ui->dateEditProximo->date(); }
 
 QString InputDialogConfirmacao::getRecebeu() const { return ui->lineEditRecebeu->text(); }
 

@@ -1,4 +1,4 @@
-#include <QDateTime>
+#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -265,7 +265,7 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->pushButtonConsultarNFe->setEnabled(isValid);
 }
 
-bool WidgetLogisticaEntregas::confirmarEntrega(const QDateTime &dataRealEnt, const QString &entregou, const QString &recebeu) {
+bool WidgetLogisticaEntregas::confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) {
   QSqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGUE' WHERE status IN ('ENTREGA AGEND.', 'EM ENTREGA') AND idVendaProduto2 = :idVendaProduto2");
 
@@ -311,13 +311,9 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  const QDateTime dataRealEnt = inputDlg.getDateTime();
-  const QString entregou = inputDlg.getEntregou();
-  const QString recebeu = inputDlg.getRecebeu();
-
   if (not qApp->startTransaction()) { return; }
 
-  if (not confirmarEntrega(dataRealEnt, entregou, recebeu)) { return qApp->rollbackTransaction(); }
+  if (not confirmarEntrega(inputDlg.getDate(), inputDlg.getEntregou(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

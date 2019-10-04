@@ -16,8 +16,8 @@ public:
 
   explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogFinanceiro();
-  auto getDate() const -> QDateTime;
-  auto getNextDate() const -> QDateTime;
+  auto getDate() const -> QDate;
+  auto getNextDate() const -> QDate;
   auto setFilter(const QString &idCompra) -> bool;
 
 private:

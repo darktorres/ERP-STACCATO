@@ -60,7 +60,7 @@ void InputDialogProduto::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged, connectionType);
-  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged, connectionType);
   connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged, connectionType);
   connect(ui->doubleSpinBoxST, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked, connectionType);
@@ -69,7 +69,7 @@ void InputDialogProduto::setConnections() {
 
 void InputDialogProduto::unsetConnections() {
   disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
-  disconnect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
+  disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxST, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
@@ -173,9 +173,9 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   return true;
 }
 
-QDateTime InputDialogProduto::getDate() const { return ui->dateEditEvento->dateTime(); }
+QDate InputDialogProduto::getDate() const { return ui->dateEditEvento->date(); }
 
-QDateTime InputDialogProduto::getNextDate() const { return ui->dateEditProximo->dateTime(); }
+QDate InputDialogProduto::getNextDate() const { return ui->dateEditProximo->date(); }
 
 void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
   disconnect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);

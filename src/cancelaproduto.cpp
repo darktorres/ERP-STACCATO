@@ -49,14 +49,13 @@ void CancelaProduto::setupTables() {
 
   ui->table->setModel(&model);
 
+  ui->table->hideColumn("idPedidoFK");
   ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantConsumida");
-  ui->table->hideColumn("idNfe");
-  ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("idProduto");

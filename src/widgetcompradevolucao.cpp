@@ -39,7 +39,7 @@ void WidgetCompraDevolucao::updateTables() {
 }
 
 void WidgetCompraDevolucao::setupTables() {
-  modelVendaProduto.setTable("venda_has_produto");
+  modelVendaProduto.setTable("venda_has_produto2");
 
   modelVendaProduto.setSort("idVenda");
 
@@ -63,7 +63,8 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("recebeu");
   ui->table->hideColumn("entregou");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idVendaProduto1");
+  ui->table->hideColumn("idVendaProduto2");
+  ui->table->hideColumn("idVendaProdutoFK");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idNFeSaida");
   ui->table->hideColumn("idNFeFutura");
@@ -161,7 +162,8 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       for (int column = 0; column < modelConsumo.columnCount(); ++column) {
         if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
-        if (modelConsumo.fieldIndex("idVendaProduto") == column) { continue; }
+        if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
+        if (modelConsumo.fieldIndex("idPedido2") == column) { continue; }
         if (modelConsumo.fieldIndex("created") == column) { continue; }
         if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 

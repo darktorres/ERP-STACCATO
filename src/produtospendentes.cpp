@@ -273,7 +273,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":quant", excedente);
     query.bindValue(":un", modelViewProdutos.data(row, "un"));
     query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
-    query.bindValue(":caixas", excedente * modelProdutos.data(row, "unCaixa").toDouble());
+    query.bindValue(":caixas", excedente / modelProdutos.data(row, "unCaixa").toDouble());
     query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo").toDouble());
     query.bindValue(":preco", modelViewProdutos.data(row, "custo").toDouble() * excedente);
     query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));

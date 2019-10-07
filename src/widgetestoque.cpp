@@ -1,22 +1,13 @@
 #include <QDebug>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSortFilterProxyModel>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QSqlRecord>
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
-#include "importarxml.h"
 #include "sortfilterproxymodel.h"
 #include "ui_widgetestoque.h"
 #include "usersession.h"
 #include "widgetestoque.h"
 #include "xlsxdocument.h"
-#include "xml.h"
 
 WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
 
@@ -27,9 +18,24 @@ void WidgetEstoque::setConnections() {
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
-  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
-  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
-  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(
+      ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this,
+      [&](const bool checked) {
+        if (checked) { setupTables(); }
+      },
+      connectionType);
+  connect(
+      ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this,
+      [&](const bool checked) {
+        if (checked) { setupTables(); }
+      },
+      connectionType);
+  connect(
+      ui->radioButtonMaior, &QRadioButton::toggled, this,
+      [&](const bool checked) {
+        if (checked) { setupTables(); }
+      },
+      connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated, connectionType);
 }
 

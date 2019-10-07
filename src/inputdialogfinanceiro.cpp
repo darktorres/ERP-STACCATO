@@ -143,6 +143,8 @@ QDate InputDialogFinanceiro::getDate() const { return ui->dateEditEvento->date()
 QDate InputDialogFinanceiro::getNextDate() const { return ui->dateEditProximo->date(); }
 
 void InputDialogFinanceiro::setupTables() {
+  // TODO: montar TreeView pf/pf2 (pelo menos no historico)
+
   modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2");
 
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
@@ -428,7 +430,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   }
 
   QSqlQuery query;
-  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto2 pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE idCompra = :idCompra");
+  query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }

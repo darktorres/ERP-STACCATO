@@ -109,7 +109,6 @@ void Devolucao::setupTables() {
   ui->tableProdutos->hideColumn("idNFeFutura");
   ui->tableProdutos->hideColumn("idLoja");
   ui->tableProdutos->hideColumn("idVenda");
-  ui->tableProdutos->hideColumn("item");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->hideColumn("dataPrevCompra");
@@ -166,7 +165,6 @@ void Devolucao::setupTables() {
   ui->tableDevolvidos->hideColumn("idNFeFutura");
   ui->tableDevolvidos->hideColumn("idLoja");
   ui->tableDevolvidos->hideColumn("idVenda");
-  ui->tableDevolvidos->hideColumn("item");
   ui->tableDevolvidos->hideColumn("idProduto");
   ui->tableDevolvidos->hideColumn("idCompra");
   ui->tableDevolvidos->hideColumn("parcial");
@@ -473,6 +471,17 @@ bool Devolucao::inserirItens(const int currentRow) {
   //----------------------------------------------
 
   if (not modelProdutos.submitAll()) { return false; }
+
+  //----------------------------------------------
+
+  // Model faz atualização da linha atual antes de inserir a linha do restante, fazendo com que 'CALL update_venda_produto_status' tenha apenas o status de 'DEVOLVIDO' visível colocando o status
+  // errado em VP1. Por isso é feito uma chamada manual da procedure após a inserção da linha
+
+  const QString idVendaProdutoFK = modelProdutos.data(currentRow, "idVendaProdutoFK").toString();
+
+  QSqlQuery query;
+
+  if (not query.exec("CALL update_venda_produto_status(" + idVendaProdutoFK + ")")) { return false; }
 
   return true;
 }

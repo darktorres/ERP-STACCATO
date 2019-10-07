@@ -139,32 +139,51 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
 
   QSqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE status = 'INICIADO' AND "
-                     "idVendaProduto2 = :idVendaProduto2");
+                     "idVendaProdutoFK = :idVendaProduto1");
+
+  QSqlQuery queryCompra1;
+  queryCompra1.prepare("UPDATE pedido_fornecedor_has_produto set STATUS = 'EM COMPRA', idCompra = :idCompra, ordemCompra = :ordemCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
+                       ":dataPrevConf WHERE status = 'PENDENTE' AND idPedido1 = :idPedido1");
+
+  QSqlQuery queryCompra2;
+  queryCompra2.prepare("UPDATE pedido_fornecedor_has_produto2 set STATUS = 'EM COMPRA', idCompra = :idCompra, ordemCompra = :ordemCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
+                       ":dataPrevConf WHERE status = 'PENDENTE' AND idPedidoFK = :idPedido1");
 
   for (const auto &index : list) {
-    const auto row = index.row();
-
-    if (not modelProdutos.setData(row, "status", "EM COMPRA")) { return false; }
-    if (not modelProdutos.setData(row, "idCompra", idCompra)) { return false; }
-    if (not modelProdutos.setData(row, "ordemCompra", oc)) { return false; }
-    if (not modelProdutos.setData(row, "dataRealCompra", dataCompra)) { return false; }
-    if (not modelProdutos.setData(row, "dataPrevConf", dataPrevista)) { return false; }
-
     // salvar status na venda
 
-    const int idVendaProduto2 = modelProdutos.data(row, "idVendaProduto2").toInt();
+    const int idVendaProduto1 = modelProdutos.data(index.row(), "idVendaProduto1").toInt();
+    const int idPedido1 = modelProdutos.data(index.row(), "idPedido1").toInt();
 
-    if (idVendaProduto2 != 0) {
+    if (idVendaProduto1 != 0) {
       queryVenda.bindValue(":idCompra", idCompra);
       queryVenda.bindValue(":dataRealCompra", dataCompra);
       queryVenda.bindValue(":dataPrevConf", dataPrevista);
-      queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
+      queryVenda.bindValue(":idVendaProduto1", idVendaProduto1);
 
       if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text(), this); }
     }
-  }
 
-  if (not modelProdutos.submitAll()) { return false; }
+    // ---------------------------------------------------------
+
+    queryCompra1.bindValue(":idCompra", idCompra);
+    queryCompra1.bindValue(":ordemCompra", ordemCompra);
+    queryCompra1.bindValue(":dataRealCompra", dataCompra);
+    queryCompra1.bindValue(":dataPrevConf", dataPrevista);
+    queryCompra1.bindValue(":idPedido1", idPedido1);
+
+    if (not queryCompra1.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra1.lastError().text(), this); }
+
+    // ---------------------------------------------------------
+
+    queryCompra2.bindValue(":idCompra", idCompra);
+    queryCompra2.bindValue(":ordemCompra", ordemCompra);
+    queryCompra2.bindValue(":dataRealCompra", dataCompra);
+    queryCompra2.bindValue(":dataPrevConf", dataPrevista);
+    queryCompra2.bindValue(":idPedido1", idPedido1);
+
+    if (not queryCompra2.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra2.lastError().text(), this); }
+  }
 
   return true;
 }
@@ -457,19 +476,35 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
 }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
-  QSqlQuery query;
-  query.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
-                "idVendaProduto2 = :idVendaProduto2");
+  QSqlQuery query1;
+  query1.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
+                 "idVendaProdutoFK = :idVendaProduto1");
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido1 = :idPedido1");
+
+  QSqlQuery query3;
+  query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE idPedidoFK = :idPedidoFK");
 
   for (const auto &index : list) {
-    if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) { return false; }
+    query1.bindValue(":idVendaProduto1", modelProdutos.data(index.row(), "idVendaProduto1"));
 
-    query.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
+    if (not query1.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query1.lastError().text(), this); }
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query.lastError().text(), this); }
+    // ---------------------------------------------------------
+
+    query2.bindValue(":idPedido1", modelProdutos.data(index.row(), "idPedido1"));
+
+    if (not query2.exec()) { return qApp->enqueueError(false, "Erro cancelando compra: " + query2.lastError().text(), this); }
+
+    // ---------------------------------------------------------
+
+    query3.bindValue(":idPedidoFK", modelProdutos.data(index.row(), "idPedido1"));
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro cancelando compra: " + query3.lastError().text(), this); }
   }
 
-  return modelProdutos.submitAll();
+  return true;
 }
 
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {

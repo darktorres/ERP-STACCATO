@@ -27,9 +27,9 @@ void WidgetEstoque::setConnections() {
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
-  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro, connectionType);
-  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro, connectionType);
-  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro, connectionType);
+  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated, connectionType);
 }
 
@@ -58,7 +58,7 @@ void WidgetEstoque::setupTables() {
 
   ui->table->setModel(&model);
 
-  ui->table->hideColumn("contabil");
+  ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
@@ -97,19 +97,17 @@ void WidgetEstoque::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetEstoque::montaFiltro() {
-  const bool contabil = ui->radioButtonEstoqueContabil->isChecked();
-
-  contabil ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
-
   const QString text = ui->lineEditBusca->text().replace("-", " ").replace("(", "").replace(")", "");
 
   const QString match = text.isEmpty() ? ""
                                        : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
+  const bool contabil = ui->radioButtonEstoqueContabil->isChecked();
+
   const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "HAVING restante <= 0" : contabil ? "" : "HAVING restante > 0";
 
-  const QString filtroContabil = ui->radioButtonEstoqueContabil->isChecked() ? " HAVING contabil > 0" : "";
+  const QString filtroContabil = contabil ? " HAVING contabil > 0" : "";
 
   model.setQuery(
       "SELECT `n`.`cnpjDest` AS `cnpjDest`, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + e.ajuste AS contabil, e.restante AS "

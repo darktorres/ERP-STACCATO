@@ -470,14 +470,14 @@ bool Devolucao::inserirItens(const int currentRow) {
 
   //----------------------------------------------
 
+  const QString idVendaProdutoFK = modelProdutos.data(currentRow, "idVendaProdutoFK").toString();
+
   if (not modelProdutos.submitAll()) { return false; }
 
   //----------------------------------------------
 
   // Model faz atualização da linha atual antes de inserir a linha do restante, fazendo com que 'CALL update_venda_produto_status' tenha apenas o status de 'DEVOLVIDO' visível colocando o status
   // errado em VP1. Por isso é feito uma chamada manual da procedure após a inserção da linha
-
-  const QString idVendaProdutoFK = modelProdutos.data(currentRow, "idVendaProdutoFK").toString();
 
   QSqlQuery query;
 

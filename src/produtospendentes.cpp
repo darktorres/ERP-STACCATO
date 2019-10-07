@@ -247,7 +247,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":quant", excedente);
     query.bindValue(":un", modelViewProdutos.data(row, "un"));
     query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
-    query.bindValue(":caixas", excedente * modelProdutos.data(row, "unCaixa").toDouble());
+    query.bindValue(":caixas", excedente / modelProdutos.data(row, "unCaixa").toDouble());
     query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo").toDouble());
     query.bindValue(":preco", modelViewProdutos.data(row, "custo").toDouble() * excedente);
     query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));
@@ -264,11 +264,11 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
 
 bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
   QSqlQuery query;
-  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto2, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
-                "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto2, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, "
+  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto1, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
+                "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto1, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, "
                 ":kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
   query.bindValue(":idVenda", modelViewProdutos.data(row, "idVenda"));
-  query.bindValue(":idVendaProduto2", modelViewProdutos.data(row, "idVendaProduto2"));
+  query.bindValue(":idVendaProduto1", modelViewProdutos.data(row, "idVendaProdutoFK"));
   query.bindValue(":fornecedor", modelViewProdutos.data(row, "fornecedor"));
   query.bindValue(":idProduto", modelViewProdutos.data(row, "idProduto"));
   query.bindValue(":descricao", modelViewProdutos.data(row, "produto"));
@@ -349,7 +349,7 @@ bool ProdutosPendentes::dividirVenda(const QDecDouble quantSeparar, const QDecDo
   const QDecDouble parcialDescNovo = QDecDouble(modelProdutos.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
   const QDecDouble totalNovo = QDecDouble(modelProdutos.data(newRow, "total").toDouble()) * proporcaoNovo;
 
-  if (not modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto"))) { return false; }
+  if (not modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"))) { return false; }
   if (not modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar).toDouble())) { return false; }
   if (not modelProdutos.setData(newRow, "caixas", ((quantVenda - quantSeparar) / unCaixa).toDouble())) { return false; }
   if (not modelProdutos.setData(newRow, "parcial", parcialNovo.toDouble())) { return false; }

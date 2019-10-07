@@ -205,7 +205,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
   // -------------------------------------------------------------------------
 
-  const auto idPedido = dividirCompra(idVendaProduto2, quant);
+  const auto idPedido2 = dividirCompra(idVendaProduto2, quant);
 
   // -------------------------------------------------------------------------
 
@@ -245,7 +245,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
-  if (idPedido and not modelConsumo.setData(rowConsumo, "idPedido", idPedido.value())) { return false; }
+  if (idPedido2 and not modelConsumo.setData(rowConsumo, "idPedido2", idPedido2.value())) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
@@ -274,8 +274,8 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
   // senao fazer a quebra
 
   QSqlQuery query1;
-  query1.prepare("SELECT pf.codComercial, pf.idCompra, pf.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON "
-                 "pf.idPedido = ehc.idPedido WHERE e.idEstoque = :idEstoque");
+  query1.prepare("SELECT pf.codComercial, pf.idCompra, pf.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON "
+                 "pf.idPedido2 = ehc.idPedido2 WHERE e.idEstoque = :idEstoque");
   query1.bindValue(":idEstoque", idEstoque);
 
   if (not query1.exec() or not query1.first()) {
@@ -327,7 +327,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
     modelCompra.insertRow(newRow);
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
-      if (column == modelCompra.fieldIndex("idPedido")) { continue; }
+      if (column == modelCompra.fieldIndex("idPedido2")) { continue; }
       if (column == modelCompra.fieldIndex("created")) { continue; }
       if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
@@ -343,7 +343,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
     const double proporcaoNovo = quant / quantOriginal;
     const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
 
-    if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(row, "idPedido"))) { return {}; }
+    if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(row, "idPedido2"))) { return {}; }
     if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return {}; }
     if (not modelCompra.setData(newRow, "idVendaProduto2", idVendaProduto2)) { return {}; }
     if (not modelCompra.setData(newRow, "quant", quant)) { return {}; }
@@ -357,7 +357,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
     if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return {}; }
   }
 
-  const int id = modelCompra.data(row, "idPedido").toInt();
+  const int id = modelCompra.data(row, "idPedido2").toInt();
 
   if (not modelCompra.submitAll()) { return {}; }
 

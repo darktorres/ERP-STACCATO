@@ -26,10 +26,6 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
   const QString tipoUsuario = UserSession::tipoUsuario();
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->pushButtonExibirNfe->hide(); }
-
-  // TODO: why is this hidden?
-  ui->labelRestante_2->hide();
-  ui->doubleSpinBoxComprometidoNaoEntregue->hide();
 }
 
 Estoque::~Estoque() { delete ui; }
@@ -57,6 +53,8 @@ void Estoque::setupTables() {
 
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
 
+  ui->tableEstoque->hideColumn("restante");
+  ui->tableEstoque->hideColumn("ajuste");
   ui->tableEstoque->hideColumn("idNFe");
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("idProduto");
@@ -133,28 +131,11 @@ void Estoque::setupTables() {
 }
 
 void Estoque::calcularRestante() {
-  double quantRestante = modelEstoque.data(0, "quant").toDouble();
-  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
-  // TODO: V656 http://www.viva64.com/en/V656 Variables 'quantRestante', 'quantComprometidoNaoEntregue' are initialized through the call to the same
-  // function. It's probably an error or un-optimized code. Consider inspecting the 'modelEstoque.data(0, "quant").toDouble()' expression. Check lines:
-  // 127, 128.  double quantComprometidoNaoEntregue = modelEstoque.data(0, "quant").toDouble();
-
-  for (int row = 0; row < modelViewConsumo.rowCount(); ++row) {
-    const double quant = modelViewConsumo.data(row, "quant").toDouble();
-    const QString statusProduto = modelViewConsumo.data(row, "statusProduto").toString();
-
-    quantRestante += quant;
-
-    if (statusProduto == "ENTREGUE") { quantComprometidoNaoEntregue -= quant * -1; }
-  }
-
+  const double quantRestante = modelEstoque.data(0, "restante").toDouble();
   const QString un = modelEstoque.data(0, "un").toString();
 
   ui->doubleSpinBoxRestante->setValue(quantRestante);
   ui->doubleSpinBoxRestante->setSuffix(" " + un);
-
-  ui->doubleSpinBoxComprometidoNaoEntregue->setValue(quantComprometidoNaoEntregue);
-  ui->doubleSpinBoxComprometidoNaoEntregue->setSuffix(" " + un);
 }
 
 bool Estoque::viewRegisterById(const bool showWindow) {

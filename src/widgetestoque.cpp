@@ -1,4 +1,7 @@
 #include <QDebug>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QSqlError>
 
 #include "application.h"
 #include "doubledelegate.h"

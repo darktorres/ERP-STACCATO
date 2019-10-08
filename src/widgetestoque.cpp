@@ -109,25 +109,21 @@ void WidgetEstoque::montaFiltro() {
                                        : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
                                              "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
 
-  const bool contabil = ui->radioButtonEstoqueContabil->isChecked();
+  QString having;
 
-  const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "HAVING restante <= 0" : contabil ? "" : "HAVING restante > 0";
-
-  const QString filtroContabil = contabil ? " HAVING contabil > 0" : "";
+  if (ui->radioButtonMaior->isChecked()) { having = "restante > 0"; }
+  if (ui->radioButtonEstoqueZerado->isChecked()) { having = "restante <= 0"; }
+  if (ui->radioButtonEstoqueContabil->isChecked()) { having = "contabil > 0"; }
 
   model.setQuery(
-      "SELECT `n`.`cnpjDest` AS `cnpjDest`, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + e.ajuste AS contabil, e.restante AS "
-      "restante, e.un AS `unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')),(e.restante / `p`.`m2cx`), (e.restante / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco,"
-      " e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb,"
-      " ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote,e.local, e.bloco, e.quant, e.quant + "
-      "COALESCE(SUM(consumo.quant), 0) AS restante, SUM(IF(consumo.status = 'AJUSTE', consumo.quant, 0)) AS ajuste FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = "
-      "consumo.idEstoque LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
-      match + " GROUP BY e.idEstoque " + restante +
-      ") e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto2 vp ON consumo.idVendaProduto2 = vp.idVendaProduto2"
+      "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + e.ajuste AS contabil, e.restante AS restante, e.un AS unEst, IF(((p.un "
+      "= 'M²') OR (p.un = 'M2') OR (p.un = 'ML')),(e.restante / p.m2cx), (e.restante / p.pccx)) AS Caixas, e.lote, e.local, e.bloco, e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, "
+      "ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb, ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM "
+      "estoque e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto2 vp ON consumo.idVendaProduto2 = vp.idVendaProduto2"
       " WHERE (vp.dataRealEnt < NOW()) AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = "
-      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY "
-      "e.idEstoque" +
-      filtroContabil);
+      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status "
+      "NOT IN ('CANCELADO', 'QUEBRADO')" +
+      match + " GROUP BY e.idEstoque HAVING " + having);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 }
@@ -147,20 +143,17 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   SqlQueryModel modelContabil;
   modelContabil.setQuery(
-      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + ajuste AS contabil, "
-      "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), "
-      "((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo "
+      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT n.cnpjDest SEPARATOR ',') AS cnpjDest, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + ajuste AS contabil, "
+      "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, if(((p.un = 'M²') OR (p.un = 'M2') OR (p.un = 'ML')), ((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / p.m2cx), "
+      "((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / p.pccx)) AS Caixas, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, p.custo "
       "AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + COALESCE(e2.consumoEst, 0) + ajuste) AS custo, p.precoVenda * (e.quant + COALESCE(e2.consumoEst, 0) + ajuste) AS precoVenda "
-      "FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + COALESCE(SUM(consumo.quant), 0) AS "
-      "restante, SUM(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque "
-      "WHERE e.status = 'ESTOQUE' AND e.created < '" +
-      data +
-      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM "
+      "FROM estoque e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM "
       "estoque_has_consumo consumo LEFT JOIN venda_has_produto2 vp ON consumo.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < '" +
       data +
       "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
-      "pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP "
-      "BY e.idEstoque HAVING contabil > 0");
+      "pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status = 'ESTOQUE' AND "
+      "e.created < '" +
+      data + "' GROUP BY e.idEstoque HAVING contabil > 0");
 
   if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text(), this); }
 

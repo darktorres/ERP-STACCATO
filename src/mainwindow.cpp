@@ -60,10 +60,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     qApp->enqueueError("A chave 'hostname' não está configurada!", this);
   }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
+
+  if (UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->actionCadastrarFornecedor->setDisabled(true);
     ui->actionCadastrarProdutos->setDisabled(true);
-    ui->actionCadastrarUsuario->setDisabled(true);
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->actionGerenciar_preco_estoque->setDisabled(true);

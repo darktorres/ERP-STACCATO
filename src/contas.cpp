@@ -78,11 +78,13 @@ void Contas::preencher(const QModelIndex &index) {
   }
 
   if (index.column() == modelPendentes.fieldIndex("dataRealizado")) {
+    const int contaDestino = (modelPendentes.data(index.row(), "tipo").toString().contains("Boleto")) ? 33 : 3;
+
     if (not modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) { return; }
     if (not modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"))) { return; }
     if (not modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"))) { return; }
     if (not modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"))) { return; }
-    if (not modelPendentes.setData(index.row(), "contaDestino", 3)) { return; }
+    if (not modelPendentes.setData(index.row(), "contaDestino", contaDestino)) { return; }
     if (not modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"))) { return; }
 
     // -------------------------------------------------------------------------
@@ -97,8 +99,20 @@ void Contas::preencher(const QModelIndex &index) {
       if (not modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"))) { return; }
       if (not modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"))) { return; }
       if (not modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"))) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", 3)) { return; }
+      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", contaDestino)) { return; }
       if (not modelPendentes.setData(indexMatch.row(), "centroCusto", modelPendentes.data(indexMatch.row(), "idLoja"))) { return; }
+    }
+  }
+
+  if (index.column() == modelPendentes.fieldIndex("contaDestino")) {
+    // buscar linha da taxa cartao e alterar a conta para ser igual
+
+    const QModelIndexList list = modelPendentes.match("tipo", modelPendentes.data(index.row(), "tipo").toString().left(1) + ". Taxa Cartão", -1);
+
+    for (const auto &indexMatch : list) {
+      if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) { continue; }
+
+      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", modelPendentes.data(index.row(), "contaDestino"))) { return; }
     }
   }
 

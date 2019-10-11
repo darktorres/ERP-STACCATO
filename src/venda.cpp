@@ -1150,7 +1150,9 @@ void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
   ui->tableFluxoCaixa2->show();
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO" and UserSession::tipoUsuario() != "GERENTE DEPARTAMENTO") {
+    ui->pushButtonCorrigirFluxo->hide();
+  }
 
   ui->frameButtons->hide();
   financeiro = true;

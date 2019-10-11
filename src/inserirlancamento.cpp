@@ -41,6 +41,7 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setHeaderData("observacao", "Obs.");
   modelContaPagamento.setHeaderData("grupo", "Grupo");
   modelContaPagamento.setHeaderData("subGrupo", "SubGrupo");
+  modelContaPagamento.setHeaderData("nfe", "NFe");
 
   ui->table->setModel(&modelContaPagamento);
 
@@ -57,7 +58,6 @@ void InserirLancamento::setupTables() {
 
   ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});
 
-  ui->table->hideColumn("nfe");
   ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");
   ui->table->hideColumn("status");

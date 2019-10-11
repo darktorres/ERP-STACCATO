@@ -339,7 +339,8 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   const QString filtro = "desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')";
   const QString filtroLoja = (idLoja == 1 or specialSeller) ? "" : " AND idLoja = " + QString::number(idLoja);
-  const QString filtroAdmin = (UserSession::tipoUsuario() == "ADMINISTRADOR") ? "" : " AND nome != 'REPOSIÇÂO'";
+  const QString tipoUsuario = UserSession::tipoUsuario();
+  const QString filtroAdmin = (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO") ? "" : " AND nome != 'REPOSIÇÂO'";
 
   SearchDialog *sdVendedor = new SearchDialog("Buscar Vendedor", "usuario", "idUsuario", {"nome"}, "nome, tipo", filtro + filtroLoja + filtroAdmin, parent);
 

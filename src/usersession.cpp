@@ -15,7 +15,7 @@ bool UserSession::login(const QString &user, const QString &password, LoginDialo
   if (tipo == LoginDialog::Tipo::Autorizacao) {
     QSqlQuery queryAutorizar;
     queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
-                           "(tipo IN ('ADMINISTRADOR', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
+                           "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
     queryAutorizar.bindValue(":user", user);
     queryAutorizar.bindValue(":password", password);
 

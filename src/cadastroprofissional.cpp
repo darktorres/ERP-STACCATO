@@ -51,7 +51,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false);
     ui->pushButtonRemover->setDisabled(true);
   }

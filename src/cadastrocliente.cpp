@@ -28,7 +28,7 @@ CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("clien
   sdCliente = SearchDialog::cliente(this);
   connect(sdCliente, &SearchDialog::itemSelected, this, &CadastroCliente::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }

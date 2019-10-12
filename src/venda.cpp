@@ -587,7 +587,7 @@ bool Venda::viewRegister() {
 
     const QString tipoUsuario = UserSession::tipoUsuario();
 
-    if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR") {
+    if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO") {
       ui->pushButtonDevolucao->hide();
       ui->pushButtonCancelamento->hide();
     }
@@ -1203,7 +1203,9 @@ void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
   ui->tableFluxoCaixa2->show();
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
+  const QString tipoUsuario = UserSession::tipoUsuario();
+
+  if (tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO" and tipoUsuario != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
 
   ui->frameButtons->hide();
   financeiro = true;

@@ -17,7 +17,7 @@ WidgetOrcamento::~WidgetOrcamento() { delete ui; }
 void WidgetOrcamento::setPermissions() {
   const QString tipoUsuario = UserSession::tipoUsuario();
 
-  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
+  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") {
     QSqlQuery query;
 
     if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }

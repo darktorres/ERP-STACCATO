@@ -49,7 +49,6 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->table->setItemDelegateForColumn("contaDestino", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
-  ui->table->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
@@ -58,10 +57,8 @@ void InserirLancamento::setupTables() {
 
   ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});
 
-  ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");
   ui->table->hideColumn("status");
-  ui->table->hideColumn("representacao");
   ui->table->hideColumn("dataRealizado");
   ui->table->hideColumn("valorReal");
   ui->table->hideColumn("tipoReal");
@@ -69,12 +66,8 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("contaDestino");
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
-  ui->table->hideColumn("comissao");
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idCompra");
-  ui->table->hideColumn("idVenda");
-  ui->table->hideColumn("created");
-  ui->table->hideColumn("lastUpdated");
   ui->table->hideColumn("desativado");
 }
 

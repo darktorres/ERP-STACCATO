@@ -8,9 +8,7 @@ EstoqueProxyModel::EstoqueProxyModel(SqlRelationalTableModel *model, QObject *pa
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
     if (quantUpdColumn != -1) {
-      const auto adjustedIndex = proxyIndex.model()->index(proxyIndex.row(), quantUpdColumn, proxyIndex.parent());
-
-      const Status quantUpd = static_cast<Status>(QSortFilterProxyModel::data(adjustedIndex).toInt());
+      const Status quantUpd = static_cast<Status>(proxyIndex.siblingAtColumn(quantUpdColumn).data().toInt());
 
       if (quantUpd == Status::Ok) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::green); }

@@ -48,7 +48,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   ui->itemBoxConsultor->hide();
   ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
-  if (UserSession::tipoUsuario() == "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO") {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
   }

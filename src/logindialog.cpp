@@ -67,11 +67,11 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   if (tipo == Tipo::Login) {
     UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
     UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+
+    if (not qApp->dbConnect()) { return; }
+
+    if (not verificaVersao()) { return; }
   }
-
-  if (not qApp->dbConnect()) { return; }
-
-  if (not verificaVersao()) { return; }
 
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
     qApp->enqueueError("Login inválido!", this);

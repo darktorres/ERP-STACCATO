@@ -85,7 +85,8 @@ void WidgetVenda::montaFiltro() {
   //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text();
-  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca + "%')";
+  const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
+                              "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 
@@ -112,7 +113,7 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
 void WidgetVenda::setPermissions() {
   const QString tipoUsuario = UserSession::tipoUsuario();
 
-  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
+  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") {
     QSqlQuery query;
 
     if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }

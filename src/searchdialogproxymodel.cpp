@@ -15,9 +15,7 @@ SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *par
 QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
     if (descontinuadoColumn != -1) {
-      const auto adjustedIndex = proxyIndex.model()->index(proxyIndex.row(), descontinuadoColumn, proxyIndex.parent());
-
-      const bool descontinuado = QSortFilterProxyModel::data(adjustedIndex).toBool();
+      const bool descontinuado = proxyIndex.siblingAtColumn(descontinuadoColumn).data().toBool();
 
       if (descontinuado) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::red); }
@@ -26,9 +24,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
     }
 
     if (estoqueColumn != -1) {
-      const auto adjustedIndex = proxyIndex.model()->index(proxyIndex.row(), estoqueColumn, proxyIndex.parent());
-
-      const bool estoque = QSortFilterProxyModel::data(adjustedIndex).toBool();
+      const bool estoque = proxyIndex.siblingAtColumn(estoqueColumn).data().toBool();
 
       if (estoque) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::yellow); }
@@ -37,9 +33,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
     }
 
     if (promocaoColumn != -1) {
-      const auto adjustedIndex = proxyIndex.model()->index(proxyIndex.row(), promocaoColumn, proxyIndex.parent());
-
-      const int promocao = QSortFilterProxyModel::data(adjustedIndex).toInt();
+      const int promocao = proxyIndex.siblingAtColumn(promocaoColumn).data().toInt();
 
       if (promocao == 1) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::green); } // promocao
@@ -53,9 +47,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
     }
 
     if (proxyIndex.column() == validadeColumn) {
-      const auto adjustedIndex = proxyIndex.model()->index(proxyIndex.row(), validadeColumn, proxyIndex.parent());
-
-      const QDate validade = QSortFilterProxyModel::data(adjustedIndex).toDate();
+      const QDate validade = proxyIndex.siblingAtColumn(validadeColumn).data().toDate();
       const bool expirado = validade < QDate::currentDate();
 
       if (expirado) {

@@ -191,9 +191,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   // -------------------------------------------------------------------------
 
   const int rowEstoque = 0;
-  const int rowConsumo = modelConsumo.rowCount();
-
-  modelConsumo.insertRow(rowConsumo);
+  const int rowConsumo = modelConsumo.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelEstoque.columnCount(); column < columnCount; ++column) {
     const QString field = modelEstoque.record().fieldName(column);
@@ -303,9 +301,8 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
   const bool dividir = quant < quantCompra;
 
   if (dividir) {
-    const int newRow = modelCompra.rowCount();
     // NOTE: *quebralinha pedido_fornecedor
-    modelCompra.insertRow(newRow);
+    const int newRow = modelCompra.insertRowAtEnd();
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
       if (column == modelCompra.fieldIndex("idPedido2")) { continue; }

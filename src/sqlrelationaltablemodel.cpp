@@ -82,6 +82,29 @@ QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVar
   return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, QSqlRelationalTableModel::fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
 }
 
+QVector<int> SqlRelationalTableModel::multiMatch(const QVector<Condition> conditions, bool allHits) const {
+  QVector<int> result;
+
+  for (int row = 0; row < rowCount(); ++row) {
+    bool ok = true;
+
+    for (const auto &condition : conditions) {
+      const QVariant value = data(row, condition.column);
+      const QVariant condition_ = condition.condition;
+
+      if ((condition.equal and value != condition_) or (not condition.equal and value == condition_)) { ok = false; }
+    }
+
+    if (ok) {
+      result << row;
+
+      if (not allHits) { break; }
+    }
+  }
+
+  return result;
+}
+
 bool SqlRelationalTableModel::select() {
   //  qDebug() << "selecting " << tableName();
   //  qDebug() << "filter: " << filter();

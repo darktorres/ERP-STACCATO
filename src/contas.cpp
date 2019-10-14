@@ -78,7 +78,10 @@ void Contas::preencher(const QModelIndex &index) {
   }
 
   if (index.column() == modelPendentes.fieldIndex("dataRealizado")) {
-    const int contaDestino = (modelPendentes.data(index.row(), "tipo").toString().contains("Boleto")) ? 33 : 3;
+    const int contaSantander = 3;
+    const int contaItau = 33;
+
+    const int contaDestino = (tipo == Tipo::Receber and modelPendentes.data(index.row(), "tipo").toString().contains("Boleto")) ? contaItau : contaSantander;
 
     if (not modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) { return; }
     if (not modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"))) { return; }

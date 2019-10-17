@@ -16,8 +16,6 @@ QVariant SqlQueryModel::data(const int row, const QString &column) const {
     return QVariant();
   }
 
-  if (proxyModel) { return proxyModel->data(proxyModel->index(row, index)); }
-
   return QSqlQueryModel::data(QSqlQueryModel::index(row, index));
 }
 

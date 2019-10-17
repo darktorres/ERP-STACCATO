@@ -30,7 +30,7 @@ void WidgetCompraGerar::calcularPreco() {
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  for (const auto &item : list) { preco += modelProdutos.data(item.row(), "preco").toDouble(); }
+  for (const auto &index : list) { preco += modelProdutos.data(index.row(), "preco").toDouble(); }
 
   ui->doubleSpinBox->setValue(preco);
 }
@@ -61,7 +61,6 @@ void WidgetCompraGerar::setupTables() {
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("codBarras", "Cód. Bar.");
   modelProdutos.setHeaderData("dataPrevCompra", "Prev. Compra");
-  modelProdutos.setHeaderData("dataCompra", "Data Compra");
   modelProdutos.setHeaderData("obs", "Obs.");
   modelProdutos.setHeaderData("status", "Status");
 

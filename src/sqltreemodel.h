@@ -167,6 +167,7 @@ public: // overrides
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
   bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+  bool setHeaderData(const QString &column, const QVariant &value);
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
@@ -188,7 +189,7 @@ private:
 public:
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-  int fieldIndex(const QString &fieldName);
+  int fieldIndex(const QString &fieldName) const;
 };
 
 #endif

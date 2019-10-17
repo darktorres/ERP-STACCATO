@@ -32,9 +32,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
   modelVendas.setHeaderData("idVenda", "Venda");
 
-  modelVendas.proxyModel = new FinanceiroProxyModel(&modelVendas, this);
-
-  ui->tableVendas->setModel(&modelVendas);
+  ui->tableVendas->setModel(new FinanceiroProxyModel(&modelVendas, this));
 
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 
@@ -48,7 +46,6 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
-  modelProdutos.setHeaderData("idNFeFutura", "NFe Futura");
   modelProdutos.setHeaderData("produto", "Produto");
   modelProdutos.setHeaderData("idEstoque", "Estoque");
   modelProdutos.setHeaderData("lote", "Lote");
@@ -139,13 +136,13 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 
   const auto selectedRows = ui->tableProdutos->selectionModel()->selectedRows();
 
-  for (const auto &item : selectedRows) {
-    query.bindValue(":idProduto", modelProdutos.data(item.row(), "idProduto"));
+  for (const auto &index : selectedRows) {
+    query.bindValue(":idProduto", modelProdutos.data(index.row(), "idProduto"));
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando peso do produto: " + query.lastError().text(), this); }
 
     const double kg = query.value("kgcx").toDouble();
-    const double caixas = modelProdutos.data(item.row(), "caixas").toDouble();
+    const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
     peso += kg * caixas;
   }
 
@@ -313,32 +310,32 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
   QSqlQuery query;
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
 
-  for (const auto &item : list) {
-    query.bindValue(":idProduto", modelProdutos.data(item.row(), "idProduto"));
+  for (const auto &index : list) {
+    query.bindValue(":idProduto", modelProdutos.data(index.row(), "idProduto"));
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
 
     const double kg = query.value("kgcx").toDouble();
-    const double caixas = modelProdutos.data(item.row(), "caixas").toDouble();
+    const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
     const double peso = kg * caixas;
 
     // -------------------------------------------------------------------------
 
     const int row = modelTranspAtual.insertRowAtEnd();
 
-    if (not modelTranspAtual.setData(row, "fornecedor", modelProdutos.data(item.row(), "fornecedor"))) { return false; }
-    if (not modelTranspAtual.setData(row, "unCaixa", modelProdutos.data(item.row(), "unCaixa"))) { return false; }
-    if (not modelTranspAtual.setData(row, "formComercial", modelProdutos.data(item.row(), "formComercial"))) { return false; }
+    if (not modelTranspAtual.setData(row, "fornecedor", modelProdutos.data(index.row(), "fornecedor"))) { return false; }
+    if (not modelTranspAtual.setData(row, "unCaixa", modelProdutos.data(index.row(), "unCaixa"))) { return false; }
+    if (not modelTranspAtual.setData(row, "formComercial", modelProdutos.data(index.row(), "formComercial"))) { return false; }
     if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
-    if (not modelTranspAtual.setData(row, "idVenda", modelProdutos.data(item.row(), "idVenda"))) { return false; }
-    if (not modelTranspAtual.setData(row, "idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "idProduto", modelProdutos.data(item.row(), "idProduto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "produto", modelProdutos.data(item.row(), "produto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "codComercial", modelProdutos.data(item.row(), "codComercial"))) { return false; }
-    if (not modelTranspAtual.setData(row, "un", modelProdutos.data(item.row(), "un"))) { return false; }
-    if (not modelTranspAtual.setData(row, "caixas", modelProdutos.data(item.row(), "caixas"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idVenda", modelProdutos.data(index.row(), "idVenda"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idProduto", modelProdutos.data(index.row(), "idProduto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "produto", modelProdutos.data(index.row(), "produto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "codComercial", modelProdutos.data(index.row(), "codComercial"))) { return false; }
+    if (not modelTranspAtual.setData(row, "un", modelProdutos.data(index.row(), "un"))) { return false; }
+    if (not modelTranspAtual.setData(row, "caixas", modelProdutos.data(index.row(), "caixas"))) { return false; }
     if (not modelTranspAtual.setData(row, "kg", peso)) { return false; }
-    if (not modelTranspAtual.setData(row, "quant", modelProdutos.data(item.row(), "quant"))) { return false; }
+    if (not modelTranspAtual.setData(row, "quant", modelProdutos.data(index.row(), "quant"))) { return false; }
     if (not modelTranspAtual.setData(row, "status", "ENTREGA AGEND.")) { return false; }
   }
 
@@ -354,16 +351,16 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
-  for (const auto &item : list) {
-    const auto listMatch = modelTranspAtual.match("idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"), 1, Qt::MatchExactly);
+  for (const auto &index : list) {
+    const auto listMatch = modelTranspAtual.match("idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"), 1, Qt::MatchExactly);
 
-    if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelProdutos.data(item.row(), "produto").toString() + "' já inserido!", this); }
+    if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelProdutos.data(index.row(), "produto").toString() + "' já inserido!", this); }
 
-    if (modelProdutos.data(item.row(), "status").toString() != "ESTOQUE") { return qApp->enqueueError("Produto não está em estoque!", this); }
+    if (modelProdutos.data(index.row(), "status").toString() != "ESTOQUE") { return qApp->enqueueError("Produto não está em estoque!", this); }
 
-    if (modelProdutos.data(item.row(), "idConsumo").toString().isEmpty()) { return qApp->enqueueError("Produto ainda não possui nota de entrada!", this); }
+    if (modelProdutos.data(index.row(), "idConsumo").toString().isEmpty()) { return qApp->enqueueError("Produto ainda não possui nota de entrada!", this); }
 
-    if (not modelProdutos.data(item.row(), "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
+    if (not modelProdutos.data(index.row(), "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
   }
 
   if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
@@ -376,7 +373,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  for (const auto &item : list) { modelTranspAtual.removeRow(item.row()); }
+  for (const auto &index : list) { modelTranspAtual.removeRow(index.row()); }
 }
 
 void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString &) {
@@ -671,14 +668,14 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
   query2.prepare("INSERT INTO venda_has_followup (idVenda, idVendaBase, idLoja, idUsuario, tipoOperacao, observacao, dataFollowup) VALUES (:idVenda, :idVendaBase, :idLoja, :idUsuario, :tipoOperacao, "
                  ":observacao, :dataFollowup)");
 
-  for (const auto &item : list) {
-    query1.bindValue(":novoPrazoEntrega", modelVendas.data(item.row(), "data").toDate().daysTo(dataPrev));
-    query1.bindValue(":idVenda", modelVendas.data(item.row(), "idVenda"));
+  for (const auto &index : list) {
+    query1.bindValue(":novoPrazoEntrega", modelVendas.data(index.row(), "data").toDate().daysTo(dataPrev));
+    query1.bindValue(":idVenda", modelVendas.data(index.row(), "idVenda"));
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando novo prazo: " + query1.lastError().text(), this); }
 
-    query2.bindValue(":idVenda", modelVendas.data(item.row(), "idVenda"));
-    query2.bindValue(":idVendaBase", modelVendas.data(item.row(), "idVenda").toString().left(11));
+    query2.bindValue(":idVenda", modelVendas.data(index.row(), "idVenda"));
+    query2.bindValue(":idVendaBase", modelVendas.data(index.row(), "idVenda").toString().left(11));
     query2.bindValue(":idLoja", UserSession::idLoja());
     query2.bindValue(":idUsuario", UserSession::idUsuario());
     query2.bindValue(":tipoOperacao", "Alteração do prazo de entrega");
@@ -710,10 +707,10 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  for (const auto &item : list) {
-    if (not modelProdutos.data(item.row(), "NFe Fut.").isNull()) { return qApp->enqueueError("Produto já possui nota futura!", this); }
+  for (const auto &index : list) {
+    if (not modelProdutos.data(index.row(), "NFe Fut.").isNull()) { return qApp->enqueueError("Produto já possui nota futura!", this); }
 
-    if (modelProdutos.data(item.row(), "idConsumo").toInt() == 0) { return qApp->enqueueError("Nem todos os produtos selecionados possuem nota de entrada!", this); }
+    if (modelProdutos.data(index.row(), "idConsumo").toInt() == 0) { return qApp->enqueueError("Nem todos os produtos selecionados possuem nota de entrada!", this); }
   }
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
@@ -722,7 +719,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   QList<int> lista;
 
-  for (const auto &item : list) { lista << modelProdutos.data(item.row(), "idVendaProduto").toInt(); }
+  for (const auto &index : list) { lista << modelProdutos.data(index.row(), "idVendaProduto").toInt(); }
 
   auto *nfe = new CadastrarNFe(idVenda, lista, CadastrarNFe::Tipo::Futura, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);

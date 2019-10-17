@@ -63,9 +63,7 @@ void WidgetEstoque::setupTables() {
   model.setHeaderData("dataPrevReceb", "Prev. Receb.");
   model.setHeaderData("dataRealReceb", "Receb.");
 
-  model.proxyModel = new SortFilterProxyModel(&model, this);
-
-  ui->table->setModel(&model);
+  ui->table->setModel(new SortFilterProxyModel(&model, this));
 
   ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
 
@@ -100,7 +98,8 @@ void WidgetEstoque::updateTables() {
 void WidgetEstoque::resetTables() { modelIsSet = false; }
 
 void WidgetEstoque::on_table_activated(const QModelIndex &index) {
-  const QString idEstoque = model.data(index.row(), "idEstoque").toString();
+  const QString idEstoque = ui->table->dataAt(index, "idEstoque").toString();
+
   auto *estoque = new Estoque(idEstoque, true, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
 }

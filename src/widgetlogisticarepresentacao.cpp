@@ -62,9 +62,7 @@ void WidgetLogisticaRepresentacao::setupTables() {
 
   modelViewLogisticaRepresentacao.setSort("prazoEntrega");
 
-  modelViewLogisticaRepresentacao.proxyModel = new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this);
-
-  ui->table->setModel(&modelViewLogisticaRepresentacao);
+  ui->table->setModel(new EstoquePrazoProxyModel(&modelViewLogisticaRepresentacao, this));
 
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("fornecedor");
@@ -97,14 +95,14 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
   QSqlQuery query2;
   query2.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt, recebeu = :recebeu WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
-  for (const auto &item : list) {
+  for (const auto &index : list) {
     query1.bindValue(":dataRealEnt", dataEntrega);
-    query1.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto2"));
+    query1.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
-    query2.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(item.row(), "idVendaProduto2"));
+    query2.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
     query2.bindValue(":recebeu", recebeu);
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }

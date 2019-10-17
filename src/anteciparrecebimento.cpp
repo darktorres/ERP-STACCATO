@@ -72,10 +72,10 @@ void AnteciparRecebimento::calcularTotais() {
   double liquido = 0;
   double prazoMedio = 0;
 
-  for (const auto &item : list) {
-    const QString tipo = modelContaReceber.data(item.row(), "tipo").toString();
-    const double valor = modelContaReceber.data(item.row(), "valor").toDouble();
-    const QDate dataPagamento = modelContaReceber.data(item.row(), "dataPagamento").toDate();
+  for (const auto &index : list) {
+    const QString tipo = ui->table->dataAt(index, "tipo").toString();
+    const double valor = ui->table->dataAt(index, "valor").toDouble();
+    const QDate dataPagamento = ui->table->dataAt(index, "dataPagamento").toDate();
 
     if (not tipo.contains("Taxa Cartão")) { bruto += valor; }
 
@@ -190,22 +190,20 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 }
 
 bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
-  for (const auto &item : list) {
-    const int row = item.row();
+  for (const auto &index : list) {
+    if (not ui->table->setDataAt(index, "status", "RECEBIDO")) { return false; }
+    if (not ui->table->setDataAt(index, "dataRealizado", ui->dateEditEvento->date())) { return false; }
+    if (not ui->table->setDataAt(index, "valorReal", ui->table->dataAt(index, "valor"))) { return false; }
+    if (not ui->table->setDataAt(index, "tipoReal", ui->table->dataAt(index, "tipo"))) { return false; }
+    if (not ui->table->setDataAt(index, "parcelaReal", ui->table->dataAt(index, "parcela"))) { return false; }
+    if (not ui->table->setDataAt(index, "tipoReal", ui->table->dataAt(index, "tipo"))) { return false; }
+    if (not ui->table->setDataAt(index, "contaDestino", ui->itemBoxConta->getId())) { return false; }
 
-    if (not modelContaReceber.setData(row, "status", "RECEBIDO")) { return false; }
-    if (not modelContaReceber.setData(row, "dataRealizado", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaReceber.setData(row, "valorReal", modelContaReceber.data(row, "valor"))) { return false; }
-    if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"))) { return false; }
-    if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(row, "contaDestino", ui->itemBoxConta->getId())) { return false; }
+    if (ui->table->dataAt(index, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + ui->table->dataAt(index, "idVenda").toString(), this); }
 
-    if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
+    if (ui->table->dataAt(index, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + ui->table->dataAt(index, "idVenda").toString(), this); }
 
-    if (modelContaReceber.data(row, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
-
-    if (not modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + "Antecipação")) { return false; }
+    if (not ui->table->setDataAt(index, "observacao", ui->table->dataAt(index, "observacao").toString() + "Antecipação")) { return false; }
   }
 
   if (not modelContaReceber.submitAll()) { return false; }

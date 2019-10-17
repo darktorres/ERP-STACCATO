@@ -105,8 +105,8 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
-  for (const auto &item : list) {
-    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) { return; }
+  for (const auto &index : list) {
+    if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO FORN.")) { return; }
   }
 
   if (not modelVendaProduto.submitAll()) { return; }
@@ -122,10 +122,10 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: e se tiver varios consumos?
   query.prepare("SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda AND idProduto = :idProduto");
 
-  for (const auto &item : list) {
-    const QString status = modelVendaProduto.data(item.row(), "statusOriginal").toString();
+  for (const auto &index : list) {
+    const QString status = modelVendaProduto.data(index.row(), "statusOriginal").toString();
 
-    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
+    if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
     // TODO: 5refazer isso para bloquear o botao
     if (status == "PENDENTE" or status == "INICIADO" or status == "EM COMPRA" or status == "EM FATURAMENTO") {
@@ -143,8 +143,8 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       // 1.procurar em estoque pelo idVendaProduto
       // 2.copiar linha consumo mudando quant, status para devolucao e idCompra 0
 
-      query.bindValue(":idVenda", modelVendaProduto.data(item.row(), "idVenda").toString().left(11));
-      query.bindValue(":idProduto", modelVendaProduto.data(item.row(), "idProduto"));
+      query.bindValue(":idVenda", modelVendaProduto.data(index.row(), "idVenda").toString().left(11));
+      query.bindValue(":idProduto", modelVendaProduto.data(index.row(), "idProduto"));
 
       if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto2: " + query.lastError().text(), this); }
 
@@ -173,10 +173,10 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       }
 
       // TODO: update other fields
-      if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(item.row(), "idVendaProduto2"))) { return false; }
+      if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(index.row(), "idVendaProduto2"))) { return false; }
       if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
-      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(item.row(), "caixas").toDouble() * -1)) { return false; }
-      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) { return false; }
+      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(index.row(), "caixas").toDouble() * -1)) { return false; }
+      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(index.row(), "quant").toDouble() * -1)) { return false; }
       if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
 
       if (not modelConsumo.submitAll()) { return false; }

@@ -61,7 +61,7 @@ public:
 
 class SqlTreeModelPrivate {
 public:
-  SqlTreeModelPrivate(SqlTreeModel *model) : q(model), m_columns(-1), m_sortColumn(-1), m_sortOrder(Qt::AscendingOrder) {}
+  explicit SqlTreeModelPrivate(SqlTreeModel *model) : q(model), m_columns(-1), m_sortColumn(-1), m_sortOrder(Qt::AscendingOrder) {}
 
   ~SqlTreeModelPrivate() { qDeleteAll(m_levelData); }
 
@@ -354,7 +354,7 @@ QModelIndex SqlTreeModel::parent(const QModelIndex &index) const {
   }
 
   for (int i = 0; i < parentNode->m_rows.count(); i++) {
-    if (parentNode->m_rows.at(i) == row && parentNode->m_levels.at(i) == levelData->m_parentLevel) { return createIndex(i, 0, static_cast<void *>(parentNode)); }
+    if (parentNode->m_rows.at(i) == row and parentNode->m_levels.at(i) == levelData->m_parentLevel) { return createIndex(i, 0, static_cast<void *>(parentNode)); }
   }
 
   return QModelIndex();
@@ -380,11 +380,13 @@ bool SqlTreeModel::setHeaderData(int section, Qt::Orientation orientation, const
   return true;
 }
 
+bool SqlTreeModel::setHeaderData(const QString &column, const QVariant &value) { return setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
+
 QVariant SqlTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (orientation == Qt::Horizontal) {
     QVariant value = d->m_headers.value(section).value(role);
 
-    if (role == Qt::DisplayRole && not value.isValid()) { value = d->m_headers.value(section).value(Qt::EditRole); }
+    if (role == Qt::DisplayRole and not value.isValid()) { value = d->m_headers.value(section).value(Qt::EditRole); }
 
     if (value.isValid()) { return value; }
 
@@ -420,7 +422,7 @@ Qt::ItemFlags SqlTreeModel::flags(const QModelIndex &index) const {
   return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
-int SqlTreeModel::fieldIndex(const QString &fieldName) {
+int SqlTreeModel::fieldIndex(const QString &fieldName) const {
   const int field = modelAt(0)->record().indexOf(fieldName) - 1;
 
   if (field == -1) { qApp->enqueueError(fieldName + " não encontrado na arvore!"); }

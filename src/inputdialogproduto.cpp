@@ -12,7 +12,7 @@
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogproduto.h"
 
-InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
+InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), proxyModel(&modelPedidoFornecedor, this), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -32,7 +32,7 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->labelEvento->setText("Data compra:");
     ui->labelProximoEvento->setText("Data prevista confirmação:");
 
-    connect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+    connect(&proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
   if (tipo == Tipo::Faturamento) {
@@ -98,9 +98,7 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
 
-  modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
-
-  ui->table->setModel(&modelPedidoFornecedor);
+  ui->table->setModel(&proxyModel);
 
   if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idRelacionado"); }
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idVendaProduto1"); }
@@ -181,7 +179,7 @@ QDate InputDialogProduto::getDate() const { return ui->dateEditEvento->date(); }
 QDate InputDialogProduto::getNextDate() const { return ui->dateEditProximo->date(); }
 
 void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
-  disconnect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+  disconnect(&proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
   [&] {
     const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
@@ -198,7 +196,7 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
     }
   }();
 
-  connect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+  connect(&proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
   calcularTotal();
 }

@@ -2,6 +2,7 @@
 
 #include <QDialog>
 
+#include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
@@ -24,6 +25,7 @@ private:
   // attributes
   const Tipo tipo;
   SqlRelationalTableModel modelPedidoFornecedor;
+  SortFilterProxyModel proxyModel;
   Ui::InputDialogProduto *ui;
   // methods
   auto cadastrar() -> bool;

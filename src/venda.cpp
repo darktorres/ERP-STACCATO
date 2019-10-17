@@ -52,7 +52,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   ui->groupBoxFinanceiro->hide();
   ui->tableFluxoCaixa2->hide();
 
-  for (auto &item : ui->frameRT->findChildren<QWidget *>()) { item->setHidden(true); }
+  for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
 
   ui->splitter->setStretchFactor(0, 1);
   ui->splitter->setStretchFactor(1, 0);
@@ -68,35 +68,35 @@ void Venda::setTreeView() {
 
   modelTree.updateData();
 
-  modelTree.setHeaderData(modelTree.fieldIndex("status"), Qt::Horizontal, "Status");
-  modelTree.setHeaderData(modelTree.fieldIndex("fornecedor"), Qt::Horizontal, "Fornecedor");
-  modelTree.setHeaderData(modelTree.fieldIndex("produto"), Qt::Horizontal, "Produto");
-  modelTree.setHeaderData(modelTree.fieldIndex("obs"), Qt::Horizontal, "Obs.");
-  modelTree.setHeaderData(modelTree.fieldIndex("lote"), Qt::Horizontal, "Lote");
-  modelTree.setHeaderData(modelTree.fieldIndex("prcUnitario"), Qt::Horizontal, "Preço/Un");
-  modelTree.setHeaderData(modelTree.fieldIndex("caixas"), Qt::Horizontal, "Caixas");
-  modelTree.setHeaderData(modelTree.fieldIndex("quant"), Qt::Horizontal, "Quant.");
-  modelTree.setHeaderData(modelTree.fieldIndex("un"), Qt::Horizontal, "Un.");
-  modelTree.setHeaderData(modelTree.fieldIndex("unCaixa"), Qt::Horizontal, "Un./Cx.");
-  modelTree.setHeaderData(modelTree.fieldIndex("codComercial"), Qt::Horizontal, "Código");
-  modelTree.setHeaderData(modelTree.fieldIndex("formComercial"), Qt::Horizontal, "Formato");
-  modelTree.setHeaderData(modelTree.fieldIndex("parcial"), Qt::Horizontal, "Subtotal");
-  modelTree.setHeaderData(modelTree.fieldIndex("desconto"), Qt::Horizontal, "Desc. %");
-  modelTree.setHeaderData(modelTree.fieldIndex("parcialDesc"), Qt::Horizontal, "Desc. Parc.");
-  modelTree.setHeaderData(modelTree.fieldIndex("descGlobal"), Qt::Horizontal, "Desc. Glob. %");
-  modelTree.setHeaderData(modelTree.fieldIndex("total"), Qt::Horizontal, "Total");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevCompra"), Qt::Horizontal, "Prev. Compra");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataRealCompra"), Qt::Horizontal, "Data Compra");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevConf"), Qt::Horizontal, "Prev. Confirm.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataRealConf"), Qt::Horizontal, "Data Confirm.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevFat"), Qt::Horizontal, "Prev. Fat.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataRealFat"), Qt::Horizontal, "Data Fat.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevColeta"), Qt::Horizontal, "Prev. Coleta");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataRealColeta"), Qt::Horizontal, "Data Coleta");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevReceb"), Qt::Horizontal, "Prev. Receb.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataRealReceb"), Qt::Horizontal, "Data Receb.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataPrevEnt"), Qt::Horizontal, "Prev. Ent.");
-  modelTree.setHeaderData(modelTree.fieldIndex("dataRealEnt"), Qt::Horizontal, "Data Ent.");
+  modelTree.setHeaderData("status", "Status");
+  modelTree.setHeaderData("fornecedor", "Fornecedor");
+  modelTree.setHeaderData("produto", "Produto");
+  modelTree.setHeaderData("obs", "Obs.");
+  modelTree.setHeaderData("lote", "Lote");
+  modelTree.setHeaderData("prcUnitario", "Preço/Un");
+  modelTree.setHeaderData("caixas", "Caixas");
+  modelTree.setHeaderData("quant", "Quant.");
+  modelTree.setHeaderData("un", "Un.");
+  modelTree.setHeaderData("unCaixa", "Un./Cx.");
+  modelTree.setHeaderData("codComercial", "Código");
+  modelTree.setHeaderData("formComercial", "Formato");
+  modelTree.setHeaderData("parcial", "Subtotal");
+  modelTree.setHeaderData("desconto", "Desc. %");
+  modelTree.setHeaderData("parcialDesc", "Desc. Parc.");
+  modelTree.setHeaderData("descGlobal", "Desc. Glob. %");
+  modelTree.setHeaderData("total", "Total");
+  modelTree.setHeaderData("dataPrevCompra", "Prev. Compra");
+  modelTree.setHeaderData("dataRealCompra", "Data Compra");
+  modelTree.setHeaderData("dataPrevConf", "Prev. Confirm.");
+  modelTree.setHeaderData("dataRealConf", "Data Confirm.");
+  modelTree.setHeaderData("dataPrevFat", "Prev. Fat.");
+  modelTree.setHeaderData("dataRealFat", "Data Fat.");
+  modelTree.setHeaderData("dataPrevColeta", "Prev. Coleta");
+  modelTree.setHeaderData("dataRealColeta", "Data Coleta");
+  modelTree.setHeaderData("dataPrevReceb", "Prev. Receb.");
+  modelTree.setHeaderData("dataRealReceb", "Data Receb.");
+  modelTree.setHeaderData("dataPrevEnt", "Prev. Ent.");
+  modelTree.setHeaderData("dataRealEnt", "Data Ent.");
 
   ui->treeView->setModel(new SearchDialogProxyModel(&modelTree, this));
 
@@ -108,35 +108,35 @@ void Venda::setTreeView() {
     for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
   });
 
-  ui->treeView->hideColumn(modelTree.fieldIndex("selecionado"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idRelacionado"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("statusOriginal"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("recebeu"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("entregou"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("descUnitario"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("estoque"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("promocao"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idCompra"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idNFeSaida"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idNFeFutura"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idVenda"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idLoja"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("idProduto"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("reposicaoEntrega"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("reposicaoReceb"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("mostrarDesconto"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("created"));
-  ui->treeView->hideColumn(modelTree.fieldIndex("lastUpdated"));
+  ui->treeView->hideColumn("selecionado");
+  ui->treeView->hideColumn("idRelacionado");
+  ui->treeView->hideColumn("statusOriginal");
+  ui->treeView->hideColumn("recebeu");
+  ui->treeView->hideColumn("entregou");
+  ui->treeView->hideColumn("descUnitario");
+  ui->treeView->hideColumn("estoque");
+  ui->treeView->hideColumn("promocao");
+  ui->treeView->hideColumn("idCompra");
+  ui->treeView->hideColumn("idNFeSaida");
+  ui->treeView->hideColumn("idNFeFutura");
+  ui->treeView->hideColumn("idVenda");
+  ui->treeView->hideColumn("idLoja");
+  ui->treeView->hideColumn("idProduto");
+  ui->treeView->hideColumn("reposicaoEntrega");
+  ui->treeView->hideColumn("reposicaoReceb");
+  ui->treeView->hideColumn("mostrarDesconto");
+  ui->treeView->hideColumn("created");
+  ui->treeView->hideColumn("lastUpdated");
 
   ui->treeView->setItemDelegate(new QTreeViewGridDelegate(this));
 
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("quant"), new DoubleDelegate(this, 4, true));
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("prcUnitario"), new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("parcial"), new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("parcialDesc"), new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("desconto"), new PorcentagemDelegate(this, true));
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("descGlobal"), new PorcentagemDelegate(this, true));
-  ui->treeView->setItemDelegateForColumn(modelTree.fieldIndex("total"), new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4, true));
+  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this, true));
+  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this, true));
+  ui->treeView->setItemDelegateForColumn("total", new ReaisDelegate(this, 2, true));
 }
 
 void Venda::setConnections() {
@@ -204,9 +204,7 @@ void Venda::setupTables() {
   modelFluxoCaixa.setHeaderData("status", "Status");
   modelFluxoCaixa.setHeaderData("representacao", "Representação");
 
-  modelFluxoCaixa.proxyModel = new SortFilterProxyModel(&modelFluxoCaixa, this);
-
-  ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
+  ui->tableFluxoCaixa->setModel(new SortFilterProxyModel(&modelFluxoCaixa, this));
 
   ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("contraParte");
@@ -247,9 +245,7 @@ void Venda::setupTables() {
   modelFluxoCaixa2.setHeaderData("observacao", "Obs.");
   modelFluxoCaixa2.setHeaderData("status", "Status");
 
-  modelFluxoCaixa2.proxyModel = new SortFilterProxyModel(&modelFluxoCaixa2, this);
-
-  ui->tableFluxoCaixa2->setModel(&modelFluxoCaixa2);
+  ui->tableFluxoCaixa2->setModel(new SortFilterProxyModel(&modelFluxoCaixa2, this));
 
   ui->tableFluxoCaixa2->hideColumn("idPagamento");
   ui->tableFluxoCaixa2->hideColumn("dataEmissao");
@@ -522,7 +518,7 @@ void Venda::updateMode() {
 bool Venda::viewRegister() {
   unsetConnections();
 
-  const auto load = [&] {
+  const auto ok = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
     ui->doubleSpinBoxDescontoGlobalReais->setMinimum(-9999999);
@@ -622,7 +618,7 @@ bool Venda::viewRegister() {
 
   setConnections();
 
-  return load;
+  return ok;
 }
 
 void Venda::on_pushButtonVoltar_clicked() {
@@ -1299,7 +1295,7 @@ void Venda::on_checkBoxPontuacaoIsento_toggled(bool checked) {
 }
 
 void Venda::on_checkBoxRT_toggled(bool checked) {
-  for (auto &item : ui->frameRT->findChildren<QWidget *>()) { item->setVisible(checked); }
+  for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(checked); }
 
   ui->checkBoxRT->setText(checked ? "Pontuação" : "");
 }

@@ -47,9 +47,7 @@ void Estoque::setupTables() {
   modelEstoque.setHeaderData("lote", "Lote");
   modelEstoque.setHeaderData("bloco", "Bloco");
 
-  modelEstoque.proxyModel = new EstoqueProxyModel(&modelEstoque, this);
-
-  ui->tableEstoque->setModel(&modelEstoque);
+  ui->tableEstoque->setModel(new EstoqueProxyModel(&modelEstoque, this));
 
   ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
 
@@ -108,7 +106,6 @@ void Estoque::setupTables() {
 
   modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
   modelViewConsumo.setHeaderData("status", "Status Consumo");
-  modelViewConsumo.setHeaderData("ordemCompra", "OC");
   modelViewConsumo.setHeaderData("local", "Local");
   modelViewConsumo.setHeaderData("fornecedor", "Fornecedor");
   modelViewConsumo.setHeaderData("descricao", "Produto");
@@ -119,9 +116,7 @@ void Estoque::setupTables() {
   modelViewConsumo.setHeaderData("dataRealEnt", "Entrega");
   modelViewConsumo.setHeaderData("created", "Criado");
 
-  modelViewConsumo.proxyModel = new EstoqueProxyModel(&modelViewConsumo, this);
-
-  ui->tableConsumo->setModel(&modelViewConsumo);
+  ui->tableConsumo->setModel(new EstoqueProxyModel(&modelViewConsumo, this));
 
   ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
 
@@ -131,8 +126,8 @@ void Estoque::setupTables() {
 }
 
 void Estoque::calcularRestante() {
-  const double quantRestante = modelEstoque.data(0, "restante").toDouble();
-  const QString un = modelEstoque.data(0, "un").toString();
+  const double quantRestante = ui->tableEstoque->dataAt(0, "restante").toDouble();
+  const QString un = ui->tableEstoque->dataAt(0, "un").toString();
 
   ui->doubleSpinBoxRestante->setValue(quantRestante);
   ui->doubleSpinBoxRestante->setSuffix(" " + un);
@@ -165,7 +160,7 @@ void Estoque::on_pushButtonExibirNfe_clicked() { exibirNota(); }
 void Estoque::exibirNota() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", modelEstoque.data(0, "idNFe"));
+  query.bindValue(":idNFe", ui->tableEstoque->dataAt(0, "idNFe"));
 
   if (not query.exec()) { return qApp->enqueueError("Erro buscando nfe: " + query.lastError().text(), this); }
 
@@ -200,14 +195,14 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
     if (index == -1) { continue; }
     if (column == modelEstoque.fieldIndex("cfop")) { break; }
 
-    const QVariant value = modelEstoque.data(rowEstoque, column);
+    const QVariant value = ui->tableEstoque->dataAt(rowEstoque, column);
 
-    if (not modelConsumo.setData(rowConsumo, index, value)) { return false; }
+    if (not ui->tableConsumo->setDataAt(rowConsumo, index, value)) { return false; }
   }
 
   QSqlQuery query;
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
-  query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
+  query.bindValue(":idProduto", ui->tableEstoque->dataAt(rowEstoque, "idProduto"));
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
 
@@ -219,25 +214,25 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
   const double caixas = qRound(quant / unCaixa * 100) / 100.;
 
-  if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
-  if (idPedido2 and not modelConsumo.setData(rowConsumo, "idPedido2", idPedido2.value())) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
+  if (not ui->tableConsumo->setDataAt(rowConsumo, "quant", quant * -1)) { return false; }
+  if (not ui->tableConsumo->setDataAt(rowConsumo, "caixas", caixas)) { return false; }
+  if (not ui->tableConsumo->setDataAt(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
+  if (not ui->tableConsumo->setDataAt(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
+  if (not ui->tableConsumo->setDataAt(rowConsumo, "idEstoque", ui->tableEstoque->dataAt(rowEstoque, "idEstoque"))) { return false; }
+  if (idPedido2 and not ui->tableConsumo->setDataAt(rowConsumo, "idPedido2", idPedido2.value())) { return false; }
+  if (not ui->tableConsumo->setDataAt(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
 
   // -------------------------------------------------------------------------
   // copy lote to venda_has_produto
 
-  const QString lote = modelEstoque.data(rowEstoque, "lote").toString();
+  const QString lote = ui->tableEstoque->dataAt(rowEstoque, "lote").toString();
 
   if (not lote.isEmpty() and lote != "N/D") {
     QSqlQuery queryProduto;
     queryProduto.prepare("UPDATE venda_has_produto2 SET lote = :lote WHERE idVendaProduto2 = :idVendaProduto2");
-    queryProduto.bindValue(":lote", modelEstoque.data(rowEstoque, "lote"));
+    queryProduto.bindValue(":lote", ui->tableEstoque->dataAt(rowEstoque, "lote"));
     queryProduto.bindValue(":idVendaProduto2", idVendaProduto2);
 
     if (not queryProduto.exec()) { return qApp->enqueueError(false, "Erro salvando lote: " + queryProduto.lastError().text(), this); }

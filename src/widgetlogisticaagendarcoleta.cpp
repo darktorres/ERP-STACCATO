@@ -60,9 +60,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setHeaderData("caixas", "Cx.");
   modelEstoque.setHeaderData("kgcx", "Kg./Cx.");
 
-  modelEstoque.proxyModel = new EstoquePrazoProxyModel(&modelEstoque, this);
-
-  ui->tableEstoque->setModel(&modelEstoque);
+  ui->tableEstoque->setModel(new EstoquePrazoProxyModel(&modelEstoque, this));
 
   ui->tableEstoque->setItemDelegate(new DoubleDelegate(this));
 
@@ -141,9 +139,9 @@ void WidgetLogisticaAgendarColeta::calcularPeso() {
 
   const auto list = ui->tableEstoque->selectionModel()->selectedRows();
 
-  for (const auto &item : list) {
-    const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
-    const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
+  for (const auto &index : list) {
+    const double kg = modelEstoque.data(index.row(), "kgcx").toDouble();
+    const double caixa = modelEstoque.data(index.row(), "caixas").toDouble();
     peso += kg * caixa;
     caixas += caixa;
   }
@@ -241,7 +239,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
   query3.prepare("UPDATE venda_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE status = 'EM COLETA' AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = "
                  ":idEstoque)");
 
-  for (const auto &item : list) {
+  for (const auto &index : list) {
     int idEstoque;
     QString codComercial;
 
@@ -252,10 +250,10 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       const int idEvento = query.value(0).toInt();
 
-      if (not modelTranspAtual.setData(item.row(), "data", dataPrevColeta)) { return false; }
-      if (not modelTranspAtual.setData(item.row(), "idEvento", idEvento)) { return false; }
+      if (not modelTranspAtual.setData(index.row(), "data", dataPrevColeta)) { return false; }
+      if (not modelTranspAtual.setData(index.row(), "idEvento", idEvento)) { return false; }
 
-      idEstoque = modelTranspAtual.data(item.row(), "idEstoque").toInt();
+      idEstoque = modelTranspAtual.data(index.row(), "idEstoque").toInt();
 
       queryTemp.bindValue(":idEstoque", idEstoque);
 
@@ -263,8 +261,8 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       codComercial = queryTemp.value("codComercial").toString();
     } else {
-      idEstoque = modelEstoque.data(item.row(), "idEstoque").toInt();
-      codComercial = modelEstoque.data(item.row(), "codComercial").toString();
+      idEstoque = modelEstoque.data(index.row(), "idEstoque").toInt();
+      codComercial = modelEstoque.data(index.row(), "codComercial").toString();
     }
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
@@ -298,25 +296,25 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
 }
 
 bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list) {
-  for (const auto &item : list) {
-    const double kg = modelEstoque.data(item.row(), "kgcx").toDouble();
-    const double caixa = modelEstoque.data(item.row(), "caixas").toDouble();
+  for (const auto &index : list) {
+    const double kg = modelEstoque.data(index.row(), "kgcx").toDouble();
+    const double caixa = modelEstoque.data(index.row(), "caixas").toDouble();
     const double peso = kg * caixa;
 
     const int row = modelTranspAtual.insertRowAtEnd();
 
-    if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(item.row(), "fornecedor"))) { return false; }
-    if (not modelTranspAtual.setData(row, "unCaixa", modelEstoque.data(item.row(), "unCaixa"))) { return false; }
-    if (not modelTranspAtual.setData(row, "formComercial", modelEstoque.data(item.row(), "formComercial"))) { return false; }
+    if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(index.row(), "fornecedor"))) { return false; }
+    if (not modelTranspAtual.setData(row, "unCaixa", modelEstoque.data(index.row(), "unCaixa"))) { return false; }
+    if (not modelTranspAtual.setData(row, "formComercial", modelEstoque.data(index.row(), "formComercial"))) { return false; }
     if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
-    if (not modelTranspAtual.setData(row, "idEstoque", modelEstoque.data(item.row(), "idEstoque"))) { return false; }
-    if (not modelTranspAtual.setData(row, "idProduto", modelEstoque.data(item.row(), "idProduto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "produto", modelEstoque.data(item.row(), "produto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "codComercial", modelEstoque.data(item.row(), "codComercial"))) { return false; }
-    if (not modelTranspAtual.setData(row, "un", modelEstoque.data(item.row(), "un"))) { return false; }
-    if (not modelTranspAtual.setData(row, "caixas", modelEstoque.data(item.row(), "caixas"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idEstoque", modelEstoque.data(index.row(), "idEstoque"))) { return false; }
+    if (not modelTranspAtual.setData(row, "idProduto", modelEstoque.data(index.row(), "idProduto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "produto", modelEstoque.data(index.row(), "produto"))) { return false; }
+    if (not modelTranspAtual.setData(row, "codComercial", modelEstoque.data(index.row(), "codComercial"))) { return false; }
+    if (not modelTranspAtual.setData(row, "un", modelEstoque.data(index.row(), "un"))) { return false; }
+    if (not modelTranspAtual.setData(row, "caixas", modelEstoque.data(index.row(), "caixas"))) { return false; }
     if (not modelTranspAtual.setData(row, "kg", peso)) { return false; }
-    if (not modelTranspAtual.setData(row, "quant", modelEstoque.data(item.row(), "quant"))) { return false; }
+    if (not modelTranspAtual.setData(row, "quant", modelEstoque.data(index.row(), "quant"))) { return false; }
     if (not modelTranspAtual.setData(row, "status", "EM COLETA")) { return false; }
   }
 
@@ -332,10 +330,10 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxCapacidade->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
-  for (const auto &item : list) {
-    const auto listMatch = modelTranspAtual.match("idEstoque", modelEstoque.data(item.row(), "idEstoque"), 1, Qt::MatchExactly);
+  for (const auto &index : list) {
+    const auto listMatch = modelTranspAtual.match("idEstoque", modelEstoque.data(index.row(), "idEstoque"), 1, Qt::MatchExactly);
 
-    if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelEstoque.data(item.row(), "produto").toString() + "' já inserido!", this); }
+    if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelEstoque.data(index.row(), "produto").toString() + "' já inserido!", this); }
   }
 
   if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
@@ -346,7 +344,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  for (const auto &item : list) { modelTranspAtual.removeRow(item.row()); }
+  for (const auto &index : list) { modelTranspAtual.removeRow(index.row()); }
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
@@ -384,8 +382,8 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  for (const auto &item : list) {
-    const QString idVenda = modelEstoque.data(item.row(), "idVenda").toString();
+  for (const auto &index : list) {
+    const QString idVenda = modelEstoque.data(index.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
     if (ids.isEmpty()) { return; }

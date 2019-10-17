@@ -89,11 +89,12 @@ void WidgetLogisticaEntregues::setupTables() {
 void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  modelProdutos.setQuery("SELECT `vp`.`idVendaProduto2` AS `idVendaProduto2`, `vp`.`idProduto` AS `idProduto`, `vp`.`dataPrevEnt` AS `dataPrevEnt`, `vp`.`dataRealEnt` AS `dataRealEnt`, `vp`.`status` "
-                         "AS `status`, `vp`.`fornecedor` AS `fornecedor`, `vp`.`idVenda` AS `idVenda`, `vp`.`produto` AS `produto`, `vp`.`caixas` AS `caixas`, `vp`.`quant` AS `quant`, `vp`.`un` AS "
-                         "`un`, `vp`.`unCaixa` AS `unCaixa`, `vp`.`codComercial` AS `codComercial`, `vp`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
-                         "FROM (`venda_has_produto2` `vp` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
-                         modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp`.`idVendaProduto2`");
+  modelProdutos.setQuery(
+      "SELECT `vp2`.`idVendaProduto2` AS `idVendaProduto2`, `vp2`.`idProduto` AS `idProduto`, `vp2`.`dataPrevEnt` AS `dataPrevEnt`, `vp2`.`dataRealEnt` AS `dataRealEnt`, `vp2`.`status` "
+      "AS `status`, `vp2`.`fornecedor` AS `fornecedor`, `vp2`.`idVenda` AS `idVenda`, `vp2`.`produto` AS `produto`, `vp2`.`caixas` AS `caixas`, `vp2`.`quant` AS `quant`, `vp2`.`un` AS "
+      "`un`, `vp2`.`unCaixa` AS `unCaixa`, `vp2`.`codComercial` AS `codComercial`, `vp2`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
+      "FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
+      modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
   if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro: " + modelProdutos.lastError().text(), this); }
 
@@ -109,15 +110,12 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");
 
-  modelProdutos.proxyModel = new SortFilterProxyModel(&modelProdutos, this);
+  ui->tableProdutos->setModel(new SortFilterProxyModel(&modelProdutos, this));
 
-  ui->tableProdutos->setModel(&modelProdutos);
   ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataPrevEnt");
   ui->tableProdutos->hideColumn("idConsumo");
-
-  ui->tableProdutos->setPersistentColumns({"selecionado"});
 }
 
 void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
@@ -163,16 +161,16 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   query3.prepare(
       "UPDATE pedido_fornecedor_has_produto SET status = 'ESTOQUE', dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
-  for (const auto &item : list) {
-    query1.bindValue(":idVendaProduto2", modelProdutos.data(item.row(), "idVendaProduto2"));
+  for (const auto &index : list) {
+    query1.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando veiculo_produto: " + query1.lastError().text(), this); }
 
-    query2.bindValue(":idVendaProduto2", modelProdutos.data(item.row(), "idVendaProduto2"));
+    query2.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
 
-    query3.bindValue(":idVendaProduto", modelProdutos.data(item.row(), "idVendaProduto"));
+    query3.bindValue(":idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"));
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido_fornecedor: " + query3.lastError().text(), this); }
   }

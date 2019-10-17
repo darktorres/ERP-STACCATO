@@ -104,9 +104,9 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   QStringList idsCompra;
   QStringList fornecedores;
 
-  for (const auto &item : list) {
-    idsCompra << modelViewFaturamento.data(item.row(), "idCompra").toString();
-    fornecedores << modelViewFaturamento.data(item.row(), "fornecedor").toString();
+  for (const auto &index : list) {
+    idsCompra << modelViewFaturamento.data(index.row(), "idCompra").toString();
+    fornecedores << modelViewFaturamento.data(index.row(), "fornecedor").toString();
   }
 
   const int size = fornecedores.size();
@@ -171,8 +171,8 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   QSqlQuery queryVenda;
   queryVenda.prepare("UPDATE venda_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
-  for (const auto &item : list) {
-    const int idCompra = modelViewFaturamento.data(item.row(), "idCompra").toInt();
+  for (const auto &index : list) {
+    const int idCompra = modelViewFaturamento.data(index.row(), "idCompra").toInt();
 
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);

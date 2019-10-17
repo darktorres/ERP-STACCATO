@@ -339,7 +339,7 @@ color: rgb(0, 0, 0);</string>
             </widget>
            </item>
            <item row="1" column="0" colspan="2">
-            <widget class="QTreeView" name="treeView"/>
+            <widget class="TreeView" name="treeView"/>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="labelPrazoEntrega">
@@ -1109,6 +1109,11 @@ color: rgb(0, 0, 0);</string>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>src/treeview.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

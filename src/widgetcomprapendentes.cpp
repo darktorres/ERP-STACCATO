@@ -108,28 +108,25 @@ void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setHeaderData("caixas", "Caixas");
   modelViewVendaProduto.setHeaderData("quant", "Quant.");
   modelViewVendaProduto.setHeaderData("un", "Un.");
-  modelViewVendaProduto.setHeaderData("total", "Total");
   modelViewVendaProduto.setHeaderData("codComercial", "Cód. Com.");
   modelViewVendaProduto.setHeaderData("formComercial", "Form. Com.");
   modelViewVendaProduto.setHeaderData("status", "Status");
   modelViewVendaProduto.setHeaderData("statusFinanceiro", "Financeiro");
   modelViewVendaProduto.setHeaderData("obs", "Obs.");
 
-  modelViewVendaProduto.proxyModel = new FinanceiroProxyModel(&modelViewVendaProduto, this);
-
-  ui->table->setModel(&modelViewVendaProduto);
+  ui->table->setModel(new FinanceiroProxyModel(&modelViewVendaProduto, this));
 
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
-  const QString status = modelViewVendaProduto.data(index.row(), "status").toString();
+  const QString status = ui->table->dataAt(index, "status").toString();
 
   if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
-  const QString financeiro = modelViewVendaProduto.data(index.row(), "statusFinanceiro").toString();
-  const QString codComercial = modelViewVendaProduto.data(index.row(), "codComercial").toString();
-  const QString idVenda = modelViewVendaProduto.data(index.row(), "idVenda").toString();
+  const QString financeiro = ui->table->dataAt(index, "statusFinanceiro").toString();
+  const QString codComercial = ui->table->dataAt(index, "codComercial").toString();
+  const QString idVenda = ui->table->dataAt(index, "idVenda").toString();
 
   if (financeiro == "PENDENTE") {
     QMessageBox msgBox(QMessageBox::Question, "Pendente!", "Financeiro não liberou! Continuar?", QMessageBox::Yes | QMessageBox::No, this);

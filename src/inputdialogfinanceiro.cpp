@@ -311,13 +311,13 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &item : list) {
-      const QString tipoSt = modelPedidoFornecedor.data(item.row(), "st").toString();
+    for (const auto &index : list) {
+      const QString tipoSt = modelPedidoFornecedor.data(index.row(), "st").toString();
 
       if (tipoSt == "Sem ST") { continue; }
 
-      const double aliquotaSt = modelPedidoFornecedor.data(item.row(), "aliquotaSt").toDouble();
-      const double preco = modelPedidoFornecedor.data(item.row(), "preco").toDouble();
+      const double aliquotaSt = modelPedidoFornecedor.data(index.row(), "aliquotaSt").toDouble();
+      const double preco = modelPedidoFornecedor.data(index.row(), "preco").toDouble();
       const double valorSt = preco * (aliquotaSt / 100);
 
       if (tipoSt == "ST Fornecedor") { stForn += valorSt; }
@@ -491,14 +491,14 @@ bool InputDialogFinanceiro::cadastrar() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (tipo == Tipo::ConfirmarCompra) {
-    for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "selecionado", true)) { return false; }
+    for (const auto &index : list) {
+      if (not modelPedidoFornecedor.setData(index.row(), "selecionado", true)) { return false; }
     }
   }
 
   if (tipo == Tipo::Financeiro) {
-    for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
+    for (const auto &index : list) {
+      if (not modelPedidoFornecedor.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
     }
   }
 
@@ -543,14 +543,14 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &item : list) { total += modelPedidoFornecedor.data(item.row(), "preco").toDouble(); }
+    for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
 
     const double aliquota = valueSt * 100 / total;
 
     ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-    for (const auto &item : list) {
-      if (not modelPedidoFornecedor.setData(item.row(), "aliquotaSt", aliquota)) { return; }
+    for (const auto &index : list) {
+      if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", aliquota)) { return; }
     }
 
     ui->doubleSpinBoxTotal->setValue(total);

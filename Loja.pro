@@ -179,6 +179,7 @@ SOURCES += \
     src/sqlrelationaltablemodel.cpp \
     src/sqltreemodel.cpp \
     src/tableview.cpp \
+    src/treeview.cpp \
     src/userconfig.cpp \
     src/usersession.cpp \
     src/validadedialog.cpp \
@@ -292,6 +293,7 @@ HEADERS  += \
     src/sqlrelationaltablemodel.h \
     src/sqltreemodel.h \
     src/tableview.h \
+    src/treeview.h \
     src/userconfig.h \
     src/usersession.h \
     src/validadedialog.h \

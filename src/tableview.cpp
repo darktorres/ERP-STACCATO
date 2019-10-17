@@ -1,4 +1,3 @@
-#include <QAbstractProxyModel>
 #include <QClipboard>
 #include <QDebug>
 #include <QHeaderView>
@@ -8,8 +7,6 @@
 #include <QSqlRecord>
 
 #include "application.h"
-#include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
 #include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
@@ -29,6 +26,8 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
+int TableView::columnCount() const { return model()->columnCount(); }
+
 void TableView::showContextMenu(const QPoint &pos) {
   QMenu contextMenu;
 
@@ -41,27 +40,41 @@ void TableView::showContextMenu(const QPoint &pos) {
   contextMenu.exec(mapToGlobal(pos));
 }
 
-int TableView::getColumnIndex(const QString &column) const {
+int TableView::columnIndex(const QString &column, const bool silent) const {
   int columnIndex = -1;
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
-  if (columnIndex == -1 and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }
 
-void TableView::hideColumn(const QString &column) { QTableView::hideColumn(getColumnIndex(column)); }
+void TableView::hideColumn(const QString &column) { QTableView::hideColumn(columnIndex(column)); }
 
-void TableView::showColumn(const QString &column) { QTableView::showColumn(getColumnIndex(column)); }
+void TableView::showColumn(const QString &column) { QTableView::showColumn(columnIndex(column)); }
 
-void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTableView::setItemDelegateForColumn(getColumnIndex(column), delegate); }
+void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTableView::setItemDelegateForColumn(columnIndex(column), delegate); }
 
-void TableView::openPersistentEditor(const int row, const QString &column) { QTableView::openPersistentEditor(QTableView::model()->index(row, getColumnIndex(column))); }
+void TableView::openPersistentEditor(const int row, const QString &column) { QTableView::openPersistentEditor(QTableView::model()->index(row, columnIndex(column))); }
 
 void TableView::openPersistentEditor(const int row, const int column) { QTableView::openPersistentEditor(QTableView::model()->index(row, column)); }
 
-void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(getColumnIndex(column), order); }
+void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(columnIndex(column), order); }
+
+int TableView::rowCount() const { return model()->rowCount(); }
+
+QVariant TableView::dataAt(const QModelIndex &index, const QString &column) const { return index.siblingAtColumn(columnIndex(column)).data(); }
+
+QVariant TableView::dataAt(const int row, const QString &column) const { return model()->data(model()->index(row, columnIndex(column))); }
+
+QVariant TableView::dataAt(const int row, const int column) const { return model()->data(model()->index(row, column)); }
+
+bool TableView::setDataAt(const QModelIndex &index, const QString &column, const QVariant &value) { return model()->setData(model()->index(index.row(), columnIndex(column)), value); }
+
+bool TableView::setDataAt(const int row, const QString &column, const QVariant &value) { return model()->setData(model()->index(row, columnIndex(column)), value); }
+
+bool TableView::setDataAt(const int row, const int column, const QVariant &value) { return model()->setData(model()->index(row, column), value); }
 
 void TableView::redoView() {
   if (not persistentColumns.isEmpty()) {
@@ -71,24 +84,42 @@ void TableView::redoView() {
   }
 }
 
-void TableView::setModel(QAbstractItemModel *model) {
-  if (auto sqlQuery = qobject_cast<SqlQueryModel *>(model); sqlQuery and sqlQuery->proxyModel) {
-    QTableView::setModel(sqlQuery->proxyModel);
-  } else if (auto sqlRelat = qobject_cast<SqlRelationalTableModel *>(model); sqlRelat and sqlRelat->proxyModel) {
-    QTableView::setModel(sqlRelat->proxyModel);
-  } else {
-    QTableView::setModel(model);
-  }
+void TableView::setModel(QIdentityProxyModel *model) {
+  baseModel = static_cast<QSqlQueryModel *>(model->sourceModel());
 
-  baseModel = qobject_cast<QSqlQueryModel *>(model);
+  setModel(static_cast<QAbstractItemModel *>(model));
+}
+
+void TableView::setModel(QSortFilterProxyModel *model) {
+  baseModel = static_cast<QSqlQueryModel *>(model->sourceModel());
+
+  setModel(static_cast<QAbstractItemModel *>(model));
+}
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+void TableView::setModel(QTransposeProxyModel *model) {
+  baseModel = static_cast<QSqlQueryModel *>(model->sourceModel());
+
+  setModel(static_cast<QAbstractItemModel *>(model));
+}
+#endif
+
+void TableView::setModel(QSqlQueryModel *model) {
+  baseModel = model;
+
+  setModel(static_cast<QAbstractItemModel *>(model));
+}
+
+void TableView::setModel(QAbstractItemModel *model) {
+  QTableView::setModel(model);
 
   //---------------------------------------
 
-  if (baseModel) {
-    connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
-    connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
-    connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
-  }
+  if (not baseModel) { qApp->enqueueError("Sem baseModel!"); }
+
+  connect(model, &QAbstractItemModel::modelReset, this, &TableView::redoView);
+  connect(model, &QAbstractItemModel::dataChanged, this, &TableView::redoView);
+  connect(model, &QAbstractItemModel::rowsRemoved, this, &TableView::redoView);
 
   //---------------------------------------
 

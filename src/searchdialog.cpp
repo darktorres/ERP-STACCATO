@@ -49,9 +49,7 @@ void SearchDialog::setupTables(const QString &table) {
 
   setFilter(filter);
 
-  model.proxyModel = new SearchDialogProxyModel(&model, this);
-
-  ui->table->setModel(&model);
+  ui->table->setModel(new SearchDialogProxyModel(&model, this));
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
@@ -85,7 +83,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   model.setFilter(searchFilter);
 }
 
-void SearchDialog::sendUpdateMessage(const int row) { emit itemSelected(model.data(row, primaryKey)); }
+void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(ui->table->dataAt(index, primaryKey)); }
 
 bool SearchDialog::prepare_show() {
   model.setFilter(filter);
@@ -140,12 +138,12 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
   }
 
   if (model.tableName() == "view_produto") {
-    const bool isEstoque = model.data(selection.first().row(), "estoque").toBool();
+    const bool isEstoque = ui->table->dataAt(selection.first(), "estoque").toBool();
 
     if (not silent and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }
 
-  sendUpdateMessage(selection.first().row());
+  sendUpdateMessage(selection.first());
   close();
 }
 
@@ -327,7 +325,6 @@ SearchDialog *SearchDialog::usuario(QWidget *parent) {
   sdUsuario->setHeaderData("idLoja", "Loja");
   sdUsuario->setHeaderData("tipo", "Função");
   sdUsuario->setHeaderData("nome", "Nome");
-  sdUsuario->setHeaderData("sigla", "Sigla");
   sdUsuario->setHeaderData("email", "E-mail");
 
   sdUsuario->model.setRelation(sdUsuario->model.fieldIndex("idLoja"), QSqlRelation("loja", "idLoja", "descricao"));
@@ -352,7 +349,6 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
 
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");
-  sdVendedor->setHeaderData("sigla", "Sigla");
   sdVendedor->setHeaderData("email", "E-mail");
 
   return sdVendedor;

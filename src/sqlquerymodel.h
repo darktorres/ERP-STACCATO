@@ -13,8 +13,6 @@ public:
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setQuery(const QString &query, const QSqlDatabase &db = QSqlDatabase()) -> bool;
 
-  QAbstractProxyModel *proxyModel = nullptr;
-
 private:
   using QSqlQueryModel::data;
   using QSqlQueryModel::setHeaderData;

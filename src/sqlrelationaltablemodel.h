@@ -23,7 +23,7 @@ public:
   [[nodiscard]] auto submitAll() -> bool;
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
-  auto fieldIndex(const QString &fieldName, const bool silent = false) -> int;
+  auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
   auto setFilter(const QString &filter) -> void final;
@@ -32,8 +32,6 @@ public:
   auto setTable(const QString &tableName) -> void final;
   auto supportedDropActions() const -> Qt::DropActions final;
   auto insertRowAtEnd() -> int;
-
-  QAbstractProxyModel *proxyModel = nullptr;
 
 private:
   using QSqlRelationalTableModel::data;

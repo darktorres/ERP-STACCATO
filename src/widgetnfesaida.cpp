@@ -76,7 +76,6 @@ void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 void WidgetNfeSaida::setupTables() {
   modelViewNFeSaida.setTable("view_nfe_saida");
 
-  modelViewNFeSaida.setHeaderData("created", "Criado em");
   modelViewNFeSaida.setHeaderData("valor", "R$");
 
   ui->table->setModel(&modelViewNFeSaida);
@@ -92,7 +91,7 @@ void WidgetNfeSaida::setupTables() {
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
+  query.bindValue(":idNFe", ui->table->dataAt(index, "idNFe"));
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
@@ -273,17 +272,17 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   ACBr acbr;
 
-  for (const auto &item : list) {
+  for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (modelViewNFeSaida.data(item.row(), "status").toString() != "AUTORIZADO") { continue; }
+    if (modelViewNFeSaida.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
 
     // pegar xml do bd e salvar em arquivo
 
-    const QString chaveAcesso = modelViewNFeSaida.data(item.row(), "chaveAcesso").toString();
+    const QString chaveAcesso = modelViewNFeSaida.data(index.row(), "chaveAcesso").toString();
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 

@@ -7,33 +7,18 @@
 
 SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *parent) : QSqlRelationalTableModel(parent), limit(limit) {}
 
-QVariant SqlRelationalTableModel::data(const int row, const int column) const {
-  if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
-
-  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column));
-}
+QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column)); }
 
 QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
-  const int columnIndex = QSqlTableModel::fieldIndex(column);
+  const int columnIndex = fieldIndex(column);
 
-  if (columnIndex == -1) {
-    qApp->enqueueError("Chave '" + column + "' não encontrada na tabela " + QSqlTableModel::tableName());
-    return QVariant();
-  }
-
-  if (proxyModel) { return proxyModel->data(proxyModel->index(row, columnIndex)); }
+  if (columnIndex == -1) { return QVariant(); }
 
   return QSqlRelationalTableModel::data(QSqlTableModel::index(row, columnIndex));
 }
 
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
   if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
-
-  if (proxyModel) {
-    if (not proxyModel->setData(proxyModel->index(row, column), value)) {
-      return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
-    }
-  }
 
   if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), value)) {
     return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
@@ -45,11 +30,7 @@ bool SqlRelationalTableModel::setData(const int row, const int column, const QVa
 bool SqlRelationalTableModel::setData(const int row, const QString &column, const QVariant &value) {
   if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
 
-  const int columnIndex = QSqlTableModel::fieldIndex(column);
-
-  if (columnIndex == -1) { return qApp->enqueueError(false, "Chave " + column + " não encontrada na tabela " + QSqlTableModel::tableName()); }
-
-  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, columnIndex), value); }
+  const int columnIndex = fieldIndex(column);
 
   if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, columnIndex), value)) {
     return qApp->enqueueError(false, "Erro inserindo '" + column + "' na tabela '" + tableName() + "': " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) +
@@ -59,7 +40,7 @@ bool SqlRelationalTableModel::setData(const int row, const QString &column, cons
   return true;
 }
 
-bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(QSqlTableModel::fieldIndex(column), Qt::Horizontal, value); }
+bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
 
 Qt::DropActions SqlRelationalTableModel::supportedDropActions() const { return Qt::MoveAction; }
 
@@ -79,7 +60,7 @@ bool SqlRelationalTableModel::submitAll() {
 QString SqlRelationalTableModel::selectStatement() const { return QSqlRelationalTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
 
 QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
-  return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, QSqlRelationalTableModel::fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
+  return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
 }
 
 QVector<int> SqlRelationalTableModel::multiMatch(const QVector<Condition> conditions, bool allHits) const {
@@ -132,7 +113,7 @@ void SqlRelationalTableModel::setTable(const QString &tableName) {
   setFilter("0");
 }
 
-int SqlRelationalTableModel::fieldIndex(const QString &fieldName, const bool silent) {
+int SqlRelationalTableModel::fieldIndex(const QString &fieldName, const bool silent) const {
   const int field = QSqlRelationalTableModel::fieldIndex(fieldName);
 
   if (field == -1 and not silent) { qApp->enqueueError(fieldName + " não encontrado na tabela " + tableName()); }

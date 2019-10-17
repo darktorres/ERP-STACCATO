@@ -26,15 +26,15 @@ Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), 
   showMaximized();
 
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &Contas::on_pushButtonSalvar_clicked);
-  connect(&modelPendentes, &QSqlTableModel::dataChanged, this, &Contas::preencher);
-  connect(&modelPendentes, &QSqlTableModel::dataChanged, this, &Contas::validarData);
+  connect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::preencher);
+  connect(ui->tablePendentes->model(), &QAbstractItemModel::dataChanged, this, &Contas::validarData);
 }
 
 Contas::~Contas() { delete ui; }
 
 void Contas::validarData(const QModelIndex &index) {
-  if (index.column() == modelPendentes.fieldIndex("dataPagamento")) {
-    const int idPagamento = modelPendentes.data(index.row(), "idPagamento").toInt();
+  if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
+    const int idPagamento = ui->tablePendentes->dataAt(index, "idPagamento").toInt();
 
     QSqlQuery query;
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
@@ -43,82 +43,82 @@ void Contas::validarData(const QModelIndex &index) {
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
-    const QDate newDate = modelPendentes.data(index.row(), "dataPagamento").toDate();
+    const QDate newDate = ui->tablePendentes->dataAt(index, "dataPagamento").toDate();
 
     if (oldDate.isNull()) { return; }
 
     // TODO: verificar se essa funcao nao precisa retornar um bool e porque ela nao retorna nos erros
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
       qApp->enqueueError("Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
-      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) { return; }
+      if (not ui->tablePendentes->setDataAt(index, "dataPagamento", oldDate)) { return; }
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
       qApp->enqueueError("Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
-      if (not modelPendentes.setData(index.row(), "dataPagamento", oldDate)) { return; }
+      if (not ui->tablePendentes->setDataAt(index, "dataPagamento", oldDate)) { return; }
     }
   }
 }
 
 void Contas::preencher(const QModelIndex &index) {
-  if (index.column() == modelPendentes.fieldIndex("valor")) {
+  if (index.column() == ui->tablePendentes->columnIndex("valor")) {
     QSqlQuery query;
     query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", modelPendentes.data(index.row(), "idPagamento"));
+    query.bindValue(":idPagamento", ui->tablePendentes->dataAt(index, "idPagamento"));
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando valor: " + query.lastError().text(), this); }
 
     const double oldValor = query.value("valor").toDouble();
-    const double newValor = modelPendentes.data(index.row(), "valor").toDouble();
+    const double newValor = ui->tablePendentes->dataAt(index, "valor").toDouble();
 
     if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
       qApp->enqueueError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
-      if (not modelPendentes.setData(index.row(), "valor", oldValor)) { return; }
+      if (not ui->tablePendentes->setDataAt(index, "valor", oldValor)) { return; }
     }
   }
 
-  if (index.column() == modelPendentes.fieldIndex("dataRealizado")) {
-    const int contaDestino = (modelPendentes.data(index.row(), "tipo").toString().contains("Boleto")) ? 33 : 3;
+  if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
+    const int contaSantander = 3;
+    const int contaItau = 33;
 
-    if (not modelPendentes.setData(index.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) { return; }
-    if (not modelPendentes.setData(index.row(), "valorReal", modelPendentes.data(index.row(), "valor"))) { return; }
-    if (not modelPendentes.setData(index.row(), "tipoReal", modelPendentes.data(index.row(), "tipo"))) { return; }
-    if (not modelPendentes.setData(index.row(), "parcelaReal", modelPendentes.data(index.row(), "parcela"))) { return; }
-    if (not modelPendentes.setData(index.row(), "contaDestino", contaDestino)) { return; }
-    if (not modelPendentes.setData(index.row(), "centroCusto", modelPendentes.data(index.row(), "idLoja"))) { return; }
+    const int contaDestino = (tipo == Tipo::Receber and ui->tablePendentes->dataAt(index, "tipo").toString().contains("Boleto")) ? contaItau : contaSantander;
+
+    if (not ui->tablePendentes->setDataAt(index, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
+    if (not ui->tablePendentes->setDataAt(index, "valorReal", ui->tablePendentes->dataAt(index, "valor"))) { return; }
+    if (not ui->tablePendentes->setDataAt(index, "tipoReal", ui->tablePendentes->dataAt(index, "tipo"))) { return; }
+    if (not ui->tablePendentes->setDataAt(index, "parcelaReal", ui->tablePendentes->dataAt(index, "parcela"))) { return; }
+    if (not ui->tablePendentes->setDataAt(index, "contaDestino", contaDestino)) { return; }
+    if (not ui->tablePendentes->setDataAt(index, "centroCusto", ui->tablePendentes->dataAt(index, "idLoja"))) { return; }
 
     // -------------------------------------------------------------------------
 
-    const QModelIndexList list = modelPendentes.match("tipo", modelPendentes.data(index.row(), "tipo").toString().left(1) + ". Taxa Cartão", -1);
+    const auto list =
+        modelPendentes.multiMatch({{"tipo", ui->tablePendentes->dataAt(index, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", ui->tablePendentes->dataAt(index, "parcela"), false}});
 
-    for (const auto &indexMatch : list) {
-      if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) { continue; }
-
-      if (not modelPendentes.setData(indexMatch.row(), "dataRealizado", modelPendentes.data(index.row(), "dataRealizado"))) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "status", tipo == Tipo::Receber ? "RECEBIDO" : "PAGO")) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "valorReal", modelPendentes.data(indexMatch.row(), "valor"))) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "tipoReal", modelPendentes.data(indexMatch.row(), "tipo"))) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "parcelaReal", modelPendentes.data(indexMatch.row(), "parcela"))) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", contaDestino)) { return; }
-      if (not modelPendentes.setData(indexMatch.row(), "centroCusto", modelPendentes.data(indexMatch.row(), "idLoja"))) { return; }
+    for (const auto &rowMatch : list) {
+      if (not ui->tablePendentes->setDataAt(rowMatch, "dataRealizado", ui->tablePendentes->dataAt(index, "dataRealizado"))) { return; }
+      if (not ui->tablePendentes->setDataAt(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
+      if (not ui->tablePendentes->setDataAt(rowMatch, "valorReal", ui->tablePendentes->dataAt(rowMatch, "valor"))) { return; }
+      if (not ui->tablePendentes->setDataAt(rowMatch, "tipoReal", ui->tablePendentes->dataAt(rowMatch, "tipo"))) { return; }
+      if (not ui->tablePendentes->setDataAt(rowMatch, "parcelaReal", ui->tablePendentes->dataAt(rowMatch, "parcela"))) { return; }
+      if (not ui->tablePendentes->setDataAt(rowMatch, "contaDestino", contaDestino)) { return; }
+      if (not ui->tablePendentes->setDataAt(rowMatch, "centroCusto", ui->tablePendentes->dataAt(rowMatch, "idLoja"))) { return; }
     }
   }
 
-  if (index.column() == modelPendentes.fieldIndex("contaDestino")) {
-    // buscar linha da taxa cartao e alterar a conta para ser igual
+  // buscar linha da taxa cartao e alterar a conta para ser igual
+  if (index.column() == ui->tablePendentes->columnIndex("contaDestino")) {
+    const auto list =
+        modelPendentes.multiMatch({{"tipo", ui->tablePendentes->dataAt(index, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", ui->tablePendentes->dataAt(index, "parcela"), false}});
 
-    const QModelIndexList list = modelPendentes.match("tipo", modelPendentes.data(index.row(), "tipo").toString().left(1) + ". Taxa Cartão", -1);
-
-    for (const auto &indexMatch : list) {
-      if (modelPendentes.data(indexMatch.row(), "parcela") != modelPendentes.data(index.row(), "parcela")) { continue; }
-
-      if (not modelPendentes.setData(indexMatch.row(), "contaDestino", modelPendentes.data(index.row(), "contaDestino"))) { return; }
+    for (const auto &rowMatch : list) {
+      if (not ui->tablePendentes->setDataAt(rowMatch, "contaDestino", ui->tablePendentes->dataAt(index, "contaDestino"))) { return; }
     }
   }
 
-  if (index.column() != modelPendentes.fieldIndex("dataRealizado")) {
-    if (modelPendentes.data(index.row(), "status").toString() == "PENDENTE") {
-      if (not modelPendentes.setData(index.row(), "status", "CONFERIDO")) { return; }
+  if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
+    if (ui->tablePendentes->dataAt(index, "status").toString() == "PENDENTE") {
+      if (not ui->tablePendentes->setDataAt(index, "status", "CONFERIDO")) { return; }
     }
   }
 }
@@ -147,9 +147,7 @@ void Contas::setupTables() {
 
   modelPendentes.setSort("dataPagamento");
 
-  modelPendentes.proxyModel = new SortFilterProxyModel(&modelPendentes, this);
-
-  ui->tablePendentes->setModel(&modelPendentes);
+  ui->tablePendentes->setModel(new SortFilterProxyModel(&modelPendentes, this));
 
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataEmissao", new NoEditDelegate(this));
@@ -216,9 +214,7 @@ void Contas::setupTables() {
   modelProcessados.setHeaderData("grupo", "Grupo");
   modelProcessados.setHeaderData("subGrupo", "SubGrupo");
 
-  modelProcessados.proxyModel = new SortFilterProxyModel(&modelProcessados, this);
-
-  ui->tableProcessados->setModel(&modelProcessados);
+  ui->tableProcessados->setModel(new SortFilterProxyModel(&modelProcessados, this));
 
   ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
@@ -245,15 +241,17 @@ void Contas::setupTables() {
 }
 
 bool Contas::verifyFields() {
-  for (int row = 0; row < modelPendentes.rowCount(); ++row) {
-    if ((tipo == Tipo::Pagar and modelPendentes.data(row, "status").toString() == "PAGO") or (tipo == Tipo::Receber and modelPendentes.data(row, "status").toString() == "RECEBIDO")) {
-      if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!", this); }
-      if (modelPendentes.data(row, "valorReal").toString().isEmpty()) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
-      if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "parcelaReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Parcela Real' vazio!", this); }
-      if (modelPendentes.data(row, "contaDestino").toString().isEmpty()) { return qApp->enqueueError(false, "'Conta Dest.' vazio!", this); }
-      if (modelPendentes.data(row, "centroCusto").toString().isEmpty()) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
-      if (modelPendentes.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!", this); }
+  for (int row = 0; row < ui->tablePendentes->rowCount(); ++row) {
+    const QString status = ui->tablePendentes->dataAt(row, "status").toString();
+
+    if ((tipo == Tipo::Pagar and status == "PAGO") or (tipo == Tipo::Receber and status == "RECEBIDO")) {
+      if (ui->tablePendentes->dataAt(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!", this); }
+      if (ui->tablePendentes->dataAt(row, "valorReal").toString().isEmpty()) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
+      if (ui->tablePendentes->dataAt(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!", this); }
+      if (ui->tablePendentes->dataAt(row, "parcelaReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Parcela Real' vazio!", this); }
+      if (ui->tablePendentes->dataAt(row, "contaDestino").toString().isEmpty()) { return qApp->enqueueError(false, "'Conta Dest.' vazio!", this); }
+      if (ui->tablePendentes->dataAt(row, "centroCusto").toString().isEmpty()) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
+      if (ui->tablePendentes->dataAt(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!", this); }
     }
   }
 

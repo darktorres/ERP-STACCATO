@@ -13,8 +13,6 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
   ui->splitter_6->setStretchFactor(1, 1);
 
   setConnections();
-
-  ui->tableForn->setModel(&modelViewLogistica);
 }
 
 WidgetLogistica::~WidgetLogistica() { delete ui; }
@@ -39,6 +37,8 @@ void WidgetLogistica::resetTables() {
 }
 
 void WidgetLogistica::updateTables() {
+  ui->tableForn->setModel(&modelViewLogistica);
+
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
   ui->frameForn->hide();

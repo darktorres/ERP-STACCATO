@@ -166,7 +166,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
   QSqlQuery query3;
   query3.prepare("UPDATE veiculo_has_produto SET data = :data WHERE idEvento = :idEvento");
 
-  for (const auto &item : list) {
+  for (const auto &index : list) {
     for (int row = 0; row < modelProdutos.rowCount(); ++row) {
       query1.bindValue(":dataPrevEnt", dataPrevEnt);
       query1.bindValue(":idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"));
@@ -180,7 +180,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
     }
 
     query3.bindValue(":data", dataPrevEnt);
-    query3.bindValue(":idEvento", modelCarga.data(item.row(), "idEvento"));
+    query3.bindValue(":idEvento", modelCarga.data(index.row(), "idEvento"));
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando data carga: " + query3.lastError().text(), this); }
   }

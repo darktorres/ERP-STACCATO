@@ -74,9 +74,7 @@ void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setHeaderData("un", "Un.");
   modelViewRecebimento.setHeaderData("caixas", "Caixas");
 
-  modelViewRecebimento.proxyModel = new EstoquePrazoProxyModel(&modelViewRecebimento, this);
-
-  ui->table->setModel(&modelViewRecebimento);
+  ui->table->setModel(new EstoquePrazoProxyModel(&modelViewRecebimento, this));
 
   ui->table->hideColumn("fornecedor");
 }
@@ -97,24 +95,24 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   query4.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
                  "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
-  for (const auto &item : list) {
+  for (const auto &index : list) {
     query1.bindValue(":recebidoPor", recebidoPor);
-    query1.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
+    query1.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
     if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do estoque: " + query1.lastError().text(), this); }
 
-    query2.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
+    query2.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + query2.lastError().text(), this); }
 
     query3.bindValue(":dataRealReceb", dataReceb);
-    query3.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
-    query3.bindValue(":codComercial", modelViewRecebimento.data(item.row(), "codComercial"));
+    query3.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    query3.bindValue(":codComercial", modelViewRecebimento.data(index.row(), "codComercial"));
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query3.lastError().text(), this); }
 
     query4.bindValue(":dataRealReceb", dataReceb);
-    query4.bindValue(":idEstoque", modelViewRecebimento.data(item.row(), "idEstoque"));
+    query4.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
     if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando produtos venda: " + query4.lastError().text(), this); }
   }
@@ -131,7 +129,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   QStringList ids;
 
-  for (const auto &item : list) { ids << modelViewRecebimento.data(item.row(), "idEstoque").toString(); }
+  for (const auto &index : list) { ids << modelViewRecebimento.data(index.row(), "idEstoque").toString(); }
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento, this);
   inputDlg.setFilterRecebe(ids);
@@ -186,9 +184,9 @@ bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
   query2.prepare("UPDATE venda_has_produto2 SET dataPrevReceb = :dataPrevReceb WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM RECEBIMENTO'");
 
-  for (const auto &item : list) {
-    const int idEstoque = modelViewRecebimento.data(item.row(), "idEstoque").toInt();
-    const QString codComercial = modelViewRecebimento.data(item.row(), "codComercial").toString();
+  for (const auto &index : list) {
+    const int idEstoque = modelViewRecebimento.data(index.row(), "idEstoque").toInt();
+    const QString codComercial = modelViewRecebimento.data(index.row(), "codComercial").toString();
 
     query1.bindValue(":dataPrevReceb", dataPrevReceb);
     query1.bindValue(":idEstoque", idEstoque);
@@ -211,8 +209,8 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  for (const auto &item : list) {
-    const QString idVenda = modelViewRecebimento.data(item.row(), "idVenda").toString();
+  for (const auto &index : list) {
+    const QString idVenda = modelViewRecebimento.data(index.row(), "idVenda").toString();
     const QStringList ids = idVenda.split(", ");
 
     if (ids.isEmpty()) { return; }
@@ -258,9 +256,9 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
   query3.prepare("UPDATE venda_has_produto2 SET status = 'EM COLETA', dataRealColeta = NULL, dataPrevReceb = NULL WHERE status = 'EM RECEBIMENTO' AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM "
                  "estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
-  for (const auto &item : list) {
-    const int idEstoque = modelViewRecebimento.data(item.row(), "idEstoque").toInt();
-    const QString codComercial = modelViewRecebimento.data(item.row(), "codComercial").toString();
+  for (const auto &index : list) {
+    const int idEstoque = modelViewRecebimento.data(index.row(), "idEstoque").toInt();
+    const QString codComercial = modelViewRecebimento.data(index.row(), "codComercial").toString();
 
     query1.bindValue(":idEstoque", idEstoque);
 

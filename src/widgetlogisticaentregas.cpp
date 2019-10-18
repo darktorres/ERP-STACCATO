@@ -45,6 +45,7 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
   connect(ui->tableCalendario, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCalendario_clicked, connectionType);
   connect(ui->tableCarga, &TableView::clicked, this, &WidgetLogisticaEntregas::on_tableCarga_clicked, connectionType);
+  connect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonImportarNFe_clicked, connectionType);
 }
 
 void WidgetLogisticaEntregas::updateTables() {
@@ -244,18 +245,21 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
 
   if (status == "ENTREGA AGEND.") {
     ui->pushButtonGerarNFeEntregar->setEnabled(true);
+    ui->pushButtonImportarNFe->setEnabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
   if (status == "EM ENTREGA") {
     ui->pushButtonGerarNFeEntregar->setDisabled(true);
+    ui->pushButtonImportarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setEnabled(true);
   }
 
   if (status == "NOTA PENDENTE") {
     ui->pushButtonGerarNFeEntregar->setDisabled(true);
+    ui->pushButtonImportarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setDisabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
@@ -550,6 +554,97 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
+}
+
+void WidgetLogisticaEntregas::on_pushButtonImportarNFe_clicked() {
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
+
+  if (filePath.isEmpty()) { return; }
+
+  QFile file(filePath);
+
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file.errorString(), this); }
+
+  XML xml(file.readAll(), file.fileName());
+
+  if (not verificaCNPJ(xml) or verificaExiste(xml) or not verificaValido(xml)) { return; }
+
+  QSqlQuery query;
+  query.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, cnpjOrig, chaveAcesso, valor) VALUES (:numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :cnpjOrig, :chaveAcesso, :valor)");
+  query.bindValue(":numeroNFe", xml.nNF);
+  query.bindValue(":xml", xml.fileContent);
+  query.bindValue(":cnpjOrig", xml.cnpjDest);
+  query.bindValue(":chaveAcesso", xml.chaveAcesso);
+  query.bindValue(":valor", xml.vNF_Total);
+
+  if (not query.exec()) { return qApp->enqueueError("Erro importando NFe: " + query.lastError().text(), this); }
+
+  const QVariant id = query.lastInsertId();
+
+  // update other tables
+
+  QSqlQuery query1;
+  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA' WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+
+  QSqlQuery query3;
+  query3.prepare("UPDATE veiculo_has_produto SET status = 'EM ENTREGA', idNFeSaida = :idNFeSaida WHERE status = 'ENTREGA AGEND.' AND idVendaProduto = :idVendaProduto");
+
+  for (int row = 0; row < modelProdutos.rowCount(); ++row) {
+    query1.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+
+    if (not query1.exec()) { return qApp->enqueueError("Erro atualizando status do pedido_fornecedor: " + query1.lastError().text(), this); }
+
+    query2.bindValue(":idNFeSaida", id);
+    query2.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+
+    if (not query2.exec()) { return qApp->enqueueError("Erro salvando NFe nos produtos: " + query2.lastError().text(), this); }
+
+    query3.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+    query3.bindValue(":idNFeSaida", id);
+
+    if (not query3.exec()) { return qApp->enqueueError("Erro atualizando carga veiculo: " + query3.lastError().text(), this); }
+  }
+
+  updateTables();
+  qApp->enqueueInformation("Nota importada com sucesso!", this);
+}
+
+bool WidgetLogisticaEntregas::verificaCNPJ(const XML &xml) {
+  QSqlQuery queryLoja;
+
+  // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
+  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
+
+  if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != xml.cnpjDest) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "CNPJ da nota não é do galpão. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
+    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+    return (msgBox.exec() == QMessageBox::Yes);
+  }
+
+  return true;
+}
+
+bool WidgetLogisticaEntregas::verificaExiste(const XML &xml) {
+  QSqlQuery query;
+  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", xml.chaveAcesso);
+
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
+
+  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+
+  return false;
+}
+
+bool WidgetLogisticaEntregas::verificaValido(const XML &xml) {
+  if (not xml.fileContent.contains("nProt")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", this); }
+
+  return true;
 }
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto

@@ -568,7 +568,7 @@ bool ImportarXML::verificaCNPJ(const XML &xml) {
   // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
   if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
 
-  if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != xml.cnpj) {
+  if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != xml.cnpjDest) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "CNPJ da nota não é do galpão. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
     msgBox.setButtonText(QMessageBox::Yes, "Continuar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");
@@ -619,7 +619,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
   if (not modelNFe.setData(row, "tipo", "ENTRADA")) { return false; }
-  if (not modelNFe.setData(row, "cnpjDest", xml.cnpj)) { return false; }
+  if (not modelNFe.setData(row, "cnpjDest", xml.cnpjDest)) { return false; }
   if (not modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso)) { return false; }
   if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) { return false; }
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }

@@ -45,7 +45,6 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   }
 
   adjustSize();
-  accept();
 }
 
 void LoginDialog::setComboBox() {

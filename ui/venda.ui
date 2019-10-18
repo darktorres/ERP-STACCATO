@@ -33,12 +33,6 @@
           <enum>Qt::Horizontal</enum>
          </property>
          <widget class="QFrame" name="frameProdutos">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -481,12 +475,6 @@ color: rgb(0, 0, 0);</string>
           </layout>
          </widget>
          <widget class="QFrame" name="framePagamentos">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -791,12 +779,6 @@ color: rgb(0, 0, 0);</string>
                 </property>
                 <property name="frame">
                  <bool>true</bool>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-                <property name="buttonSymbols">
-                 <enum>QAbstractSpinBox::NoButtons</enum>
                 </property>
                 <property name="correctionMode">
                  <enum>QAbstractSpinBox::CorrectToNearestValue</enum>

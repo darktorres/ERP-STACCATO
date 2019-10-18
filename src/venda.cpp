@@ -56,8 +56,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   for (auto &item : ui->frameRT->findChildren<QWidget *>()) { item->setHidden(true); }
 
-  ui->splitter->setStretchFactor(0, 1);
-  ui->splitter->setStretchFactor(1, 0);
+  ui->splitter->setStretchFactor(0, 255);
+  ui->splitter->setStretchFactor(1, 1);
 
   show();
 }

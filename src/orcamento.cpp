@@ -948,16 +948,25 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   QSqlQuery queryProduto;
   queryProduto.prepare("SELECT (descontinuado OR desativado) AS invalido FROM produto WHERE idProduto = :idProduto");
 
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    const int idProduto = modelItem.data(row, "idProduto").toInt();
+  QSqlQuery queryEquivalente;
+  queryEquivalente.prepare("SELECT idProduto FROM produto WHERE codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
 
-    queryProduto.bindValue(":idProduto", idProduto);
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
     if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
 
     if (queryProduto.value("invalido").toBool()) {
-      produtos << QString::number(row) + " - " + modelItem.data(row, "produto").toString();
-      skipRows << row;
+      queryEquivalente.bindValue(":codComercial", modelItem.data(row, "codComercial"));
+
+      if (not queryEquivalente.exec()) { return qApp->enqueueError("Erro procurando produto equivalente: " + queryEquivalente.lastError().text(), this); }
+
+      if (queryEquivalente.first()) {
+        if (not modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"))) {}
+      } else {
+        produtos << QString::number(row) + " - " + modelItem.data(row, "produto").toString();
+        skipRows << row;
+      }
     }
   }
 

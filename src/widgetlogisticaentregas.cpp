@@ -615,16 +615,11 @@ void WidgetLogisticaEntregas::on_pushButtonImportarNFe_clicked() {
 bool WidgetLogisticaEntregas::verificaCNPJ(const XML &xml) {
   QSqlQuery queryLoja;
 
-  // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
-  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
+  const QString cnpj = QString(xml.cnpjOrig).insert(2, ".").insert(6, ".").insert(10, "/").insert(15, "-");
 
-  if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != xml.cnpjDest) {
-    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "CNPJ da nota não é do galpão. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
+  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE cnpj = '" + cnpj + "'")) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
 
-    return (msgBox.exec() == QMessageBox::Yes);
-  }
+  if (not queryLoja.first()) { return qApp->enqueueError(false, "CNPJ da NFe difere dos CNPJs da loja!", this); }
 
   return true;
 }

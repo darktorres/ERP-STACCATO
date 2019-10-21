@@ -2,7 +2,13 @@
 
 #include "sqltreemodel.h"
 
+#include <QIdentityProxyModel>
+#include <QSortFilterProxyModel>
 #include <QTreeView>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+#include <QTransposeProxyModel>
+#endif
 
 class TreeView final : public QTreeView {
   Q_OBJECT

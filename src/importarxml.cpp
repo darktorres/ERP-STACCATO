@@ -52,6 +52,8 @@ void ImportarXML::updateTableData(const QModelIndex &topLeft) {
     const QString header = modelEstoque.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
+    // TODO: se alterar quant. tem que alterar caixas
+
     if (header == "Quant." or header == "R$ Unid.") {
       const double preco = modelEstoque.data(row, "quant").toDouble() * modelEstoque.data(row, "valorUnid").toDouble();
       if (not modelEstoque.setData(row, "valor", preco)) { return; }
@@ -280,6 +282,7 @@ void ImportarXML::setupTables() {
   // -------------------------------------------------------------------------
 
   modelEstoque_compra.setTable("estoque_has_compra");
+
   // -------------------------------------------------------------------------
 
   QStringList idVendas;
@@ -353,8 +356,11 @@ bool ImportarXML::salvarDadosVenda() {
   if (not modelVenda.submitAll()) { return false; }
 
   for (int row = 0; row < modelVenda.rowCount(); ++row) {
+    QSqlQuery query;
 
-    if (not queryLote.exec()) { return qApp->enqueueError(false, "Erro atualizando lote na venda: " + queryLote.lastError().text(), this); }
+    if (not query.exec("CALL update_venda_produto_status(" + modelVenda.data(row, "idVendaProdutoFK").toString() + ")")) {
+      return qApp->enqueueError(false, "Erro atualizando status venda: " + query.lastError().text(), this);
+    }
   }
 
   return true;
@@ -1078,7 +1084,3 @@ std::optional<int> ImportarXML::reservarIdCompra() {
 // TODO: 5quando as unidades vierem diferente pedir para usuario converter
 // TODO: 5avisar se R$ da nota for diferente do R$ da compra
 // TODO: verificar se o valor total da nota bate com o valor total da compra (bater impostos/st)
-
-// TODO: verificar:
-//          *1 linha vp/pf para 2 linhas estoque
-//          *2 linhas vp/pf para 1 linha estoque

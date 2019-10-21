@@ -616,12 +616,6 @@
             <property name="frame">
              <bool>true</bool>
             </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::NoButtons</enum>
-            </property>
             <property name="correctionMode">
              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
             </property>

@@ -245,8 +245,9 @@ bool Orcamento::viewRegister() {
 
     const bool freteManual = ui->checkBoxFreteManual->isChecked();
 
-    ui->doubleSpinBoxFrete->setReadOnly(not freteManual);
-    ui->doubleSpinBoxFrete->setButtonSymbols(freteManual ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
+    canChangeFrete = freteManual;
+
+    ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : ui->doubleSpinBoxFrete->value());
 
     ui->doubleSpinBoxDescontoGlobalReais->setMaximum(ui->doubleSpinBoxSubTotalLiq->value());
 
@@ -656,7 +657,12 @@ void Orcamento::calcPrecoGlobalTotal() {
 
   // calcula totais considerando desconto global atual
 
-  ui->doubleSpinBoxFrete->setValue(ui->checkBoxFreteManual->isChecked() ? ui->doubleSpinBoxFrete->value() : qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+  if (not ui->checkBoxFreteManual->isChecked()) {
+    const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
+
+    ui->doubleSpinBoxFrete->setValue(frete);
+    ui->doubleSpinBoxFrete->setMinimum(frete);
+  }
 
   const double frete = ui->doubleSpinBoxFrete->value();
   const double descGlobal = ui->doubleSpinBoxDescontoGlobal->value();
@@ -917,7 +923,7 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
-    if (dialog.exec() == QDialog::Rejected) {
+    if (dialog.exec() != QDialog::Accepted) {
       ui->checkBoxFreteManual->setChecked(not checked);
       return;
     }
@@ -925,12 +931,11 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
     canChangeFrete = true;
   }
 
-  ui->doubleSpinBoxFrete->setReadOnly(not checked);
-  ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
+  const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-  if (checked) { return; }
+  ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
 
-  ui->doubleSpinBoxFrete->setValue(qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+  if (not checked) { ui->doubleSpinBoxFrete->setValue(frete); }
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {
@@ -941,16 +946,25 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   QSqlQuery queryProduto;
   queryProduto.prepare("SELECT (descontinuado OR desativado) AS invalido FROM produto WHERE idProduto = :idProduto");
 
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    const int idProduto = modelItem.data(row, "idProduto").toInt();
+  QSqlQuery queryEquivalente;
+  queryEquivalente.prepare("SELECT idProduto FROM produto WHERE codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
 
-    queryProduto.bindValue(":idProduto", idProduto);
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
     if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
 
     if (queryProduto.value("invalido").toBool()) {
-      produtos << QString::number(row) + " - " + modelItem.data(row, "produto").toString();
-      skipRows << row;
+      queryEquivalente.bindValue(":codComercial", modelItem.data(row, "codComercial"));
+
+      if (not queryEquivalente.exec()) { return qApp->enqueueError("Erro procurando produto equivalente: " + queryEquivalente.lastError().text(), this); }
+
+      if (queryEquivalente.first()) {
+        if (not modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"))) {}
+      } else {
+        produtos << QString::number(row) + " - " + modelItem.data(row, "produto").toString();
+        skipRows << row;
+      }
     }
   }
 
@@ -1152,9 +1166,12 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
 
   if (not buscarParametrosFrete()) { return; }
 
-  if (ui->checkBoxFreteManual->isChecked()) { return; }
+  if (not ui->checkBoxFreteManual->isChecked()) {
+    const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-  ui->doubleSpinBoxFrete->setValue(qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+    ui->doubleSpinBoxFrete->setValue(frete);
+    ui->doubleSpinBoxFrete->setMinimum(frete);
+  }
 }
 
 bool Orcamento::buscarParametrosFrete() {

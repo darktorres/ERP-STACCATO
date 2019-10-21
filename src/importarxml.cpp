@@ -611,7 +611,7 @@ bool ImportarXML::verificaValido(const XML &xml) {
 }
 
 bool ImportarXML::cadastrarNFe(XML &xml) {
-  if (not verificaCNPJ(xml.cnpj) or verificaExiste(xml.chaveAcesso) or not verificaValido(xml)) { return false; }
+  if (not verificaCNPJ(xml.cnpjDest) or verificaExiste(xml.chaveAcesso) or not verificaValido(xml)) { return false; }
 
   QSqlQuery query;
 
@@ -627,7 +627,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
   if (not modelNFe.setData(row, "tipo", "ENTRADA")) { return false; }
-  if (not modelNFe.setData(row, "cnpjDest", xml.cnpj)) { return false; }
+  if (not modelNFe.setData(row, "cnpjDest", xml.cnpjDest)) { return false; }
   if (not modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso)) { return false; }
   if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) { return false; }
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }

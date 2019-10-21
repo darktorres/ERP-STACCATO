@@ -85,7 +85,8 @@ void XML::lerValores(const QStandardItem *item) {
 
       if (parentText == "emit" and text.left(7) == "xFant -") { xFant = text.remove(0, 8); }
       if (parentText == "emit" and text.left(7) == "xNome -") { xNome = text.remove(0, 8); }
-      if (parentText == "dest" and text.left(6) == "CNPJ -") { cnpj = text.remove(0, 7); }
+      if (parentText == "emit" and text.left(6) == "CNPJ -") { cnpjOrig = text.remove(0, 7); }
+      if (parentText == "dest" and text.left(6) == "CNPJ -") { cnpjDest = text.remove(0, 7); }
       if (parentText == "transporta" and text.left(7) == "xNome -") { xNomeTransp = text.remove(0, 8); }
 
       lerDadosProduto(child);

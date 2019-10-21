@@ -77,7 +77,8 @@ void Impressao::print() {
 
   QLocale locale;
 
-  dataManager->setReportVariable("Soma", locale.toString(query.value("subTotalLiq").toDouble(), 'f', 2));
+  dataManager->setReportVariable("Bruto", locale.toString(query.value("subTotalBru").toDouble(), 'f', 2));
+  dataManager->setReportVariable("Liquido", locale.toString(query.value("subTotalLiq").toDouble(), 'f', 2));
   dataManager->setReportVariable("Desconto", "R$ " + locale.toString(query.value("descontoReais").toDouble(), 'f', 2) + " (" + locale.toString(query.value("descontoPorc").toDouble(), 'f', 2) + "%)");
   double value = query.value("total").toDouble() - query.value("frete").toDouble();
   dataManager->setReportVariable("Total", locale.toString(value, 'f', 2));
@@ -139,14 +140,15 @@ void Impressao::print() {
 
 bool Impressao::setQuerys() {
   if (tipo == Tipo::Orcamento) {
-    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, "
-                  "prazoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento");
+    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, idEnderecoEntrega, subTotalBru, subTotalLiq, descontoPorc, descontoReais, frete, "
+                  "total, observacao, prazoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento");
     query.bindValue(":idOrcamento", id);
   }
 
   if (tipo == Tipo::Venda) {
-    query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, idOrcamento, data, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, "
-                  "observacao, prazoEntrega FROM venda WHERE idVenda = :idVenda");
+    query.prepare(
+        "SELECT idCliente, idProfissional, idUsuario, idLoja, idOrcamento, data, idEnderecoFaturamento, idEnderecoEntrega, subTotalBru, subTotalLiq, descontoPorc, descontoReais, frete, total, "
+        "observacao, prazoEntrega FROM venda WHERE idVenda = :idVenda");
     query.bindValue(":idVenda", id);
   }
 

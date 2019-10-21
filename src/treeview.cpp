@@ -1,9 +1,7 @@
 #include "treeview.h"
 #include "application.h"
-#include "searchdialogproxymodel.h"
 
 #include <QDebug>
-#include <QIdentityProxyModel>
 
 TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
   connect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns);

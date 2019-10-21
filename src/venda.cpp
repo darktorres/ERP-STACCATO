@@ -54,8 +54,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
 
-  ui->splitter->setStretchFactor(0, 1);
-  ui->splitter->setStretchFactor(1, 0);
+  ui->splitter->setStretchFactor(0, 255);
+  ui->splitter->setStretchFactor(1, 1);
 
   show();
 }
@@ -300,9 +300,16 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   ui->plainTextEdit->setPlainText(queryOrc.value("observacao").toString());
   ui->doubleSpinBoxSubTotalBruto->setValue(queryOrc.value("subTotalBru").toDouble());
   ui->doubleSpinBoxSubTotalLiq->setValue(queryOrc.value("subTotalLiq").toDouble());
-  ui->doubleSpinBoxFrete->setValue(queryOrc.value("frete").toDouble());
+
+  const bool freteManual = queryOrc.value("freteManual").toBool();
+  const double frete = queryOrc.value("frete").toDouble();
+
+  ui->doubleSpinBoxFrete->setValue(frete);
+  ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : frete);
   silentFrete = true;
-  ui->checkBoxFreteManual->setChecked(queryOrc.value("freteManual").toBool());
+  ui->checkBoxFreteManual->setChecked(freteManual);
+  canChangeFrete = freteManual;
+
   ui->doubleSpinBoxDescontoGlobal->setValue(queryOrc.value("descontoPorc").toDouble());
   ui->doubleSpinBoxDescontoGlobalReais->setValue(queryOrc.value("descontoReais").toDouble());
   ui->doubleSpinBoxTotal->setValue(queryOrc.value("total").toDouble());
@@ -574,7 +581,7 @@ bool Venda::viewRegister() {
     const bool freteManual = ui->checkBoxFreteManual->isChecked();
 
     ui->doubleSpinBoxFrete->setReadOnly(not freteManual);
-    ui->doubleSpinBoxFrete->setButtonSymbols(freteManual ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
+    ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
     if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
       ui->pushButtonCancelamento->hide();
@@ -786,7 +793,7 @@ void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
-    if (dialog.exec() == QDialog::Rejected) {
+    if (dialog.exec() != QDialog::Accepted) {
       ui->checkBoxFreteManual->setChecked(not checked);
       return;
     }
@@ -794,12 +801,11 @@ void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
     canChangeFrete = true;
   }
 
-  ui->doubleSpinBoxFrete->setReadOnly(not checked);
-  ui->doubleSpinBoxFrete->setButtonSymbols(checked ? QDoubleSpinBox::UpDownArrows : QDoubleSpinBox::NoButtons);
+  const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-  if (checked) { return; }
+  ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
 
-  ui->doubleSpinBoxFrete->setValue(qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete));
+  if (not checked) { ui->doubleSpinBoxFrete->setValue(frete); }
 }
 
 void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {

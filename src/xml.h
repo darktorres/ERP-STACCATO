@@ -20,8 +20,9 @@ public:
   // emit
   QString xFant;
   QString xNome;
+  QString cnpjOrig;
   // dest
-  QString cnpj;
+  QString cnpjDest;
   // produto
   QString codProd;
   QString codBarras;

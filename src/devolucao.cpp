@@ -249,38 +249,25 @@ void Devolucao::setupTables() {
 
   //--------------------------------------------------------------
 
-  mapperItem.setModel(&modelProdutos);
-  mapperItem.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
+  mapperProdutos.setModel(&modelProdutos);
+  mapperProdutos.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 
-  mapperItem.addMapping(ui->doubleSpinBoxQuant, modelProdutos.fieldIndex("quant"));
-  mapperItem.addMapping(ui->doubleSpinBoxCaixas, modelProdutos.fieldIndex("caixas"));
-  mapperItem.addMapping(ui->lineEditUn, modelProdutos.fieldIndex("un"));
+  mapperProdutos.addMapping(ui->doubleSpinBoxQuant, modelProdutos.fieldIndex("quant"));
+  mapperProdutos.addMapping(ui->doubleSpinBoxCaixas, modelProdutos.fieldIndex("caixas"));
+  mapperProdutos.addMapping(ui->lineEditUn, modelProdutos.fieldIndex("un"));
 }
 
 void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const double total = modelProdutos.data(index.row(), "total").toDouble();
-
-  const auto list = modelDevolvidos.match("idRelacionado", modelProdutos.data(index.row(), "idVendaProdutoFK"), -1, Qt::MatchExactly);
-
-  double quantDevolvida = 0;
-  double caixasDevolvidas = 0;
-
-  for (const auto &index2 : list) {
-    quantDevolvida += modelDevolvidos.data(index2.row(), "quant").toDouble();
-    caixasDevolvidas += modelDevolvidos.data(index2.row(), "caixas").toDouble();
-  }
-
-  const double quant = modelProdutos.data(index.row(), "quant").toDouble() + quantDevolvida;
-  const double caixas = modelProdutos.data(index.row(), "caixas").toDouble() + caixasDevolvidas;
+  const double quant = modelProdutos.data(index.row(), "quant").toDouble();
+  const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
 
   ui->doubleSpinBoxQuant->setSingleStep(quant / caixas);
 
-  ui->doubleSpinBoxQuant->setMaximum(quant);
-  ui->doubleSpinBoxCaixas->setMaximum(caixas);
+  mapperProdutos.setCurrentModelIndex(index);
 
-  mapperItem.setCurrentModelIndex(index);
+  const double total = modelProdutos.data(index.row(), "total").toDouble();
 
   ui->doubleSpinBoxPrecoUn->setValue(total / quant);
 
@@ -355,7 +342,7 @@ bool Devolucao::inserirItens(const int currentRow) {
   // ???
   // ???
 
-  const QDecDouble quant = modelProdutos.data(mapperItem.currentIndex(), "quant").toDouble();
+  const QDecDouble quant = modelProdutos.data(mapperProdutos.currentIndex(), "quant").toDouble();
   const QDecDouble quantDevolvida = ui->doubleSpinBoxQuant->value();
   const QDecDouble restante = quant - quantDevolvida;
   const QDecDouble step = ui->doubleSpinBoxQuant->singleStep();

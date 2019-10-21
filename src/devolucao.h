@@ -19,7 +19,7 @@ public:
 private:
   // attributes
   const QString idVenda;
-  QDataWidgetMapper mapperItem;
+  QDataWidgetMapper mapperProdutos;
   QString idDevolucao;
   SqlRelationalTableModel modelCliente;
   SqlRelationalTableModel modelDevolvidos;

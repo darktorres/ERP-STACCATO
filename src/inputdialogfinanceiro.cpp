@@ -361,9 +361,9 @@ void InputDialogFinanceiro::calcularTotal() {
   [=] {
     double total = 0;
 
-    const auto list = ui->table->selectionModel()->selectedRows();
-
     if (tipo == Tipo::ConfirmarCompra) {
+      const auto list = ui->table->selectionModel()->selectedRows();
+
       for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
     }
 

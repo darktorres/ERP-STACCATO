@@ -3,10 +3,10 @@
 
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
-#include "ui_widgetfinanceirocompra.h"
+#include "ui_widgethistoricocompra.h"
 #include "widgethistoricocompra.h"
 
-WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
+WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
 
 WidgetHistoricoCompra::~WidgetHistoricoCompra() { delete ui; }
 

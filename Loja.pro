@@ -375,10 +375,10 @@ FORMS += \
     ui/widgetcompraresumo.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
-    ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetgraficos.ui \
+    ui/widgethistoricocompra.ui \
     ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
     ui/widgetlogisticaagendarentrega.ui \

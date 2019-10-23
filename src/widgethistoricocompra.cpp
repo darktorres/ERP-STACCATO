@@ -47,10 +47,11 @@ void WidgetHistoricoCompra::setupTables() {
 void WidgetHistoricoCompra::on_table_activated(const QModelIndex &index) {
   const auto tipoFinanceiro = (tipo == Tipo::Compra) ? InputDialogFinanceiro::Tipo::Historico : InputDialogFinanceiro::Tipo::Financeiro;
 
-  InputDialogFinanceiro input(tipoFinanceiro, this);
-  input.setFilter(modelViewComprasFinanceiro.data(index.row(), "Compra").toString());
+  InputDialogFinanceiro *input = new InputDialogFinanceiro(tipoFinanceiro, this);
+  input->setAttribute(Qt::WA_DeleteOnClose);
+  input->setFilter(modelViewComprasFinanceiro.data(index.row(), "Compra").toString());
 
-  if (input.exec() != InputDialogFinanceiro::Accepted) { return; }
+  input->show();
 }
 
 void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }

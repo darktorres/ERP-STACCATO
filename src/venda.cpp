@@ -556,9 +556,7 @@ bool Venda::viewRegister() {
     ui->pushButtonCancelamento->show();
     ui->pushButtonDevolucao->show();
 
-    const bool freteManual = ui->checkBoxFreteManual->isChecked();
-
-    ui->doubleSpinBoxFrete->setReadOnly(not freteManual);
+    ui->doubleSpinBoxFrete->setReadOnly(true);
     ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
     if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {

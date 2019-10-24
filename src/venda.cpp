@@ -291,7 +291,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   ui->doubleSpinBoxFrete->setValue(frete);
   ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : frete);
-  silentFrete = true;
   ui->checkBoxFreteManual->setChecked(freteManual);
   canChangeFrete = freteManual;
 
@@ -339,11 +338,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     ui->labelConsultor->show();
     ui->itemBoxConsultor->show();
   }
-
-  // -------------------------------------------------------------------------
-
-  on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
-  silentFrete = false;
 
   // -------------------------------------------------------------------------
 
@@ -762,7 +756,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
-  if (not silentFrete and not canChangeFrete) {
+  if (not canChangeFrete) {
     qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);

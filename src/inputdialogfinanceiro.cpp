@@ -23,56 +23,51 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
   ui->widgetPgts->setTipo(WidgetPagamentos::Tipo::Compra);
 
-  ui->widgetPgts->hide();
-
-  ui->frameData->hide();
-  ui->frameDataPreco->hide();
-  ui->checkBoxMarcarTodos->hide();
-  ui->groupBoxFinanceiro->hide();
-
-  ui->labelAliquota->hide();
-  ui->doubleSpinBoxAliquota->hide();
-  ui->labelSt->hide();
-  ui->doubleSpinBoxSt->hide();
-
   ui->dateEditEvento->setDate(QDate::currentDate());
   ui->dateEditProximo->setDate(QDate::currentDate());
   ui->dateEditPgtSt->setDate(QDate::currentDate());
 
-  if (tipo == Tipo::ConfirmarCompra) {
-    ui->frameData->show();
-    ui->frameDataPreco->show();
-    ui->frameFrete->show();
-    ui->checkBoxMarcarTodos->show();
+  switch (tipo) {
+  case Tipo::ConfirmarCompra:
+    ui->groupBoxFinanceiro->hide();
+    ui->labelAliquota->hide();
+    ui->doubleSpinBoxAliquota->hide();
+    ui->labelSt->hide();
+    ui->doubleSpinBoxSt->hide();
 
     ui->labelEvento->setText("Data confirmação:");
     ui->labelProximoEvento->setText("Data prevista faturamento:");
 
-    ui->widgetPgts->show();
-  }
+    break;
+  case Tipo::Financeiro:
+    ui->widgetPgts->hide();
 
-  if (tipo == Tipo::Financeiro) {
-    ui->frameDataPreco->show();
-    ui->groupBoxFinanceiro->show();
+    ui->frameData->hide();
+    ui->checkBoxMarcarTodos->hide();
+
+    ui->labelAliquota->hide();
+    ui->doubleSpinBoxAliquota->hide();
+    ui->labelSt->hide();
+    ui->doubleSpinBoxSt->hide();
 
     ui->frameAdicionais->hide();
 
     //    ui->table->setSelectionMode(QTableView::NoSelection);
-  }
 
-  if (tipo == Tipo::Historico) {
-    ui->frameDataPreco->show();
-
+    break;
+  case Tipo::Historico:
+    ui->checkBoxMarcarTodos->hide();
+    ui->frameData->hide();
     ui->framePagamentos->hide();
     ui->frameAdicionais->hide();
     ui->pushButtonSalvar->hide();
+
+    break;
   }
 
   setConnections();
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(true); });
-
-  show();
 }
 
 InputDialogFinanceiro::~InputDialogFinanceiro() { delete ui; }
@@ -434,11 +429,21 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   representacao = query.value("representacao").toBool();
 
-  if (representacao) { ui->framePagamentos->hide(); }
+  if (representacao and tipo == Tipo::ConfirmarCompra) {
+    ui->frameAdicionais->hide();
+    ui->framePagamentos->hide();
+  }
+
+  if (representacao and tipo == Tipo::Financeiro) {
+    ui->framePagamentos->hide();
+    ui->pushButtonSalvar->hide();
+  }
 
   ui->widgetPgts->setRepresentacao(representacao);
 
-  setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
+  const QString rep = representacao ? " REP. APENAS CONSULTA" : "";
+
+  setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString() + rep);
 
   // -------------------------------------------------------------------------
 

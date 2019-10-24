@@ -399,7 +399,7 @@ void Orcamento::removeItem() {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
@@ -730,7 +730,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     if (tipoItem == Tipo::Cadastrar) { currentRowItem = modelItem.insertRowAtEnd(); }
 
     if (not modelItem.setData(currentRowItem, "idProduto", ui->itemBoxProduto->getId().toInt())) { return; }
@@ -807,8 +807,10 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
   unsetConnections();
 
-  ui->doubleSpinBoxQuant->setValue(quant);
-  ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
+  [&] {
+    ui->doubleSpinBoxQuant->setValue(quant);
+    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
+  }();
 
   setConnections();
 }
@@ -1115,10 +1117,12 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
 
   unsetConnections();
 
-  const double prcUn = ui->lineEditPrecoUn->getValue();
-  const double itemBruto = quant * prcUn;
+  [&] {
+    const double prcUn = ui->lineEditPrecoUn->getValue();
+    const double itemBruto = quant * prcUn;
 
-  ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - (desconto / 100)));
+    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - (desconto / 100)));
+  }();
 
   setConnections();
 }
@@ -1126,7 +1130,7 @@ void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
 void Orcamento::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
-  [=] {
+  [&] {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double descontoPorc = descontoReais / subTotalLiq;
 
@@ -1152,9 +1156,11 @@ void Orcamento::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  ui->doubleSpinBoxTotal->setMinimum(frete);
-  ui->doubleSpinBoxTotal->setMaximum(ui->doubleSpinBoxSubTotalLiq->value() + frete);
-  ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
+  [&] {
+    ui->doubleSpinBoxTotal->setMinimum(frete);
+    ui->doubleSpinBoxTotal->setMaximum(ui->doubleSpinBoxSubTotalLiq->value() + frete);
+    ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
+  }();
 
   setConnections();
 }
@@ -1192,7 +1198,7 @@ bool Orcamento::buscarParametrosFrete() {
 void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
-  [=] {
+  [&] {
     const double descontoPorc2 = descontoPorc / 100;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -1215,7 +1221,7 @@ void Orcamento::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descont
 void Orcamento::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
-  [=] {
+  [&] {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
@@ -1248,7 +1254,7 @@ void Orcamento::on_doubleSpinBoxTotalItem_valueChanged(const double) {
 
   unsetConnections();
 
-  ui->doubleSpinBoxDesconto->setValue(desconto);
+  [&] { ui->doubleSpinBoxDesconto->setValue(desconto); }();
 
   setConnections();
 }

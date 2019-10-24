@@ -732,7 +732,7 @@ void Venda::montarFluxoCaixa() {
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
-  [=]() {
+  [&] {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
@@ -782,7 +782,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  [=]() {
+  [&] {
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
     ui->widgetPgts->setFrete(frete);
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
@@ -795,7 +795,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
-  [=]() {
+  [&] {
     const double descontoPorc2 = descontoPorc / 100;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -821,7 +821,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
-  [=]() {
+  [&] {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double descontoPorc = descontoReais / subTotalLiq;
 

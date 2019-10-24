@@ -661,8 +661,9 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa.setData(row, "centroCusto", idLoja)) { return; }
       }
 
-      // calculo comissao
+      // calculo comissao loja
       for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
+        if (modelFluxoCaixa.data(z, "representacao").toBool() and modelFluxoCaixa.data(z, "observacao").toString() == "Frete") { continue; }
         if (not modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
         if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
         if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }

@@ -732,7 +732,7 @@ void Venda::montarFluxoCaixa() {
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
-  {
+  [=]() {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
@@ -750,7 +750,7 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
     ui->widgetPgts->setTotal(total);
     ui->widgetPgts->resetarPagamentos();
-  }
+  }();
 
   setConnections();
 }
@@ -782,12 +782,12 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  {
+  [=]() {
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
     ui->widgetPgts->setFrete(frete);
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
-  }
+  }();
 
   setConnections();
 }

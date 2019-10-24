@@ -233,7 +233,7 @@ void InputDialogFinanceiro::setupTables() {
 void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
   unsetConnections();
 
-  [=]() {
+  [=] {
     if (representacao) { return; }
 
     modelFluxoCaixa.revertAll();
@@ -567,7 +567,7 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text) {
   unsetConnections();
 
-  [=]() {
+  [=] {
     if (text == "Sem ST") {
       ui->doubleSpinBoxSt->setValue(0);
       ui->doubleSpinBoxAliquota->setValue(0);

@@ -1081,7 +1081,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->frame_7->setEnabled(true);
     ui->frame_8->setEnabled(true);
     ui->frame_9->setEnabled(true);
@@ -1145,7 +1145,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxICMSvicms->setValue(ui->doubleSpinBoxICMSvbc->value() * ui->doubleSpinBoxICMSpicms->value() / 100);
 
     const int row = list.first().row();
@@ -1165,7 +1165,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxICMSvicmsst->setValue(ui->doubleSpinBoxICMSvbcst->value() * ui->doubleSpinBoxICMSpicmsst->value() / 100);
 
     const int row = list.first().row();
@@ -1187,7 +1187,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxICMSvicms->setValue(ui->doubleSpinBoxICMSvbc->value() * ui->doubleSpinBoxICMSpicms->value() / 100);
 
     const int row = list.first().row();
@@ -1207,7 +1207,7 @@ void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxPISvpis->setValue(ui->doubleSpinBoxPISvbc->value() * ui->doubleSpinBoxPISppis->value() / 100);
 
     const int row = list.first().row();
@@ -1229,7 +1229,7 @@ void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxPISvpis->setValue(ui->doubleSpinBoxPISvbc->value() * ui->doubleSpinBoxPISppis->value() / 100);
 
     const int row = list.first().row();
@@ -1249,7 +1249,7 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxCOFINSvcofins->setValue(ui->doubleSpinBoxCOFINSvbc->value() * ui->doubleSpinBoxCOFINSpcofins->value() / 100);
 
     const int row = list.first().row();
@@ -1271,7 +1271,7 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxCOFINSvcofins->setValue(ui->doubleSpinBoxCOFINSvbc->value() * ui->doubleSpinBoxCOFINSpcofins->value() / 100);
 
     const int row = list.first().row();
@@ -1476,7 +1476,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxICMSvbc->setValue(ui->doubleSpinBoxICMSvicms->value() * 100 / ui->doubleSpinBoxICMSpicms->value());
 
     const int row = list.first().row();
@@ -1496,7 +1496,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxICMSvbcst->setValue(ui->doubleSpinBoxICMSvicmsst->value() * 100 / ui->doubleSpinBoxICMSpicmsst->value());
 
     const int row = list.first().row();
@@ -1532,7 +1532,7 @@ void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxPISvbc->setValue(ui->doubleSpinBoxPISvpis->value() * 100 / ui->doubleSpinBoxPISppis->value());
 
     const int row = list.first().row();
@@ -1560,7 +1560,7 @@ void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) {
 
   unsetConnections();
 
-  [=] {
+  [&] {
     ui->doubleSpinBoxCOFINSvbc->setValue(ui->doubleSpinBoxCOFINSvcofins->value() * 100 / ui->doubleSpinBoxCOFINSpcofins->value());
 
     const int row = list.first().row();
@@ -1581,7 +1581,8 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
   if (list.isEmpty()) { return; }
 
   unsetConnections();
-  [=] {
+
+  [&] {
     ui->doubleSpinBoxICMSvicmsst->setValue(ui->doubleSpinBoxICMSvbcst->value() * ui->doubleSpinBoxICMSpicmsst->value() / 100);
 
     const int row = list.first().row();
@@ -1590,6 +1591,7 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
     if (not modelViewProdutoEstoque.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "vICMSST", ui->doubleSpinBoxICMSvicmsst->value())) { return; }
   }();
+
   setConnections();
 }
 

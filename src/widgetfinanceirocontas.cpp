@@ -19,6 +19,8 @@ WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent
 WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 
 void WidgetFinanceiroContas::setupTables() {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   // TODO: refactor @running_total into running_total :- ifnull(running_total, 0) + ...
   modelVencidos.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString(tipo == Tipo::Receber ? "view_a_receber_vencidos_base" : "view_a_pagar_vencidos_base") +
                          " v JOIN (SELECT @running_total := 0) r");
@@ -106,6 +108,8 @@ void WidgetFinanceiroContas::updateTables() {
 void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   auto *contas = new Contas(tipo == Tipo::Receber ? Contas::Tipo::Receber : Contas::Tipo::Pagar, this);
   contas->setAttribute(Qt::WA_DeleteOnClose);
   const QString idPagamento = model.data(index.row(), "idPagamento").toString();
@@ -116,6 +120,8 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetFinanceiroContas::montaFiltro() {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   if (tipo == Tipo::Pagar) {
     QStringList filtros;
     QString status;
@@ -260,6 +266,8 @@ void WidgetFinanceiroContas::montaFiltro() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   auto *lancamento = new InserirLancamento(tipo == Tipo::Receber ? InserirLancamento::Tipo::Receber : InserirLancamento::Tipo::Pagar, this);
   lancamento->setAttribute(Qt::WA_DeleteOnClose);
   lancamento->show();
@@ -275,8 +283,10 @@ void WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged(const double value)
 
 void WidgetFinanceiroContas::on_dateEditDe_dateChanged(const QDate &date) { ui->dateEditAte->setDate(date); }
 
-void WidgetFinanceiroContas::setTipo(const Tipo &value) {
-  tipo = value;
+void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
+  if (novoTipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
+  tipo = novoTipo;
 
   if (tipo == Tipo::Pagar) {
     ui->pushButtonAdiantarRecebimento->hide();
@@ -322,6 +332,8 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   // TASK: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
 
@@ -349,6 +361,8 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo creio eu porem em diversas linhas eles tem valores diferentes
 
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   // TODO: verificar se precisa limpar os campos que foram preenchidos
 
   const auto list = ui->table->selectionModel()->selectedRows();

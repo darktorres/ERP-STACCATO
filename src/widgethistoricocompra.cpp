@@ -1,6 +1,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 
+#include "application.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "ui_widgethistoricocompra.h"
@@ -32,7 +33,11 @@ void WidgetHistoricoCompra::updateTables() {
   if (not modelViewComprasFinanceiro.select()) { return; }
 }
 
-void WidgetHistoricoCompra::setTipo(const WidgetHistoricoCompra::Tipo novotipo) { tipo = novotipo; }
+void WidgetHistoricoCompra::setTipo(const WidgetHistoricoCompra::Tipo novotipo) {
+  if (novotipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
+  tipo = novotipo;
+}
 
 void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
 
@@ -45,6 +50,8 @@ void WidgetHistoricoCompra::setupTables() {
 }
 
 void WidgetHistoricoCompra::on_table_activated(const QModelIndex &index) {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   const auto tipoFinanceiro = (tipo == Tipo::Compra) ? InputDialogFinanceiro::Tipo::Historico : InputDialogFinanceiro::Tipo::Financeiro;
 
   InputDialogFinanceiro *input = new InputDialogFinanceiro(tipoFinanceiro, this);

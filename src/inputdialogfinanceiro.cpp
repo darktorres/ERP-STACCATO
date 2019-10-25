@@ -434,7 +434,15 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   representacao = query.value("representacao").toBool();
 
-  if (representacao) { ui->framePagamentos->hide(); }
+  if (representacao and tipo == Tipo::ConfirmarCompra) {
+    ui->framePagamentos->hide();
+    ui->frameAdicionais->hide();
+  }
+
+  if (representacao and tipo == Tipo::Financeiro) {
+    ui->framePagamentos->hide();
+    ui->pushButtonSalvar->hide();
+  }
 
   ui->widgetPgts->setRepresentacao(representacao);
 

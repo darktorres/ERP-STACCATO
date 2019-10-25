@@ -34,7 +34,7 @@ void ImportarXML::setConnections() {
   connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked, connectionType);
   connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked, connectionType);
   connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled, connectionType);
-  connect(proxyEstoque, &SqlRelationalTableModel::dataChanged, this, &ImportarXML::updateTableData, connectionType);
+  connect(proxyEstoque, &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData, connectionType);
 }
 
 void ImportarXML::unsetConnections() {
@@ -42,7 +42,7 @@ void ImportarXML::unsetConnections() {
   disconnect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
   disconnect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
   disconnect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
-  disconnect(proxyEstoque, &SqlRelationalTableModel::dataChanged, this, &ImportarXML::updateTableData);
+  disconnect(proxyEstoque, &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData);
 }
 
 void ImportarXML::updateTableData(const QModelIndex &topLeft) {

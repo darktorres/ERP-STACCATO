@@ -1978,7 +1978,7 @@ void CadastrarNFe::setConnections() {
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked, connectionType);
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged, connectionType);
   connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked, connectionType);
-  connect(&modelViewProdutoEstoque, &SqlRelationalTableModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged, connectionType);
+  connect(&modelViewProdutoEstoque, &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged, connectionType);
 }
 
 void CadastrarNFe::unsetConnections() {

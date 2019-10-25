@@ -14,7 +14,7 @@ class WidgetPagamentos final : public QWidget {
   Q_OBJECT
 
 public:
-  enum class Tipo { Compra, Venda };
+  enum class Tipo { Nulo, Compra, Venda };
   explicit WidgetPagamentos(QWidget *parent = nullptr);
   ~WidgetPagamentos();
   auto getCredito() const -> double;
@@ -24,7 +24,7 @@ public:
   auto setFrete(double value) -> void;
   auto setIdOrcamento(const QString &value) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
-  auto setTipo(const Tipo &value) -> void;
+  auto setTipo(const Tipo &novoTipo) -> void;
   auto setTotal(double value) -> void;
   auto verifyFields() -> bool;
 
@@ -48,7 +48,7 @@ private:
   double credito = 0;
   double creditoRestante = 0;
   QString idOrcamento;
-  Tipo tipo;
+  Tipo tipo = Tipo::Nulo;
   Ui::WidgetPagamentos *ui;
   // methods
   auto calculaCreditoRestante() -> void;

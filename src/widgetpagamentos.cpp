@@ -287,8 +287,10 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
   }
 }
 
-void WidgetPagamentos::setTipo(const Tipo &value) {
-  tipo = value;
+void WidgetPagamentos::setTipo(const Tipo &novoTipo) {
+  if (novoTipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
+  tipo = novoTipo;
 
   if (tipo == Tipo::Compra) {
     ui->label_4->hide();
@@ -335,6 +337,8 @@ void WidgetPagamentos::calcularTotal() {
 }
 
 void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   auto *frame = new QFrame(this);
   auto *layout = new QHBoxLayout(frame);
   frame->setLayout(layout);

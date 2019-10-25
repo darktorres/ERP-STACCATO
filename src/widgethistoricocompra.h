@@ -12,7 +12,7 @@ class WidgetHistoricoCompra final : public QWidget {
   Q_OBJECT
 
 public:
-  enum class Tipo { Compra, Financeiro };
+  enum class Tipo { Nulo, Compra, Financeiro };
   explicit WidgetHistoricoCompra(QWidget *parent = nullptr);
   ~WidgetHistoricoCompra();
   auto resetTables() -> void;
@@ -23,7 +23,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  Tipo tipo;
+  Tipo tipo = Tipo::Nulo;
   SqlRelationalTableModel modelViewComprasFinanceiro;
   Ui::WidgetHistoricoCompra *ui;
   // methods

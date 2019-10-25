@@ -11,7 +11,6 @@
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "sortfilterproxymodel.h"
 #include "ui_inputdialogfinanceiro.h"
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
@@ -84,7 +83,7 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged, connectionType);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked, connectionType);
-  connect(modelPedidoFornecedor.proxyModel, &QAbstractProxyModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
+  connect(proxyModel, &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
 
   if (tipo == Tipo::ConfirmarCompra) { connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal, connectionType); }
 }
@@ -99,7 +98,7 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
-  disconnect(modelPedidoFornecedor.proxyModel, &QAbstractProxyModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
+  disconnect(proxyModel, &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
 
   if (tipo == Tipo::ConfirmarCompra) { disconnect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &InputDialogFinanceiro::calcularTotal); }
 }
@@ -115,9 +114,9 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : list) {
-      if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", aliquota)) { return; }
+      if (not modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota)) { return; }
 
-      total += modelPedidoFornecedor.data(index.row(), "preco").toDouble();
+      total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble();
     }
 
     const double valueSt = total * (aliquota / 100);
@@ -140,30 +139,34 @@ QDate InputDialogFinanceiro::getNextDate() const { return ui->dateEditProximo->d
 void InputDialogFinanceiro::setupTables() {
   // TODO: montar TreeView pf/pf2 (pelo menos no historico)
 
-  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2");
+  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
 
-  modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
-  modelPedidoFornecedor.setHeaderData("st", "ST");
-  modelPedidoFornecedor.setHeaderData("status", "Status");
-  modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
-  modelPedidoFornecedor.setHeaderData("idVenda", "Código");
-  modelPedidoFornecedor.setHeaderData("fornecedor", "Fornecedor");
-  modelPedidoFornecedor.setHeaderData("descricao", "Produto");
-  modelPedidoFornecedor.setHeaderData("obs", "Obs.");
-  modelPedidoFornecedor.setHeaderData("colecao", "Coleção");
-  modelPedidoFornecedor.setHeaderData("codComercial", "Cód. Com.");
-  modelPedidoFornecedor.setHeaderData("quant", "Quant.");
-  modelPedidoFornecedor.setHeaderData("un", "Un.");
-  modelPedidoFornecedor.setHeaderData("un2", "Un.2");
-  modelPedidoFornecedor.setHeaderData("caixas", "Caixas");
-  modelPedidoFornecedor.setHeaderData("prcUnitario", "$ Unit.");
-  modelPedidoFornecedor.setHeaderData("preco", "Total");
-  modelPedidoFornecedor.setHeaderData("kgcx", "Kg./Cx.");
-  modelPedidoFornecedor.setHeaderData("formComercial", "Formato");
+  //--------------------------------------------------
 
-  modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
+  modelPedidoFornecedor2.setTable("pedido_fornecedor_has_produto2");
 
-  ui->table->setModel(&modelPedidoFornecedor);
+  modelPedidoFornecedor2.setHeaderData("aliquotaSt", "Alíquota ST");
+  modelPedidoFornecedor2.setHeaderData("st", "ST");
+  modelPedidoFornecedor2.setHeaderData("status", "Status");
+  modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+  modelPedidoFornecedor2.setHeaderData("idVenda", "Código");
+  modelPedidoFornecedor2.setHeaderData("fornecedor", "Fornecedor");
+  modelPedidoFornecedor2.setHeaderData("descricao", "Produto");
+  modelPedidoFornecedor2.setHeaderData("obs", "Obs.");
+  modelPedidoFornecedor2.setHeaderData("colecao", "Coleção");
+  modelPedidoFornecedor2.setHeaderData("codComercial", "Cód. Com.");
+  modelPedidoFornecedor2.setHeaderData("quant", "Quant.");
+  modelPedidoFornecedor2.setHeaderData("un", "Un.");
+  modelPedidoFornecedor2.setHeaderData("un2", "Un.2");
+  modelPedidoFornecedor2.setHeaderData("caixas", "Caixas");
+  modelPedidoFornecedor2.setHeaderData("prcUnitario", "$ Unit.");
+  modelPedidoFornecedor2.setHeaderData("preco", "Total");
+  modelPedidoFornecedor2.setHeaderData("kgcx", "Kg./Cx.");
+  modelPedidoFornecedor2.setHeaderData("formComercial", "Formato");
+
+  proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor2, this);
+
+  ui->table->setModel(proxyModel);
 
   ui->table->hideColumn("idRelacionado");
   ui->table->hideColumn("idPedido2");
@@ -262,9 +265,9 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
           const int row = modelFluxoCaixa.insertRowAtEnd();
 
-          if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+          if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"))) { return; }
           if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
-          if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+          if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
           if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
 
           const QString currentText = ui->widgetPgts->listComboData.at(i)->currentText();
@@ -283,9 +286,9 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     if (ui->doubleSpinBoxFrete->value() > 0) {
       const int row = modelFluxoCaixa.insertRowAtEnd();
 
-      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
-      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
       if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; }                           // Geral
       if (not modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate())) { return; } // TODO: 5redo this with a editable date
       if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value())) { return; }
@@ -307,12 +310,12 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : list) {
-      const QString tipoSt = modelPedidoFornecedor.data(index.row(), "st").toString();
+      const QString tipoSt = modelPedidoFornecedor2.data(index.row(), "st").toString();
 
       if (tipoSt == "Sem ST") { continue; }
 
-      const double aliquotaSt = modelPedidoFornecedor.data(index.row(), "aliquotaSt").toDouble();
-      const double preco = modelPedidoFornecedor.data(index.row(), "preco").toDouble();
+      const double aliquotaSt = modelPedidoFornecedor2.data(index.row(), "aliquotaSt").toDouble();
+      const double preco = modelPedidoFornecedor2.data(index.row(), "preco").toDouble();
       const double valorSt = preco * (aliquotaSt / 100);
 
       if (tipoSt == "ST Fornecedor") { stForn += valorSt; }
@@ -324,9 +327,9 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     if (stForn > 0) {
       const int row = modelFluxoCaixa.insertRowAtEnd();
 
-      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
-      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
       if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
       if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) { return; }
       if (not modelFluxoCaixa.setData(row, "valor", stForn)) { return; }
@@ -338,9 +341,9 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     if (stLoja > 0) {
       const int row = modelFluxoCaixa.insertRowAtEnd();
 
-      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
-      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
+      if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
       if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
       if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) { return; }
       if (not modelFluxoCaixa.setData(row, "valor", stLoja)) { return; }
@@ -356,17 +359,17 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 void InputDialogFinanceiro::calcularTotal() {
   unsetConnections();
 
-  [=] {
+  [&] {
     double total = 0;
 
     if (tipo == Tipo::ConfirmarCompra) {
       const auto list = ui->table->selectionModel()->selectedRows();
 
-      for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
+      for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
     }
 
     if (tipo == Tipo::Financeiro) {
-      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+      for (int row = 0; row < modelPedidoFornecedor2.rowCount(); ++row) { total += modelPedidoFornecedor2.data(row, "preco").toDouble(); }
     }
 
     ui->doubleSpinBoxTotal->setValue(total);
@@ -380,17 +383,17 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
   unsetConnections();
 
   [&] {
-    const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
+    const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
     if (header == "Quant." or header == "$ Unit.") {
-      const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
-      if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
+      const double preco = modelPedidoFornecedor2.data(row, "quant").toDouble() * modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
+      if (not modelPedidoFornecedor2.setData(row, "preco", preco)) { return; }
     }
 
     if (header == "Total") {
-      const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
-      if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
+      const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble() / modelPedidoFornecedor2.data(row, "quant").toDouble();
+      if (not modelPedidoFornecedor2.setData(row, "prcUnitario", preco)) { return; }
     }
   }();
 
@@ -398,6 +401,75 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
   calcularTotal();
   ui->widgetPgts->resetarPagamentos();
+}
+
+void InputDialogFinanceiro::setTreeView() {
+  modelTree.appendModel(&modelPedidoFornecedor);
+  modelTree.appendModel(&modelPedidoFornecedor2);
+
+  modelTree.updateData();
+
+  modelTree.setHeaderData("aliquotaSt", "Alíquota ST");
+  modelTree.setHeaderData("st", "ST");
+  modelTree.setHeaderData("status", "Status");
+  modelTree.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+  modelTree.setHeaderData("idVenda", "Código");
+  modelTree.setHeaderData("fornecedor", "Fornecedor");
+  modelTree.setHeaderData("descricao", "Produto");
+  modelTree.setHeaderData("obs", "Obs.");
+  modelTree.setHeaderData("colecao", "Coleção");
+  modelTree.setHeaderData("codComercial", "Cód. Com.");
+  modelTree.setHeaderData("quant", "Quant.");
+  modelTree.setHeaderData("un", "Un.");
+  modelTree.setHeaderData("un2", "Un.2");
+  modelTree.setHeaderData("caixas", "Caixas");
+  modelTree.setHeaderData("prcUnitario", "$ Unit.");
+  modelTree.setHeaderData("preco", "Total");
+  modelTree.setHeaderData("kgcx", "Kg./Cx.");
+  modelTree.setHeaderData("formComercial", "Formato");
+
+  ui->treeView->setModel(&modelTree);
+
+  connect(ui->treeView, &QTreeView::expanded, this, [&] {
+    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
+  });
+
+  connect(ui->treeView, &QTreeView::collapsed, this, [&] {
+    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
+  });
+
+  ui->treeView->hideColumn("idRelacionado");
+  ui->treeView->hideColumn("idPedido2");
+  ui->treeView->hideColumn("idPedidoFK");
+  ui->treeView->hideColumn("selecionado");
+  ui->treeView->hideColumn("statusFinanceiro");
+  ui->treeView->hideColumn("ordemCompra");
+  ui->treeView->hideColumn("idVendaProduto2");
+  ui->treeView->hideColumn("idCompra");
+  ui->treeView->hideColumn("idProduto");
+  ui->treeView->hideColumn("quantUpd");
+  ui->treeView->hideColumn("quantConsumida");
+  ui->treeView->hideColumn("codBarras");
+  ui->treeView->hideColumn("dataPrevCompra");
+  ui->treeView->hideColumn("dataRealCompra");
+  ui->treeView->hideColumn("dataPrevConf");
+  ui->treeView->hideColumn("dataRealConf");
+  ui->treeView->hideColumn("dataPrevFat");
+  ui->treeView->hideColumn("dataRealFat");
+  ui->treeView->hideColumn("dataPrevColeta");
+  ui->treeView->hideColumn("dataRealColeta");
+  ui->treeView->hideColumn("dataPrevReceb");
+  ui->treeView->hideColumn("dataRealReceb");
+  ui->treeView->hideColumn("dataPrevEnt");
+  ui->treeView->hideColumn("dataRealEnt");
+
+  ui->treeView->setItemDelegate(new NoEditDelegate(this));
+
+  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
+  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
 }
 
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
@@ -410,6 +482,12 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   modelPedidoFornecedor.setFilter(filtro);
 
   if (not modelPedidoFornecedor.select()) { return false; }
+
+  modelPedidoFornecedor2.setFilter(filtro);
+
+  if (not modelPedidoFornecedor2.select()) { return false; }
+
+  setTreeView();
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra + " AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");
@@ -497,17 +575,17 @@ bool InputDialogFinanceiro::cadastrar() {
 
   if (tipo == Tipo::ConfirmarCompra) {
     for (const auto &index : list) {
-      if (not modelPedidoFornecedor.setData(index.row(), "selecionado", true)) { return false; }
+      if (not modelPedidoFornecedor2.setData(index.row(), "selecionado", true)) { return false; }
     }
   }
 
   if (tipo == Tipo::Financeiro) {
     for (const auto &index : list) {
-      if (not modelPedidoFornecedor.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
+      if (not modelPedidoFornecedor2.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
     }
   }
 
-  if (not modelPedidoFornecedor.submitAll()) { return false; }
+  if (not modelPedidoFornecedor2.submitAll()) { return false; }
 
   if (not modelFluxoCaixa.submitAll()) { return false; }
 
@@ -548,14 +626,14 @@ void InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged(const double valueSt
 
     const auto list = ui->table->selectionModel()->selectedRows();
 
-    for (const auto &index : list) { total += modelPedidoFornecedor.data(index.row(), "preco").toDouble(); }
+    for (const auto &index : list) { total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble(); }
 
     const double aliquota = valueSt * 100 / total;
 
     ui->doubleSpinBoxAliquota->setValue(aliquota);
 
     for (const auto &index : list) {
-      if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", aliquota)) { return; }
+      if (not modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota)) { return; }
     }
 
     ui->doubleSpinBoxTotal->setValue(total);
@@ -593,8 +671,8 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : list) {
-      if (not modelPedidoFornecedor.setData(index.row(), "st", text)) { return; }
-      if (not modelPedidoFornecedor.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
+      if (not modelPedidoFornecedor2.setData(index.row(), "st", text)) { return; }
+      if (not modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", ui->doubleSpinBoxAliquota->value())) { return; }
     }
   }();
 

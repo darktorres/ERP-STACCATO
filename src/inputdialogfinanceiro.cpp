@@ -48,6 +48,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
     ui->labelProximoEvento->setText("Data prevista faturamento:");
 
     ui->widgetPgts->show();
+
+    ui->treeView->hide();
   }
 
   if (tipo == Tipo::Financeiro) {
@@ -56,7 +58,9 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
     ui->frameAdicionais->hide();
 
-    //    ui->table->setSelectionMode(QTableView::NoSelection);
+    ui->table->setSelectionMode(QTableView::NoSelection);
+
+    ui->treeView->hide();
   }
 
   if (tipo == Tipo::Historico) {
@@ -65,6 +69,8 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
     ui->framePagamentos->hide();
     ui->frameAdicionais->hide();
     ui->pushButtonSalvar->hide();
+
+    ui->table->hide();
   }
 
   setConnections();
@@ -449,6 +455,7 @@ void InputDialogFinanceiro::setTreeView() {
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("statusFinanceiro");
   ui->treeView->hideColumn("ordemCompra");
+  ui->treeView->hideColumn("idVendaProduto1");
   ui->treeView->hideColumn("idVendaProduto2");
   ui->treeView->hideColumn("idCompra");
   ui->treeView->hideColumn("idProduto");
@@ -467,6 +474,8 @@ void InputDialogFinanceiro::setTreeView() {
   ui->treeView->hideColumn("dataRealReceb");
   ui->treeView->hideColumn("dataPrevEnt");
   ui->treeView->hideColumn("dataRealEnt");
+  ui->treeView->hideColumn("created");
+  ui->treeView->hideColumn("lastUpdated");
 
   ui->treeView->setItemDelegate(new NoEditDelegate(this));
 

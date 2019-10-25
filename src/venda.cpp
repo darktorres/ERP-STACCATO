@@ -306,7 +306,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   ui->doubleSpinBoxFrete->setValue(frete);
   ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : frete);
-  silentFrete = true;
   ui->checkBoxFreteManual->setChecked(freteManual);
   canChangeFrete = freteManual;
 
@@ -354,11 +353,6 @@ void Venda::prepararVenda(const QString &idOrcamento) {
     ui->labelConsultor->show();
     ui->itemBoxConsultor->show();
   }
-
-  // -------------------------------------------------------------------------
-
-  on_checkBoxFreteManual_clicked(ui->checkBoxFreteManual->isChecked());
-  silentFrete = false;
 
   // -------------------------------------------------------------------------
 
@@ -578,9 +572,7 @@ bool Venda::viewRegister() {
     ui->pushButtonCancelamento->show();
     ui->pushButtonDevolucao->show();
 
-    const bool freteManual = ui->checkBoxFreteManual->isChecked();
-
-    ui->doubleSpinBoxFrete->setReadOnly(not freteManual);
+    ui->doubleSpinBoxFrete->setReadOnly(true);
     ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
     if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
@@ -688,8 +680,9 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa.setData(row, "centroCusto", idLoja)) { return; }
       }
 
-      // calculo comissao
+      // calculo comissao loja
       for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
+        if (modelFluxoCaixa.data(z, "representacao").toBool() and modelFluxoCaixa.data(z, "observacao").toString() == "Frete") { continue; }
         if (not modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
         if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
         if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
@@ -764,7 +757,7 @@ void Venda::montarFluxoCaixa() {
 void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
   unsetConnections();
 
-  {
+  [&] {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double frete = ui->doubleSpinBoxFrete->value();
     const double descontoReais = subTotalLiq + frete - total;
@@ -782,13 +775,13 @@ void Venda::on_doubleSpinBoxTotal_valueChanged(const double total) {
 
     ui->widgetPgts->setTotal(total);
     ui->widgetPgts->resetarPagamentos();
-  }
+  }();
 
   setConnections();
 }
 
 void Venda::on_checkBoxFreteManual_clicked(const bool checked) {
-  if (not silentFrete and not canChangeFrete) {
+  if (not canChangeFrete) {
     qApp->enqueueInformation("Necessário autorização de um gerente ou administrador!", this);
 
     LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
@@ -814,12 +807,12 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 
   unsetConnections();
 
-  {
+  [&] {
     ui->doubleSpinBoxTotal->setValue(subTotalLiq - desconto + frete);
     ui->widgetPgts->setFrete(frete);
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
     ui->widgetPgts->resetarPagamentos();
-  }
+  }();
 
   setConnections();
 }
@@ -827,7 +820,7 @@ void Venda::on_doubleSpinBoxFrete_valueChanged(const double frete) {
 void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) {
   unsetConnections();
 
-  [=]() {
+  [&] {
     const double descontoPorc2 = descontoPorc / 100;
 
     for (int row = 0; row < modelItem.rowCount(); ++row) {
@@ -853,7 +846,7 @@ void Venda::on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPor
 void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) {
   unsetConnections();
 
-  [=]() {
+  [&] {
     const double subTotalLiq = ui->doubleSpinBoxSubTotalLiq->value();
     const double descontoPorc = descontoReais / subTotalLiq;
 

@@ -52,8 +52,13 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroData = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "'" : "";
-  if (not filtroData.isEmpty()) { filtros << filtroData; }
+  const QString filtroMes = ui->groupBoxMes->isChecked() ? "DATE_FORMAT(Data, '%Y-%m') = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'" : "";
+  if (not filtroMes.isEmpty()) { filtros << filtroMes; }
+
+  //-------------------------------------
+
+  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(Data, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
 
@@ -96,12 +101,14 @@ void WidgetVenda::montaFiltro() {
 void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  [&] {
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
-  for (const auto &child : children) {
-    child->setEnabled(true);
-    child->setChecked(enabled);
-  }
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  }();
 
   setConnections();
 
@@ -151,7 +158,8 @@ void WidgetVenda::setPermissions() {
 
   ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
 
-  ui->dateEdit->setDate(QDate::currentDate());
+  ui->dateEditMes->setDate(QDate::currentDate());
+  ui->dateEditDia->setDate(QDate::currentDate());
 }
 
 void WidgetVenda::setConnections() {
@@ -177,8 +185,10 @@ void WidgetVenda::setConnections() {
   connect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged, connectionType);
   connect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro, connectionType);
-  connect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled, connectionType);
   connect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro, connectionType);
@@ -209,8 +219,10 @@ void WidgetVenda::unsetConnections() {
   disconnect(ui->comboBoxLojas, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->comboBoxLojas, qOverload<int>(&QComboBox::currentIndexChanged), this, &WidgetVenda::on_comboBoxLojas_currentIndexChanged);
   disconnect(ui->comboBoxVendedores, &ComboBox::currentTextChanged, this, &WidgetVenda::montaFiltro);
-  disconnect(ui->dateEdit, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetVenda::montaFiltro);
   disconnect(ui->groupBoxMes, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatus_toggled);
   disconnect(ui->groupBoxStatusFinanceiro, &QGroupBox::toggled, this, &WidgetVenda::on_groupBoxStatusFinanceiro_toggled);
   disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetVenda::montaFiltro);
@@ -302,12 +314,14 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
   unsetConnections();
 
-  const auto children = ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>();
+  [&] {
+    const auto children = ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>();
 
-  for (const auto &child : children) {
-    child->setEnabled(true);
-    child->setChecked(enabled);
-  }
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  }();
 
   setConnections();
 

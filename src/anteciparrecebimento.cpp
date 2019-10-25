@@ -96,7 +96,7 @@ void AnteciparRecebimento::calcularTotais() {
   ui->doubleSpinBoxValorLiquido->setValue(liquido);
 
   unsetConnections();
-  ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100));
+  [&] { ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100)); }();
   setConnections();
 
   ui->doubleSpinBoxIOF->setValue(0);
@@ -182,7 +182,7 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 
   const double valor = descTotal / prazoMedio * 30 * 100;
   unsetConnections();
-  ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor);
+  [&] { ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor); }();
   setConnections();
   ui->doubleSpinBoxIOF->setValue(0);
   if (ui->checkBoxIOF->isChecked()) { ui->doubleSpinBoxIOF->setValue(ui->doubleSpinBoxValorPresente->value() * (0.0038 + 0.0041 * prazoMedio)); }

@@ -72,6 +72,7 @@ void WidgetRelatorio::setupTables() {
   ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
 
   ui->tableRelatorio->hideColumn("Mês");
+  ui->tableRelatorio->hideColumn("Data");
   ui->tableRelatorio->hideColumn("idUsuario");
 
   // -------------------------------------------------------------------------

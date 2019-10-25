@@ -68,4 +68,5 @@ private:
   auto on_pushButtonFreteLoja_clicked() -> void;
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;
+  auto prepararPagamentosRep() -> void;
 };

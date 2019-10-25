@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.7.16
+VERSION = 0.7.19
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -381,10 +381,10 @@ FORMS += \
     ui/widgetcompraresumo.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
-    ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetgraficos.ui \
+    ui/widgethistoricocompra.ui \
     ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
     ui/widgetlogisticaagendarentrega.ui \

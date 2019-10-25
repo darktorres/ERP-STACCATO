@@ -259,6 +259,18 @@ void WidgetPagamentos::resetarPagamentos() {
 
 double WidgetPagamentos::getTotalPag() { return ui->doubleSpinBoxTotalPag->value(); }
 
+void WidgetPagamentos::prepararPagamentosRep() {
+  if (qFuzzyIsNull(frete)) { return; }
+
+  on_pushButtonAdicionarPagamento_clicked();
+
+  listCheckBoxRep.at(0)->setChecked(true);
+  listLinePgt.at(0)->setText("Frete");
+  listLinePgt.at(0)->setReadOnly(true);
+  listDoubleSpinPgt.at(0)->setValue(frete);
+  listDoubleSpinPgt.at(0)->setReadOnly(true);
+}
+
 void WidgetPagamentos::setCredito(const double creditoCliente) {
   credito = creditoCliente;
   creditoRestante = creditoCliente;
@@ -369,6 +381,10 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
   //---------------------------------------------------
 
   calcularTotal();
+
+  //---------------------------------------------------
+
+  if (representacao and listDatePgt.size() == 1) { prepararPagamentosRep(); }
 }
 
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }

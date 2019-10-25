@@ -5,7 +5,7 @@
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
-class WidgetFinanceiroCompra;
+class WidgetHistoricoCompra;
 }
 
 class WidgetHistoricoCompra final : public QWidget {
@@ -25,7 +25,7 @@ private:
   bool modelIsSet = false;
   Tipo tipo;
   SqlRelationalTableModel modelViewComprasFinanceiro;
-  Ui::WidgetFinanceiroCompra *ui;
+  Ui::WidgetHistoricoCompra *ui;
   // methods
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;

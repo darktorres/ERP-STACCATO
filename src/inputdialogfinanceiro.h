@@ -2,7 +2,9 @@
 
 #include <QDialog>
 
+#include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
+#include "sqltreemodel.h"
 
 namespace Ui {
 class InputDialogFinanceiro;
@@ -24,8 +26,11 @@ private:
   // attributes
   bool representacao;
   const Tipo tipo;
+  SortFilterProxyModel *proxyModel;
   SqlRelationalTableModel modelPedidoFornecedor;
+  SqlRelationalTableModel modelPedidoFornecedor2;
   SqlRelationalTableModel modelFluxoCaixa;
+  SqlTreeModel modelTree;
   Ui::InputDialogFinanceiro *ui;
   // methods
   auto cadastrar() -> bool;
@@ -41,6 +46,7 @@ private:
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;
+  auto setTreeView() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;

@@ -23,7 +23,7 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui
 
   //---------------------------------------------------
 
-  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked);
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, [=] { on_pushButtonAdicionarPagamento_clicked(); });
   connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonLimparPag_clicked);
   connect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonPgtLoja_clicked);
   connect(ui->pushButtonFreteLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonFreteLoja_clicked);
@@ -336,7 +336,7 @@ void WidgetPagamentos::calcularTotal() {
   emit montarFluxoCaixa();
 }
 
-void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
+void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFrete) {
   if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
 
   auto *frame = new QFrame(this);
@@ -388,7 +388,7 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
 
   //---------------------------------------------------
 
-  if (representacao and listDatePgt.size() == 1) { prepararPagamentosRep(); }
+  if (representacao and addFrete and listDatePgt.size() == 1) { prepararPagamentosRep(); }
 }
 
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
@@ -408,8 +408,8 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
   resetarPagamentos();
 
-  on_pushButtonAdicionarPagamento_clicked();
-  on_pushButtonAdicionarPagamento_clicked();
+  on_pushButtonAdicionarPagamento_clicked(false);
+  on_pushButtonAdicionarPagamento_clicked(false);
 
   listCheckBoxRep.at(0)->setChecked(false);
   listLinePgt.at(0)->setText("Frete");

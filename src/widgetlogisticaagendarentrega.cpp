@@ -1,8 +1,7 @@
-#include <QDate>
 #include <QDebug>
+#include <QFileDialog>
 #include <QInputDialog>
-#include <QMessageBox>
-#include <QSortFilterProxyModel>
+
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -12,7 +11,6 @@
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
-#include "sortfilterproxymodel.h"
 #include "ui_widgetlogisticaagendarentrega.h"
 #include "usersession.h"
 #include "widgetlogisticaagendarentrega.h"
@@ -46,6 +44,8 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("idVenda", "Venda");
+  modelProdutos.setHeaderData("idNFeSaida", "NFe");
+  modelProdutos.setHeaderData("idNFeFutura", "NFe Futura");
   modelProdutos.setHeaderData("produto", "Produto");
   modelProdutos.setHeaderData("idEstoque", "Estoque");
   modelProdutos.setHeaderData("lote", "Lote");
@@ -161,6 +161,7 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked, connectionType);
   connect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked, connectionType);
   connect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked, connectionType);
+  connect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked, connectionType);
   connect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked, connectionType);
   connect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked, connectionType);
   connect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
@@ -725,6 +726,86 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
   nfe->setAttribute(Qt::WA_DeleteOnClose);
 
   nfe->show();
+}
+
+void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
+  const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
+
+  for (const auto &index : selection) {
+    if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { return qApp->enqueueError("Pelo menos uma linha selecionada já possui nota!", this); }
+  }
+
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
+
+  if (filePath.isEmpty()) { return; }
+
+  QFile file(filePath);
+
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file.errorString(), this); }
+
+  XML xml(file.readAll(), file.fileName());
+
+  if (not verificaCNPJ(xml) or verificaExiste(xml) or not verificaValido(xml)) { return; }
+
+  QSqlQuery queryNFe;
+  queryNFe.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, cnpjOrig, chaveAcesso, valor) VALUES (:numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :cnpjOrig, :chaveAcesso, :valor)");
+  queryNFe.bindValue(":numeroNFe", xml.nNF);
+  queryNFe.bindValue(":xml", xml.fileContent);
+  queryNFe.bindValue(":cnpjOrig", xml.cnpjDest);
+  queryNFe.bindValue(":chaveAcesso", xml.chaveAcesso);
+  queryNFe.bindValue(":valor", xml.vNF_Total);
+
+  if (not queryNFe.exec()) { return qApp->enqueueError("Erro importando NFe: " + queryNFe.lastError().text(), this); }
+
+  const QVariant id = queryNFe.lastInsertId();
+
+  // update other tables
+
+  QSqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto SET idNFeSaida = :idNFeSaida WHERE idVendaProduto = :idVendaProduto");
+
+  for (const auto &index : selection) {
+    const int row = index.row();
+    queryVenda.bindValue(":idNFeSaida", id);
+    queryVenda.bindValue(":idVendaProduto", modelProdutos.data(row, "idVendaProduto"));
+
+    if (not queryVenda.exec()) { return qApp->enqueueError("Erro salvando NFe nos produtos: " + queryVenda.lastError().text(), this); }
+  }
+
+  updateTables();
+  qApp->enqueueInformation("Nota importada com sucesso!", this);
+}
+
+bool WidgetLogisticaAgendarEntrega::verificaCNPJ(const XML &xml) {
+  QSqlQuery queryLoja;
+
+  const QString cnpj = QString(xml.cnpjOrig).insert(2, ".").insert(6, ".").insert(10, "/").insert(15, "-");
+
+  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE cnpj = '" + cnpj + "'")) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
+
+  if (not queryLoja.first()) { return qApp->enqueueError(false, "CNPJ da NFe difere dos CNPJs da loja!", this); }
+
+  return true;
+}
+
+bool WidgetLogisticaAgendarEntrega::verificaExiste(const XML &xml) {
+  QSqlQuery query;
+  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", xml.chaveAcesso);
+
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
+
+  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+
+  return false;
+}
+
+bool WidgetLogisticaAgendarEntrega::verificaValido(const XML &xml) {
+  if (not xml.fileContent.contains("nProt")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", this); }
+
+  return true;
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?

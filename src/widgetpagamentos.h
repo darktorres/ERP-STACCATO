@@ -64,7 +64,7 @@ private:
   auto lineEditPgt(QHBoxLayout *layout) -> void;
   auto on_comboBoxPgt_currentTextChanged(const int index, const QString &text) -> void;
   auto on_doubleSpinBoxPgt_valueChanged(const int index) -> void;
-  auto on_pushButtonAdicionarPagamento_clicked() -> void;
+  auto on_pushButtonAdicionarPagamento_clicked(const bool addFrete = true) -> void;
   auto on_pushButtonFreteLoja_clicked() -> void;
   auto on_pushButtonLimparPag_clicked() -> void;
   auto on_pushButtonPgtLoja_clicked() -> void;

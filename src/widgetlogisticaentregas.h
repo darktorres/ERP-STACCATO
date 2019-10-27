@@ -3,7 +3,6 @@
 #include <QWidget>
 
 #include "sqlrelationaltablemodel.h"
-#include "xml.h"
 
 namespace Ui {
 class WidgetLogisticaEntregas;
@@ -35,7 +34,6 @@ private:
   auto on_pushButtonConfirmarEntrega_clicked() -> void;
   auto on_pushButtonConsultarNFe_clicked() -> void;
   auto on_pushButtonGerarNFeEntregar_clicked() -> void;
-  auto on_pushButtonImportarNFe_clicked() -> void;
   auto on_pushButtonImprimirDanfe_clicked() -> void;
   auto on_pushButtonProtocoloEntrega_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
@@ -45,7 +43,4 @@ private:
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto verificaCNPJ(const XML &xml) -> bool;
-  auto verificaExiste(const XML &xml) -> bool;
-  auto verificaValido(const XML &xml) -> bool;
 };

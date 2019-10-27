@@ -560,9 +560,15 @@ bool Orcamento::savingProcedures() {
   for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) {
     if (not modelItem.setData(row, "idOrcamento", ui->lineEditOrcamento->text())) { return false; }
     if (not modelItem.setData(row, "idLoja", model.data(currentRow, "idLoja"))) { return false; }
+
     const double prcUnitario = modelItem.data(row, "prcUnitario").toDouble();
     const double desconto = modelItem.data(row, "desconto").toDouble() / 100.;
+
     if (not modelItem.setData(row, "descUnitario", prcUnitario - (prcUnitario * desconto))) { return false; }
+
+    const bool mostrarDesconto = (modelItem.data(row, "parcialDesc").toDouble() - modelItem.data(row, "parcial").toDouble()) < -0.1;
+
+    if (not modelItem.setData(row, "mostrarDesconto", mostrarDesconto)) { return false; }
   }
 
   if (not buscarCadastrarConsultor()) { return false; }
@@ -749,8 +755,6 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
     if (not modelItem.setData(currentRowItem, "parcialDesc", ui->doubleSpinBoxTotalItem->value())) { return; }
     if (not modelItem.setData(currentRowItem, "descGlobal", ui->doubleSpinBoxDescontoGlobal->value())) { return; }
     if (not modelItem.setData(currentRowItem, "total", ui->doubleSpinBoxTotalItem->value() * (1 - (ui->doubleSpinBoxDescontoGlobal->value() / 100)))) { return; }
-    const bool mostrarDesconto = (modelItem.data(currentRowItem, "total").toDouble() - modelItem.data(currentRowItem, "parcial").toDouble()) < -0.1;
-    if (not modelItem.setData(currentRowItem, "mostrarDesconto", mostrarDesconto)) { return; }
 
     if (modelItem.rowCount() == 1 and ui->checkBoxRepresentacao->isChecked()) { ui->itemBoxProduto->setFornecedorRep(modelItem.data(currentRowItem, "fornecedor").toString()); }
 

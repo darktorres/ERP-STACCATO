@@ -666,8 +666,8 @@ void Orcamento::calcPrecoGlobalTotal() {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setValue(frete);
     ui->doubleSpinBoxFrete->setMinimum(frete);
+    ui->doubleSpinBoxFrete->setValue(frete);
   }
 
   const double frete = ui->doubleSpinBoxFrete->value();
@@ -1177,8 +1177,8 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setValue(frete);
     ui->doubleSpinBoxFrete->setMinimum(frete);
+    ui->doubleSpinBoxFrete->setValue(frete);
   }
 }
 

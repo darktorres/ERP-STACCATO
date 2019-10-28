@@ -289,8 +289,8 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   const bool freteManual = queryOrc.value("freteManual").toBool();
   const double frete = queryOrc.value("frete").toDouble();
 
-  ui->doubleSpinBoxFrete->setValue(frete);
   ui->doubleSpinBoxFrete->setMinimum(freteManual ? 0 : frete);
+  ui->doubleSpinBoxFrete->setValue(frete);
   ui->checkBoxFreteManual->setChecked(freteManual);
   canChangeFrete = freteManual;
 

@@ -33,7 +33,7 @@ private:
   auto adicionarProdutoParcial(const int row, const int caixasAgendar, const int caixasTotal) -> bool;
   auto calcularDisponivel() -> void;
   auto calcularPeso() -> void;
-  auto dividirConsumo(const int row, const QDecDouble proporcao, const QDecDouble proporcaoNovo, const int idVendaProduto) -> bool;
+  auto dividirConsumo(const int row, const QDecDouble proporcao, const QDecDouble proporcaoNovo, const int idVendaProduto2) -> bool;
   auto dividirProduto(const int row, const int caixasAgendar, const int caixasTotal) -> bool;
   auto montaFiltro() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;

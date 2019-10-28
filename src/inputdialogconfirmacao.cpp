@@ -404,9 +404,9 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   // TODO: marcar idRelacionado
 
   SqlRelationalTableModel modelVendaProduto;
-  modelVendaProduto.setTable("venda_has_produto");
+  modelVendaProduto.setTable("venda_has_produto2");
 
-  modelVendaProduto.setFilter("idVendaProduto = " + modelVeiculo.data(row, "idVendaProduto").toString());
+  modelVendaProduto.setFilter("idVendaProduto2 = " + modelVeiculo.data(row, "idVendaProduto2").toString());
 
   if (not modelVendaProduto.select()) { return false; }
 
@@ -428,7 +428,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   // NOTE: *quebralinha venda_produto
 
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
-    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("idVendaProduto2") == col) { continue; }
     if (modelVendaProduto.fieldIndex("entregou") == col) { continue; }
     if (modelVendaProduto.fieldIndex("idCompra") == col) { continue; }
     if (modelVendaProduto.fieldIndex("idNFeSaida") == col) { continue; }
@@ -453,7 +453,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
 
   const double quantDefeito = caixasDefeito * unCaixa;
 
-  if (not modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto"))) { return false; }
+  if (not modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"))) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito)) { return false; }
   if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
@@ -602,8 +602,8 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
     QSqlQuery querySelect;
     querySelect.prepare(
-        "SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto vp ON ehc.idVendaProduto = "
-        "vp.idVendaProduto LEFT JOIN venda v ON vp.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
+        "SELECT CAST((`v`.`data` + INTERVAL `v`.`prazoEntrega` DAY) AS DATE) AS `prazoEntrega`, ehc.* FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp2 ON ehc.idVendaProduto2 = "
+        "vp2.idVendaProduto2 LEFT JOIN venda v ON vp2.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
     querySelect.bindValue(":idEstoque", idEstoque);
 
     if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando consumo estoque: " + querySelect.lastError().text(), this); }
@@ -614,7 +614,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
     QSqlQuery queryVenda;
     // TODO: should set flag 'reposicao'
-    queryVenda.prepare("UPDATE venda_has_produto SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+    queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     while (querySelect.next()) {
       const int caixas = querySelect.value("caixas").toInt();
@@ -623,7 +623,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
       if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo: " + queryDelete.lastError().text(), this); }
 
-      queryVenda.bindValue(":idVendaProduto", querySelect.value("idVendaProduto"));
+      queryVenda.bindValue(":idVendaProduto2", querySelect.value("idVendaProduto2"));
 
       if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro voltando produto para pendente: " + queryVenda.lastError().text(), this); }
 

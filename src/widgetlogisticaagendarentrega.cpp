@@ -296,7 +296,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
     if (not query1.exec() or not query1.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataPrevEnt", dataPrevEnt);
-    query2.bindValue(":idVenda", idVendaProduto);
+    query2.bindValue(":idVendaProduto", idVendaProduto);
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query2.lastError().text(), this); }
 

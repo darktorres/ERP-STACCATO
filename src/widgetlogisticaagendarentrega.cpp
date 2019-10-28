@@ -463,7 +463,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
 bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int caixasAgendar, const int caixasTotal) {
   if (caixasAgendar < caixasTotal) {
-    if (not dividirProduto(row, caixasAgendar, caixasTotal)) { return false; }
+    if (not dividirVenda(row, caixasAgendar, caixasTotal)) { return false; }
   }
 
   QSqlQuery query;
@@ -495,7 +495,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
   return true;
 }
 
-bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caixasAgendar, const int caixasTotal) {
+bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const int caixasAgendar, const int caixasTotal) {
   // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
 
   SqlRelationalTableModel modelProdutosTemp;
@@ -510,9 +510,9 @@ bool WidgetLogisticaAgendarEntrega::dividirProduto(const int row, const int caix
 
   // copiar colunas
   for (int column = 0, columnCount = modelProdutosTemp.columnCount(); column < columnCount; ++column) {
-    if (modelProdutosTemp.fieldIndex("idVendaProduto2") == column) { continue; }
-    if (modelProdutosTemp.fieldIndex("created") == column) { continue; }
-    if (modelProdutosTemp.fieldIndex("lastUpdated") == column) { continue; }
+    if (column == modelProdutosTemp.fieldIndex("idVendaProduto2")) { continue; }
+    if (column == modelProdutosTemp.fieldIndex("created")) { continue; }
+    if (column == modelProdutosTemp.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelProdutosTemp.data(0, column);
 

@@ -36,10 +36,10 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
 
     // REFAC: 0dont hardcode magic numbers
     const int contaSantander = 3;
-    const int contaCaixa = 8;
+    const int contaItau = 33;
 
     ui->itemBoxCaixa1->setId(contaSantander);
-    ui->itemBoxCaixa2->setId(contaCaixa);
+    ui->itemBoxCaixa2->setId(contaItau);
 
     ui->groupBoxCaixa1->setChecked(true);
     ui->groupBoxCaixa2->setChecked(true);

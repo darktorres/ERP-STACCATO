@@ -400,6 +400,8 @@ void Orcamento::removeItem() {
   unsetConnections();
 
   [&] {
+    if (isDirty) { save(true); }
+
     if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {

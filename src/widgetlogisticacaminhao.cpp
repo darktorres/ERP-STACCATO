@@ -59,5 +59,5 @@ void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }
 void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString() + " ORDER BY data DESC");
+  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
 }

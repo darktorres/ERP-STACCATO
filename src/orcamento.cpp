@@ -400,6 +400,8 @@ void Orcamento::removeItem() {
   unsetConnections();
 
   [&] {
+    if (isDirty) { save(true); }
+
     if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
@@ -666,8 +668,8 @@ void Orcamento::calcPrecoGlobalTotal() {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setValue(frete);
     ui->doubleSpinBoxFrete->setMinimum(frete);
+    ui->doubleSpinBoxFrete->setValue(frete);
   }
 
   const double frete = ui->doubleSpinBoxFrete->value();
@@ -1179,8 +1181,8 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
   if (not ui->checkBoxFreteManual->isChecked()) {
     const double frete = qMax(ui->doubleSpinBoxSubTotalBruto->value() * porcFrete / 100., minimoFrete);
 
-    ui->doubleSpinBoxFrete->setValue(frete);
     ui->doubleSpinBoxFrete->setMinimum(frete);
+    ui->doubleSpinBoxFrete->setValue(frete);
   }
 }
 

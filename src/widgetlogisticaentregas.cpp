@@ -506,18 +506,41 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
   xlsx.currentWorksheet()->setOrientation(QXlsx::Worksheet::Orientation::Vertical);
 
   QSqlQuery queryCliente;
-  queryCliente.prepare("SELECT nome_razao, tel, telCel FROM cliente c WHERE c.idCliente = (SELECT idCliente FROM venda WHERE idVenda = :idVenda)");
+  queryCliente.prepare("SELECT v.idProfissional, c.nome_razao, c.tel AS clienteTel, c.telCel AS clienteCel, p.tel AS profissionalTel, p.telCel AS profissionalCel FROM venda v LEFT JOIN cliente c ON "
+                       "v.idCliente = c.idCliente LEFT JOIN profissional p ON v.idProfissional = p.idProfissional WHERE v.idVenda = :idVenda");
   queryCliente.bindValue(":idVenda", idVenda);
 
   if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError("Erro buscando dados cliente: " + queryCliente.lastError().text(), this); }
 
-  const QString tel = queryCliente.value("tel").toString();
-  const QString telCel = queryCliente.value("telCel").toString();
-  const QString tels = tel.isEmpty() ? "" : tel + (telCel.isEmpty() ? "" : " - " + telCel);
+  QString telefones;
+
+  if (queryCliente.value("idProfissional").toInt() == 1) { // NÃO HÁ
+    const QString clienteTel = queryCliente.value("clienteTel").toString();
+    const QString clienteCel = queryCliente.value("clienteCel").toString();
+
+    if (not clienteTel.isEmpty() and not clienteCel.isEmpty()) {
+      telefones = clienteTel + " - " + clienteCel;
+    } else if (not clienteTel.isEmpty()) {
+      telefones = clienteTel;
+    } else if (not clienteCel.isEmpty()) {
+      telefones = clienteCel;
+    }
+  } else {
+    const QString profissionalTel = queryCliente.value("profissionalTel").toString();
+    const QString profissionalCel = queryCliente.value("profissionalCel").toString();
+
+    if (not profissionalTel.isEmpty() and not profissionalCel.isEmpty()) {
+      telefones = profissionalTel + " - " + profissionalCel;
+    } else if (not profissionalTel.isEmpty()) {
+      telefones = profissionalTel;
+    } else if (not profissionalCel.isEmpty()) {
+      telefones = profissionalCel;
+    }
+  }
 
   xlsx.write("AA5", idVenda);
   xlsx.write("G11", queryCliente.value("nome_razao"));
-  xlsx.write("Y11", tels);
+  xlsx.write("Y11", telefones);
 
   QSqlQuery queryEndereco;
   queryEndereco.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = (SELECT idEnderecoEntrega FROM venda WHERE idVenda = :idVenda)");

@@ -57,7 +57,7 @@ void WidgetNfeSaida::unsetConnections() {
 
 void WidgetNfeSaida::updateTables() {
   if (not isSet) {
-    ui->dateEdit->setDate(QDate::currentDate());
+    ui->dateEdit->setDate(qApp->serverDateTime().date());
     setConnections();
     isSet = true;
   }

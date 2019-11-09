@@ -16,7 +16,7 @@ void WidgetRh::resetTables() { modelIsSet = false; }
 
 void WidgetRh::updateTables() {
   if (not isSet) {
-    ui->dateEdit->setDate(QDate::currentDate());
+    ui->dateEdit->setDate(qApp->serverDateTime().date());
     setConnections();
     isSet = true;
   }

@@ -35,9 +35,9 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
   ui->labelSt->hide();
   ui->doubleSpinBoxSt->hide();
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
-  ui->dateEditProximo->setDate(QDate::currentDate());
-  ui->dateEditPgtSt->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDateTime().date());
+  ui->dateEditProximo->setDate(qApp->serverDateTime().date());
+  ui->dateEditPgtSt->setDate(qApp->serverDateTime().date());
 
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
@@ -288,8 +288,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->dateTime())) { return; }
       if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor.data(0, "idCompra"))) { return; }
-      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; }                           // Geral
-      if (not modelFluxoCaixa.setData(row, "dataPagamento", QDate::currentDate())) { return; } // TODO: 5redo this with a editable date
+      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; }                                    // Geral
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", qApp->serverDateTime().date())) { return; } // TODO: 5redo this with a editable date
       if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value())) { return; }
       if (not modelFluxoCaixa.setData(row, "tipo", "Frete")) { return; }
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }

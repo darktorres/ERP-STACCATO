@@ -33,7 +33,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
 
   while (query.next()) { ui->comboBox->addItem(query.value("tipo").toString()); }
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDateTime().date());
 
   setConnections();
 }

@@ -261,7 +261,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   ui->lineEditIdOrcamento->setText(idOrcamento);
   ui->lineEditVenda->setText("Auto gerado");
-  ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
+  ui->dateTimeEdit->setDateTime(qApp->serverDateTime());
 
   if (not copiaProdutosOrcamento()) { return; }
 
@@ -635,7 +635,7 @@ void Venda::montarFluxoCaixa() {
       const double parcela = static_cast<double>(part2) / 100;
       const double resto = valor - (parcela * parcelas);
 
-      const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : QDate::currentDate();
+      const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDateTime().date();
 
       for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
         const int row = modelFluxoCaixa.insertRowAtEnd();
@@ -1054,7 +1054,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   // caso pedido nao seja do mes atual, bloquear se nao estiver no primeiro dia util
   const QDate dataVenda = data("data").toDate();
-  const QDate dataAtual = QDate::currentDate();
+  const QDate dataAtual = qApp->serverDateTime().date();
 
   if (dataVenda.month() != dataAtual.month()) {
     const int diaSemana = dataAtual.dayOfWeek();
@@ -1162,7 +1162,7 @@ bool Venda::financeiroSalvar() {
 
   if (not setData("statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
 
-  if (not setData("dataFinanceiro", QDateTime::currentDateTime())) { return false; }
+  if (not setData("dataFinanceiro", qApp->serverDateTime())) { return false; }
 
   if (not model.submitAll()) { return false; }
 

@@ -156,7 +156,7 @@ void WidgetLogisticaAgendarColeta::updateTables() {
   if (not isSet) {
     ui->frameCaminhao->hide();
     ui->pushButtonCancelarCarga->hide();
-    ui->dateTimeEdit->setDate(QDate::currentDate());
+    ui->dateTimeEdit->setDate(qApp->serverDateTime().date());
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     setConnections();
     isSet = true;

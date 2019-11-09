@@ -504,8 +504,8 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
   ui->lineEditModelo->setText("55");
   ui->lineEditSerie->setText("001");
-  ui->lineEditEmissao->setText(QDate::currentDate().toString("dd/MM/yy"));
-  ui->lineEditSaida->setText(QDate::currentDate().toString("dd/MM/yy"));
+  ui->lineEditEmissao->setText(qApp->serverDateTime().toString("dd/MM/yy"));
+  ui->lineEditSaida->setText(qApp->serverDateTime().toString("dd/MM/yy"));
   ui->comboBoxTipo->setCurrentIndex(1);
   ui->lineEditFormatoPagina->setText("0");
 
@@ -777,7 +777,7 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
 
 bool CadastrarNFe::criarChaveAcesso() {
   const QStringList listChave = {modelLoja.data(0, "codUF").toString(),
-                                 QDate::currentDate().toString("yyMM"),
+                                 qApp->serverDateTime().toString("yyMM"),
                                  clearStr(ui->lineEditEmitenteCNPJ->text()),
                                  ui->lineEditModelo->text(),
                                  ui->lineEditSerie->text(),
@@ -817,8 +817,8 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
   stream << "Serie = " + ui->lineEditSerie->text() << endl;
   stream << "Codigo = " << ui->lineEditCodigo->text() << endl; // 1
   stream << "Numero = " << ui->lineEditNumero->text() << endl; // 1
-  stream << "Emissao = " + QDate::currentDate().toString("dd/MM/yyyy") << endl;
-  stream << "Saida = " + QDate::currentDate().toString("dd/MM/yyyy") << endl;
+  stream << "Emissao = " + qApp->serverDateTime().toString("dd/MM/yyyy") << endl;
+  stream << "Saida = " + qApp->serverDateTime().toString("dd/MM/yyyy") << endl;
   stream << "Tipo = " + ui->comboBoxTipo->currentText().left(1) << endl;
   stream << "finNFe = " + ui->comboBoxFinalidade->currentText().left(1) << endl;
   stream << "FormaPag = " + ui->lineEditFormatoPagina->text() << endl;

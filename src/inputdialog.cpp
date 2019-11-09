@@ -19,8 +19,8 @@ InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), t
 
   setWindowFlags(Qt::Window);
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
-  ui->dateEditProximo->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDateTime().date());
+  ui->dateEditProximo->setDate(qApp->serverDateTime().date());
 
   if (tipo == Tipo::Carrinho) {
     ui->labelEvento->hide();
@@ -49,7 +49,7 @@ InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), t
     ui->lineEditObservacao->hide();
 
     ui->labelProximoEvento->setText("Data prevista coleta");
-    ui->dateEditProximo->setDate(QDate::currentDate().addDays(8));
+    ui->dateEditProximo->setDate(qApp->serverDateTime().date().addDays(8));
   }
 
   if (tipo == Tipo::Coleta) {

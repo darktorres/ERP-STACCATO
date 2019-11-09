@@ -34,7 +34,7 @@ void WidgetGraficos::updateTables() {
 
     // ----------------------------------------------------
 
-    const QDate now = QDate::currentDate();
+    const QDate now = qApp->serverDateTime().date();
     const QVector<QPen> colors = {QPen(QBrush(QColor(255, 70, 70)), 2), QPen(QBrush(QColor(255, 100, 0)), 2), QPen(QBrush(QColor(255, 170, 0)), 2), QPen(QBrush(QColor(255, 255, 0)), 2),
                                   QPen(QBrush(QColor(195, 255, 0)), 2), QPen(QBrush(QColor(17, 166, 0)), 2),  QPen(QBrush(QColor(0, 217, 148)), 2), QPen(QBrush(QColor(0, 255, 255)), 2),
                                   QPen(QBrush(QColor(0, 30, 255)), 2),  QPen(QBrush(QColor(140, 0, 255)), 2), QPen(QBrush(QColor(255, 0, 255)), 2), QPen(QBrush(QColor(180, 80, 60)), 2),

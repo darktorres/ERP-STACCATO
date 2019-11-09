@@ -205,7 +205,7 @@ bool CadastroProduto::savingProcedures() {
   const bool representacao = query.value("representacao").toBool();
 
   if (not setData("representacao", representacao)) { return false; }
-  if (not setData("descontinuado", ui->dateEditValidade->date() < QDate::currentDate())) { return false; }
+  if (not setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDateTime().date())) { return false; }
 
   return true;
 }

@@ -400,14 +400,14 @@ void Orcamento::removeItem() {
   unsetConnections();
 
   [&] {
-    if (isDirty) { save(true); }
+    if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
 
-    if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
+    if (not modelItem.removeRow(currentRowItem)) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
       if (not modelItem.submitAll()) { return; }
       calcPrecoGlobalTotal();
-      save();
+      save(true);
     } else {
       calcPrecoGlobalTotal();
     }

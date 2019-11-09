@@ -82,7 +82,7 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   const int newRow = modelContaPagamento.insertRowAtEnd();
 
   if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
-  if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) { return; }
+  if (not modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDateTime().date())) { return; }
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {

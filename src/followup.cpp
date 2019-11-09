@@ -20,8 +20,8 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
 
   setWindowTitle((tipo == Tipo::Orcamento ? "Orçamento: " : "Pedido: ") + id);
 
-  ui->dateFollowup->setDateTime(QDateTime::currentDateTime());
-  ui->dateProxFollowup->setDateTime(QDateTime::currentDateTime().addDays(1));
+  ui->dateFollowup->setDateTime(qApp->serverDateTime());
+  ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
 
   if (tipo == Tipo::Venda) { ui->frameOrcamento->hide(); }
 }

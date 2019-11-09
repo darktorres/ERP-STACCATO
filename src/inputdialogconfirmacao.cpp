@@ -22,8 +22,8 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
 
   setupTables();
 
-  ui->dateEditEvento->setDateTime(QDateTime::currentDateTime());
-  ui->dateEditProximo->setDateTime(QDateTime::currentDateTime());
+  ui->dateEditEvento->setDateTime(qApp->serverDateTime());
+  ui->dateEditProximo->setDateTime(qApp->serverDateTime());
 
   if (tipo == Tipo::Recebimento) {
     ui->labelProximoEvento->hide();

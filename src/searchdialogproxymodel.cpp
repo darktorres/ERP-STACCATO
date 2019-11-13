@@ -20,26 +20,23 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
     }
   }
 
-  if (estoqueColumn != -1) {
+  if (estoqueColumn != -1 and promocaoColumn != -1) {
     const bool estoque = SortFilterProxyModel::data(proxyIndex.row(), estoqueColumn, Qt::DisplayRole).toBool();
+    const int promocao = SortFilterProxyModel::data(proxyIndex.row(), promocaoColumn, Qt::DisplayRole).toInt();
 
-    if (estoque) {
+    if (estoque and promocao == 0) {
       if (role == Qt::BackgroundRole) { return QBrush(Qt::yellow); }
       if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
     }
-  }
 
-  if (promocaoColumn != -1) {
-    const int promocao = SortFilterProxyModel::data(proxyIndex.row(), promocaoColumn, Qt::DisplayRole).toInt();
-
-    if (promocao == 1) {
-      if (role == Qt::BackgroundRole) { return QBrush(Qt::green); } // promocao
-      if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
+    if (estoque and promocao == 2) {
+      if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // BLACK NOVEMBER
+      if (role == Qt::ForegroundRole) { return QBrush(Qt::white); }
     }
 
-    if (promocao == 2) {
-      if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // staccato OFF
-      if (role == Qt::ForegroundRole) { return QBrush(Qt::white); }
+    if (not estoque and promocao == 1) {
+      if (role == Qt::BackgroundRole) { return QBrush(Qt::green); } // promocao
+      if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
     }
   }
 
@@ -64,4 +61,4 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
   return QSortFilterProxyModel::data(proxyIndex, role);
 }
 
-// TODO: posteriormente remover o azul da promocao 'staccato off'
+// TODO: posteriormente remover o azul da promocao 'BLACK NOVEMBER'

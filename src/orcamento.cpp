@@ -874,10 +874,10 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->doubleSpinBoxQuant->setMinimum(minimo);
   ui->doubleSpinBoxCaixas->setMinimum(minimo / uncx);
 
-  currentItemIsEstoque = query.value("estoque").toInt();
-  currentItemIsPromocao = query.value("promocao").toBool();
+  currentItemIsEstoque = query.value("estoque").toBool();
+  currentItemIsPromocao = query.value("promocao").toInt();
 
-  if (currentItemIsEstoque != 0) {
+  if (currentItemIsEstoque) {
     ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
     ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / uncx);
   } else {

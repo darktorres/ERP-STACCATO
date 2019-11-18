@@ -1,5 +1,6 @@
 #include <QDateEdit>
 
+#include "application.h"
 #include "dateformatdelegate.h"
 #include "sqlrelationaltablemodel.h"
 
@@ -11,7 +12,7 @@ QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &) 
 
 QWidget *DateFormatDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const {
   auto *editor = new QDateEdit(parent);
-  editor->setDate(QDate::currentDate());
+  editor->setDate(qApp->serverDate());
   editor->setDisplayFormat("dd/MM/yy");
   editor->setCalendarPopup(true);
 

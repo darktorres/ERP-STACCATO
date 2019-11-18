@@ -33,9 +33,8 @@ Devolucao::~Devolucao() { delete ui; }
 
 std::optional<bool> Devolucao::determinarIdDevolucao() {
   QSqlQuery query;
-  query.prepare("SELECT MAX(idVenda) AS id FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = :month HAVING MAX(idVenda) IS NOT NULL");
+  query.prepare("SELECT MAX(idVenda) AS id FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(NOW()) HAVING MAX(idVenda) IS NOT NULL");
   query.bindValue(":idVenda", idVenda + "D%");
-  query.bindValue(":month", QDate::currentDate().month());
 
   if (not query.exec()) {
     qApp->enqueueError("Erro verificando se existe devolução: " + query.lastError().text(), this);
@@ -306,7 +305,7 @@ bool Devolucao::criarDevolucao() {
   }
 
   if (not modelVenda.setData(newRow, "idVenda", idDevolucao)) { return false; }
-  if (not modelVenda.setData(newRow, "data", QDateTime::currentDateTime())) { return false; }
+  if (not modelVenda.setData(newRow, "data", qApp->serverDateTime())) { return false; }
   if (not modelVenda.setData(newRow, "subTotalBru", 0)) { return false; }
   if (not modelVenda.setData(newRow, "subTotalLiq", 0)) { return false; }
   if (not modelVenda.setData(newRow, "descontoPorc", 0)) { return false; }
@@ -482,7 +481,7 @@ bool Devolucao::criarContas() {
   const int newRowPag = modelPagamentos.insertRowAtEnd();
 
   if (not modelPagamentos.setData(newRowPag, "contraParte", modelCliente.data(0, "nome_razao"))) { return false; }
-  if (not modelPagamentos.setData(newRowPag, "dataEmissao", QDate::currentDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataEmissao", qApp->serverDate())) { return false; }
   if (not modelPagamentos.setData(newRowPag, "idVenda", idDevolucao)) { return false; }
   if (not modelPagamentos.setData(newRowPag, "idLoja", UserSession::idLoja())) { return false; }
   if (not modelPagamentos.setData(newRowPag, "valor", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
@@ -490,8 +489,8 @@ bool Devolucao::criarContas() {
   if (not modelPagamentos.setData(newRowPag, "parcela", 1)) { return false; }
   if (not modelPagamentos.setData(newRowPag, "observacao", "")) { return false; }
   if (not modelPagamentos.setData(newRowPag, "status", "RECEBIDO")) { return false; }
-  if (not modelPagamentos.setData(newRowPag, "dataPagamento", QDate::currentDate())) { return false; }
-  if (not modelPagamentos.setData(newRowPag, "dataRealizado", QDate::currentDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataPagamento", qApp->serverDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataRealizado", qApp->serverDate())) { return false; }
   if (not modelPagamentos.setData(newRowPag, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
   // REFAC: 0dont hardcode
   if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) { return false; }
@@ -523,11 +522,11 @@ bool Devolucao::criarContas() {
   //        "frete").toDouble()));
 
   //    modelPagamentos.setData(row, "contraParte", fornecedor);
-  //    modelPagamentos.setData(row, "dataEmissao", QDate::currentDate());
+  //    modelPagamentos.setData(row, "dataEmissao", qApp->serverDate());
   //    modelPagamentos.setData(row, "idVenda", idDevolucao);
   //    modelPagamentos.setData(row, "idLoja", modelVenda.data(0, "idLoja"));
   // TODO: 0colocar mesma data do fluxo original
-  //    modelPagamentos.setData(row, "dataPagamento", QDate::currentDate());
+  //    modelPagamentos.setData(row, "dataPagamento", qApp->serverDate());
   //    modelPagamentos.setData(row, "valor", valorAjustado);
   //    modelPagamentos.setData(row, "tipo", "1. Comissão");
   //    modelPagamentos.setData(row, "parcela", 1);

@@ -1,6 +1,7 @@
 #include <QBrush>
 #include <QDate>
 
+#include "application.h"
 #include "financeiroproxymodel.h"
 #include "usersession.h"
 
@@ -32,7 +33,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     if (proxyIndex.column() == prazoEntrega) {
       const QDate prazo = proxyIndex.siblingAtColumn(prazoEntrega).data().toDate();
-      const int dias = static_cast<int>(QDate::currentDate().daysTo(prazo));
+      const int dias = static_cast<int>(qApp->serverDate().daysTo(prazo));
 
       if (not prazo.isNull()) {
         if (dias >= 3 and dias < 5) {
@@ -49,7 +50,7 @@ QVariant FinanceiroProxyModel::data(const QModelIndex &proxyIndex, int role) con
 
     if (proxyIndex.column() == novoPrazoEntrega) {
       const QDate prazo = proxyIndex.siblingAtColumn(novoPrazoEntrega).data().toDate();
-      const int dias = static_cast<int>(QDate::currentDate().daysTo(prazo));
+      const int dias = static_cast<int>(qApp->serverDate().daysTo(prazo));
 
       if (not prazo.isNull()) {
         if (dias >= 3 and dias < 5) {

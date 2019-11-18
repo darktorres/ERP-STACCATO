@@ -73,8 +73,8 @@ void WidgetFinanceiroContas::setConnections() {
 void WidgetFinanceiroContas::updateTables() {
   if (not isSet) {
     ui->radioButtonPendente->setChecked(true);
-    ui->dateEditAte->setDate(QDate::currentDate());
-    ui->dateEditDe->setDate(QDate::currentDate());
+    ui->dateEditAte->setDate(qApp->serverDate());
+    ui->dateEditDe->setDate(qApp->serverDate());
 
     ui->itemBoxLojas->setSearchDialog(SearchDialog::loja(this));
 
@@ -376,7 +376,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   if (not queryPagamento.exec() or not queryPagamento.first()) { return qApp->enqueueError("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-  if (queryPagamento.value("dataPagamento").toDate().daysTo(QDate::currentDate()) > 5) { return qApp->enqueueError("No máximo 5 dias para reverter!", this); }
+  if (queryPagamento.value("dataPagamento").toDate().daysTo(qApp->serverDate()) > 5) { return qApp->enqueueError("No máximo 5 dias para reverter!", this); }
 
   if (queryPagamento.value("grupo").toString() == "Transferência") { return qApp->enqueueError("Não pode reverter transferência!", this); }
 

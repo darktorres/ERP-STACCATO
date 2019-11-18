@@ -25,8 +25,8 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
   ui->doubleSpinBoxST->hide();
   ui->lineEditCodRep->hide();
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
-  ui->dateEditProximo->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDate());
+  ui->dateEditProximo->setDate(qApp->serverDate());
 
   if (tipo == Tipo::GerarCompra) {
     ui->labelEvento->setText("Data compra:");

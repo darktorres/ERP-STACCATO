@@ -19,8 +19,8 @@ private:
   QList<QSqlRecord> backupItem;
   int currentRowItem = -1;
   bool isReadOnly = false;
-  int currentItemIsEstoque = 0;
-  bool currentItemIsPromocao = false;
+  bool currentItemIsEstoque = false;
+  int currentItemIsPromocao = 0;
   bool canChangeFrete = false;
   double minimoFrete = 0;
   double porcFrete = 0;

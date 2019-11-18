@@ -168,7 +168,7 @@ bool Orcamento::viewRegister() {
 
     if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
 
-    const bool expirado = ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < QDate::currentDate();
+    const bool expirado = ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDate();
 
     if (expirado or status != "ATIVO") {
       isReadOnly = true;
@@ -382,7 +382,7 @@ bool Orcamento::newRegister() {
   if (not RegisterDialog::newRegister()) { return false; }
 
   ui->lineEditOrcamento->setText("Auto gerado");
-  ui->dataEmissao->setDateTime(QDateTime::currentDateTime());
+  ui->dataEmissao->setDateTime(qApp->serverDateTime());
   on_dataEmissao_dateChanged(ui->dataEmissao->date());
   ui->spinBoxValidade->setValue(7);
   novoItem();
@@ -400,14 +400,14 @@ void Orcamento::removeItem() {
   unsetConnections();
 
   [&] {
-    if (isDirty) { save(true); }
+    if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
 
-    if (not modelItem.removeRow(ui->tableProdutos->currentIndex().row())) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
+    if (not modelItem.removeRow(currentRowItem)) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
       if (not modelItem.submitAll()) { return; }
       calcPrecoGlobalTotal();
-      save();
+      save(true);
     } else {
       calcPrecoGlobalTotal();
     }
@@ -428,7 +428,7 @@ bool Orcamento::generateId() {
 
   if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
 
-  QString id = siglaLoja.value().toString() + "-" + QDate::currentDate().toString("yy");
+  QString id = siglaLoja.value().toString() + "-" + qApp->serverDate().toString("yy");
 
   const QString replica = ui->lineEditReplicaDe->text();
 
@@ -784,7 +784,7 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 
   if (not time.isValid()) { return; }
 
-  if (time.addDays(data("validade").toInt()).date() < QDateTime::currentDateTime().date()) { return qApp->enqueueError("Orçamento vencido!", this); }
+  if (time.addDays(data("validade").toInt()).date() < qApp->serverDate()) { return qApp->enqueueError("Orçamento vencido!", this); }
 
   if (ui->itemBoxEndereco->text().isEmpty()) {
     qApp->enqueueError("Deve selecionar endereço!", this);
@@ -872,10 +872,10 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->doubleSpinBoxQuant->setMinimum(minimo);
   ui->doubleSpinBoxCaixas->setMinimum(minimo / uncx);
 
-  currentItemIsEstoque = query.value("estoque").toInt();
-  currentItemIsPromocao = query.value("promocao").toBool();
+  currentItemIsEstoque = query.value("estoque").toBool();
+  currentItemIsPromocao = query.value("promocao").toInt();
 
-  if (currentItemIsEstoque != 0) {
+  if (currentItemIsEstoque) {
     ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
     ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / uncx);
   } else {
@@ -993,7 +993,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   replica->ui->itemBoxVendedor->setId(data("idUsuario"));
   replica->ui->itemBoxEndereco->setId(data("idEnderecoEntrega"));
   replica->ui->spinBoxValidade->setValue(data("validade").toInt());
-  replica->ui->dataEmissao->setDateTime(QDateTime::currentDateTime());
+  replica->ui->dataEmissao->setDateTime(qApp->serverDateTime());
   replica->ui->checkBoxRepresentacao->setChecked(ui->checkBoxRepresentacao->isChecked());
   replica->ui->lineEditReplicaDe->setText(data("idOrcamento").toString());
   replica->ui->plainTextEditObs->setPlainText(data("observacao").toString());

@@ -96,7 +96,7 @@ bool SearchDialog::prepare_show() {
   ui->lineEditBusca->setFocus();
   ui->lineEditBusca->clear();
 
-  ui->lineEditEstoque_2->setText("Staccato OFF");
+  ui->lineEditEstoque_2->setText("BLACK NOVEMBER");
   ui->lineEditEstoque->setText("Estoque");
   ui->lineEditPromocao->setText("Promoção");
 

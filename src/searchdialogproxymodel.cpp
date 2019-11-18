@@ -2,6 +2,7 @@
 #include <QDate>
 #include <QDebug>
 
+#include "application.h"
 #include "searchdialogproxymodel.h"
 #include "usersession.h"
 
@@ -23,32 +24,29 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
       }
     }
 
-    if (estoqueColumn != -1) {
+    if (estoqueColumn != -1 and promocaoColumn != -1) {
       const bool estoque = proxyIndex.siblingAtColumn(estoqueColumn).data().toBool();
+      const int promocao = proxyIndex.siblingAtColumn(promocaoColumn).data().toInt();
 
-      if (estoque) {
+      if (estoque and promocao == 0) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::yellow); }
         if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
       }
-    }
 
-    if (promocaoColumn != -1) {
-      const int promocao = proxyIndex.siblingAtColumn(promocaoColumn).data().toInt();
-
-      if (promocao == 1) {
-        if (role == Qt::BackgroundRole) { return QBrush(Qt::green); } // promocao
-        if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
+      if (estoque and promocao == 2) {
+        if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // BLACK NOVEMBER
+        if (role == Qt::ForegroundRole) { return QBrush(Qt::white); }
       }
 
-      if (promocao == 2) {
-        if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // staccato OFF
-        if (role == Qt::ForegroundRole) { return QBrush(Qt::white); }
+      if (not estoque and promocao == 1) {
+        if (role == Qt::BackgroundRole) { return QBrush(Qt::green); } // promocao
+        if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
       }
     }
 
     if (proxyIndex.column() == validadeColumn) {
       const QDate validade = proxyIndex.siblingAtColumn(validadeColumn).data().toDate();
-      const bool expirado = validade < QDate::currentDate();
+      const bool expirado = validade < qApp->serverDate();
 
       if (expirado) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::red); }
@@ -67,3 +65,5 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
 
   return QSortFilterProxyModel::data(proxyIndex, role);
 }
+
+// TODO: posteriormente remover o azul da promocao 'BLACK NOVEMBER'

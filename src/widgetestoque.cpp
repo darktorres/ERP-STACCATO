@@ -72,7 +72,7 @@ void WidgetEstoque::setupTables() {
 
 void WidgetEstoque::updateTables() {
   if (not isSet) {
-    ui->dateEditMes->setDate(QDate::currentDate());
+    ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
 
     const QString tipoUsuario = UserSession::tipoUsuario();

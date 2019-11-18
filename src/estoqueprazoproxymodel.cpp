@@ -1,6 +1,7 @@
 #include <QBrush>
 #include <QDate>
 
+#include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "usersession.h"
 
@@ -12,7 +13,7 @@ QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int r
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
     if (proxyIndex.column() == prazoEntregaColumn) {
       const QDate prazo = proxyIndex.siblingAtColumn(prazoEntregaColumn).data().toDate();
-      const bool atrasado = not prazo.isNull() and prazo < QDate::currentDate();
+      const bool atrasado = not prazo.isNull() and prazo < qApp->serverDate();
 
       if (atrasado) {
         if (role == Qt::BackgroundRole) { return QBrush(Qt::red); }

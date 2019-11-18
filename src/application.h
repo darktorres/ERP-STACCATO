@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QApplication>
+#include <QDateTime>
 #include <QPalette>
 #include <QSqlDatabase>
 

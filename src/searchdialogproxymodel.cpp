@@ -42,7 +42,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
 
   if (proxyIndex.column() == validadeColumn) {
     const QDate validade = SortFilterProxyModel::data(proxyIndex.row(), validadeColumn, Qt::DisplayRole).toDate();
-    const bool expirado = validade < qApp->serverDateTime().date();
+    const bool expirado = validade < qApp->serverDate();
 
     if (expirado) {
       if (role == Qt::BackgroundRole) { return QBrush(Qt::red); }

@@ -168,7 +168,7 @@ bool Orcamento::viewRegister() {
 
     if (status == "ATIVO") { ui->pushButtonReplicar->hide(); }
 
-    const bool expirado = ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDateTime().date();
+    const bool expirado = ui->dataEmissao->dateTime().addDays(data("validade").toInt()).date() < qApp->serverDate();
 
     if (expirado or status != "ATIVO") {
       isReadOnly = true;
@@ -428,7 +428,7 @@ bool Orcamento::generateId() {
 
   if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
 
-  QString id = siglaLoja.value().toString() + "-" + qApp->serverDateTime().toString("yy");
+  QString id = siglaLoja.value().toString() + "-" + qApp->serverDate().toString("yy");
 
   const QString replica = ui->lineEditReplicaDe->text();
 
@@ -786,7 +786,7 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 
   if (not time.isValid()) { return; }
 
-  if (time.addDays(data("validade").toInt()).date() < qApp->serverDateTime().date()) { return qApp->enqueueError("Orçamento vencido!", this); }
+  if (time.addDays(data("validade").toInt()).date() < qApp->serverDate()) { return qApp->enqueueError("Orçamento vencido!", this); }
 
   if (ui->itemBoxEndereco->text().isEmpty()) {
     qApp->enqueueError("Deve selecionar endereço!", this);

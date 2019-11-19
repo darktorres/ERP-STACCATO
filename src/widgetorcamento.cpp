@@ -61,7 +61,7 @@ void WidgetOrcamento::setPermissions() {
 
   ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
 
-  ui->dateEdit->setDate(qApp->serverDateTime().date());
+  ui->dateEdit->setDate(qApp->serverDate());
 }
 
 void WidgetOrcamento::setupTables() {

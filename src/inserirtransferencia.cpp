@@ -17,7 +17,7 @@ InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), u
   ui->itemBoxDe->setSearchDialog(SearchDialog::conta(this));
   ui->itemBoxPara->setSearchDialog(SearchDialog::conta(this));
 
-  ui->dateEdit->setDate(qApp->serverDateTime().date());
+  ui->dateEdit->setDate(qApp->serverDate());
 }
 
 InserirTransferencia::~InserirTransferencia() { delete ui; }

@@ -324,5 +324,21 @@ QDateTime Application::serverDateTime() {
     return QDateTime();
   }
 
-  return query.value("now()").toDateTime();
+  return query.value("NOW()").toDateTime();
+}
+
+QDate Application::serverDate() {
+  if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
+    QSqlQuery query;
+
+    if (not query.exec("SELECT NOW()") or not query.first()) {
+      enqueueError("Erro buscando data/hora: " + query.lastError().text());
+      return QDate();
+    }
+
+    systemDate = QDate::currentDate();
+    serverDateCache = query.value("NOW()").toDateTime();
+  }
+
+  return serverDateCache.date();
 }

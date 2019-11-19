@@ -182,7 +182,7 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
     }
 
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
-    ui->dateTimeEdit->setDate(qApp->serverDateTime().date());
+    ui->dateTimeEdit->setDate(qApp->serverDate());
 
     setConnections();
     isSet = true;
@@ -683,7 +683,7 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
     query2.bindValue(":idUsuario", UserSession::idUsuario());
     query2.bindValue(":tipoOperacao", "Alteração do prazo de entrega");
     query2.bindValue(":observacao", observacao);
-    query2.bindValue(":dataFollowup", qApp->serverDateTime().date());
+    query2.bindValue(":dataFollowup", qApp->serverDate());
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando followup: " + query2.lastError().text(), this); }
   }

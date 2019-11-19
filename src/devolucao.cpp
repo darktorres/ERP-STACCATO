@@ -455,7 +455,7 @@ bool Devolucao::criarContas() {
   const int newRowPag = modelPagamentos.insertRowAtEnd();
 
   if (not modelPagamentos.setData(newRowPag, "contraParte", modelCliente.data(0, "nome_razao"))) { return false; }
-  if (not modelPagamentos.setData(newRowPag, "dataEmissao", qApp->serverDateTime().date())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataEmissao", qApp->serverDate())) { return false; }
   if (not modelPagamentos.setData(newRowPag, "idVenda", idDevolucao)) { return false; }
   if (not modelPagamentos.setData(newRowPag, "idLoja", UserSession::idLoja())) { return false; }
   if (not modelPagamentos.setData(newRowPag, "valor", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
@@ -463,8 +463,8 @@ bool Devolucao::criarContas() {
   if (not modelPagamentos.setData(newRowPag, "parcela", 1)) { return false; }
   if (not modelPagamentos.setData(newRowPag, "observacao", "")) { return false; }
   if (not modelPagamentos.setData(newRowPag, "status", "RECEBIDO")) { return false; }
-  if (not modelPagamentos.setData(newRowPag, "dataPagamento", qApp->serverDateTime().date())) { return false; }
-  if (not modelPagamentos.setData(newRowPag, "dataRealizado", qApp->serverDateTime().date())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataPagamento", qApp->serverDate())) { return false; }
+  if (not modelPagamentos.setData(newRowPag, "dataRealizado", qApp->serverDate())) { return false; }
   if (not modelPagamentos.setData(newRowPag, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
   // REFAC: 0dont hardcode
   if (not modelPagamentos.setData(newRowPag, "contaDestino", 11)) { return false; }
@@ -496,11 +496,11 @@ bool Devolucao::criarContas() {
   //        "frete").toDouble()));
 
   //    modelPagamentos.setData(row, "contraParte", fornecedor);
-  //    modelPagamentos.setData(row, "dataEmissao", qApp->serverDateTime().date());
+  //    modelPagamentos.setData(row, "dataEmissao", qApp->serverDate());
   //    modelPagamentos.setData(row, "idVenda", idDevolucao);
   //    modelPagamentos.setData(row, "idLoja", modelVenda.data(0, "idLoja"));
   // TODO: 0colocar mesma data do fluxo original
-  //    modelPagamentos.setData(row, "dataPagamento", qApp->serverDateTime().date());
+  //    modelPagamentos.setData(row, "dataPagamento", qApp->serverDate());
   //    modelPagamentos.setData(row, "valor", valorAjustado);
   //    modelPagamentos.setData(row, "tipo", "1. Comissão");
   //    modelPagamentos.setData(row, "parcela", 1);

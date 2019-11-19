@@ -160,8 +160,8 @@ void WidgetVenda::setPermissions() {
 
   ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
 
-  ui->dateEditMes->setDate(qApp->serverDateTime().date());
-  ui->dateEditDia->setDate(qApp->serverDateTime().date());
+  ui->dateEditMes->setDate(qApp->serverDate());
+  ui->dateEditDia->setDate(qApp->serverDate());
 }
 
 void WidgetVenda::setConnections() {

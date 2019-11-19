@@ -166,7 +166,7 @@ void WidgetRelatorio::updateTables() {
       ui->groupBoxResumoOrcamento->hide();
     }
 
-    ui->dateEditMes->setDate(qApp->serverDateTime().date());
+    ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
     isSet = true;
   }

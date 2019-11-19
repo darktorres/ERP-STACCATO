@@ -29,7 +29,7 @@ void WidgetFinanceiroFluxoCaixa::setConnections() {
 
 void WidgetFinanceiroFluxoCaixa::updateTables() {
   if (not isSet) {
-    ui->dateEdit->setDate(qApp->serverDateTime().date());
+    ui->dateEdit->setDate(qApp->serverDate());
 
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));

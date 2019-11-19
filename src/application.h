@@ -30,6 +30,7 @@ public:
   auto lightTheme() -> void;
   auto rollbackTransaction() -> void;
   auto serverDateTime() -> QDateTime;
+  auto serverDate() -> QDate;
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto showMessages() -> void;
@@ -44,6 +45,7 @@ private:
     QString message;
     QWidget *widget = nullptr;
   };
+
   // attributes
   QMap<QString, QString> mapLojas;
   QSqlDatabase db;
@@ -56,6 +58,8 @@ private:
   bool showingErrors = false;
   bool updating = false;
   const QPalette defaultPalette = palette();
+  QDateTime serverDateCache;
+  QDate systemDate = QDate::currentDate();
   // methods
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> bool;

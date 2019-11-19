@@ -12,7 +12,7 @@ QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &) 
 
 QWidget *DateFormatDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const {
   auto *editor = new QDateTimeEdit(parent);
-  editor->setDate(qApp->serverDateTime().date());
+  editor->setDate(qApp->serverDate());
   editor->setDisplayFormat("dd/MM/yy");
   editor->setCalendarPopup(true);
 

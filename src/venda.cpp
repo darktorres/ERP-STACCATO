@@ -635,7 +635,7 @@ void Venda::montarFluxoCaixa() {
       const double parcela = static_cast<double>(part2) / 100;
       const double resto = valor - (parcela * parcelas);
 
-      const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDateTime().date();
+      const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
 
       for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
         const int row = modelFluxoCaixa.insertRowAtEnd();
@@ -1054,7 +1054,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   // caso pedido nao seja do mes atual, bloquear se nao estiver no primeiro dia util
   const QDate dataVenda = data("data").toDate();
-  const QDate dataAtual = qApp->serverDateTime().date();
+  const QDate dataAtual = qApp->serverDate();
 
   if (dataVenda.month() != dataAtual.month()) {
     const int diaSemana = dataAtual.dayOfWeek();

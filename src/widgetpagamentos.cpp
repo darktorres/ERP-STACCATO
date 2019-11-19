@@ -50,7 +50,7 @@ QDateEdit *WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
   dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   dateEditPgt->setDisplayFormat("dd/MM/yy");
   dateEditPgt->setCalendarPopup(true);
-  dateEditPgt->setDate(qApp->serverDateTime().date());
+  dateEditPgt->setDate(qApp->serverDate());
   connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
   layout->addWidget(dateEditPgt);
   listDatePgt << dateEditPgt;
@@ -365,7 +365,7 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
   if (tipo == Tipo::Compra) {
     connect(comboBox, &QComboBox::currentTextChanged, [=] {
       const QString currentText = comboBox->currentText();
-      const QDate currentDate = qApp->serverDateTime().date();
+      const QDate currentDate = qApp->serverDate();
       QDate dataPgt;
 
       if (currentText == "Data + 1 Mês") {

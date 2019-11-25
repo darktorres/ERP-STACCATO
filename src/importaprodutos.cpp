@@ -417,6 +417,9 @@ void ImportaProdutos::contaProdutos() {
 }
 
 void ImportaProdutos::consistenciaDados() {
+  // TODO: colocar unCaixa nos produtos usando a lógica:
+  //  const double unCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
+
   const auto keys = variantMap.keys();
 
   for (const auto &key : keys) {

@@ -185,6 +185,8 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
     const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
+    // TODO: se alterar quant. tem que alterar caixas
+
     if (header == "Quant." or header == "$ Unit.") {
       const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
       if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }

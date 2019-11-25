@@ -142,6 +142,7 @@ bool CadastroUsuario::viewRegister() {
 
   if (not modelPermissoes.select()) { return false; }
 
+// TODO: shouldn't this be in setupTables?
 #if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
   auto *transpose = new QTransposeProxyModel(this);
   transpose->setSourceModel(&modelPermissoes);

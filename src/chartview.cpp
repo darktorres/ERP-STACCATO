@@ -18,7 +18,7 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QGraphicsView(new QGraphi
   m_coordY = new QGraphicsSimpleTextItem(m_chart);
   m_coordY->setPos(m_chart->size().width() / 2 + 50, m_chart->size().height());
 
-  const auto series = chart->series();
+  //  const auto series = chart->series();
 
   //  for (const auto &AbstractSerie : series) {
   //    auto serie = static_cast<QLineSeries *>(AbstractSerie);

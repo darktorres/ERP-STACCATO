@@ -46,3 +46,5 @@ protected:
   // methods
   auto selectStatement() const -> QString final;
 };
+
+// TODO: add a readOnly attribute for when table is a view?

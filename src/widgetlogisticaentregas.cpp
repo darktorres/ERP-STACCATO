@@ -11,6 +11,7 @@
 #include "doubledelegate.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
+#include "sql.h"
 #include "sqlquerymodel.h"
 #include "ui_widgetlogisticaentregas.h"
 #include "usersession.h"
@@ -300,6 +301,10 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   const int row = list.first().row();
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega, this);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());
 
@@ -308,6 +313,8 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
   if (not qApp->startTransaction()) { return; }
 
   if (not confirmarEntrega(inputDlg.getDate(), inputDlg.getEntregou(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

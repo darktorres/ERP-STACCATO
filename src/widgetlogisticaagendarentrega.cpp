@@ -11,6 +11,7 @@
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
+#include "sql.h"
 #include "ui_widgetlogisticaagendarentrega.h"
 #include "usersession.h"
 #include "widgetlogisticaagendarentrega.h"
@@ -253,9 +254,15 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 
   if (modelTranspAtual.rowCount() == 0) { return qApp->enqueueError("Carga vazia!", this); }
 
+  QStringList idVendas;
+
+  for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { idVendas << modelTranspAtual.data(row, "idVenda").toString(); }
+
   if (not qApp->startTransaction()) { return; }
 
   if (not processRows()) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

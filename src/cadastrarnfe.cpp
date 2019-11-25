@@ -631,8 +631,10 @@ void CadastrarNFe::prepararNFe(const QList<int> &items) {
   // TODO: verificar na nota futura qual transportadora preencher
   if (tipo == Tipo::Normal) {
     for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
-      for (int col = modelViewProdutoEstoque.fieldIndex("numeroPedido"); col < modelViewProdutoEstoque.columnCount(); ++col) {
-        if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
+      for (int col = 0; col < modelViewProdutoEstoque.columnCount(); ++col) {
+        if (modelViewProdutoEstoque.data(row, col).isNull()) {
+          if (not modelViewProdutoEstoque.setData(row, col, 0)) { return; } // limpar campos dos imposto
+        }
       }
 
       if (not modelViewProdutoEstoque.setData(row, "cfop", mesmaUf ? "5403" : "6403")) { return; }

@@ -116,71 +116,19 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
-
-  QSqlQuery query;
   // TODO: add quant too?
   // TODO: e se tiver varios consumos?
-  query.prepare("SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda AND idProduto = :idProduto");
 
   for (const auto &index : list) {
     const QString status = modelVendaProduto.data(index.row(), "statusOriginal").toString();
 
     if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
-    // TODO: 5refazer isso para bloquear o botao
-    if (status == "PENDENTE" or status == "INICIADO" or status == "EM COMPRA" or status == "EM FATURAMENTO") {
-      // se nao faturado nao faz nada
+    QSqlQuery query;
+    query.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
+    query.bindValue(":idVendaProduto", modelVendaProduto.data(index.row(), "idVendaProduto"));
 
-      // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo
-      // idVendaProduto)
-      // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total
-      // alterado
-      // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
-
-    } else {
-      //    else if (status == "EM COLETA" or status == "EM RECEBIMENTO" or status == "ESTOQUE") {
-      // se faturado criar devolucao estoque_has_consumo
-      // 1.procurar em estoque pelo idVendaProduto
-      // 2.copiar linha consumo mudando quant, status para devolucao e idCompra 0
-
-      query.bindValue(":idVenda", modelVendaProduto.data(index.row(), "idVenda").toString().left(11));
-      query.bindValue(":idProduto", modelVendaProduto.data(index.row(), "idProduto"));
-
-      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto2: " + query.lastError().text(), this); }
-
-      const QString idVendaProduto2 = query.value("idVendaProduto2").toString();
-
-      SqlRelationalTableModel modelConsumo;
-      modelConsumo.setTable("estoque_has_consumo");
-      modelConsumo.setFilter("idVendaProduto2 = " + idVendaProduto2);
-
-      if (not modelConsumo.select()) { return false; }
-
-      if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!", this); }
-
-      const int newRow = modelConsumo.insertRowAtEnd();
-
-      for (int column = 0; column < modelConsumo.columnCount(); ++column) {
-        if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
-        if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
-        if (modelConsumo.fieldIndex("idPedido2") == column) { continue; }
-        if (modelConsumo.fieldIndex("created") == column) { continue; }
-        if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
-
-        const QVariant value = modelConsumo.data(0, column);
-
-        if (not modelConsumo.setData(newRow, column, value)) { return false; }
-      }
-
-      // TODO: update other fields
-      if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(index.row(), "idVendaProduto2"))) { return false; }
-      if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
-      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(index.row(), "caixas").toDouble() * -1)) { return false; }
-      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(index.row(), "quant").toDouble() * -1)) { return false; }
-      if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
-
-      if (not modelConsumo.submitAll()) { return false; }
-    }
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro ajustando consumo: " + query.lastError().text(), this); }
   }
 
   return modelVendaProduto.submitAll();

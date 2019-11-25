@@ -7,6 +7,7 @@
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
+#include "sql.h"
 #include "ui_widgetlogisticacoleta.h"
 #include "venda.h"
 #include "widgetlogisticacoleta.h"
@@ -86,6 +87,10 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelViewColeta.data(index.row(), "idVenda").toString(); }
+
   InputDialog input(InputDialog::Tipo::Coleta, this);
 
   if (input.exec() != InputDialog::Accepted) { return; }
@@ -93,6 +98,8 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
   if (not qApp->startTransaction()) { return; }
 
   if (not cadastrar(list, input.getDate(), input.getNextDate())) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

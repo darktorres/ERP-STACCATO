@@ -174,6 +174,7 @@ SOURCES += \
     src/sendmail.cpp \
     src/smtp.cpp \
     src/sortfilterproxymodel.cpp \
+    src/sql.cpp \
     src/sqlquerymodel.cpp \
     src/sqlrelationaltablemodel.cpp \
     src/tableview.cpp \
@@ -285,6 +286,7 @@ HEADERS  += \
     src/sendmail.h \
     src/smtp.h \
     src/sortfilterproxymodel.h \
+    src/sql.h \
     src/sqlquerymodel.h \
     src/sqlrelationaltablemodel.h \
     src/tableview.h \

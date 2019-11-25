@@ -122,7 +122,7 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
 
     if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
 
-    idVendas << model.data(row, "idVenda").toString();
+    idVendas << ui->table->dataAt(index, "idVenda").toString();
   }
 
   if (not Sql::updateVendaStatus(idVendas)) { return false; }

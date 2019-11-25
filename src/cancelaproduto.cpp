@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "cancelaproduto.h"
+#include "sql.h"
 #include "ui_cancelaproduto.h"
 
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
@@ -110,6 +111,8 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
                      "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE status = '" +
                      status + "' AND `idVendaProduto2` = :idVendaProduto2");
 
+  QStringList idVendas;
+
   for (const auto &index : list) {
     queryCompra.bindValue(":idPedido2", ui->table->dataAt(index, "idPedido2"));
 
@@ -118,7 +121,11 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
     queryVenda.bindValue(":idVendaProduto2", ui->table->dataAt(index, "idVendaProduto2"));
 
     if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
+
+    idVendas << model.data(row, "idVenda").toString();
   }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return false; }
 
   return true;
 }

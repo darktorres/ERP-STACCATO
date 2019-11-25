@@ -8,6 +8,7 @@
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
+#include "sql.h"
 #include "ui_widgetlogisticarecebimento.h"
 #include "venda.h"
 #include "widgetlogisticarecebimento.h"
@@ -130,8 +131,12 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   QStringList ids;
+  QStringList idVendas;
 
-  for (const auto &item : list) { ids << modelViewRecebimento.data(item.row(), "idEstoque").toString(); }
+  for (const auto &item : list) {
+    ids << modelViewRecebimento.data(item.row(), "idEstoque").toString();
+    idVendas << modelViewRecebimento.data(item.row(), "idVenda").toString();
+  }
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Recebimento, this);
   inputDlg.setFilterRecebe(ids);
@@ -144,6 +149,8 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
   if (not qApp->startTransaction()) { return; }
 
   if (not processRows(list, dataReceb, recebidoPor)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -233,6 +240,10 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelViewRecebimento.data(index.row(), "idVenda").toString(); }
+
   QMessageBox msgBox(QMessageBox::Question, "Cancelar?", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
@@ -242,6 +253,8 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
   if (not qApp->startTransaction()) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

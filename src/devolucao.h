@@ -26,6 +26,7 @@ private:
   SqlRelationalTableModel modelPagamentos;
   SqlRelationalTableModel modelProdutos;
   SqlRelationalTableModel modelVenda;
+  SqlRelationalTableModel modelConsumos;
   Ui::Devolucao *ui;
   // methods
   auto atualizarDevolucao() -> bool;
@@ -33,8 +34,8 @@ private:
   auto criarContas() -> bool;
   auto criarDevolucao() -> bool;
   auto determinarIdDevolucao() -> std::optional<bool>;
-  auto devolverItem(const int currentRow, const bool createNewId) -> bool;
-  auto inserirItens(const int currentRow) -> bool;
+  auto devolverItem(const int currentRow, const bool createNewId, const int novoIdVendaProduto) -> bool;
+  auto inserirItens(const int currentRow, const int novoIdVendaProduto) -> bool;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxQuant_editingFinished() -> void;
@@ -42,6 +43,7 @@ private:
   auto on_doubleSpinBoxTotalItem_valueChanged(double value) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
+  auto reservarIdVendaProduto() -> std::optional<int>;
   auto salvarCredito() -> bool;
   auto setupTables() -> void;
 };

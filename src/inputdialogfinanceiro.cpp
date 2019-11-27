@@ -60,14 +60,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
     //    ui->table->setSelectionMode(QTableView::NoSelection);
   }
 
-  if (tipo == Tipo::Historico) {
-    ui->frameDataPreco->show();
-
-    ui->framePagamentos->hide();
-    ui->frameAdicionais->hide();
-    ui->pushButtonSalvar->hide();
-  }
-
   setConnections();
 
   connect(ui->widgetPgts, &WidgetPagamentos::montarFluxoCaixa, [=]() { montarFluxoCaixa(true); });

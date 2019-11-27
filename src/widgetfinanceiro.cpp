@@ -8,7 +8,6 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
 
   ui->widgetPagar->setTipo(WidgetFinanceiroContas::Tipo::Pagar);
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
-  ui->widgetCompra->setTipo(WidgetHistoricoCompra::Tipo::Financeiro);
   ui->widgetVenda->setFinanceiro();
 
   connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);

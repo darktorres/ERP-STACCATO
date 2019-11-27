@@ -8,13 +8,13 @@
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "ui_widgetcompraoc.h"
-#include "widgetcompraoc.h"
+#include "widgetcompraconsumos.h"
 
-WidgetCompraOC::WidgetCompraOC(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
+WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
 
-WidgetCompraOC::~WidgetCompraOC() { delete ui; }
+WidgetCompraConsumos::~WidgetCompraConsumos() { delete ui; }
 
-void WidgetCompraOC::updateTables() {
+void WidgetCompraConsumos::updateTables() {
   if (not isSet) {
     setConnections();
     isSet = true;
@@ -29,13 +29,11 @@ void WidgetCompraOC::updateTables() {
   if (not modelPedido.select()) { return; }
 
   if (not modelProduto.select()) { return; }
-
-  if (not modelNFe.select()) { return; }
 }
 
-void WidgetCompraOC::resetTables() { modelIsSet = false; }
+void WidgetCompraConsumos::resetTables() { modelIsSet = false; }
 
-void WidgetCompraOC::setupTables() {
+void WidgetCompraConsumos::setupTables() {
   modelPedido.setTable("view_ordemcompra_resumo");
 
   ui->tablePedido->setModel(&modelPedido);
@@ -44,23 +42,14 @@ void WidgetCompraOC::setupTables() {
 
   modelProduto.setTable("view_ordemcompra");
 
-  modelProduto.setHeaderData("statusPF", "Status Compra");
-  modelProduto.setHeaderData("statusVP", "Status Venda");
-  modelProduto.setHeaderData("idVenda", "Venda");
-  modelProduto.setHeaderData("idVendaProdutoEHC", "Consumo");
+  modelProduto.setHeaderData("status", "Status");
   modelProduto.setHeaderData("fornecedor", "Fornecedor");
-  modelProduto.setHeaderData("descricao", "Produto");
-  modelProduto.setHeaderData("colecao", "Coleção");
+  modelProduto.setHeaderData("produto", "Produto");
   modelProduto.setHeaderData("codComercial", "Cód. Com.");
   modelProduto.setHeaderData("quant", "Quant.");
   modelProduto.setHeaderData("un", "Un.");
-  modelProduto.setHeaderData("un2", "Un2.");
   modelProduto.setHeaderData("caixas", "Cx.");
-  modelProduto.setHeaderData("prcUnitario", "R$ Unit.");
-  modelProduto.setHeaderData("preco", "R$");
-  modelProduto.setHeaderData("kgcx", "Kg./Cx.");
   modelProduto.setHeaderData("formComercial", "Form. Com.");
-  modelProduto.setHeaderData("codBarras", "Cód. Barras");
   modelProduto.setHeaderData("obs", "Obs.");
 
   ui->tableProduto->setModel(&modelProduto);
@@ -70,58 +59,34 @@ void WidgetCompraOC::setupTables() {
   ui->tableProduto->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableProduto->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
 
-  ui->tableProduto->hideColumn("idVendaProdutoPF");
-  ui->tableProduto->hideColumn("idPedido");
-  ui->tableProduto->hideColumn("idCompra");
-  ui->tableProduto->hideColumn("ordemCompra");
-
-  //------------------------------------------------------
-
-  modelNFe.setTable("view_ordemcompra_nfe");
-
-  modelNFe.setHeaderData("numeroNFe", "NFe");
-
-  ui->tableNFe->setModel(&modelNFe);
-
-  ui->tableNFe->hideColumn("ordemCompra");
-  ui->tableNFe->hideColumn("idNFe");
+  ui->tableProduto->hideColumn("idVenda");
+  ui->tableProduto->hideColumn("idVendaProduto");
 }
 
-void WidgetCompraOC::setConnections() {
+void WidgetCompraConsumos::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraOC::on_lineEditBusca_textChanged, connectionType);
-  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDanfe_clicked, connectionType);
-  connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked, connectionType);
-  connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraOC::on_tablePedido_clicked, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraConsumos::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonDesfazerConsumo, &QPushButton::clicked, this, &WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked, connectionType);
+  connect(ui->tablePedido, &TableView::clicked, this, &WidgetCompraConsumos::on_tablePedido_clicked, connectionType);
 }
 
-void WidgetCompraOC::on_tablePedido_clicked(const QModelIndex &index) {
+void WidgetCompraConsumos::on_tablePedido_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString oc = modelPedido.data(index.row(), "OC").toString();
+  const QString idVenda = modelPedido.data(index.row(), "Venda").toString();
 
-  modelProduto.setFilter("ordemCompra = " + oc);
-
-  modelNFe.setFilter("ordemCompra = " + oc);
+  modelProduto.setFilter("idVenda = '" + idVenda + "'");
 }
 
-void WidgetCompraOC::on_pushButtonDanfe_clicked() {
-  const auto list = ui->tableNFe->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
-
-  if (ACBr acbr; not acbr.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
-}
-
-void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
+void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   const int row = list.first().row();
 
-  const QString status = modelProduto.data(row, "statusVP").toString();
+  const QString status = modelProduto.data(row, "status").toString();
 
   if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
 
@@ -146,24 +111,22 @@ void WidgetCompraOC::on_pushButtonDesfazerConsumo_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool WidgetCompraOC::desfazerConsumo(const int row) {
-  const int idVendaProduto = modelProduto.data(row, "idVendaProdutoPF").toInt();
+bool WidgetCompraConsumos::desfazerConsumo(const int row) {
+  const int idVendaProduto = modelProduto.data(row, "idVendaProduto").toInt();
 
   // REFAC: pass this responsability to Estoque class?
 
   // NOTE: estoque_has_consumo may have the same idVendaProduto in more than one row
   QSqlQuery queryDelete;
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-  // TODO: change this to idPedido?
   queryDelete.bindValue(":idVendaProduto", idVendaProduto);
 
   if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
-
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idPedido = :idPedido AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  queryCompra.bindValue(":idPedido", modelProduto.data(row, "idPedido"));
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET idVenda = NULL, idVendaProduto = NULL WHERE idVendaProduto = :idVendaProduto AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  queryCompra.bindValue(":idVendaProduto", idVendaProduto);
 
   if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), this); }
 
@@ -179,12 +142,10 @@ bool WidgetCompraOC::desfazerConsumo(const int row) {
   return true;
 }
 
-void WidgetCompraOC::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
+void WidgetCompraConsumos::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
-void WidgetCompraOC::montaFiltro() {
+void WidgetCompraConsumos::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
 
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
 }
-
-// TODO: alterar filtros, muito ruim de achar coisas nessa tela

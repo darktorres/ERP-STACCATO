@@ -185,14 +185,15 @@ SOURCES += \
     src/vendaproxymodel.cpp \
     src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
+    src/widgetcompraconsumos.cpp \
     src/widgetcompradevolucao.cpp \
     src/widgetcomprafaturar.cpp \
     src/widgetcompragerar.cpp \
-    src/widgetcompraoc.cpp \
     src/widgetcomprapendentes.cpp \
     src/widgetcompraresumo.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
+    src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
     src/widgetgraficos.cpp \
@@ -297,14 +298,15 @@ HEADERS  += \
     src/vendaproxymodel.h \
     src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
+    src/widgetcompraconsumos.h \
     src/widgetcompradevolucao.h \
     src/widgetcomprafaturar.h \
     src/widgetcompragerar.h \
-    src/widgetcompraoc.h \
     src/widgetcomprapendentes.h \
     src/widgetcompraresumo.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
+    src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
     src/widgetgraficos.h \
@@ -377,6 +379,7 @@ FORMS += \
     ui/widgetcompraresumo.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
+    ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetgraficos.ui \

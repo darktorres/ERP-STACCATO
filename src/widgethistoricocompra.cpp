@@ -88,13 +88,12 @@ void WidgetHistoricoCompra::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
 
-  ui->tableProdutos->hideColumn("idPedido");
-  ui->tableProdutos->hideColumn("idRelacionado");
+  ui->tableProdutos->hideColumn("idPedido1");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("aliquotaSt");
   ui->tableProdutos->hideColumn("st");
   ui->tableProdutos->hideColumn("ordemCompra");
-  ui->tableProdutos->hideColumn("idVendaProduto");
+  ui->tableProdutos->hideColumn("idVendaProduto1");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->hideColumn("fornecedor");
   ui->tableProdutos->hideColumn("idProduto");
@@ -143,3 +142,5 @@ void WidgetHistoricoCompra::on_tableNFe_activated(const QModelIndex &index) {
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
 // TODO: 4associar notas com cada produto? e verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota
+
+// TODO: converter tabela inferior para arvore

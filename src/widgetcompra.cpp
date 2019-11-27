@@ -4,8 +4,6 @@
 WidgetCompra::WidgetCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompra) {
   ui->setupUi(this);
 
-  ui->widgetHistorico->setTipo(WidgetHistoricoCompra::Tipo::Compra);
-
   setConnections();
 }
 

@@ -85,7 +85,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="0">
-        <widget class="WidgetCompraOC" name="widgetOC" native="true"/>
+        <widget class="WidgetCompraConsumos" name="widgetOC" native="true"/>
        </item>
       </layout>
      </widget>
@@ -135,12 +135,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetCompraOC</class>
-   <extends>QWidget</extends>
-   <header>src/widgetcompraoc.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>WidgetCompraResumo</class>
    <extends>QWidget</extends>
    <header>src/widgetcompraresumo.h</header>
@@ -150,6 +144,12 @@
    <class>WidgetHistoricoCompra</class>
    <extends>QWidget</extends>
    <header>src/widgethistoricocompra.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetCompraConsumos</class>
+   <extends>QWidget</extends>
+   <header>src/widgetcompraconsumos.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

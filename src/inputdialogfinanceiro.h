@@ -14,7 +14,7 @@ class InputDialogFinanceiro final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { ConfirmarCompra, Financeiro, Historico };
+  enum class Tipo { ConfirmarCompra, Financeiro };
 
   explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogFinanceiro();

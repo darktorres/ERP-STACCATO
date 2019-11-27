@@ -65,7 +65,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_9">
        <item row="0" column="0">
-        <widget class="WidgetHistoricoCompra" name="widgetCompra" native="true"/>
+        <widget class="WidgetFinanceiroCompra" name="widgetCompra" native="true"/>
        </item>
       </layout>
      </widget>
@@ -74,12 +74,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>WidgetHistoricoCompra</class>
-   <extends>QWidget</extends>
-   <header>src/widgethistoricocompra.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>WidgetVenda</class>
    <extends>QWidget</extends>
@@ -96,6 +90,12 @@
    <class>WidgetFinanceiroContas</class>
    <extends>QWidget</extends>
    <header>src/widgetfinanceirocontas.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetFinanceiroCompra</class>
+   <extends>QWidget</extends>
+   <header>src/widgetfinanceirocompra.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

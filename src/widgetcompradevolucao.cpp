@@ -49,6 +49,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("idVenda", "Venda");
   modelVendaProduto.setHeaderData("produto", "Produto");
   modelVendaProduto.setHeaderData("obs", "Obs.");
+  modelVendaProduto.setHeaderData("lote", "Lote");
   modelVendaProduto.setHeaderData("caixas", "Cx.");
   modelVendaProduto.setHeaderData("quant", "Quant.");
   modelVendaProduto.setHeaderData("un", "Un.");
@@ -58,11 +59,11 @@ void WidgetCompraDevolucao::setupTables() {
 
   ui->table->setModel(&modelVendaProduto);
 
-  ui->table->hideColumn("idRelacionado");
-  ui->table->hideColumn("recebeu");
-  ui->table->hideColumn("entregou");
-  ui->table->hideColumn("selecionado");
   ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("idRelacionado");
+  ui->table->hideColumn("selecionado");
+  ui->table->hideColumn("entregou");
+  ui->table->hideColumn("recebeu");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idNFeSaida");
   ui->table->hideColumn("idNFeFutura");
@@ -75,11 +76,11 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("parcialDesc");
   ui->table->hideColumn("descGlobal");
   ui->table->hideColumn("total");
-  ui->table->hideColumn("reposicaoEntrega");
-  ui->table->hideColumn("reposicaoReceb");
+  ui->table->hideColumn("mostrarDesconto");
   ui->table->hideColumn("estoque");
   ui->table->hideColumn("promocao");
-  ui->table->hideColumn("mostrarDesconto");
+  ui->table->hideColumn("reposicaoEntrega");
+  ui->table->hideColumn("reposicaoReceb");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
   ui->table->hideColumn("dataPrevConf");

@@ -55,9 +55,6 @@ void WidgetCompraConsumos::setupTables() {
   ui->tableProduto->setModel(&modelProduto);
 
   ui->tableProduto->setItemDelegateForColumn("quant", new DoubleDelegate(this));
-  ui->tableProduto->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->tableProduto->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->tableProduto->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
 
   ui->tableProduto->hideColumn("idVenda");
   ui->tableProduto->hideColumn("idVendaProduto");

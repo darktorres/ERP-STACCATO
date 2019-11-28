@@ -371,10 +371,10 @@ FORMS += \
     ui/venda.ui \
     ui/widgetcompra.ui \
     ui/widgetcompraconfirmar.ui \
+    ui/widgetcompraconsumos.ui \
     ui/widgetcompradevolucao.ui \
     ui/widgetcomprafaturar.ui \
     ui/widgetcompragerar.ui \
-    ui/widgetcompraoc.ui \
     ui/widgetcomprapendentes.ui \
     ui/widgetcompraresumo.ui \
     ui/widgetestoque.ui \

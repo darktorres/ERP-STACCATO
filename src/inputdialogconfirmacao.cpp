@@ -584,7 +584,7 @@ bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int ca
 
 bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
   // REFAC: pass this responsability to Estoque class
-  // NOTE: verificar WidgetCompraOC::desfazerConsumo
+  // NOTE: verificar WidgetCompraConsumos::desfazerConsumo
 
   QSqlQuery query;
   query.prepare("SELECT COALESCE(e.caixas - SUM(ehc.caixas), 0) AS sobra FROM estoque_has_consumo ehc LEFT JOIN estoque e ON ehc.idEstoque = e.idEstoque WHERE ehc.idEstoque = :idEstoque");

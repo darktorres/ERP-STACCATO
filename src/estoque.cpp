@@ -339,7 +339,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
 
 bool Estoque::desfazerConsumo() {
   // there is one implementation in InputDialogConfirmacao
-  // and another one in WidgetCompraOC
+  // and another one in WidgetCompraConsumos
   // TODO: juntar as lógicas
   // TODO: se houver agendamento de estoque remover
 

@@ -5,7 +5,7 @@
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
-class WidgetCompraOC;
+class WidgetCompraConsumos;
 }
 
 class WidgetCompraConsumos final : public QWidget {
@@ -23,7 +23,7 @@ private:
   bool modelIsSet = false;
   SqlRelationalTableModel modelPedido;
   SqlRelationalTableModel modelProduto;
-  Ui::WidgetCompraOC *ui;
+  Ui::WidgetCompraConsumos *ui;
   // methods
   auto desfazerConsumo(const int row) -> bool;
   auto montaFiltro() -> void;

@@ -7,10 +7,10 @@
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "ui_widgetcompraoc.h"
+#include "ui_widgetcompraconsumos.h"
 #include "widgetcompraconsumos.h"
 
-WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraOC) { ui->setupUi(this); }
+WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) { ui->setupUi(this); }
 
 WidgetCompraConsumos::~WidgetCompraConsumos() { delete ui; }
 

@@ -161,6 +161,8 @@ bool Orcamento::viewRegister() {
 
     const QString status = data("status").toString();
 
+    if (status == "FECHADO" or status == "PERDIDO") { ui->pushButtonApagarOrc->hide(); }
+
     if (status == "PERDIDO" or status == "CANCELADO") {
       ui->labelBaixa->show();
       ui->plainTextEditBaixa->show();
@@ -189,6 +191,7 @@ bool Orcamento::viewRegister() {
       ui->itemBoxVendedor->setReadOnlyItemBox(true);
 
       ui->spinBoxPrazoEntrega->setReadOnly(true);
+      ui->dataEmissao->setReadOnly(true);
 
       ui->doubleSpinBoxDesconto->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
@@ -972,7 +975,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
       if (queryEquivalente.first()) {
         if (not modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"))) {}
       } else {
-        produtos << QString::number(row) + " - " + modelItem.data(row, "produto").toString();
+        produtos << QString::number(row + 1) + " - " + modelItem.data(row, "produto").toString();
         skipRows << row;
       }
     }

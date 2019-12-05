@@ -106,7 +106,7 @@ void ItemBox::setIcons() {
     searchButton->hide();
   }
 
-  if (registerDialog) {
+  if (registerDialog and not readOnlyItemBox) {
     x -= size.width();
     plusButton->setGeometry(QRect(QPoint(x, y), size));
     plusButton->show();

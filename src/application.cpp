@@ -139,9 +139,9 @@ bool Application::runSqlJobs() {
   if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { return qApp->enqueueError(false, "Erro verificando lastInvalidated: " + query.lastError().text()); }
 
   if (query.value("lastInvalidated").toDate() < qApp->serverDateTime().date()) {
-    if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text()); }
+    if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
 
-    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { return qApp->enqueueError(false, "Erro executando update_orcamento_status: " + query.lastError().text()); }
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
 
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
     query.bindValue(":lastInvalidated", qApp->serverDateTime().toString("yyyy-MM-dd"));

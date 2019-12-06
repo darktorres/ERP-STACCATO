@@ -949,7 +949,9 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     // PARTILHA ICMS
 
-    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+    const QString inscEst = queryCliente.value("inscEstadual").toString();
+
+    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and inscEst == "ISENTO") {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
       stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl; // TODO: should be valorProduto + frete + ipi + outros - desconto
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
@@ -978,7 +980,10 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
   stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
 
   // PARTILHA ICMS
-  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+
+  const QString inscEst = queryCliente.value("inscEstadual").toString();
+
+  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and inscEst == "ISENTO") {
     double totalIcmsDest = 0;
 
     const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;

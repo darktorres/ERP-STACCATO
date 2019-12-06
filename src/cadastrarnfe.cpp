@@ -949,7 +949,9 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     // PARTILHA ICMS
 
-    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+    const QString inscEst = queryCliente.value("inscEstadual").toString();
+
+    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and inscEst == "ISENTO") {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
       stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl; // TODO: should be valorProduto + frete + ipi + outros - desconto
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;

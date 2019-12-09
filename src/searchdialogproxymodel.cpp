@@ -54,6 +54,10 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
       }
     }
 
+    if (role == Qt::BackgroundRole) {
+      if (not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid()) { return QBrush(Qt::gray); }
+    }
+
     if (role == Qt::ForegroundRole) {
       const auto tema = UserSession::getSetting("User/tema");
 

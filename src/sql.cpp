@@ -8,19 +8,12 @@
 bool Sql::updateVendaStatus(const QStringList &idVendas) { return updateVendaStatus(idVendas.join(", ")); }
 
 bool Sql::updateVendaStatus(const QString &idVendas) {
-  QStringList list = idVendas.split(", ");
+  QStringList list = idVendas.split(", ", QString::SkipEmptyParts);
+  list.removeDuplicates();
 
-  for (auto idVenda : list) {
-    if (not runQuerys(idVenda)) { return false; }
+  for (auto const &idVenda : list) {
+    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueError(false, "Erro atualizando status: " + query.lastError().text()); }
   }
-
-  return true;
-}
-
-bool Sql::runQuerys(const QString &idVenda) {
-  if (idVenda.isEmpty()) { return true; }
-
-  if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueError(false, "Erro atualizando status: " + query.lastError().text()); }
 
   return true;
 }

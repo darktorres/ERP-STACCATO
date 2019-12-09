@@ -378,12 +378,12 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto)
 
   //------------------------------------
 
-  modelConsumos.setFilter("idVendaProduto = " + modelProdutos.data(currentRow, "idVendaProduto").toString());
+  modelConsumos.setFilter("idVendaProduto2 = " + modelProdutos.data(currentRow, "idVendaProduto2").toString());
 
   if (not modelConsumos.select()) { return qApp->enqueueError(false, "Erro lendo consumos: " + modelConsumos.lastError().text(), this); }
 
   if (modelConsumos.rowCount() > 0) {
-    if (not modelConsumos.setData(0, "idVendaProduto", idDevolucao)) { return false; }
+    if (not modelConsumos.setData(0, "idVendaProduto2", idDevolucao)) { return false; }
     if (not modelConsumos.setData(0, "status", "PENDENTE DEV.")) { return false; }
     if (not modelConsumos.setData(0, "quant", quantDevolvida.toDouble() * -1)) { return false; }
     if (not modelConsumos.setData(0, "quantUpd", 5)) { return false; }
@@ -441,7 +441,7 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto)
         if (not modelConsumos.setData(newRowConsumo, column, value)) { return false; }
       }
 
-      if (not modelConsumos.setData(newRowConsumo, "idVendaProduto", novoIdVendaProduto)) { return false; }
+      if (not modelConsumos.setData(newRowConsumo, "idVendaProduto2", novoIdVendaProduto)) { return false; }
       if (not modelConsumos.setData(newRowConsumo, "status", "CONSUMO")) { return false; }
       if (not modelConsumos.setData(newRowConsumo, "quant", restante.toDouble() * -1)) { return false; }
       if (not modelConsumos.setData(newRowConsumo, "quantUpd", 4)) { return false; }

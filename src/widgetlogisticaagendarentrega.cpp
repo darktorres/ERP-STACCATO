@@ -725,9 +725,11 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   if (idVenda.isEmpty()) { return qApp->enqueueError("Erro buscando 'Venda'!", this); }
 
-  QList<int> lista;
+  QStringList lista;
 
-  for (const auto &index : list) { lista << modelProdutos.data(index.row(), "idVendaProduto2").toInt(); }
+  for (const auto &index : list) { lista << modelProdutos.data(index.row(), "idVendaProduto2").toString(); }
+
+  lista.removeDuplicates();
 
   auto *nfe = new CadastrarNFe(idVenda, lista, CadastrarNFe::Tipo::Futura, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);

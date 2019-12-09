@@ -98,7 +98,7 @@ void WidgetEstoque::updateTables() {
 void WidgetEstoque::resetTables() { modelIsSet = false; }
 
 void WidgetEstoque::on_table_activated(const QModelIndex &index) {
-  const QString idEstoque = ui->table->dataAt(index, "idEstoque").toString();
+  const QString idEstoque = model.data(index, "idEstoque").toString();
 
   auto *estoque = new Estoque(idEstoque, true, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);

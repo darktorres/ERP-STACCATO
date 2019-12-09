@@ -11,7 +11,7 @@
 #include "ui_cadastrarnfe.h"
 #include "usersession.h"
 
-CadastrarNFe::CadastrarNFe(const QString &idVenda, const QList<int> &items, const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
+CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -97,7 +97,6 @@ void CadastrarNFe::setupTables() {
 
   modelViewProdutoEstoque.setHeaderData("fornecedor", "Fornecedor");
   modelViewProdutoEstoque.setHeaderData("produto", "Produto");
-  modelViewProdutoEstoque.setHeaderData("obs", "Obs.");
   modelViewProdutoEstoque.setHeaderData("caixas", "Caixas");
   modelViewProdutoEstoque.setHeaderData("descUnitario", "R$ Unit.");
   modelViewProdutoEstoque.setHeaderData("quant", "Quant.");
@@ -479,19 +478,17 @@ bool CadastrarNFe::preencherNumeroNFe() {
   return true;
 }
 
-void CadastrarNFe::prepararNFe(const QList<int> &items) {
+void CadastrarNFe::prepararNFe(const QStringList &items) {
   QString filter;
 
   for (const auto &item : items) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT NULL FROM estoque_has_consumo WHERE `idVendaProduto2` = " + QString::number(item)) or not query.first()) {
-      return qApp->enqueueError("Erro buscando idVendaProduto2 " + QString::number(item), this);
-    }
+    if (not query.exec("SELECT NULL FROM estoque_has_consumo WHERE `idVendaProduto2` = " + item) or not query.first()) { return qApp->enqueueError("Erro buscando idVendaProduto2 " + item, this); }
 
     //--------------------------------------
 
-    filter += QString(filter.isEmpty() ? "" : " OR ") + "`idVendaProduto2` = " + QString::number(item);
+    filter += QString(filter.isEmpty() ? "" : " OR ") + "`idVendaProduto2` = " + item;
   }
 
   modelViewProdutoEstoque.setFilter(filter);

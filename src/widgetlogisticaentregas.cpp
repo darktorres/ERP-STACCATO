@@ -190,9 +190,11 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
-  QList<int> lista;
+  QStringList lista;
 
-  for (int row = 0; row < modelProdutos.rowCount(); ++row) { lista.append(modelProdutos.data(row, "idVendaProduto2").toInt()); }
+  for (int row = 0; row < modelProdutos.rowCount(); ++row) { lista << modelProdutos.data(row, "idVendaProduto2").toString(); }
+
+  lista.removeDuplicates();
 
   const CadastrarNFe::Tipo tipo = modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0 ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
 

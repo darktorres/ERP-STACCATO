@@ -355,12 +355,14 @@ bool ImportarXML::salvarDadosVenda() {
 
   if (not modelVenda.submitAll()) { return false; }
 
-  for (int row = 0; row < modelVenda.rowCount(); ++row) {
-    QSqlQuery query;
+  QStringList idVendas;
 
-    if (not query.exec("CALL update_venda_produto_status(" + modelVenda.data(row, "idVendaProdutoFK").toString() + ")")) {
-      return qApp->enqueueError(false, "Erro atualizando status venda: " + query.lastError().text(), this);
-    }
+  for (int row = 0; row < modelVenda.rowCount(); ++row) { idVendas << modelVenda.data(row, "idVenda").toString(); }
+
+  idVendas.removeDuplicates();
+
+  for (const auto &idVenda : idVendas) {
+    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueError(false, "Erro atualizando status: " + query.lastError().text()); }
   }
 
   return true;

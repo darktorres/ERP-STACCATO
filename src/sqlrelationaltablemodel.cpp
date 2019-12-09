@@ -9,6 +9,8 @@ SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *paren
 
 QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column)); }
 
+QVariant SqlRelationalTableModel::data(const QModelIndex &index, const QString &column) const { return data(index.row(), column); }
+
 QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
   const int columnIndex = fieldIndex(column);
 
@@ -26,6 +28,8 @@ bool SqlRelationalTableModel::setData(const int row, const int column, const QVa
 
   return true;
 }
+
+bool SqlRelationalTableModel::setData(const QModelIndex &index, const QString &column, const QVariant &value) { return setData(index.row(), column, value); }
 
 bool SqlRelationalTableModel::setData(const int row, const QString &column, const QVariant &value) {
   if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }

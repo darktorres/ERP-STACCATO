@@ -16,17 +16,11 @@ public:
   explicit TableView(QWidget *parent = nullptr);
   ~TableView() final = default;
   auto columnCount() const -> int;
-  auto dataAt(const QModelIndex &index, const QString &column) const -> QVariant;
-  auto dataAt(const int row, const QString &column) const -> QVariant;
-  auto dataAt(const int row, const int column) const -> QVariant;
   auto columnIndex(const QString &column, const bool silent = false) const -> int;
   auto hideColumn(const QString &column) -> void;
   auto openPersistentEditor(const int row, const int column) -> void;
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;
-  auto setDataAt(const QModelIndex &index, const QString &column, const QVariant &value) -> bool;
-  auto setDataAt(const int row, const QString &column, const QVariant &value) -> bool;
-  auto setDataAt(const int row, const int column, const QVariant &value) -> bool;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QIdentityProxyModel *model) -> void;
   auto setModel(QSortFilterProxyModel *model) -> void;

@@ -83,7 +83,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   model.setFilter(searchFilter);
 }
 
-void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(ui->table->dataAt(index, primaryKey)); }
+void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(model.data(index, primaryKey)); }
 
 bool SearchDialog::prepare_show() {
   model.setFilter(filter);
@@ -138,7 +138,7 @@ void SearchDialog::on_pushButtonSelecionar_clicked() {
   }
 
   if (model.tableName() == "view_produto") {
-    const bool isEstoque = ui->table->dataAt(selection.first(), "estoque").toBool();
+    const bool isEstoque = model.data(selection.first(), "estoque").toBool();
 
     if (not silent and isEstoque) { qApp->enqueueWarning("Verificar com o Dept. de Compras a disponibilidade do estoque antes de vender!", this); }
   }

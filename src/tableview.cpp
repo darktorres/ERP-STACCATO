@@ -64,18 +64,6 @@ void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTabl
 
 int TableView::rowCount() const { return model()->rowCount(); }
 
-QVariant TableView::dataAt(const QModelIndex &index, const QString &column) const { return index.siblingAtColumn(columnIndex(column)).data(); }
-
-QVariant TableView::dataAt(const int row, const QString &column) const { return model()->data(model()->index(row, columnIndex(column))); }
-
-QVariant TableView::dataAt(const int row, const int column) const { return model()->data(model()->index(row, column)); }
-
-bool TableView::setDataAt(const QModelIndex &index, const QString &column, const QVariant &value) { return model()->setData(model()->index(index.row(), columnIndex(column)), value); }
-
-bool TableView::setDataAt(const int row, const QString &column, const QVariant &value) { return model()->setData(model()->index(row, columnIndex(column)), value); }
-
-bool TableView::setDataAt(const int row, const int column, const QVariant &value) { return model()->setData(model()->index(row, column), value); }
-
 void TableView::redoView() {
   if (not persistentColumns.isEmpty()) {
     for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {

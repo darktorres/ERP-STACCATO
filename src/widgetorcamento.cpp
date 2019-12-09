@@ -145,7 +145,7 @@ void WidgetOrcamento::resetTables() { modelIsSet = false; }
 void WidgetOrcamento::on_table_activated(const QModelIndex &index) {
   auto *orcamento = new Orcamento(this);
   orcamento->setAttribute(Qt::WA_DeleteOnClose);
-  orcamento->viewRegisterById(ui->table->dataAt(index, "Código"));
+  orcamento->viewRegisterById(modelViewOrcamento.data(index, "Código"));
 
   orcamento->show();
 }
@@ -224,7 +224,7 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  const QString codigo = ui->table->dataAt(list.first(), "Código").toString();
+  const QString codigo = modelViewOrcamento.data(list.first(), "Código").toString();
 
   FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

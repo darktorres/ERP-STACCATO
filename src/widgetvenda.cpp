@@ -253,7 +253,7 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   auto *vendas = new Venda(this);
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) { vendas->setFinanceiro(); }
-  vendas->viewRegisterById(ui->table->dataAt(index, "Código"));
+  vendas->viewRegisterById(modelViewVenda.data(index, "Código"));
 }
 
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
@@ -304,7 +304,7 @@ void WidgetVenda::on_pushButtonFollowup_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  const QString codigo = ui->table->dataAt(list.first(), "Código").toString();
+  const QString codigo = modelViewVenda.data(list.first(), "Código").toString();
 
   FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Venda, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);

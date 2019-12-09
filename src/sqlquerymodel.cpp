@@ -8,6 +8,8 @@ SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 
 QVariant SqlQueryModel::data(const QModelIndex &index, int role) const { return QSqlQueryModel::data(index, role); }
 
+QVariant SqlQueryModel::data(const QModelIndex &index, const QString &column) const { return data(index.row(), column); }
+
 QVariant SqlQueryModel::data(const int row, const QString &column) const {
   const int index = QSqlQueryModel::record().indexOf(column);
 

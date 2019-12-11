@@ -86,6 +86,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   ui->tableTranspAtual->setModel(&modelTranspAtual);
 
+  ui->tableTranspAtual->hideColumn("idVendaProduto1");
   ui->tableTranspAtual->hideColumn("idVendaProduto2");
   ui->tableTranspAtual->hideColumn("id");
   ui->tableTranspAtual->hideColumn("idEstoque");
@@ -118,6 +119,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   ui->tableTranspAgend->setModel(&modelTranspAgend);
 
+  ui->tableTranspAgend->hideColumn("idVendaProduto1");
   ui->tableTranspAgend->hideColumn("idVendaProduto2");
   ui->tableTranspAgend->hideColumn("id");
   ui->tableTranspAgend->hideColumn("idEvento");

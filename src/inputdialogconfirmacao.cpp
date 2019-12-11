@@ -187,7 +187,8 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("idEvento");
     ui->tableLogistica->hideColumn("idVeiculo");
     ui->tableLogistica->hideColumn("idEstoque");
-    ui->tableLogistica->hideColumn("idVendaProduto");
+    ui->tableLogistica->hideColumn("idVendaProduto1");
+    ui->tableLogistica->hideColumn("idVendaProduto2");
     ui->tableLogistica->hideColumn("idCompra");
     ui->tableLogistica->hideColumn("idNFeSaida");
     ui->tableLogistica->hideColumn("idLoja");

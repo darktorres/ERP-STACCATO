@@ -171,7 +171,9 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
+  ui->tableConsumo->hideColumn("idVendaProduto1");
   ui->tableConsumo->hideColumn("idVendaProduto2");
+  ui->tableConsumo->hideColumn("idPedido1");
   ui->tableConsumo->hideColumn("idPedido2");
   ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("quantUpd");

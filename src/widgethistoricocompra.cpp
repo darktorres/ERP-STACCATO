@@ -88,6 +88,7 @@ void WidgetHistoricoCompra::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
 
+  ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("idPedido1");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("aliquotaSt");

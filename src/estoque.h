@@ -35,7 +35,7 @@ private:
   };
 
   // methods
-  auto calcularRestante() -> void;
+  auto buscarRestante() -> void;
   auto desfazerConsumo() -> bool;
   auto dividirCompra(const int idVendaProduto2, const double quant) -> std::optional<int>;
   auto exibirNota() -> void;

@@ -90,6 +90,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAtual->hideColumn("id");
   ui->tableTranspAtual->hideColumn("idEvento");
   ui->tableTranspAtual->hideColumn("idVeiculo");
+  ui->tableTranspAtual->hideColumn("idVendaProduto1");
   ui->tableTranspAtual->hideColumn("idVendaProduto2");
   ui->tableTranspAtual->hideColumn("idCompra");
   ui->tableTranspAtual->hideColumn("idNFeSaida");
@@ -121,6 +122,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAgend->hideColumn("id");
   ui->tableTranspAgend->hideColumn("idEvento");
   ui->tableTranspAgend->hideColumn("idVeiculo");
+  ui->tableTranspAgend->hideColumn("idVendaProduto1");
   ui->tableTranspAgend->hideColumn("idVendaProduto2");
   ui->tableTranspAgend->hideColumn("idCompra");
   ui->tableTranspAgend->hideColumn("idNFeSaida");

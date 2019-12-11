@@ -125,7 +125,7 @@ void Estoque::setupTables() {
   ui->tableConsumo->hideColumn("quantUpd");
 }
 
-void Estoque::calcularRestante() {
+void Estoque::buscarRestante() {
   const double quantRestante = modelEstoque.data(0, "restante").toDouble();
   const QString un = modelEstoque.data(0, "un").toString();
 
@@ -148,7 +148,7 @@ bool Estoque::viewRegisterById(const bool showWindow) {
 
   //--------------------------------------
 
-  calcularRestante();
+  buscarRestante();
 
   if (showWindow) { show(); }
 

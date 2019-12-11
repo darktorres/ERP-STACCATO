@@ -49,6 +49,7 @@ void WidgetRh::setupTables() {
   ui->table->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
 
+  ui->table->hideColumn("idVendaProduto1");
   ui->table->hideColumn("idComissao");
   ui->table->hideColumn("Mês");
   ui->table->hideColumn("idUsuario");

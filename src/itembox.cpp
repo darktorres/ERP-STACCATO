@@ -114,9 +114,8 @@ void ItemBox::setIcons() {
     plusButton->hide();
   }
 
-  int left, top, bottom;
-  getTextMargins(&left, &top, nullptr, &bottom);
-  setTextMargins(left, top, rect().right() - x, bottom);
+  const auto margins = textMargins();
+  setTextMargins(margins.left(), margins.top(), rect().right() - x, margins.bottom());
 }
 
 void ItemBox::setRepresentacao(const bool isRepresentacao) { searchDialog->setRepresentacao(isRepresentacao); }

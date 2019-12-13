@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QDesktopServices>
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QSqlError>
 
@@ -181,7 +182,7 @@ void WidgetRelatorio::updateTables() {
 
     calcularTotalVendedor();
   } else {
-    QTime time;
+    QElapsedTimer time;
     time.start();
     setFilterRelatorio();
     qDebug() << "1: " << time.restart();

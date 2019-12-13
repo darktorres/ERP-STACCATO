@@ -190,17 +190,19 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   resposta.clear();
   progressDialog->show();
 
-  if (socket.state() != QTcpSocket::ConnectedState) {
-    conectado = false;
-    pronto = false;
+  const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
 
-    const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
+  if (lastHost != servidor.value().toString()) { socket.disconnectFromHost(); }
+
+  if (not conectado) {
     const auto porta = UserSession::getSetting("User/portaACBr");
 
     if (not servidor or not porta) {
       qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
       return {};
     }
+
+    lastHost = servidor.value().toString();
 
     socket.connectToHost(servidor.value().toString(), porta.value().toByteArray().toUShort());
   }

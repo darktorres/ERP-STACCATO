@@ -77,6 +77,7 @@ private:
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaCadastroCliente() -> bool;
+  auto verificaDisponibilidadeEstoque() -> bool;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

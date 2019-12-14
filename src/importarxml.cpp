@@ -847,10 +847,10 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 }
 
 std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {
-  // NOTE: *quebralinha venda_has_produto
-  const auto novoIdVenda = reservarIdVenda();
+  // NOTE: *quebralinha venda_has_produto2
+  const auto novoIdVendaProduto2 = reservarIdVendaProduto2();
 
-  if (not novoIdVenda) { return {}; }
+  if (not novoIdVendaProduto2) { return {}; }
 
   const int newRowVenda = modelVenda.insertRowAtEnd();
 
@@ -884,7 +884,7 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
   const double parcialDescNovo = modelVenda.data(newRowVenda, "parcialDesc").toDouble() * proporcaoNovo;
   const double totalNovo = modelVenda.data(newRowVenda, "total").toDouble() * proporcaoNovo;
 
-  if (not modelVenda.setData(newRowVenda, "idVendaProduto2", novoIdVenda.value())) { return {}; }
+  if (not modelVenda.setData(newRowVenda, "idVendaProduto2", novoIdVendaProduto2.value())) { return {}; }
   if (not modelVenda.setData(newRowVenda, "idRelacionado", modelVenda.data(rowVenda, "idVendaProduto2"))) { return {}; }
   if (not modelVenda.setData(newRowVenda, "quant", quantNovo)) { return {}; }
   if (not modelVenda.setData(newRowVenda, "caixas", quantNovo / unCaixa)) { return {}; }
@@ -894,14 +894,14 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
 
   // -------------------------------------
 
-  return novoIdVenda.value();
+  return novoIdVendaProduto2.value();
 }
 
 bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar) {
-  // NOTE: *quebralinha pedido_fornecedor
-  const auto novoIdCompra = reservarIdCompra();
+  // NOTE: *quebralinha pedido_fornecedor2
+  const auto novoIdPedido2 = reservarIdPedido2();
 
-  if (not novoIdCompra) { return false; }
+  if (not novoIdPedido2) { return false; }
 
   const int newRow = modelCompra.insertRowAtEnd();
 
@@ -926,7 +926,7 @@ bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
   if (not modelCompra.setData(rowCompra, "caixas", caixas * proporcaoAntigo)) { return false; }
   if (not modelCompra.setData(rowCompra, "preco", prcUnitario * quantAdicionar)) { return false; }
 
-  if (not modelCompra.setData(newRow, "idPedido2", novoIdCompra.value())) { return false; }
+  if (not modelCompra.setData(newRow, "idPedido2", novoIdPedido2.value())) { return false; }
   if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(rowCompra, "idPedido2"))) { return false; }
   if (not modelCompra.setData(newRow, "quant", quantNovo)) { return false; }
   if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) { return false; }
@@ -1037,7 +1037,7 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
   }
 }
 
-std::optional<int> ImportarXML::reservarIdVenda() {
+std::optional<int> ImportarXML::reservarIdVendaProduto2() {
   if (qApp->getInTransaction()) {
     qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
     return {};
@@ -1060,7 +1060,7 @@ std::optional<int> ImportarXML::reservarIdVenda() {
   return id;
 }
 
-std::optional<int> ImportarXML::reservarIdCompra() {
+std::optional<int> ImportarXML::reservarIdPedido2() {
   if (qApp->getInTransaction()) {
     qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
     return {};

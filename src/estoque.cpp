@@ -296,7 +296,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
   const bool dividir = quant < quantCompra;
 
   if (dividir) {
-    // NOTE: *quebralinha pedido_fornecedor
+    // NOTE: *quebralinha pedido_fornecedor2
     const int newRow = modelCompra.insertRowAtEnd();
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {

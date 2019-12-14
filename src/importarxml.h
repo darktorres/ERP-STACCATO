@@ -70,9 +70,9 @@ private:
   auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
   auto perguntarLocal() -> std::optional<QString>;
   auto reparear(const QModelIndex &index) -> void;
-  auto reservarIdCompra() -> std::optional<int>;
+  auto reservarIdPedido2() -> std::optional<int>;
   auto reservarIdEstoque() -> std::optional<int>;
-  auto reservarIdVenda() -> std::optional<int>;
+  auto reservarIdVendaProduto2() -> std::optional<int>;
   auto salvarDadosVenda() -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

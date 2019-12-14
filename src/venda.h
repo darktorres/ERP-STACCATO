@@ -39,6 +39,7 @@ private:
   auto cancelamento() -> bool;
   auto clearFields() -> void final;
   auto copiaProdutosOrcamento() -> bool;
+  auto criarConsumos() -> bool;
   auto financeiroSalvar() -> bool;
   auto generateId() -> bool;
   auto montarFluxoCaixa() -> void;
@@ -73,5 +74,4 @@ private:
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
-  auto criarConsumos() -> void;
 };

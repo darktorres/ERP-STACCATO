@@ -426,7 +426,7 @@ bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, con
   if (not modelVendaProduto.setData(0, "total", quantRestante * descUnitario * (1 - descGlobal))) { return false; }
 
   const int rowQuebrado2 = modelVendaProduto.insertRowAtEnd();
-  // NOTE: *quebralinha venda_produto
+  // NOTE: *quebralinha venda_produto2
 
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
     if (modelVendaProduto.fieldIndex("idVendaProduto2") == col) { continue; }
@@ -502,11 +502,11 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 
 bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
   const int newRow = modelVendaProduto.insertRowAtEnd();
-  // NOTE: *quebralinha venda_produto
+  // NOTE: *quebralinha venda_produto2
 
   // copiar linha com quantidade quebrada
   for (int col = 0; col < modelVendaProduto.columnCount(); ++col) {
-    if (modelVendaProduto.fieldIndex("idVendaProduto") == col) { continue; }
+    if (modelVendaProduto.fieldIndex("idVendaProduto2") == col) { continue; }
     if (modelVendaProduto.fieldIndex("entregou") == col) { continue; }
     if (modelVendaProduto.fieldIndex("idCompra") == col) { continue; }
     if (modelVendaProduto.fieldIndex("idNFeSaida") == col) { continue; }
@@ -529,7 +529,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
     if (not modelVendaProduto.setData(newRow, col, value)) { return false; }
   }
 
-  if (not modelVendaProduto.setData(newRow, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto"))) { return false; }
+  if (not modelVendaProduto.setData(newRow, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"))) { return false; }
   if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * unCaixa)) { return false; }
   if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) { return false; }
   if (not modelVendaProduto.setData(newRow, "prcUnitario", 0)) { return false; }

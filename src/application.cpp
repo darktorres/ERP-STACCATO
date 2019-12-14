@@ -201,7 +201,10 @@ void Application::lightTheme() {
 }
 
 bool Application::startTransaction(const bool delayMessages) {
-  if (inTransaction) { return qApp->enqueueError(false, "Transação já em execução!"); }
+  if (inTransaction) {
+    // TODO: this message wont show due to inTransaction flag (look for other places that need to use a messagebox directly)
+    return qApp->enqueueError(false, "Transação já em execução!");
+  }
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return qApp->enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
 

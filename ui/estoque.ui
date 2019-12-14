@@ -135,6 +135,9 @@ color: rgb(0, 0, 0);</string>
        <property name="readOnly">
         <bool>true</bool>
        </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
        <property name="decimals">
         <number>3</number>
        </property>

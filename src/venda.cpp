@@ -1009,22 +1009,20 @@ bool Venda::cadastrar() {
   return success;
 }
 
-void Venda::criarConsumos() {
-  QSqlQuery query2;
-  query2.prepare(
-      "SELECT p.idEstoque, vp2.idVendaProduto2, pf2.idPedido2, vp2.quant FROM venda_has_produto2 vp2 LEFT JOIN produto p ON vp2.idProduto = p.idProduto LEFT JOIN estoque e ON p.idEstoque = "
-      "e.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc.idPedido2 WHERE vp2.idVenda = :idVenda AND "
-      "vp2.estoque > 0");
-  query2.bindValue(":idVenda", ui->lineEditVenda->text());
+bool Venda::criarConsumos() {
+  QSqlQuery query;
+  query.prepare("SELECT p.idEstoque, vp2.idVendaProduto2, vp2.quant FROM venda_has_produto2 vp2 LEFT JOIN produto p ON vp2.idProduto = p.idProduto WHERE vp2.idVenda = :idVenda AND vp2.estoque > 0");
+  query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query2.exec()) { return qApp->enqueueError("Erro buscando produtos estoque: " + query2.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query.lastError().text(), this); }
 
-  while (query2.next()) {
-    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
+  while (query.next()) {
+    auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
 
-    //    if (not estoque->criarConsumo(query2.value("idVendaProduto2").toInt(), query2.value("idPedido2").toInt(), query2.value("quant").toDouble())) { return; }
-    if (not estoque->criarConsumo(query2.value("idVendaProduto2").toInt(), query2.value("quant").toDouble())) { return; }
+    if (not estoque->criarConsumo(query.value("idVendaProduto2").toInt(), query.value("quant").toDouble())) { return false; }
   }
+
+  return true;
 }
 
 bool Venda::cancelamento() {

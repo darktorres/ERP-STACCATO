@@ -797,6 +797,8 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 
   if (not verificaCadastroCliente()) { return; }
 
+  if (not verificaDisponibilidadeEstoque()) { return; }
+
   auto *venda = new Venda(parentWidget());
   venda->prepararVenda(ui->lineEditOrcamento->text());
 
@@ -1334,6 +1336,24 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 }
 
 void Orcamento::on_dataEmissao_dateChanged(const QDate &date) { ui->spinBoxValidade->setMaximum(date.daysInMonth() - date.day()); }
+
+bool Orcamento::verificaDisponibilidadeEstoque() {
+  QSqlQuery query;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.data(row, "estoque").toInt() != 1) { continue; }
+
+    const QString idProduto = modelItem.data(row, "idProduto").toString();
+
+    if (not query.exec("SELECT descontinuado FROM produto WHERE idProduto = " + idProduto) or not query.first()) {
+      return qApp->enqueueError(false, "Erro verificando a disponibilidade do estoque: " + query.lastError().text(), this);
+    }
+
+    if (query.value("descontinuado").toBool()) { return qApp->enqueueError(false, "Item " + QString::number(row + 1) + " não está mais disponível!", this); }
+  }
+
+  return true;
+}
 
 // NOTE: model.submitAll faz mapper voltar para -1, select tambem (talvez porque submitAll chama select)
 // TODO: 0se produto for estoque permitir vender por peça (setar minimo/multiplo)

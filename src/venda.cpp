@@ -983,6 +983,8 @@ bool Venda::cadastrar() {
 
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
 
+    if (not criarConsumos()) { return false; }
+
     return true;
   }();
 
@@ -996,8 +998,6 @@ bool Venda::cadastrar() {
     modelItem.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE");
-
-    criarConsumos();
   } else {
     qApp->rollbackTransaction();
     void(model.select());

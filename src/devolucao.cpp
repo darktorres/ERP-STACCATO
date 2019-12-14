@@ -374,7 +374,13 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   if (not modelDevolvidos1.submitAll()) { return false; } // this copy into venda_has_produto2
 
   // get modelDevolvidos lastInsertId for modelConsumos
-  const int idDevolucao = modelDevolvidos.query().lastInsertId().toInt();
+  const QString idVendaProduto1_Devolucao = modelDevolvidos1.query().lastInsertId().toString();
+
+  QSqlQuery queryBusca;
+
+  if (not queryBusca.exec("SELECT idVendaProduto2 FROM venda_has_produto2 WHERE idVendaProdutoFK = " + idVendaProduto1_Devolucao) or not queryBusca.first()) {
+    return qApp->enqueueError(false, "Erro buscando idVendaProduto2: " + queryBusca.lastError().text(), this);
+  }
 
   //------------------------------------
 
@@ -383,7 +389,7 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   if (not modelConsumos.select()) { return qApp->enqueueError(false, "Erro lendo consumos: " + modelConsumos.lastError().text(), this); }
 
   if (modelConsumos.rowCount() > 0) {
-    if (not modelConsumos.setData(0, "idVendaProduto2", idDevolucao)) { return false; }
+    if (not modelConsumos.setData(0, "idVendaProduto2", queryBusca.value("idVendaProduto2"))) { return false; }
     if (not modelConsumos.setData(0, "status", "PENDENTE DEV.")) { return false; }
     if (not modelConsumos.setData(0, "quant", quantDevolvida.toDouble() * -1)) { return false; }
     if (not modelConsumos.setData(0, "quantUpd", 5)) { return false; }
@@ -655,14 +661,14 @@ std::optional<int> Devolucao::reservarIdVendaProduto2() {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'mydb' AND table_name = 'venda_has_produto'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
     qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
     return {};
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE venda_has_produto auto_increment = " + QString::number(id + 1))) {
+  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
     qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
     return {};
   }

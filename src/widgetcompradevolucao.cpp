@@ -125,8 +125,8 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
     if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
     QSqlQuery query;
-    query.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto = :idVendaProduto");
-    query.bindValue(":idVendaProduto", modelVendaProduto.data(index.row(), "idVendaProduto"));
+    query.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
+    query.bindValue(":idVendaProduto2", modelVendaProduto.data(index.row(), "idVendaProduto2"));
 
     if (not query.exec()) { return qApp->enqueueError(false, "Erro ajustando consumo: " + query.lastError().text(), this); }
   }

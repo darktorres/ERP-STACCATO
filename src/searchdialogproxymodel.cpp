@@ -15,6 +15,10 @@ SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *par
 
 QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
+    if (role == Qt::BackgroundRole) {
+      if (not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid()) { return QBrush(Qt::gray); }
+    }
+
     if (descontinuadoColumn != -1) {
       const bool descontinuado = proxyIndex.siblingAtColumn(descontinuadoColumn).data().toBool();
 
@@ -52,10 +56,6 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
         if (role == Qt::BackgroundRole) { return QBrush(Qt::red); }
         if (role == Qt::ForegroundRole) { return QBrush(Qt::black); }
       }
-    }
-
-    if (role == Qt::BackgroundRole) {
-      if (not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid()) { return QBrush(Qt::gray); }
     }
 
     if (role == Qt::ForegroundRole) {

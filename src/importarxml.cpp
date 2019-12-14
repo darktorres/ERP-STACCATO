@@ -619,7 +619,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'develop' AND table_name = 'nfe'") or not query.first()) { return false; }
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) { return false; }
 
   const int id = query.value("auto_increment").toInt();
 
@@ -1016,7 +1016,7 @@ std::optional<int> ImportarXML::reservarIdEstoque() {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'develop' AND table_name = 'estoque'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
     qApp->enqueueError("Erro reservar id estoque: " + query.lastError().text(), this);
     return {};
   }
@@ -1045,7 +1045,7 @@ std::optional<int> ImportarXML::reservarIdVendaProduto2() {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'develop' AND table_name = 'venda_has_produto2'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
     qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
     return {};
   }
@@ -1068,7 +1068,7 @@ std::optional<int> ImportarXML::reservarIdPedido2() {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'develop' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
     qApp->enqueueError("Erro reservar id compra: " + query.lastError().text(), this);
     return {};
   }

@@ -83,7 +83,7 @@ private:
   auto preCadastrarNota() -> std::optional<int>;
   auto preencherNumeroNFe() -> bool;
   auto prepararNFe(const QStringList &items) -> void;
-  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbr) -> bool;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> bool;
   auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

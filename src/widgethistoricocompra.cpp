@@ -139,7 +139,7 @@ void WidgetHistoricoCompra::montaFiltro() {
 }
 
 void WidgetHistoricoCompra::on_tableNFe_activated(const QModelIndex &index) {
-  if (ACBr acbr; not acbr.gerarDanfe(modelNFe.data(index.row(), "idNFe").toInt())) { return; }
+  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelNFe.data(index.row(), "idNFe").toInt())) { return; }
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

@@ -166,9 +166,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  const auto resposta = acbr.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
+  const auto resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
   if (not resposta) { return; }
 
@@ -191,8 +191,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
+  ACBr acbrLocal;
   // TODO: usar ACBR.EnviarEmailInutilizacao?
-  acbr.enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath);
+  acbrLocal.enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -270,7 +271,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   // TODO: create folders if they dont exist (it wont work if they dont)
 
-  ACBr acbr;
+  ACBr acbrLocal;
 
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
@@ -301,7 +302,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar xml para acbr gerar pdf
 
-    const auto pdfOrigem = acbr.gerarDanfe(query.value("xml").toByteArray(), false);
+    const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
 
     if (not pdfOrigem) { return; }
 
@@ -345,9 +346,9 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
     const auto [xml, resposta] = tuple.value();
 
     if (not qApp->startTransaction()) { return; }

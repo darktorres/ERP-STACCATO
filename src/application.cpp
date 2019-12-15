@@ -24,7 +24,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 
   storeSelection();
 
-  if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") { darkTheme(); }
+  if (UserSession::getSetting("User/tema").value_or("claro").toString() == "escuro") { darkTheme(); }
 }
 
 void Application::enqueueError(const QString &error, QWidget *parent) {
@@ -82,9 +82,9 @@ bool Application::setDatabase() {
 
   const QString password = file.readAll();
 
-  db.setHostName(hostname.value().toString());
+  db.setHostName(hostname->toString());
   // TODO: to avoid getting blocked by fail2ban always login with same user?
-  db.setUserName(lastuser.value().toString().toLower());
+  db.setUserName(lastuser->toString().toLower());
   db.setPassword(password);
   db.setDatabaseName("staccato");
   db.setPort(3306);
@@ -312,8 +312,8 @@ void Application::updater() {
 
   auto *updater = new QSimpleUpdater(this);
   updater->setApplicationVersion(qApp->applicationVersion());
-  updater->setReferenceUrl("http://" + hostname.value().toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + hostname.value().toString() + "/Instalador.exe");
+  updater->setReferenceUrl("http://" + hostname->toString() + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname->toString() + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();

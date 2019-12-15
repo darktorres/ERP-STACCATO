@@ -53,9 +53,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
   if (const auto hostname = UserSession::getSetting("Login/hostname"); hostname) {
-    const QString hostnameText = qApp->getMapLojas().key(hostname.value().toString());
+    const QString hostnameText = qApp->getMapLojas().key(hostname->toString());
 
-    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
+    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
   } else {
     qApp->enqueueError("A chave 'hostname' não está configurada!", this);
   }
@@ -96,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
-  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").value().toString());
+  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname")->toString());
   pushButtonStatus->setStyleSheet("color: rgb(0, 190, 0);");
 
   ui->statusBar->addWidget(pushButtonStatus);
@@ -123,7 +123,7 @@ void MainWindow::reconnectDb() {
 }
 
 void MainWindow::verifyDb(const bool conectado) {
-  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
+  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname")->toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }

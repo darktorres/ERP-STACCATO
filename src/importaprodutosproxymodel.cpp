@@ -45,11 +45,9 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
     }
 
     if (role == Qt::ForegroundRole) {
-      const auto tema = UserSession::getSetting("User/tema");
+      const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
 
-      if (not tema) { return QBrush(Qt::black); }
-
-      return tema->toString() == "claro" ? QBrush(Qt::black) : QBrush(Qt::white);
+      return (tema == "claro") ? QBrush(Qt::black) : QBrush(Qt::white);
     }
   }
 

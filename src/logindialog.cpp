@@ -24,13 +24,13 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->lineEditUser->setFocus();
 
   if (const auto key = UserSession::getSetting("User/lastuser"); key) {
-    ui->lineEditUser->setText(key.value().toString());
+    ui->lineEditUser->setText(key->toString());
     ui->lineEditPass->setFocus();
   }
 
-  if (const auto key = UserSession::getSetting("Login/hostname"); key) { ui->lineEditHostname->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("Login/hostname"); key) { ui->lineEditHostname->setText(key->toString()); }
 
-  if (const auto key = UserSession::getSetting("Login/loja"); key) { ui->comboBoxLoja->setCurrentText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("Login/loja"); key) { ui->comboBoxLoja->setCurrentText(key->toString()); }
 
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();

@@ -395,7 +395,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   if (not folderKey) { return {}; }
 
-  const QString fileName = folderKey.value().toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
+  const QString fileName = folderKey->toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   QFile file(fileName);
 

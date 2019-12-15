@@ -118,7 +118,7 @@ void Impressao::print() {
     }
   }
 
-  const QString path = folderKey.value().toString();
+  const QString path = folderKey->toString();
 
   QDir dir(path);
 

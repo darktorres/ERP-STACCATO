@@ -263,7 +263,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
   if (not qApp->endTransaction()) { return; }
 }
 
-bool CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbr) {
+bool CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
   // erro de comunicacao/rejeicao
   qDebug() << "resposta: " << resposta;
   if (not resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
@@ -273,7 +273,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
       return qApp->enqueueError(false, "Resposta EnviarNFe: " + resposta, this);
     }
 
-    const auto respostaConsultar = acbr.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
+    const auto respostaConsultar = acbrRemoto.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
     if (not respostaConsultar) { return false; }
 
@@ -287,7 +287,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
   // reread the file now authorized
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
-    auto resposta2 = acbr.enviarComando("NFe.LoadFromFile(" + filePath + ")");
+    auto resposta2 = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
 
     if (not resposta2) { return false; }
 
@@ -332,9 +332,9 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not criarChaveAcesso()) { return; }
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  auto resposta = acbr.enviarComando(gerarNota());
+  auto resposta = acbrRemoto.enviarComando(gerarNota());
 
   if (not resposta) { return; }
 
@@ -360,13 +360,13 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  const auto resposta2 = acbr.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
+  const auto resposta2 = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
 
   if (not resposta2) { return; }
 
   qDebug() << "enviar nfe: " << resposta2.value();
 
-  if (not processarResposta(resposta2.value(), filePath, idNFe.value(), acbr)) { return; }
+  if (not processarResposta(resposta2.value(), filePath, idNFe.value(), acbrRemoto)) { return; }
 
   if (not qApp->startTransaction()) { return; }
 
@@ -1868,9 +1868,9 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  const auto resposta = acbr.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
+  const auto resposta = acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
 
   if (not resposta) { return; }
 
@@ -1909,9 +1909,9 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   if (not query.first()) { return qApp->enqueueError("A loja selecionada não possui certificado cadastrado no sistema!", this); }
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  if (const auto resposta = acbr.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
+  if (const auto resposta = acbrRemoto.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
       not resposta or not resposta->contains("OK")) {
     ui->itemBoxLoja->clear();
     return qApp->enqueueError(resposta.value(), this);

@@ -368,7 +368,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  if (ACBr acbr; not acbr.gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }

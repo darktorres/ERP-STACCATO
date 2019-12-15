@@ -329,7 +329,7 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  if (ACBr acbr; not acbr.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &) { montaFiltro(); }
@@ -407,9 +407,9 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelCarga.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
     const auto [xml, resposta] = *tuple;
 
     if (not qApp->startTransaction()) { return; }

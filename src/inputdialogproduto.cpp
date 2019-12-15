@@ -100,9 +100,9 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setModel(&proxyModel);
 
-  if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idRelacionado"); }
+  ui->table->hideColumn("idRelacionado");
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idVendaProduto1"); }
-  if (tipo == Tipo::Faturamento) { ui->table->hideColumn("idVendaProduto2"); }
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
   ui->table->hideColumn("quantConsumida");

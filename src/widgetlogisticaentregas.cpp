@@ -361,6 +361,7 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
+  updateTables();
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 

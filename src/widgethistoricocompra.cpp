@@ -95,6 +95,7 @@ void WidgetHistoricoCompra::setupTables() {
   ui->tableProdutos->hideColumn("st");
   ui->tableProdutos->hideColumn("ordemCompra");
   ui->tableProdutos->hideColumn("idVendaProduto1");
+  ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("idCompra");
   ui->tableProdutos->hideColumn("fornecedor");
   ui->tableProdutos->hideColumn("idProduto");

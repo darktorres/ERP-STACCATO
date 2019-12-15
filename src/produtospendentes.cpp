@@ -272,11 +272,12 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
 
 bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
   QSqlQuery query;
-  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto1, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, "
-                "codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto1, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, "
-                ":kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
+  query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto1, idVendaProduto2, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, "
+                "kgcx, formComercial, codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto1, :idVendaProduto2, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, "
+                ":un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
   query.bindValue(":idVenda", modelViewProdutos.data(row, "idVenda"));
   query.bindValue(":idVendaProduto1", modelViewProdutos.data(row, "idVendaProdutoFK"));
+  query.bindValue(":idVendaProduto2", modelViewProdutos.data(row, "idVendaProduto2"));
   query.bindValue(":fornecedor", modelViewProdutos.data(row, "fornecedor"));
   query.bindValue(":idProduto", modelViewProdutos.data(row, "idProduto"));
   query.bindValue(":descricao", modelViewProdutos.data(row, "produto"));

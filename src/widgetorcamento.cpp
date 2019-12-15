@@ -168,8 +168,8 @@ void WidgetOrcamento::montaFiltro() {
     filtroLoja = "";
   } else if (tipoUsuario == "GERENTE LOJA" or tipoUsuario == "VENDEDOR") {
     const auto siglaLoja = UserSession::fromLoja("sigla");
-    const auto sigla = siglaLoja ? siglaLoja.value().toString() : "";
-    filtroLoja = "(Código LIKE '%" + sigla + "%')";
+
+    if (siglaLoja) { filtroLoja = "(Código LIKE '%" + siglaLoja->toString() + "%')"; }
   }
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }

@@ -33,7 +33,7 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor";
@@ -51,7 +51,7 @@ void WidgetRelatorio::setFilterTotaisLoja() {
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
   }
 
   filter += " ORDER BY Loja";
@@ -141,7 +141,7 @@ void WidgetRelatorio::setFilterRelatorio() {
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
@@ -207,7 +207,7 @@ void WidgetRelatorio::setResumoOrcamento() {
   modelOrcamento.setFilter("");
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor"); }
+    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
   }
 
   if (not modelOrcamento.select()) { return; }

@@ -486,7 +486,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (not folderKey) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
-  const QString path = folderKey.value().toString();
+  const QString path = folderKey->toString();
 
   QDir dir(path);
 

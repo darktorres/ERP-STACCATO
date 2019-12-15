@@ -85,7 +85,7 @@ void CadastrarNFe::setupTables() {
 
   if (not lojaACBr) { qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
 
-  if (lojaACBr) { modelLoja.setFilter("idLoja = " + lojaACBr.value().toString()); }
+  modelLoja.setFilter("idLoja = " + lojaACBr->toString());
 
   if (not modelLoja.select()) { return; }
 
@@ -382,7 +382,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   // TODO: enviar email separado para cliente
   // TODO: enviar local ou remoto?
-  if (not acbrLocal.enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath)) { return; }
+  if (not acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath)) { return; }
 
   if (not acbrLocal.gerarDanfe(xml.toLatin1())) { return; }
 

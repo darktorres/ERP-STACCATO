@@ -16,7 +16,7 @@ void PorcentagemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 
   if (not customPaint) { return; }
 
-  const QString tema = UserSession::getSetting("User/tema").value().toString();
+  const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
 
   const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
   painter->setPen(color);

@@ -431,7 +431,7 @@ bool Orcamento::generateId() {
 
   if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
 
-  QString id = siglaLoja.value().toString() + "-" + qApp->serverDate().toString("yy");
+  QString id = siglaLoja->toString() + "-" + qApp->serverDate().toString("yy");
 
   const QString replica = ui->lineEditReplicaDe->text();
 
@@ -538,7 +538,7 @@ bool Orcamento::savingProcedures() {
 
     if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!", this); }
 
-    if (not setData("idLoja", idLoja.value().toInt())) { return false; }
+    if (not setData("idLoja", idLoja->toInt())) { return false; }
 
     if (not setData("idOrcamento", ui->lineEditOrcamento->text())) { return false; }
     if (not setData("idOrcamentoBase", ui->lineEditOrcamento->text().left(11))) { return false; }
@@ -1198,7 +1198,7 @@ bool Orcamento::buscarParametrosFrete() {
 
   QSqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
-  queryFrete.bindValue(":idLoja", idLoja.value().toInt());
+  queryFrete.bindValue(":idLoja", idLoja->toInt());
 
   if (not queryFrete.exec() or not queryFrete.next()) { return qApp->enqueueError(false, "Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
 

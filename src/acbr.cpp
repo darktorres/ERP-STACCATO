@@ -190,21 +190,22 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   resposta.clear();
   progressDialog->show();
 
-  const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
+  const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
+  const auto porta = UserSession::getSetting("User/portaACBr");
 
-  if (lastHost != servidor.value().toString()) { socket.disconnectFromHost(); }
+  if (not servidorConfig or not porta) {
+    qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
+    return {};
+  }
+
+  const auto servidor = local ? "localhost" : servidorConfig->toString();
+
+  if (lastHost != servidor) { socket.disconnectFromHost(); }
 
   if (not conectado) {
-    const auto porta = UserSession::getSetting("User/portaACBr");
+    lastHost = servidor;
 
-    if (not servidor or not porta) {
-      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
-      return {};
-    }
-
-    lastHost = servidor.value().toString();
-
-    socket.connectToHost(servidor.value().toString(), porta.value().toByteArray().toUShort());
+    socket.connectToHost(servidor, porta.value().toByteArray().toUShort());
   }
 
   while (not pronto) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }

@@ -193,7 +193,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   ACBr acbrLocal;
   // TODO: usar ACBR.EnviarEmailInutilizacao?
-  acbrLocal.enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath);
+  acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -266,8 +266,8 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  const QString xmlFolder = folderKeyXml.value().toString();
-  const QString pdfFolder = folderKeyPdf.value().toString();
+  const QString xmlFolder = folderKeyXml->toString();
+  const QString pdfFolder = folderKeyPdf->toString();
 
   // TODO: create folders if they dont exist (it wont work if they dont)
 

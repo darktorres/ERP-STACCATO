@@ -22,7 +22,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   if (not folderKey) { return qApp->enqueueError(false, "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
-  const QString path = folderKey.value().toString();
+  const QString path = folderKey->toString();
 
   QDir dir(path);
 

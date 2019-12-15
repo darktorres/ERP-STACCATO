@@ -21,7 +21,9 @@ void WidgetGraficos::resetTables() {}
 void WidgetGraficos::updateTables() {
   if (not isSet) {
     if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-      ui->comboBoxLojas->addItem(UserSession::fromLoja("descricao")->toString(), UserSession::idLoja());
+      const auto nomeLoja = UserSession::fromLoja("descricao");
+
+      if (nomeLoja) { ui->comboBoxLojas->addItem(nomeLoja->toString(), UserSession::idLoja()); }
     } else {
       QSqlQuery query;
 

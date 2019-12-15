@@ -9,7 +9,9 @@ QTreeViewGridDelegate::QTreeViewGridDelegate(QObject *parent) : QStyledItemDeleg
 void QTreeViewGridDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
   QStyledItemDelegate::paint(painter, option, index);
 
-  const QString tema = UserSession::getSetting("User/tema").value().toString();
+  const auto temaOptional = UserSession::getSetting("User/tema");
+
+  const QString tema = temaOptional ? temaOptional.value().toString() : "claro";
 
   const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
   painter->setPen(color);

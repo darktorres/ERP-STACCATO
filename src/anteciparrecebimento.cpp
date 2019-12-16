@@ -126,7 +126,6 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("grupo", "Grupo");
   modelContaReceber.setHeaderData("subGrupo", "SubGrupo");
   modelContaReceber.setHeaderData("contraParte", "Contraparte");
-  modelContaReceber.setHeaderData("statusFinanceiro", "Financeiro");
 
   modelContaReceber.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
 

@@ -33,15 +33,15 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setTable(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento");
 
   modelContaPagamento.setHeaderData("dataEmissao", "Data Emissão");
-  modelContaPagamento.setHeaderData("contraParte", "ContraParte");
   modelContaPagamento.setHeaderData("idLoja", "Centro Custo");
+  modelContaPagamento.setHeaderData("contraParte", "ContraParte");
+  modelContaPagamento.setHeaderData("nfe", "NFe");
   modelContaPagamento.setHeaderData("valor", "R$");
   modelContaPagamento.setHeaderData("tipo", "Tipo");
   modelContaPagamento.setHeaderData("dataPagamento", "Vencimento");
   modelContaPagamento.setHeaderData("observacao", "Obs.");
   modelContaPagamento.setHeaderData("grupo", "Grupo");
   modelContaPagamento.setHeaderData("subGrupo", "SubGrupo");
-  modelContaPagamento.setHeaderData("nfe", "NFe");
 
   ui->table->setModel(&modelContaPagamento);
 
@@ -67,7 +67,12 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("idPagamento");
-  ui->table->hideColumn("idCompra");
+  ui->table->hideColumn(tipo == Tipo::Pagar ? "idCompra" : "idVenda");
+  if (tipo == Tipo::Receber) {
+    ui->table->hideColumn("taxa");
+    ui->table->hideColumn("comissao");
+    ui->table->hideColumn("representacao");
+  }
   ui->table->hideColumn("desativado");
 }
 

@@ -364,6 +364,8 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
 
+  // TODO: bloquear se o pagamento já estiver PENDENTE
+
   // TODO: verificar se precisa limpar os campos que foram preenchidos
 
   const auto list = ui->table->selectionModel()->selectedRows();

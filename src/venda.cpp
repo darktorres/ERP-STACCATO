@@ -920,12 +920,11 @@ bool Venda::cadastrar() {
 
     // inserir rt em contas_pagar
 
-    QSqlQuery query1;
-
-    if (ui->checkBoxPontuacaoPadrao->isChecked()) {
+    if (ui->checkBoxPontuacaoPadrao->isChecked() and ui->itemBoxProfissional->getId() != 1) {
       const QDate date = ui->dateTimeEdit->date();
       const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
 
+      QSqlQuery query1;
       query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
                      ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
       query1.bindValue(":dataEmissao", date);

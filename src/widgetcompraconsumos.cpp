@@ -57,7 +57,7 @@ void WidgetCompraConsumos::setupTables() {
   ui->tableProduto->setItemDelegateForColumn("quant", new DoubleDelegate(this));
 
   ui->tableProduto->hideColumn("idVenda");
-  ui->tableProduto->hideColumn("idVendaProduto1");
+  ui->tableProduto->hideColumn("idVendaProduto2");
 }
 
 void WidgetCompraConsumos::setConnections() {
@@ -77,8 +77,6 @@ void WidgetCompraConsumos::on_tablePedido_clicked(const QModelIndex &index) {
 }
 
 void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
-  return qApp->enqueueError("Desativado até que a tabela seja convertida em TreeView", this);
-
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
@@ -150,3 +148,4 @@ void WidgetCompraConsumos::montaFiltro() {
 }
 
 // TODO: converter tabela inferior para arvore e permitir o desconsumo apenas das sublinhas (vp2)
+// TODO: ao selecionar uma linha na tabela superior mostrar apenas os produtos da dupla idVenda/idCompra ou juntar todos os idCompra com um group_concat

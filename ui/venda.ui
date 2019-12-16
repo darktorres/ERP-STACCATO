@@ -333,7 +333,11 @@ color: rgb(0, 0, 0);</string>
             </widget>
            </item>
            <item row="1" column="0" colspan="2">
-            <widget class="TreeView" name="treeView"/>
+            <widget class="TreeView" name="treeView">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="labelPrazoEntrega">
@@ -1082,11 +1086,6 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>WidgetPagamentos</class>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
@@ -1096,6 +1095,11 @@ color: rgb(0, 0, 0);</string>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header>src/treeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

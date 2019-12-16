@@ -205,7 +205,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   if (not conectado) {
     lastHost = servidor;
 
-    socket.connectToHost(servidor, porta.value().toByteArray().toUShort());
+    socket.connectToHost(servidor, porta->toByteArray().toUShort());
   }
 
   while (not pronto) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }

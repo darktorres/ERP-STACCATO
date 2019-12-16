@@ -205,35 +205,12 @@ bool CadastroUsuario::cadastrar() {
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
     if (tipo == Tipo::Cadastrar) {
-      QFile file("mysql.txt");
+      const int row = modelPermissoes.insertRowAtEnd();
 
-      if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
-
-      const QString password = file.readAll();
-
-      // NOTE: those query's below commit transaction so rollback won't work
-      // TODO: do these after success->endTransaction
-      QSqlQuery query;
-      query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
-      query.bindValue(":user", ui->lineEditUser->text().toLower());
-
-      if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
-
-      query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
-      query.bindValue(":user", ui->lineEditUser->text().toLower());
-
-      if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
-
-      if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
-
-      // -------------------------------------------------------------------------
-
-      const int row2 = modelPermissoes.insertRowAtEnd();
-
-      if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
-      if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
-      if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
-      if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
+      if (not modelPermissoes.setData(row, "idUsuario", primaryId)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_orcamento", true)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_venda", true)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_relatorio", true)) { return false; }
     }
 
     if (not modelPermissoes.submitAll()) { return false; }
@@ -243,6 +220,26 @@ bool CadastroUsuario::cadastrar() {
 
   if (success) {
     if (not qApp->endTransaction()) { return false; }
+
+    QFile file("mysql.txt");
+
+    if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
+
+    const QString password = file.readAll();
+
+    // NOTE: those query's below commit transaction so have to be done outside transaction
+    QSqlQuery query;
+    query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
+    query.bindValue(":user", ui->lineEditUser->text().toLower());
+
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+
+    query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
+    query.bindValue(":user", ui->lineEditUser->text().toLower());
+
+    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
+
+    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
   } else {
     qApp->rollbackTransaction();
     void(model.select());

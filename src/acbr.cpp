@@ -185,11 +185,6 @@ bool ACBr::abrirPdf(const QString &filePath) {
 }
 
 std::optional<QString> ACBr::enviarComando(const QString &comando, const bool local) {
-  recebido = false;
-  enviado = false;
-  resposta.clear();
-  progressDialog->show();
-
   const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
   const auto porta = UserSession::getSetting("User/portaACBr");
 
@@ -197,6 +192,11 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
     qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
     return {};
   }
+
+  recebido = false;
+  enviado = false;
+  resposta.clear();
+  progressDialog->show();
 
   const auto servidor = local ? "localhost" : servidorConfig->toString();
 

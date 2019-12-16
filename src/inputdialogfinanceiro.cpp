@@ -58,8 +58,6 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
 
     ui->frameAdicionais->hide();
 
-    ui->table->setSelectionMode(QTableView::NoSelection);
-
     ui->treeView->hide();
   }
 

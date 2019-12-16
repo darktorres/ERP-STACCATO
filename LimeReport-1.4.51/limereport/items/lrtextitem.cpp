@@ -347,7 +347,7 @@ QString TextItem::formatNumber(const double value) {
   QString str = QString::number(value);
 
   if (m_format.contains("%")) {
-    str.asprintf(m_format.toStdString().c_str(), value);
+    str.sprintf(m_format.toStdString().c_str(), value);
     str = str.replace(",", QLocale::system().groupSeparator());
     str = str.replace(".", QLocale::system().decimalPoint());
   }

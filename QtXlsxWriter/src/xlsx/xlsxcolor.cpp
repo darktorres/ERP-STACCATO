@@ -96,7 +96,7 @@ QColor XlsxColor::fromARGBString(const QString &c) {
 
 QString XlsxColor::toARGBString(const QColor &c) {
   QString color;
-  color.asprintf("%02X%02X%02X%02X", c.alpha(), c.red(), c.green(), c.blue());
+  color.sprintf("%02X%02X%02X%02X", c.alpha(), c.red(), c.green(), c.blue());
   return color;
 }
 

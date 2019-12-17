@@ -4,10 +4,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
 #include <QTransposeProxyModel>
-#endif
 
 #include "application.h"
 #include "cadastrousuario.h"
@@ -142,11 +139,9 @@ bool CadastroUsuario::viewRegister() {
 
   if (not modelPermissoes.select()) { return false; }
 
-// TODO: shouldn't this be in setupTables?
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+  // TODO: shouldn't this be in setupTables?
   auto *transpose = new QTransposeProxyModel(this);
   transpose->setSourceModel(&modelPermissoes);
-#endif
   modelPermissoes.proxyModel = transpose;
 
   ui->table->setModel(&modelPermissoes);

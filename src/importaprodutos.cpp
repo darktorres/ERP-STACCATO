@@ -207,7 +207,9 @@ void ImportaProdutos::setupTables() {
   modelProduto.setHeaderData("validade", "Validade");
   modelProduto.setHeaderData("markup", "Markup");
 
-  ui->tableProdutos->setModel(new ImportaProdutosProxyModel(&modelProduto, this));
+  modelProduto.proxyModel = new ImportaProdutosProxyModel(&modelProduto, this);
+
+  ui->tableProdutos->setModel(&modelProduto);
 
   ui->tableProdutos->setAutoResize(false);
 
@@ -290,7 +292,9 @@ void ImportaProdutos::setupTables() {
   modelErro.setHeaderData("validade", "Validade");
   modelErro.setHeaderData("markup", "Markup");
 
-  ui->tableErro->setModel(new ImportaProdutosProxyModel(&modelErro, this));
+  modelErro.proxyModel = new ImportaProdutosProxyModel(&modelErro, this);
+
+  ui->tableErro->setModel(&modelErro);
 
   ui->tableErro->setAutoResize(false);
 

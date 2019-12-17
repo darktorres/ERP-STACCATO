@@ -48,7 +48,9 @@ void PrecoEstoque::setupTables() {
 
   if (not modelProduto.select()) { return; }
 
-  ui->table->setModel(new SortFilterProxyModel(&modelProduto, this));
+  modelProduto.proxyModel = new SortFilterProxyModel(&modelProduto, this);
+
+  ui->table->setModel(&modelProduto);
 
   ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("atualizarTabelaPreco");

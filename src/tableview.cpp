@@ -7,6 +7,8 @@
 #include <QSqlRecord>
 
 #include "application.h"
+#include "sqlquerymodel.h"
+#include "sqlrelationaltablemodel.h"
 #include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
@@ -72,42 +74,24 @@ void TableView::redoView() {
   }
 }
 
-void TableView::setModel(QIdentityProxyModel *model) {
-  baseModel = static_cast<QSqlQueryModel *>(model->sourceModel());
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-
-void TableView::setModel(QSortFilterProxyModel *model) {
-  baseModel = static_cast<QSqlQueryModel *>(model->sourceModel());
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
-void TableView::setModel(QTransposeProxyModel *model) {
-  baseModel = static_cast<QSqlQueryModel *>(model->sourceModel());
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-#endif
-
-void TableView::setModel(QSqlQueryModel *model) {
-  baseModel = model;
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-
 void TableView::setModel(QAbstractItemModel *model) {
-  QTableView::setModel(model);
+  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
+    QTableView::setModel(temp->proxyModel);
+  } else if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
+    QTableView::setModel(temp2->proxyModel);
+  } else {
+    QTableView::setModel(model);
+  }
+
+  baseModel = qobject_cast<QSqlQueryModel *>(model);
+
+  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
 
   //---------------------------------------
 
-  if (not baseModel) { qApp->enqueueError("Sem baseModel!"); }
-
-  connect(model, &QAbstractItemModel::modelReset, this, &TableView::redoView);
-  connect(model, &QAbstractItemModel::dataChanged, this, &TableView::redoView);
-  connect(model, &QAbstractItemModel::rowsRemoved, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
 
   //---------------------------------------
 

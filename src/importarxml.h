@@ -28,9 +28,6 @@ private:
   // attributes
   const QDate dataReal;
   const QStringList idsCompra;
-  EstoqueProxyModel *proxyCompra;
-  EstoqueProxyModel *proxyConsumo;
-  EstoqueProxyModel *proxyEstoque;
   SqlRelationalTableModel modelCompra;
   SqlRelationalTableModel modelConsumo;
   SqlRelationalTableModel modelEstoque;

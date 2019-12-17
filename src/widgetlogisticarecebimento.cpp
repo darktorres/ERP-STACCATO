@@ -75,7 +75,9 @@ void WidgetLogisticaRecebimento::setupTables() {
   modelViewRecebimento.setHeaderData("un", "Un.");
   modelViewRecebimento.setHeaderData("caixas", "Caixas");
 
-  ui->table->setModel(new EstoquePrazoProxyModel(&modelViewRecebimento, this));
+  modelViewRecebimento.proxyModel = new EstoquePrazoProxyModel(&modelViewRecebimento, this);
+
+  ui->table->setModel(&modelViewRecebimento);
 
   ui->table->hideColumn("fornecedor");
 }

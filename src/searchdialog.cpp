@@ -49,7 +49,9 @@ void SearchDialog::setupTables(const QString &table) {
 
   setFilter(filter);
 
-  ui->table->setModel(new SearchDialogProxyModel(&model, this));
+  model.proxyModel = new SearchDialogProxyModel(&model, this);
+
+  ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }

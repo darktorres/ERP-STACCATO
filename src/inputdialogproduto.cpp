@@ -98,7 +98,9 @@ void InputDialogProduto::setupTables() {
   modelPedidoFornecedor.setHeaderData("aliquotaSt", "Alíquota ST");
   modelPedidoFornecedor.setHeaderData("st", "ST");
 
-  ui->table->setModel(&proxyModel);
+  modelPedidoFornecedor.proxyModel = new SortFilterProxyModel(&modelPedidoFornecedor, this);
+
+  ui->table->setModel(&modelPedidoFornecedor);
 
   ui->table->hideColumn("idRelacionado");
   if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idVendaProduto1"); }

@@ -24,7 +24,9 @@ void WidgetVenda::setupTables() {
   modelViewVenda.setHeaderData("statusFinanceiro", "Financeiro");
   modelViewVenda.setHeaderData("dataFinanceiro", "Data Financ.");
 
-  ui->table->setModel(new VendaProxyModel(&modelViewVenda, this));
+  modelViewVenda.proxyModel = new VendaProxyModel(&modelViewVenda, this);
+
+  ui->table->setModel(&modelViewVenda);
 
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("idUsuario");

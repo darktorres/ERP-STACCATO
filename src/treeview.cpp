@@ -1,7 +1,7 @@
-#include "treeview.h"
-#include "application.h"
-
 #include <QDebug>
+
+#include "application.h"
+#include "treeview.h"
 
 TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
   connect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns);
@@ -12,34 +12,14 @@ void TreeView::hideColumn(const QString &column) { QTreeView::hideColumn(columnI
 
 void TreeView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTreeView::setItemDelegateForColumn(columnIndex(column), delegate); }
 
-void TreeView::setModel(QIdentityProxyModel *model) {
-  baseModel = static_cast<SqlTreeModel *>(model->sourceModel());
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-
-void TreeView::setModel(QSortFilterProxyModel *model) {
-  baseModel = static_cast<SqlTreeModel *>(model->sourceModel());
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
-void TreeView::setModel(QTransposeProxyModel *model) {
-  baseModel = static_cast<SqlTreeModel *>(model->sourceModel());
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-#endif
-
-void TreeView::setModel(SqlTreeModel *model) {
-  baseModel = model;
-
-  setModel(static_cast<QAbstractItemModel *>(model));
-}
-
 void TreeView::setModel(QAbstractItemModel *model) {
-  QTreeView::setModel(model);
+  if (auto temp = qobject_cast<SqlTreeModel *>(model); temp and temp->proxyModel) {
+    QTreeView::setModel(temp->proxyModel);
+  } else {
+    QTreeView::setModel(model);
+  }
+
+  baseModel = qobject_cast<SqlTreeModel *>(model);
 
   if (not baseModel) { qApp->enqueueError("Sem baseModel!"); }
 

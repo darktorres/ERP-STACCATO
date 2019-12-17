@@ -98,7 +98,9 @@ void Venda::setTreeView() {
   modelTree.setHeaderData("dataPrevEnt", "Prev. Ent.");
   modelTree.setHeaderData("dataRealEnt", "Data Ent.");
 
-  ui->treeView->setModel(new SearchDialogProxyModel(&modelTree, this));
+  modelTree.proxyModel = new SearchDialogProxyModel(&modelTree, this);
+
+  ui->treeView->setModel(&modelTree);
 
   connect(ui->treeView, &QTreeView::expanded, this, [&] {
     for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
@@ -204,7 +206,9 @@ void Venda::setupTables() {
   modelFluxoCaixa.setHeaderData("status", "Status");
   modelFluxoCaixa.setHeaderData("representacao", "Representação");
 
-  ui->tableFluxoCaixa->setModel(new SortFilterProxyModel(&modelFluxoCaixa, this));
+  modelFluxoCaixa.proxyModel = new SortFilterProxyModel(&modelFluxoCaixa, this);
+
+  ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
   ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("contraParte");
@@ -245,7 +249,9 @@ void Venda::setupTables() {
   modelFluxoCaixa2.setHeaderData("observacao", "Obs.");
   modelFluxoCaixa2.setHeaderData("status", "Status");
 
-  ui->tableFluxoCaixa2->setModel(new SortFilterProxyModel(&modelFluxoCaixa2, this));
+  modelFluxoCaixa2.proxyModel = new SortFilterProxyModel(&modelFluxoCaixa2, this);
+
+  ui->tableFluxoCaixa2->setModel(&modelFluxoCaixa2);
 
   ui->tableFluxoCaixa2->hideColumn("idPagamento");
   ui->tableFluxoCaixa2->hideColumn("dataEmissao");

@@ -31,7 +31,9 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelVendas.setHeaderData("statusFinanceiro", "Financeiro");
   modelVendas.setHeaderData("idVenda", "Venda");
 
-  ui->tableVendas->setModel(new FinanceiroProxyModel(&modelVendas, this));
+  modelVendas.proxyModel = new FinanceiroProxyModel(&modelVendas, this);
+
+  ui->tableVendas->setModel(&modelVendas);
 
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 

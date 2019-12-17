@@ -256,7 +256,9 @@ void WidgetFinanceiroContas::montaFiltro() {
   model.setHeaderData("status", "Status");
   model.setHeaderData("statusFinanceiro", "Status Financeiro");
 
-  ui->table->setModel(new SortFilterProxyModel(&model, this));
+  model.proxyModel = new SortFilterProxyModel(&model, this);
+
+  ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));

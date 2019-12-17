@@ -34,7 +34,7 @@ void ImportarXML::setConnections() {
   connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked, connectionType);
   connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked, connectionType);
   connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled, connectionType);
-  connect(proxyEstoque, &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData, connectionType);
+  connect(&modelEstoque, &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData, connectionType);
 }
 
 void ImportarXML::unsetConnections() {
@@ -42,7 +42,7 @@ void ImportarXML::unsetConnections() {
   disconnect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
   disconnect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
   disconnect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
-  disconnect(proxyEstoque, &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData);
+  disconnect(&modelEstoque, &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData);
 }
 
 void ImportarXML::updateTableData(const QModelIndex &topLeft) {
@@ -89,9 +89,9 @@ void ImportarXML::setupTables() {
   modelEstoque.setHeaderData("valor", "R$");
   modelEstoque.setHeaderData("vICMSST", "ST");
 
-  proxyEstoque = new EstoqueProxyModel(&modelEstoque, this);
+  modelEstoque.proxyModel = new EstoqueProxyModel(&modelEstoque, this);
 
-  ui->tableEstoque->setModel(proxyEstoque);
+  ui->tableEstoque->setModel(&modelEstoque);
 
   ui->tableEstoque->setItemDelegate(new NoEditDelegate(this));
 
@@ -162,9 +162,9 @@ void ImportarXML::setupTables() {
   modelConsumo.setHeaderData("codBarras", "Cód. Bar.");
   modelConsumo.setHeaderData("codComercial", "Cód. Com.");
 
-  proxyConsumo = new EstoqueProxyModel(&modelConsumo, this);
+  modelConsumo.proxyModel = new EstoqueProxyModel(&modelConsumo, this);
 
-  ui->tableConsumo->setModel(proxyConsumo);
+  ui->tableConsumo->setModel(&modelConsumo);
 
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
 
@@ -241,9 +241,9 @@ void ImportarXML::setupTables() {
 
   if (not modelCompra.select()) { return; }
 
-  proxyCompra = new EstoqueProxyModel(&modelCompra, this);
+  modelCompra.proxyModel = new EstoqueProxyModel(&modelCompra, this);
 
-  ui->tableCompra->setModel(proxyCompra);
+  ui->tableCompra->setModel(&modelCompra);
 
   ui->tableCompra->setItemDelegate(new NoEditDelegate(this));
 

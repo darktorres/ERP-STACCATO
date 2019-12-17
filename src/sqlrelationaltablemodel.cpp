@@ -7,20 +7,22 @@
 
 SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *parent) : QSqlRelationalTableModel(parent), limit(limit) {}
 
-QVariant SqlRelationalTableModel::data(const int row, const int column) const { return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column)); }
+QVariant SqlRelationalTableModel::data(const int row, const int column) const {
+  if (row == -1 or column == -1) { return qApp->enqueueError(false, "Erro: linha/coluna -1 SqlTableModel"); }
+
+  if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
+
+  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, column));
+}
 
 QVariant SqlRelationalTableModel::data(const QModelIndex &index, const QString &column) const { return data(index.row(), column); }
 
-QVariant SqlRelationalTableModel::data(const int row, const QString &column) const {
-  const int columnIndex = fieldIndex(column);
-
-  if (columnIndex == -1) { return QVariant(); }
-
-  return QSqlRelationalTableModel::data(QSqlTableModel::index(row, columnIndex));
-}
+QVariant SqlRelationalTableModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
-  if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
+  if (row == -1 or column == -1) { return qApp->enqueueError(false, "Erro: linha/coluna -1 SqlTableModel"); }
+
+  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), value); }
 
   if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), value)) {
     return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
@@ -31,18 +33,7 @@ bool SqlRelationalTableModel::setData(const int row, const int column, const QVa
 
 bool SqlRelationalTableModel::setData(const QModelIndex &index, const QString &column, const QVariant &value) { return setData(index.row(), column, value); }
 
-bool SqlRelationalTableModel::setData(const int row, const QString &column, const QVariant &value) {
-  if (row == -1) { return qApp->enqueueError(false, "Erro: linha -1 SqlTableModel"); }
-
-  const int columnIndex = fieldIndex(column);
-
-  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, columnIndex), value)) {
-    return qApp->enqueueError(false, "Erro inserindo '" + column + "' na tabela '" + tableName() + "': " + QSqlTableModel::lastError().text() + " - linha: " + QString::number(row) +
-                                         " - valor: " + value.toString());
-  }
-
-  return true;
-}
+bool SqlRelationalTableModel::setData(const int row, const QString &column, const QVariant &value) { return setData(row, fieldIndex(column), value); }
 
 bool SqlRelationalTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
 
@@ -64,6 +55,8 @@ bool SqlRelationalTableModel::submitAll() {
 QString SqlRelationalTableModel::selectStatement() const { return QSqlRelationalTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
 
 QModelIndexList SqlRelationalTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
+  if (proxyModel) { return proxyModel->match(QSqlRelationalTableModel::index(0, fieldIndex(column)), Qt::DisplayRole, value, hits, flags); }
+
   return QSqlRelationalTableModel::match(QSqlRelationalTableModel::index(0, fieldIndex(column)), Qt::DisplayRole, value, hits, flags);
 }
 

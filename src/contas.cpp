@@ -166,7 +166,9 @@ void Contas::setupTables() {
 
   modelPendentes.setSort("dataPagamento");
 
-  ui->tablePendentes->setModel(new SortFilterProxyModel(&modelPendentes, this));
+  modelPendentes.proxyModel = new SortFilterProxyModel(&modelPendentes, this);
+
+  ui->tablePendentes->setModel(&modelPendentes);
 
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataEmissao", new NoEditDelegate(this));
@@ -233,7 +235,9 @@ void Contas::setupTables() {
   modelProcessados.setHeaderData("grupo", "Grupo");
   modelProcessados.setHeaderData("subGrupo", "SubGrupo");
 
-  ui->tableProcessados->setModel(new SortFilterProxyModel(&modelProcessados, this));
+  modelProcessados.proxyModel = new SortFilterProxyModel(&modelProcessados, this);
+
+  ui->tableProcessados->setModel(&modelProcessados);
 
   ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));

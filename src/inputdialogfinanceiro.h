@@ -26,7 +26,6 @@ private:
   // attributes
   bool representacao;
   const Tipo tipo;
-  SortFilterProxyModel *proxyModel;
   SqlRelationalTableModel modelPedidoFornecedor;
   SqlRelationalTableModel modelPedidoFornecedor2;
   SqlRelationalTableModel modelFluxoCaixa;

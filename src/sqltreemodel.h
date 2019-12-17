@@ -20,7 +20,7 @@
 #ifndef SQLTREEMODEL_H
 #define SQLTREEMODEL_H
 
-#include <QAbstractItemModel>
+#include <QAbstractProxyModel>
 
 class SqlTreeModelPrivate;
 
@@ -50,7 +50,6 @@ public:
    */
   ~SqlTreeModel() override;
 
-public:
   /**
    * Append the SQL model as the next level of the tree.
    * @param model The SQL model to append.
@@ -157,7 +156,7 @@ public:
    */
   Qt::SortOrder sortOrder() const;
 
-public: // overrides
+  // overrides
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -172,6 +171,12 @@ public: // overrides
 
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+  int fieldIndex(const QString &fieldName) const;
+
+  QAbstractProxyModel *proxyModel = nullptr;
+
 protected:
   /**
    * Called to update the queries of child SQL models after changing
@@ -185,11 +190,6 @@ private:
   // QAbstractItemModel interface
   bool setRawData(const int level, const int row, const int column, const QVariant &value, const int role = Qt::DisplayRole);
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
-
-public:
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
-
-  int fieldIndex(const QString &fieldName) const;
 };
 
 #endif

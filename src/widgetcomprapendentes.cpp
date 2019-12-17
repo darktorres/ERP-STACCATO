@@ -114,7 +114,9 @@ void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setHeaderData("statusFinanceiro", "Financeiro");
   modelViewVendaProduto.setHeaderData("obs", "Obs.");
 
-  ui->table->setModel(new FinanceiroProxyModel(&modelViewVendaProduto, this));
+  modelViewVendaProduto.proxyModel = new FinanceiroProxyModel(&modelViewVendaProduto, this);
+
+  ui->table->setModel(&modelViewVendaProduto);
 
   ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
 }

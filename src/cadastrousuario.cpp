@@ -146,8 +146,10 @@ bool CadastroUsuario::viewRegister() {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
   auto *transpose = new QTransposeProxyModel(this);
   transpose->setSourceModel(&modelPermissoes);
-  ui->table->setModel(transpose);
 #endif
+  modelPermissoes.proxyModel = transpose;
+
+  ui->table->setModel(&modelPermissoes);
 
   ui->table->hideRow(0);                                  // idUsuario
   ui->table->hideRow(ui->table->model()->rowCount() - 1); // created

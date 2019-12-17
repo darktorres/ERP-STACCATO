@@ -63,7 +63,9 @@ void WidgetEstoque::setupTables() {
   model.setHeaderData("dataPrevReceb", "Prev. Receb.");
   model.setHeaderData("dataRealReceb", "Receb.");
 
-  ui->table->setModel(new SortFilterProxyModel(&model, this));
+  model.proxyModel = new SortFilterProxyModel(&model, this);
+
+  ui->table->setModel(&model);
 
   ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
 
@@ -195,7 +197,7 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
   column = 'A';
 
   for (int row = 0; row < modelContabil.rowCount(); ++row) {
-    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(row + 2), modelContabil.data(modelContabil.index(row, col))); }
+    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(row + 2), modelContabil.data(row, col)); }
 
     column = 'A';
   }

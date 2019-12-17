@@ -60,7 +60,9 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   modelEstoque.setHeaderData("caixas", "Cx.");
   modelEstoque.setHeaderData("kgcx", "Kg./Cx.");
 
-  ui->tableEstoque->setModel(new EstoquePrazoProxyModel(&modelEstoque, this));
+  modelEstoque.proxyModel = new EstoquePrazoProxyModel(&modelEstoque, this);
+
+  ui->tableEstoque->setModel(&modelEstoque);
 
   ui->tableEstoque->setItemDelegate(new DoubleDelegate(this));
 

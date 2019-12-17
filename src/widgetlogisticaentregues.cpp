@@ -82,7 +82,9 @@ void WidgetLogisticaEntregues::setupTables() {
   modelVendas.setHeaderData("idVenda", "Venda");
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  ui->tableVendas->setModel(&modelVendas);
+  modelProdutos.proxyModel = new SortFilterProxyModel(&modelProdutos, this);
+
+  ui->tableProdutos->setModel(&modelProdutos);
 
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 }
@@ -111,7 +113,9 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");
 
-  ui->tableProdutos->setModel(new SortFilterProxyModel(&modelProdutos, this));
+  modelProdutos.proxyModel = new SortFilterProxyModel(&modelProdutos, this);
+
+  ui->tableProdutos->setModel(&modelProdutos);
 
   ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("idProduto");

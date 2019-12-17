@@ -67,7 +67,9 @@ void WidgetOrcamento::setPermissions() {
 void WidgetOrcamento::setupTables() {
   modelViewOrcamento.setTable("view_orcamento");
 
-  ui->table->setModel(new OrcamentoProxyModel(&modelViewOrcamento, this));
+  modelViewOrcamento.proxyModel = new OrcamentoProxyModel(&modelViewOrcamento, this);
+
+  ui->table->setModel(&modelViewOrcamento);
 
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
 

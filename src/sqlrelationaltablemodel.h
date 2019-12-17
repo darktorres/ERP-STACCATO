@@ -35,6 +35,8 @@ public:
   auto supportedDropActions() const -> Qt::DropActions final;
   auto insertRowAtEnd() -> int;
 
+  QAbstractProxyModel *proxyModel = nullptr;
+
 private:
   using QSqlRelationalTableModel::data;
   using QSqlRelationalTableModel::match;

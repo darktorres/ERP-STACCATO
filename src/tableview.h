@@ -1,13 +1,7 @@
 #pragma once
 
-#include <QIdentityProxyModel>
-#include <QSortFilterProxyModel>
 #include <QSqlQueryModel>
 #include <QTableView>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
-#include <QTransposeProxyModel>
-#endif
 
 class TableView final : public QTableView {
   Q_OBJECT
@@ -22,12 +16,7 @@ public:
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
-  auto setModel(QIdentityProxyModel *model) -> void;
-  auto setModel(QSortFilterProxyModel *model) -> void;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
-  auto setModel(QTransposeProxyModel *model) -> void;
-#endif
-  auto setModel(QSqlQueryModel *model) -> void;
+  auto setModel(QAbstractItemModel *model) -> void;
   auto setPersistentColumns(const QStringList &value) -> void;
   auto showColumn(const QString &column) -> void;
   auto sortByColumn(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
@@ -45,5 +34,4 @@ private:
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto redoView() -> void;
   auto showContextMenu(const QPoint &pos) -> void;
-  auto setModel(QAbstractItemModel *model) -> void;
 };

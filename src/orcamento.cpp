@@ -377,7 +377,7 @@ void Orcamento::updateMode() {
   ui->pushButtonGerarExcel->setEnabled(true);
   ui->pushButtonImprimir->setEnabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
-  ui->itemBoxEndereco->setVisible(true);
+  ui->itemBoxEndereco->show();
   ui->spinBoxValidade->setDisabled(true);
 }
 

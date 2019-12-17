@@ -152,7 +152,7 @@ bool CadastroUsuario::viewRegister() {
 
   ui->table->setItemDelegate(new CheckBoxDelegate(this));
 
-  ui->table->horizontalHeader()->setVisible(false);
+  ui->table->horizontalHeader()->hide();
 
   for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
 

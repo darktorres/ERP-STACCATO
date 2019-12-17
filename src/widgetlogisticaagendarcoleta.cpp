@@ -187,7 +187,7 @@ void WidgetLogisticaAgendarColeta::resetTables() { modelIsSet = false; }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
   if (not ui->frameCaminhao->isVisible()) {
-    ui->frameCaminhao->setVisible(true);
+    ui->frameCaminhao->show();
     ui->pushButtonAgendarColeta->hide();
     ui->pushButtonCancelarCarga->show();
     return;
@@ -208,7 +208,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
   updateTables();
   qApp->enqueueInformation("Agendado com sucesso!", this);
 
-  ui->frameCaminhao->setVisible(false);
+  ui->frameCaminhao->hide();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {

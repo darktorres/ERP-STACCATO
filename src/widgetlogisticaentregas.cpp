@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QUrl>
 
 #include "application.h"
 #include "cadastrarnfe.h"

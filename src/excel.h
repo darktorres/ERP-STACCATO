@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QSqlQuery>
-#include <QWidget>
 
 #include <xlsxdocument.h>
 

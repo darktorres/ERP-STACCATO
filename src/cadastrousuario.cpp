@@ -223,25 +223,7 @@ bool CadastroUsuario::cadastrar() {
   if (success) {
     if (not qApp->endTransaction()) { return false; }
 
-    QFile file("mysql.txt");
-
-    if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
-
-    const QString password = file.readAll();
-
-    // NOTE: those query's below commit transaction so have to be done outside transaction
-    QSqlQuery query;
-    query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
-    query.bindValue(":user", ui->lineEditUser->text().toLower());
-
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
-
-    query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
-    query.bindValue(":user", ui->lineEditUser->text().toLower());
-
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
-
-    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
+    if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
   } else {
     qApp->rollbackTransaction();
     void(model.select());
@@ -249,6 +231,28 @@ bool CadastroUsuario::cadastrar() {
   }
 
   return success;
+}
+
+void CadastroUsuario::criarUsuarioMySQL() {
+  QFile file("mysql.txt");
+
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo mysql.txt: " + file.errorString()); }
+
+  const QString password = file.readAll();
+
+  // NOTE: those query's below commit transaction so have to be done outside transaction
+  QSqlQuery query;
+  query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
+  query.bindValue(":user", ui->lineEditUser->text().toLower());
+
+  if (not query.exec()) { return qApp->enqueueError("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+
+  query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
+  query.bindValue(":user", ui->lineEditUser->text().toLower());
+
+  if (not query.exec()) { return qApp->enqueueError("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
+
+  if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return; }
 }
 
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }

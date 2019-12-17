@@ -209,6 +209,8 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
   qApp->enqueueInformation("Agendado com sucesso!", this);
 
   ui->frameCaminhao->hide();
+  ui->pushButtonAgendarColeta->show();
+  ui->pushButtonCancelarCarga->hide();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {

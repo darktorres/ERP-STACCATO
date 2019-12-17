@@ -1348,3 +1348,5 @@ bool Venda::copiaProdutosOrcamento() {
 //      }
 
 // TODO: implement proxyModel for treeView to color lines if estoque/promocao
+
+// TODO: nao perguntar pontuacao se for correcao de fluxo no financeiro? nao vai gerar lançamento de RT novamente

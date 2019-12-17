@@ -26,7 +26,9 @@ private:
   // methods
   auto on_pushButtonSalvar_clicked() -> void;
   auto preencher(const QModelIndex &index) -> void;
+  auto setConnections() -> void;
   auto setupTables() -> void;
-  auto validarData(const QModelIndex &index) -> void;
+  auto unsetConnections() -> void;
+  auto validarData(const QModelIndex &index) -> bool;
   auto verifyFields() -> bool;
 };

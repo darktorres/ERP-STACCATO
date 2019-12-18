@@ -5,7 +5,6 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-#include "QDecDouble.hh"
 #include "application.h"
 #include "checkboxdelegate.h"
 #include "devolucao.h"
@@ -327,10 +326,10 @@ bool Devolucao::criarDevolucao() {
 }
 
 bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2) {
-  const QDecDouble quant = modelProdutos2.data(mapperProdutos.currentIndex(), "quant").toDouble();
-  const QDecDouble quantDevolvida = ui->doubleSpinBoxQuant->value();
-  const QDecDouble restante = quant - quantDevolvida;
-  const QDecDouble step = ui->doubleSpinBoxQuant->singleStep();
+  const double quant = modelProdutos2.data(mapperProdutos.currentIndex(), "quant").toDouble();
+  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
+  const double restante = quant - quantDevolvida;
+  const double step = ui->doubleSpinBoxQuant->singleStep();
 
   // copiar linha para devolucao
   const int rowDevolucao = modelDevolvidos1.insertRowAtEnd();
@@ -355,17 +354,17 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   if (not modelDevolvidos1.setData(rowDevolucao, "idVenda", idDevolucao)) { return false; }
   if (not modelDevolvidos1.setData(rowDevolucao, "idRelacionado", modelProdutos2.data(currentRow, "idVendaProdutoFK"))) { return false; }
 
-  const QDecDouble quantDevolvidaInvertida = quantDevolvida * -1;
-  const QDecDouble parcialDevolvido = ui->doubleSpinBoxTotalItem->value() * -1;
-  const QDecDouble prcUnitarioDevolvido = parcialDevolvido / quantDevolvidaInvertida;
+  const double quantDevolvidaInvertida = quantDevolvida * -1;
+  const double parcialDevolvido = ui->doubleSpinBoxTotalItem->value() * -1;
+  const double prcUnitarioDevolvido = parcialDevolvido / quantDevolvidaInvertida;
 
   if (not modelDevolvidos1.setData(rowDevolucao, "status", "PENDENTE DEV.")) { return false; }
   if (not modelDevolvidos1.setData(rowDevolucao, "statusOriginal", modelProdutos2.data(currentRow, "status"))) { return false; }
-  if (not modelDevolvidos1.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
-  if (not modelDevolvidos1.setData(rowDevolucao, "descUnitario", prcUnitarioDevolvido.toDouble())) { return false; }
-  if (not modelDevolvidos1.setData(rowDevolucao, "caixas", (quantDevolvida / step * -1).toDouble())) { return false; }
-  if (not modelDevolvidos1.setData(rowDevolucao, "quant", quantDevolvidaInvertida.toDouble())) { return false; }
-  if (not modelDevolvidos1.setData(rowDevolucao, "parcial", parcialDevolvido.toDouble())) { return false; }
+  if (not modelDevolvidos1.setData(rowDevolucao, "prcUnitario", prcUnitarioDevolvido)) { return false; }
+  if (not modelDevolvidos1.setData(rowDevolucao, "descUnitario", prcUnitarioDevolvido)) { return false; }
+  if (not modelDevolvidos1.setData(rowDevolucao, "caixas", (quantDevolvida / step * -1))) { return false; }
+  if (not modelDevolvidos1.setData(rowDevolucao, "quant", quantDevolvidaInvertida)) { return false; }
+  if (not modelDevolvidos1.setData(rowDevolucao, "parcial", parcialDevolvido)) { return false; }
   if (not modelDevolvidos1.setData(rowDevolucao, "desconto", 0)) { return false; }
   if (not modelDevolvidos1.setData(rowDevolucao, "parcialDesc", ui->doubleSpinBoxTotalItem->value() * -1)) { return false; }
   if (not modelDevolvidos1.setData(rowDevolucao, "descGlobal", 0)) { return false; }
@@ -391,9 +390,9 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   if (modelConsumos.rowCount() > 0) {
     if (not modelConsumos.setData(0, "idVendaProduto2", queryBusca.value("idVendaProduto2"))) { return false; }
     if (not modelConsumos.setData(0, "status", "PENDENTE DEV.")) { return false; }
-    if (not modelConsumos.setData(0, "quant", quantDevolvida.toDouble() * -1)) { return false; }
+    if (not modelConsumos.setData(0, "quant", quantDevolvida * -1)) { return false; }
     if (not modelConsumos.setData(0, "quantUpd", 5)) { return false; }
-    if (not modelConsumos.setData(0, "caixas", (quantDevolvida / step).toDouble())) { return false; }
+    if (not modelConsumos.setData(0, "caixas", (quantDevolvida / step))) { return false; }
   }
 
   //------------------------------------
@@ -414,23 +413,23 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
 
     if (not modelProdutos2.setData(newRowRestante, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
     if (not modelProdutos2.setData(newRowRestante, "idRelacionado", modelProdutos2.data(currentRow, "idVendaProduto2"))) { return false; }
-    if (not modelProdutos2.setData(newRowRestante, "caixas", (restante / step).toDouble())) { return false; }
-    if (not modelProdutos2.setData(newRowRestante, "quant", restante.toDouble())) { return false; }
+    if (not modelProdutos2.setData(newRowRestante, "caixas", (restante / step))) { return false; }
+    if (not modelProdutos2.setData(newRowRestante, "quant", restante)) { return false; }
 
-    const QDecDouble prcUnitario = modelProdutos2.data(newRowRestante, "prcUnitario").toDouble();
-    const QDecDouble parcial = restante * prcUnitario;
+    const double prcUnitario = modelProdutos2.data(newRowRestante, "prcUnitario").toDouble();
+    const double parcial = restante * prcUnitario;
 
-    if (not modelProdutos2.setData(newRowRestante, "parcial", parcial.toDouble())) { return false; }
+    if (not modelProdutos2.setData(newRowRestante, "parcial", parcial)) { return false; }
 
-    const QDecDouble desconto = modelProdutos2.data(newRowRestante, "desconto").toDouble();
-    const QDecDouble parcialDesc = parcial * (1 - (desconto / 100).toDouble());
+    const double desconto = modelProdutos2.data(newRowRestante, "desconto").toDouble();
+    const double parcialDesc = parcial * (1 - (desconto / 100));
 
-    if (not modelProdutos2.setData(newRowRestante, "parcialDesc", parcialDesc.toDouble())) { return false; }
+    if (not modelProdutos2.setData(newRowRestante, "parcialDesc", parcialDesc)) { return false; }
 
-    const QDecDouble descGlobal = modelProdutos2.data(newRowRestante, "descGlobal").toDouble();
-    const QDecDouble total = parcialDesc * (1 - (descGlobal / 100).toDouble());
+    const double descGlobal = modelProdutos2.data(newRowRestante, "descGlobal").toDouble();
+    const double total = parcialDesc * (1 - (descGlobal / 100));
 
-    if (not modelProdutos2.setData(newRowRestante, "total", total.toDouble())) { return false; }
+    if (not modelProdutos2.setData(newRowRestante, "total", total)) { return false; }
 
     //------------------------------------
 
@@ -449,9 +448,9 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
 
       if (not modelConsumos.setData(newRowConsumo, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
       if (not modelConsumos.setData(newRowConsumo, "status", "CONSUMO")) { return false; }
-      if (not modelConsumos.setData(newRowConsumo, "quant", restante.toDouble() * -1)) { return false; }
+      if (not modelConsumos.setData(newRowConsumo, "quant", restante * -1)) { return false; }
       if (not modelConsumos.setData(newRowConsumo, "quantUpd", 4)) { return false; }
-      if (not modelConsumos.setData(newRowConsumo, "caixas", (restante / step).toDouble())) { return false; }
+      if (not modelConsumos.setData(newRowConsumo, "caixas", (restante / step))) { return false; }
     }
   }
 
@@ -461,29 +460,29 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   // *Deve deixar a devolucao numa linha nova para seguir a ordem das operações
   // *Operações devem ficar na ordem que aconteceram
 
-  const QDecDouble prcUnitario = modelProdutos2.data(currentRow, "prcUnitario").toDouble();
-  const QDecDouble desconto = modelProdutos2.data(currentRow, "desconto").toDouble();
-  const QDecDouble descGlobal = modelProdutos2.data(currentRow, "descGlobal").toDouble();
+  const double prcUnitario = modelProdutos2.data(currentRow, "prcUnitario").toDouble();
+  const double desconto = modelProdutos2.data(currentRow, "desconto").toDouble();
+  const double descGlobal = modelProdutos2.data(currentRow, "descGlobal").toDouble();
 
   // linha original
 
-  const QDecDouble caixas = quantDevolvida / step;
+  const double caixas = quantDevolvida / step;
 
-  if (not modelProdutos2.setData(currentRow, "caixas", caixas.toDouble())) { return false; }
-  if (not modelProdutos2.setData(currentRow, "quant", quantDevolvida.toDouble())) { return false; }
+  if (not modelProdutos2.setData(currentRow, "caixas", caixas)) { return false; }
+  if (not modelProdutos2.setData(currentRow, "quant", quantDevolvida)) { return false; }
 
-  const QDecDouble parcialRestante = quantDevolvida * prcUnitario;
+  const double parcialRestante = quantDevolvida * prcUnitario;
 
-  if (not modelProdutos2.setData(currentRow, "parcial", parcialRestante.toDouble())) { return false; }
+  if (not modelProdutos2.setData(currentRow, "parcial", parcialRestante)) { return false; }
 
-  const QDecDouble parcialDescRestante = parcialRestante * (1 - (desconto / 100).toDouble());
+  const double parcialDescRestante = parcialRestante * (1 - (desconto / 100));
 
-  if (not modelProdutos2.setData(currentRow, "parcialDesc", parcialDescRestante.toDouble())) { return false; }
+  if (not modelProdutos2.setData(currentRow, "parcialDesc", parcialDescRestante)) { return false; }
 
-  const QDecDouble totalRestante = parcialDescRestante * (1 - (descGlobal / 100).toDouble());
+  const double totalRestante = parcialDescRestante * (1 - (descGlobal / 100));
 
   // TODO: guardar status original nessa linha?
-  if (not modelProdutos2.setData(currentRow, "total", totalRestante.toDouble())) { return false; }
+  if (not modelProdutos2.setData(currentRow, "total", totalRestante)) { return false; }
   if (not modelProdutos2.setData(currentRow, "status", "DEVOLVIDO")) { return false; }
 
   //----------------------------------------------

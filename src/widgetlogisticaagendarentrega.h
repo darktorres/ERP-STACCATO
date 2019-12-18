@@ -2,7 +2,6 @@
 
 #include <QWidget>
 
-#include "QDecDouble.hh"
 #include "sqlrelationaltablemodel.h"
 #include "xml.h"
 
@@ -33,7 +32,7 @@ private:
   auto adicionarProdutoParcial(const int row, const int caixasAgendar, const int caixasTotal) -> bool;
   auto calcularDisponivel() -> void;
   auto calcularPeso() -> void;
-  auto dividirConsumo(const int row, const QDecDouble proporcao, const QDecDouble proporcaoNovo, const int idVendaProduto2) -> bool;
+  auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> bool;
   auto dividirVenda(const int row, const int caixasAgendar, const int caixasTotal) -> bool;
   auto montaFiltro() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;

@@ -238,6 +238,8 @@ void Application::rollbackTransaction() {
   showMessages();
 }
 
+double Application::roundDouble(const double value) const { return qRound(value * 10000) / 10000.; }
+
 bool Application::getShowingErrors() const { return showingErrors; }
 
 bool Application::getIsConnected() const { return isConnected; }

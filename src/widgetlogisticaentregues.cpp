@@ -77,14 +77,10 @@ void WidgetLogisticaEntregues::montaFiltro() {
 void WidgetLogisticaEntregues::setupTables() {
   modelVendas.setTable("view_entrega");
 
-  modelVendas.setSort("prazoEntrega");
-
   modelVendas.setHeaderData("idVenda", "Venda");
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
 
-  modelProdutos.proxyModel = new SortFilterProxyModel(&modelProdutos, this);
-
-  ui->tableProdutos->setModel(&modelProdutos);
+  ui->tableVendas->setModel(&modelVendas);
 
   ui->tableVendas->setItemDelegate(new DoubleDelegate(this));
 }

@@ -40,5 +40,4 @@ int TreeView::columnIndex(const QString &column) const {
   return columnIndex;
 }
 
-// TODO: set stylesheet for coloring subrows
-// TODO: verify that last column with a number
+// TODO: copy right-click menu from TableView

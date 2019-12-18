@@ -1,15 +1,13 @@
 #include <QDebug>
 #include <QMessageBox>
-#include <QSortFilterProxyModel>
 #include <QSqlError>
+#include <QSqlQuery>
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
 #include "ui_widgetlogisticaentregues.h"
-#include "usersession.h"
-#include "vendaproxymodel.h"
 #include "widgetlogisticaentregues.h"
 
 WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
@@ -185,4 +183,4 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   return true;
 }
 
-// TODO: 0mostrar quem entregou/recebeu
+// TODO: 0mostrar quem entregou/recebeu nos produtos

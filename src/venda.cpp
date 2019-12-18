@@ -1316,6 +1316,8 @@ bool Venda::copiaProdutosOrcamento() {
       }
 
       if (not modelItem.setData(rowItem, "status", queryStatus.value("status"))) { return false; }
+    } else {
+      if (not modelItem.setData(rowItem, "status", "PENDENTE")) { return false; }
     }
   }
 

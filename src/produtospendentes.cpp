@@ -254,7 +254,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":un", modelViewProdutos.data(row, "un"));
     query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
     query.bindValue(":caixas", excedente / modelProdutos.data(row, "unCaixa").toDouble());
-    query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo").toDouble());
+    query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo"));
     query.bindValue(":preco", modelViewProdutos.data(row, "custo").toDouble() * excedente);
     query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));
     query.bindValue(":formComercial", modelViewProdutos.data(row, "formComercial"));
@@ -283,7 +283,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   query.bindValue(":colecao", modelViewProdutos.data(row, "colecao"));
   query.bindValue(":un", modelViewProdutos.data(row, "un"));
   query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
-  query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo").toDouble());
+  query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo"));
   query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));
   query.bindValue(":formComercial", modelViewProdutos.data(row, "formComercial"));
   query.bindValue(":codComercial", modelViewProdutos.data(row, "codComercial"));
@@ -291,21 +291,21 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   query.bindValue(":dataPrevCompra", dataPrevista);
 
   if (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { // compra avulsa para menos
-    const QDecDouble quant = ui->doubleSpinBoxComprar->value();
-    const QDecDouble custo = modelViewProdutos.data(row, "custo").toDouble();
-    const QDecDouble step = ui->doubleSpinBoxQuantTotal->singleStep();
+    const double quant = ui->doubleSpinBoxComprar->value();
+    const double custo = modelViewProdutos.data(row, "custo").toDouble();
+    const double step = ui->doubleSpinBoxQuantTotal->singleStep();
 
-    query.bindValue(":quant", quant.toDouble());
-    query.bindValue(":preco", (quant * custo).toDouble());
-    query.bindValue(":caixas", (quant / step).toDouble());
+    query.bindValue(":quant", quant);
+    query.bindValue(":preco", (quant * custo));
+    query.bindValue(":caixas", (quant / step));
   } else {
-    const QDecDouble quant = modelViewProdutos.data(row, "quant").toDouble();
-    const QDecDouble custo = modelViewProdutos.data(row, "custo").toDouble();
-    const QDecDouble step = ui->doubleSpinBoxQuantTotal->singleStep();
+    const double quant = modelViewProdutos.data(row, "quant").toDouble();
+    const double custo = modelViewProdutos.data(row, "custo").toDouble();
+    const double step = ui->doubleSpinBoxQuantTotal->singleStep();
 
-    query.bindValue(":quant", quant.toDouble());
-    query.bindValue(":preco", (quant * custo).toDouble());
-    query.bindValue(":caixas", (quant / step).toDouble());
+    query.bindValue(":quant", quant);
+    query.bindValue(":preco", (quant * custo));
+    query.bindValue(":caixas", (quant / step));
   }
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
@@ -323,7 +323,7 @@ bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
   return true;
 }
 
-bool ProdutosPendentes::dividirVenda(const QDecDouble quantSeparar, const QDecDouble quantVenda, const int rowProduto) {
+bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
   const int newRow = modelProdutos.insertRowAtEnd();
 
   // copiar colunas
@@ -337,31 +337,31 @@ bool ProdutosPendentes::dividirVenda(const QDecDouble quantSeparar, const QDecDo
     if (not modelProdutos.setData(newRow, column, value)) { return false; }
   }
 
-  const QDecDouble unCaixa = modelProdutos.data(rowProduto, "unCaixa").toDouble();
+  const double unCaixa = modelProdutos.data(rowProduto, "unCaixa").toDouble();
 
-  const QDecDouble proporcao = quantSeparar / quantVenda;
-  const QDecDouble parcial = QDecDouble(modelProdutos.data(rowProduto, "parcial").toDouble()) * proporcao;
-  const QDecDouble parcialDesc = QDecDouble(modelProdutos.data(rowProduto, "parcialDesc").toDouble()) * proporcao;
-  const QDecDouble total = QDecDouble(modelProdutos.data(rowProduto, "total").toDouble()) * proporcao;
+  const double proporcao = quantSeparar / quantVenda;
+  const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble() * proporcao;
+  const double parcialDesc = modelProdutos.data(rowProduto, "parcialDesc").toDouble() * proporcao;
+  const double total = modelProdutos.data(rowProduto, "total").toDouble() * proporcao;
 
-  if (not modelProdutos.setData(rowProduto, "quant", quantSeparar.toDouble())) { return false; }
-  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / unCaixa).toDouble())) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcial", parcial.toDouble())) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc.toDouble())) { return false; }
-  if (not modelProdutos.setData(rowProduto, "total", total.toDouble())) { return false; }
+  if (not modelProdutos.setData(rowProduto, "quant", quantSeparar)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / unCaixa))) { return false; }
+  if (not modelProdutos.setData(rowProduto, "parcial", parcial)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "total", total)) { return false; }
 
   // alterar quant, precos, etc da linha nova
-  const QDecDouble proporcaoNovo = (quantVenda - quantSeparar) / quantVenda;
-  const QDecDouble parcialNovo = QDecDouble(modelProdutos.data(newRow, "parcial").toDouble()) * proporcaoNovo;
-  const QDecDouble parcialDescNovo = QDecDouble(modelProdutos.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
-  const QDecDouble totalNovo = QDecDouble(modelProdutos.data(newRow, "total").toDouble()) * proporcaoNovo;
+  const double proporcaoNovo = (quantVenda - quantSeparar) / quantVenda;
+  const double parcialNovo = modelProdutos.data(newRow, "parcial").toDouble() * proporcaoNovo;
+  const double parcialDescNovo = modelProdutos.data(newRow, "parcialDesc").toDouble() * proporcaoNovo;
+  const double totalNovo = modelProdutos.data(newRow, "total").toDouble() * proporcaoNovo;
 
   if (not modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"))) { return false; }
-  if (not modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar).toDouble())) { return false; }
-  if (not modelProdutos.setData(newRow, "caixas", ((quantVenda - quantSeparar) / unCaixa).toDouble())) { return false; }
-  if (not modelProdutos.setData(newRow, "parcial", parcialNovo.toDouble())) { return false; }
-  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo.toDouble())) { return false; }
-  if (not modelProdutos.setData(newRow, "total", totalNovo.toDouble())) { return false; }
+  if (not modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar))) { return false; }
+  if (not modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / unCaixa)) { return false; }
+  if (not modelProdutos.setData(newRow, "parcial", parcialNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "total", totalNovo)) { return false; }
 
   return true;
 }

@@ -22,9 +22,13 @@ QVariant SqlRelationalTableModel::data(const int row, const QString &column) con
 bool SqlRelationalTableModel::setData(const int row, const int column, const QVariant &value) {
   if (row == -1 or column == -1) { return qApp->enqueueError(false, "Erro: linha/coluna -1 SqlTableModel"); }
 
-  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), value); }
+  QVariant adjustedValue = value;
 
-  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), value)) {
+  if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
+
+  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), adjustedValue); }
+
+  if (not QSqlRelationalTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {
     return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
   }
 

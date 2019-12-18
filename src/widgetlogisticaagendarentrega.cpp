@@ -530,34 +530,34 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const int caixas
     if (not modelProdutosTemp.setData(newRow, column, value)) { return false; }
   }
 
-  const QDecDouble caixasAgendar2 = caixasAgendar;
-  const QDecDouble caixasTotal2 = caixasTotal;
+  const double caixasAgendar2 = caixasAgendar;
+  const double caixasTotal2 = caixasTotal;
 
-  const QDecDouble unCaixa = modelProdutosTemp.data(0, "unCaixa").toDouble();
+  const double unCaixa = modelProdutosTemp.data(0, "unCaixa").toDouble();
 
-  const QDecDouble proporcao = caixasAgendar2 / caixasTotal2;
-  const QDecDouble parcial = QDecDouble(modelProdutosTemp.data(0, "parcial").toDouble()) * proporcao;
-  const QDecDouble parcialDesc = QDecDouble(modelProdutosTemp.data(0, "parcialDesc").toDouble()) * proporcao;
-  const QDecDouble total = QDecDouble(modelProdutosTemp.data(0, "total").toDouble()) * proporcao;
+  const double proporcao = caixasAgendar2 / caixasTotal2;
+  const double parcial = double(modelProdutosTemp.data(0, "parcial").toDouble()) * proporcao;
+  const double parcialDesc = double(modelProdutosTemp.data(0, "parcialDesc").toDouble()) * proporcao;
+  const double total = double(modelProdutosTemp.data(0, "total").toDouble()) * proporcao;
 
-  if (not modelProdutosTemp.setData(0, "quant", (caixasAgendar2 * unCaixa).toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(0, "caixas", caixasAgendar2.toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(0, "parcial", parcial.toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(0, "parcialDesc", parcialDesc.toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(0, "total", total.toDouble())) { return false; }
+  if (not modelProdutosTemp.setData(0, "quant", (caixasAgendar2 * unCaixa))) { return false; }
+  if (not modelProdutosTemp.setData(0, "caixas", caixasAgendar2)) { return false; }
+  if (not modelProdutosTemp.setData(0, "parcial", parcial)) { return false; }
+  if (not modelProdutosTemp.setData(0, "parcialDesc", parcialDesc)) { return false; }
+  if (not modelProdutosTemp.setData(0, "total", total)) { return false; }
 
   // alterar quant, precos, etc da linha nova
-  const QDecDouble proporcaoNovo = (caixasTotal2 - caixasAgendar2) / caixasTotal2;
-  const QDecDouble parcialNovo = QDecDouble(modelProdutosTemp.data(newRow, "parcial").toDouble()) * proporcaoNovo;
-  const QDecDouble parcialDescNovo = QDecDouble(modelProdutosTemp.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
-  const QDecDouble totalNovo = QDecDouble(modelProdutosTemp.data(newRow, "total").toDouble()) * proporcaoNovo;
+  const double proporcaoNovo = (caixasTotal2 - caixasAgendar2) / caixasTotal2;
+  const double parcialNovo = double(modelProdutosTemp.data(newRow, "parcial").toDouble()) * proporcaoNovo;
+  const double parcialDescNovo = double(modelProdutosTemp.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
+  const double totalNovo = double(modelProdutosTemp.data(newRow, "total").toDouble()) * proporcaoNovo;
 
   if (not modelProdutosTemp.setData(newRow, "idRelacionado", modelProdutosTemp.data(0, "idVendaProduto2"))) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * unCaixa).toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal2 - caixasAgendar2).toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "parcial", parcialNovo.toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "parcialDesc", parcialDescNovo.toDouble())) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "total", totalNovo.toDouble())) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * unCaixa))) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal2 - caixasAgendar2))) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "parcial", parcialNovo)) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "total", totalNovo)) { return false; }
 
   if (not modelProdutosTemp.submitAll()) { return false; }
 
@@ -567,7 +567,7 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const int caixas
   return true;
 }
 
-bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const QDecDouble proporcao, const QDecDouble proporcaoNovo, const int idVendaProduto2) {
+bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) {
   SqlRelationalTableModel modelConsumoTemp;
   modelConsumoTemp.setTable("estoque_has_consumo");
 
@@ -590,61 +590,61 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const QDecDoub
 
   // alterar quant, caixas, valor
 
-  const QDecDouble quantConsumo = QDecDouble(modelConsumoTemp.data(0, "quant").toDouble()) * proporcao;
-  const QDecDouble caixasConsumo = QDecDouble(modelConsumoTemp.data(0, "caixas").toDouble()) * proporcao;
-  const QDecDouble valorConsumo = QDecDouble(modelConsumoTemp.data(0, "valor").toDouble()) * proporcao;
+  const double quantConsumo = double(modelConsumoTemp.data(0, "quant").toDouble()) * proporcao;
+  const double caixasConsumo = double(modelConsumoTemp.data(0, "caixas").toDouble()) * proporcao;
+  const double valorConsumo = double(modelConsumoTemp.data(0, "valor").toDouble()) * proporcao;
 
-  const QDecDouble desconto = QDecDouble(modelConsumoTemp.data(0, "desconto").toDouble()) * proporcao;
-  const QDecDouble vBC = QDecDouble(modelConsumoTemp.data(0, "vBC").toDouble()) * proporcao;
-  const QDecDouble vICMS = QDecDouble(modelConsumoTemp.data(0, "vICMS").toDouble()) * proporcao;
-  const QDecDouble vBCST = QDecDouble(modelConsumoTemp.data(0, "vBCST").toDouble()) * proporcao;
-  const QDecDouble vICMSST = QDecDouble(modelConsumoTemp.data(0, "vICMSST").toDouble()) * proporcao;
-  const QDecDouble vBCPIS = QDecDouble(modelConsumoTemp.data(0, "vBCPIS").toDouble()) * proporcao;
-  const QDecDouble vPIS = QDecDouble(modelConsumoTemp.data(0, "vPIS").toDouble()) * proporcao;
-  const QDecDouble vBCCOFINS = QDecDouble(modelConsumoTemp.data(0, "vBCCOFINS").toDouble()) * proporcao;
-  const QDecDouble vCOFINS = QDecDouble(modelConsumoTemp.data(0, "vCOFINS").toDouble()) * proporcao;
+  const double desconto = double(modelConsumoTemp.data(0, "desconto").toDouble()) * proporcao;
+  const double vBC = double(modelConsumoTemp.data(0, "vBC").toDouble()) * proporcao;
+  const double vICMS = double(modelConsumoTemp.data(0, "vICMS").toDouble()) * proporcao;
+  const double vBCST = double(modelConsumoTemp.data(0, "vBCST").toDouble()) * proporcao;
+  const double vICMSST = double(modelConsumoTemp.data(0, "vICMSST").toDouble()) * proporcao;
+  const double vBCPIS = double(modelConsumoTemp.data(0, "vBCPIS").toDouble()) * proporcao;
+  const double vPIS = double(modelConsumoTemp.data(0, "vPIS").toDouble()) * proporcao;
+  const double vBCCOFINS = double(modelConsumoTemp.data(0, "vBCCOFINS").toDouble()) * proporcao;
+  const double vCOFINS = double(modelConsumoTemp.data(0, "vCOFINS").toDouble()) * proporcao;
 
-  if (not modelConsumoTemp.setData(0, "quant", quantConsumo.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "caixas", caixasConsumo.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "valor", valorConsumo.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "desconto", desconto.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBC", vBC.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vICMS", vICMS.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBCST", vBCST.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vICMSST", vICMSST.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBCPIS", vBCPIS.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vPIS", vPIS.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBCCOFINS", vBCCOFINS.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(0, "vCOFINS", vCOFINS.toDouble())) { return false; }
+  if (not modelConsumoTemp.setData(0, "quant", quantConsumo)) { return false; }
+  if (not modelConsumoTemp.setData(0, "caixas", caixasConsumo)) { return false; }
+  if (not modelConsumoTemp.setData(0, "valor", valorConsumo)) { return false; }
+  if (not modelConsumoTemp.setData(0, "desconto", desconto)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBC", vBC)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vICMS", vICMS)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBCST", vBCST)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vICMSST", vICMSST)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBCPIS", vBCPIS)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vPIS", vPIS)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBCCOFINS", vBCCOFINS)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vCOFINS", vCOFINS)) { return false; }
 
   // alterar linha nova
-  const QDecDouble quantConsumo2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "quant").toDouble()) * proporcaoNovo;
-  const QDecDouble caixasConsumo2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "caixas").toDouble()) * proporcaoNovo;
-  const QDecDouble valorConsumo2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "valor").toDouble()) * proporcaoNovo;
+  const double quantConsumo2 = double(modelConsumoTemp.data(rowConsumo, "quant").toDouble()) * proporcaoNovo;
+  const double caixasConsumo2 = double(modelConsumoTemp.data(rowConsumo, "caixas").toDouble()) * proporcaoNovo;
+  const double valorConsumo2 = double(modelConsumoTemp.data(rowConsumo, "valor").toDouble()) * proporcaoNovo;
 
-  const QDecDouble desconto2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "desconto").toDouble()) * proporcaoNovo;
-  const QDecDouble vBC2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vBC").toDouble()) * proporcaoNovo;
-  const QDecDouble vICMS2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vICMS").toDouble()) * proporcaoNovo;
-  const QDecDouble vBCST2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vBCST").toDouble()) * proporcaoNovo;
-  const QDecDouble vICMSST2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vICMSST").toDouble()) * proporcaoNovo;
-  const QDecDouble vBCPIS2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vBCPIS").toDouble()) * proporcaoNovo;
-  const QDecDouble vPIS2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vPIS").toDouble()) * proporcaoNovo;
-  const QDecDouble vBCCOFINS2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vBCCOFINS").toDouble()) * proporcaoNovo;
-  const QDecDouble vCOFINS2 = QDecDouble(modelConsumoTemp.data(rowConsumo, "vCOFINS").toDouble()) * proporcaoNovo;
+  const double desconto2 = double(modelConsumoTemp.data(rowConsumo, "desconto").toDouble()) * proporcaoNovo;
+  const double vBC2 = double(modelConsumoTemp.data(rowConsumo, "vBC").toDouble()) * proporcaoNovo;
+  const double vICMS2 = double(modelConsumoTemp.data(rowConsumo, "vICMS").toDouble()) * proporcaoNovo;
+  const double vBCST2 = double(modelConsumoTemp.data(rowConsumo, "vBCST").toDouble()) * proporcaoNovo;
+  const double vICMSST2 = double(modelConsumoTemp.data(rowConsumo, "vICMSST").toDouble()) * proporcaoNovo;
+  const double vBCPIS2 = double(modelConsumoTemp.data(rowConsumo, "vBCPIS").toDouble()) * proporcaoNovo;
+  const double vPIS2 = double(modelConsumoTemp.data(rowConsumo, "vPIS").toDouble()) * proporcaoNovo;
+  const double vBCCOFINS2 = double(modelConsumoTemp.data(rowConsumo, "vBCCOFINS").toDouble()) * proporcaoNovo;
+  const double vCOFINS2 = double(modelConsumoTemp.data(rowConsumo, "vCOFINS").toDouble()) * proporcaoNovo;
 
   if (not modelConsumoTemp.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "quant", quantConsumo2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "caixas", caixasConsumo2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "valor", valorConsumo2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "desconto", desconto2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBC", vBC2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vICMS", vICMS2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCST", vBCST2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vICMSST", vICMSST2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCPIS", vBCPIS2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vPIS", vPIS2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCCOFINS", vBCCOFINS2.toDouble())) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vCOFINS", vCOFINS2.toDouble())) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "quant", quantConsumo2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "caixas", caixasConsumo2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "valor", valorConsumo2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "desconto", desconto2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBC", vBC2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vICMS", vICMS2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBCST", vBCST2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vICMSST", vICMSST2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBCPIS", vBCPIS2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vPIS", vPIS2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBCCOFINS", vBCCOFINS2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vCOFINS", vCOFINS2)) { return false; }
 
   if (not modelConsumoTemp.submitAll()) { return false; }
 

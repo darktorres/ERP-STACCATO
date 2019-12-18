@@ -57,7 +57,7 @@ void SearchDialog::setupTables(const QString &table) {
 }
 
 void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
-  const QString text = ui->lineEditBusca->text().replace("-", " ").replace("(", "").replace(")", "");
+  const QString text = ui->lineEditBusca->text();
 
   if (text.isEmpty()) {
     model.setFilter(filter);
@@ -66,7 +66,14 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
   QStringList strings = text.split(" ", QString::SkipEmptyParts);
 
-  for (auto &string : strings) { string.prepend("+").append("*"); }
+  for (auto &string : strings) {
+    if (string.contains("-")) {
+      string.prepend("\"").append("\"");
+    } else {
+      string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+      string.prepend("+").append("*");
+    }
+  }
 
   QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 

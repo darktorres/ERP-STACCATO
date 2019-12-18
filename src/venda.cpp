@@ -1318,7 +1318,16 @@ bool Venda::copiaProdutosOrcamento() {
       if (not modelItem.setData(rowItem, field, queryProdutos.value(field))) { return false; }
     }
 
-    if (not modelItem.setData(rowItem, "status", modelItem.data(rowItem, "estoque").toBool() ? "ESTOQUE" : "PENDENTE")) { return false; }
+    if (modelItem.data(rowItem, "estoque").toInt() > 0) {
+      QSqlQuery queryStatus;
+
+      if (not queryStatus.exec("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = " + modelItem.data(rowItem, "idProduto").toString()) or
+          not queryStatus.first()) {
+        return qApp->enqueueError(false, "Erro buscando status do estoque: " + queryStatus.lastError().text(), this);
+      }
+
+      if (not modelItem.setData(rowItem, "status", queryStatus.value("status"))) { return false; }
+    }
   }
 
   for (int row = 0; row < modelItem.rowCount(); ++row) { backupItem.append(modelItem.record(row)); }

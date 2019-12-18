@@ -277,8 +277,6 @@ void Venda::setupTables() {
 }
 
 void Venda::prepararVenda(const QString &idOrcamento) {
-  // TODO: verificar se as quantidades de produto_estoque ainda estão disponiveis
-
   ui->lineEditIdOrcamento->setText(idOrcamento);
   ui->lineEditVenda->setText("Auto gerado");
   ui->dateTimeEdit->setDateTime(qApp->serverDateTime());
@@ -371,6 +369,8 @@ bool Venda::verifyFields() {
   // TODO: pintar campos necessarios de amarelo
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
+
+  // TODO: copiar do orçamento a verificação de disponibilidade de estoque?
 
   if (ui->widgetPgts->isHidden()) { return true; }
 
@@ -1340,12 +1340,6 @@ bool Venda::copiaProdutosOrcamento() {
 // REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
 // TODO: usar coluna 'idRelacionado' para vincular a linha quebrada/reposicao com a correspondente
 // TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao
-
-// NOTE: for coloring childs:
-//      QTreeView::item:!has-children
-//      {
-//      	background-color: rgb(255, 85, 0);
-//      }
 
 // TODO: implement proxyModel for treeView to color lines if estoque/promocao
 

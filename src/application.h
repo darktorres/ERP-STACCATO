@@ -30,9 +30,9 @@ public:
   auto getUpdating() const -> bool;
   auto lightTheme() -> void;
   auto rollbackTransaction() -> void;
-  auto serverDateTime() -> QDateTime;
   auto roundDouble(const double value) const -> double;
   auto serverDate() -> QDate;
+  auto serverDateTime() -> QDateTime;
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto showMessages() -> void;

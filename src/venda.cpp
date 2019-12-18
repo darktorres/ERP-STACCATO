@@ -17,6 +17,7 @@
 #include "porcentagemdelegate.h"
 #include "qtreeviewgriddelegate.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "ui_venda.h"
 #include "usersession.h"
 #include "venda.h"
@@ -444,7 +445,6 @@ void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 bool Venda::savingProcedures() {
   // TODO: remove novoPrazoEntrega from DB?
 
-  if (not setData("status", todosProdutosSaoEstoque() ? "ESTOQUE" : "PENDENTE")) { return false; }
   if (not setData("data", ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("dataOrc", ui->dateTimeEditOrc->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
@@ -471,19 +471,6 @@ bool Venda::savingProcedures() {
   if (not setData("total", ui->doubleSpinBoxTotal->value())) { return false; }
 
   return true;
-}
-
-bool Venda::todosProdutosSaoEstoque() {
-  bool temEstoque = true;
-
-  for (int row = 0; row < modelItem.rowCount(); ++row) {
-    if (not modelItem.data(row, "estoque").toBool()) {
-      temEstoque = false;
-      break;
-    }
-  }
-
-  return temEstoque;
 }
 
 void Venda::registerMode() {
@@ -989,6 +976,8 @@ bool Venda::cadastrar() {
     if (not query3.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
 
     if (not criarConsumos()) { return false; }
+
+    if (not Sql::updateVendaStatus(ui->lineEditVenda->text())) { return false; }
 
     return true;
   }();

@@ -69,7 +69,6 @@ private:
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
-  auto todosProdutosSaoEstoque() -> bool;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;

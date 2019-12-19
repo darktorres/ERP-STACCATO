@@ -25,7 +25,6 @@ private:
   // attributes
   const Tipo tipo;
   SqlRelationalTableModel modelPedidoFornecedor;
-  SortFilterProxyModel proxyModel;
   Ui::InputDialogProduto *ui;
   // methods
   auto cadastrar() -> bool;

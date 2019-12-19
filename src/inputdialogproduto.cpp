@@ -12,7 +12,7 @@
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogproduto.h"
 
-InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), proxyModel(&modelPedidoFornecedor, this), ui(new Ui::InputDialogProduto) {
+InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -32,7 +32,7 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
     ui->labelEvento->setText("Data compra:");
     ui->labelProximoEvento->setText("Data prevista confirmação:");
 
-    connect(&proxyModel, &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
+    connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
   if (tipo == Tipo::Faturamento) {
@@ -181,7 +181,7 @@ QDate InputDialogProduto::getDate() const { return ui->dateEditEvento->date(); }
 QDate InputDialogProduto::getNextDate() const { return ui->dateEditProximo->date(); }
 
 void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
-  disconnect(&proxyModel, &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
+  disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
   [&] {
     const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
@@ -200,7 +200,7 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
     }
   }();
 
-  connect(&proxyModel, &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
+  connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
   calcularTotal();
 }

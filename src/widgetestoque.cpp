@@ -107,11 +107,26 @@ void WidgetEstoque::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetEstoque::montaFiltro() {
-  const QString text = ui->lineEditBusca->text().replace("-", " ").replace("(", "").replace(")", "");
+  const QString text = ui->lineEditBusca->text();
 
-  const QString match = text.isEmpty() ? ""
-                                       : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
-                                             "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  QString match;
+
+  if (not text.isEmpty()) {
+    QStringList strings = text.split(" ", QString::SkipEmptyParts);
+
+    for (auto &string : strings) {
+      if (string.contains("-")) {
+        string.prepend("\"").append("\"");
+      } else {
+        string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+        string.prepend("+").append("*");
+      }
+    }
+
+    const QString text2 = strings.join(" ");
+
+    match = " AND (MATCH (e.descricao , e.codComercial) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  }
 
   QString having;
 

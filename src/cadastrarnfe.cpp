@@ -60,9 +60,6 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
 
   if (idVenda.isEmpty()) { qApp->enqueueError("idVenda vazio!", this); }
 
-  connect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::updateImpostos);
-  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado);
-
   ui->frame_2->hide();
 
   prepararNFe(items);
@@ -1040,6 +1037,8 @@ void CadastrarNFe::writeVolume(QTextStream &stream) const {
 }
 
 void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
+  updateImpostos();
+
   Q_UNUSED(index)
 
   //  const QString field = modelViewProdutoEstoque.record().fieldName(index.column());
@@ -1977,6 +1976,7 @@ void CadastrarNFe::setConnections() {
   connect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxCliente_textChanged, connectionType);
   connect(ui->itemBoxEnderecoEntrega, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged, connectionType);
   connect(ui->itemBoxEnderecoFaturamento, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged, connectionType);
+  connect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged, connectionType);
   connect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked, connectionType);
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked, connectionType);
@@ -2013,11 +2013,13 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->itemBoxCliente, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxCliente_textChanged);
   disconnect(ui->itemBoxEnderecoEntrega, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged);
   disconnect(ui->itemBoxEnderecoFaturamento, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged);
+  disconnect(ui->itemBoxLoja, &ItemBox::textChanged, this, &CadastrarNFe::alterarCertificado);
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged);
   disconnect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
   disconnect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
   disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
   disconnect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
+  disconnect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged);
 }
 
 bool CadastrarNFe::listarCfop() {

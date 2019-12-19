@@ -24,7 +24,7 @@ bool SqlRelationalTableModel::setData(const int row, const int column, const QVa
 
   QVariant adjustedValue = value;
 
-  if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
+  //  if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
 
   if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), adjustedValue); }
 

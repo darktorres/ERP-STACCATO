@@ -101,8 +101,21 @@ void PrecoEstoque::on_pushButtonSalvar_clicked() {
 void PrecoEstoque::on_pushButtonCancelar_clicked() { close(); }
 
 void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
-  const QString textFiltered = QString(text).replace("-", " ").replace("(", "").replace(")", "");
+  if (text.isEmpty()) {
+    modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
+    return;
+  }
 
-  modelProduto.setFilter(text.isEmpty() ? "estoque = TRUE AND estoqueRestante > 0"
-                                        : "MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('+" + textFiltered + "*' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
+  QStringList strings = text.split(" ", QString::SkipEmptyParts);
+
+  for (auto &string : strings) {
+    if (string.contains("-")) {
+      string.prepend("\"").append("\"");
+    } else {
+      string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+      string.prepend("+").append("*");
+    }
+  }
+
+  modelProduto.setFilter("MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
 }

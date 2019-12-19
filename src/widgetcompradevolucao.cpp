@@ -5,6 +5,7 @@
 #include <QSqlQuery>
 
 #include "application.h"
+#include "sql.h"
 #include "ui_widgetcompradevolucao.h"
 #include "widgetcompradevolucao.h"
 
@@ -105,11 +106,17 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
-  for (const auto &index : list) {
-    if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO FORN.")) { return; }
-  }
+  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  if (not modelVendaProduto.submitAll()) { return; }
+  if (not qApp->startTransaction()) { return; }
+
+  if (not retornarFornecedor(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
+
+  if (not modelVendaProduto.select()) { return; }
 
   qApp->enqueueInformation("Retornado para fornecedor!", this);
 }
@@ -134,14 +141,28 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   return modelVendaProduto.submitAll();
 }
 
+bool WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
+  for (const auto &index : list) {
+    if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO FORN.")) { return false; }
+  }
+
+  if (not modelVendaProduto.submitAll()) { return false; }
+
+  return true;
+}
+
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
+  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
+
   if (not qApp->startTransaction()) { return; }
 
   if (not retornarEstoque(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

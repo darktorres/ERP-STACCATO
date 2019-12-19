@@ -237,7 +237,7 @@ void ImportarXML::setupTables() {
   modelCompra.setHeaderData("codBarras", "Cód. Bar.");
   modelCompra.setHeaderData("obs", "Obs.");
 
-  modelCompra.setFilter("idCompra = " + idsCompra.join(" OR idCompra = "));
+  modelCompra.setFilter("idCompra = " + idsCompra.join(" OR idCompra = ") + " AND status NOT IN ('CANCELADO')");
 
   if (not modelCompra.select()) { return; }
 

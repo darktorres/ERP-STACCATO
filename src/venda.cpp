@@ -1064,6 +1064,7 @@ bool Venda::cancelamento() {
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) {
+      // TODO: é gerado crédito mesmo se a conta nao chegou a ser paga?
       if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
 

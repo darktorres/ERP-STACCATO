@@ -13,6 +13,7 @@
 #include "importarxml.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
+#include "sql.h"
 #include "ui_importarxml.h"
 
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
@@ -361,11 +362,7 @@ bool ImportarXML::salvarDadosVenda() {
 
   for (int row = 0; row < modelVenda.rowCount(); ++row) { idVendas << modelVenda.data(row, "idVenda").toString(); }
 
-  idVendas.removeDuplicates();
-
-  for (const auto &idVenda : idVendas) {
-    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueError(false, "Erro atualizando status: " + query.lastError().text()); }
-  }
+  if (not Sql::updateVendaStatus(idVendas)) { return false; }
 
   return true;
 }

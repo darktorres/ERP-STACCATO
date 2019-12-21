@@ -294,7 +294,7 @@ void ImportarXML::setupTables() {
 
   modelVenda.setTable("venda_has_produto2");
 
-  modelVenda.setFilter("idVendaProduto2 IN (" + idVendas.join(", ") + ")");
+  modelVenda.setFilter("idVendaProduto2 IN (" + idVendas.join(", ") + ") AND status = 'EM FATURAMENTO'");
 
   if (not modelVenda.select()) { return; }
 }

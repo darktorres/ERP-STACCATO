@@ -81,8 +81,8 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     QStringList temp = child->text().split(" / ");
 
-    list << "Manhã\n" + temp.at(0) + "\n" + temp.at(1);
-    list << "Tarde\n" + temp.at(0) + "\n" + temp.at(1);
+    list << "Manhã\n" + temp.at(0).left(15) + "\n" + temp.at(1).left(15);
+    list << "Tarde\n" + temp.at(0).left(15) + "\n" + temp.at(1).left(15);
   }
 
   ui->tableWidget->setRowCount(veiculos * 2); // manha/tarde

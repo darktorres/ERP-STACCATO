@@ -97,7 +97,7 @@
           <x>0</x>
           <y>0</y>
           <width>174</width>
-          <height>905</height>
+          <height>913</height>
          </rect>
         </property>
         <property name="autoFillBackground">
@@ -282,7 +282,7 @@
                <bool>true</bool>
               </property>
               <property name="checked">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_40">
                <item row="12" column="0">

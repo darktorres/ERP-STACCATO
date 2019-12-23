@@ -400,6 +400,7 @@ bool ImportarXML::salvarDadosCompra() {
 
   if (not modelCompra.submitAll()) { return false; }
 
+  // TODO: ainda precisa disso considerando que agora tem o trigger no BD?
   for (int row = 0; row < modelCompra.rowCount(); ++row) {
     QSqlQuery query;
 

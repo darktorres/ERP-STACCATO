@@ -33,13 +33,13 @@
       <item row="1" column="0">
        <widget class="QGroupBox" name="groupBoxStatus">
         <property name="title">
-         <string>Todos</string>
+         <string>Status</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="10" column="0">

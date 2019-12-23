@@ -122,13 +122,15 @@ void WidgetCompraPendentes::setupTables() {
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
-  const QString status = modelViewVendaProduto.data(index, "status").toString();
+  const int row = index.row();
+
+  const QString status = modelViewVendaProduto.data(row, "status").toString();
 
   if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
 
-  const QString financeiro = modelViewVendaProduto.data(index, "statusFinanceiro").toString();
-  const QString codComercial = modelViewVendaProduto.data(index, "codComercial").toString();
-  const QString idVenda = modelViewVendaProduto.data(index, "idVenda").toString();
+  const QString financeiro = modelViewVendaProduto.data(row, "statusFinanceiro").toString();
+  const QString codComercial = modelViewVendaProduto.data(row, "codComercial").toString();
+  const QString idVenda = modelViewVendaProduto.data(row, "idVenda").toString();
 
   if (financeiro == "PENDENTE") {
     QMessageBox msgBox(QMessageBox::Question, "Pendente!", "Financeiro não liberou! Continuar?", QMessageBox::Yes | QMessageBox::No, this);

@@ -263,14 +263,16 @@ void Devolucao::setupTables() {
 void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const double quant = modelProdutos2.data(index.row(), "quant").toDouble();
-  const double caixas = modelProdutos2.data(index.row(), "caixas").toDouble();
+  const int row = index.row();
+
+  const double quant = modelProdutos2.data(row, "quant").toDouble();
+  const double caixas = modelProdutos2.data(row, "caixas").toDouble();
 
   ui->doubleSpinBoxQuant->setSingleStep(quant / caixas);
 
   mapperProdutos.setCurrentModelIndex(index);
 
-  const double total = modelProdutos2.data(index.row(), "total").toDouble();
+  const double total = modelProdutos2.data(row, "total").toDouble();
 
   ui->doubleSpinBoxPrecoUn->setValue(total / quant);
 

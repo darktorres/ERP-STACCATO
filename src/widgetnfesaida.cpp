@@ -91,7 +91,7 @@ void WidgetNfeSaida::setupTables() {
 void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
-  query.bindValue(":idNFe", modelViewNFeSaida.data(index, "idNFe"));
+  query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text(), this); }
 

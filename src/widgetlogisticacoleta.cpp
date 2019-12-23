@@ -131,7 +131,6 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
     query2.bindValue(":dataRealColeta", dataColeta);
     query2.bindValue(":dataPrevReceb", dataPrevReceb);
     query2.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
-    //    query2.bindValue(":codComercial", modelViewColeta.data(item.row(), "codComercial"));
 
     if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
 

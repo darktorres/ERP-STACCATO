@@ -1085,6 +1085,8 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   unsetConnections();
 
   [&] {
+    const int row = index.row();
+
     ui->frame_7->setEnabled(true);
     ui->frame_8->setEnabled(true);
     ui->frame_9->setEnabled(true);
@@ -1092,21 +1094,21 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
     if (not listarCfop()) { return; }
 
-    ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelViewProdutoEstoque.data(index.row(), "cfop").toString(), Qt::MatchStartsWith));
-    ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelViewProdutoEstoque.data(index.row(), "orig").toString(), Qt::MatchStartsWith));
-    ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelViewProdutoEstoque.data(index.row(), "cstICMS").toString(), Qt::MatchStartsWith));
+    ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelViewProdutoEstoque.data(row, "cfop").toString(), Qt::MatchStartsWith));
+    ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelViewProdutoEstoque.data(row, "orig").toString(), Qt::MatchStartsWith));
+    ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelViewProdutoEstoque.data(row, "cstICMS").toString(), Qt::MatchStartsWith));
     // TODO: fix properly
     this->on_comboBoxSituacaoTributaria_currentTextChanged(ui->comboBoxSituacaoTributaria->currentText());
-    ui->comboBoxICMSModBc->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "modBC").toInt() + 1);
-    ui->comboBoxICMSModBcSt->setCurrentIndex(modelViewProdutoEstoque.data(index.row(), "modBCST").toInt() + 1);
-    ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelViewProdutoEstoque.data(index.row(), "cstIPI").toString(), Qt::MatchStartsWith));
-    ui->comboBoxPIScst->setCurrentIndex(ui->comboBoxPIScst->findText(modelViewProdutoEstoque.data(index.row(), "cstPIS").toString(), Qt::MatchStartsWith));
-    ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelViewProdutoEstoque.data(index.row(), "cstCOFINS").toString(), Qt::MatchStartsWith));
+    ui->comboBoxICMSModBc->setCurrentIndex(modelViewProdutoEstoque.data(row, "modBC").toInt() + 1);
+    ui->comboBoxICMSModBcSt->setCurrentIndex(modelViewProdutoEstoque.data(row, "modBCST").toInt() + 1);
+    ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelViewProdutoEstoque.data(row, "cstIPI").toString(), Qt::MatchStartsWith));
+    ui->comboBoxPIScst->setCurrentIndex(ui->comboBoxPIScst->findText(modelViewProdutoEstoque.data(row, "cstPIS").toString(), Qt::MatchStartsWith));
+    ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelViewProdutoEstoque.data(row, "cstCOFINS").toString(), Qt::MatchStartsWith));
 
     QSqlQuery queryCfop;
     if (ui->comboBoxTipo->currentText() == "0 Entrada") queryCfop.prepare("SELECT NAT FROM cfop_entr WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop");
     if (ui->comboBoxTipo->currentText() == "1 Saída") queryCfop.prepare("SELECT NAT FROM cfop_sai WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop");
-    queryCfop.bindValue(":cfop", modelViewProdutoEstoque.data(index.row(), "cfop"));
+    queryCfop.bindValue(":cfop", modelViewProdutoEstoque.data(row, "cfop"));
 
     if (not queryCfop.exec()) { return qApp->enqueueError("Erro buscando CFOP: " + queryCfop.lastError().text(), this); }
 
@@ -1116,17 +1118,17 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
       ui->doubleSpinBoxPercentualFcpDestino->setValue(2);
-      ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelViewProdutoEstoque.data(index.row(), "vBCPIS").toDouble());
+      ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble());
       ui->doubleSpinBoxAliquotaInternaDestinatario->setValue(queryPartilhaIntra.value("valor").toDouble());
       ui->doubleSpinBoxAliquotaInter->setValue(queryPartilhaInter.value("valor").toDouble());
       ui->doubleSpinBoxPercentualPartilha->setValue(80);
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
-      const double difal = modelViewProdutoEstoque.data(index.row(), "vBCPIS").toDouble() * diferencaICMS;
+      const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
       ui->doubleSpinBoxPartilhaDestinatario->setValue(difal * 0.8);
       ui->doubleSpinBoxPartilhaRemetente->setValue(difal * 0.2);
-      ui->doubleSpinBoxFcpDestino->setValue(modelViewProdutoEstoque.data(index.row(), "vBCPIS").toDouble() * 0.02);
+      ui->doubleSpinBoxFcpDestino->setValue(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * 0.02);
     }
 
     // -------------------------------------------------------------------------

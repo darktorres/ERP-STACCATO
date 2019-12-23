@@ -20,11 +20,9 @@ public:
   [[nodiscard]] auto select() -> bool final;
   [[nodiscard]] auto setData(const int row, const QString &column, const QVariant &value) -> bool;
   [[nodiscard]] auto setData(const int row, const int column, const QVariant &value) -> bool;
-  [[nodiscard]] auto setData(const QModelIndex &index, const QString &column, const QVariant &value) -> bool;
   [[nodiscard]] auto submitAll() -> bool;
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
-  auto data(const QModelIndex &index, const QString &column) const -> QVariant;
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;

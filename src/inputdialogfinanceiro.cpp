@@ -113,9 +113,11 @@ void InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged(const double a
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : list) {
-      if (not modelPedidoFornecedor2.setData(index.row(), "aliquotaSt", aliquota)) { return; }
+      const int row = index.row();
 
-      total += modelPedidoFornecedor2.data(index.row(), "preco").toDouble();
+      if (not modelPedidoFornecedor2.setData(row, "aliquotaSt", aliquota)) { return; }
+
+      total += modelPedidoFornecedor2.data(row, "preco").toDouble();
     }
 
     const double valueSt = total * (aliquota / 100);
@@ -309,12 +311,14 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     const auto list = ui->table->selectionModel()->selectedRows();
 
     for (const auto &index : list) {
-      const QString tipoSt = modelPedidoFornecedor2.data(index.row(), "st").toString();
+      const int row = index.row();
+
+      const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
 
       if (tipoSt == "Sem ST") { continue; }
 
-      const double aliquotaSt = modelPedidoFornecedor2.data(index.row(), "aliquotaSt").toDouble();
-      const double preco = modelPedidoFornecedor2.data(index.row(), "preco").toDouble();
+      const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
+      const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
       const double valorSt = preco * (aliquotaSt / 100);
 
       if (tipoSt == "ST Fornecedor") { stForn += valorSt; }

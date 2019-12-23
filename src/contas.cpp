@@ -42,7 +42,8 @@ void Contas::unsetConnections() {
 
 bool Contas::validarData(const QModelIndex &index) {
   if (index.column() == ui->tablePendentes->columnIndex("dataPagamento")) {
-    const int idPagamento = modelPendentes.data(index, "idPagamento").toInt();
+    const int row = index.row();
+    const int idPagamento = modelPendentes.data(row, "idPagamento").toInt();
 
     QSqlQuery query;
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
@@ -51,17 +52,17 @@ bool Contas::validarData(const QModelIndex &index) {
     if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
-    const QDate newDate = modelPendentes.data(index, "dataPagamento").toDate();
+    const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
 
     if (oldDate.isNull()) { return true; }
 
     if (tipo == Tipo::Pagar and (newDate > oldDate.addDays(92) or newDate < oldDate.addDays(-32))) {
-      if (not modelPendentes.setData(index, "dataPagamento", oldDate)) { return false; }
+      if (not modelPendentes.setData(row, "dataPagamento", oldDate)) { return false; }
       return qApp->enqueueError(false, "Limite de alteração de data excedido! Use corrigir fluxo na tela de compras!", this);
     }
 
     if (tipo == Tipo::Receber and (newDate > oldDate.addDays(32) or newDate < oldDate.addDays(-92))) {
-      if (not modelPendentes.setData(index, "dataPagamento", oldDate)) { return false; }
+      if (not modelPendentes.setData(row, "dataPagamento", oldDate)) { return false; }
       return qApp->enqueueError(false, "Limite de alteração de data excedido! Use corrigir fluxo na tela de vendas!", this);
     }
   }
@@ -75,19 +76,21 @@ void Contas::preencher(const QModelIndex &index) {
   unsetConnections();
 
   [&] {
+    const int row = index.row();
+
     if (index.column() == ui->tablePendentes->columnIndex("valor")) {
       QSqlQuery query;
       query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
-      query.bindValue(":idPagamento", modelPendentes.data(index, "idPagamento"));
+      query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
       if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando valor: " + query.lastError().text(), this); }
 
       const double oldValor = query.value("valor").toDouble();
-      const double newValor = modelPendentes.data(index, "valor").toDouble();
+      const double newValor = modelPendentes.data(row, "valor").toDouble();
 
       if ((oldValor / newValor < 0.99 or oldValor / newValor > 1.01) and qFabs(oldValor - newValor) > 5) {
         qApp->enqueueError("Limite de alteração de valor excedido! Use a função de corrigir fluxo!", this);
-        if (not modelPendentes.setData(index, QString("valor"), QVariant(oldValor))) { return; }
+        if (not modelPendentes.setData(row, "valor", oldValor)) { return; }
       }
     }
 
@@ -95,21 +98,21 @@ void Contas::preencher(const QModelIndex &index) {
       const int contaSantander = 3;
       const int contaItau = 33;
 
-      const int contaDestino = (tipo == Tipo::Receber and modelPendentes.data(index, "tipo").toString().contains("Boleto")) ? contaItau : contaSantander;
+      const int contaDestino = (tipo == Tipo::Receber and modelPendentes.data(row, "tipo").toString().contains("Boleto")) ? contaItau : contaSantander;
 
-      if (not modelPendentes.setData(index, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
-      if (not modelPendentes.setData(index, "valorReal", modelPendentes.data(index, "valor"))) { return; }
-      if (not modelPendentes.setData(index, "tipoReal", modelPendentes.data(index, "tipo"))) { return; }
-      if (not modelPendentes.setData(index, "parcelaReal", modelPendentes.data(index, "parcela"))) { return; }
-      if (not modelPendentes.setData(index, QString("contaDestino"), QVariant(contaDestino))) { return; }
-      if (not modelPendentes.setData(index, "centroCusto", modelPendentes.data(index, "idLoja"))) { return; }
+      if (not modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
+      if (not modelPendentes.setData(row, "valorReal", modelPendentes.data(row, "valor"))) { return; }
+      if (not modelPendentes.setData(row, "tipoReal", modelPendentes.data(row, "tipo"))) { return; }
+      if (not modelPendentes.setData(row, "parcelaReal", modelPendentes.data(row, "parcela"))) { return; }
+      if (not modelPendentes.setData(row, "contaDestino", contaDestino)) { return; }
+      if (not modelPendentes.setData(row, "centroCusto", modelPendentes.data(row, "idLoja"))) { return; }
 
       // -------------------------------------------------------------------------
 
-      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(index, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", modelPendentes.data(index, "parcela")}});
+      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
-        if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(index, "dataRealizado"))) { return; }
+        if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"))) { return; }
         if (not modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
         if (not modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"))) { return; }
         if (not modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"))) { return; }
@@ -123,18 +126,18 @@ void Contas::preencher(const QModelIndex &index) {
     if (index.column() == ui->tablePendentes->columnIndex("contaDestino")) {
       if (index.data() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
 
-      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(index, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", modelPendentes.data(index, "parcela")}});
+      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
-        if (not modelPendentes.setData(rowMatch, "contaDestino", modelPendentes.data(index, "contaDestino"))) { return; }
+        if (not modelPendentes.setData(rowMatch, "contaDestino", modelPendentes.data(row, "contaDestino"))) { return; }
       }
     }
 
     if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
       if (index.data().toString() == "PENDENTE") { return; }
 
-      if (modelPendentes.data(index, "status").toString() == "PENDENTE") {
-        if (not modelPendentes.setData(index, "status", "CONFERIDO")) { return; }
+      if (modelPendentes.data(row, "status").toString() == "PENDENTE") {
+        if (not modelPendentes.setData(row, "status", "CONFERIDO")) { return; }
       }
     }
   }();

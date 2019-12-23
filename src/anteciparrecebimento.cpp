@@ -73,9 +73,11 @@ void AnteciparRecebimento::calcularTotais() {
   double prazoMedio = 0;
 
   for (const auto &index : list) {
-    const QString tipo = modelContaReceber.data(index, "tipo").toString();
-    const double valor = modelContaReceber.data(index, "valor").toDouble();
-    const QDate dataPagamento = modelContaReceber.data(index, "dataPagamento").toDate();
+    const int row = index.row();
+
+    const QString tipo = modelContaReceber.data(row, "tipo").toString();
+    const double valor = modelContaReceber.data(row, "valor").toDouble();
+    const QDate dataPagamento = modelContaReceber.data(row, "dataPagamento").toDate();
 
     if (not tipo.contains("Taxa Cartão")) { bruto += valor; }
 
@@ -190,21 +192,21 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 
 bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   for (const auto &index : list) {
-    if (not modelContaReceber.setData(index, "status", "RECEBIDO")) { return false; }
-    if (not modelContaReceber.setData(index, "dataRealizado", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaReceber.setData(index, "valorReal", modelContaReceber.data(index, "valor"))) { return false; }
-    if (not modelContaReceber.setData(index, "tipoReal", modelContaReceber.data(index, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(index, "parcelaReal", modelContaReceber.data(index, "parcela"))) { return false; }
-    if (not modelContaReceber.setData(index, "tipoReal", modelContaReceber.data(index, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(index, "contaDestino", ui->itemBoxConta->getId())) { return false; }
+    const int row = index.row();
 
-    if (modelContaReceber.data(index, "centroCusto").isNull()) {
-      return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(index, "idVenda").toString(), this);
-    }
+    if (not modelContaReceber.setData(row, "status", "RECEBIDO")) { return false; }
+    if (not modelContaReceber.setData(row, "dataRealizado", ui->dateEditEvento->date())) { return false; }
+    if (not modelContaReceber.setData(row, "valorReal", modelContaReceber.data(row, "valor"))) { return false; }
+    if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
+    if (not modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"))) { return false; }
+    if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
+    if (not modelContaReceber.setData(row, "contaDestino", ui->itemBoxConta->getId())) { return false; }
 
-    if (modelContaReceber.data(index, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + modelContaReceber.data(index, "idVenda").toString(), this); }
+    if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
 
-    if (not modelContaReceber.setData(index, "observacao", modelContaReceber.data(index, "observacao").toString() + "Antecipação")) { return false; }
+    if (modelContaReceber.data(row, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
+
+    if (not modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + "Antecipação")) { return false; }
   }
 
   if (not modelContaReceber.submitAll()) { return false; }

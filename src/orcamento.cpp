@@ -74,9 +74,12 @@ Orcamento::~Orcamento() { delete ui; }
 void Orcamento::show() { RegisterDialog::show(); }
 
 void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return novoItem(); }
+  if (isReadOnly) {
+    if (not index.isValid()) { ui->tableProdutos->clearSelection(); }
+    return;
+  }
 
-  if (isReadOnly) { return; }
+  if (not index.isValid()) { return novoItem(); }
 
   ui->pushButtonAtualizarItem->show();
   ui->pushButtonAdicionarItem->hide();

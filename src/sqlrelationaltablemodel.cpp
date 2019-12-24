@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <cmath>
 
 #include "application.h"
 #include "sqlrelationaltablemodel.h"

@@ -1,12 +1,9 @@
-#include <QDate>
 #include <QDebug>
 #include <QFile>
 #include <QIcon>
 #include <QInputDialog>
 #include <QMessageBox>
-#include <QSqlDriver>
 #include <QSqlError>
-#include <QStyle>
 #include <QTimer>
 
 #include "application.h"

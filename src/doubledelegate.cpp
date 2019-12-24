@@ -26,6 +26,8 @@ void DoubleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
 
   if (not customPaint) { return; }
 
+  // QTreeView doesn't paint grid, paint it manually
+
   const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
 
   const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);

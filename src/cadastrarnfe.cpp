@@ -80,7 +80,7 @@ void CadastrarNFe::setupTables() {
 
   const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
 
-  if (not lojaACBr) { qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+  if (not lojaACBr) { return qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
 
   modelLoja.setFilter("idLoja = " + lojaACBr->toString());
 

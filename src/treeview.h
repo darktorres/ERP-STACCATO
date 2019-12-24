@@ -20,4 +20,5 @@ private:
   // methods
   auto columnIndex(const QString &column) const -> int;
   auto resizeAllColumns() -> void;
+  auto showContextMenu(const QPoint &pos) -> void;
 };

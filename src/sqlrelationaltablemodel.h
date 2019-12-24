@@ -47,6 +47,7 @@ protected:
   const int limit;
   // methods
   auto selectStatement() const -> QString final;
+  auto roundDouble(const double value) const -> double;
 };
 
 // TODO: add a readOnly attribute for when table is a view?

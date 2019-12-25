@@ -61,7 +61,6 @@ private:
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonImprimir_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
-  auto on_treeView_entered() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
   auto setConnections() -> void;

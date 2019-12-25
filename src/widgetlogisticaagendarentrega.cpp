@@ -707,6 +707,8 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
 }
 
 void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   if (index.column() == modelVendas.record().indexOf("novoPrazoEntrega")) {
     const auto list = ui->tableVendas->selectionModel()->selectedRows();
 

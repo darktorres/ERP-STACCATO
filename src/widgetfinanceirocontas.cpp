@@ -310,6 +310,8 @@ void WidgetFinanceiroContas::on_groupBoxData_toggled(const bool enabled) {
 }
 
 void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   ui->dateEditDe->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
   ui->dateEditAte->setDate(modelVencidos.record(index.row()).value("Data Pagamento").toDate());
 
@@ -319,6 +321,8 @@ void WidgetFinanceiroContas::on_tableVencidos_doubleClicked(const QModelIndex &i
 }
 
 void WidgetFinanceiroContas::on_tableVencer_doubleClicked(const QModelIndex &index) {
+  if (not index.isValid()) { return; }
+
   ui->dateEditDe->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
   ui->dateEditAte->setDate(modelVencer.record(index.row()).value("Data Pagamento").toDate());
 

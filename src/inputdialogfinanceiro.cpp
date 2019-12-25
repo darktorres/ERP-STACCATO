@@ -433,14 +433,6 @@ void InputDialogFinanceiro::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
-  connect(ui->treeView, &QTreeView::expanded, this, [&] {
-    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
-  });
-
-  connect(ui->treeView, &QTreeView::collapsed, this, [&] {
-    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
-  });
-
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("idPedido2");
   ui->treeView->hideColumn("idPedidoFK");

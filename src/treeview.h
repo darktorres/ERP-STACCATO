@@ -16,9 +16,15 @@ public:
 
 private:
   // attributes
+  bool autoResize = true;
   SqlTreeModel *baseModel = nullptr;
   // methods
+  auto collapseAll() -> void;
   auto columnIndex(const QString &column) const -> int;
+  auto expandAll() -> void;
   auto resizeAllColumns() -> void;
+  auto setAutoResize(const bool value) -> void;
+  auto setConnections() -> void;
   auto showContextMenu(const QPoint &pos) -> void;
+  auto unsetConnections() -> void;
 };

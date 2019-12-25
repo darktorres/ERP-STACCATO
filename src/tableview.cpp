@@ -15,10 +15,7 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
   connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
-
-  connect(this->verticalScrollBar(), &QScrollBar::valueChanged, this, [&] {
-    if (autoResize) { resizeColumnsToContents(); }
-  });
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
 
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);
@@ -26,6 +23,10 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   verticalHeader()->setDefaultSectionSize(20);
 
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+}
+
+void TableView::resizeColumnsToContents() {
+  if (autoResize) { QTableView::resizeColumnsToContents(); }
 }
 
 int TableView::columnCount() const { return model()->columnCount(); }
@@ -67,10 +68,10 @@ void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTabl
 int TableView::rowCount() const { return model()->rowCount(); }
 
 void TableView::redoView() {
-  if (not persistentColumns.isEmpty()) {
-    for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
-      for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
-    }
+  if (persistentColumns.isEmpty()) { return; }
+
+  for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
+    for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
   }
 }
 
@@ -104,8 +105,11 @@ void TableView::setModel(QAbstractItemModel *model) {
 void TableView::mousePressEvent(QMouseEvent *event) {
   const QModelIndex item = indexAt(event->pos());
 
-  // this enables clicking outside of lines to clear selection
-  if (not item.isValid()) { emit clicked(item); }
+  if (not item.isValid()) {
+    clearSelection();
+    // QTableView don't emit when index is invalid, emit manually for widgets
+    emit clicked(item);
+  }
 
   QTableView::mousePressEvent(event);
 }

@@ -103,14 +103,6 @@ void Venda::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
-  connect(ui->treeView, &QTreeView::expanded, this, [&] {
-    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
-  });
-
-  connect(ui->treeView, &QTreeView::collapsed, this, [&] {
-    for (int col = 0; col < modelTree.columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
-  });
-
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("statusOriginal");
@@ -163,7 +155,6 @@ void Venda::setConnections() {
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Venda::on_pushButtonImprimir_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
-  connect(ui->treeView, &QTreeView::entered, this, &Venda::on_treeView_entered, connectionType);
 }
 
 void Venda::unsetConnections() {
@@ -185,7 +176,6 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Venda::on_pushButtonImprimir_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
-  disconnect(ui->treeView, &QTreeView::entered, this, &Venda::on_treeView_entered);
 }
 
 void Venda::setupTables() {
@@ -599,8 +589,6 @@ bool Venda::viewRegister() {
     ui->widgetPgts->setRepresentacao(representacao);
     ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-
-    for (int col = 0; col < ui->treeView->model()->columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
 
     ui->tableFluxoCaixa2->hide();
     ui->widgetPgts->hide();
@@ -1173,10 +1161,6 @@ void Venda::on_pushButtonDevolucao_clicked() {
   auto *devolucao = new Devolucao(data("idVenda").toString(), this);
   connect(devolucao, &Devolucao::finished, [&] { viewRegisterById(ui->lineEditVenda->text()); });
   devolucao->show();
-}
-
-void Venda::on_treeView_entered() {
-  for (int col = 0; col < ui->treeView->model()->columnCount(); ++col) { ui->treeView->resizeColumnToContents(col); }
 }
 
 void Venda::on_dateTimeEdit_dateTimeChanged(const QDateTime &) { ui->widgetPgts->resetarPagamentos(); }

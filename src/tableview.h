@@ -33,5 +33,6 @@ private:
   // methods
   auto openPersistentEditor(const int row, const QString &column) -> void;
   auto redoView() -> void;
+  auto resizeColumnsToContents() -> void;
   auto showContextMenu(const QPoint &pos) -> void;
 };

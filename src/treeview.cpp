@@ -7,9 +7,27 @@
 TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
-  connect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns);
-  connect(this, &QTreeView::collapsed, this, &TreeView::resizeAllColumns);
-  connect(this, &QWidget::customContextMenuRequested, this, &TreeView::showContextMenu);
+  setConnections();
+
+  setAlternatingRowColors(true);
+  setUniformRowHeights(true);
+  setSortingEnabled(true);
+}
+
+void TreeView::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns, connectionType);
+  connect(this, &QTreeView::collapsed, this, &TreeView::resizeAllColumns, connectionType);
+  connect(this, &QWidget::customContextMenuRequested, this, &TreeView::showContextMenu, connectionType);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TreeView::resizeAllColumns, connectionType);
+}
+
+void TreeView::unsetConnections() {
+  disconnect(this, &QTreeView::expanded, this, &TreeView::resizeAllColumns);
+  disconnect(this, &QTreeView::collapsed, this, &TreeView::resizeAllColumns);
+  disconnect(this, &QWidget::customContextMenuRequested, this, &TreeView::showContextMenu);
+  disconnect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TreeView::resizeAllColumns);
 }
 
 void TreeView::showContextMenu(const QPoint &pos) {
@@ -23,7 +41,31 @@ void TreeView::showContextMenu(const QPoint &pos) {
   connect(&actionCollapse, &QAction::triggered, this, &TreeView::collapseAll);
   contextMenu.addAction(&actionCollapse);
 
+  QAction action("Autodimensionar", this);
+  action.setCheckable(true);
+  action.setChecked(autoResize);
+  connect(&action, &QAction::triggered, this, &TreeView::setAutoResize);
+  contextMenu.addAction(&action);
+
   contextMenu.exec(mapToGlobal(pos));
+}
+
+void TreeView::collapseAll() {
+  unsetConnections();
+
+  QTreeView::collapseAll();
+  resizeAllColumns();
+
+  setConnections();
+}
+
+void TreeView::expandAll() {
+  unsetConnections();
+
+  QTreeView::expandAll();
+  resizeAllColumns();
+
+  setConnections();
 }
 
 void TreeView::hideColumn(const QString &column) { QTreeView::hideColumn(columnIndex(column)); }
@@ -45,7 +87,9 @@ void TreeView::setModel(QAbstractItemModel *model) {
 }
 
 void TreeView::resizeAllColumns() {
-  for (int col = 0; col < model()->columnCount(); ++col) { resizeColumnToContents(col); }
+  if (autoResize) {
+    for (int col = 0; col < model()->columnCount(); ++col) { resizeColumnToContents(col); }
+  }
 }
 
 int TreeView::columnIndex(const QString &column) const {
@@ -58,4 +102,4 @@ int TreeView::columnIndex(const QString &column) const {
   return columnIndex;
 }
 
-// TODO: copy right-click menu from TableView
+void TreeView::setAutoResize(const bool value) { autoResize = value; }

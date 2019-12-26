@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QMenu>
+#include <QScrollBar>
 
 #include "application.h"
 #include "treeview.h"

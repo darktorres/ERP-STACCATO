@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QMenu>
+#include <QMouseEvent>
 #include <QScrollBar>
 
 #include "application.h"

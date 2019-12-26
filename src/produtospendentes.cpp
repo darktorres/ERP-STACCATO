@@ -200,7 +200,7 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
   return true;
 }
 
-void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() { // TODO: deve preencher lote no venda_has_produto
+void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const auto listProduto = ui->tableProdutos->selectionModel()->selectedRows();
 
   if (listProduto.size() > 1) { return qApp->enqueueError("Selecione apenas um item na tabela de produtos!", this); }

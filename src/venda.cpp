@@ -1029,6 +1029,14 @@ bool Venda::cancelamento() {
 
   // -------------------------------------------------------------------------
 
+  QSqlQuery queryDelete;
+  queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
+  queryDelete.bindValue(":idVenda", ui->lineEditVenda->text());
+
+  if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
+
+  // -------------------------------------------------------------------------
+
   QSqlQuery query3;
   query3.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, `idVendaProduto2` = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
@@ -1099,6 +1107,8 @@ void Venda::on_pushButtonCancelamento_clicked() {
   bool ok = true;
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.data(row, "estoque").toInt() > 0) { continue; }
+
     if (modelItem.data(row, "status").toString() != "PENDENTE") {
       ok = false;
       break;

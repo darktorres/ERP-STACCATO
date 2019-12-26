@@ -252,8 +252,8 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
   // senao fazer a quebra
 
   QSqlQuery query1;
-  query1.prepare("SELECT pf.codComercial, pf.idCompra, pf.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON "
-                 "pf.idPedido2 = ehc.idPedido2 WHERE e.idEstoque = :idEstoque");
+  query1.prepare("SELECT pf2.codComercial, GROUP_CONCAT(pf2.idCompra SEPARATOR ', ') AS idCompra, pf2.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
+                 "pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc.idPedido2 WHERE e.idEstoque = :idEstoque");
   query1.bindValue(":idEstoque", idEstoque);
 
   if (not query1.exec() or not query1.first()) {
@@ -269,7 +269,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
   SqlRelationalTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
-  modelCompra.setFilter("idCompra = " + idCompra + " AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto2 IS NULL");
+  modelCompra.setFilter("idCompra IN (" + idCompra + ") AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto2 IS NULL");
 
   if (not modelCompra.select()) { return {}; }
 

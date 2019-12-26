@@ -104,3 +104,12 @@ int TreeView::columnIndex(const QString &column) const {
 }
 
 void TreeView::setAutoResize(const bool value) { autoResize = value; }
+
+void TreeView::mousePressEvent(QMouseEvent *event) {
+  const QModelIndex item = indexAt(event->pos());
+
+  // QTreeView don't emit when index is invalid, emit manually for widgets
+  if (not item.isValid()) { clearSelection(); }
+
+  QTreeView::mousePressEvent(event);
+}

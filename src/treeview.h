@@ -14,6 +14,9 @@ public:
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
   auto setModel(QAbstractItemModel *model) -> void;
 
+protected:
+  auto mousePressEvent(QMouseEvent *event) -> void final;
+
 private:
   // attributes
   bool autoResize = true;

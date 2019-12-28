@@ -61,6 +61,9 @@ void XML::limparValores() {
   // ipi
   cEnq = 0;
   cstIPI = 0;
+  vBCIPI = 0;
+  pIPI = 0;
+  vIPI = 0;
   // pis
   cstPIS = 0;
   vBCPIS = 0;

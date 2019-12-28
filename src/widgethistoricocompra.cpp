@@ -5,7 +5,9 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
+#include "qtreeviewgriddelegate.h"
 #include "reaisdelegate.h"
+#include "searchdialogproxymodel.h"
 #include "ui_widgethistoricocompra.h"
 #include "widgethistoricocompra.h"
 
@@ -17,8 +19,8 @@ void WidgetHistoricoCompra::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetHistoricoCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &WidgetHistoricoCompra::on_pushButtonDanfe_clicked, connectionType);
   connect(ui->tablePedidos, &TableView::clicked, this, &WidgetHistoricoCompra::on_tablePedidos_clicked, connectionType);
-  connect(ui->tableNFe, &TableView::activated, this, &WidgetHistoricoCompra::on_tableNFe_activated, connectionType);
 }
 
 void WidgetHistoricoCompra::updateTables() {
@@ -51,56 +53,9 @@ void WidgetHistoricoCompra::setupTables() {
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
 
-  modelProdutos.setHeaderData("status", "Status");
-  modelProdutos.setHeaderData("statusFinanceiro", "Financeiro");
-  modelProdutos.setHeaderData("ordemRepresentacao", "OC Rep");
-  modelProdutos.setHeaderData("idVenda", "Venda");
-  modelProdutos.setHeaderData("descricao", "Produto");
-  modelProdutos.setHeaderData("colecao", "Coleção");
-  modelProdutos.setHeaderData("codComercial", "Cód. Com.");
-  modelProdutos.setHeaderData("quant", "Quant.");
-  modelProdutos.setHeaderData("un", "Un.");
-  modelProdutos.setHeaderData("un2", "Un2.");
-  modelProdutos.setHeaderData("caixas", "Cx.");
-  modelProdutos.setHeaderData("prcUnitario", "R$ Unit.");
-  modelProdutos.setHeaderData("preco", "R$");
-  modelProdutos.setHeaderData("kgcx", "Kg./Cx.");
-  modelProdutos.setHeaderData("formComercial", "Form. Com.");
-  modelProdutos.setHeaderData("codBarras", "Cód. Barras");
-  modelProdutos.setHeaderData("obs", "Obs.");
-  modelProdutos.setHeaderData("dataPrevCompra", "Prev. Compra");
-  modelProdutos.setHeaderData("dataRealCompra", "Compra");
-  modelProdutos.setHeaderData("dataPrevConf", "Prev. Confirmação");
-  modelProdutos.setHeaderData("dataRealConf", "Confirmação");
-  modelProdutos.setHeaderData("dataPrevFat", "Prev. Faturamento");
-  modelProdutos.setHeaderData("dataRealFat", "Faturamento");
-  modelProdutos.setHeaderData("dataPrevColeta", "Prev. Coleta");
-  modelProdutos.setHeaderData("dataRealColeta", "Coleta");
-  modelProdutos.setHeaderData("dataPrevReceb", "Prev. Recebimento");
-  modelProdutos.setHeaderData("dataRealReceb", "Recebimento");
-  modelProdutos.setHeaderData("dataPrevEnt", "Prev. Entrega");
-  modelProdutos.setHeaderData("dataRealEnt", "Entrega");
+  //------------------------------------------------------
 
-  ui->tableProdutos->setModel(&modelProdutos);
-
-  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("kgcx", new DoubleDelegate(this));
-
-  ui->tableProdutos->hideColumn("idRelacionado");
-  ui->tableProdutos->hideColumn("idPedido1");
-  ui->tableProdutos->hideColumn("selecionado");
-  ui->tableProdutos->hideColumn("aliquotaSt");
-  ui->tableProdutos->hideColumn("st");
-  ui->tableProdutos->hideColumn("ordemCompra");
-  ui->tableProdutos->hideColumn("idVendaProduto1");
-  ui->tableProdutos->hideColumn("idVendaProduto2");
-  ui->tableProdutos->hideColumn("idCompra");
-  ui->tableProdutos->hideColumn("fornecedor");
-  ui->tableProdutos->hideColumn("idProduto");
-  ui->tableProdutos->hideColumn("quantUpd");
-  ui->tableProdutos->hideColumn("quantConsumida");
+  modelProdutos2.setTable("pedido_fornecedor_has_produto2");
 
   //------------------------------------------------------
 
@@ -115,6 +70,69 @@ void WidgetHistoricoCompra::setupTables() {
   ui->tableNFe->hideColumn("idNFe");
 }
 
+void WidgetHistoricoCompra::setTreeView() {
+  modelTree.appendModel(&modelProdutos);
+  modelTree.appendModel(&modelProdutos2);
+
+  modelTree.updateData();
+
+  modelTree.setHeaderData("status", "Status");
+  modelTree.setHeaderData("statusFinanceiro", "Financeiro");
+  modelTree.setHeaderData("ordemRepresentacao", "OC Rep");
+  modelTree.setHeaderData("idVenda", "Venda");
+  modelTree.setHeaderData("descricao", "Produto");
+  modelTree.setHeaderData("colecao", "Coleção");
+  modelTree.setHeaderData("codComercial", "Cód. Com.");
+  modelTree.setHeaderData("quant", "Quant.");
+  modelTree.setHeaderData("un", "Un.");
+  modelTree.setHeaderData("un2", "Un2.");
+  modelTree.setHeaderData("caixas", "Cx.");
+  modelTree.setHeaderData("prcUnitario", "R$ Unit.");
+  modelTree.setHeaderData("preco", "R$");
+  modelTree.setHeaderData("kgcx", "Kg./Cx.");
+  modelTree.setHeaderData("formComercial", "Form. Com.");
+  modelTree.setHeaderData("codBarras", "Cód. Barras");
+  modelTree.setHeaderData("obs", "Obs.");
+  modelTree.setHeaderData("dataPrevCompra", "Prev. Compra");
+  modelTree.setHeaderData("dataRealCompra", "Compra");
+  modelTree.setHeaderData("dataPrevConf", "Prev. Confirmação");
+  modelTree.setHeaderData("dataRealConf", "Confirmação");
+  modelTree.setHeaderData("dataPrevFat", "Prev. Faturamento");
+  modelTree.setHeaderData("dataRealFat", "Faturamento");
+  modelTree.setHeaderData("dataPrevColeta", "Prev. Coleta");
+  modelTree.setHeaderData("dataRealColeta", "Coleta");
+  modelTree.setHeaderData("dataPrevReceb", "Prev. Recebimento");
+  modelTree.setHeaderData("dataRealReceb", "Recebimento");
+  modelTree.setHeaderData("dataPrevEnt", "Prev. Entrega");
+  modelTree.setHeaderData("dataRealEnt", "Entrega");
+
+  modelTree.proxyModel = new SearchDialogProxyModel(&modelTree, this);
+
+  ui->treeView->setModel(&modelTree);
+
+  ui->treeView->hideColumn("idRelacionado");
+  ui->treeView->hideColumn("selecionado");
+  ui->treeView->hideColumn("aliquotaSt");
+  ui->treeView->hideColumn("st");
+  ui->treeView->hideColumn("ordemCompra");
+  ui->treeView->hideColumn("idVendaProduto1");
+  ui->treeView->hideColumn("idVendaProduto2");
+  ui->treeView->hideColumn("idCompra");
+  ui->treeView->hideColumn("fornecedor");
+  ui->treeView->hideColumn("idProduto");
+  ui->treeView->hideColumn("quantUpd");
+  ui->treeView->hideColumn("quantConsumida");
+  ui->treeView->hideColumn("created");
+  ui->treeView->hideColumn("lastUpdated");
+
+  ui->treeView->setItemDelegate(new QTreeViewGridDelegate(this));
+
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4, true));
+  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(this, 4, true));
+}
+
 void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
@@ -123,6 +141,12 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
   modelProdutos.setFilter("idCompra = " + idCompra);
 
   if (not modelProdutos.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
+
+  modelProdutos2.setFilter("idCompra = " + idCompra);
+
+  if (not modelProdutos2.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos2.lastError().text(), this); }
+
+  setTreeView();
 
   modelNFe.setFilter("idCompra = " + idCompra);
 
@@ -138,11 +162,13 @@ void WidgetHistoricoCompra::montaFiltro() {
   modelViewComprasFinanceiro.setFilter(filtroBusca);
 }
 
-void WidgetHistoricoCompra::on_tableNFe_activated(const QModelIndex &index) {
-  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelNFe.data(index.row(), "idNFe").toInt())) { return; }
+void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
+  const auto list = ui->tableNFe->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
 // TODO: 4associar notas com cada produto? e verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota
-
-// TODO: converter tabela inferior para arvore

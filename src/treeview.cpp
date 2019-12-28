@@ -11,6 +11,7 @@ TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
 
   setConnections();
 
+  setEditTriggers(NoEditTriggers);
   setAlternatingRowColors(true);
   setUniformRowHeights(true);
   setSortingEnabled(true);

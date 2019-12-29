@@ -126,11 +126,20 @@ bool WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query3;
-  query3.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
-  query3.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  QSqlQuery query03;
+  query03.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
+  query03.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo consumos: " + query3.lastError().text(), this); }
+  if (not query03.exec()) { return qApp->enqueueError(false, "Erro buscando consumos: " + query03.lastError().text(), this); }
+
+  QSqlQuery query3;
+  query3.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque = :idEstoque");
+
+  while (query03.next()) {
+    query3.bindValue(":idEstoque", query03.value("idEstoque"));
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo consumos: " + query3.lastError().text(), this); }
+  }
 
   //-----------------------------------------------------------------------------
 

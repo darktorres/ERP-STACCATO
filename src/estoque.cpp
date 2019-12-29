@@ -315,7 +315,6 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
 
     const double caixas = modelCompra.data(row, "caixas").toDouble();
     const double prcUnitario = modelCompra.data(row, "prcUnitario").toDouble();
-    const double quantConsumida = modelCompra.data(row, "quantConsumida").toDouble();
     const double quantOriginal = modelCompra.data(row, "quant").toDouble();
     const double proporcaoNovo = quant / quantOriginal;
     const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
@@ -324,12 +323,10 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
     if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return {}; }
     if (not modelCompra.setData(newRow, "idVendaProduto2", idVendaProduto2)) { return {}; }
     if (not modelCompra.setData(newRow, "quant", quant)) { return {}; }
-    if (not modelCompra.setData(newRow, "quantConsumida", qMin(quant, quantConsumida))) { return {}; }
     if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) { return {}; }
     if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) { return {}; }
 
     if (not modelCompra.setData(row, "quant", quantOriginal - quant)) { return {}; }
-    if (not modelCompra.setData(row, "quantConsumida", qMin(quantOriginal - quant, quantConsumida))) { return {}; }
     if (not modelCompra.setData(row, "caixas", caixas * proporcaoAntigo)) { return {}; }
     if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return {}; }
   }

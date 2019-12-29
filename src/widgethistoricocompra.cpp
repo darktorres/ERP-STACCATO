@@ -121,7 +121,6 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->hideColumn("fornecedor");
   ui->treeView->hideColumn("idProduto");
   ui->treeView->hideColumn("quantUpd");
-  ui->treeView->hideColumn("quantConsumida");
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 

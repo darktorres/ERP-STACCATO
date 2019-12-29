@@ -226,7 +226,6 @@ void ImportarXML::setupTables() {
   modelCompra.setHeaderData("descricao", "Produto");
   modelCompra.setHeaderData("colecao", "Coleção");
   modelCompra.setHeaderData("quant", "Quant.");
-  modelCompra.setHeaderData("quantConsumida", "Consumido");
   modelCompra.setHeaderData("un", "Un.");
   modelCompra.setHeaderData("un2", "Un. 2");
   modelCompra.setHeaderData("caixas", "Cx.");

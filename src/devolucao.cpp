@@ -489,8 +489,6 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
 
   //----------------------------------------------
 
-  const QString idVendaProdutoFK = modelProdutos2.data(currentRow, "idVendaProdutoFK").toString();
-
   if (not modelProdutos2.submitAll()) { return false; }
 
   if (not modelConsumos.submitAll()) { return false; }

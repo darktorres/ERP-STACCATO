@@ -127,8 +127,6 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: e se tiver varios consumos?
 
   for (const auto &index : list) {
-    const QString status = modelVendaProduto.data(index.row(), "statusOriginal").toString();
-
     if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
     QSqlQuery query;

@@ -57,7 +57,6 @@ void CancelaProduto::setupTables() {
   ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
-  ui->table->hideColumn("quantConsumida");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("idPedido2");
   ui->table->hideColumn("idProduto");

@@ -179,7 +179,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("quantUpd");
-  ui->table->hideColumn("quantConsumida");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
@@ -444,7 +443,6 @@ void InputDialogFinanceiro::setTreeView() {
   ui->treeView->hideColumn("idCompra");
   ui->treeView->hideColumn("idProduto");
   ui->treeView->hideColumn("quantUpd");
-  ui->treeView->hideColumn("quantConsumida");
   ui->treeView->hideColumn("codBarras");
   ui->treeView->hideColumn("dataPrevCompra");
   ui->treeView->hideColumn("dataRealCompra");

@@ -680,9 +680,10 @@ void Venda::montarFluxoCaixa() {
 
         const double taxaComissao = query.value("comissaoLoja").toDouble() / 100;
         const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
-        double valorAjustado = taxaComissao * (valorComissao - (valorComissao / totalVenda * frete));
 
-        if (modelFluxoCaixa.data(0, "observacao").toString() == "FRETE") { valorAjustado = valorComissao * taxaComissao; }
+        const bool isFreteLoja = ui->widgetPgts->listLinePgt.at(0)->text() == "Frete";
+
+        const double valorAjustado = isFreteLoja ? valorComissao * taxaComissao : taxaComissao * (valorComissao - (valorComissao / totalVenda * frete));
 
         const int row = modelFluxoCaixa2.insertRowAtEnd();
 
@@ -1335,6 +1336,3 @@ bool Venda::copiaProdutosOrcamento() {
 // REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
 // TODO: usar coluna 'idRelacionado' para vincular a linha quebrada/reposicao com a correspondente
 // TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao
-
-// TODO: implement proxyModel for treeView to color lines if estoque/promocao
-

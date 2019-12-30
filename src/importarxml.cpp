@@ -712,8 +712,8 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "codComercial", xml.codProd)) { return false; }
   if (not modelEstoque.setData(newRow, "ncm", xml.ncm)) { return false; }
   if (not modelEstoque.setData(newRow, "cfop", xml.cfop)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorUnid", (xml.valor + xml.vIPI) / xml.quant)) { return false; }
-  if (not modelEstoque.setData(newRow, "valor", xml.valor + xml.vIPI)) { return false; }
+  if (not modelEstoque.setData(newRow, "valorUnid", (xml.valor + xml.vIPI - xml.desconto) / xml.quant)) { return false; }
+  if (not modelEstoque.setData(newRow, "valor", xml.valor + xml.vIPI - xml.desconto)) { return false; }
   if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) { return false; }

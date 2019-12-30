@@ -175,6 +175,7 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->hideColumn("selecionado");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
+  ui->table->hideColumn("idVendaProduto1");
   ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idProduto");

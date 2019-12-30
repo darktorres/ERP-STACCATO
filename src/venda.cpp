@@ -380,7 +380,7 @@ bool Venda::verifyFields() {
     return false;
   }
 
-  if (ui->itemBoxProfissional->getId() != 1 and not ui->checkBoxPontuacaoIsento->isChecked() and not ui->checkBoxPontuacaoPadrao->isChecked()) {
+  if (not financeiro and ui->itemBoxProfissional->getId() != 1 and not ui->checkBoxPontuacaoIsento->isChecked() and not ui->checkBoxPontuacaoPadrao->isChecked()) {
     qApp->enqueueError("Por favor preencha a pontuação!", this);
     ui->checkBoxRT->setChecked(true);
     ui->doubleSpinBoxPontuacao->setFocus();
@@ -1338,4 +1338,3 @@ bool Venda::copiaProdutosOrcamento() {
 
 // TODO: implement proxyModel for treeView to color lines if estoque/promocao
 
-// TODO: nao perguntar pontuacao se for correcao de fluxo no financeiro? nao vai gerar lançamento de RT novamente

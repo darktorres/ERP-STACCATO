@@ -17,4 +17,8 @@ private:
   const int promocaoColumn = -1;
   const int descontinuadoColumn = -1;
   const int validadeColumn = -1;
+
+  // QSortFilterProxyModel interface
+protected:
+  auto lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const -> bool final;
 };

@@ -72,4 +72,10 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
   return QSortFilterProxyModel::data(proxyIndex, role);
 }
 
+bool SearchDialogProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const {
+  if (source_left.parent().isValid()) { return false; } // disable sorting for childs
+
+  return QSortFilterProxyModel::lessThan(source_left, source_right);
+}
+
 // TODO: posteriormente remover o azul da promocao 'BLACK NOVEMBER'

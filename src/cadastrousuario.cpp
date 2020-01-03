@@ -275,3 +275,6 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)
 // FIXME: quando o usuario é alterado o usuario do MySql não é, fazendo com que o login não funcione mais
+
+// FIXME: nao está mostrando mensagem de confirmacao apos desativar usuario
+// TODO: mudar botao de 'remover' para 'desativar'

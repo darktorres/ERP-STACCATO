@@ -478,6 +478,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
+  // update this table to show the newly divided lines
+  void(modelProdutos.select());
+
   ui->tableProdutos->clearSelection();
 }
 

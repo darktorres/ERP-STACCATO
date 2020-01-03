@@ -172,6 +172,8 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: ProdutosPendentes::on_pushButtonComprar")) { return qApp->rollbackTransaction(); }
+
   if (not comprar(list, inputDlg.getNextDate())) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
@@ -226,6 +228,8 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: ProdutosPendentes::on_pushButtonConsumirEstoque")) { return qApp->rollbackTransaction(); }
 
   if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) { return qApp->rollbackTransaction(); }
 

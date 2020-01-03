@@ -6,6 +6,7 @@
 
 #include "application.h"
 #include "inputdialogconfirmacao.h"
+#include "log.h"
 #include "orcamento.h"
 #include "sortfilterproxymodel.h"
 #include "ui_inputdialogconfirmacao.h"
@@ -90,6 +91,8 @@ void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
 
   if (tipo != Tipo::Representacao) {
     if (not qApp->startTransaction()) { return; }
+
+    if (not Log::createLog("Transação: InputDialogConfirmacao::on_pushButtonSalvar")) { return qApp->rollbackTransaction(); }
 
     if (not cadastrar()) { return qApp->rollbackTransaction(); }
 
@@ -287,6 +290,8 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
   if (not ok or qFuzzyIsNull(caixasDefeito)) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: InputDialogConfirmacao::on_pushButtonQuebrado")) { return qApp->rollbackTransaction(); }
 
   if (not processarQuebra(row, choice, caixasDefeito, unCaixa)) { return qApp->rollbackTransaction(); }
 

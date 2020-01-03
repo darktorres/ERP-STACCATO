@@ -11,6 +11,7 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
@@ -176,6 +177,8 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueError("Resposta: " + resposta.value(), this); }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetNfeSaida::on_pushButtonCancelarNFe")) { return qApp->rollbackTransaction(); }
 
   if (not cancelarNFe(chaveAcesso, row)) { return qApp->rollbackTransaction(); }
 
@@ -352,6 +355,8 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
     const auto [xml, resposta] = tuple.value();
 
     if (not qApp->startTransaction()) { return; }
+
+    if (not Log::createLog("Transação: WidgetNfeSaida::on_pushButtonConsultarNFe")) { return qApp->rollbackTransaction(); }
 
     if (not atualizarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
 

@@ -6,6 +6,7 @@
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
+#include "log.h"
 #include "ui_cadastrocliente.h"
 #include "usersession.h"
 
@@ -309,6 +310,11 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
 
 bool CadastroCliente::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroCliente::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }

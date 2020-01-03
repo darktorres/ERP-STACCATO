@@ -5,6 +5,7 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
 #include "ui_widgetlogisticaentregues.h"
@@ -141,6 +142,8 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
   // desfazer passos da confirmacao de entrega (volta para tela de confirmar entrega)
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetLogisticaEntregues::on_pushButtonCancelar")) { return qApp->rollbackTransaction(); }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 

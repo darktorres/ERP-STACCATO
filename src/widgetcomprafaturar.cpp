@@ -9,6 +9,7 @@
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
+#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "ui_widgetcomprafaturar.h"
@@ -126,6 +127,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   if (pularNota) {
     if (not qApp->startTransaction()) { return; }
+    if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return qApp->rollbackTransaction(); }
     if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
     if (not qApp->endTransaction()) { return; }
   } else {
@@ -137,6 +139,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   }
 
   if (not qApp->startTransaction()) { return; }
+  if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return qApp->rollbackTransaction(); }
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
   if (not qApp->endTransaction()) { return; }
 

@@ -5,6 +5,7 @@
 
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "ui_widgetnfeentrada.h"
 #include "widgetnfeentrada.h"
 #include "xml_viewer.h"
@@ -94,6 +95,8 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   if (msgBox.exec() == QMessageBox::No) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetNfeEntrada::on_pushButtonRemoverNFe")) { return qApp->rollbackTransaction(); }
 
   if (not remover(row)) { return qApp->rollbackTransaction(); }
 

@@ -5,6 +5,7 @@
 #include "anteciparrecebimento.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "reaisdelegate.h"
 #include "ui_anteciparrecebimento.h"
 
@@ -276,6 +277,8 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: AnteciparRecebimento::on_pushButtonGerar")) { return qApp->rollbackTransaction(); }
 
   if (not cadastrar(list)) { return qApp->rollbackTransaction(); }
 

@@ -7,6 +7,7 @@
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "itembox.h"
+#include "log.h"
 #include "ui_cadastroprofissional.h"
 #include "usersession.h"
 
@@ -163,6 +164,11 @@ bool CadastroProfissional::viewRegister() {
 
 bool CadastroProfissional::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroProfissional::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }

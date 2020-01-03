@@ -5,6 +5,7 @@
 #include <QSqlQuery>
 
 #include "application.h"
+#include "log.h"
 #include "sql.h"
 #include "ui_widgetcompradevolucao.h"
 #include "widgetcompradevolucao.h"
@@ -110,6 +111,8 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor")) { return qApp->rollbackTransaction(); }
+
   if (not retornarFornecedor(list)) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
@@ -157,6 +160,8 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetCompraDevolucao::on_pushButtonRetornarEstoque")) { return qApp->rollbackTransaction(); }
 
   if (not retornarEstoque(list)) { return qApp->rollbackTransaction(); }
 

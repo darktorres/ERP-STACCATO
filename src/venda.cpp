@@ -11,6 +11,7 @@
 #include "estoque.h"
 #include "excel.h"
 #include "impressao.h"
+#include "log.h"
 #include "logindialog.h"
 #include "noeditdelegate.h"
 #include "orcamento.h"
@@ -889,6 +890,11 @@ bool Venda::atualizarCredito() {
 bool Venda::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
 
+  if (not Log::createLog("Transação: Venda::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) {
       if (not generateId()) { return false; }
@@ -1130,6 +1136,8 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: Venda::on_pushButtonCancelamento")) { return qApp->rollbackTransaction(); }
+
   if (not cancelamento()) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
@@ -1208,6 +1216,8 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
   if (not verifyFields()) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: Venda::on_pushButtonFinanceiroSalvar")) { return qApp->rollbackTransaction(); }
 
   if (not financeiroSalvar()) { return qApp->rollbackTransaction(); }
 

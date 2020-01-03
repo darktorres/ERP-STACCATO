@@ -14,6 +14,7 @@
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
+#include "log.h"
 #include "ui_widgetlogisticaagendarcoleta.h"
 #include "usersession.h"
 #include "venda.h"
@@ -201,6 +202,8 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga")) { return qApp->rollbackTransaction(); }
+
   if (not processRows(list, ui->dateTimeEdit->date(), true)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
@@ -224,6 +227,8 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
   if (input.exec() != InputDialog::Accepted) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta")) { return qApp->rollbackTransaction(); }
 
   if (not processRows(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 

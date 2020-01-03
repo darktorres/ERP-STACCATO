@@ -7,6 +7,7 @@
 #include "cadastroloja.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
+#include "log.h"
 #include "porcentagemdelegate.h"
 #include "searchdialog.h"
 #include "ui_cadastroloja.h"
@@ -402,6 +403,11 @@ void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::At
 bool CadastroLoja::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
 
+  if (not Log::createLog("Transação: CadastroLoja::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -572,6 +578,8 @@ bool CadastroLoja::adicionarPagamento() {
 void CadastroLoja::on_pushButtonAdicionarPagamento_clicked() {
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: CadastroLoja::on_pushButtonAdicionarPagamento")) { return qApp->rollbackTransaction(); }
+
   if (not adicionarPagamento()) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
@@ -664,6 +672,8 @@ bool CadastroLoja::atualizarPagamento() {
 
 void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: CadastroLoja::on_pushButtonAtualizarPagamento")) { return qApp->rollbackTransaction(); }
 
   if (not atualizarPagamento()) { return qApp->rollbackTransaction(); }
 

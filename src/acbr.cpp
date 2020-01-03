@@ -7,6 +7,7 @@
 
 #include "acbr.h"
 #include "application.h"
+#include "log.h"
 #include "usersession.h"
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {
@@ -150,6 +151,8 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
 void ACBr::removerNota(const int idNFe) {
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: ACBr::removerNota")) { return qApp->rollbackTransaction(); }
 
   const bool remover = [&] {
     QSqlQuery query2a;

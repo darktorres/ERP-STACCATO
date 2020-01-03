@@ -6,6 +6,7 @@
 
 #include "application.h"
 #include "cadastrarnfe.h"
+#include "log.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "ui_cadastrarnfe.h"
@@ -224,6 +225,8 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
 void CadastrarNFe::removerNota(const int idNFe) {
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: CadastrarNFe::removerNota")) { return qApp->rollbackTransaction(); }
+
   const bool remover = [&] {
     QSqlQuery query2a;
     query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFeSaida");
@@ -350,6 +353,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: CadastrarNFe::on_pushButtonEnviarNFe_precadastrar")) { return qApp->rollbackTransaction(); }
+
   const auto idNFe = preCadastrarNota();
   qDebug() << "precadastrar";
 
@@ -366,6 +371,8 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   if (not processarResposta(resposta2.value(), filePath, idNFe.value(), acbrRemoto)) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: CadastrarNFe::on_pushButtonEnviarNFe_cadastrar")) { return qApp->rollbackTransaction(); }
 
   if (not cadastrar(idNFe.value())) { return qApp->rollbackTransaction(); }
 

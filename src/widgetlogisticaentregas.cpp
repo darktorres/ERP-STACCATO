@@ -12,6 +12,7 @@
 #include "doubledelegate.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
+#include "log.h"
 #include "sql.h"
 #include "sqlquerymodel.h"
 #include "ui_widgetlogisticaentregas.h"
@@ -143,6 +144,8 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
   if (input.exec() != InputDialog::Accepted) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonReagendar")) { return qApp->rollbackTransaction(); }
 
   if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -315,6 +318,8 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega")) { return qApp->rollbackTransaction(); }
+
   if (not confirmarEntrega(inputDlg.getDate(), inputDlg.getEntregou(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
@@ -357,6 +362,8 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
   if (msgBox.exec() == QMessageBox::No) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonCancelarEntrega")) { return qApp->rollbackTransaction(); }
 
   if (not cancelarEntrega(list)) { return qApp->rollbackTransaction(); }
 
@@ -414,6 +421,8 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
     const auto [xml, resposta] = *tuple;
 
     if (not qApp->startTransaction()) { return; }
+
+    if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonConsultarNFe")) { return qApp->rollbackTransaction(); }
 
     if (not processarConsultaNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
 

@@ -9,6 +9,7 @@
 #include "application.h"
 #include "cadastrousuario.h"
 #include "checkboxdelegate.h"
+#include "log.h"
 #include "searchdialog.h"
 #include "ui_cadastrousuario.h"
 #include "usersession.h"
@@ -187,6 +188,11 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 
 bool CadastroUsuario::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroUsuario::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }

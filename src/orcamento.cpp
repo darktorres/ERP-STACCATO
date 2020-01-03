@@ -12,6 +12,7 @@
 #include "doubledelegate.h"
 #include "excel.h"
 #include "impressao.h"
+#include "log.h"
 #include "logindialog.h"
 #include "orcamento.h"
 #include "porcentagemdelegate.h"
@@ -1020,6 +1021,11 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 
 bool Orcamento::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: Orcamento::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) {

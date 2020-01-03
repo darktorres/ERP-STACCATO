@@ -8,6 +8,7 @@
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
+#include "log.h"
 #include "sql.h"
 #include "ui_widgetlogisticarecebimento.h"
 #include "venda.h"
@@ -145,6 +146,8 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido")) { return qApp->rollbackTransaction(); }
+
   if (not processRows(list, inputDlg.getDate(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
 
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
@@ -175,6 +178,8 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
   if (input.exec() != InputDialog::Accepted) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetLogisticaRecebimento::on_pushButtonReagendar")) { return qApp->rollbackTransaction(); }
 
   if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -248,6 +253,8 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
   if (msgBox.exec() == QMessageBox::No) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetLogisticaRecebimento::on_pushButtonCancelar")) { return qApp->rollbackTransaction(); }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 

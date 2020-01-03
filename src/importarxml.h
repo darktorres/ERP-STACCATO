@@ -23,6 +23,7 @@ private:
     int idProduto;
     int idEstoque;
     double estoqueRestante;
+    double valorUnid;
   };
 
   // attributes

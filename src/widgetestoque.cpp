@@ -21,28 +21,15 @@ void WidgetEstoque::setConnections() {
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
-  connect(
-      ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this,
-      [&](const bool checked) {
-        if (checked) { setupTables(); }
-      },
-      connectionType);
-  connect(
-      ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this,
-      [&](const bool checked) {
-        if (checked) { setupTables(); }
-      },
-      connectionType);
-  connect(
-      ui->radioButtonMaior, &QRadioButton::toggled, this,
-      [&](const bool checked) {
-        if (checked) { setupTables(); }
-      },
-      connectionType);
+  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated, connectionType);
 }
 
-void WidgetEstoque::setupTables() {
+void WidgetEstoque::setupTables(const bool checked) {
+  if (not checked) { return; }
+
   montaFiltro();
 
   model.setHeaderData("cnpjDest", "CNPJ");

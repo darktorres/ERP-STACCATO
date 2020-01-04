@@ -329,6 +329,14 @@ bool Devolucao::criarDevolucao() {
 }
 
 bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2) {
+  //  10cx
+
+  //  1cx devolvido -> -1cx consumo
+  //  9cx entregue  -> -9cx consumo
+  //  D1 1cx pend. dev. -> sem consumo
+  //  D1 1cx dev. forn. -> sem consumo
+  //  D1 1cx dev. est.  -> +1cx
+
   const double quant = modelProdutos2.data(mapperProdutos.currentIndex(), "quant").toDouble();
   const double quantDevolvida = ui->doubleSpinBoxQuant->value();
   const double restante = quant - quantDevolvida;
@@ -384,6 +392,13 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
     return qApp->enqueueError(false, "Erro buscando idVendaProduto2: " + queryBusca.lastError().text(), this);
   }
 
+  QSqlQuery queryRelacionado;
+
+  if (not queryRelacionado.exec("UPDATE venda_has_produto2 SET idRelacionado = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString() +
+                                " WHERE idVendaProduto2 = " + queryBusca.value("idVendaProduto2").toString())) {
+    return qApp->enqueueError(false, "Erro marcando linha relacionada: " + queryRelacionado.lastError().text(), this);
+  }
+
   //------------------------------------
 
   modelConsumos.setFilter("idVendaProduto2 = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString());
@@ -391,10 +406,8 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   if (not modelConsumos.select()) { return qApp->enqueueError(false, "Erro lendo consumos: " + modelConsumos.lastError().text(), this); }
 
   if (modelConsumos.rowCount() > 0) {
-    if (not modelConsumos.setData(0, "idVendaProduto2", queryBusca.value("idVendaProduto2"))) { return false; }
-    if (not modelConsumos.setData(0, "status", "PENDENTE DEV.")) { return false; }
+    if (not modelConsumos.setData(0, "status", "CONSUMO")) { return false; }
     if (not modelConsumos.setData(0, "quant", quantDevolvida * -1)) { return false; }
-    if (not modelConsumos.setData(0, "quantUpd", 5)) { return false; }
     if (not modelConsumos.setData(0, "caixas", (quantDevolvida / step))) { return false; }
   }
 
@@ -484,8 +497,8 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
 
   const double totalRestante = parcialDescRestante * (1 - (descGlobal / 100));
 
-  // TODO: guardar status original nessa linha?
   if (not modelProdutos2.setData(currentRow, "total", totalRestante)) { return false; }
+  if (not modelProdutos2.setData(currentRow, "statusOriginal", modelProdutos2.data(currentRow, "status"))) { return false; }
   if (not modelProdutos2.setData(currentRow, "status", "DEVOLVIDO")) { return false; }
 
   //----------------------------------------------

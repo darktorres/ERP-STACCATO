@@ -96,6 +96,8 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraDevolucao::on_table_selectionChanged, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
 }
 
 void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
@@ -126,23 +128,56 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
-  // TODO: add quant too?
-  // TODO: e se tiver varios consumos?
 
   for (const auto &index : list) {
-    if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
+    const int row = index.row();
 
-    QSqlQuery query;
-    query.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
-    query.bindValue(":idVendaProduto2", modelVendaProduto.data(index.row(), "idVendaProduto2"));
+    if (not modelVendaProduto.setData(row, "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro ajustando consumo: " + query.lastError().text(), this); }
+    const QString status = modelVendaProduto.data(row, "statusOriginal").toString();
+    const QString idRelacionado = modelVendaProduto.data(row, "idRelacionado").toString();
+
+    // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo idVendaProduto)
+    // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total alterado
+    // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
+
+    SqlRelationalTableModel modelConsumo;
+    modelConsumo.setTable("estoque_has_consumo");
+    modelConsumo.setFilter("idVendaProduto2 = " + idRelacionado);
+
+    if (not modelConsumo.select()) { return false; }
+
+    if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou consumo!", this); }
+
+    const int newRow = modelConsumo.insertRowAtEnd();
+
+    for (int column = 0; column < modelConsumo.columnCount(); ++column) {
+      if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
+      if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
+      if (modelConsumo.fieldIndex("created") == column) { continue; }
+      if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
+
+      const QVariant value = modelConsumo.data(0, column);
+
+      if (not modelConsumo.setData(newRow, column, value)) { return false; }
+    }
+
+    // TODO: update other fields
+    if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(row, "idVendaProduto2"))) { return false; }
+    if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
+    if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(row, "caixas").toDouble() * -1)) { return false; }
+    if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(row, "quant").toDouble() * -1)) { return false; }
+    if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
+
+    if (not modelConsumo.submitAll()) { return false; }
   }
 
   return modelVendaProduto.submitAll();
 }
 
 bool WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
+  // se for devolucao fornecedor na logica nova nao havera linha de consumo, a quant. simplesmente mantem o consumo negativo na linha original de DEVOLVIDO
+
   for (const auto &index : list) {
     if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO FORN.")) { return false; }
   }
@@ -185,4 +220,20 @@ void WidgetCompraDevolucao::montaFiltro() {
   ui->pushButtonRetornarEstoque->setEnabled(isPendente);
 
   modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
+}
+
+void WidgetCompraDevolucao::on_table_selectionChanged() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  QStringList status;
+
+  for (auto index : list) { status << modelVendaProduto.data(index.row(), "statusOriginal").toString(); }
+
+  status.removeDuplicates();
+
+  if (status.contains("PENDENTE") or status.contains("INICIADO") or status.contains("EM COMPRA") or status.contains("EM FATURAMENTO")) {
+    ui->pushButtonRetornarEstoque->setDisabled(true);
+  } else {
+    ui->pushButtonRetornarEstoque->setEnabled(true);
+  }
 }

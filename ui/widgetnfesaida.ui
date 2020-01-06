@@ -48,7 +48,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Gerar Relatório</string>
+        <string>Gerar Relatório Mensal</string>
        </property>
       </widget>
      </item>

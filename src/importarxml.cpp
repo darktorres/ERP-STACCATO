@@ -628,6 +628,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
   if (not modelNFe.setData(row, "tipo", "ENTRADA")) { return false; }
   if (not modelNFe.setData(row, "cnpjDest", xml.cnpjDest)) { return false; }
+  if (not modelNFe.setData(row, "cnpjOrig", xml.cnpjOrig)) { return false; }
   if (not modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso)) { return false; }
   if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) { return false; }
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }

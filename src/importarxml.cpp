@@ -585,18 +585,7 @@ bool ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
 }
 
 bool ImportarXML::verificaCNPJ(const QString &cnpj) {
-  QSqlQuery queryLoja;
-
-  // TODO: 5make this not hardcoded but still it shouldnt need the user to set a UserSession flag
-  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE descricao = 'CD'") or not queryLoja.first()) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
-
-  if (queryLoja.value("cnpj").toString().remove(".").remove("/").remove("-") != cnpj) {
-    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "CNPJ da nota não é do galpão. Continuar?", QMessageBox::Yes | QMessageBox::No, this);
-    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
-    msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-    return (msgBox.exec() == QMessageBox::Yes);
-  }
+  if (cnpj.left(11) != "09375013000") { return qApp->enqueueError(false, "CNPJ da nota não é da Staccato!", this); }
 
   return true;
 }

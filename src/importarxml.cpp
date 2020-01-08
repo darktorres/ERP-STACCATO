@@ -653,7 +653,11 @@ bool ImportarXML::lerXML() {
 
   if (not local) { return false; }
 
-  XML xml(file.readAll(), file.fileName());
+  auto fileContent = file.readAll();
+
+  if (fileContent.left(3) == "o;?") { fileContent.remove(0, 3); }
+
+  XML xml(fileContent, file.fileName());
   xml.local = local.value();
 
   file.close();

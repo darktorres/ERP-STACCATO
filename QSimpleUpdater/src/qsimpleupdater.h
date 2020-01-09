@@ -53,6 +53,7 @@ public:
 
 signals:
   void checkingFinished();
+  void done();
 
 private:
   // attributes

@@ -53,6 +53,7 @@ private:
   QVector<Message> errorQueue;
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;
+  bool updaterOpen = false;
   bool delayMessages = false;
   bool inTransaction = false;
   bool isConnected = false;
@@ -66,5 +67,6 @@ private:
   auto runSqlJobs() -> bool;
   auto setDatabase() -> bool;
   auto startSqlPing() -> void;
+  auto startUpdaterPing() -> void;
   auto storeSelection() -> void;
 };

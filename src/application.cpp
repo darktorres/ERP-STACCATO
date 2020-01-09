@@ -125,7 +125,7 @@ bool Application::dbConnect() {
   if (not runSqlJobs()) { return false; }
 
   startSqlPing();
-  // startUpdaterPing();
+  startUpdaterPing();
 
   return true;
 }
@@ -157,6 +157,12 @@ void Application::startSqlPing() {
   // TODO: se ping falhar marcar 'desconectado'?
 
   // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
+}
+
+void Application::startUpdaterPing() {
+  auto *timer = new QTimer(this);
+  connect(timer, &QTimer::timeout, this, [&] { updater(); });
+  timer->start(3600000);
 }
 
 void Application::darkTheme() {
@@ -303,11 +309,16 @@ void Application::showMessages() {
 }
 
 void Application::updater() {
+  if (updaterOpen) { return; }
+
   const auto hostname = UserSession::getSetting("Login/hostname");
 
   if (not hostname) { return; }
 
+  updaterOpen = true;
+
   auto *updater = new QSimpleUpdater(this);
+  connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
   updater->setApplicationVersion(qApp->applicationVersion());
   updater->setReferenceUrl("http://" + hostname->toString() + "/versao.txt");
   updater->setDownloadUrl("http://" + hostname->toString() + "/Instalador.exe");

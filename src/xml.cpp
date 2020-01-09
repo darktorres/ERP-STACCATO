@@ -127,7 +127,10 @@ void XML::lerDadosProduto(const QStandardItem *child) {
     if (text.left(10) == "nItemPed -") { itemPedido = text.remove(0, 11).toInt(); }
 
     // remove 'A' from end of product code
-    if (xNome == "CECRISA REVEST. CERAMICOS S.A." and codProd.endsWith("A")) { codProd = codProd.left(codProd.size() - 1); }
+    if (xNome == "CECRISA REVEST. CERAMICOS S.A." and codProd.endsWith("A")) {
+      codProd = codProd.left(codProd.size() - 1);
+      desconto = 0;
+    }
   }
 }
 

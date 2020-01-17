@@ -309,27 +309,19 @@ void WidgetPagamentos::setIdOrcamento(const QString &value) { idOrcamento = valu
 double WidgetPagamentos::getCredito() const { return credito; }
 
 void WidgetPagamentos::calcularTotal() {
-  double sum = 0;
-
-  for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum += spinbox->value(); }
+  const double sumWithoutLast = std::accumulate(listDoubleSpinPgt.cbegin(), listDoubleSpinPgt.cend() - 1, 0., [=](double accum, const QDoubleSpinBox *spinbox) { return accum += spinbox->value(); });
 
   auto lastSpinBox = listDoubleSpinPgt.last();
 
-  sum -= lastSpinBox->value();
-
-  const double leftOver = total - sum;
-
   lastSpinBox->blockSignals(true);
-  lastSpinBox->setValue(leftOver);
+  lastSpinBox->setValue(total - sumWithoutLast);
   lastSpinBox->blockSignals(false);
 
   // ----------------------------------------
 
-  double sum2 = 0;
+  const double sumAll = std::accumulate(listDoubleSpinPgt.cbegin(), listDoubleSpinPgt.cend(), 0., [=](double accum, const QDoubleSpinBox *spinbox) { return accum += spinbox->value(); });
 
-  for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum2 += spinbox->value(); }
-
-  ui->doubleSpinBoxTotalPag->setValue(sum2);
+  ui->doubleSpinBoxTotalPag->setValue(sumAll);
 
   // ----------------------------------------
 

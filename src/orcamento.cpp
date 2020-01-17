@@ -1373,3 +1373,4 @@ bool Orcamento::verificaDisponibilidadeEstoque() {
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
 // TODO: limitar validade para o fim do mes
 // FIXME: adicionar novamente botao para limpar selecao para quando a tabela de itens está cheia e não tem como clicar no espaço vazio
+// FIXME: orçamento permite adicionar o mesmo estoque duas vezes (e provavelmente faz o consumo duas vezes)

@@ -462,13 +462,13 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
 
   // perguntar quantidade
-  const int caixasTotal = modelProdutos.data(row, "caixas").toInt();
+  const double caixasTotal = modelProdutos.data(row, "caixas").toInt();
 
   bool ok;
 
-  const int caixasAgendar = QInputDialog::getInt(this, "Agendar", "Quantidade de caixas: ", caixasTotal, 0, caixasTotal, 1, &ok);
+  const double caixasAgendar = QInputDialog::getDouble(this, "Agendar", "Quantidade de caixas: ", caixasTotal, 0, caixasTotal, 1, &ok);
 
-  if (caixasAgendar == 0 or not ok) { return; }
+  if (qFuzzyIsNull(caixasAgendar) or not ok) { return; }
 
   if (not qApp->startTransaction()) { return; }
 
@@ -484,7 +484,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
   ui->tableProdutos->clearSelection();
 }
 
-bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const int caixasAgendar, const int caixasTotal) {
+bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const double caixasAgendar, const double caixasTotal) {
   if (caixasAgendar < caixasTotal) {
     if (not dividirVenda(row, caixasAgendar, caixasTotal)) { return false; }
   }
@@ -518,7 +518,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
   return true;
 }
 
-bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const int caixasAgendar, const int caixasTotal) {
+bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double caixasAgendar, const double caixasTotal) {
   // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
 
   SqlRelationalTableModel modelProdutosTemp;

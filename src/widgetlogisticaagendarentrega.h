@@ -29,11 +29,11 @@ private:
   Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> bool;
-  auto adicionarProdutoParcial(const int row, const int caixasAgendar, const int caixasTotal) -> bool;
+  auto adicionarProdutoParcial(const int row, const double caixasAgendar, const double caixasTotal) -> bool;
   auto calcularDisponivel() -> void;
   auto calcularPeso() -> void;
   auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> bool;
-  auto dividirVenda(const int row, const int caixasAgendar, const int caixasTotal) -> bool;
+  auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal) -> bool;
   auto montaFiltro() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;
   auto on_itemBoxVeiculo_textChanged(const QString &) -> void;

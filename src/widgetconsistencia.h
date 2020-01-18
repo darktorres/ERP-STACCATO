@@ -25,6 +25,7 @@ private:
   SqlRelationalTableModel model5;
   SqlRelationalTableModel model6;
   SqlRelationalTableModel model7;
+  SqlRelationalTableModel model8;
 
 private:
   // attributes

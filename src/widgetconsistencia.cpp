@@ -29,12 +29,16 @@ void WidgetConsistencia::updateTables() {
   if (not model6.select()) { qApp->enqueueError("Erro6: " + model6.lastError().text(), this); }
 
   if (not model7.select()) { qApp->enqueueError("Erro7: " + model7.lastError().text(), this); }
+
+  if (not model8.select()) { qApp->enqueueError("Erro8: " + model8.lastError().text(), this); }
 }
 
 void WidgetConsistencia::setupTables() {
   const QDate date = ui->dateEditMes->date();
   const QString dateBegin = QDate(date.year(), date.month(), 1).toString("yyyy-MM-dd");
   const QString dateEnd = QDate(date.year(), date.month(), date.daysInMonth()).toString("yyyy-MM-dd");
+
+  //-------------------------------------
 
   model1.setTable("view_consistencia_compra");
 
@@ -44,6 +48,8 @@ void WidgetConsistencia::setupTables() {
 
   ui->tableView->setModel(&model1);
 
+  //-------------------------------------
+
   model2.setTable("view_consistencia_vp1_v_total");
 
   model2.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
@@ -51,6 +57,8 @@ void WidgetConsistencia::setupTables() {
   if (not model2.select()) { qApp->enqueueError("Erro2: " + model2.lastError().text(), this); }
 
   ui->tableView_2->setModel(&model2);
+
+  //-------------------------------------
 
   model3.setTable("view_consistencia_vp1_vp2_quant");
 
@@ -60,6 +68,8 @@ void WidgetConsistencia::setupTables() {
 
   ui->tableView_3->setModel(&model3);
 
+  //-------------------------------------
+
   model4.setTable("view_consistencia_vp1_vp2_total");
 
   model4.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
@@ -67,6 +77,8 @@ void WidgetConsistencia::setupTables() {
   if (not model4.select()) { qApp->enqueueError("Erro4: " + model4.lastError().text(), this); }
 
   ui->tableView_4->setModel(&model4);
+
+  //-------------------------------------
 
   model5.setTable("view_consistencia_vp2_ehc_quant");
 
@@ -76,6 +88,8 @@ void WidgetConsistencia::setupTables() {
 
   ui->tableView_5->setModel(&model5);
 
+  //-------------------------------------
+
   model6.setTable("view_consistencia_vp2_pf2_quant");
 
   model6.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
@@ -84,6 +98,8 @@ void WidgetConsistencia::setupTables() {
 
   ui->tableView_6->setModel(&model6);
 
+  //-------------------------------------
+
   model7.setTable("view_consistencia_vp_op_quant");
 
   model7.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
@@ -91,4 +107,14 @@ void WidgetConsistencia::setupTables() {
   if (not model7.select()) { qApp->enqueueError("Erro7: " + model7.lastError().text(), this); }
 
   ui->tableView_7->setModel(&model7);
+
+  //-------------------------------------
+
+  model8.setTable("view_consistencia_vinculos");
+
+  model8.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
+
+  if (not model8.select()) { qApp->enqueueError("Erro8: " + model8.lastError().text(), this); }
+
+  ui->tableView_8->setModel(&model8);
 }

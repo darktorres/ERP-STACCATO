@@ -1,8 +1,8 @@
 #include <QSqlError>
 
-#include "widgetconsistencia.h"
 #include "application.h"
 #include "ui_widgetconsistencia.h"
+#include "widgetconsistencia.h"
 
 WidgetConsistencia::WidgetConsistencia(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetConsistencia) {
   ui->setupUi(this);
@@ -11,6 +11,8 @@ WidgetConsistencia::WidgetConsistencia(QWidget *parent) : QWidget(parent), ui(ne
 }
 
 WidgetConsistencia::~WidgetConsistencia() { delete ui; }
+
+void WidgetConsistencia::resetTables() { modelIsSet = false; }
 
 void WidgetConsistencia::updateTables() {
   if (not modelIsSet) {

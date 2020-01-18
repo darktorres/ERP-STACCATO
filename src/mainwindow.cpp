@@ -112,6 +112,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or UserSession::tipoUsuario() == "GERENTE LOJA") {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true);
   }
+
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -204,6 +206,7 @@ void MainWindow::updateTables() {
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
   if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
   if (currentText == "RH") { ui->widgetRh->updateTables(); }
+  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
 
   qApp->setUpdating(false);
 }

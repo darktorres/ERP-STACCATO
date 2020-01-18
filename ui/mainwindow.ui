@@ -135,6 +135,16 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabConsistencia">
+       <attribute name="title">
+        <string>Consistência</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <widget class="WidgetConsistencia" name="widgetConsistencia" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -388,6 +398,12 @@
    <class>WidgetRh</class>
    <extends>QWidget</extends>
    <header>src/widgetrh.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetConsistencia</class>
+   <extends>QWidget</extends>
+   <header>src\widgetconsistencia.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

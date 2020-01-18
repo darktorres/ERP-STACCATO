@@ -193,6 +193,7 @@ SOURCES += \
     src/widgetcompragerar.cpp \
     src/widgetcomprapendentes.cpp \
     src/widgetcompraresumo.cpp \
+    src/widgetconsistencia.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
@@ -309,6 +310,7 @@ HEADERS  += \
     src/widgetcompragerar.h \
     src/widgetcomprapendentes.h \
     src/widgetcompraresumo.h \
+    src/widgetconsistencia.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
     src/widgetfinanceirocompra.h \
@@ -382,6 +384,7 @@ FORMS += \
     ui/widgetcompragerar.ui \
     ui/widgetcomprapendentes.ui \
     ui/widgetcompraresumo.ui \
+    ui/widgetconsistencia.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \

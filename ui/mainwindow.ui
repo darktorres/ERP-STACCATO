@@ -160,7 +160,7 @@
      <x>0</x>
      <y>0</y>
      <width>764</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOpcoes">
@@ -403,7 +403,7 @@
   <customwidget>
    <class>WidgetConsistencia</class>
    <extends>QWidget</extends>
-   <header>src\widgetconsistencia.h</header>
+   <header>src/widgetconsistencia.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

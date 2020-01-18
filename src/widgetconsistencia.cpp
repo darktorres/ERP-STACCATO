@@ -1,3 +1,5 @@
+#include <QSqlError>
+
 #include "widgetconsistencia.h"
 #include "application.h"
 #include "ui_widgetconsistencia.h"

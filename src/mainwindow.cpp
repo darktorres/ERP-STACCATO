@@ -187,6 +187,7 @@ void MainWindow::resetTables() {
   ui->widgetFinanceiro->resetTables();
   ui->widgetRelatorio->resetTables();
   ui->widgetGraficos->resetTables();
+  ui->widgetConsistencia->resetTables();
 
   updateTables();
 }

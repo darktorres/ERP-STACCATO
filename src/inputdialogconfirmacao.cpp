@@ -1,6 +1,9 @@
 #include <QDebug>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QSqlError>
 #include <QSqlQuery>
 
@@ -18,6 +21,7 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
   connect(ui->pushButtonFaltando, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFaltando_clicked);
   connect(ui->pushButtonQuebrado, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonQuebrado_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonSalvar_clicked);
+  connect(ui->pushButtonFoto, &QPushButton::clicked, this, &InputDialogConfirmacao::on_pushButtonFoto_clicked);
 
   setWindowFlags(Qt::Window);
 
@@ -87,7 +91,11 @@ bool InputDialogConfirmacao::cadastrar() {
 void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
   if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega) and ui->lineEditRecebeu->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem recebeu!", this); }
 
-  if (tipo == Tipo::Entrega and ui->lineEditEntregou->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem entregou!", this); }
+  if (tipo == Tipo::Entrega) {
+    if (ui->lineEditEntregou->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem entregou!", this); }
+
+    if (not ui->lineEditFoto->styleSheet().contains("background-color: rgb(0, 255, 0);")) { return qApp->enqueueError("Falta enviar foto da entrega!"); }
+  }
 
   if (tipo != Tipo::Representacao) {
     if (not qApp->startTransaction()) { return; }
@@ -189,6 +197,7 @@ void InputDialogConfirmacao::setupTables() {
 
     ui->tableLogistica->setModel(&modelVeiculo);
 
+    ui->tableLogistica->hideColumn("fotoEntrega");
     ui->tableLogistica->hideColumn("id");
     ui->tableLogistica->hideColumn("data");
     ui->tableLogistica->hideColumn("idEvento");
@@ -655,4 +664,43 @@ void InputDialogConfirmacao::on_pushButtonFaltando_clicked() {
 
   // entrega
   // 1. confirmando apenas a linha já selecionada (visivel na tela) a linha duplicada irá se manter na entrega
+}
+
+void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo JPG", QDir::currentPath(), "JPG (*.jpg *.jpeg)");
+
+  if (filePath.isEmpty()) { return; }
+
+  QFile *file = new QFile(filePath);
+
+  if (not file->open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file->errorString(), this); }
+
+  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
+  const QString ip = qApp->getWebDavIp();
+  const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
+  const QString idEvento = modelVeiculo.data(0, "idEvento").toString();
+
+  const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + ".jpg";
+
+  auto reply = manager->put(QNetworkRequest(QUrl(url)), file);
+
+  ui->lineEditFoto->setText("Enviando...");
+
+  connect(reply, &QNetworkReply::finished, [=] {
+    ui->lineEditFoto->setText((reply->error() == QNetworkReply::NoError) ? url : "Erro enviando foto: " + reply->errorString());
+
+    if (reply->error() == QNetworkReply::NoError) {
+      ui->lineEditFoto->setText(url);
+      ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
+
+      for (int row = 0; row < modelVeiculo.rowCount(); ++row) {
+        if (not modelVeiculo.setData(row, "fotoEntrega", url)) { return; }
+      }
+
+    } else {
+      ui->lineEditFoto->setText("Erro enviando foto: " + reply->errorString());
+      ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+    }
+  });
 }

@@ -47,6 +47,8 @@ void Application::enqueueWarning(const QString &warning, QWidget *parent) {
   if (not updating) { showMessages(); }
 }
 
+QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo - Alphaville"); }
+
 void Application::readSettingsFile() {
   QFile file("lojas.txt");
 

@@ -23,6 +23,7 @@ public:
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
   auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
+  auto getWebDavIp() const -> QString;
   auto getInTransaction() const -> bool;
   auto getIsConnected() const -> bool;
   auto getMapLojas() const -> QMap<QString, QString>;

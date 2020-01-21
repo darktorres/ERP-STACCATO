@@ -36,6 +36,7 @@ private:
   auto gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) -> bool;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
   auto on_pushButtonFaltando_clicked() -> void;
+  auto on_pushButtonFoto_clicked() -> void;
   auto on_pushButtonQuebrado_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;

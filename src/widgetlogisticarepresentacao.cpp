@@ -119,3 +119,4 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) { modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')"); }
 
 // TODO: 2palimanan precisa de coleta/recebimento (colocar flag no cadastro dizendo que entra no fluxo de logistica)
+// TODO: colocar botao para cancelar

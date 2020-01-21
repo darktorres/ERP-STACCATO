@@ -922,6 +922,7 @@ bool Venda::cadastrar() {
       query1.bindValue(":valor", valor);
       query1.bindValue(":tipo", "1. Dinheiro");
       // 01-15 paga dia 30, 16-30 paga prox dia 15
+      // TODO: can this '30 > date.daysInMonth() ? date.daysInMonth() : 30' be simplified to just 'daysInMonth'?
       query1.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
       query1.bindValue(":grupo", "RT's");
 

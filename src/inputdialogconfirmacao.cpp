@@ -89,12 +89,12 @@ bool InputDialogConfirmacao::cadastrar() {
 }
 
 void InputDialogConfirmacao::on_pushButtonSalvar_clicked() {
-  if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega) and ui->lineEditRecebeu->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem recebeu!", this); }
+  if ((tipo == Tipo::Recebimento or tipo == Tipo::Entrega)) {
+    if (ui->lineEditRecebeu->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem recebeu!", this); }
+  }
 
   if (tipo == Tipo::Entrega) {
     if (ui->lineEditEntregou->text().isEmpty()) { return qApp->enqueueError("Faltou preencher quem entregou!", this); }
-
-    if (not ui->lineEditFoto->styleSheet().contains("background-color: rgb(0, 255, 0);")) { return qApp->enqueueError("Falta enviar foto da entrega!"); }
   }
 
   if (tipo != Tipo::Representacao) {

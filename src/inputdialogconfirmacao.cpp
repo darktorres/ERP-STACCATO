@@ -667,7 +667,7 @@ void InputDialogConfirmacao::on_pushButtonFaltando_clicked() {
 }
 
 void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
-  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo JPG", QDir::currentPath(), "JPG (*.jpg *.jpeg)");
+  const QString filePath = QFileDialog::getOpenFileName(this, "Imagens", QDir::currentPath(), "(*.jpg *.jpeg *.png *.tif *.bmp *.pdf)");
 
   if (filePath.isEmpty()) { return; }
 
@@ -681,7 +681,11 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
   const QString idEvento = modelVeiculo.data(0, "idEvento").toString();
 
-  const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + ".jpg";
+  QFileInfo info(*file);
+
+  const QString extension = info.suffix();
+
+  const QString url = "http://" + ip + "/webdav/FOTOS ENTREGAS/" + idVenda + " - " + idEvento + "." + extension;
 
   auto reply = manager->put(QNetworkRequest(QUrl(url)), file);
 

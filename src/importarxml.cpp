@@ -621,11 +621,22 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
 
   if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) { return false; }
 
+  // ---------------------------------
+
+  QStringList listOC;
+
+  for (int row = 0; row < modelCompra.rowCount(); ++row) { listOC << modelCompra.data(row, "ordemCompra").toString(); }
+
+  listOC.removeDuplicates();
+
+  // ---------------------------------
+
   xml.idNFe = id;
 
   const int row = modelNFe.insertRowAtEnd();
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
+  if (not modelNFe.setData(row, "ordemCompra", listOC.join(", "))) { return false; }
   if (not modelNFe.setData(row, "tipo", "ENTRADA")) { return false; }
   if (not modelNFe.setData(row, "cnpjDest", xml.cnpjDest)) { return false; }
   if (not modelNFe.setData(row, "cnpjOrig", xml.cnpjOrig)) { return false; }

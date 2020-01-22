@@ -4,6 +4,7 @@
 
 #include "application.h"
 #include "inserirtransferencia.h"
+#include "log.h"
 #include "ui_inserirtransferencia.h"
 
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
@@ -17,7 +18,7 @@ InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), u
   ui->itemBoxDe->setSearchDialog(SearchDialog::conta(this));
   ui->itemBoxPara->setSearchDialog(SearchDialog::conta(this));
 
-  ui->dateEdit->setDate(QDate::currentDate());
+  ui->dateEdit->setDate(qApp->serverDate());
 }
 
 InserirTransferencia::~InserirTransferencia() { delete ui; }
@@ -26,6 +27,8 @@ void InserirTransferencia::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: InserirTransferencia::on_pushButtonSalvar")) { return qApp->rollbackTransaction(); }
 
   if (not cadastrar()) { return qApp->rollbackTransaction(); }
 

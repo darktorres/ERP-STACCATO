@@ -11,6 +11,7 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
@@ -57,7 +58,7 @@ void WidgetNfeSaida::unsetConnections() {
 
 void WidgetNfeSaida::updateTables() {
   if (not isSet) {
-    ui->dateEdit->setDate(QDate::currentDate());
+    ui->dateEdit->setDate(qApp->serverDate());
     setConnections();
     isSet = true;
   }
@@ -76,7 +77,6 @@ void WidgetNfeSaida::resetTables() { modelIsSet = false; }
 void WidgetNfeSaida::setupTables() {
   modelViewNFeSaida.setTable("view_nfe_saida");
 
-  modelViewNFeSaida.setHeaderData("created", "Criado em");
   modelViewNFeSaida.setHeaderData("valor", "R$");
 
   ui->table->setModel(&modelViewNFeSaida);
@@ -122,10 +122,10 @@ void WidgetNfeSaida::montaFiltro() {
   const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
   for (const auto &child : children) {
-    if (child->isChecked()) { filtroCheck << "status = '" + child->text().toUpper() + "'"; }
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  if (not filtroCheck.isEmpty()) { filtros << "(" + filtroCheck.join(" OR ") + ")"; }
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
 
   //-------------------------------------
 
@@ -167,9 +167,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  const auto resposta = acbr.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
+  const auto resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
   if (not resposta) { return; }
 
@@ -177,6 +177,8 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueError("Resposta: " + resposta.value(), this); }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetNfeSaida::on_pushButtonCancelarNFe")) { return qApp->rollbackTransaction(); }
 
   if (not cancelarNFe(chaveAcesso, row)) { return qApp->rollbackTransaction(); }
 
@@ -192,8 +194,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
+  ACBr acbrLocal;
   // TODO: usar ACBR.EnviarEmailInutilizacao?
-  acbr.enviarEmail(emailContabilidade.value().toString(), emailLogistica.value().toString(), assunto, filePath);
+  acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto
@@ -255,9 +258,6 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  QSqlQuery query;
-  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
-
   const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
 
   if (not folderKeyXml) { return qApp->enqueueError("Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!", this); }
@@ -266,24 +266,27 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   if (not folderKeyPdf) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
-  const QString xmlFolder = folderKeyXml.value().toString();
-  const QString pdfFolder = folderKeyPdf.value().toString();
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
+
+  const QString xmlFolder = folderKeyXml->toString();
+  const QString pdfFolder = folderKeyPdf->toString();
 
   // TODO: create folders if they dont exist (it wont work if they dont)
 
-  ACBr acbr;
+  ACBr acbrLocal;
 
-  for (const auto &item : list) {
+  for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
     // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
     // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
     // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
 
-    if (modelViewNFeSaida.data(item.row(), "status").toString() != "AUTORIZADO") { continue; }
+    if (modelViewNFeSaida.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
 
     // pegar xml do bd e salvar em arquivo
 
-    const QString chaveAcesso = modelViewNFeSaida.data(item.row(), "chaveAcesso").toString();
+    const QString chaveAcesso = modelViewNFeSaida.data(index.row(), "chaveAcesso").toString();
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
@@ -302,7 +305,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar xml para acbr gerar pdf
 
-    const auto pdfOrigem = acbr.gerarDanfe(query.value("xml").toByteArray(), false);
+    const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
 
     if (not pdfOrigem) { return; }
 
@@ -325,12 +328,14 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  [&] {
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
-  for (const auto &child : children) {
-    child->setEnabled(true);
-    child->setChecked(enabled);
-  }
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  }();
 
   setConnections();
 
@@ -344,12 +349,14 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbr;
+  ACBr acbrRemoto;
 
-  if (auto tuple = acbr.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
     const auto [xml, resposta] = tuple.value();
 
     if (not qApp->startTransaction()) { return; }
+
+    if (not Log::createLog("Transação: WidgetNfeSaida::on_pushButtonConsultarNFe")) { return qApp->rollbackTransaction(); }
 
     if (not atualizarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
 
@@ -371,7 +378,8 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
 }
 
 bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
+  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a
+  // nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
 
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
@@ -381,7 +389,7 @@ bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 
   const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
 
-  query.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
+  query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo NFe da venda_produto: " + query.lastError().text(), this); }

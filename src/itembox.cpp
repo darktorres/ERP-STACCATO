@@ -106,7 +106,7 @@ void ItemBox::setIcons() {
     searchButton->hide();
   }
 
-  if (registerDialog) {
+  if (registerDialog and not readOnlyItemBox) {
     x -= size.width();
     plusButton->setGeometry(QRect(QPoint(x, y), size));
     plusButton->show();
@@ -114,9 +114,8 @@ void ItemBox::setIcons() {
     plusButton->hide();
   }
 
-  int left, top, bottom;
-  getTextMargins(&left, &top, nullptr, &bottom);
-  setTextMargins(left, top, rect().right() - x + 4, bottom);
+  const auto margins = textMargins();
+  setTextMargins(margins.left(), margins.top(), rect().right() - x, margins.bottom());
 }
 
 void ItemBox::setRepresentacao(const bool isRepresentacao) { searchDialog->setRepresentacao(isRepresentacao); }

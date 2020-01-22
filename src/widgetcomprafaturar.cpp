@@ -9,6 +9,7 @@
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
+#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "ui_widgetcomprafaturar.h"
@@ -34,6 +35,8 @@ void WidgetCompraFaturar::setupTables() {
 
   modelViewFaturamento.setTable("view_faturamento");
 
+  modelViewFaturamento.setSort("OC");
+
   modelViewFaturamento.setHeaderData("dataPrevFat", "Prev. Fat.");
 
   ui->table->setModel(&modelViewFaturamento);
@@ -45,10 +48,12 @@ void WidgetCompraFaturar::setupTables() {
 }
 
 void WidgetCompraFaturar::setConnections() {
-  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::on_checkBoxRepresentacao_toggled);
-  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked);
-  connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked);
-  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxRepresentacao, &QCheckBox::toggled, this, &WidgetCompraFaturar::on_checkBoxRepresentacao_toggled, connectionType);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked, connectionType);
+  connect(ui->pushButtonMarcarFaturado, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked, connectionType);
+  connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetCompraFaturar::on_pushButtonReagendar_clicked, connectionType);
 }
 
 void WidgetCompraFaturar::updateTables() {
@@ -72,12 +77,12 @@ void WidgetCompraFaturar::updateTables() {
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraFaturar::faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) {
+bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   for (const auto &idCompra : idsCompra) {
     queryCompra.bindValue(":dataRealFat", dataReal);
@@ -102,10 +107,10 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   QStringList fornecedores;
   QStringList idVendas;
 
-  for (const auto &item : list) {
-    idsCompra << modelViewFaturamento.data(item.row(), "idCompra").toString();
-    fornecedores << modelViewFaturamento.data(item.row(), "fornecedor").toString();
-    idVendas << modelViewFaturamento.data(item.row(), "Código").toString();
+  for (const auto &index : list) {
+    idsCompra << modelViewFaturamento.data(index.row(), "idCompra").toString();
+    fornecedores << modelViewFaturamento.data(index.row(), "fornecedor").toString();
+    idVendas << modelViewFaturamento.data(index.row(), "Código").toString();
   }
 
   const int size = fornecedores.size();
@@ -116,12 +121,13 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (not inputDlg.setFilter(idsCompra)) { return; }
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
-  const QDateTime dataReal = inputDlg.getDate();
+  const QDate dataReal = inputDlg.getDate();
 
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {
     if (not qApp->startTransaction()) { return; }
+    if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return qApp->rollbackTransaction(); }
     if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
     if (not qApp->endTransaction()) { return; }
   } else {
@@ -133,6 +139,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   }
 
   if (not qApp->startTransaction()) { return; }
+  if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return qApp->rollbackTransaction(); }
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
   if (not qApp->endTransaction()) { return; }
 
@@ -151,6 +158,8 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
+
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
   cancelaProduto->setFilter(modelViewFaturamento.data(list.first().row(), "OC").toString());
@@ -167,13 +176,13 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const QDate dataPrevista = input.getNextDate();
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET dataPrevFat = :dataPrevFat WHERE idCompra = :idCompra");
 
-  for (const auto &item : list) {
-    const int idCompra = modelViewFaturamento.data(item.row(), "idCompra").toInt();
+  for (const auto &index : list) {
+    const int idCompra = modelViewFaturamento.data(index.row(), "idCompra").toInt();
 
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);
@@ -183,7 +192,7 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     queryVenda.bindValue(":dataPrevFat", dataPrevista);
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

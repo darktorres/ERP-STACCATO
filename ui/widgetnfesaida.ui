@@ -48,7 +48,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Gerar Relatório</string>
+        <string>Gerar Relatório Mensal</string>
        </property>
       </widget>
      </item>
@@ -144,7 +144,7 @@
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_40">
          <item row="0" column="0">

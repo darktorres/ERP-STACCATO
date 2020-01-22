@@ -16,9 +16,9 @@ public:
 
   explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent = nullptr);
   ~InputDialogConfirmacao() final;
-  auto getDateTime() const -> QDateTime;
+  auto getDate() const -> QDate;
   auto getEntregou() const -> QString;
-  auto getNextDateTime() const -> QDateTime;
+  auto getNextDateTime() const -> QDate;
   auto getRecebeu() const -> QString;
   auto setFilterEntrega(const QString &id, const QString &idEvento) -> bool;
   auto setFilterRecebe(const QStringList &ids) -> bool;
@@ -36,6 +36,7 @@ private:
   auto gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) -> bool;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
   auto on_pushButtonFaltando_clicked() -> void;
+  auto on_pushButtonFoto_clicked() -> void;
   auto on_pushButtonQuebrado_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;

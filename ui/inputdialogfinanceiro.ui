@@ -38,8 +38,8 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDateTimeEdit" name="dateEditProximo">
+          <item row="0" column="1">
+           <widget class="QDateEdit" name="dateEditEvento">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -51,8 +51,8 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDateTimeEdit" name="dateEditEvento">
+          <item row="1" column="1">
+           <widget class="QDateEdit" name="dateEditProximo">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -70,36 +70,7 @@
        <item>
         <widget class="QFrame" name="frameDataPreco">
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="checkBoxMarcarTodos">
-            <property name="text">
-             <string>Marcar todos</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="TableView" name="table">
-            <property name="minimumSize">
-             <size>
-              <width>600</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="mouseTracking">
-             <bool>true</bool>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::MultiSelection</enum>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QFrame" name="frameAdicionais">
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
@@ -300,6 +271,42 @@
             </layout>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="TableView" name="table">
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::MultiSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBoxMarcarTodos">
+            <property name="text">
+             <string>Marcar todos</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="TreeView" name="treeView">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -353,7 +360,7 @@
            <bool>false</bool>
           </attribute>
          </widget>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget1">
           <layout class="QGridLayout" name="gridLayout_8">
            <item row="1" column="0">
             <widget class="QLabel" name="labelRestante_2">
@@ -531,6 +538,11 @@
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>src/treeview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

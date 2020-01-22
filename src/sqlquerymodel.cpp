@@ -6,20 +6,17 @@
 
 SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 
-QVariant SqlQueryModel::data(const QModelIndex &index, int role) const { return QSqlQueryModel::data(index, role); }
+QVariant SqlQueryModel::data(const int row, const int column) const {
+  if (row == -1 or column == -1) { return qApp->enqueueError(false, "Erro: linha/coluna -1 SqlQueryModel"); }
 
-QVariant SqlQueryModel::data(const int row, const QString &column) const {
-  const int index = QSqlQueryModel::record().indexOf(column);
+  if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
 
-  if (index == -1) {
-    qApp->enqueueError("Coluna '" + column + "' não encontrada na tabela!");
-    return QVariant();
-  }
-
-  if (proxyModel) { return proxyModel->data(proxyModel->index(row, index)); }
-
-  return QSqlQueryModel::data(QSqlQueryModel::index(row, index));
+  return QSqlQueryModel::data(QSqlQueryModel::index(row, column));
 }
+
+QVariant SqlQueryModel::data(const QModelIndex &index, const QString &column) const { return data(index.row(), column); }
+
+QVariant SqlQueryModel::data(const int row, const QString &column) const { return data(row, QSqlQueryModel::record().indexOf(column)); }
 
 bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) {
   const int index = QSqlQueryModel::record().indexOf(column);

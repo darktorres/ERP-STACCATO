@@ -34,6 +34,9 @@
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
         </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -48,6 +51,9 @@
       <item row="0" column="0">
        <widget class="TableView" name="tablePendentes">
         <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="sortingEnabled">
          <bool>true</bool>
         </property>
        </widget>

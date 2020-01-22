@@ -1,12 +1,9 @@
-#include <QDate>
 #include <QDebug>
 #include <QFile>
 #include <QIcon>
 #include <QInputDialog>
 #include <QMessageBox>
-#include <QSqlDriver>
 #include <QSqlError>
-#include <QStyle>
 #include <QTimer>
 
 #include "application.h"
@@ -24,7 +21,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 
   storeSelection();
 
-  if (const auto tema = UserSession::getSetting("User/tema"); tema and tema.value().toString() == "escuro") { darkTheme(); }
+  if (UserSession::getSetting("User/tema").value_or("claro").toString() == "escuro") { darkTheme(); }
 }
 
 void Application::enqueueError(const QString &error, QWidget *parent) {
@@ -49,6 +46,8 @@ void Application::enqueueWarning(const QString &warning, QWidget *parent) {
 
   if (not updating) { showMessages(); }
 }
+
+QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo - Alphaville"); }
 
 void Application::readSettingsFile() {
   QFile file("lojas.txt");
@@ -82,10 +81,11 @@ bool Application::setDatabase() {
 
   const QString password = file.readAll();
 
-  db.setHostName(hostname.value().toString());
-  db.setUserName(lastuser.value().toString().toLower());
+  db.setHostName(hostname->toString());
+  // TODO: to avoid getting blocked by fail2ban always login with same user?
+  db.setUserName(lastuser->toString().toLower());
   db.setPassword(password);
-  db.setDatabaseName("mydb");
+  db.setDatabaseName("staccato");
   db.setPort(3306);
 
   db.setConnectOptions("CLIENT_COMPRESS=1");
@@ -113,7 +113,13 @@ bool Application::dbConnect() {
 
     isConnected = false;
 
-    return qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text());
+    const QString error = db.lastError().text();
+
+    QString message = "Erro conectando no banco de dados: " + error;
+
+    if (error.contains("Access denied for user")) { message = "Login inválido!"; }
+
+    return qApp->enqueueError(false, message);
   }
 
   isConnected = true;
@@ -121,7 +127,7 @@ bool Application::dbConnect() {
   if (not runSqlJobs()) { return false; }
 
   startSqlPing();
-  // startUpdaterPing();
+  startUpdaterPing();
 
   return true;
 }
@@ -131,13 +137,13 @@ bool Application::runSqlJobs() {
 
   if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { return qApp->enqueueError(false, "Erro verificando lastInvalidated: " + query.lastError().text()); }
 
-  if (query.value("lastInvalidated").toDate() < QDate::currentDate()) {
-    if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text()); }
+  if (query.value("lastInvalidated").toDate() < qApp->serverDateTime().date()) {
+    if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
 
-    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { return qApp->enqueueError(false, "Erro executando update_orcamento_status: " + query.lastError().text()); }
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
 
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
-    query.bindValue(":lastInvalidated", QDate::currentDate().toString("yyyy-MM-dd"));
+    query.bindValue(":lastInvalidated", qApp->serverDateTime().toString("yyyy-MM-dd"));
 
     if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando lastInvalidated: " + query.lastError().text()); }
   }
@@ -153,6 +159,12 @@ void Application::startSqlPing() {
   // TODO: se ping falhar marcar 'desconectado'?
 
   // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
+}
+
+void Application::startUpdaterPing() {
+  auto *timer = new QTimer(this);
+  connect(timer, &QTimer::timeout, this, [&] { updater(); });
+  timer->start(3600000);
 }
 
 void Application::darkTheme() {
@@ -194,7 +206,10 @@ void Application::lightTheme() {
 }
 
 bool Application::startTransaction(const bool delayMessages) {
-  if (inTransaction) { return qApp->enqueueError(false, "Transação já em execução!"); }
+  if (inTransaction) {
+    // TODO: this message wont show due to inTransaction flag (look for other places that need to use a messagebox directly)
+    return qApp->enqueueError(false, "Transação já em execução!");
+  }
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return qApp->enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
@@ -296,15 +311,47 @@ void Application::showMessages() {
 }
 
 void Application::updater() {
+  if (updaterOpen) { return; }
+
   const auto hostname = UserSession::getSetting("Login/hostname");
 
   if (not hostname) { return; }
 
+  updaterOpen = true;
+
   auto *updater = new QSimpleUpdater(this);
+  connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
   updater->setApplicationVersion(qApp->applicationVersion());
-  updater->setReferenceUrl("http://" + hostname.value().toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + hostname.value().toString() + "/Instalador.exe");
+  updater->setReferenceUrl("http://" + hostname->toString() + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname->toString() + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
+}
+
+QDateTime Application::serverDateTime() {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT NOW()") or not query.first()) {
+    enqueueError("Erro buscando data/hora: " + query.lastError().text());
+    return QDateTime();
+  }
+
+  return query.value("NOW()").toDateTime();
+}
+
+QDate Application::serverDate() {
+  if (serverDateCache.isNull() or systemDate.daysTo(QDate::currentDate()) > 0) {
+    QSqlQuery query;
+
+    if (not query.exec("SELECT NOW()") or not query.first()) {
+      enqueueError("Erro buscando data/hora: " + query.lastError().text());
+      return QDate();
+    }
+
+    systemDate = QDate::currentDate();
+    serverDateCache = query.value("NOW()").toDateTime();
+  }
+
+  return serverDateCache.date();
 }

@@ -4,12 +4,10 @@
 WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
   ui->setupUi(this);
 
-  setConnections();
+  connect(ui->tabWidgetNfe, &QTabWidget::currentChanged, this, &WidgetNfe::on_tabWidgetNfe_currentChanged);
 }
 
 WidgetNfe::~WidgetNfe() { delete ui; }
-
-void WidgetNfe::setConnections() { connect(ui->tabWidgetNfe, &QTabWidget::currentChanged, this, &WidgetNfe::on_tabWidgetNfe_currentChanged); }
 
 void WidgetNfe::updateTables() {
   const QString currentText = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());

@@ -28,7 +28,7 @@ public:
   static auto enderecoCliente(QWidget *parent) -> SearchDialog *;
   static auto fornecedor(QWidget *parent) -> SearchDialog *;
   static auto loja(QWidget *parent) -> SearchDialog *;
-  static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, QWidget *parent) -> SearchDialog *;
+  static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) -> SearchDialog *;
   static auto profissional(const bool mostrarNaoHa, QWidget *parent) -> SearchDialog *;
   static auto transportadora(QWidget *parent) -> SearchDialog *;
   static auto usuario(QWidget *parent) -> SearchDialog *;
@@ -47,6 +47,7 @@ private:
   bool silent = false;
   bool isRepresentacao = false;
   bool showAllProdutos = false;
+  bool compraAvulsa = false;
   bool isSet = false;
   QString filter;
   QString fornecedorRep;
@@ -62,7 +63,7 @@ private:
   auto on_radioButtonProdDesc_toggled(const bool) -> void;
   auto on_table_doubleClicked(const QModelIndex &) -> void;
   auto prepare_show() -> bool;
-  auto sendUpdateMessage() -> void;
+  auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table) -> void;
 };

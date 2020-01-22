@@ -16,7 +16,7 @@ void WidgetRh::resetTables() { modelIsSet = false; }
 
 void WidgetRh::updateTables() {
   if (not isSet) {
-    ui->dateEdit->setDate(QDate::currentDate());
+    ui->dateEdit->setDate(qApp->serverDate());
     setConnections();
     isSet = true;
   }
@@ -49,13 +49,14 @@ void WidgetRh::setupTables() {
   ui->table->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
 
+  ui->table->hideColumn("idVendaProduto1");
   ui->table->hideColumn("idComissao");
   ui->table->hideColumn("Mês");
   ui->table->hideColumn("idUsuario");
 
   // -------------------------------------------------------------------------
 
-  modelTotal.setTable("view_relatorio_vendedor2");
+  modelTotal.setTable("view_relatorio_vendedor");
 
   ui->tableTotal->setModel(&modelTotal);
 

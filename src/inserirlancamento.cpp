@@ -33,8 +33,9 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setTable(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento");
 
   modelContaPagamento.setHeaderData("dataEmissao", "Data Emissão");
-  modelContaPagamento.setHeaderData("contraParte", "ContraParte");
   modelContaPagamento.setHeaderData("idLoja", "Centro Custo");
+  modelContaPagamento.setHeaderData("contraParte", "ContraParte");
+  modelContaPagamento.setHeaderData("nfe", "NFe");
   modelContaPagamento.setHeaderData("valor", "R$");
   modelContaPagamento.setHeaderData("tipo", "Tipo");
   modelContaPagamento.setHeaderData("dataPagamento", "Vencimento");
@@ -48,7 +49,6 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
   ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->table->setItemDelegateForColumn("contaDestino", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
-  ui->table->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
@@ -57,11 +57,8 @@ void InserirLancamento::setupTables() {
 
   ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});
 
-  ui->table->hideColumn("nfe");
-  ui->table->hideColumn("taxa");
   ui->table->hideColumn("parcela");
   ui->table->hideColumn("status");
-  ui->table->hideColumn("representacao");
   ui->table->hideColumn("dataRealizado");
   ui->table->hideColumn("valorReal");
   ui->table->hideColumn("tipoReal");
@@ -69,12 +66,13 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("contaDestino");
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
-  ui->table->hideColumn("comissao");
   ui->table->hideColumn("idPagamento");
-  ui->table->hideColumn("idCompra");
-  ui->table->hideColumn("idVenda");
-  ui->table->hideColumn("created");
-  ui->table->hideColumn("lastUpdated");
+  ui->table->hideColumn(tipo == Tipo::Pagar ? "idCompra" : "idVenda");
+  if (tipo == Tipo::Receber) {
+    ui->table->hideColumn("taxa");
+    ui->table->hideColumn("comissao");
+    ui->table->hideColumn("representacao");
+  }
   ui->table->hideColumn("desativado");
 }
 
@@ -82,7 +80,7 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   const int newRow = modelContaPagamento.insertRowAtEnd();
 
   if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
-  if (not modelContaPagamento.setData(newRow, "dataEmissao", QDate::currentDate())) { return; }
+  if (not modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate())) { return; }
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {

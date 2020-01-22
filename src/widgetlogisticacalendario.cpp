@@ -14,10 +14,12 @@ WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(
 WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 
 void WidgetLogisticaCalendario::setConnections() {
-  connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
-  connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
-  connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked);
-  connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged, connectionType);
+  connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled, connectionType);
+  connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked, connectionType);
+  connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked, connectionType);
 }
 
 void WidgetLogisticaCalendario::listarVeiculos() {
@@ -79,8 +81,8 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     QStringList temp = child->text().split(" / ");
 
-    list << "Manhã\n" + temp.at(0) + "\n" + temp.at(1);
-    list << "Tarde\n" + temp.at(0) + "\n" + temp.at(1);
+    list << "Manhã\n" + temp.at(0).left(15) + "\n" + temp.at(1).left(15);
+    list << "Tarde\n" + temp.at(0).left(15) + "\n" + temp.at(1).left(15);
   }
 
   ui->tableWidget->setRowCount(veiculos * 2); // manha/tarde

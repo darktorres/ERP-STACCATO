@@ -1,9 +1,9 @@
-#include <QAbstractProxyModel>
 #include <QClipboard>
 #include <QDebug>
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QScrollBar>
 #include <QSqlRecord>
 
 #include "application.h"
@@ -15,6 +15,7 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
   connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
 
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);
@@ -23,6 +24,12 @@ TableView::TableView(QWidget *parent) : QTableView(parent) {
 
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
+
+void TableView::resizeColumnsToContents() {
+  if (autoResize) { QTableView::resizeColumnsToContents(); }
+}
+
+int TableView::columnCount() const { return model()->columnCount(); }
 
 void TableView::showContextMenu(const QPoint &pos) {
   QMenu contextMenu;
@@ -36,52 +43,56 @@ void TableView::showContextMenu(const QPoint &pos) {
   contextMenu.exec(mapToGlobal(pos));
 }
 
-int TableView::getColumnIndex(const QString &column) const {
+int TableView::columnIndex(const QString &column, const bool silent) const {
   int columnIndex = -1;
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
+  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
+
   return columnIndex;
 }
 
-void TableView::hideColumn(const QString &column) { QTableView::hideColumn(getColumnIndex(column)); }
+void TableView::hideColumn(const QString &column) { QTableView::hideColumn(columnIndex(column)); }
 
-void TableView::showColumn(const QString &column) { QTableView::showColumn(getColumnIndex(column)); }
+void TableView::showColumn(const QString &column) { QTableView::showColumn(columnIndex(column)); }
 
-void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTableView::setItemDelegateForColumn(getColumnIndex(column), delegate); }
+void TableView::setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) { QTableView::setItemDelegateForColumn(columnIndex(column), delegate); }
 
-void TableView::openPersistentEditor(const int row, const QString &column) { QTableView::openPersistentEditor(QTableView::model()->index(row, getColumnIndex(column))); }
+void TableView::openPersistentEditor(const int row, const QString &column) { QTableView::openPersistentEditor(QTableView::model()->index(row, columnIndex(column))); }
 
 void TableView::openPersistentEditor(const int row, const int column) { QTableView::openPersistentEditor(QTableView::model()->index(row, column)); }
 
-void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(getColumnIndex(column), order); }
+void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(columnIndex(column), order); }
+
+int TableView::rowCount() const { return model()->rowCount(); }
 
 void TableView::redoView() {
-  if (not persistentColumns.isEmpty()) {
-    for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
-      for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
-    }
+  if (persistentColumns.isEmpty()) { return; }
+
+  for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
+    for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
   }
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto sqlQuery = qobject_cast<SqlQueryModel *>(model); sqlQuery and sqlQuery->proxyModel) {
-    QTableView::setModel(sqlQuery->proxyModel);
-  } else if (auto sqlRelat = qobject_cast<SqlRelationalTableModel *>(model); sqlRelat and sqlRelat->proxyModel) {
-    QTableView::setModel(sqlRelat->proxyModel);
+  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
+    QTableView::setModel(temp->proxyModel);
+  } else if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
+    QTableView::setModel(temp2->proxyModel);
   } else {
     QTableView::setModel(model);
   }
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
 
+  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
+
   //---------------------------------------
 
-  if (baseModel) {
-    connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
-    connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
-    connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
-  }
+  connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
+  connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
 
   //---------------------------------------
 
@@ -94,8 +105,11 @@ void TableView::setModel(QAbstractItemModel *model) {
 void TableView::mousePressEvent(QMouseEvent *event) {
   const QModelIndex item = indexAt(event->pos());
 
-  // this enables clicking outside of lines to clear selection
-  if (not item.isValid()) { emit clicked(item); }
+  if (not item.isValid()) {
+    clearSelection();
+    // QTableView don't emit when index is invalid, emit manually for widgets
+    emit clicked(item);
+  }
 
   QTableView::mousePressEvent(event);
 }

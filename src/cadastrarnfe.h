@@ -17,7 +17,7 @@ class CadastrarNFe final : public QDialog {
 
 public:
   enum class Tipo { Futura, Normal, NormalAposFutura };
-  explicit CadastrarNFe(const QString &idVenda, const QList<int> &items, const Tipo tipo, QWidget *parent = nullptr);
+  explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent = nullptr);
   ~CadastrarNFe();
 
 private:
@@ -47,6 +47,7 @@ private:
   auto criarChaveAcesso() -> bool;
   auto gerarNota() -> QString;
   auto listarCfop() -> bool;
+  auto on_checkBoxFrete_toggled(bool checked) -> void;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) -> void;
@@ -81,8 +82,8 @@ private:
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
   auto preCadastrarNota() -> std::optional<int>;
   auto preencherNumeroNFe() -> bool;
-  auto prepararNFe(const QList<int> &items) -> void;
-  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbr) -> bool;
+  auto prepararNFe(const QStringList &items) -> void;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> bool;
   auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

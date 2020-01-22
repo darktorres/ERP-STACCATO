@@ -10,7 +10,11 @@ WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(pare
 
 WidgetLogisticaCaminhao::~WidgetLogisticaCaminhao() { delete ui; }
 
-void WidgetLogisticaCaminhao::setConnections() { connect(ui->table, &TableView::clicked, this, &WidgetLogisticaCaminhao::on_table_clicked); }
+void WidgetLogisticaCaminhao::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->table, &TableView::clicked, this, &WidgetLogisticaCaminhao::on_table_clicked, connectionType);
+}
 
 void WidgetLogisticaCaminhao::setupTables() {
   modelCaminhao.setTable("view_caminhao");
@@ -55,5 +59,5 @@ void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }
 void WidgetLogisticaCaminhao::on_table_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString() + " ORDER BY data DESC");
+  modelCarga.setFilter("idVeiculo = " + modelCaminhao.data(index.row(), "idVeiculo").toString());
 }

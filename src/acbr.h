@@ -20,6 +20,7 @@ private:
   // attributes
   QTcpSocket socket;
   const QString welcome = "Esperando por comandos.\x03";
+  QString lastHost;
   QString resposta;
   bool pronto = false;
   bool conectado = false;

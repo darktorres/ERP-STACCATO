@@ -17,10 +17,10 @@ WidgetOrcamento::~WidgetOrcamento() { delete ui; }
 void WidgetOrcamento::setPermissions() {
   const QString tipoUsuario = UserSession::tipoUsuario();
 
-  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "DIRETOR") {
+  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -34,7 +34,9 @@ void WidgetOrcamento::setPermissions() {
 
     QSqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) { return; }
+    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) {
+      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+    }
 
     ui->comboBoxVendedores->addItem("");
 
@@ -44,7 +46,7 @@ void WidgetOrcamento::setPermissions() {
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE")) { return; }
+    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
     while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -59,7 +61,7 @@ void WidgetOrcamento::setPermissions() {
 
   ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
 
-  ui->dateEdit->setDate(QDate::currentDate());
+  ui->dateEdit->setDate(qApp->serverDate());
 }
 
 void WidgetOrcamento::setupTables() {
@@ -168,8 +170,8 @@ void WidgetOrcamento::montaFiltro() {
     filtroLoja = "";
   } else if (tipoUsuario == "GERENTE LOJA" or tipoUsuario == "VENDEDOR") {
     const auto siglaLoja = UserSession::fromLoja("sigla");
-    const auto sigla = siglaLoja ? siglaLoja.value().toString() : "";
-    filtroLoja = "(Código LIKE '%" + sigla + "%')";
+
+    if (siglaLoja) { filtroLoja = "(Código LIKE '%" + siglaLoja->toString() + "%')"; }
   }
 
   if (not filtroLoja.isEmpty()) { filtros << filtroLoja; }
@@ -224,7 +226,9 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  FollowUp *followup = new FollowUp(modelViewOrcamento.data(list.first().row(), "Código").toString(), FollowUp::Tipo::Orcamento, this);
+  const QString codigo = modelViewOrcamento.data(list.first().row(), "Código").toString();
+
+  FollowUp *followup = new FollowUp(codigo, FollowUp::Tipo::Orcamento, this);
   followup->setAttribute(Qt::WA_DeleteOnClose);
   followup->show();
 }
@@ -232,12 +236,14 @@ void WidgetOrcamento::on_pushButtonFollowup_clicked() {
 void WidgetOrcamento::on_groupBoxStatus_toggled(const bool enabled) {
   unsetConnections();
 
-  const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+  [&] {
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
 
-  for (const auto &child : children) {
-    child->setEnabled(true);
-    child->setChecked(enabled);
-  }
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  }();
 
   setConnections();
 
@@ -254,7 +260,9 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 
     QSqlQuery query;
 
-    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) { return; }
+    if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
+      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+    }
 
     ui->comboBoxVendedores->addItem("");
 

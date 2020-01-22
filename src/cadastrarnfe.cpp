@@ -161,7 +161,9 @@ QString CadastrarNFe::gerarNota() {
 
 std::optional<int> CadastrarNFe::preCadastrarNota() {
   QSqlQuery queryNota;
-  queryNota.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) VALUES (:numeroNFe, :tipo, :xml, :status, :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
+  queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) VALUES (:idVenda, :numeroNFe, :tipo, :xml, :status, :chaveAcesso, :cnpjOrig, "
+                    ":cnpjDest, :valor)");
+  queryNota.bindValue(":idVenda", idVenda);
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
   queryNota.bindValue(":tipo", "SAÍDA");
   queryNota.bindValue(":xml", xml);

@@ -304,13 +304,13 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
 
-    modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE"
-                                               : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE");
+    modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                               : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
 
     // -------------------------------------------------------------------------
 
-    modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE"
-                                                 : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE");
+    modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                                 : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
   }
 
   if (tipo == Tipo::Pagar) {
@@ -325,12 +325,13 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 
     setWindowTitle("Contas A Pagar - " + contraparte + (ordemCompra == "0" ? "" : " OC " + ordemCompra));
 
-    modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO')" : "idCompra = '" + idCompra + "' AND status IN ('PENDENTE', 'CONFERIDO')");
+    modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE"
+                                             : "idCompra = '" + idCompra + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
 
     // -------------------------------------------------------------------------
 
-    modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO')"
-                                               : "idCompra = " + idCompra + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO')");
+    modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE"
+                                               : "idCompra = " + idCompra + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE");
   }
 
   if (not modelPendentes.select()) { return; }

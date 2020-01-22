@@ -41,7 +41,6 @@ void PrecoEstoque::setupTables() {
   modelProduto.setHeaderData("formComercial", "Form. Com.");
   modelProduto.setHeaderData("codComercial", "Cód. Com.");
   modelProduto.setHeaderData("precoVenda", "R$");
-  modelProduto.setHeaderData("validade", "Validade");
   modelProduto.setHeaderData("ui", "UI");
 
   modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
@@ -81,6 +80,7 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("temLote");
   ui->table->hideColumn("sticms");
   ui->table->hideColumn("mva");
+  ui->table->hideColumn("validade");
 
   for (int column = 0, columnCount = modelProduto.columnCount(); column < columnCount; ++column) {
     if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->table->setColumnHidden(column, true); }

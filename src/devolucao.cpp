@@ -703,3 +703,5 @@ std::optional<int> Devolucao::reservarIdVendaProduto2() {
 // TODO: verificar se o valor total de um produto e o valor creditado devem ser sempre iguais
 
 // TODO: lidar com os casos em que o produto estava agendado e é feita a devolucao, alterando os consumos
+// TODO: adicionar campo para calcular por porcentagem
+// TODO: adicionar devolucao de frete quando houver

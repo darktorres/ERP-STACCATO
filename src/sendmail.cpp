@@ -59,11 +59,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditCopia->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidor->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPorta->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditPasswd->setText(key.value().toString()); }
+    if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditCopia->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidor->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPorta->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditPasswd->setText(key->toString()); }
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);

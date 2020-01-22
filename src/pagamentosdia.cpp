@@ -18,7 +18,9 @@ PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::Paga
 PagamentosDia::~PagamentosDia() { delete ui; }
 
 void PagamentosDia::setupTables() {
-  modelViewFluxoCaixa.setTable("view_fluxo_caixa");
+  modelViewFluxoCaixa.setTable("view_fluxo_caixa_realizado");
+
+  modelViewFluxoCaixa.setHeaderData("contaDestino", "Conta Destino");
 
   ui->tableView->setModel(&modelViewFluxoCaixa);
 
@@ -26,10 +28,8 @@ void PagamentosDia::setupTables() {
   // TODO: 5renomear/esconder colunas de data
   // TODO: 5colocar delegates
 
-  ui->tableView->hideColumn("contaDestino");
   ui->tableView->hideColumn("idConta");
-  ui->tableView->hideColumn("Data Pag");
-  ui->tableView->hideColumn("Data");
+  ui->tableView->hideColumn("dataRealizado");
 
   ui->tableView->setItemDelegateForColumn("R$", new ReaisDelegate(this));
 }
@@ -37,7 +37,7 @@ void PagamentosDia::setupTables() {
 bool PagamentosDia::setFilter(const QDate &date, const QString &idConta) {
   const QString filtroConta = idConta.isEmpty() ? "" : "AND idConta = " + idConta;
 
-  modelViewFluxoCaixa.setFilter("`Data` = '" + date.toString("yyyy-MM-dd") + "' AND status IN ('PAGO', 'RECEBIDO') " + filtroConta);
+  modelViewFluxoCaixa.setFilter("`dataRealizado` = '" + date.toString("yyyy-MM-dd") + "' AND status IN ('PAGO', 'RECEBIDO') " + filtroConta);
 
   if (not modelViewFluxoCaixa.select()) { return false; }
 

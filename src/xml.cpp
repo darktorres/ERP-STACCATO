@@ -26,6 +26,56 @@ void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
   }
 }
 
+void XML::limparValores() {
+  // produto
+  codProd = "";
+  codBarras = "";
+  descricao = "";
+  ncm = "";
+  cfop = "";
+  un = "";
+  quant = 0;
+  valorUnid = 0;
+  valor = 0;
+  codBarrasTrib = "";
+  unTrib = "";
+  quantTrib = 0;
+  valorTrib = 0;
+  desconto = 0;
+  compoeTotal = false;
+  numeroPedido = "";
+  itemPedido = 0;
+  // icms
+  tipoICMS = "";
+  orig = 0;
+  cstICMS = 0;
+  modBC = 0;
+  vBC = 0;
+  pICMS = 0;
+  vICMS = 0;
+  modBCST = 0;
+  pMVAST = 0;
+  vBCST = 0;
+  pICMSST = 0;
+  vICMSST = 0;
+  // ipi
+  cEnq = 0;
+  cstIPI = 0;
+  vBCIPI = 0;
+  pIPI = 0;
+  vIPI = 0;
+  // pis
+  cstPIS = 0;
+  vBCPIS = 0;
+  pPIS = 0;
+  vPIS = 0;
+  // cofins
+  cstCOFINS = 0;
+  vBCCOFINS = 0;
+  pCOFINS = 0;
+  vCOFINS = 0;
+}
+
 void XML::lerValores(const QStandardItem *item) {
   for (int row = 0; row < item->rowCount(); ++row) {
     for (int col = 0; col < item->columnCount(); ++col) {
@@ -38,7 +88,8 @@ void XML::lerValores(const QStandardItem *item) {
 
       if (parentText == "emit" and text.left(7) == "xFant -") { xFant = text.remove(0, 8); }
       if (parentText == "emit" and text.left(7) == "xNome -") { xNome = text.remove(0, 8); }
-      if (parentText == "dest" and text.left(6) == "CNPJ -") { cnpj = text.remove(0, 7); }
+      if (parentText == "emit" and text.left(6) == "CNPJ -") { cnpjOrig = text.remove(0, 7); }
+      if (parentText == "dest" and text.left(6) == "CNPJ -") { cnpjDest = text.remove(0, 7); }
       if (parentText == "transporta" and text.left(7) == "xNome -") { xNomeTransp = text.remove(0, 8); }
 
       lerDadosProduto(child);
@@ -76,7 +127,10 @@ void XML::lerDadosProduto(const QStandardItem *child) {
     if (text.left(10) == "nItemPed -") { itemPedido = text.remove(0, 11).toInt(); }
 
     // remove 'A' from end of product code
-    if (xNome == "CECRISA REVEST. CERAMICOS S.A." and codProd.endsWith("A")) { codProd = codProd.left(codProd.size() - 1); }
+    if (xNome == "CECRISA REVEST. CERAMICOS S.A." and codProd.endsWith("A")) {
+      codProd = codProd.left(codProd.size() - 1);
+      desconto = 0;
+    }
   }
 }
 
@@ -164,7 +218,7 @@ void XML::lerTotais(const QStandardItem *child) {
 }
 
 void XML::montarArvore() {
-  if (fileContent.isEmpty()) { return; }
+  if (fileContent.isEmpty()) { return qApp->enqueueError("XML vazio!"); }
 
   QDomDocument document;
   QString error;

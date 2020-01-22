@@ -1,23 +1,22 @@
-#include <QDateTimeEdit>
+#include <QDateEdit>
 
+#include "application.h"
 #include "dateformatdelegate.h"
 #include "sqlrelationaltablemodel.h"
 
-DateFormatDelegate::DateFormatDelegate(const QString defaultDateColumn, QObject *parent) : QStyledItemDelegate(parent), defaultDateColumn(defaultDateColumn) {}
+DateFormatDelegate::DateFormatDelegate(const int vencimentoColumn, QObject *parent) : QStyledItemDelegate(parent), vencimentoColumn(vencimentoColumn) {}
 
-DateFormatDelegate::DateFormatDelegate(QObject *parent) { DateFormatDelegate("", parent); }
+DateFormatDelegate::DateFormatDelegate(QObject *parent) { DateFormatDelegate(-1, parent); }
 
 QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toDate().toString("dd/MM/yyyy"); }
 
 QWidget *DateFormatDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const {
-  auto *editor = new QDateTimeEdit(parent);
-  editor->setDate(QDate::currentDate());
+  auto *editor = new QDateEdit(parent);
+  editor->setDate(qApp->serverDate());
   editor->setDisplayFormat("dd/MM/yy");
   editor->setCalendarPopup(true);
 
-  auto model = qobject_cast<SqlRelationalTableModel *>(const_cast<QAbstractItemModel *>(index.model()));
-
-  if (model and not defaultDateColumn.isEmpty()) { editor->setDate(index.siblingAtColumn(model->fieldIndex(defaultDateColumn)).data().toDate()); }
+  if (vencimentoColumn != -1) { editor->setDate(index.siblingAtColumn(vencimentoColumn).data().toDate()); }
 
   return editor;
 }

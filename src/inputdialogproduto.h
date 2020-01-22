@@ -2,6 +2,7 @@
 
 #include <QDialog>
 
+#include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 
 namespace Ui {
@@ -16,8 +17,8 @@ public:
 
   explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogProduto();
-  auto getDate() const -> QDateTime;
-  auto getNextDate() const -> QDateTime;
+  auto getDate() const -> QDate;
+  auto getNextDate() const -> QDate;
   auto setFilter(const QStringList &ids) -> bool;
 
 private:

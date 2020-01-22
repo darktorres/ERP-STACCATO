@@ -45,6 +45,7 @@
 #endif
 
 namespace LimeReport {
+Q_NAMESPACE
 
 #ifdef __GNUC__
 #define VARIABLE_IS_NOT_USED __attribute__((unused))
@@ -114,7 +115,7 @@ Q_FLAGS(PreviewHints)
 
 class ReportError : public std::runtime_error {
 public:
-  explicit ReportError(const QString &message) : std::runtime_error(message.toStdString()) {}
+  explicit ReportError(const QString &message);
 };
 
 class ReportSettings {

@@ -30,5 +30,5 @@ private:
   auto on_pushButtonRelatorio_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
-  auto setupTables() -> void;
+  auto setupTables(const bool checked = true) -> void;
 };

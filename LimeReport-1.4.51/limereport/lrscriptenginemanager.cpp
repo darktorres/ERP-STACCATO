@@ -741,7 +741,7 @@ QObject *ScriptEngineContext::createElement(const QString &collectionName, const
 
 int ScriptEngineContext::elementsCount(const QString &collectionName) {
 #ifdef HAVE_UI_LOADER
-  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.count(); };
+  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.count(); }
 #else
   Q_UNUSED(collectionName)
 #endif
@@ -750,7 +750,7 @@ int ScriptEngineContext::elementsCount(const QString &collectionName) {
 
 QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index) {
 #ifdef HAVE_UI_LOADER
-  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.at(index).data(); };
+  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.at(index).data(); }
 #else
   Q_UNUSED(collectionName)
   Q_UNUSED(index)
@@ -758,7 +758,7 @@ QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index
   return nullptr;
 }
 
-void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName); }
+void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName) }
 
 #ifdef HAVE_UI_LOADER
 QDialog *ScriptEngineContext::createDialog(DialogDescriber *cont) {

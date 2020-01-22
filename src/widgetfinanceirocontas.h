@@ -17,7 +17,7 @@ public:
   explicit WidgetFinanceiroContas(QWidget *parent = nullptr);
   ~WidgetFinanceiroContas();
   auto resetTables() -> void;
-  auto setTipo(const Tipo &value) -> void;
+  auto setTipo(const Tipo &novoTipo) -> void;
   auto updateTables() -> void;
 
 private:

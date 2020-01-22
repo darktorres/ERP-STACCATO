@@ -5,6 +5,7 @@
 #include "anteciparrecebimento.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "log.h"
 #include "reaisdelegate.h"
 #include "ui_anteciparrecebimento.h"
 
@@ -33,7 +34,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
 
   while (query.next()) { ui->comboBox->addItem(query.value("tipo").toString()); }
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDate());
 
   setConnections();
 }
@@ -72,10 +73,12 @@ void AnteciparRecebimento::calcularTotais() {
   double liquido = 0;
   double prazoMedio = 0;
 
-  for (const auto &item : list) {
-    const QString tipo = modelContaReceber.data(item.row(), "tipo").toString();
-    const double valor = modelContaReceber.data(item.row(), "valor").toDouble();
-    const QDate dataPagamento = modelContaReceber.data(item.row(), "dataPagamento").toDate();
+  for (const auto &index : list) {
+    const int row = index.row();
+
+    const QString tipo = modelContaReceber.data(row, "tipo").toString();
+    const double valor = modelContaReceber.data(row, "valor").toDouble();
+    const QDate dataPagamento = modelContaReceber.data(row, "dataPagamento").toDate();
 
     if (not tipo.contains("Taxa Cartão")) { bruto += valor; }
 
@@ -96,7 +99,7 @@ void AnteciparRecebimento::calcularTotais() {
   ui->doubleSpinBoxValorLiquido->setValue(liquido);
 
   unsetConnections();
-  ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100));
+  [&] { ui->doubleSpinBoxValorPresente->setValue(liquido * (1 - ui->doubleSpinBoxDescTotal->value() / 100)); }();
   setConnections();
 
   ui->doubleSpinBoxIOF->setValue(0);
@@ -126,7 +129,6 @@ void AnteciparRecebimento::setupTables() {
   modelContaReceber.setHeaderData("grupo", "Grupo");
   modelContaReceber.setHeaderData("subGrupo", "SubGrupo");
   modelContaReceber.setHeaderData("contraParte", "Contraparte");
-  modelContaReceber.setHeaderData("statusFinanceiro", "Financeiro");
 
   modelContaReceber.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
 
@@ -182,7 +184,7 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 
   const double valor = descTotal / prazoMedio * 30 * 100;
   unsetConnections();
-  ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor);
+  [&] { ui->doubleSpinBoxDescMes->setValue(qIsNaN(valor) or qIsInf(valor) ? 0 : valor); }();
   setConnections();
   ui->doubleSpinBoxIOF->setValue(0);
   if (ui->checkBoxIOF->isChecked()) { ui->doubleSpinBoxIOF->setValue(ui->doubleSpinBoxValorPresente->value() * (0.0038 + 0.0041 * prazoMedio)); }
@@ -190,8 +192,8 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
 }
 
 bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
-  for (const auto &item : list) {
-    const int row = item.row();
+  for (const auto &index : list) {
+    const int row = index.row();
 
     if (not modelContaReceber.setData(row, "status", "RECEBIDO")) { return false; }
     if (not modelContaReceber.setData(row, "dataRealizado", ui->dateEditEvento->date())) { return false; }
@@ -221,7 +223,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando 'banco': " + query.lastError().text(), this); }
 
-  if (ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value() > 0) {
+  if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
     const int rowPagar1 = modelContaPagar.insertRowAtEnd();
 
     if (not modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date())) { return false; }
@@ -243,7 +245,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   //
 
-  if (ui->doubleSpinBoxIOF->value() > 0) {
+  if (not qFuzzyIsNull(ui->doubleSpinBoxIOF->value())) {
     const int rowPagar2 = modelContaPagar.insertRowAtEnd();
 
     if (not modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date())) { return false; }
@@ -275,6 +277,8 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: AnteciparRecebimento::on_pushButtonGerar")) { return qApp->rollbackTransaction(); }
 
   if (not cadastrar(list)) { return qApp->rollbackTransaction(); }
 
@@ -322,3 +326,5 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 // valor presente = R$ 98 - (R$ 98 * 10%) = R$ 88,2
 
 // TODO: 1para recebiveis diferentes de cartao calcular IOF
+
+// TODO: fazer uma tela igual para dar baixa em lote nos recebimentos

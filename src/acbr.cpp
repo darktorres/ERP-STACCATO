@@ -7,6 +7,7 @@
 
 #include "acbr.h"
 #include "application.h"
+#include "log.h"
 #include "usersession.h"
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {
@@ -46,14 +47,15 @@ void ACBr::readSocket() {
   resposta += stream;
 
   if (resposta.endsWith(welcome)) {
-    pronto = true;
     resposta.clear();
+    pronto = true;
     return;
   }
 
   if (resposta.endsWith("\u0003")) {
     resposta.remove("\u0003");
     recebido = true;
+    return;
   }
 }
 
@@ -150,9 +152,11 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 void ACBr::removerNota(const int idNFe) {
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: ACBr::removerNota")) { return qApp->rollbackTransaction(); }
+
   const bool remover = [&] {
     QSqlQuery query2a;
-    query2a.prepare("UPDATE venda_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
+    query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
     query2a.bindValue(":idNFeSaida", idNFe);
 
     if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }
@@ -184,24 +188,27 @@ bool ACBr::abrirPdf(const QString &filePath) {
 }
 
 std::optional<QString> ACBr::enviarComando(const QString &comando, const bool local) {
+  const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
+  const auto porta = UserSession::getSetting("User/portaACBr");
+
+  if (not servidorConfig or not porta) {
+    qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
+    return {};
+  }
+
   recebido = false;
   enviado = false;
   resposta.clear();
   progressDialog->show();
 
-  if (socket.state() != QTcpSocket::ConnectedState) {
-    conectado = false;
-    pronto = false;
+  const auto servidor = local ? "localhost" : servidorConfig->toString();
 
-    const auto servidor = local ? "localhost" : UserSession::getSetting("User/servidorACBr");
-    const auto porta = UserSession::getSetting("User/portaACBr");
+  if (lastHost != servidor) { socket.disconnectFromHost(); }
 
-    if (not servidor or not porta) {
-      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
-      return {};
-    }
+  if (not conectado) {
+    lastHost = servidor;
 
-    socket.connectToHost(servidor.value().toString(), porta.value().toByteArray().toUShort());
+    socket.connectToHost(servidor, porta->toByteArray().toUShort());
   }
 
   while (not pronto) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }

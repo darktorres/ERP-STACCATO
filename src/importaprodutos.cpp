@@ -10,6 +10,7 @@
 #include "doubledelegate.h"
 #include "importaprodutos.h"
 #include "importaprodutosproxymodel.h"
+#include "log.h"
 #include "porcentagemdelegate.h"
 #include "ui_importaprodutos.h"
 #include "validadedialog.h"
@@ -29,29 +30,13 @@ ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(par
 
 ImportaProdutos::~ImportaProdutos() { delete ui; }
 
-bool ImportaProdutos::expiraPrecosAntigos() {
-  QStringList idsProdutos;
-
-  for (int row = 0, rowCount = modelProduto.rowCount(); row < rowCount; ++row) { idsProdutos << modelProduto.data(row, "idProduto").toString(); }
-
-  if (idsProdutos.isEmpty()) { return true; }
-
-  QSqlQuery query;
-
-  if (not query.exec("UPDATE produto_has_preco SET expirado = TRUE WHERE idProduto IN (" + idsProdutos.join(",") + ")")) {
-    return qApp->enqueueError(false, "Erro expirando preços antigos: " + query.lastError().text(), this);
-  }
-
-  return true;
-}
-
 void ImportaProdutos::importarTabela() {
-  if (tipo == Tipo::Estoque) { return qApp->enqueueError("Temporariamente desativado!", this); }
-
   if (not readFile()) { return; }
   if (not readValidade()) { return; }
 
   if (not qApp->startTransaction(false)) { return; }
+
+  if (not Log::createLog("Transação: ImportaProdutos::importaTabela")) { return qApp->rollbackTransaction(); }
 
   if (not importar()) {
     db.close();
@@ -99,22 +84,9 @@ bool ImportaProdutos::importar() {
 
   if (not verificaTabela(record)) { return false; }
   if (not cadastraFornecedores()) { return false; }
-  mostraApenasEstesFornecedores();
   if (not verificaSeRepresentacao()) { return false; }
   if (not marcaTodosProdutosDescontinuados()) { return false; }
-
-  modelProduto.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));
-
-  if (not modelProduto.select()) { return false; }
-
-  if (not expiraPrecosAntigos()) { return false; }
-
-  const QString red = QString::number(static_cast<int>(FieldColors::Red));
-
-  modelErro.setFilter("idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)) + " AND (m2cxUpd = " + red +
-                      " OR pccxUpd = " + red + " OR codComercialUpd = " + red + " OR custoUpd = " + red + " OR precoVendaUpd = " + red + ")");
-
-  if (not modelErro.select()) { return false; }
+  if (not mostraApenasEstesFornecedores()) { return false; }
 
   itensExpired = modelProduto.rowCount();
 
@@ -241,6 +213,7 @@ void ImportaProdutos::setupTables() {
   modelProduto.proxyModel = new ImportaProdutosProxyModel(&modelProduto, this);
 
   ui->tableProdutos->setModel(&modelProduto);
+
   ui->tableProdutos->setAutoResize(false);
 
   for (int column = 0; column < modelProduto.columnCount(); ++column) {
@@ -265,7 +238,6 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->hideColumn("icms");
   ui->tableProdutos->hideColumn("cst");
   ui->tableProdutos->hideColumn("ipi");
-  //  ui->tableProdutos->hideColumn("st");
   ui->tableProdutos->hideColumn("estoque");
   ui->tableProdutos->hideColumn("promocao");
   ui->tableProdutos->hideColumn("idProdutoRelacionado");
@@ -326,6 +298,7 @@ void ImportaProdutos::setupTables() {
   modelErro.proxyModel = new ImportaProdutosProxyModel(&modelErro, this);
 
   ui->tableErro->setModel(&modelErro);
+
   ui->tableErro->setAutoResize(false);
 
   for (int column = 0; column < modelErro.columnCount(); ++column) {
@@ -396,12 +369,16 @@ void ImportaProdutos::setVariantMap() {
 bool ImportaProdutos::cadastraFornecedores() {
   QSqlQuery query("SELECT DISTINCT(fornecedor) FROM [BASE$]", db);
 
+  QStringList ids;
+
   while (query.next()) {
     if (query.value("fornecedor").toString().isEmpty()) { continue; }
 
     fornecedor = query.value("fornecedor").toString();
 
-    const auto idFornecedor = buscarCadastrarFornecedor(fornecedor);
+    const auto idFornecedor = buscarCadastrarFornecedor();
+
+    ids << QString::number(idFornecedor.value());
 
     if (not idFornecedor) { return false; }
 
@@ -409,26 +386,31 @@ bool ImportaProdutos::cadastraFornecedores() {
 
     QSqlQuery queryFornecedor;
     queryFornecedor.prepare("UPDATE fornecedor SET validadeProdutos = :validade WHERE razaoSocial = :razaoSocial");
-    queryFornecedor.bindValue(":validade", QDate::currentDate().addDays(validade));
+    queryFornecedor.bindValue(":validade", qApp->serverDateTime().date().addDays(validade));
     queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
     if (not queryFornecedor.exec()) { return qApp->enqueueError(false, "Erro salvando validade: " + queryFornecedor.lastError().text(), this); }
   }
+
+  idsFornecedor = ids.join(",");
 
   if (fornecedores.isEmpty()) { return qApp->enqueueError(false, "Erro ao cadastrar fornecedores.", this); }
 
   return true;
 }
 
-void ImportaProdutos::mostraApenasEstesFornecedores() {
-  // TODO: refactor this to store joined string in a variable directly
-  for (const auto &fornecedor : std::as_const(fornecedores)) { idsFornecedor.append(QString::number(fornecedor)); } // FIXME: shadows
+bool ImportaProdutos::mostraApenasEstesFornecedores() {
+  modelProduto.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));
+
+  if (not modelProduto.select()) { return false; }
+
+  return true;
 }
 
 bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
   QSqlQuery query;
 
-  if (not query.exec("UPDATE produto SET descontinuado = TRUE WHERE idFornecedor IN (" + idsFornecedor.join(",") + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)))) {
+  if (not query.exec("UPDATE produto SET descontinuado = TRUE WHERE idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)))) {
     return qApp->enqueueError(false, "Erro marcando produtos descontinuados: " + query.lastError().text(), this);
   }
 
@@ -442,6 +424,9 @@ void ImportaProdutos::contaProdutos() {
 }
 
 void ImportaProdutos::consistenciaDados() {
+  // TODO: colocar unCaixa nos produtos usando a lógica:
+  //  const double unCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
+
   const auto keys = variantMap.keys();
 
   for (const auto &key : keys) {
@@ -514,7 +499,7 @@ bool ImportaProdutos::atualizaCamposProduto() {
     if (not modelProduto.setData(currentRow, "ncmExUpd", static_cast<int>(FieldColors::White))) { return false; }
   }
 
-  const QString validadeStr = QDate::currentDate().addDays(validade).toString("yyyy-MM-dd");
+  const QString validadeStr = qApp->serverDateTime().date().addDays(validade).toString("yyyy-MM-dd");
 
   if (modelProduto.data(currentRow, "validade") != validadeStr) {
     if (not modelProduto.setData(currentRow, "validade", validadeStr)) { return false; }
@@ -627,7 +612,7 @@ bool ImportaProdutos::insereEmErro() {
   if (not modelErro.setData(row, "idFornecedor", fornecedores.value(variantMap.value("fornecedor").toString()))) { return false; }
 
   if (not modelErro.setData(row, "atualizarTabelaPreco", true)) { return false; }
-  const QString data = QDate::currentDate().addDays(validade).toString("yyyy-MM-dd");
+  const QString data = qApp->serverDateTime().date().addDays(validade).toString("yyyy-MM-dd");
   if (not modelErro.setData(row, "validade", data)) { return false; }
   if (not modelErro.setData(row, "validadeUpd", static_cast<int>(FieldColors::Green))) { return false; }
 
@@ -662,7 +647,7 @@ bool ImportaProdutos::insereEmOk() {
 
   if (not modelProduto.setData(row, "promocao", static_cast<int>(tipo))) { return false; }
 
-  if (tipo == Tipo::Estoque or tipo == Tipo::Promocao) {
+  if (tipo == Tipo::Promocao or tipo == Tipo::StaccatoOFF) {
     QSqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE idFornecedor = :idFornecedor AND codComercial = :codComercial AND promocao = FALSE AND estoque = FALSE");
     query.bindValue(":idFornecedor", fornecedores.value(variantMap.value("fornecedor").toString()));
@@ -677,7 +662,7 @@ bool ImportaProdutos::insereEmOk() {
   if (not modelProduto.setData(row, "idFornecedor", idFornecedor)) { return false; }
 
   if (not modelProduto.setData(row, "atualizarTabelaPreco", true)) { return false; }
-  if (not modelProduto.setData(row, "validade", QDate::currentDate().addDays(validade).toString("yyyy-MM-dd"))) { return false; }
+  if (not modelProduto.setData(row, "validade", qApp->serverDateTime().date().addDays(validade).toString("yyyy-MM-dd"))) { return false; }
   if (not modelProduto.setData(row, "validadeUpd", static_cast<int>(FieldColors::Green))) { return false; }
 
   const double markup = 100 * ((variantMap.value("precoVenda").toDouble() / variantMap.value("custo").toDouble()) - 1.);
@@ -704,7 +689,7 @@ bool ImportaProdutos::insereEmOk() {
 
 bool ImportaProdutos::cadastraProduto() { return insereEmOk(); }
 
-std::optional<int> ImportaProdutos::buscarCadastrarFornecedor(const QString &fornecedor) { // FIXME: shadows
+std::optional<int> ImportaProdutos::buscarCadastrarFornecedor() {
   QSqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
@@ -740,8 +725,8 @@ bool ImportaProdutos::salvar() {
   QSqlQuery queryPrecos;
   queryPrecos.prepare("INSERT INTO produto_has_preco (idProduto, preco, validadeInicio, validadeFim) SELECT idProduto, precoVenda, :validadeInicio AS validadeInicio, :validadeFim AS validadeFim FROM "
                       "produto WHERE atualizarTabelaPreco = TRUE");
-  queryPrecos.bindValue(":validadeInicio", QDate::currentDate().toString("yyyy-MM-dd"));
-  queryPrecos.bindValue(":validadeFim", QDate::currentDate().addDays(validade).toString("yyyy-MM-dd"));
+  queryPrecos.bindValue(":validadeInicio", qApp->serverDateTime().date().toString("yyyy-MM-dd"));
+  queryPrecos.bindValue(":validadeFim", qApp->serverDateTime().date().addDays(validade).toString("yyyy-MM-dd"));
 
   if (not queryPrecos.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text(), this); }
 
@@ -772,7 +757,7 @@ bool ImportaProdutos::verificaTabela(const QSqlRecord &record) {
   const auto keys = variantMap.keys();
 
   for (const auto &key : keys) {
-    if (not record.contains(key)) { return qApp->enqueueError(false, R"(Tabela não possui coluna ")" + key + R"(")", this); }
+    if (not record.contains(key)) { return qApp->enqueueError(false, "Tabela não possui coluna \"" + key + "\"", this); }
   }
 
   return true;
@@ -790,7 +775,7 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
   }
 
   QSqlQuery query;
-  if (not query.exec("UPDATE fornecedor SET representacao = " + QString(checked ? "TRUE" : "FALSE") + " WHERE idFornecedor IN (" + idsFornecedor.join(",") + ")")) {
+  if (not query.exec("UPDATE fornecedor SET representacao = " + QString(checked ? "TRUE" : "FALSE") + " WHERE idFornecedor IN (" + idsFornecedor + ")")) {
     return qApp->enqueueError("Erro guardando 'Representacao' em Fornecedor: " + query.lastError().text(), this);
   }
 }

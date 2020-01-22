@@ -11,6 +11,6 @@ public:
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
-  const int quantUpdIndex;
+  const int quantUpdColumn = -1;
   enum class Status { Ok = 1, QuantDifere = 2, NaoEncontrado = 3, Consumo = 4, Devolucao = 5 };
 };

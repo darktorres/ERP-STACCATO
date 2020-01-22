@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionConfiguracoes, &QAction::triggered, this, &MainWindow::on_actionConfiguracoes_triggered);
   connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
   connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
-  connect(ui->actionEstoque, &QAction::triggered, this, &MainWindow::on_actionEstoque_triggered);
+  connect(ui->actionStaccatoOFF, &QAction::triggered, this, &MainWindow::on_actionStaccatoOFF_triggered);
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
@@ -53,17 +53,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
   if (const auto hostname = UserSession::getSetting("Login/hostname"); hostname) {
-    const QString hostnameText = qApp->getMapLojas().key(hostname.value().toString());
+    const QString hostnameText = qApp->getMapLojas().key(hostname->toString());
 
-    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname.value().toString() : hostnameText));
+    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
   } else {
     qApp->enqueueError("A chave 'hostname' não está configurada!", this);
   }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
+
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->actionCadastrarFornecedor->setDisabled(true);
     ui->actionCadastrarProdutos->setDisabled(true);
-    ui->actionCadastrarUsuario->setDisabled(true);
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->actionGerenciar_preco_estoque->setDisabled(true);
@@ -95,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
-  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").value().toString());
+  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname")->toString());
   pushButtonStatus->setStyleSheet("color: rgb(0, 190, 0);");
 
   ui->statusBar->addWidget(pushButtonStatus);
@@ -108,7 +109,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   const QString nomeUsuario = UserSession::nome();
 
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true); }
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or UserSession::tipoUsuario() == "GERENTE LOJA") {
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true);
+  }
+
+  //---------------------------------------------------------------------------
+
+  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), false);
+
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -120,7 +129,7 @@ void MainWindow::reconnectDb() {
 }
 
 void MainWindow::verifyDb(const bool conectado) {
-  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").value().toString() : "Desconectado");
+  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname")->toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }
@@ -178,6 +187,7 @@ void MainWindow::resetTables() {
   ui->widgetFinanceiro->resetTables();
   ui->widgetRelatorio->resetTables();
   ui->widgetGraficos->resetTables();
+  ui->widgetConsistencia->resetTables();
 
   updateTables();
 }
@@ -201,6 +211,7 @@ void MainWindow::updateTables() {
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
   if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
   if (currentText == "RH") { ui->widgetRh->updateTables(); }
+  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
 
   qApp->setUpdating(false);
 }
@@ -245,8 +256,8 @@ void MainWindow::on_actionProdutos_triggered() {
   importa->importarTabela();
 }
 
-void MainWindow::on_actionEstoque_triggered() {
-  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Estoque, this);
+void MainWindow::on_actionStaccatoOFF_triggered() {
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::StaccatoOFF, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
   importa->importarTabela();
 }
@@ -276,7 +287,8 @@ void MainWindow::on_actionCalcular_frete_triggered() {
 // TODO: logistica da devolucao
 
 // TASK: cancelamento de nfe: terminar de arrumar formato do email
-// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
+// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na
+// tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
 // autorizacao e os status)
 // TASK: verificar porque os estoques 10649, 10650 e 10651 nao mudaram de status (pararam em 'em coleta')
 // TASK: anotar alteracoes que Anderson pediu nos audios do whats

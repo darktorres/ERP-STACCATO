@@ -6,6 +6,7 @@
 #include "cadastrotransportadora.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
+#include "log.h"
 #include "searchdialog.h"
 #include "ui_cadastrotransportadora.h"
 #include "usersession.h"
@@ -43,7 +44,7 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   sdTransportadora = SearchDialog::transportadora(this);
   connect(sdTransportadora, &SearchDialog::itemSelected, this, &CadastroTransportadora::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
@@ -352,6 +353,13 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroTransportadora::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -379,6 +387,8 @@ bool CadastroTransportadora::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupEndereco.clear();
     backupVeiculo.clear();
 

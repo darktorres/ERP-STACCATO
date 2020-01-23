@@ -36,6 +36,10 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
 
     ui->labelEvento->setText("Data do recebimento:");
 
+    ui->labelFoto->hide();
+    ui->lineEditFoto->hide();
+    ui->pushButtonFoto->hide();
+
     ui->labelEntregou->hide();
     ui->lineEditEntregou->hide();
   }
@@ -54,6 +58,10 @@ InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent)
     ui->dateEditProximo->hide();
 
     ui->tableLogistica->hide();
+
+    ui->labelFoto->hide();
+    ui->lineEditFoto->hide();
+    ui->pushButtonFoto->hide();
 
     ui->labelEntregou->hide();
     ui->lineEditEntregou->hide();
@@ -135,6 +143,12 @@ void InputDialogConfirmacao::setupTables() {
 
     ui->tableLogistica->setModel(&modelEstoque);
 
+    ui->tableLogistica->hideColumn("restante");
+    ui->tableLogistica->hideColumn("ajuste");
+    ui->tableLogistica->hideColumn("vBCIPI");
+    ui->tableLogistica->hideColumn("pIPI");
+    ui->tableLogistica->hideColumn("vIPI");
+    ui->tableLogistica->hideColumn("valorGare");
     ui->tableLogistica->hideColumn("idEstoque");
     ui->tableLogistica->hideColumn("idNFe");
     ui->tableLogistica->hideColumn("recebidoPor");
@@ -223,6 +237,8 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 
   ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
+  setWindowTitle("Venda: " + id);
+
   return true;
 }
 
@@ -293,7 +309,7 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
   }
 
   bool ok;
-  // TODO: verify if this needs to be changed to use step after &ok
+
   const double caixasDefeito = QInputDialog::getDouble(this, produto, "Caixas quebradas: ", caixas, 0, caixas, 1, &ok);
 
   if (not ok or qFuzzyIsNull(caixasDefeito)) { return; }
@@ -310,23 +326,22 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
 }
 
 bool InputDialogConfirmacao::processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) {
-  // TODO: ao quebrar linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
+  // TODO: ao dividir linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
   // TODO: fazer no recebimento o mesmo fluxo da entrega (criar nova linha, etc)
-  if (tipo == Tipo::Recebimento and not quebrarRecebimento(row, caixasDefeito, unCaixa)) { return false; }
-  if (tipo == Tipo::Entrega and not quebrarEntrega(row, choice, caixasDefeito, unCaixa)) { return false; }
+  if (tipo == Tipo::Recebimento and not dividirRecebimento(row, caixasDefeito, unCaixa)) { return false; }
+  if (tipo == Tipo::Entrega and not dividirEntrega(row, choice, caixasDefeito, unCaixa)) { return false; }
 
   return true;
 }
 
-bool InputDialogConfirmacao::quebrarRecebimento(const int row, const double caixasDefeito, const double unCaixa) {
-  // REFAC: 0finish this part
+bool InputDialogConfirmacao::dividirRecebimento(const int row, const double caixasDefeito, const double unCaixa) {
+  // TODO: nao dividir linha do estoque, apenas criar um consumo 'quebrado' para inutilizar a parte que foi quebrada (a mesma coisa para faltando)
 
-  // model is estoque
-  // perguntar quant. quebrada - QInputDialog
+  // REFAC: 0finish this part
 
   //  const QString produto = model.data(row, "descricao").toString();
   const int idEstoque = modelEstoque.data(row, "idEstoque").toInt();
-  const int caixas = modelEstoque.data(row, "caixas").toInt();
+  const double caixas = modelEstoque.data(row, "caixas").toDouble();
 
   //  QSqlQuery query;
   //  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
@@ -349,7 +364,7 @@ bool InputDialogConfirmacao::quebrarRecebimento(const int row, const double caix
   //  if (not ok or caixasDefeito == 0) { return false; }
 
   // TODO: inline this
-  if (not quebrarLinhaRecebimento(row, caixas, caixasDefeito, unCaixa)) { return false; }
+  //  if (not dividirLinhaRecebimento(row, caixas, caixasDefeito, unCaixa)) { return false; }
   //  if (not criarConsumo(row)) { return false; }
   if (not desfazerConsumo(idEstoque, caixasDefeito)) { return false; }
 
@@ -379,7 +394,7 @@ bool InputDialogConfirmacao::quebrarRecebimento(const int row, const double caix
   return true;
 }
 
-bool InputDialogConfirmacao::quebrarEntrega(const int row, const int choice, const double caixasDefeito, const double unCaixa) {
+bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, const double caixasDefeito, const double unCaixa) {
   // NOTE: na tabela veiculo_has_produto é separado a linha em 2:
   // -linha original mantem a quant. entregue
   // -linha nova mostra a quant. quebrada
@@ -566,7 +581,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &mode
   return modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
 }
 
-bool InputDialogConfirmacao::quebrarLinhaRecebimento(const int row, const int caixas, const double caixasDefeito, const double unCaixa) {
+bool InputDialogConfirmacao::dividirLinhaRecebimento(const int row, const double caixas, const double caixasDefeito, const double unCaixa) {
   // TODO: 5ao marcar caixas quebradas e só houver uma nao dividir em duas linhas (para nao ficar linha zerado)
   // diminuir quant. da linha selecionada
 
@@ -611,8 +626,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando sobra estoque: " + query.lastError().text(), this); }
 
-  // REFAC: why this int is stored in a double?
-  double sobra = query.value("sobra").toInt();
+  double sobra = query.value("sobra").toDouble();
   qDebug() << "sobra: " << sobra;
   qDebug() << "caixasDefeito: " << caixasDefeito;
 
@@ -632,7 +646,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
     queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idConsumo = :idConsumo");
 
     QSqlQuery queryVenda;
-    // TODO: should set flag 'reposicao'
+    // TODO: should set flag 'reposicao' (where is this flag unset?)
     queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'REPO. RECEB.', dataPrevEnt = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
 
     while (querySelect.next()) {

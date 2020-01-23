@@ -50,9 +50,9 @@ bool ImportaProdutos::verificaSeRepresentacao() {
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-  if (not queryFornecedor.exec()) { return qApp->enqueueError(false, "Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text(), this); }
+  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueError(false, "Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text(), this); }
 
-  if (queryFornecedor.first()) { ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool()); }
+  ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool());
 
   return true;
 }
@@ -378,9 +378,9 @@ bool ImportaProdutos::cadastraFornecedores() {
 
     const auto idFornecedor = buscarCadastrarFornecedor();
 
-    ids << QString::number(idFornecedor.value());
-
     if (not idFornecedor) { return false; }
+
+    ids << QString::number(idFornecedor.value());
 
     fornecedores.insert(fornecedor, idFornecedor.value());
 
@@ -394,7 +394,7 @@ bool ImportaProdutos::cadastraFornecedores() {
 
   idsFornecedor = ids.join(",");
 
-  if (fornecedores.isEmpty()) { return qApp->enqueueError(false, "Erro ao cadastrar fornecedores.", this); }
+  if (fornecedores.isEmpty()) { return qApp->enqueueError(false, "Erro ao cadastrar fornecedores!", this); }
 
   return true;
 }

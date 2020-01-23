@@ -780,7 +780,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   XML xml(file.readAll(), file.fileName());
 
-  if (not verificaCNPJ(xml) or verificaExiste(xml) or not verificaValido(xml)) { return; }
+  if (not xml.validar(XML::Tipo::Saida)) { return; }
 
   QSqlQuery queryNFe;
   queryNFe.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, cnpjOrig, chaveAcesso, valor) VALUES (:numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :cnpjOrig, :chaveAcesso, :valor)");
@@ -808,36 +808,6 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   updateTables();
   qApp->enqueueInformation("Nota importada com sucesso!", this);
-}
-
-bool WidgetLogisticaAgendarEntrega::verificaCNPJ(const XML &xml) {
-  QSqlQuery queryLoja;
-
-  const QString cnpj = QString(xml.cnpjOrig).insert(2, ".").insert(6, ".").insert(10, "/").insert(15, "-");
-
-  if (not queryLoja.exec("SELECT cnpj FROM loja WHERE cnpj = '" + cnpj + "'")) { return qApp->enqueueError(false, "Erro na query CNPJ: " + queryLoja.lastError().text(), this); }
-
-  if (not queryLoja.first()) { return qApp->enqueueError(false, "CNPJ da NFe difere dos CNPJs da loja!", this); }
-
-  return true;
-}
-
-bool WidgetLogisticaAgendarEntrega::verificaExiste(const XML &xml) {
-  QSqlQuery query;
-  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
-  query.bindValue(":chaveAcesso", xml.chaveAcesso);
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
-
-  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
-
-  return false;
-}
-
-bool WidgetLogisticaAgendarEntrega::verificaValido(const XML &xml) {
-  if (not xml.fileContent.contains("nProt")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", this); }
-
-  return true;
 }
 
 // TODO: 1'em entrega' deve entrar na categoria 100% estoque?

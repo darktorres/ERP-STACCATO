@@ -50,7 +50,4 @@ private:
   auto reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
-  auto verificaCNPJ(const XML &xml) -> bool;
-  auto verificaExiste(const XML &xml) -> bool;
-  auto verificaValido(const XML &xml) -> bool;
 };

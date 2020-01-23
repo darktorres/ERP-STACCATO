@@ -584,35 +584,15 @@ bool ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
   return criarConsumo(rowCompra, rowEstoque);
 }
 
-bool ImportarXML::verificaCNPJ(const QString &cnpj) {
-  if (cnpj.left(11) != "09375013000") { return qApp->enqueueError(false, "CNPJ da nota não é da Staccato!", this); }
-
-  return true;
-}
-
 bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
-  QSqlQuery query;
-  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
-  query.bindValue(":chaveAcesso", chaveAcesso);
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
-
   const auto list = modelNFe.multiMatch({{"chaveAcesso", chaveAcesso}}, false);
 
-  if (query.first() or not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+  if (not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
 
   return false;
 }
 
-bool ImportarXML::verificaValido(const XML &xml) {
-  if (not xml.fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", this); }
-
-  return true;
-}
-
 bool ImportarXML::cadastrarNFe(XML &xml) {
-  if (not verificaCNPJ(xml.cnpjDest) or verificaExiste(xml.chaveAcesso) or not verificaValido(xml)) { return false; }
-
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) { return false; }
@@ -649,18 +629,19 @@ bool ImportarXML::lerXML() {
 
   if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo arquivo: " + file.errorString(), this); }
 
-  const auto local = perguntarLocal();
-
-  if (not local) { return false; }
-
   auto fileContent = file.readAll();
 
   if (fileContent.left(3) == "o;?") { fileContent.remove(0, 3); }
 
   XML xml(fileContent, file.fileName());
-  xml.local = local.value();
 
   file.close();
+
+  if (not xml.validar(XML::Tipo::Entrada)) { return false; }
+
+  if (verificaExiste(xml.chaveAcesso)) { return false; }
+
+  if (not perguntarLocal(xml)) { return false; }
 
   if (not cadastrarNFe(xml)) { return false; }
 
@@ -669,12 +650,12 @@ bool ImportarXML::lerXML() {
   return true;
 }
 
-std::optional<QString> ImportarXML::perguntarLocal() {
+bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
   if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) {
     qApp->enqueueError("Erro buscando lojas: " + query.lastError().text(), this);
-    return {};
+    return false;
   }
 
   QStringList lojas{"CD"};
@@ -689,11 +670,13 @@ std::optional<QString> ImportarXML::perguntarLocal() {
   input.setComboBoxItems(lojas);
   input.setComboBoxEditable(false);
 
-  if (input.exec() != QInputDialog::Accepted) { return {}; }
+  if (input.exec() != QInputDialog::Accepted) { return false; }
 
   const QString local = input.textValue();
 
-  return local;
+  xml.local = local;
+
+  return true;
 }
 
 bool ImportarXML::inserirItemModel(const XML &xml) {

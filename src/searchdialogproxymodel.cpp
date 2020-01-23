@@ -41,7 +41,7 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
       }
 
       if (estoque and promocao == 2) {
-        if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // BLACK NOVEMBER
+        if (role == Qt::BackgroundRole) { return QBrush(Qt::blue); } // STACCATO OFF
         if (role == Qt::ForegroundRole) { return QBrush(Qt::white); }
       }
 
@@ -76,5 +76,3 @@ bool SearchDialogProxyModel::lessThan(const QModelIndex &source_left, const QMod
 
   return QSortFilterProxyModel::lessThan(source_left, source_right);
 }
-
-// TODO: posteriormente remover o azul da promocao 'BLACK NOVEMBER'

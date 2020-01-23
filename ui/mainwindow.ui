@@ -160,7 +160,7 @@
      <x>0</x>
      <y>0</y>
      <width>764</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOpcoes">
@@ -180,7 +180,6 @@
      </property>
      <addaction name="actionProdutos"/>
      <addaction name="actionPromocao"/>
-     <addaction name="actionStaccatoOFF"/>
     </widget>
     <addaction name="menuImportar_tabela_fornecedor"/>
     <addaction name="menuTema"/>

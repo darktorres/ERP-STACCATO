@@ -647,7 +647,7 @@ bool ImportaProdutos::insereEmOk() {
 
   if (not modelProduto.setData(row, "promocao", static_cast<int>(tipo))) { return false; }
 
-  if (tipo == Tipo::Promocao or tipo == Tipo::StaccatoOFF) {
+  if (tipo == Tipo::Promocao) {
     QSqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE idFornecedor = :idFornecedor AND codComercial = :codComercial AND promocao = FALSE AND estoque = FALSE");
     query.bindValue(":idFornecedor", fornecedores.value(variantMap.value("fornecedor").toString()));

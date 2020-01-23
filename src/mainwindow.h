@@ -32,7 +32,6 @@ private:
   auto on_actionConfiguracoes_triggered() -> void;
   auto on_actionCriarOrcamento_triggered() -> void;
   auto on_actionEscuro_triggered() -> void;
-  auto on_actionStaccatoOFF_triggered() -> void;
   auto on_actionGerenciar_Lojas_triggered() -> void;
   auto on_actionGerenciar_Transportadoras_triggered() -> void;
   auto on_actionGerenciar_preco_estoque_triggered() -> void;

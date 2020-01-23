@@ -48,7 +48,7 @@
 color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
-        <string>BLACK NOVEMBER</string>
+        <string>STACCATO OFF</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>

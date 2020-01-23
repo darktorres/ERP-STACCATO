@@ -66,7 +66,7 @@ private:
   auto on_pushButtonProcurar_clicked() -> void;
   auto parear() -> bool;
   auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
-  auto perguntarLocal() -> std::optional<QString>;
+  auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
   auto reservarIdPedido2() -> std::optional<int>;
   auto reservarIdEstoque() -> std::optional<int>;
@@ -76,8 +76,6 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
-  auto verificaCNPJ(const QString &cnpj) -> bool;
   auto verificaExiste(const QString &chaveAcesso) -> bool;
-  auto verificaValido(const XML &xml) -> bool;
   auto verifyFields() -> bool;
 };

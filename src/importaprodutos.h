@@ -12,7 +12,7 @@ class ImportaProdutos final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { Produto = 0, Promocao = 1, StaccatoOFF = 2 };
+  enum class Tipo { Produto = 0, Promocao = 1 };
   explicit ImportaProdutos(const Tipo tipo, QWidget *parent = nullptr);
   ~ImportaProdutos();
   auto importarTabela() -> void;

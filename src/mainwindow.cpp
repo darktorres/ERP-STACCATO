@@ -37,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionConfiguracoes, &QAction::triggered, this, &MainWindow::on_actionConfiguracoes_triggered);
   connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
   connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
-  connect(ui->actionStaccatoOFF, &QAction::triggered, this, &MainWindow::on_actionStaccatoOFF_triggered);
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
@@ -252,12 +251,6 @@ void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QU
 
 void MainWindow::on_actionProdutos_triggered() {
   auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Produto, this);
-  importa->setAttribute(Qt::WA_DeleteOnClose);
-  importa->importarTabela();
-}
-
-void MainWindow::on_actionStaccatoOFF_triggered() {
-  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::StaccatoOFF, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
   importa->importarTabela();
 }

@@ -264,6 +264,8 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
   const QString idCompra = query1.value("idCompra").toString();
   const QString codComercial = query1.value("codComercial").toString();
 
+  if (idCompra.isEmpty() or codComercial.isEmpty()) { return {}; }
+
   //--------------------------------------------------------------------
 
   SqlRelationalTableModel modelCompra;

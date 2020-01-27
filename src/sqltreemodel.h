@@ -17,8 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-#ifndef SQLTREEMODEL_H
-#define SQLTREEMODEL_H
+#pragma once
 
 #include <QAbstractProxyModel>
 
@@ -191,5 +190,3 @@ private:
   bool setRawData(const int level, const int row, const int column, const QVariant &value, const int role = Qt::DisplayRole);
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
 };
-
-#endif

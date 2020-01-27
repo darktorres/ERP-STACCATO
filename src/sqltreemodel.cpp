@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-#include "sqltreemodel.h"
-#include "application.h"
-
 #include <QHash>
 #include <QSqlQueryModel>
 #include <QSqlRecord>
 #include <QVector>
+
+#include "application.h"
+#include "sqltreemodel.h"
 
 class SqlTreeModelNode {
 public:

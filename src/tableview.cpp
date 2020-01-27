@@ -107,8 +107,8 @@ void TableView::mousePressEvent(QMouseEvent *event) {
 
   if (not item.isValid()) {
     clearSelection();
-    // QTableView don't emit when index is invalid, emit manually for widgets
-    emit clicked(item);
+
+    emit clicked(item); // QTableView don't emit when index is invalid, emit manually for widgets
   }
 
   QTableView::mousePressEvent(event);

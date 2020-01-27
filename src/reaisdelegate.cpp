@@ -1,7 +1,7 @@
+#include <QPainter>
+
 #include "reaisdelegate.h"
 #include "usersession.h"
-
-#include <QPainter>
 
 ReaisDelegate::ReaisDelegate(QObject *parent, const int decimais, const bool customPaint) : QStyledItemDelegate(parent), decimais(decimais), customPaint(customPaint) {}
 

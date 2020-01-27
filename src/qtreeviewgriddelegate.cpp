@@ -1,8 +1,8 @@
-#include "qtreeviewgriddelegate.h"
-#include "usersession.h"
-
 #include <QPainter>
 #include <QTreeView>
+
+#include "qtreeviewgriddelegate.h"
+#include "usersession.h"
 
 QTreeViewGridDelegate::QTreeViewGridDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 

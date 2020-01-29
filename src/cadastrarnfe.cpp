@@ -955,7 +955,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
     const QString inscEst = queryCliente.value("inscEstadual").toString();
 
-    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and inscEst == "ISENTO") {
+    if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
       stream << "[ICMSUFDest" + numProd + "]" << endl;
       stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl; // TODO: should be valorProduto + frete + ipi + outros - desconto
       stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
@@ -987,7 +987,7 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
 
   const QString inscEst = queryCliente.value("inscEstadual").toString();
 
-  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and inscEst == "ISENTO") {
+  if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
     double totalIcmsDest = 0;
 
     const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
@@ -2079,3 +2079,4 @@ void CadastrarNFe::on_checkBoxFrete_toggled(bool checked) {
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
 // precisa detalhar a partilha no complemento bem como origem e destino
 // TODO: na importacao verificar se a nota está autorizada
+// TODO: quando mudar endereco de entrega mudar a operacao para interestadual se for para outro estado

@@ -1,10 +1,13 @@
 #include <QDebug>
+#include <QHeaderView>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QPainter>
 #include <QScrollBar>
 
 #include "application.h"
 #include "treeview.h"
+#include "usersession.h"
 
 TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
@@ -114,4 +117,26 @@ void TreeView::mousePressEvent(QMouseEvent *event) {
   if (not item.isValid()) { clearSelection(); }
 
   QTreeView::mousePressEvent(event);
+}
+
+void TreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const {
+  QTreeView::drawRow(painter, options, index);
+
+  const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+
+  const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
+  painter->setPen(color);
+  int top = options.rect.top();
+
+  painter->save();
+  painter->translate(visualRect(model()->index(0, 0)).left() - indentation() - .5, -.5);
+
+  for (int sectionId = 0; sectionId < header()->count(); ++sectionId) {
+    painter->translate(header()->sectionSize(sectionId), 0);
+    painter->drawLine(0, top, 0, top + options.rect.height());
+  }
+
+  painter->restore();
+
+  painter->drawLine(0, options.rect.bottom(), options.rect.width(), options.rect.bottom());
 }

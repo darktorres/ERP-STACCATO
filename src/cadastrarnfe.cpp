@@ -161,18 +161,15 @@ QString CadastrarNFe::gerarNota() {
 
 std::optional<int> CadastrarNFe::preCadastrarNota() {
   QSqlQuery queryNota;
-  queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) VALUES (:idVenda, :numeroNFe, :tipo, :xml, :status, :chaveAcesso, :cnpjOrig, "
-                    ":cnpjDest, :valor)");
+  queryNota.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
+                    "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'NOTA PENDENTE', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
   queryNota.bindValue(":idVenda", idVenda);
   queryNota.bindValue(":numeroNFe", ui->lineEditNumero->text());
-  queryNota.bindValue(":tipo", "SAÍDA");
   queryNota.bindValue(":xml", xml);
-  queryNota.bindValue(":status", "NOTA PENDENTE");
   queryNota.bindValue(":chaveAcesso", chaveNum);
   queryNota.bindValue(":cnpjOrig", clearStr(ui->lineEditEmitenteCNPJ->text()));
   queryNota.bindValue(":cnpjDest", clearStr(ui->lineEditDestinatarioCPFCNPJ->text()));
   queryNota.bindValue(":valor", ui->doubleSpinBoxValorNota->value());
-  // TODO: verificar se devo salvar idVenda aqui ou apenas remover esse campo do BD
 
   if (not queryNota.exec()) {
     qApp->enqueueError("Erro guardando nota: " + queryNota.lastError().text(), this);

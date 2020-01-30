@@ -783,11 +783,14 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   if (not xml.validar(XML::Tipo::Saida)) { return; }
 
   QSqlQuery queryNFe;
-  queryNFe.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, cnpjOrig, chaveAcesso, valor) VALUES (:numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :cnpjOrig, :chaveAcesso, :valor)");
+  queryNFe.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
+                   "VALUES (:idVenda, :numeroNFe, 'SAÍDA', :xml, 'AUTORIZADO', :chaveAcesso, :cnpjOrig, :cnpjDest, :valor)");
+  queryNFe.bindValue(":idVenda", modelProdutos.data(0, "idVenda"));
   queryNFe.bindValue(":numeroNFe", xml.nNF);
   queryNFe.bindValue(":xml", xml.fileContent);
-  queryNFe.bindValue(":cnpjOrig", xml.cnpjDest);
   queryNFe.bindValue(":chaveAcesso", xml.chaveAcesso);
+  queryNFe.bindValue(":cnpjOrig", xml.cnpjOrig);
+  queryNFe.bindValue(":cnpjDest", xml.cnpjDest);
   queryNFe.bindValue(":valor", xml.vNF_Total);
 
   if (not queryNFe.exec()) { return qApp->enqueueError("Erro importando NFe: " + queryNFe.lastError().text(), this); }

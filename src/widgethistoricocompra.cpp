@@ -5,7 +5,6 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
-#include "qtreeviewgriddelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
 #include "ui_widgethistoricocompra.h"
@@ -124,12 +123,10 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegate(new QTreeViewGridDelegate(this));
-
-  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4, true));
-  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(this, 4, true));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(this, 4));
 }
 
 void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {

@@ -30,4 +30,8 @@ private:
   auto setConnections() -> void;
   auto showContextMenu(const QPoint &pos) -> void;
   auto unsetConnections() -> void;
+
+  // QTreeView interface
+protected:
+  virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const override;
 };

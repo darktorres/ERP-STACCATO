@@ -16,7 +16,6 @@
 #include "noeditdelegate.h"
 #include "orcamento.h"
 #include "porcentagemdelegate.h"
-#include "qtreeviewgriddelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 #include "ui_venda.h"
@@ -124,15 +123,13 @@ void Venda::setTreeView() {
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegate(new QTreeViewGridDelegate(this));
-
-  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4, true));
-  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this, 2, true));
-  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this, true));
-  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this, true));
-  ui->treeView->setItemDelegateForColumn("total", new ReaisDelegate(this, 2, true));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
+  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
 
 void Venda::setConnections() {

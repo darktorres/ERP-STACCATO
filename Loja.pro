@@ -165,7 +165,6 @@ SOURCES += \
     src/porcentagemdelegate.cpp \
     src/precoestoque.cpp \
     src/produtospendentes.cpp \
-    src/qtreeviewgriddelegate.cpp \
     src/reaisdelegate.cpp \
     src/registeraddressdialog.cpp \
     src/registerdialog.cpp \
@@ -282,7 +281,6 @@ HEADERS  += \
     src/porcentagemdelegate.h \
     src/precoestoque.h \
     src/produtospendentes.h \
-    src/qtreeviewgriddelegate.h \
     src/reaisdelegate.h \
     src/registeraddressdialog.h \
     src/registerdialog.h \

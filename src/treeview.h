@@ -12,7 +12,7 @@ public:
   ~TreeView() final = default;
   auto hideColumn(const QString &column) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;
-  auto setModel(QAbstractItemModel *model) -> void;
+  auto setModel(QAbstractItemModel *model) -> void final;
 
 protected:
   auto mousePressEvent(QMouseEvent *event) -> void final;

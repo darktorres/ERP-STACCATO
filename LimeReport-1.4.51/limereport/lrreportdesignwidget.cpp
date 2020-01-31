@@ -244,7 +244,7 @@ bool ReportDesignWidget::save() {
     if (m_report->saveToFile(QFileDialog::getSaveFileName(this, tr("Report file name"), "", "Report files (*.lrxml);; All files (*)"))) {
       m_report->emitSaveFinished();
       return true;
-    };
+    }
   }
   return false;
 }
@@ -534,7 +534,7 @@ bool ReportDesignWidget::eventFilter(QObject *target, QEvent *event) {
   if (event->type() == QEvent::Wheel) {
     QWheelEvent *we = dynamic_cast<QWheelEvent *>(event);
     if (QApplication::keyboardModifiers() == Qt::ControlModifier) {
-      if (we->delta() < 0)
+      if (we->angleDelta().y() < 0)
         scale(1.2, 1.2);
       else
         scale(1 / 1.2, 1 / 1.2);

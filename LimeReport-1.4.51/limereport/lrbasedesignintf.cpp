@@ -52,7 +52,7 @@ namespace LimeReport {
 BaseDesignIntf::BaseDesignIntf(const QString &storageTypeName, QObject *owner, QGraphicsItem *parent)
     : QObject(owner), QGraphicsItem(parent), m_resizeHandleSize(Const::RESIZE_HANDLE_SIZE), m_selectionPenSize(Const::SELECTION_PEN_SIZE),
       m_possibleResizeDirectionFlags(ResizeTop | ResizeBottom | ResizeLeft | ResizeRight), m_possibleMoveDirectionFlags(All), m_resizeDirectionFlags(0), m_width(200), m_height(50),
-      m_fontColor(Qt::black), m_mmFactor(Const::mmFACTOR), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags(nullptr),
+      m_fontColor(Qt::black), m_mmFactor(Const::mmFACTOR), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags({}),
       m_storageTypeName(storageTypeName), m_itemMode(DesignMode), m_objectState(ObjectCreated), m_selectionMarker(nullptr), m_joinMarker(nullptr), m_backgroundBrushStyle(SolidPattern),
       m_backgroundColor(Qt::white), m_margin(4), m_itemAlign(DesignedItemAlign), m_changingItemAlign(false), m_borderColor(Qt::black), m_reportSettings(nullptr), m_patternName("") {
   setGeometry(QRectF(0, 0, m_width, m_height));

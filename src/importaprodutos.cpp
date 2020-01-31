@@ -554,11 +554,11 @@ bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
     if (not modelErro.setData(row, "colecaoUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
-  if ((variantMap.value("un").toString() == "M2" or variantMap.value("un").toString() == "M²" or variantMap.value("un").toString() == "ML") and variantMap.value("m2cx") <= 0.) {
+  if ((variantMap.value("un").toString() == "M2" or variantMap.value("un").toString() == "M²" or variantMap.value("un").toString() == "ML") and variantMap.value("m2cx").toDouble() <= 0.) {
     if (not modelErro.setData(row, "m2cxUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
-  if (variantMap.value("un").toString() != "M2" and variantMap.value("un").toString() != "M²" and variantMap.value("un").toString() != "ML" and variantMap.value("pccx") < 1) {
+  if (variantMap.value("un").toString() != "M2" and variantMap.value("un").toString() != "M²" and variantMap.value("un").toString() != "ML" and variantMap.value("pccx").toDouble() < 1) {
     if (not modelErro.setData(row, "pccxUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
@@ -566,15 +566,15 @@ bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
     if (not modelErro.setData(row, "codComercialUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
-  if (variantMap.value("custo") <= 0.) {
+  if (variantMap.value("custo").toDouble() <= 0.) {
     if (not modelErro.setData(row, "custoUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
-  if (variantMap.value("precoVenda") <= 0.) {
+  if (variantMap.value("precoVenda").toDouble() <= 0.) {
     if (not modelErro.setData(row, "precoVendaUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
-  if (variantMap.value("precoVenda") < variantMap.value("custo")) {
+  if (variantMap.value("precoVenda").toDouble() < variantMap.value("custo").toDouble()) {
     if (not modelErro.setData(row, "precoVendaUpd", static_cast<int>(FieldColors::Red))) { return false; }
   }
 
@@ -586,15 +586,15 @@ bool ImportaProdutos::camposForaDoPadrao() {
   if (variantMap.value("colecao").toString() == "REPETIDO") { return true; }
 
   const QString un = variantMap.value("un").toString();
-  if ((un == "M2" or un == "M²" or un == "ML") and variantMap.value("m2cx") <= 0.) { return true; }
-  if (un != "M2" and un != "M²" and un != "ML" and variantMap.value("pccx") < 1) { return true; }
+  if ((un == "M2" or un == "M²" or un == "ML") and variantMap.value("m2cx").toDouble() <= 0.) { return true; }
+  if (un != "M2" and un != "M²" and un != "ML" and variantMap.value("pccx").toDouble() < 1) { return true; }
 
   const QString codComercial = variantMap.value("codComercial").toString();
   if (codComercial == "0" or codComercial.isEmpty()) { return true; }
 
-  if (variantMap.value("custo") <= 0.) { return true; }
-  if (variantMap.value("precoVenda") <= 0.) { return true; }
-  if (variantMap.value("precoVenda") < variantMap.value("custo")) { return true; }
+  if (variantMap.value("custo").toDouble() <= 0.) { return true; }
+  if (variantMap.value("precoVenda").toDouble() <= 0.) { return true; }
+  if (variantMap.value("precoVenda").toDouble() < variantMap.value("custo").toDouble()) { return true; }
 
   return false;
 }

@@ -417,7 +417,7 @@ void SqlTreeModel::sort(int column, Qt::SortOrder order) {
 void SqlTreeModel::updateQueries() {}
 
 Qt::ItemFlags SqlTreeModel::flags(const QModelIndex &index) const {
-  if (not index.isValid()) { return nullptr; }
+  if (not index.isValid()) { return {}; }
 
   return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }

@@ -110,7 +110,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   if (not query.exec()) { return qApp->enqueueError("Erro query: " + query.lastError().text(), this); }
 
   while (query.next()) {
-    const QString transportadora = query.value("razaoSocial").toString() + "\n" + query.value("modelo").toString();
+    const QString transportadora = query.value("razaoSocial").toString().left(15) + "\n" + query.value("modelo").toString().left(15);
 
     int row = -1;
 
@@ -121,7 +121,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
       }
     }
 
-    if (row == -1) { continue; }
+    if (row == -1) { return qApp->enqueueError("Erro procurando transportadora!", this); }
 
     const int diaSemana = query.value("data").toDate().dayOfWeek();
 

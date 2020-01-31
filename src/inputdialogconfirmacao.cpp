@@ -342,6 +342,8 @@ bool InputDialogConfirmacao::dividirRecebimento(const int row, const double caix
   //  const QString produto = model.data(row, "descricao").toString();
   const int idEstoque = modelEstoque.data(row, "idEstoque").toInt();
   const double caixas = modelEstoque.data(row, "caixas").toDouble();
+  Q_UNUSED(caixas)
+  Q_UNUSED(unCaixa)
 
   //  QSqlQuery query;
   //  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");

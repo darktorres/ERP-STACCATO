@@ -1876,6 +1876,8 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 }
 
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
+  if (ui->lineEditDestinatarioCPFCNPJ->text().length() == 14) { return qApp->enqueueInformation("SP não faz consulta de CPF!", this); }
+
   ACBr acbrRemoto;
 
   const auto resposta = acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");

@@ -49,7 +49,7 @@
             <string>R$ </string>
            </property>
            <property name="maximum">
-            <double>999999.989999999990687</double>
+            <double>9999999.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -186,6 +186,9 @@
            </property>
            <property name="correctionMode">
             <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+           </property>
+           <property name="maximum">
+            <double>9999999.000000000000000</double>
            </property>
           </widget>
          </item>

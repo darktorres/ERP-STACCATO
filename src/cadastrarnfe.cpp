@@ -1884,8 +1884,8 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
 
   if (not resposta) { return; }
 
-  if (resposta->contains("xMotivo=Consulta cadastro com uma ocorrência")) {
-    QStringList list = resposta->mid(resposta->indexOf("IE=")).split("\n");
+  if (resposta->contains("XMotivo=Consulta cadastro com uma ocorrência")) {
+    QStringList list = resposta->mid(resposta->indexOf("IE=")).split("\r\n");
     const QString insc = list.first().remove("IE=");
 
     if (not insc.isEmpty()) {

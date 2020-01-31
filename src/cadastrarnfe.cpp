@@ -469,7 +469,7 @@ bool CadastrarNFe::preencherNumeroNFe() {
   QSqlQuery queryNfe;
 
   if (not queryNfe.exec("SELECT COALESCE(MAX(numeroNFe), 0) + 1 AS numeroNFe FROM nfe WHERE tipo = 'SAÍDA' AND status = 'AUTORIZADO' AND mid(chaveAcesso, 7, 14) = '" + cnpj +
-                        "' AND created BETWEEN DATE_ADD(CURDATE(), INTERVAL - 30 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)") or
+                        "' AND DATE(created) BETWEEN DATE_ADD(CURDATE(), INTERVAL - 30 DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)") or
       not queryNfe.first()) {
     return qApp->enqueueError(false, "Erro buscando idNFe: " + queryNfe.lastError().text(), this);
   }

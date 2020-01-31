@@ -80,10 +80,10 @@ linux-g++{
 }
 
 linux-clang{
-    QMAKE_CC = clang-8
-    QMAKE_CXX = clang++-8
+    QMAKE_CC = clang-9
+    QMAKE_CXX = clang++-9
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-8
+    QMAKE_LFLAGS *= -fuse-ld=lld-9
 
     #QMAKE_CXXFLAGS *= -flto=thin
     #QMAKE_LFLAGS *= -flto=thin

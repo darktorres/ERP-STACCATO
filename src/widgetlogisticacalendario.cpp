@@ -103,7 +103,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   }
 
   QSqlQuery query;
-  query.prepare("SELECT * FROM view_calendario WHERE data BETWEEN :start AND :end");
+  query.prepare("SELECT * FROM view_calendario WHERE DATE(data) BETWEEN :start AND :end");
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
 

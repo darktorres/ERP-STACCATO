@@ -12,9 +12,7 @@ include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
 include(LimeReport-1.4.51/limereport/limereport.pri)
 
-QT *= core gui sql network xml charts
-
-greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
+QT *= core gui sql network xml charts widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"

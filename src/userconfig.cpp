@@ -13,7 +13,7 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   if (const auto key = UserSession::getSetting("User/servidorACBr"); key) { ui->lineEditACBrServidor->setText(key->toString()); }
   if (const auto key = UserSession::getSetting("User/portaACBr"); key) { ui->lineEditACBrPorta->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) { ui->itemBoxLoja->setId(key.value()); }
+  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) { ui->itemBoxLoja->setId(key->toInt()); }
 
   if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) { ui->lineEditEmailContabilidade->setText(key->toString()); }
   if (const auto key = UserSession::getSetting("User/emailLogistica"); key) { ui->lineEditEmailLogistica->setText(key->toString()); }

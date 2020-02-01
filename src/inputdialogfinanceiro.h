@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QDialog>
-
 #include "sqlrelationaltablemodel.h"
+#include "sqltreemodel.h"
+
+#include <QDialog>
 
 namespace Ui {
 class InputDialogFinanceiro;
@@ -16,8 +17,8 @@ public:
 
   explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogFinanceiro();
-  auto getDate() const -> QDateTime;
-  auto getNextDate() const -> QDateTime;
+  auto getDate() const -> QDate;
+  auto getNextDate() const -> QDate;
   auto setFilter(const QString &idCompra) -> bool;
 
 private:
@@ -25,7 +26,9 @@ private:
   bool representacao;
   const Tipo tipo;
   SqlRelationalTableModel modelPedidoFornecedor;
+  SqlRelationalTableModel modelPedidoFornecedor2;
   SqlRelationalTableModel modelFluxoCaixa;
+  SqlTreeModel modelTree;
   Ui::InputDialogFinanceiro *ui;
   // methods
   auto cadastrar() -> bool;
@@ -41,6 +44,7 @@ private:
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;
+  auto setTreeView() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;

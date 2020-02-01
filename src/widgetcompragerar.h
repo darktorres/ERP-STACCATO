@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetCompraGerar;
@@ -31,9 +31,9 @@ private:
   auto calcularPreco() -> void;
   auto cancelar(const QModelIndexList &list) -> bool;
   auto enviarEmail(const QString &razaoSocial, const QString &anexo) -> void;
-  auto gerarCompra(const QList<QModelIndex> &list, const QDateTime &dataCompra, const QDateTime &dataPrevista, const int oc) -> bool;
+  auto gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) -> bool;
   auto gerarExcel(const QList<QModelIndex> &list, const int oc, const bool isRepresentacao) -> std::optional<QString>;
-  auto getDates(const QList<QModelIndex> &list) -> std::optional<std::tuple<QDateTime, QDateTime>>;
+  auto getDates(const QList<QModelIndex> &list) -> std::optional<std::tuple<QDate, QDate>>;
   auto getOrdemCompra() -> std::optional<int>;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;

@@ -1,11 +1,12 @@
-#include <QDateTime>
+#include "excel.h"
+
+#include "application.h"
+#include "usersession.h"
+
 #include <QDesktopServices>
 #include <QDir>
 #include <QSqlError>
-
-#include "application.h"
-#include "excel.h"
-#include "usersession.h"
+#include <QUrl>
 
 Excel::Excel(const QString &id, const Tipo tipo) : tipo(tipo), id(id) {}
 
@@ -22,7 +23,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   if (not folderKey) { return qApp->enqueueError(false, "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!"); }
 
-  const QString path = folderKey.value().toString();
+  const QString path = folderKey->toString();
 
   QDir dir(path);
 
@@ -142,7 +143,6 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   // TODO: 5refator this to start at 12
   int row = 0;
-  queryProduto.first();
 
   QSqlQuery queryUi; // TODO: put this query in 'setQuerys'?
   queryUi.prepare("SELECT ui FROM produto WHERE idProduto = :idProduto");

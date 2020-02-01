@@ -1,13 +1,14 @@
+#include "widgetpagamentos.h"
+#include "ui_widgetpagamentos.h"
+
+#include "application.h"
+#include "logindialog.h"
+#include "usersession.h"
+
 #include <QDebug>
 #include <QLineEdit>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "logindialog.h"
-#include "ui_widgetpagamentos.h"
-#include "usersession.h"
-#include "widgetpagamentos.h"
 
 WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamentos) {
   ui->setupUi(this);
@@ -23,7 +24,7 @@ WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui
 
   //---------------------------------------------------
 
-  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked);
+  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, [=] { on_pushButtonAdicionarPagamento_clicked(); });
   connect(ui->pushButtonLimparPag, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonLimparPag_clicked);
   connect(ui->pushButtonPgtLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonPgtLoja_clicked);
   connect(ui->pushButtonFreteLoja, &QPushButton::clicked, this, &WidgetPagamentos::on_pushButtonFreteLoja_clicked);
@@ -50,7 +51,7 @@ QDateEdit *WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
   dateEditPgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   dateEditPgt->setDisplayFormat("dd/MM/yy");
   dateEditPgt->setCalendarPopup(true);
-  dateEditPgt->setDate(QDate::currentDate());
+  dateEditPgt->setDate(qApp->serverDate());
   connect(dateEditPgt, &QDateEdit::dateChanged, this, &WidgetPagamentos::montarFluxoCaixa);
   layout->addWidget(dateEditPgt);
   listDatePgt << dateEditPgt;
@@ -259,6 +260,18 @@ void WidgetPagamentos::resetarPagamentos() {
 
 double WidgetPagamentos::getTotalPag() { return ui->doubleSpinBoxTotalPag->value(); }
 
+void WidgetPagamentos::prepararPagamentosRep() {
+  if (qFuzzyIsNull(frete)) { return; }
+
+  on_pushButtonAdicionarPagamento_clicked();
+
+  listCheckBoxRep.at(0)->setChecked(true);
+  listLinePgt.at(0)->setText("Frete");
+  listLinePgt.at(0)->setReadOnly(true);
+  listDoubleSpinPgt.at(0)->setValue(frete);
+  listDoubleSpinPgt.at(0)->setReadOnly(true);
+}
+
 void WidgetPagamentos::setCredito(const double creditoCliente) {
   credito = creditoCliente;
   creditoRestante = creditoCliente;
@@ -275,8 +288,10 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
   }
 }
 
-void WidgetPagamentos::setTipo(const Tipo &value) {
-  tipo = value;
+void WidgetPagamentos::setTipo(const Tipo &novoTipo) {
+  if (novoTipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
+  tipo = novoTipo;
 
   if (tipo == Tipo::Compra) {
     ui->label_4->hide();
@@ -295,34 +310,28 @@ void WidgetPagamentos::setIdOrcamento(const QString &value) { idOrcamento = valu
 double WidgetPagamentos::getCredito() const { return credito; }
 
 void WidgetPagamentos::calcularTotal() {
-  double sum = 0;
-
-  for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum += spinbox->value(); }
+  const double sumWithoutLast = std::accumulate(listDoubleSpinPgt.cbegin(), listDoubleSpinPgt.cend() - 1, 0., [=](double accum, const QDoubleSpinBox *spinbox) { return accum += spinbox->value(); });
 
   auto lastSpinBox = listDoubleSpinPgt.last();
 
-  sum -= lastSpinBox->value();
-
-  const double leftOver = total - sum;
-
   lastSpinBox->blockSignals(true);
-  lastSpinBox->setValue(leftOver);
+  lastSpinBox->setValue(total - sumWithoutLast);
   lastSpinBox->blockSignals(false);
 
   // ----------------------------------------
 
-  double sum2 = 0;
+  const double sumAll = std::accumulate(listDoubleSpinPgt.cbegin(), listDoubleSpinPgt.cend(), 0., [=](double accum, const QDoubleSpinBox *spinbox) { return accum += spinbox->value(); });
 
-  for (const auto &spinbox : std::as_const(listDoubleSpinPgt)) { sum2 += spinbox->value(); }
-
-  ui->doubleSpinBoxTotalPag->setValue(sum2);
+  ui->doubleSpinBoxTotalPag->setValue(sumAll);
 
   // ----------------------------------------
 
   emit montarFluxoCaixa();
 }
 
-void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
+void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFrete) {
+  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+
   auto *frame = new QFrame(this);
   auto *layout = new QHBoxLayout(frame);
   frame->setLayout(layout);
@@ -349,7 +358,7 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
   if (tipo == Tipo::Compra) {
     connect(comboBox, &QComboBox::currentTextChanged, [=] {
       const QString currentText = comboBox->currentText();
-      const QDate currentDate = QDate::currentDate();
+      const QDate currentDate = qApp->serverDate();
       QDate dataPgt;
 
       if (currentText == "Data + 1 Mês") {
@@ -369,6 +378,10 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked() {
   //---------------------------------------------------
 
   calcularTotal();
+
+  //---------------------------------------------------
+
+  if (representacao and addFrete and listDatePgt.size() == 1) { prepararPagamentosRep(); }
 }
 
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
@@ -388,8 +401,8 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
   resetarPagamentos();
 
-  on_pushButtonAdicionarPagamento_clicked();
-  on_pushButtonAdicionarPagamento_clicked();
+  on_pushButtonAdicionarPagamento_clicked(false);
+  on_pushButtonAdicionarPagamento_clicked(false);
 
   listCheckBoxRep.at(0)->setChecked(false);
   listLinePgt.at(0)->setText("Frete");

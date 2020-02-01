@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetFinanceiroCompra;
@@ -21,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewComprasFinanceiro;
+  SqlRelationalTableModel model;
   Ui::WidgetFinanceiroCompra *ui;
   // methods
   auto montaFiltro() -> void;

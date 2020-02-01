@@ -1,12 +1,14 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastroproduto.h"
+#include "ui_cadastroproduto.h"
 
 #include "application.h"
 #include "cadastrofornecedor.h"
-#include "cadastroproduto.h"
-#include "ui_cadastroproduto.h"
+#include "log.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
@@ -34,13 +36,13 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  sdProduto = SearchDialog::produto(true, true, true, this);
+  sdProduto = SearchDialog::produto(true, true, true, false, this);
   connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
 
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->pushButtonRemover->setDisabled(true); }
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
 
   ui->groupBox->hide();
   ui->groupBox_4->hide();
@@ -205,7 +207,7 @@ bool CadastroProduto::savingProcedures() {
   const bool representacao = query.value("representacao").toBool();
 
   if (not setData("representacao", representacao)) { return false; }
-  if (not setData("descontinuado", ui->dateEditValidade->date() < QDate::currentDate())) { return false; }
+  if (not setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate())) { return false; }
 
   return true;
 }
@@ -228,6 +230,13 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroProduto::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -244,7 +253,9 @@ bool CadastroProduto::cadastrar() {
     return true;
   }();
 
-  if (not success) {
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+  } else {
     qApp->rollbackTransaction();
     void(model.select());
   }

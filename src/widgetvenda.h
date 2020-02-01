@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetVenda;
@@ -32,6 +32,7 @@ private:
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonFollowup_clicked() -> void;
   auto on_table_activated(const QModelIndex index) -> void;
+  auto setComboBoxFornecedores() -> void;
   auto setConnections() -> void;
   auto setPermissions() -> void;
   auto setupTables() -> void;

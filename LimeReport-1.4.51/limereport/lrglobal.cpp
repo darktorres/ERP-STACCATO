@@ -69,4 +69,6 @@ QVector<QString> normalizeCaptures(const QRegExp &reg) {
   return result;
 }
 
+ReportError::ReportError(const QString &message) : std::runtime_error(message.toStdString()) {}
+
 } // namespace LimeReport

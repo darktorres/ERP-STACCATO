@@ -1,40 +1,36 @@
-#include <QDebug>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSortFilterProxyModel>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QSqlRecord>
+#include "widgetestoque.h"
+#include "ui_widgetestoque.h"
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
-#include "importarxml.h"
 #include "sortfilterproxymodel.h"
-#include "ui_widgetestoque.h"
 #include "usersession.h"
-#include "widgetestoque.h"
 #include "xlsxdocument.h"
-#include "xml.h"
 
-WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) {
-  ui->setupUi(this);
-  // TODO: se 'vendedor' esconder filtros para mostar apenas os estoques disponiveis
-}
+#include <QDebug>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QSqlError>
+
+WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
 
 WidgetEstoque::~WidgetEstoque() { delete ui; }
 
 void WidgetEstoque::setConnections() {
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro);
-  connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked);
-  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::montaFiltro);
-  connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::montaFiltro, connectionType);
+  connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
+  connect(ui->radioButtonEstoqueContabil, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->radioButtonEstoqueZerado, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->radioButtonMaior, &QRadioButton::toggled, this, &WidgetEstoque::setupTables, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated, connectionType);
 }
 
-void WidgetEstoque::setupTables() {
+void WidgetEstoque::setupTables(const bool checked) {
+  if (not checked) { return; }
+
   montaFiltro();
 
   model.setHeaderData("cnpjDest", "CNPJ");
@@ -59,14 +55,14 @@ void WidgetEstoque::setupTables() {
 
   ui->table->setModel(&model);
 
-  ui->table->hideColumn("contabil");
+  ui->radioButtonEstoqueContabil->isChecked() ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
 }
 
 void WidgetEstoque::updateTables() {
   if (not isSet) {
-    ui->dateEditMes->setDate(QDate::currentDate());
+    ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
 
     const QString tipoUsuario = UserSession::tipoUsuario();
@@ -92,39 +88,49 @@ void WidgetEstoque::updateTables() {
 void WidgetEstoque::resetTables() { modelIsSet = false; }
 
 void WidgetEstoque::on_table_activated(const QModelIndex &index) {
-  const QString idEstoque = model.data(index.row(), "idEstoque").toString();
+  const QString idEstoque = model.data(index, "idEstoque").toString();
+
   auto *estoque = new Estoque(idEstoque, true, this);
   estoque->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void WidgetEstoque::montaFiltro() {
-  const bool contabil = ui->radioButtonEstoqueContabil->isChecked();
+  const QString text = ui->lineEditBusca->text();
 
-  contabil ? ui->table->showColumn("contabil") : ui->table->hideColumn("contabil");
+  QString match;
 
-  const QString text = ui->lineEditBusca->text().replace("-", " ").replace("(", "").replace(")", "");
+  if (not text.isEmpty()) {
+    QStringList strings = text.split(" ", QString::SkipEmptyParts);
 
-  const QString match = text.isEmpty() ? ""
-                                       : " AND (MATCH (e.descricao , e.codComercial) AGAINST ('+" + text + "*' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('+" + text +
-                                             "*' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+    for (auto &string : strings) {
+      if (string.contains("-")) {
+        string.prepend("\"").append("\"");
+      } else {
+        string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+        string.prepend("+").append("*");
+      }
+    }
 
-  const QString restante = ui->radioButtonEstoqueZerado->isChecked() ? "HAVING restante <= 0" : contabil ? "" : "HAVING restante > 0";
+    const QString text2 = strings.join(" ");
 
-  const QString filtroContabil = ui->radioButtonEstoqueContabil->isChecked() ? " HAVING contabil > 0" : "";
+    match = " AND (MATCH (e.descricao , e.codComercial) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR MATCH (p.fornecedor) AGAINST ('" + text2 + "' IN BOOLEAN MODE) OR e.idEstoque = '" + text + "')";
+  }
+
+  QString having;
+
+  if (ui->radioButtonMaior->isChecked()) { having = "restante > 0"; }
+  if (ui->radioButtonEstoqueZerado->isChecked()) { having = "restante <= 0"; }
+  if (ui->radioButtonEstoqueContabil->isChecked()) { having = "contabil > 0"; }
 
   model.setQuery(
-      "SELECT ANY_VALUE(`n`.`cnpjDest`) AS `cnpjDest`, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + e.ajuste AS contabil, e.restante AS "
-      "restante, e.un AS `unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')),(e.restante / `p`.`m2cx`), (e.restante / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco,"
-      " e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb,"
-      " ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.un, e.lote,e.local, e.bloco, e.quant, e.quant + "
-      "COALESCE(SUM(consumo.quant), 0) AS restante, SUM(IF(consumo.status = 'AJUSTE', consumo.quant, 0)) AS ajuste FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = "
-      "consumo.idEstoque LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
-      match + " GROUP BY e.idEstoque " + restante +
-      ") e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst FROM estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto"
-      " WHERE (vp.dataRealEnt < NOW()) AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = "
-      "ehc.idEstoque LEFT JOIN pedido_fornecedor_has_produto pf ON pf.idPedido = ehc.idPedido LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP BY "
-      "e.idEstoque" +
-      filtroContabil);
+      "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + e.ajuste AS contabil, e.restante AS restante, e.un AS unEst, IF(((p.un "
+      "= 'M²') OR (p.un = 'M2') OR (p.un = 'ML')),(e.restante / p.m2cx), (e.restante / p.pccx)) AS Caixas, e.lote, e.local, e.bloco, e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, "
+      "ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb, ANY_VALUE(pf.dataRealReceb) AS dataRealReceb FROM "
+      "estoque e LEFT JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS contabil FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2"
+      " WHERE (vp.dataRealEnt < NOW()) AND ehc.status != 'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = "
+      "ehc2.idEstoque LEFT JOIN pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE "
+      "e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
+      match + " GROUP BY e.idEstoque HAVING " + having);
 
   if (model.lastError().isValid()) { qApp->enqueueError("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 }
@@ -144,20 +150,17 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   SqlQueryModel modelContabil;
   modelContabil.setQuery(
-      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT `n`.`cnpjDest` SEPARATOR ',') AS `cnpjDest`, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(e2.consumoEst, 0) + ajuste AS contabil, "
-      "e.restante AS disponivel, e.un AS `unEst`, p.un AS `unProd`, if(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') OR (`p`.`un` = 'ML')), ((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / `p`.`m2cx`), "
-      "((e.quant + COALESCE(e2.consumoEst, 0) + ajuste) / `p`.`pccx`)) AS `Caixas`, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `nfe`, p.custo "
-      "AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + COALESCE(e2.consumoEst, 0) + ajuste) AS custo, p.precoVenda * (e.quant + COALESCE(e2.consumoEst, 0) + ajuste) AS precoVenda "
-      "FROM (SELECT e.idProduto, e.idNFe, e.status, e.idEstoque, e.descricao, e.codComercial, e.valorTrib, e.un, e.lote, e.local, e.bloco, e.quant, e.quant + COALESCE(SUM(consumo.quant), 0) AS "
-      "restante, SUM(CASE WHEN consumo.status = 'AJUSTE' THEN consumo.quant ELSE 0 END) AS ajuste, e.created FROM estoque e LEFT JOIN estoque_has_consumo consumo ON e.idEstoque = consumo.idEstoque "
-      "WHERE e.status = 'ESTOQUE' AND e.created < '" +
+      "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT n.cnpjDest SEPARATOR ',') AS cnpjDest, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + ajuste AS contabil, "
+      "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, if(((p.un = 'M²') OR (p.un = 'M2') OR (p.un = 'ML')), ((e.quant + COALESCE(ehc.contabil, 0) + ajuste) / p.m2cx), "
+      "((e.quant + COALESCE(ehc.contabil, 0) + ajuste) / p.pccx)) AS Caixas, e.lote, e.local, e.bloco, e.codComercial, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, p.custo "
+      "AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant + COALESCE(ehc.contabil, 0) + ajuste) AS custo, p.precoVenda * (e.quant + COALESCE(ehc.contabil, 0) + ajuste) AS precoVenda "
+      "FROM estoque e LEFT JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS contabil, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM "
+      "estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE (vp.dataRealEnt < '" +
       data +
-      "' GROUP BY e.idEstoque) e LEFT JOIN (SELECT consumo.idEstoque, SUM(consumo.quant) AS consumoEst, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM "
-      "estoque_has_consumo consumo LEFT JOIN venda_has_produto vp ON consumo.idVendaProduto = vp.idVendaProduto WHERE (vp.dataRealEnt < '" +
-      data +
-      "') AND consumo.status != 'CANCELADO' GROUP BY consumo.idEstoque) e2 ON e.idEstoque = e2.idEstoque LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
-      "pedido_fornecedor_has_produto pf ON pf.idPedido = ehc.idPedido LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto GROUP "
-      "BY e.idEstoque HAVING contabil > 0");
+      "') AND ehc.status != 'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN "
+      "pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status = 'ESTOQUE' AND "
+      "e.created < '" +
+      data + "' GROUP BY e.idEstoque HAVING contabil > 0");
 
   if (modelContabil.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + modelContabil.lastError().text(), this); }
 
@@ -197,7 +200,7 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
   column = 'A';
 
   for (int row = 0; row < modelContabil.rowCount(); ++row) {
-    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(row + 2), modelContabil.data(modelContabil.index(row, col))); }
+    for (int col = 0; col < modelContabil.columnCount(); ++col, ++column) { xlsx.write(column + QString::number(row + 2), modelContabil.data(row, col)); }
 
     column = 'A';
   }

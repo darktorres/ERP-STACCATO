@@ -1,34 +1,35 @@
-#include <QDebug>
-#include <QFileDialog>
+#include "userconfig.h"
+#include "ui_userconfig.h"
 
 #include "cadastrousuario.h"
-#include "ui_userconfig.h"
-#include "userconfig.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QFileDialog>
 
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (const auto key = UserSession::getSetting("User/servidorACBr"); key) { ui->lineEditACBrServidor->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/portaACBr"); key) { ui->lineEditACBrPorta->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) { ui->itemBoxLoja->setId(key.value()); }
+  if (const auto key = UserSession::getSetting("User/servidorACBr"); key) { ui->lineEditACBrServidor->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/portaACBr"); key) { ui->lineEditACBrPorta->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/lojaACBr"); key) { ui->itemBoxLoja->setId(key->toInt()); }
 
-  if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) { ui->lineEditEmailContabilidade->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/emailLogistica"); key) { ui->lineEditEmailLogistica->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/emailContabilidade"); key) { ui->lineEditEmailContabilidade->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/emailLogistica"); key) { ui->lineEditEmailLogistica->setText(key->toString()); }
 
-  if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidorSMTP->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPortaSMTP->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditEmailSenha->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditEmailCopia->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidorSMTP->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPortaSMTP->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditEmailSenha->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditEmailCopia->setText(key->toString()); }
 
-  if (const auto key = UserSession::getSetting("User/OrcamentosFolder"); key) { ui->lineEditOrcamentosFolder->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/VendasFolder"); key) { ui->lineEditVendasFolder->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/ComprasFolder"); key) { ui->lineEditComprasFolder->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder"); key) { ui->lineEditEntregasXmlFolder->setText(key.value().toString()); }
-  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder"); key) { ui->lineEditEntregasPdfFolder->setText(key.value().toString()); }
+  if (const auto key = UserSession::getSetting("User/OrcamentosFolder"); key) { ui->lineEditOrcamentosFolder->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/VendasFolder"); key) { ui->lineEditVendasFolder->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/ComprasFolder"); key) { ui->lineEditComprasFolder->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder"); key) { ui->lineEditEntregasXmlFolder->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder"); key) { ui->lineEditEntregasPdfFolder->setText(key->toString()); }
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();

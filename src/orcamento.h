@@ -19,8 +19,9 @@ private:
   QList<QSqlRecord> backupItem;
   int currentRowItem = -1;
   bool isReadOnly = false;
-  int currentItemIsEstoque = 0;
-  bool currentItemIsPromocao = false;
+  bool currentItemIsEstoque = false;
+  int currentItemIsPromocao = 0;
+  bool canChangeFrete = false;
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;
@@ -42,8 +43,8 @@ private:
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
   auto on_dataEmissao_dateChanged(const QDate &date) -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
-  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
-  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;
   auto on_doubleSpinBoxDesconto_valueChanged(const double desconto) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
@@ -76,6 +77,7 @@ private:
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaCadastroCliente() -> bool;
+  auto verificaDisponibilidadeEstoque() -> bool;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

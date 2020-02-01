@@ -1,10 +1,10 @@
 #pragma once
 
+#include "chartview.h"
+
 #include <QSqlQuery>
 #include <QWidget>
 #include <QtCharts>
-
-#include "chartview.h"
 
 namespace Ui {
 class WidgetGraficos;
@@ -27,20 +27,7 @@ private:
   Ui::WidgetGraficos *ui;
   QChart chart;
   ChartView *chartView;
-  QSqlQuery queryChart;
-  QLineSeries series12;
-  QLineSeries series11;
-  QLineSeries series10;
-  QLineSeries series9;
-  QLineSeries series8;
-  QLineSeries series7;
-  QLineSeries series6;
-  QLineSeries series5;
-  QLineSeries series4;
-  QLineSeries series3;
-  QLineSeries series2;
-  QLineSeries series1;
-  QLineSeries series0;
+  QVector<QLineSeries *> series;
   // methods
   auto handleMarkerClicked() -> void;
   auto on_checkBox_toggled() -> void;

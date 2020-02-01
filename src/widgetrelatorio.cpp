@@ -1,15 +1,17 @@
-#include <QDebug>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QSqlError>
+#include "widgetrelatorio.h"
+#include "ui_widgetrelatorio.h"
 
 #include "application.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "ui_widgetrelatorio.h"
 #include "usersession.h"
-#include "widgetrelatorio.h"
 #include "xlsxdocument.h"
+
+#include <QDebug>
+#include <QDesktopServices>
+#include <QElapsedTimer>
+#include <QFileDialog>
+#include <QSqlError>
 
 WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 
@@ -32,7 +34,7 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor";
@@ -50,7 +52,7 @@ void WidgetRelatorio::setFilterTotaisLoja() {
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
   }
 
   filter += " ORDER BY Loja";
@@ -140,7 +142,7 @@ void WidgetRelatorio::setFilterRelatorio() {
   if (tipoUsuario == "GERENTE LOJA") {
     const auto descricaoLoja = UserSession::fromLoja("descricao");
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja.value().toString() + "'"; }
+    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor, idVenda";
@@ -165,7 +167,7 @@ void WidgetRelatorio::updateTables() {
       ui->groupBoxResumoOrcamento->hide();
     }
 
-    ui->dateEditMes->setDate(QDate::currentDate());
+    ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
     isSet = true;
   }
@@ -181,7 +183,7 @@ void WidgetRelatorio::updateTables() {
 
     calcularTotalVendedor();
   } else {
-    QTime time;
+    QElapsedTimer time;
     time.start();
     setFilterRelatorio();
     qDebug() << "1: " << time.restart();
@@ -206,7 +208,7 @@ void WidgetRelatorio::setResumoOrcamento() {
   modelOrcamento.setFilter("");
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja.value().toString() + "' ORDER BY Loja, Vendedor"); }
+    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
   }
 
   if (not modelOrcamento.select()) { return; }

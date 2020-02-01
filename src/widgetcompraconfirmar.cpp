@@ -1,16 +1,18 @@
+#include "widgetcompraconfirmar.h"
+#include "ui_widgetcompraconfirmar.h"
+
+#include "application.h"
+#include "cancelaproduto.h"
+#include "inputdialogfinanceiro.h"
+#include "log.h"
+#include "reaisdelegate.h"
+#include "sql.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "cancelaproduto.h"
-#include "inputdialogfinanceiro.h"
-#include "reaisdelegate.h"
-#include "sql.h"
-#include "ui_widgetcompraconfirmar.h"
-#include "widgetcompraconfirmar.h"
 
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {
   ui->setupUi(this);
@@ -34,6 +36,8 @@ void WidgetCompraConfirmar::setupTables() {
 
   modelViewCompras.setFilter("");
 
+  modelViewCompras.setSort("OC");
+
   modelViewCompras.setHeaderData("dataPrevConf", "Prev. Conf.");
 
   ui->table->setModel(&modelViewCompras);
@@ -44,8 +48,10 @@ void WidgetCompraConfirmar::setupTables() {
 }
 
 void WidgetCompraConfirmar::setConnections() {
-  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked);
-  connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonCancelarCompra_clicked, connectionType);
+  connect(ui->pushButtonConfirmarCompra, &QPushButton::clicked, this, &WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked, connectionType);
 }
 
 void WidgetCompraConfirmar::updateTables() {
@@ -83,14 +89,16 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
 
   if (inputDlg.exec() != InputDialogFinanceiro::Accepted) { return; }
 
-  const QDateTime dataPrevista = inputDlg.getDate();
-  const QDateTime dataConf = inputDlg.getNextDate();
+  const QDate dataPrevista = inputDlg.getDate();
+  const QDate dataConf = inputDlg.getNextDate();
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetCompraConfirmar::on_pushButtonConfirmarCompra")) { return qApp->rollbackTransaction(); }
+
   if (not confirmarCompra(idCompra, dataPrevista, dataConf)) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVenda)) { return; }
+  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -98,36 +106,26 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   qApp->enqueueInformation("Compra confirmada!", this);
 }
 
-bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) {
-  QSqlQuery querySelect;
-  querySelect.prepare("SELECT idPedido, idVendaProduto FROM pedido_fornecedor_has_produto WHERE idCompra = :idCompra AND selecionado = TRUE");
-  querySelect.bindValue(":idCompra", idCompra);
+bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) {
+  QSqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto2 IN (SELECT "
+                     "idVendaProduto2 FROM pedido_fornecedor_has_produto2 WHERE idCompra = :idCompra AND selecionado = TRUE)");
+  queryVenda.bindValue(":dataRealConf", dataConf);
+  queryVenda.bindValue(":dataPrevFat", dataPrevista);
+  queryVenda.bindValue(":idCompra", idCompra);
 
-  if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + querySelect.lastError().text(), this); }
+  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
+
+  //------------------------------------------------
 
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
-                      "AND idPedido = :idPedido");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat, selecionado = FALSE WHERE status = 'EM COMPRA' "
+                      "AND idCompra = :idCompra AND selecionado = TRUE");
+  queryCompra.bindValue(":dataRealConf", dataConf);
+  queryCompra.bindValue(":dataPrevFat", dataPrevista);
+  queryCompra.bindValue(":idCompra", idCompra);
 
-  QSqlQuery queryVenda;
-  queryVenda.prepare(
-      "UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataRealConf = :dataRealConf, dataPrevFat = :dataPrevFat WHERE status = 'EM COMPRA' AND idVendaProduto = :idVendaProduto");
-
-  while (querySelect.next()) {
-    queryCompra.bindValue(":dataRealConf", dataConf);
-    queryCompra.bindValue(":dataPrevFat", dataPrevista);
-    queryCompra.bindValue(":idPedido", querySelect.value("idPedido"));
-
-    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
-
-    if (querySelect.value("idVendaProduto").toInt() != 0) {
-      queryVenda.bindValue(":dataRealConf", dataConf);
-      queryVenda.bindValue(":dataPrevFat", dataPrevista);
-      queryVenda.bindValue(":idVendaProduto", querySelect.value("idVendaProduto"));
-
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
-    }
-  }
+  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
 
   return true;
 }

@@ -1,12 +1,15 @@
+#include "widgetcompradevolucao.h"
+#include "ui_widgetcompradevolucao.h"
+
+#include "application.h"
+#include "log.h"
+#include "sql.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "ui_widgetcompradevolucao.h"
-#include "widgetcompradevolucao.h"
 
 WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraDevolucao) { ui->setupUi(this); }
 
@@ -15,10 +18,12 @@ WidgetCompraDevolucao::~WidgetCompraDevolucao() { delete ui; }
 void WidgetCompraDevolucao::resetTables() { modelIsSet = false; }
 
 void WidgetCompraDevolucao::setConnections() {
-  connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked);
-  connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked);
-  connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked);
-  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->pushButtonDevolucaoFornecedor, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked, connectionType);
+  connect(ui->pushButtonRetornarEstoque, &QPushButton::clicked, this, &WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked, connectionType);
+  connect(ui->radioButtonFiltroPendente, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroPendente_clicked, connectionType);
+  connect(ui->radioButtonFiltroDevolvido, &QRadioButton::clicked, this, &WidgetCompraDevolucao::on_radioButtonFiltroDevolvido_clicked, connectionType);
 }
 
 void WidgetCompraDevolucao::updateTables() {
@@ -37,9 +42,9 @@ void WidgetCompraDevolucao::updateTables() {
 }
 
 void WidgetCompraDevolucao::setupTables() {
-  modelVendaProduto.setTable("venda_has_produto");
+  modelVendaProduto.setTable("venda_has_produto2");
 
-  modelVendaProduto.setSort("idVenda", Qt::AscendingOrder);
+  modelVendaProduto.setSort("idVenda");
 
   modelVendaProduto.setHeaderData("status", "Status");
   modelVendaProduto.setHeaderData("statusOriginal", "Status Original");
@@ -47,6 +52,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("idVenda", "Venda");
   modelVendaProduto.setHeaderData("produto", "Produto");
   modelVendaProduto.setHeaderData("obs", "Obs.");
+  modelVendaProduto.setHeaderData("lote", "Lote");
   modelVendaProduto.setHeaderData("caixas", "Cx.");
   modelVendaProduto.setHeaderData("quant", "Quant.");
   modelVendaProduto.setHeaderData("un", "Un.");
@@ -56,11 +62,12 @@ void WidgetCompraDevolucao::setupTables() {
 
   ui->table->setModel(&modelVendaProduto);
 
+  ui->table->hideColumn("idVendaProduto2");
+  ui->table->hideColumn("idVendaProdutoFK");
   ui->table->hideColumn("idRelacionado");
-  ui->table->hideColumn("recebeu");
-  ui->table->hideColumn("entregou");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("entregou");
+  ui->table->hideColumn("recebeu");
   ui->table->hideColumn("idCompra");
   ui->table->hideColumn("idNFeSaida");
   ui->table->hideColumn("idNFeFutura");
@@ -73,11 +80,11 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("parcialDesc");
   ui->table->hideColumn("descGlobal");
   ui->table->hideColumn("total");
-  ui->table->hideColumn("reposicaoEntrega");
-  ui->table->hideColumn("reposicaoReceb");
+  ui->table->hideColumn("mostrarDesconto");
   ui->table->hideColumn("estoque");
   ui->table->hideColumn("promocao");
-  ui->table->hideColumn("mostrarDesconto");
+  ui->table->hideColumn("reposicaoEntrega");
+  ui->table->hideColumn("reposicaoReceb");
   ui->table->hideColumn("dataPrevCompra");
   ui->table->hideColumn("dataRealCompra");
   ui->table->hideColumn("dataPrevConf");
@@ -90,6 +97,8 @@ void WidgetCompraDevolucao::setupTables() {
   ui->table->hideColumn("dataRealReceb");
   ui->table->hideColumn("dataPrevEnt");
   ui->table->hideColumn("dataRealEnt");
+
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetCompraDevolucao::on_table_selectionChanged, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
 }
 
 void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
@@ -101,11 +110,19 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
-  for (const auto &item : list) {
-    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO FORN.")) { return; }
-  }
+  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  if (not modelVendaProduto.submitAll()) { return; }
+  if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor")) { return qApp->rollbackTransaction(); }
+
+  if (not retornarFornecedor(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
+
+  if (not modelVendaProduto.select()) { return; }
 
   qApp->enqueueInformation("Retornado para fornecedor!", this);
 }
@@ -113,72 +130,62 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
 
-  QSqlQuery query;
-  // TODO: add quant too?
-  // TODO: e se tiver varios consumos?
-  query.prepare("SELECT idVendaProduto FROM venda_has_produto WHERE idVenda = :idVenda AND idProduto = :idProduto");
+  for (const auto &index : list) {
+    const int row = index.row();
 
-  for (const auto &item : list) {
-    const QString status = modelVendaProduto.data(item.row(), "statusOriginal").toString();
+    if (not modelVendaProduto.setData(row, "status", "DEVOLVIDO ESTOQUE")) { return false; }
 
-    if (not modelVendaProduto.setData(item.row(), "status", "DEVOLVIDO ESTOQUE")) { return false; }
+    const QString status = modelVendaProduto.data(row, "statusOriginal").toString();
+    const QString idRelacionado = modelVendaProduto.data(row, "idRelacionado").toString();
 
-    // TODO: 5refazer isso para bloquear o botao
-    if (status == "PENDENTE" or status == "INICIADO" or status == "EM COMPRA" or status == "EM FATURAMENTO") {
-      // se nao faturado nao faz nada
+    // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo idVendaProduto)
+    // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total alterado
+    // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
 
-      // TODO: 0perguntar se quer cancelar o produto correspondente da compra/ ou a compra inteira (verificar pelo
-      // idVendaProduto)
-      // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total
-      // alterado
-      // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
+    SqlRelationalTableModel modelConsumo;
+    modelConsumo.setTable("estoque_has_consumo");
+    modelConsumo.setFilter("idVendaProduto2 = " + idRelacionado);
 
-    } else {
-      //    else if (status == "EM COLETA" or status == "EM RECEBIMENTO" or status == "ESTOQUE") {
-      // se faturado criar devolucao estoque_has_consumo
-      // 1.procurar em estoque pelo idVendaProduto
-      // 2.copiar linha consumo mudando quant, status para devolucao e idCompra 0
+    if (not modelConsumo.select()) { return false; }
 
-      query.bindValue(":idVenda", modelVendaProduto.data(item.row(), "idVenda").toString().left(11));
-      query.bindValue(":idProduto", modelVendaProduto.data(item.row(), "idProduto"));
+    if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou consumo!", this); }
 
-      if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVendaProduto: " + query.lastError().text(), this); }
+    const int newRow = modelConsumo.insertRowAtEnd();
 
-      const QString idVendaProduto = query.value("idVendaProduto").toString();
+    for (int column = 0; column < modelConsumo.columnCount(); ++column) {
+      if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
+      if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
+      if (modelConsumo.fieldIndex("created") == column) { continue; }
+      if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 
-      SqlRelationalTableModel modelConsumo;
-      modelConsumo.setTable("estoque_has_consumo");
-      modelConsumo.setFilter("idVendaProduto = " + idVendaProduto);
+      const QVariant value = modelConsumo.data(0, column);
 
-      if (not modelConsumo.select()) { return false; }
-
-      if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou estoque!", this); }
-
-      const int newRow = modelConsumo.insertRowAtEnd();
-
-      for (int column = 0; column < modelConsumo.columnCount(); ++column) {
-        if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
-        if (modelConsumo.fieldIndex("idVendaProduto") == column) { continue; }
-        if (modelConsumo.fieldIndex("created") == column) { continue; }
-        if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
-
-        const QVariant value = modelConsumo.data(0, column);
-
-        if (not modelConsumo.setData(newRow, column, value)) { return false; }
-      }
-
-      // TODO: update other fields
-      if (not modelConsumo.setData(newRow, "idVendaProduto", modelVendaProduto.data(item.row(), "idVendaProduto"))) { return false; }
-      if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
-      if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(item.row(), "caixas").toDouble() * -1)) { return false; }
-      if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(item.row(), "quant").toDouble() * -1)) { return false; }
-      if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
-
-      if (not modelConsumo.submitAll()) { return false; }
+      if (not modelConsumo.setData(newRow, column, value)) { return false; }
     }
+
+    // TODO: update other fields
+    if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(row, "idVendaProduto2"))) { return false; }
+    if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
+    if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(row, "caixas").toDouble() * -1)) { return false; }
+    if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(row, "quant").toDouble() * -1)) { return false; }
+    if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
+
+    if (not modelConsumo.submitAll()) { return false; }
   }
 
   return modelVendaProduto.submitAll();
+}
+
+bool WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
+  // se for devolucao fornecedor na logica nova nao havera linha de consumo, a quant. simplesmente mantem o consumo negativo na linha original de DEVOLVIDO
+
+  for (const auto &index : list) {
+    if (not modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO FORN.")) { return false; }
+  }
+
+  if (not modelVendaProduto.submitAll()) { return false; }
+
+  return true;
 }
 
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
@@ -186,9 +193,15 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
 
+  const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
+
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetCompraDevolucao::on_pushButtonRetornarEstoque")) { return qApp->rollbackTransaction(); }
+
   if (not retornarEstoque(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -208,4 +221,20 @@ void WidgetCompraDevolucao::montaFiltro() {
   ui->pushButtonRetornarEstoque->setEnabled(isPendente);
 
   modelVendaProduto.setFilter("quant < 0 AND " + QString(isPendente ? "status = 'PENDENTE DEV.'" : "status != 'PENDENTE DEV.'"));
+}
+
+void WidgetCompraDevolucao::on_table_selectionChanged() {
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  QStringList status;
+
+  for (auto index : list) { status << modelVendaProduto.data(index.row(), "statusOriginal").toString(); }
+
+  status.removeDuplicates();
+
+  if (status.contains("PENDENTE") or status.contains("INICIADO") or status.contains("EM COMPRA") or status.contains("EM FATURAMENTO")) {
+    ui->pushButtonRetornarEstoque->setDisabled(true);
+  } else {
+    ui->pushButtonRetornarEstoque->setEnabled(true);
+  }
 }

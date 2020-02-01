@@ -616,12 +616,6 @@
             <property name="frame">
              <bool>true</bool>
             </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::NoButtons</enum>
-            </property>
             <property name="correctionMode">
              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
             </property>
@@ -1378,7 +1372,7 @@
 color: rgb(255, 255, 255);</string>
               </property>
               <property name="text">
-               <string>Staccato OFF</string>
+               <string>STACCATO OFF</string>
               </property>
               <property name="readOnly">
                <bool>true</bool>

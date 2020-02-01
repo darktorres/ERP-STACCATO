@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetCompraFaturar;
@@ -25,7 +25,7 @@ private:
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
-  auto faturarRepresentacao(const QDateTime &dataReal, const QStringList &idsCompra) -> bool;
+  auto faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) -> bool;
   auto montaFiltro() -> void;
   auto on_checkBoxRepresentacao_toggled(bool checked) -> void;
   auto on_pushButtonCancelarCompra_clicked() -> void;

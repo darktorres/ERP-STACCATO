@@ -1,8 +1,9 @@
-#include <QSqlError>
-#include <QSqlQuery>
+#include "cepcompleter.h"
 
 #include "application.h"
-#include "cepcompleter.h"
+
+#include <QSqlError>
+#include <QSqlQuery>
 
 bool CepCompleter::buscaCEP(const QString &cep) {
   QSqlQuery query;

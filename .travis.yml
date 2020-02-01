@@ -7,20 +7,20 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:beineri/opt-qt-5.12.3-bionic'
+    - sourceline: 'ppa:beineri/opt-qt-5.14.0-bionic'
     packages:
     - gcc-9
     - g++-9
-    - qt512base
-    - qt512charts-no-lgpl
-    - qt512script
-    - qt512tools
+    - qt514base
+    - qt514charts-no-lgpl
+    - qt514script
+    - qt514tools
     - mesa-common-dev
     - libgl1-mesa-dev
     
 script:
-  - source /opt/qt512/bin/qt512-env.sh
-  - /opt/qt512/bin/qmake Loja.pro
+  - source /opt/qt514/bin/qt514-env.sh
+  - /opt/qt514/bin/qmake Loja.pro
   - make -j2
   
 before_cache:

@@ -1,22 +1,26 @@
+#include "widgetnfeentrada.h"
+#include "ui_widgetnfeentrada.h"
+
+#include "application.h"
+#include "doubledelegate.h"
+#include "log.h"
+#include "xml_viewer.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "doubledelegate.h"
-#include "ui_widgetnfeentrada.h"
-#include "widgetnfeentrada.h"
-#include "xml_viewer.h"
 
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 
 WidgetNfeEntrada::~WidgetNfeEntrada() { delete ui; }
 
 void WidgetNfeEntrada::setConnections() {
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged);
-  connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked);
-  connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
 }
 
 void WidgetNfeEntrada::updateTables() {
@@ -75,7 +79,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   //--------------------------------------------------------------
 
   QSqlQuery query;
-  query.prepare("SELECT status FROM venda_has_produto WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.') AND idVendaProduto IN (SELECT idVendaProduto FROM estoque_has_consumo WHERE "
+  query.prepare("SELECT status FROM venda_has_produto2 WHERE status IN ('ENTREGUE', 'EM ENTREGA', 'ENTREGA AGEND.') AND idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE "
                 "idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe))");
   query.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
@@ -93,6 +97,8 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   if (not qApp->startTransaction()) { return; }
 
+  if (not Log::createLog("Transação: WidgetNfeEntrada::on_pushButtonRemoverNFe")) { return qApp->rollbackTransaction(); }
+
   if (not remover(row)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
@@ -103,9 +109,10 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
 bool WidgetNfeEntrada::remover(const int row) {
   QSqlQuery query1;
-  query1.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'EM FATURAMENTO', quantUpd = 0, quantConsumida = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
-                 "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idPedido IN (SELECT idPedido FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
-                 "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query1.prepare(
+      "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
+      "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
+      "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not query1.exec()) { return qApp->enqueueError(false, "Erro voltando compra para faturamento: " + query1.lastError().text(), this); }
@@ -113,20 +120,30 @@ bool WidgetNfeEntrada::remover(const int row) {
   //-----------------------------------------------------------------------------
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda_has_produto SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
-                 "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE idVendaProduto IN (SELECT "
-                 "idVendaProduto FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+  query2.prepare(
+      "UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
+      "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` IN (SELECT "
+      "`idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   query2.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not query2.exec()) { return qApp->enqueueError(false, "Erro voltando venda para faturamento: " + query2.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query3;
-  query3.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
-  query3.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  QSqlQuery query03;
+  query03.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
+  query03.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo consumos: " + query3.lastError().text(), this); }
+  if (not query03.exec()) { return qApp->enqueueError(false, "Erro buscando consumos: " + query03.lastError().text(), this); }
+
+  QSqlQuery query3;
+  query3.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque = :idEstoque");
+
+  while (query03.next()) {
+    query3.bindValue(":idEstoque", query03.value("idEstoque"));
+
+    if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo consumos: " + query3.lastError().text(), this); }
+  }
 
   //-----------------------------------------------------------------------------
 
@@ -164,3 +181,16 @@ bool WidgetNfeEntrada::remover(const int row) {
 }
 
 // TODO: 5copiar filtros do widgetnfesaida
+
+// TODO: para gerar GARE da nfe de entrada:
+// dados ncm, valorMercadoria, ipi, desconto e aliqIcms...
+
+// valorIcms = (valorMercadoria - desconto) * aliqIcms
+// mva:
+// 		se aliqIcms = 4% procurar mva4% usando ncm
+// 		se aliqIcms <> 4% procurar mva12% usando ncm
+// IndiceAgregado = (valorMercadoria + Ipi) * MVA
+// baseCalculoIcmsST = valorMercadoria + Ipi + IndiceAgregado
+// icmsInterno = procurar aliqInterna pelo ncm
+// icmsInternoR$ = baseCalculoIcmsST * icmsInterno
+// valorIcmsSt = icmsInternoR$ - valorIcms

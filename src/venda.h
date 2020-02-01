@@ -1,6 +1,7 @@
 #pragma once
 
 #include "registerdialog.h"
+#include "sqltreemodel.h"
 
 namespace Ui {
 class Venda;
@@ -22,11 +23,14 @@ private:
   bool correcao = false;
   int idLoja;
   bool representacao;
+  bool canChangeFrete = false;
   double minimoFrete;
   double porcFrete;
   SqlRelationalTableModel modelFluxoCaixa;
   SqlRelationalTableModel modelFluxoCaixa2;
   SqlRelationalTableModel modelItem;
+  SqlRelationalTableModel modelItem2;
+  SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods
   auto atualizarCredito() -> bool;
@@ -35,6 +39,7 @@ private:
   auto cancelamento() -> bool;
   auto clearFields() -> void final;
   auto copiaProdutosOrcamento() -> bool;
+  auto criarConsumos() -> bool;
   auto financeiroSalvar() -> bool;
   auto generateId() -> bool;
   auto montarFluxoCaixa() -> void;
@@ -43,8 +48,8 @@ private:
   auto on_checkBoxPontuacaoPadrao_toggled(bool checked) -> void;
   auto on_checkBoxRT_toggled(bool checked) -> void;
   auto on_dateTimeEdit_dateTimeChanged(const QDateTime &) -> void;
-  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
-  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxProfissional_textChanged(const QString &) -> void;
@@ -59,10 +64,10 @@ private:
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
   auto setConnections() -> void;
+  auto setTreeView() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;
-  auto todosProdutosSaoEstoque() -> bool;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;

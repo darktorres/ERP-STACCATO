@@ -35,7 +35,7 @@ DownloadDialog::DownloadDialog(QWidget *parent) : QWidget(parent), ui(new Ui::Do
 
   // Configure open button
   ui->openButton->setEnabled(false);
-  ui->openButton->setVisible(false);
+  ui->openButton->hide();
 
   // Initialize the network access manager
   m_manager = new QNetworkAccessManager(this);

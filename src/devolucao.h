@@ -1,9 +1,9 @@
 #pragma once
 
+#include "sqlrelationaltablemodel.h"
+
 #include <QDataWidgetMapper>
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Devolucao;

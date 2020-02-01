@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QDialog>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QDialog>
 
 namespace Ui {
 class InserirTransferencia;

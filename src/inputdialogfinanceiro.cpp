@@ -1,17 +1,19 @@
-#include <QDebug>
-#include <QLineEdit>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "inputdialogfinanceiro.h"
+#include "ui_inputdialogfinanceiro.h"
 
 #include "application.h"
 #include "comboboxdelegate.h"
 #include "doubledelegate.h"
 #include "editdelegate.h"
-#include "inputdialogfinanceiro.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "ui_inputdialogfinanceiro.h"
+#include "sortfilterproxymodel.h"
+
+#include <QDebug>
+#include <QLineEdit>
+#include <QSqlError>
+#include <QSqlQuery>
 
 InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogFinanceiro) {
   ui->setupUi(this);

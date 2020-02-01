@@ -1,8 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetcompraconfirmar.h"
+#include "ui_widgetcompraconfirmar.h"
 
 #include "application.h"
 #include "cancelaproduto.h"
@@ -10,8 +7,12 @@
 #include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "ui_widgetcompraconfirmar.h"
-#include "widgetcompraconfirmar.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetCompraConfirmar::WidgetCompraConfirmar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConfirmar) {
   ui->setupUi(this);

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QLineEdit>
-#include <QPushButton>
-
 #include "registerdialog.h"
 #include "searchdialog.h"
+
+#include <QLineEdit>
+#include <QPushButton>
 
 class ItemBox final : public QLineEdit {
   Q_OBJECT

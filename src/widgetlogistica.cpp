@@ -1,10 +1,10 @@
+#include "widgetlogistica.h"
+#include "ui_widgetlogistica.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "ui_widgetlogistica.h"
-#include "widgetlogistica.h"
 
 WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {
   ui->setupUi(this);

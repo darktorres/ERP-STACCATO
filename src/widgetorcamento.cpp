@@ -1,14 +1,15 @@
-#include <QDebug>
-#include <QSqlError>
+#include "widgetorcamento.h"
+#include "ui_widgetorcamento.h"
 
 #include "application.h"
 #include "followup.h"
 #include "orcamento.h"
 #include "orcamentoproxymodel.h"
 #include "reaisdelegate.h"
-#include "ui_widgetorcamento.h"
 #include "usersession.h"
-#include "widgetorcamento.h"
+
+#include <QDebug>
+#include <QSqlError>
 
 WidgetOrcamento::WidgetOrcamento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetOrcamento) { ui->setupUi(this); }
 

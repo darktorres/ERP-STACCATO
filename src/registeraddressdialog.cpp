@@ -1,10 +1,11 @@
+#include "registeraddressdialog.h"
+
+#include "application.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "registeraddressdialog.h"
 
 RegisterAddressDialog::RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent) : RegisterDialog(table, primaryKey, parent) {
   setWindowModality(Qt::NonModal);

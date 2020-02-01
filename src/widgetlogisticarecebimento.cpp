@@ -1,8 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetlogisticarecebimento.h"
+#include "ui_widgetlogisticarecebimento.h"
 
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
@@ -10,9 +7,13 @@
 #include "inputdialogconfirmacao.h"
 #include "log.h"
 #include "sql.h"
-#include "ui_widgetlogisticarecebimento.h"
 #include "venda.h"
-#include "widgetlogisticarecebimento.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetLogisticaRecebimento::WidgetLogisticaRecebimento(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRecebimento) { ui->setupUi(this); }
 

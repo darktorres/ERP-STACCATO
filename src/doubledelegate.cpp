@@ -1,6 +1,6 @@
-#include <QDoubleSpinBox>
-
 #include "doubledelegate.h"
+
+#include <QDoubleSpinBox>
 
 DoubleDelegate::DoubleDelegate(QObject *parent, const int decimais) : QStyledItemDelegate(parent), decimais(decimais) {}
 

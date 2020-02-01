@@ -1,16 +1,17 @@
+#include "widgetrelatorio.h"
+#include "ui_widgetrelatorio.h"
+
+#include "application.h"
+#include "porcentagemdelegate.h"
+#include "reaisdelegate.h"
+#include "usersession.h"
+#include "xlsxdocument.h"
+
 #include <QDebug>
 #include <QDesktopServices>
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QSqlError>
-
-#include "application.h"
-#include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
-#include "ui_widgetrelatorio.h"
-#include "usersession.h"
-#include "widgetrelatorio.h"
-#include "xlsxdocument.h"
 
 WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
 

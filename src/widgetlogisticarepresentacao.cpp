@@ -1,14 +1,15 @@
-#include <QDate>
-#include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetlogisticarepresentacao.h"
+#include "ui_widgetlogisticarepresentacao.h"
 
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialogconfirmacao.h"
 #include "log.h"
-#include "ui_widgetlogisticarepresentacao.h"
-#include "widgetlogisticarepresentacao.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetLogisticaRepresentacao::WidgetLogisticaRepresentacao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaRepresentacao) { ui->setupUi(this); }
 

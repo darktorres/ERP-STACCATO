@@ -1,7 +1,8 @@
-#include <QBrush>
-
 #include "estoqueproxymodel.h"
+
 #include "usersession.h"
+
+#include <QBrush>
 
 EstoqueProxyModel::EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent) : SortFilterProxyModel(model, parent), quantUpdColumn(model->fieldIndex("quantUpd")) {}
 

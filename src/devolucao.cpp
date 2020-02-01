@@ -1,19 +1,20 @@
+#include "devolucao.h"
+#include "ui_devolucao.h"
+
+#include "application.h"
+#include "checkboxdelegate.h"
+#include "log.h"
+#include "porcentagemdelegate.h"
+#include "reaisdelegate.h"
+#include "sql.h"
+#include "usersession.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "checkboxdelegate.h"
-#include "devolucao.h"
-#include "log.h"
-#include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
-#include "sql.h"
-#include "ui_devolucao.h"
-#include "usersession.h"
 
 Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);

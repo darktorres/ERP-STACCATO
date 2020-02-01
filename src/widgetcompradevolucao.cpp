@@ -1,14 +1,15 @@
+#include "widgetcompradevolucao.h"
+#include "ui_widgetcompradevolucao.h"
+
+#include "application.h"
+#include "log.h"
+#include "sql.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "log.h"
-#include "sql.h"
-#include "ui_widgetcompradevolucao.h"
-#include "widgetcompradevolucao.h"
 
 WidgetCompraDevolucao::WidgetCompraDevolucao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraDevolucao) { ui->setupUi(this); }
 

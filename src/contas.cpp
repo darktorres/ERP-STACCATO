@@ -1,18 +1,19 @@
-#include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QtMath>
+#include "contas.h"
+#include "ui_contas.h"
 
 #include "application.h"
 #include "comboboxdelegate.h"
-#include "contas.h"
 #include "dateformatdelegate.h"
 #include "itemboxdelegate.h"
 #include "lineeditdelegate.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
-#include "ui_contas.h"
+
+#include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QtMath>
 
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);

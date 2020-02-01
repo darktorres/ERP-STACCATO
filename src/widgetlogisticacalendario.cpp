@@ -1,13 +1,14 @@
+#include "widgetlogisticacalendario.h"
+#include "ui_widgetlogisticacalendario.h"
+
+#include "application.h"
+#include "collapsiblewidget.h"
+
 #include <QCheckBox>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "collapsiblewidget.h"
-#include "ui_widgetlogisticacalendario.h"
-#include "widgetlogisticacalendario.h"
 
 WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
 

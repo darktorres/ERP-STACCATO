@@ -1,6 +1,7 @@
 #include "validadedialog.h"
-#include "application.h"
 #include "ui_validadedialog.h"
+
+#include "application.h"
 
 ValidadeDialog::ValidadeDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ValidadeDialog) {
   ui->setupUi(this);

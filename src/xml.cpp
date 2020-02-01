@@ -1,9 +1,10 @@
+#include "xml.h"
+
+#include "application.h"
+
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "xml.h"
 
 XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(); }
 

@@ -1,7 +1,5 @@
-#include <QDesktopServices>
-#include <QMessageBox>
-#include <QShortcut>
-#include <QSqlError>
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 #include "application.h"
 #include "cadastrocliente.h"
@@ -13,13 +11,16 @@
 #include "cadastrousuario.h"
 #include "calculofrete.h"
 #include "importaprodutos.h"
-#include "mainwindow.h"
 #include "orcamento.h"
 #include "precoestoque.h"
-#include "ui_mainwindow.h"
 #include "userconfig.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
+
+#include <QDesktopServices>
+#include <QMessageBox>
+#include <QShortcut>
+#include <QSqlError>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);

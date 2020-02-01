@@ -1,3 +1,12 @@
+#include "cadastrousuario.h"
+#include "ui_cadastrousuario.h"
+
+#include "application.h"
+#include "checkboxdelegate.h"
+#include "log.h"
+#include "searchdialog.h"
+#include "usersession.h"
+
 #include <QCheckBox>
 #include <QDebug>
 #include <QFile>
@@ -5,14 +14,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTransposeProxyModel>
-
-#include "application.h"
-#include "cadastrousuario.h"
-#include "checkboxdelegate.h"
-#include "log.h"
-#include "searchdialog.h"
-#include "ui_cadastrousuario.h"
-#include "usersession.h"
 
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);

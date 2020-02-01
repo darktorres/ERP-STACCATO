@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetEstoque;

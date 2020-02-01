@@ -1,7 +1,8 @@
-#include <QBrush>
+#include "vendaproxymodel.h"
 
 #include "usersession.h"
-#include "vendaproxymodel.h"
+
+#include <QBrush>
 
 VendaProxyModel::VendaProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("Status")), financeiroIndex(model->fieldIndex("statusFinanceiro")) {

@@ -1,10 +1,11 @@
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetgraficos.h"
+#include "ui_widgetgraficos.h"
 
 #include "application.h"
-#include "ui_widgetgraficos.h"
 #include "usersession.h"
-#include "widgetgraficos.h"
+
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetGraficos::WidgetGraficos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGraficos) {
   ui->setupUi(this);

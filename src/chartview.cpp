@@ -1,7 +1,7 @@
+#include "chartview.h"
+
 #include <QLineSeries>
 #include <QSplineSeries>
-
-#include "chartview.h"
 
 ChartView::ChartView(QChart *chart, QWidget *parent) : QGraphicsView(new QGraphicsScene, parent), m_chart(chart) {
   setDragMode(QGraphicsView::NoDrag);

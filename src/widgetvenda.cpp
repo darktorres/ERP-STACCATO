@@ -1,15 +1,16 @@
-#include <QDate>
-#include <QDebug>
-#include <QSqlError>
+#include "widgetvenda.h"
+#include "ui_widgetvenda.h"
 
 #include "application.h"
 #include "followup.h"
 #include "reaisdelegate.h"
-#include "ui_widgetvenda.h"
 #include "usersession.h"
 #include "venda.h"
 #include "vendaproxymodel.h"
-#include "widgetvenda.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QSqlError>
 
 WidgetVenda::WidgetVenda(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetVenda) {
   ui->setupUi(this);

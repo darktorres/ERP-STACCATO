@@ -1,11 +1,12 @@
+#include "pagamentosdia.h"
+#include "ui_pagamentosdia.h"
+
+#include "reaisdelegate.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-
-#include "pagamentosdia.h"
-#include "reaisdelegate.h"
-#include "ui_pagamentosdia.h"
 
 PagamentosDia::PagamentosDia(QWidget *parent) : QDialog(parent), ui(new Ui::PagamentosDia) {
   ui->setupUi(this);

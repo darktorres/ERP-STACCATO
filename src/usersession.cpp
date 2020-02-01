@@ -1,9 +1,10 @@
+#include "usersession.h"
+
+#include "application.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-
-#include "application.h"
-#include "usersession.h"
 
 int UserSession::idLoja() { return (query->value("idLoja").toInt()); }
 

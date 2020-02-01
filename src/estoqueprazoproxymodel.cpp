@@ -1,9 +1,10 @@
-#include <QBrush>
-#include <QDate>
+#include "estoqueprazoproxymodel.h"
 
 #include "application.h"
-#include "estoqueprazoproxymodel.h"
 #include "usersession.h"
+
+#include <QBrush>
+#include <QDate>
 
 EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), prazoEntregaColumn(model->fieldIndex("prazoEntrega")) {
   setSourceModel(model);

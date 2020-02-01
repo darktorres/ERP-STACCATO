@@ -1,14 +1,15 @@
+#include "widgetfinanceirofluxocaixa.h"
+#include "ui_widgetfinanceirofluxocaixa.h"
+
+#include "application.h"
+#include "pagamentosdia.h"
+#include "reaisdelegate.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "pagamentosdia.h"
-#include "reaisdelegate.h"
-#include "ui_widgetfinanceirofluxocaixa.h"
-#include "widgetfinanceirofluxocaixa.h"
 
 WidgetFinanceiroFluxoCaixa::WidgetFinanceiroFluxoCaixa(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroFluxoCaixa) { ui->setupUi(this); }
 

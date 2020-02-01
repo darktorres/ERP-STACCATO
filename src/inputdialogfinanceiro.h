@@ -1,10 +1,9 @@
 #pragma once
 
-#include <QDialog>
-
-#include "sortfilterproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 #include "sqltreemodel.h"
+
+#include <QDialog>
 
 namespace Ui {
 class InputDialogFinanceiro;

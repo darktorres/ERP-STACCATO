@@ -1,8 +1,8 @@
-#include "doubledelegate.h"
-#include "usersession.h"
-
 #include <QDoubleSpinBox>
 #include <QPainter>
+
+#include "doubledelegate.h"
+#include "usersession.h"
 
 DoubleDelegate::DoubleDelegate(QObject *parent, const int decimais, const bool customPaint) : QStyledItemDelegate(parent), decimais(decimais), customPaint(customPaint) {}
 

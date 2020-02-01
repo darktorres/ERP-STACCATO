@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QDialog>
-
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
+
+#include <QDialog>
 
 namespace Ui {
 class ProdutosPendentes;

@@ -1,8 +1,9 @@
-#include <QSqlError>
-#include <QSqlRecord>
+#include "sqlquerymodel.h"
 
 #include "application.h"
-#include "sqlquerymodel.h"
+
+#include <QSqlError>
+#include <QSqlRecord>
 
 SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 

@@ -1,11 +1,12 @@
+#include "inserirtransferencia.h"
+#include "ui_inserirtransferencia.h"
+
+#include "application.h"
+#include "log.h"
+
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "inserirtransferencia.h"
-#include "log.h"
-#include "ui_inserirtransferencia.h"
 
 InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), ui(new Ui::InserirTransferencia) {
   ui->setupUi(this);

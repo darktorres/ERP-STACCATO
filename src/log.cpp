@@ -1,10 +1,11 @@
+#include "log.h"
+
+#include "application.h"
+#include "usersession.h"
+
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "log.h"
-#include "usersession.h"
 
 bool Log::createLog(const QString &message) {
   QSqlQuery query;

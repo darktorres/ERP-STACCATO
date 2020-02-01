@@ -1,11 +1,12 @@
-#include <QFileDialog>
-#include <QSqlError>
+#include "sendmail.h"
+#include "ui_sendmail.h"
 
 #include "application.h"
-#include "sendmail.h"
 #include "smtp.h"
-#include "ui_sendmail.h"
 #include "usersession.h"
+
+#include <QFileDialog>
+#include <QSqlError>
 
 SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &fornecedor, QWidget *parent) : QDialog(parent), fornecedor(fornecedor), tipo(tipo), ui(new Ui::SendMail) {
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos

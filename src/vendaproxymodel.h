@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QIdentityProxyModel>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QIdentityProxyModel>
 
 class VendaProxyModel final : public QIdentityProxyModel {
 

@@ -1,14 +1,15 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetnfeentrada.h"
+#include "ui_widgetnfeentrada.h"
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "log.h"
-#include "ui_widgetnfeentrada.h"
-#include "widgetnfeentrada.h"
 #include "xml_viewer.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetNfeEntrada::WidgetNfeEntrada(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeEntrada) { ui->setupUi(this); }
 

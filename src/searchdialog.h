@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QDialog>
-
-#include "searchdialogproxymodel.h"
 #include "sqlrelationaltablemodel.h"
+
+#include <QDialog>
 
 namespace Ui {
 class SearchDialog;

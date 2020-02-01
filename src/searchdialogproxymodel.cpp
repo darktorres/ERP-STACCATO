@@ -1,10 +1,11 @@
+#include "searchdialogproxymodel.h"
+
+#include "application.h"
+#include "usersession.h"
+
 #include <QBrush>
 #include <QDate>
 #include <QDebug>
-
-#include "application.h"
-#include "searchdialogproxymodel.h"
-#include "usersession.h"
 
 SearchDialogProxyModel::SearchDialogProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), estoqueColumn(model->fieldIndex("estoque", true)), promocaoColumn(model->fieldIndex("promocao", true)),

@@ -1,16 +1,17 @@
-#include <QDebug>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QSqlError>
+#include "widgetestoque.h"
+#include "ui_widgetestoque.h"
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "sortfilterproxymodel.h"
-#include "ui_widgetestoque.h"
 #include "usersession.h"
-#include "widgetestoque.h"
 #include "xlsxdocument.h"
+
+#include <QDebug>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QSqlError>
 
 WidgetEstoque::WidgetEstoque(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetEstoque) { ui->setupUi(this); }
 

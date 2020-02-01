@@ -1,14 +1,15 @@
+#include "acbr.h"
+
+#include "application.h"
+#include "log.h"
+#include "usersession.h"
+
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
-
-#include "acbr.h"
-#include "application.h"
-#include "log.h"
-#include "usersession.h"
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {
   connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error);

@@ -1,12 +1,13 @@
+#include "logindialog.h"
+#include "ui_logindialog.h"
+
+#include "application.h"
+#include "usersession.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QVersionNumber>
-
-#include "application.h"
-#include "logindialog.h"
-#include "ui_logindialog.h"
-#include "usersession.h"
 
 LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QIdentityProxyModel>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QIdentityProxyModel>
 
 class OrcamentoProxyModel final : public QIdentityProxyModel {
 

@@ -1,13 +1,14 @@
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlRecord>
+#include "precoestoque.h"
+#include "ui_precoestoque.h"
 
 #include "application.h"
 #include "noeditdelegate.h"
-#include "precoestoque.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
-#include "ui_precoestoque.h"
+
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlRecord>
 
 PrecoEstoque::PrecoEstoque(QWidget *parent) : QDialog(parent), ui(new Ui::PrecoEstoque) {
   ui->setupUi(this);

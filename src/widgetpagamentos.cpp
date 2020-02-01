@@ -1,13 +1,14 @@
+#include "widgetpagamentos.h"
+#include "ui_widgetpagamentos.h"
+
+#include "application.h"
+#include "logindialog.h"
+#include "usersession.h"
+
 #include <QDebug>
 #include <QLineEdit>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "logindialog.h"
-#include "ui_widgetpagamentos.h"
-#include "usersession.h"
-#include "widgetpagamentos.h"
 
 WidgetPagamentos::WidgetPagamentos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetPagamentos) {
   ui->setupUi(this);

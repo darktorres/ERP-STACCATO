@@ -1,7 +1,8 @@
-#include <QBrush>
-
 #include "followupproxymodel.h"
+
 #include "usersession.h"
+
+#include <QBrush>
 
 FollowUpProxyModel::FollowUpProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->fieldIndex("semaforo", true)) { setSourceModel(model); }
 

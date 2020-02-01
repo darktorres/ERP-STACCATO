@@ -1,13 +1,14 @@
-#include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
-
 #include "anteciparrecebimento.h"
+#include "ui_anteciparrecebimento.h"
+
 #include "application.h"
 #include "doubledelegate.h"
 #include "log.h"
 #include "reaisdelegate.h"
-#include "ui_anteciparrecebimento.h"
+
+#include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
 
 AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), ui(new Ui::AnteciparRecebimento) {
   ui->setupUi(this);

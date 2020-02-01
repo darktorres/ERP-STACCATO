@@ -1,3 +1,9 @@
+#include "tableview.h"
+
+#include "application.h"
+#include "sqlquerymodel.h"
+#include "sqlrelationaltablemodel.h"
+
 #include <QClipboard>
 #include <QDebug>
 #include <QHeaderView>
@@ -5,11 +11,6 @@
 #include <QMenu>
 #include <QScrollBar>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
-#include "tableview.h"
 
 TableView::TableView(QWidget *parent) : QTableView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);

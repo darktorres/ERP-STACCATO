@@ -1,9 +1,9 @@
 #pragma once
 
+#include "logindialog.h"
+
 #include <QSettings>
 #include <QSqlQuery>
-
-#include "logindialog.h"
 
 class UserSession final {
 

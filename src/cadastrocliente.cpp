@@ -1,14 +1,15 @@
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastrocliente.h"
+#include "ui_cadastrocliente.h"
 
 #include "application.h"
-#include "cadastrocliente.h"
 #include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "log.h"
-#include "ui_cadastrocliente.h"
 #include "usersession.h"
+
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("cliente", "idCliente", parent), ui(new Ui::CadastroCliente) {
   ui->setupUi(this);

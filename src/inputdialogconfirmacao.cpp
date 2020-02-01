@@ -1,3 +1,11 @@
+#include "inputdialogconfirmacao.h"
+#include "ui_inputdialogconfirmacao.h"
+
+#include "application.h"
+#include "log.h"
+#include "orcamento.h"
+#include "sortfilterproxymodel.h"
+
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -6,13 +14,6 @@
 #include <QNetworkReply>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "inputdialogconfirmacao.h"
-#include "log.h"
-#include "orcamento.h"
-#include "sortfilterproxymodel.h"
-#include "ui_inputdialogconfirmacao.h"
 
 InputDialogConfirmacao::InputDialogConfirmacao(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogConfirmacao) {
   ui->setupUi(this);

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QSqlQuery>
-
-#include "lrreportengine.h"
 #include "sqlrelationaltablemodel.h"
+
+#include <QSqlQuery>
 
 class Impressao final {
 

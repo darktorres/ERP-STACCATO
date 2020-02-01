@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetCompraDevolucao;
@@ -29,7 +29,9 @@ private:
   auto on_pushButtonRetornarEstoque_clicked() -> void;
   auto on_radioButtonFiltroDevolvido_clicked(const bool) -> void;
   auto on_radioButtonFiltroPendente_clicked(const bool) -> void;
+  auto on_table_selectionChanged() -> void;
   auto retornarEstoque(const QModelIndexList &list) -> bool;
-  auto setupTables() -> void;
+  auto retornarFornecedor(const QModelIndexList &list) -> bool;
   auto setConnections() -> void;
+  auto setupTables() -> void;
 };

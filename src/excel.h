@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QSqlQuery>
-#include <QWidget>
+#include "xlsxdocument.h"
 
-#include <xlsxdocument.h>
+#include <QSqlQuery>
 
 class Excel final {
 

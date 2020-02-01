@@ -1,10 +1,10 @@
+#include "widgetlogistica.h"
+#include "ui_widgetlogistica.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "ui_widgetlogistica.h"
-#include "widgetlogistica.h"
 
 WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogistica) {
   ui->setupUi(this);
@@ -13,15 +13,15 @@ WidgetLogistica::WidgetLogistica(QWidget *parent) : QWidget(parent), ui(new Ui::
   ui->splitter_6->setStretchFactor(1, 1);
 
   setConnections();
-
-  ui->tableForn->setModel(&modelViewLogistica);
 }
 
 WidgetLogistica::~WidgetLogistica() { delete ui; }
 
 void WidgetLogistica::setConnections() {
-  connect(ui->tableForn, &TableView::clicked, this, &WidgetLogistica::on_tableForn_clicked);
-  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->tableForn, &TableView::clicked, this, &WidgetLogistica::on_tableForn_clicked, connectionType);
+  connect(ui->tabWidgetLogistica, &QTabWidget::currentChanged, this, &WidgetLogistica::on_tabWidgetLogistica_currentChanged, connectionType);
 }
 
 void WidgetLogistica::resetTables() {
@@ -37,6 +37,8 @@ void WidgetLogistica::resetTables() {
 }
 
 void WidgetLogistica::updateTables() {
+  ui->tableForn->setModel(&modelViewLogistica);
+
   const QString currentText = ui->tabWidgetLogistica->tabText(ui->tabWidgetLogistica->currentIndex());
 
   ui->frameForn->hide();

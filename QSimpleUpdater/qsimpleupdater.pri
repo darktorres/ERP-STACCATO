@@ -16,8 +16,6 @@ SOURCES += $$PWD/src/qsimpleupdater.cpp \
            $$PWD/src/dialogs/download_dialog.cpp \
            $$PWD/src/dialogs/progress_dialog.cpp
 
-OTHER_FILES += $$PWD/src/QSimpleUpdater
-
 INCLUDEPATH += $$PWD/src
 
 RESOURCES += $$PWD/res/qsu_resources.qrc

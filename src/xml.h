@@ -6,8 +6,11 @@
 class XML final {
 
 public:
+  enum class Tipo { Entrada, Saida };
   explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
   auto lerValores(const QStandardItem *item) -> void;
+  auto limparValores() -> void;
+  auto validar(const Tipo tipo) -> bool;
 
   const QByteArray fileContent;
   const QString fileName;
@@ -19,8 +22,9 @@ public:
   // emit
   QString xFant;
   QString xNome;
+  QString cnpjOrig;
   // dest
-  QString cnpj;
+  QString cnpjDest;
   // produto
   QString codProd;
   QString codBarras;
@@ -91,12 +95,15 @@ public:
 
   // methods
 private:
-  auto montarArvore() -> void;
   auto lerCOFINSProduto(const QStandardItem *child) -> void;
   auto lerDadosProduto(const QStandardItem *child) -> void;
   auto lerICMSProduto(const QStandardItem *child) -> void;
   auto lerIPIProduto(const QStandardItem *child) -> void;
   auto lerPISProduto(const QStandardItem *child) -> void;
   auto lerTotais(const QStandardItem *child) -> void;
+  auto montarArvore() -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
+  auto verificaCNPJ(const Tipo tipo) -> bool;
+  auto verificaExiste() -> bool;
+  auto verificaValido() -> bool;
 };

@@ -1,8 +1,9 @@
+#include "lineeditdelegate.h"
+
+#include "sqlquerymodel.h"
+
 #include <QCompleter>
 #include <QLineEdit>
-
-#include "lineeditdelegate.h"
-#include "sqlquerymodel.h"
 
 LineEditDelegate::LineEditDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 

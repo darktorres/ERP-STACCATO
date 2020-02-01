@@ -1,11 +1,12 @@
-#include <QMessageBox>
-#include <QSqlError>
+#include "followup.h"
+#include "ui_followup.h"
 
 #include "application.h"
-#include "followup.h"
 #include "followupproxymodel.h"
-#include "ui_followup.h"
 #include "usersession.h"
+
+#include <QMessageBox>
+#include <QSqlError>
 
 FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
   ui->setupUi(this);
@@ -20,8 +21,8 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
 
   setWindowTitle((tipo == Tipo::Orcamento ? "Orçamento: " : "Pedido: ") + id);
 
-  ui->dateFollowup->setDateTime(QDateTime::currentDateTime());
-  ui->dateProxFollowup->setDateTime(QDateTime::currentDateTime().addDays(1));
+  ui->dateFollowup->setDateTime(qApp->serverDateTime());
+  ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
 
   if (tipo == Tipo::Venda) { ui->frameOrcamento->hide(); }
 }
@@ -77,12 +78,12 @@ bool FollowUp::verifyFields() {
 void FollowUp::setupTables() {
   modelViewFollowup.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
 
-  modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
-  modelViewFollowup.setHeaderData("idVenda", "Venda");
+  if (tipo == Tipo::Orcamento) { modelViewFollowup.setHeaderData("idOrcamento", "Orçamento"); }
+  if (tipo == Tipo::Venda) { modelViewFollowup.setHeaderData("idVenda", "Venda"); }
   modelViewFollowup.setHeaderData("nome", "Usuário");
   modelViewFollowup.setHeaderData("observacao", "Observação");
   modelViewFollowup.setHeaderData("dataFollowup", "Data");
-  modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
+  if (tipo == Tipo::Orcamento) { modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data"); }
 
   modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
@@ -92,7 +93,7 @@ void FollowUp::setupTables() {
 
   ui->table->setModel(&modelViewFollowup);
 
-  ui->table->hideColumn("semaforo");
+  if (tipo == Tipo::Orcamento) { ui->table->hideColumn("semaforo"); }
 }
 
 void FollowUp::on_dateFollowup_dateChanged(const QDate &date) {

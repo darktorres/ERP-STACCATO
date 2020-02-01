@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlquerymodel.h"
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetFinanceiroContas;
@@ -17,7 +17,7 @@ public:
   explicit WidgetFinanceiroContas(QWidget *parent = nullptr);
   ~WidgetFinanceiroContas();
   auto resetTables() -> void;
-  auto setTipo(const Tipo &value) -> void;
+  auto setTipo(const Tipo &novoTipo) -> void;
   auto updateTables() -> void;
 
 private:

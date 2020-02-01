@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QDialog>
-#include <QStandardItemModel>
-
 #include "xml.h"
+
+#include <QDialog>
 
 namespace Ui {
 class XML_Viewer;

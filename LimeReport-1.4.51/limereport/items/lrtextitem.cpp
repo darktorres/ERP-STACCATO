@@ -108,8 +108,8 @@ void TextItem::processPopUpAction(QAction *action) {
 }
 
 void TextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *style, QWidget *widget) {
-  Q_UNUSED(widget);
-  Q_UNUSED(style);
+  Q_UNUSED(widget)
+  Q_UNUSED(style)
 
   TextPtr text = textDocument();
 
@@ -347,7 +347,7 @@ QString TextItem::formatNumber(const double value) {
   QString str = QString::number(value);
 
   if (m_format.contains("%")) {
-    str.sprintf(m_format.toStdString().c_str(), value);
+    str.asprintf(m_format.toStdString().c_str(), value);
     str = str.replace(",", QLocale::system().groupSeparator());
     str = str.replace(".", QLocale::system().decimalPoint());
   }

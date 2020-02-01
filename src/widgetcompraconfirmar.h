@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetCompraConfirmar;
@@ -25,7 +25,7 @@ private:
   SqlRelationalTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
-  auto confirmarCompra(const QString &idCompra, const QDateTime &dataPrevista, const QDateTime &dataConf) -> bool;
+  auto confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) -> bool;
   auto on_pushButtonCancelarCompra_clicked() -> void;
   auto on_pushButtonConfirmarCompra_clicked() -> void;
   auto setupTables() -> void;

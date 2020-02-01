@@ -1,9 +1,9 @@
 #pragma once
 
+#include "charttooltip.h"
+
 #include <QGraphicsView>
 #include <QtCharts>
-
-#include "charttooltip.h"
 
 QT_CHARTS_USE_NAMESPACE
 

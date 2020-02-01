@@ -1,15 +1,17 @@
+#include "cadastrofornecedor.h"
+#include "ui_cadastrofornecedor.h"
+
+#include "application.h"
+#include "cepcompleter.h"
+#include "checkboxdelegate.h"
+#include "log.h"
+#include "searchdialog.h"
+#include "usersession.h"
+
 #include <QDate>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
-
-#include "application.h"
-#include "cadastrofornecedor.h"
-#include "cepcompleter.h"
-#include "checkboxdelegate.h"
-#include "searchdialog.h"
-#include "ui_cadastrofornecedor.h"
-#include "usersession.h"
 
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);
@@ -26,7 +28,7 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   sdFornecedor = SearchDialog::fornecedor(this);
   connect(sdFornecedor, &SearchDialog::itemSelected, this, &CadastroFornecedor::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
@@ -177,6 +179,13 @@ void CadastroFornecedor::updateMode() {
 }
 
 bool CadastroFornecedor::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroFornecedor::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -200,6 +209,8 @@ bool CadastroFornecedor::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupEndereco.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");
@@ -335,27 +346,18 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = data("razaoSocial").toString();
 
   QSqlQuery query;
-  query.prepare("UPDATE produto SET validade = :novaValidade, descontinuado = FALSE WHERE fornecedor = :fornecedor AND validade = :oldValidade");
-  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
+  query.prepare("UPDATE produto SET validade = :novaValidade WHERE fornecedor = :fornecedor AND descontinuado = FALSE AND estoque = FALSE AND promocao = FALSE");
+  query.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
-  query.bindValue(":oldValidade", data("validadeProdutos"));
 
   if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
 
-  query.prepare(
-      "UPDATE produto_has_preco php, produto p SET php.validadeFim = :novaValidade, expirado = FALSE WHERE php.idProduto = p.idProduto AND php.preco = p.precoVenda AND p.fornecedor = :fornecedor");
-  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
-  query.bindValue(":fornecedor", fornecedor);
+  QSqlQuery query2;
+  query2.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
+  query2.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
+  query2.bindValue(":fornecedor", fornecedor);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no preço/produto: " + query.lastError().text(), this); }
-
-  query.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
-  query.bindValue(":novaValidade", QDate::currentDate().addDays(novaValidade));
-  query.bindValue(":fornecedor", fornecedor);
-
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query.lastError().text(), this); }
-
-  if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando InvalidarExpirados: " + query.lastError().text(), this); }
+  if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query2.lastError().text(), this); }
 
   return true;
 }
@@ -368,6 +370,8 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
   if (not ok) { return; }
 
   if (not qApp->startTransaction()) { return; }
+
+  if (not Log::createLog("Transação: CadastroFornecedor::on_pushButtonValidade")) { return qApp->rollbackTransaction(); }
 
   if (not ajustarValidade(novaValidade)) { return qApp->rollbackTransaction(); }
 

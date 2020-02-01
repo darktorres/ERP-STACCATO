@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QDialog>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QDialog>
 
 namespace Ui {
 class InputDialogProduto;
@@ -16,8 +16,8 @@ public:
 
   explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = nullptr);
   ~InputDialogProduto();
-  auto getDate() const -> QDateTime;
-  auto getNextDate() const -> QDateTime;
+  auto getDate() const -> QDate;
+  auto getNextDate() const -> QDate;
   auto setFilter(const QStringList &ids) -> bool;
 
 private:

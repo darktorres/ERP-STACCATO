@@ -32,7 +32,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDateTimeEdit" name="dateEditEvento">
+       <widget class="QDateEdit" name="dateEditEvento">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -45,7 +45,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDateTimeEdit" name="dateEditProximo">
+       <widget class="QDateEdit" name="dateEditProximo">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>

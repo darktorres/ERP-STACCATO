@@ -1,8 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetcomprapendentes.h"
+#include "ui_widgetcomprapendentes.h"
 
 #include "application.h"
 #include "doubledelegate.h"
@@ -12,8 +9,12 @@
 #include "inputdialog.h"
 #include "produtospendentes.h"
 #include "reaisdelegate.h"
-#include "ui_widgetcomprapendentes.h"
-#include "widgetcomprapendentes.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) { ui->setupUi(this); }
 
@@ -46,33 +47,36 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 }
 
 void WidgetCompraPendentes::setConnections() {
-  connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroEntregaAgend, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroEntregue, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroEstoque, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroFaturamento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroIniciados, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroPendentes, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->doubleSpinBoxQuantAvulso, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged);
-  connect(ui->doubleSpinBoxQuantAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged);
-  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled);
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::montaFiltro);
-  connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked);
-  connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked);
-  connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked);
-  connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroEntregaAgend, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroEntregue, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroEstoque, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroFaturamento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroIniciados, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroPendentes, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroRecebimento, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroRepoEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxFiltroRepoReceb, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->doubleSpinBoxQuantAvulso, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulso_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxQuantAvulsoCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged, connectionType);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetCompraPendentes::on_groupBoxStatus_toggled, connectionType);
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->pushButtonComprarAvulso, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked, connectionType);
+  connect(ui->pushButtonExcel, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonExcel_clicked, connectionType);
+  connect(ui->pushButtonPDF, &QPushButton::clicked, this, &WidgetCompraPendentes::on_pushButtonPDF_clicked, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetCompraPendentes::on_table_activated, connectionType);
 }
 
 void WidgetCompraPendentes::updateTables() {
   if (not isSet) {
     setConnections();
 
-    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, this));
+    ui->itemBoxProduto->setSearchDialog(SearchDialog::produto(false, true, true, true, this));
     ui->itemBoxProduto->setRepresentacao(false);
 
     connect(ui->itemBoxProduto, &QLineEdit::textChanged, this, &WidgetCompraPendentes::setarDadosAvulso);
@@ -94,7 +98,7 @@ void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
 void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setTable("view_venda_produto");
 
-  modelViewVendaProduto.setSort("idVenda", Qt::AscendingOrder);
+  modelViewVendaProduto.setSort("idVenda");
 
   modelViewVendaProduto.setHeaderData("prazoEntrega", "Prazo Limite");
   modelViewVendaProduto.setHeaderData("novoPrazoEntrega", "Novo Prazo");
@@ -105,7 +109,6 @@ void WidgetCompraPendentes::setupTables() {
   modelViewVendaProduto.setHeaderData("caixas", "Caixas");
   modelViewVendaProduto.setHeaderData("quant", "Quant.");
   modelViewVendaProduto.setHeaderData("un", "Un.");
-  modelViewVendaProduto.setHeaderData("total", "Total");
   modelViewVendaProduto.setHeaderData("codComercial", "Cód. Com.");
   modelViewVendaProduto.setHeaderData("formComercial", "Form. Com.");
   modelViewVendaProduto.setHeaderData("status", "Status");
@@ -116,18 +119,19 @@ void WidgetCompraPendentes::setupTables() {
 
   ui->table->setModel(&modelViewVendaProduto);
 
-  ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this));
-  ui->table->setItemDelegateForColumn("total", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
-  const QString status = modelViewVendaProduto.data(index.row(), "status").toString();
+  const int row = index.row();
 
-  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está PENDENTE!", this); }
+  const QString status = modelViewVendaProduto.data(row, "status").toString();
 
-  const QString financeiro = modelViewVendaProduto.data(index.row(), "statusFinanceiro").toString();
-  const QString codComercial = modelViewVendaProduto.data(index.row(), "codComercial").toString();
-  const QString idVenda = modelViewVendaProduto.data(index.row(), "idVenda").toString();
+  if (status != "PENDENTE" and status != "REPO. ENTREGA" and status != "REPO. RECEB.") { return qApp->enqueueError("Produto não está 'PENDENTE/REPO. ENTREGA/REPO. RECEB.'!", this); }
+
+  const QString financeiro = modelViewVendaProduto.data(row, "statusFinanceiro").toString();
+  const QString codComercial = modelViewVendaProduto.data(row, "codComercial").toString();
+  const QString idVenda = modelViewVendaProduto.data(row, "idVenda").toString();
 
   if (financeiro == "PENDENTE") {
     QMessageBox msgBox(QMessageBox::Question, "Pendente!", "Financeiro não liberou! Continuar?", QMessageBox::Yes | QMessageBox::No, this);
@@ -172,6 +176,12 @@ void WidgetCompraPendentes::montaFiltro() {
   const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR fornecedor LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR `codComercial` LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
+
+  //-------------------------------------
+
+  const bool atelier = ui->checkBoxAtelier->isChecked();
+
+  filtros << (atelier ? "fornecedor = 'ATELIER STACCATO'" : "fornecedor <> 'ATELIER STACCATO'");
 
   //-------------------------------------
 
@@ -254,5 +264,7 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
   impressao.print();
 }
 
-// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para o Conrado confirmar, apenas com um botão de ok ou cancelar.
+// TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para
+// o Conrado confirmar, apenas com um botão de ok ou cancelar.
 // TODO: pegar a tableResumo e colocar em uma aba separada no widgetCompra
+// TODO: não listar produto_estoque no SearchDialog da compra avulsa

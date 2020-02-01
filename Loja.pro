@@ -6,16 +6,13 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.7.0
+VERSION = 0.8.28
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
 include(LimeReport-1.5.31/limereport/limereport.pri)
-include(QDecimal/qdecimal.pri)
 
-QT *= core gui sql network xml charts
-
-greaterThan(QT_MAJOR_VERSION, 4): QT *= widgets
+QT *= core gui sql network xml charts widgets
 
 DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
@@ -36,11 +33,7 @@ win32{
 
     RC_ICONS = Staccato.ico
 
-    versionAtLeast(QT_VERSION, 5.13){
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
-    } else {
-        LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.0-Win32 -llibeay32
-    }
+    LIBS += -L$$_PRO_FILE_PWD_/OpenSSL-1.1-Win32 -llibcrypto-1_1
 }
 
 contains(CONFIG, deploy){
@@ -85,10 +78,10 @@ linux-g++{
 }
 
 linux-clang{
-    QMAKE_CC = clang-8
-    QMAKE_CXX = clang++-8
+    QMAKE_CC = clang-9
+    QMAKE_CXX = clang++-9
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-8
+    QMAKE_LFLAGS *= -fuse-ld=lld-9
 
     #QMAKE_CXXFLAGS *= -flto=thin
     #QMAKE_LFLAGS *= -flto=thin
@@ -143,7 +136,6 @@ SOURCES += \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
-    src/horizontalproxymodel.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
@@ -182,7 +174,9 @@ SOURCES += \
     src/sql.cpp \
     src/sqlquerymodel.cpp \
     src/sqlrelationaltablemodel.cpp \
+    src/sqltreemodel.cpp \
     src/tableview.cpp \
+    src/treeview.cpp \
     src/userconfig.cpp \
     src/usersession.cpp \
     src/validadedialog.cpp \
@@ -190,18 +184,20 @@ SOURCES += \
     src/vendaproxymodel.cpp \
     src/widgetcompra.cpp \
     src/widgetcompraconfirmar.cpp \
+    src/widgetcompraconsumos.cpp \
     src/widgetcompradevolucao.cpp \
     src/widgetcomprafaturar.cpp \
     src/widgetcompragerar.cpp \
-    src/widgetcompraoc.cpp \
     src/widgetcomprapendentes.cpp \
     src/widgetcompraresumo.cpp \
+    src/widgetconsistencia.cpp \
     src/widgetestoque.cpp \
     src/widgetfinanceiro.cpp \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
     src/widgetgraficos.cpp \
+    src/widgethistoricocompra.cpp \
     src/widgetlogistica.cpp \
     src/widgetlogisticaagendarcoleta.cpp \
     src/widgetlogisticaagendarentrega.cpp \
@@ -257,7 +253,6 @@ HEADERS  += \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
-    src/horizontalproxymodel.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
@@ -295,7 +290,9 @@ HEADERS  += \
     src/sql.h \
     src/sqlquerymodel.h \
     src/sqlrelationaltablemodel.h \
+    src/sqltreemodel.h \
     src/tableview.h \
+    src/treeview.h \
     src/userconfig.h \
     src/usersession.h \
     src/validadedialog.h \
@@ -303,18 +300,20 @@ HEADERS  += \
     src/vendaproxymodel.h \
     src/widgetcompra.h \
     src/widgetcompraconfirmar.h \
+    src/widgetcompraconsumos.h \
     src/widgetcompradevolucao.h \
     src/widgetcomprafaturar.h \
     src/widgetcompragerar.h \
-    src/widgetcompraoc.h \
     src/widgetcomprapendentes.h \
     src/widgetcompraresumo.h \
+    src/widgetconsistencia.h \
     src/widgetestoque.h \
     src/widgetfinanceiro.h \
-    src/widgetfinanceirocompra.h\
+    src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
     src/widgetgraficos.h \
+    src/widgethistoricocompra.h \
     src/widgetlogistica.h \
     src/widgetlogisticaagendarcoleta.h \
     src/widgetlogisticaagendarentrega.h \
@@ -375,18 +374,20 @@ FORMS += \
     ui/venda.ui \
     ui/widgetcompra.ui \
     ui/widgetcompraconfirmar.ui \
+    ui/widgetcompraconsumos.ui \
     ui/widgetcompradevolucao.ui \
     ui/widgetcomprafaturar.ui \
     ui/widgetcompragerar.ui \
-    ui/widgetcompraoc.ui \
     ui/widgetcomprapendentes.ui \
     ui/widgetcompraresumo.ui \
+    ui/widgetconsistencia.ui \
     ui/widgetestoque.ui \
     ui/widgetfinanceiro.ui \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
     ui/widgetgraficos.ui \
+    ui/widgethistoricocompra.ui \
     ui/widgetlogistica.ui \
     ui/widgetlogisticaagendarcoleta.ui \
     ui/widgetlogisticaagendarentrega.ui \

@@ -94,11 +94,7 @@ QColor XlsxColor::fromARGBString(const QString &c) {
   return color;
 }
 
-QString XlsxColor::toARGBString(const QColor &c) {
-  QString color;
-  color.sprintf("%02X%02X%02X%02X", c.alpha(), c.red(), c.green(), c.blue());
-  return color;
-}
+QString XlsxColor::toARGBString(const QColor &c) { return c.name(QColor::HexArgb).remove("#"); }
 
 #if not defined(QT_NO_DATASTREAM)
 QDataStream &operator<<(QDataStream &s, const XlsxColor &color) {

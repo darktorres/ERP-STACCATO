@@ -1,16 +1,17 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "inputdialogproduto.h"
+#include "ui_inputdialogproduto.h"
 
 #include "application.h"
 #include "editdelegate.h"
-#include "inputdialogproduto.h"
 #include "noeditdelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
-#include "ui_inputdialogproduto.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialogProduto) {
   ui->setupUi(this);
@@ -25,14 +26,14 @@ InputDialogProduto::InputDialogProduto(const Tipo &tipo, QWidget *parent) : QDia
   ui->doubleSpinBoxST->hide();
   ui->lineEditCodRep->hide();
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
-  ui->dateEditProximo->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDate());
+  ui->dateEditProximo->setDate(qApp->serverDate());
 
   if (tipo == Tipo::GerarCompra) {
     ui->labelEvento->setText("Data compra:");
     ui->labelProximoEvento->setText("Data prevista confirmação:");
 
-    connect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+    connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
   }
 
   if (tipo == Tipo::Faturamento) {
@@ -60,7 +61,7 @@ void InputDialogProduto::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged, connectionType);
-  connect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged, connectionType);
+  connect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged, connectionType);
   connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged, connectionType);
   connect(ui->doubleSpinBoxST, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked, connectionType);
@@ -69,7 +70,7 @@ void InputDialogProduto::setConnections() {
 
 void InputDialogProduto::unsetConnections() {
   disconnect(ui->comboBoxST, &QComboBox::currentTextChanged, this, &InputDialogProduto::on_comboBoxST_currentTextChanged);
-  disconnect(ui->dateEditEvento, &QDateTimeEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
+  disconnect(ui->dateEditEvento, &QDateEdit::dateChanged, this, &InputDialogProduto::on_dateEditEvento_dateChanged);
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxST, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogProduto::on_doubleSpinBoxST_valueChanged);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogProduto::on_pushButtonSalvar_clicked);
@@ -77,7 +78,8 @@ void InputDialogProduto::unsetConnections() {
 }
 
 void InputDialogProduto::setupTables() {
-  modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto");
+  if (tipo == Tipo::GerarCompra) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto"); }
+  if (tipo == Tipo::Faturamento) { modelPedidoFornecedor.setTable("pedido_fornecedor_has_produto2"); }
 
   modelPedidoFornecedor.setHeaderData("ordemRepresentacao", "Cód. Rep.");
   modelPedidoFornecedor.setHeaderData("idVenda", "Código");
@@ -101,15 +103,18 @@ void InputDialogProduto::setupTables() {
 
   ui->table->setModel(&modelPedidoFornecedor);
 
-  ui->table->hideColumn("idVendaProduto");
+  ui->table->hideColumn("idRelacionado");
+  ui->table->hideColumn("idVendaProduto1");
+  ui->table->hideColumn("idVendaProduto2");
   ui->table->hideColumn("statusFinanceiro");
   ui->table->hideColumn("ordemCompra");
-  ui->table->hideColumn("quantConsumida");
-  ui->table->hideColumn("idNfe");
-  ui->table->hideColumn("idEstoque");
   ui->table->hideColumn("quantUpd");
   ui->table->hideColumn("selecionado");
-  ui->table->hideColumn("idPedido");
+  if (tipo == Tipo::GerarCompra) { ui->table->hideColumn("idPedido1"); }
+  if (tipo == Tipo::Faturamento) {
+    ui->table->hideColumn("idPedido2");
+    ui->table->hideColumn("idPedidoFK");
+  }
   ui->table->hideColumn("idProduto");
   ui->table->hideColumn("codBarras");
   ui->table->hideColumn("idCompra");
@@ -144,8 +149,8 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   QString filter;
 
-  if (tipo == Tipo::GerarCompra) { filter = "(idPedido = " + ids.join(" OR idPedido = ") + ") AND status = 'PENDENTE'"; }
-  if (tipo == Tipo::Faturamento) { filter = "(idCompra = " + ids.join(" OR idCompra = ") + ") AND status = 'EM FATURAMENTO'"; }
+  if (tipo == Tipo::GerarCompra) { filter = "`idPedido1` IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
+  if (tipo == Tipo::Faturamento) { filter = "idCompra IN (" + ids.join(", ") + ") AND status = 'EM FATURAMENTO'"; }
 
   if (filter.isEmpty()) { return qApp->enqueueError(false, "Filtro vazio!", this); }
 
@@ -171,16 +176,18 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   return true;
 }
 
-QDateTime InputDialogProduto::getDate() const { return ui->dateEditEvento->dateTime(); }
+QDate InputDialogProduto::getDate() const { return ui->dateEditEvento->date(); }
 
-QDateTime InputDialogProduto::getNextDate() const { return ui->dateEditProximo->dateTime(); }
+QDate InputDialogProduto::getNextDate() const { return ui->dateEditProximo->date(); }
 
 void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
-  disconnect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+  disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
   [&] {
     const QString header = modelPedidoFornecedor.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
+
+    // TODO: se alterar quant. tem que alterar caixas
 
     if (header == "Quant." or header == "$ Unit.") {
       const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
@@ -193,7 +200,7 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
     }
   }();
 
-  connect(modelPedidoFornecedor.proxyModel, &SqlRelationalTableModel::dataChanged, this, &InputDialogProduto::updateTableData);
+  connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogProduto::updateTableData);
 
   calcularTotal();
 }
@@ -232,19 +239,21 @@ void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
 void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) {
   unsetConnections();
 
-  double total = 0;
+  [&] {
+    double total = 0;
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
-  const double valueSt = total * aliquota / 100;
+    const double valueSt = total * aliquota / 100;
 
-  ui->doubleSpinBoxST->setValue(valueSt);
+    ui->doubleSpinBoxST->setValue(valueSt);
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
-  }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
+    }
 
-  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+    ui->doubleSpinBoxTotal->setValue(total + valueSt);
+  }();
 
   setConnections();
 }
@@ -252,19 +261,21 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
 void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
   unsetConnections();
 
-  double total = 0;
+  [&] {
+    double total = 0;
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { total += modelPedidoFornecedor.data(row, "preco").toDouble(); }
 
-  const double aliquota = valueSt * 100 / total;
+    const double aliquota = valueSt * 100 / total;
 
-  ui->doubleSpinBoxAliquota->setValue(aliquota);
+    ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
-  }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
+    }
 
-  ui->doubleSpinBoxTotal->setValue(total + valueSt);
+    ui->doubleSpinBoxTotal->setValue(total + valueSt);
+  }();
 
   setConnections();
 }

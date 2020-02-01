@@ -318,6 +318,8 @@ void QSimpleUpdater::onCheckingFinished() {
 
     _message.exec();
   }
+
+  emit done();
 }
 
 /*! \internal

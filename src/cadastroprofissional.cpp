@@ -1,14 +1,16 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastroprofissional.h"
+#include "ui_cadastroprofissional.h"
 
 #include "application.h"
-#include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "itembox.h"
-#include "ui_cadastroprofissional.h"
+#include "log.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
@@ -51,7 +53,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false);
     ui->pushButtonRemover->setDisabled(true);
   }
@@ -162,6 +164,13 @@ bool CadastroProfissional::viewRegister() {
 }
 
 bool CadastroProfissional::cadastrar() {
+  if (not qApp->startTransaction()) { return false; }
+
+  if (not Log::createLog("Transação: CadastroProfissional::cadastrar")) {
+    qApp->rollbackTransaction();
+    return false;
+  }
+
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
@@ -183,6 +192,8 @@ bool CadastroProfissional::cadastrar() {
   }();
 
   if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
     backupEndereco.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");

@@ -52,7 +52,7 @@ namespace LimeReport {
 BaseDesignIntf::BaseDesignIntf(const QString &storageTypeName, QObject *owner, QGraphicsItem *parent)
     : QObject(owner), QGraphicsItem(parent), m_resizeHandleSize(Const::RESIZE_HANDLE_SIZE), m_selectionPenSize(Const::SELECTION_PEN_SIZE),
       m_possibleResizeDirectionFlags(ResizeTop | ResizeBottom | ResizeLeft | ResizeRight), m_possibleMoveDirectionFlags(All), m_resizeDirectionFlags(0), m_width(200), m_height(50),
-      m_fontColor(Qt::black), m_mmFactor(Const::mmFACTOR), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags(nullptr),
+      m_fontColor(Qt::black), m_mmFactor(Const::mmFACTOR), m_fixedPos(false), m_borderLineSize(1), m_BGMode(OpaqueMode), m_opacity(100), m_borderLinesFlags({}),
       m_storageTypeName(storageTypeName), m_itemMode(DesignMode), m_objectState(ObjectCreated), m_selectionMarker(nullptr), m_joinMarker(nullptr), m_backgroundBrushStyle(SolidPattern),
       m_backgroundColor(Qt::white), m_margin(4), m_itemAlign(DesignedItemAlign), m_changingItemAlign(false), m_borderColor(Qt::black), m_reportSettings(nullptr), m_patternName("") {
   setGeometry(QRectF(0, 0, m_width, m_height));
@@ -70,7 +70,7 @@ QRectF BaseDesignIntf::boundingRect() const {
     halfpw += 2;
     m_boundingRect = rect();
     m_boundingRect.adjust(-halfpw, -halfpw, halfpw, halfpw);
-  };
+  }
   return m_boundingRect;
 }
 
@@ -260,8 +260,8 @@ void BaseDesignIntf::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void BaseDesignIntf::paint(QPainter *ppainter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-  Q_UNUSED(option);
-  Q_UNUSED(widget);
+  Q_UNUSED(option)
+  Q_UNUSED(widget)
   setupPainter(ppainter);
   drawBorder(ppainter, rect());
   if (isSelected()) { drawSelection(ppainter, rect()); }
@@ -311,24 +311,14 @@ void BaseDesignIntf::hoverMoveEvent(QGraphicsSceneHoverEvent *event) {
         invalidateRects(m_resizeAreas);
         switch (m_resizeDirectionFlags) {
         case ResizeRight:
-        case ResizeLeft:
-          setCursor(Qt::SizeHorCursor);
-          break;
+        case ResizeLeft: setCursor(Qt::SizeHorCursor); break;
         case ResizeBottom:
-        case ResizeTop:
-          setCursor(Qt::SizeVerCursor);
-          break;
+        case ResizeTop: setCursor(Qt::SizeVerCursor); break;
         case ResizeRight | ResizeBottom:
-        case ResizeLeft | ResizeTop:
-          setCursor(Qt::SizeFDiagCursor);
-          break;
+        case ResizeLeft | ResizeTop: setCursor(Qt::SizeFDiagCursor); break;
         case ResizeLeft | ResizeBottom:
-        case ResizeRight | ResizeTop:
-          setCursor(Qt::SizeBDiagCursor);
-          break;
-        default:
-          setCursor(Qt::ArrowCursor);
-          break;
+        case ResizeRight | ResizeTop: setCursor(Qt::SizeBDiagCursor); break;
+        default: setCursor(Qt::ArrowCursor); break;
         }
       }
     }
@@ -405,7 +395,7 @@ void BaseDesignIntf::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
                      div(event->buttonDownScenePos(Qt::LeftButton).y() - event->scenePos().y(), vStep).quot * vStep);
       break;
     }
-    };
+    }
 
     setItemPos(QPointF(div(m_startPos.x(), hStep).quot * hStep, div(m_startPos.y(), vStep).quot * vStep) - delta);
 
@@ -464,20 +454,11 @@ QPointF BaseDesignIntf::modifyPosForAlignedItem(const QPointF &pos) {
     qreal avaibleSpace = parent->width() - (leftBorder + rightBorder);
 
     switch (m_itemAlign) {
-    case LeftItemAlign:
-      result.setX(leftBorder);
-      break;
-    case RightItemAlign:
-      result.setX(parent->width() - rightBorder);
-      break;
-    case CenterItemAlign:
-      result.setX((avaibleSpace - width()) / 2);
-      break;
-    case ParentWidthItemAlign:
-      result.setX(leftBorder);
-      [[fallthrough]];
-    case DesignedItemAlign:
-      break;
+    case LeftItemAlign: result.setX(leftBorder); break;
+    case RightItemAlign: result.setX(parent->width() - rightBorder); break;
+    case CenterItemAlign: result.setX((avaibleSpace - width()) / 2); break;
+    case ParentWidthItemAlign: result.setX(leftBorder); [[fallthrough]];
+    case DesignedItemAlign: break;
     }
   }
   return result;
@@ -513,18 +494,11 @@ void BaseDesignIntf::updateItemAlign() {
 void BaseDesignIntf::updatePossibleDirectionFlags() {
   setPossibleResizeDirectionFlags(AllDirections);
   switch (m_itemAlign) {
-  case LeftItemAlign:
-    setPossibleResizeDirectionFlags(AllDirections ^ ResizeLeft);
-    break;
-  case RightItemAlign:
-    setPossibleResizeDirectionFlags(AllDirections ^ ResizeRight);
-    break;
-  case ParentWidthItemAlign:
-    setPossibleResizeDirectionFlags(ResizeBottom | ResizeTop);
-    [[fallthrough]];
+  case LeftItemAlign: setPossibleResizeDirectionFlags(AllDirections ^ ResizeLeft); break;
+  case RightItemAlign: setPossibleResizeDirectionFlags(AllDirections ^ ResizeRight); break;
+  case ParentWidthItemAlign: setPossibleResizeDirectionFlags(ResizeBottom | ResizeTop); [[fallthrough]];
   case CenterItemAlign:
-  case DesignedItemAlign:
-    break;
+  case DesignedItemAlign: break;
   }
 }
 
@@ -702,8 +676,8 @@ void BaseDesignIntf::setGeometry(QRectF rect) {
 }
 
 void BaseDesignIntf::geometryChangedEvent(QRectF newRect, QRectF oldRect) {
-  Q_UNUSED(oldRect);
-  Q_UNUSED(newRect);
+  Q_UNUSED(oldRect)
+  Q_UNUSED(newRect)
 }
 
 void BaseDesignIntf::beforeDelete() {}
@@ -749,7 +723,7 @@ void BaseDesignIntf::initFlags() {
   }
 }
 
-void BaseDesignIntf::initMode(ItemMode mode) { Q_UNUSED(mode); }
+void BaseDesignIntf::initMode(ItemMode mode) { Q_UNUSED(mode) }
 
 QVariant BaseDesignIntf::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
   if (change == QGraphicsItem::ItemPositionHasChanged) { updateSelectionMarker(); }
@@ -972,8 +946,8 @@ ReportEnginePrivate *BaseDesignIntf::reportEditor() {
 }
 
 void BaseDesignIntf::updateItemSize(DataSourceManager *dataManager, RenderPass pass, int maxHeight) {
-  Q_UNUSED(maxHeight);
-  Q_UNUSED(dataManager);
+  Q_UNUSED(maxHeight)
+  Q_UNUSED(dataManager)
   m_currentPass = pass;
   updateItemAlign();
 }
@@ -1052,30 +1026,30 @@ void BaseDesignIntf::initFromItem(BaseDesignIntf *source) {
 }
 
 bool BaseDesignIntf::canBeSplitted(int height) const {
-  Q_UNUSED(height);
+  Q_UNUSED(height)
   return false;
 }
 
 bool BaseDesignIntf::isEmpty() const { return false; }
 
 BaseDesignIntf *BaseDesignIntf::cloneUpperPart(int height, QObject *owner, QGraphicsItem *parent) {
-  Q_UNUSED(height);
-  Q_UNUSED(owner);
-  Q_UNUSED(parent);
+  Q_UNUSED(height)
+  Q_UNUSED(owner)
+  Q_UNUSED(parent)
   return nullptr;
 }
 
 BaseDesignIntf *BaseDesignIntf::cloneBottomPart(int height, QObject *owner, QGraphicsItem *parent) {
-  Q_UNUSED(height);
-  Q_UNUSED(owner);
-  Q_UNUSED(parent);
+  Q_UNUSED(height)
+  Q_UNUSED(owner)
+  Q_UNUSED(parent)
   return nullptr;
 }
 
 BaseDesignIntf *BaseDesignIntf::cloneEmpty(int height, QObject *owner, QGraphicsItem *parent) {
-  Q_UNUSED(height);
-  Q_UNUSED(owner);
-  Q_UNUSED(parent);
+  Q_UNUSED(height)
+  Q_UNUSED(owner)
+  Q_UNUSED(parent)
   return nullptr;
 }
 

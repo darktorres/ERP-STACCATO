@@ -33,12 +33,6 @@
           <enum>Qt::Horizontal</enum>
          </property>
          <widget class="QFrame" name="frameProdutos">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -49,56 +43,122 @@
            <number>0</number>
           </property>
           <layout class="QGridLayout" name="gridLayout_10">
-           <item row="16" column="1">
-            <widget class="QFrame" name="frameRT">
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
+           <item row="11" column="0">
+            <widget class="QLabel" name="labelDateTimeOrc">
+             <property name="text">
+              <string>Data orçamento:</string>
              </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_16">
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="checkBoxPontuacaoIsento">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Não</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QCheckBox" name="checkBoxPontuacaoPadrao">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Sim</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QDoubleSpinBox" name="doubleSpinBoxPontuacao">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="suffix">
-                 <string/>
-                </property>
-                <property name="maximum">
-                 <double>15.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-             </layout>
             </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="labelPrazoEntrega_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>End. de faturamento:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="16" column="0">
+            <widget class="QCheckBox" name="checkBoxRT">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="labelEndereco_9">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Observação:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QLineEdit" name="lineEditEstoque_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(0, 0, 255);
+color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>STACCATO OFF</string>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditEstoque_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(255, 255, 0);
+color: rgb(0, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Estoque</string>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditPromocao_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(0, 255, 0);
+color: rgb(0, 0, 0);</string>
+               </property>
+               <property name="text">
+                <string>Promoção</string>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
            </item>
            <item row="0" column="0" colspan="2">
             <widget class="QGroupBox" name="groupBox_9">
@@ -259,15 +319,28 @@
              </property>
             </widget>
            </item>
-           <item row="16" column="0">
-            <widget class="QCheckBox" name="checkBoxRT">
-             <property name="text">
-              <string/>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="spinBoxPrazoEntrega">
+             <property name="suffix">
+              <string> dias</string>
+             </property>
+             <property name="maximum">
+              <number>365</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
-            <widget class="QLabel" name="labelEndereco_9">
+           <item row="1" column="0" colspan="2">
+            <widget class="TreeView" name="treeView">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="labelPrazoEntrega">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -275,91 +348,20 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Observação:</string>
+              <string>Prazo de entrega:</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="0" colspan="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QLineEdit" name="lineEditEstoque_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(0, 0, 255);
-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="text">
-                <string>Staccato OFF</string>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditEstoque_3">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(255, 255, 0);
-color: rgb(0, 0, 0);</string>
-               </property>
-               <property name="text">
-                <string>Estoque</string>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditPromocao_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: rgb(0, 255, 0);
-color: rgb(0, 0, 0);</string>
-               </property>
-               <property name="text">
-                <string>Promoção</string>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-           <item row="11" column="0">
-            <widget class="QLabel" name="labelDateTimeOrc">
+           <item row="13" column="0">
+            <widget class="QLabel" name="labelIdOrcamento">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
-              <string>Data orçamento:</string>
+              <string>Orçamento:</string>
              </property>
             </widget>
            </item>
@@ -379,68 +381,55 @@ color: rgb(0, 0, 0);</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="labelPrazoEntrega_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+           <item row="16" column="1">
+            <widget class="QFrame" name="frameRT">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
              </property>
-             <property name="text">
-              <string>End. de faturamento:</string>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
              </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="spinBoxPrazoEntrega">
-             <property name="suffix">
-              <string> dias</string>
-             </property>
-             <property name="maximum">
-              <number>365</number>
-             </property>
-             <property name="singleStep">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="TableView" name="tableProdutos">
-             <property name="mouseTracking">
-              <bool>true</bool>
-             </property>
-             <property name="editTriggers">
-              <set>QAbstractItemView::NoEditTriggers</set>
-             </property>
-             <property name="alternatingRowColors">
-              <bool>true</bool>
-             </property>
-             <property name="selectionMode">
-              <enum>QAbstractItemView::MultiSelection</enum>
-             </property>
-             <property name="selectionBehavior">
-              <enum>QAbstractItemView::SelectRows</enum>
-             </property>
-             <property name="sortingEnabled">
-              <bool>true</bool>
-             </property>
-             <attribute name="horizontalHeaderStretchLastSection">
-              <bool>false</bool>
-             </attribute>
-            </widget>
-           </item>
-           <item row="13" column="0">
-            <widget class="QLabel" name="labelIdOrcamento">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Orçamento:</string>
-             </property>
+             <layout class="QGridLayout" name="gridLayout_16">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="checkBoxPontuacaoIsento">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Não</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="checkBoxPontuacaoPadrao">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Sim</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QDoubleSpinBox" name="doubleSpinBoxPontuacao">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+                <property name="maximum">
+                 <double>15.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item row="11" column="1">
@@ -462,31 +451,12 @@ color: rgb(0, 0, 0);</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="labelPrazoEntrega">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Prazo de entrega:</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="1">
             <widget class="ItemBox" name="itemBoxEnderecoFat"/>
            </item>
           </layout>
          </widget>
          <widget class="QFrame" name="framePagamentos">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -520,37 +490,34 @@ color: rgb(0, 0, 0);</string>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QSplitter" name="splitter_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+            <widget class="TableView" name="tableFluxoCaixa2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <widget class="TableView" name="tableFluxoCaixa2">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="mouseTracking">
-               <bool>true</bool>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
-              </property>
-              <property name="sortingEnabled">
-               <bool>true</bool>
-              </property>
-              <attribute name="horizontalHeaderStretchLastSection">
-               <bool>false</bool>
-              </attribute>
-             </widget>
-             <widget class="WidgetPagamentos" name="widgetPgts" native="true"/>
+             <property name="mouseTracking">
+              <bool>true</bool>
+             </property>
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <attribute name="horizontalHeaderStretchLastSection">
+              <bool>false</bool>
+             </attribute>
             </widget>
            </item>
            <item row="2" column="0">
+            <widget class="WidgetPagamentos" name="widgetPgts" native="true"/>
+           </item>
+           <item row="3" column="0">
             <widget class="QGroupBox" name="groupBox_3">
              <property name="title">
               <string>Totais</string>
@@ -791,12 +758,6 @@ color: rgb(0, 0, 0);</string>
                 </property>
                 <property name="frame">
                  <bool>true</bool>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-                <property name="buttonSymbols">
-                 <enum>QAbstractSpinBox::NoButtons</enum>
                 </property>
                 <property name="correctionMode">
                  <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
@@ -1125,15 +1086,20 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>WidgetPagamentos</class>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>src/treeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1145,7 +1111,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>dateTimeEdit</tabstop>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
-  <tabstop>tableProdutos</tabstop>
   <tabstop>lineEditEstoque_2</tabstop>
   <tabstop>lineEditEstoque_3</tabstop>
   <tabstop>lineEditPromocao_2</tabstop>

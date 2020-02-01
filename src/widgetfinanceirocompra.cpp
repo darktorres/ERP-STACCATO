@@ -1,9 +1,10 @@
 #include "widgetfinanceirocompra.h"
+#include "ui_widgetfinanceirocompra.h"
+
 #include "application.h"
 #include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
-#include "ui_widgetfinanceirocompra.h"
 
 WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 

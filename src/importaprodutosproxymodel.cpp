@@ -1,7 +1,8 @@
-#include <QBrush>
-
 #include "importaprodutosproxymodel.h"
+
 #include "usersession.h"
+
+#include <QBrush>
 
 ImportaProdutosProxyModel::ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->fieldIndex("descontinuado")) {
   setSourceModel(model);

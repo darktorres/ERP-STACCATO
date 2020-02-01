@@ -1,7 +1,8 @@
-#include <QPainter>
-
 #include "porcentagemdelegate.h"
+
 #include "usersession.h"
+
+#include <QPainter>
 
 PorcentagemDelegate::PorcentagemDelegate(QObject *parent, const bool customPaint) : QStyledItemDelegate(parent), customPaint(customPaint) {}
 

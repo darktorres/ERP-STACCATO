@@ -1,3 +1,14 @@
+#include "produtospendentes.h"
+#include "ui_produtospendentes.h"
+
+#include "application.h"
+#include "doubledelegate.h"
+#include "estoque.h"
+#include "inputdialog.h"
+#include "log.h"
+#include "reaisdelegate.h"
+#include "sql.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QInputDialog>
@@ -5,16 +16,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "doubledelegate.h"
-#include "estoque.h"
-#include "inputdialog.h"
-#include "log.h"
-#include "produtospendentes.h"
-#include "reaisdelegate.h"
-#include "sql.h"
-#include "ui_produtospendentes.h"
 
 ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent) : QDialog(parent), ui(new Ui::ProdutosPendentes) {
   ui->setupUi(this);

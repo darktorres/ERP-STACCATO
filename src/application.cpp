@@ -1,3 +1,8 @@
+#include "application.h"
+
+#include "qsimpleupdater.h"
+#include "usersession.h"
+
 #include <QDebug>
 #include <QFile>
 #include <QIcon>
@@ -5,10 +10,6 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QTimer>
-
-#include "application.h"
-#include "qsimpleupdater.h"
-#include "usersession.h"
 
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
   setOrganizationName("Staccato");

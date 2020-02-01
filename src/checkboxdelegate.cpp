@@ -1,7 +1,7 @@
+#include "checkboxdelegate.h"
+
 #include <QCheckBox>
 #include <QDebug>
-
-#include "checkboxdelegate.h"
 
 CheckBoxDelegate::CheckBoxDelegate(QObject *parent, const bool readOnly) : QStyledItemDelegate(parent), readOnly(readOnly) {}
 

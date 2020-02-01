@@ -1,13 +1,14 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastroproduto.h"
+#include "ui_cadastroproduto.h"
 
 #include "application.h"
 #include "cadastrofornecedor.h"
-#include "cadastroproduto.h"
 #include "log.h"
-#include "ui_cadastroproduto.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);

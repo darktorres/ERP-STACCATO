@@ -1,11 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QDir>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QUrl>
+#include "widgetlogisticaentregas.h"
+#include "ui_widgetlogisticaentregas.h"
 
 #include "application.h"
 #include "cadastrarnfe.h"
@@ -15,10 +9,17 @@
 #include "log.h"
 #include "sql.h"
 #include "sqlquerymodel.h"
-#include "ui_widgetlogisticaentregas.h"
 #include "usersession.h"
-#include "widgetlogisticaentregas.h"
 #include "xlsxdocument.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QDesktopServices>
+#include <QDir>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QUrl>
 
 WidgetLogisticaEntregas::WidgetLogisticaEntregas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregas) {
   ui->setupUi(this);

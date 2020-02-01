@@ -1,17 +1,18 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetlogisticacoleta.h"
+#include "ui_widgetlogisticacoleta.h"
 
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "log.h"
 #include "sql.h"
-#include "ui_widgetlogisticacoleta.h"
 #include "venda.h"
-#include "widgetlogisticacoleta.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetLogisticaColeta::WidgetLogisticaColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaColeta) { ui->setupUi(this); }
 

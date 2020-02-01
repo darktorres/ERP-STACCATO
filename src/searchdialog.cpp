@@ -1,17 +1,18 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QSqlRecord>
+#include "searchdialog.h"
+#include "ui_searchdialog.h"
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
-#include "searchdialog.h"
 #include "searchdialogproxymodel.h"
-#include "ui_searchdialog.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
 
 SearchDialog::SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent)
     : QDialog(parent), primaryKey(primaryKey), fullTextIndex(fullTextIndex), textKeys(textKeys), filter(filter), model(100), ui(new Ui::SearchDialog) {

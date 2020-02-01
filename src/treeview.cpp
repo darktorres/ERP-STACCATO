@@ -1,10 +1,11 @@
+#include "treeview.h"
+
+#include "application.h"
+
 #include <QDebug>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QScrollBar>
-
-#include "application.h"
-#include "treeview.h"
 
 TreeView::TreeView(QWidget *parent) : QTreeView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);

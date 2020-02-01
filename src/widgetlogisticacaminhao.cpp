@@ -1,10 +1,11 @@
+#include "widgetlogisticacaminhao.h"
+#include "ui_widgetlogisticacaminhao.h"
+
+#include "doubledelegate.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
-
-#include "doubledelegate.h"
-#include "ui_widgetlogisticacaminhao.h"
-#include "widgetlogisticacaminhao.h"
 
 WidgetLogisticaCaminhao::WidgetLogisticaCaminhao(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCaminhao) { ui->setupUi(this); }
 

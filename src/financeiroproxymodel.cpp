@@ -1,9 +1,10 @@
-#include <QBrush>
-#include <QDate>
+#include "financeiroproxymodel.h"
 
 #include "application.h"
-#include "financeiroproxymodel.h"
 #include "usersession.h"
+
+#include <QBrush>
+#include <QDate>
 
 FinanceiroProxyModel::FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), statusFinanceiro(model->fieldIndex("statusFinanceiro")), prazoEntrega(model->fieldIndex("prazoEntrega")), novoPrazoEntrega(model->fieldIndex("novoPrazoEntrega")) {

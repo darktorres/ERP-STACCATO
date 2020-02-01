@@ -1,9 +1,5 @@
-#include <QDebug>
-#include <QFileDialog>
-#include <QInputDialog>
-
-#include <QSqlError>
-#include <QSqlRecord>
+#include "widgetlogisticaagendarentrega.h"
+#include "ui_widgetlogisticaagendarentrega.h"
 
 #include "application.h"
 #include "cadastrarnfe.h"
@@ -13,9 +9,14 @@
 #include "inputdialog.h"
 #include "log.h"
 #include "sql.h"
-#include "ui_widgetlogisticaagendarentrega.h"
 #include "usersession.h"
-#include "widgetlogisticaagendarentrega.h"
+#include "xml.h"
+
+#include <QDebug>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QSqlError>
+#include <QSqlRecord>
 
 WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarEntrega) { ui->setupUi(this); }
 

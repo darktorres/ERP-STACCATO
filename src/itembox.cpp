@@ -1,7 +1,7 @@
+#include "itembox.h"
+
 #include <QDebug>
 #include <QMouseEvent>
-
-#include "itembox.h"
 
 ItemBox::ItemBox(QWidget *parent) : QLineEdit(parent) {
   setReadOnly(true);

@@ -1,7 +1,8 @@
-#include <QDebug>
+#include "itemboxdelegate.h"
 
 #include "itembox.h"
-#include "itemboxdelegate.h"
+
+#include <QDebug>
 
 ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), isReadOnly(isReadOnly), tipo(tipo) {}
 

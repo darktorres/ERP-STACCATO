@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
-#include "xml.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetLogisticaAgendarEntrega;

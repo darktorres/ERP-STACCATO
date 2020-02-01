@@ -1,8 +1,9 @@
-#include <QDateEdit>
+#include "dateformatdelegate.h"
 
 #include "application.h"
-#include "dateformatdelegate.h"
 #include "sqlrelationaltablemodel.h"
+
+#include <QDateEdit>
 
 DateFormatDelegate::DateFormatDelegate(const int vencimentoColumn, QObject *parent) : QStyledItemDelegate(parent), vencimentoColumn(vencimentoColumn) {}
 

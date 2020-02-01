@@ -1,15 +1,16 @@
-#include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "inputdialog.h"
+#include "ui_inputdialog.h"
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "editdelegate.h"
-#include "inputdialog.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "ui_inputdialog.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
 
 InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);

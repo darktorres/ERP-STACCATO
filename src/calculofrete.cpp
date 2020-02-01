@@ -1,13 +1,14 @@
+#include "calculofrete.h"
+#include "ui_calculofrete.h"
+
+#include "application.h"
+
 #include <QFile>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QXmlStreamReader>
-
-#include "application.h"
-#include "calculofrete.h"
-#include "ui_calculofrete.h"
 
 CalculoFrete::CalculoFrete(QWidget *parent) : QDialog(parent), ui(new Ui::CalculoFrete) {
   ui->setupUi(this);

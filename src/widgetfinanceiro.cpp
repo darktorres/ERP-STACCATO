@@ -1,7 +1,7 @@
-#include <QDebug>
-
-#include "ui_widgetfinanceiro.h"
 #include "widgetfinanceiro.h"
+#include "ui_widgetfinanceiro.h"
+
+#include <QDebug>
 
 WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiro) {
   ui->setupUi(this);

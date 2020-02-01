@@ -1,16 +1,17 @@
+#include "cadastrarnfe.h"
+#include "ui_cadastrarnfe.h"
+
+#include "application.h"
+#include "log.h"
+#include "porcentagemdelegate.h"
+#include "reaisdelegate.h"
+#include "usersession.h"
+
 #include <QDate>
 #include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "cadastrarnfe.h"
-#include "log.h"
-#include "porcentagemdelegate.h"
-#include "reaisdelegate.h"
-#include "ui_cadastrarnfe.h"
-#include "usersession.h"
 
 CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), idVenda(idVenda), ui(new Ui::CadastrarNFe) {
   ui->setupUi(this);

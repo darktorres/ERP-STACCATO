@@ -1,10 +1,11 @@
+#include "sqlrelationaltablemodel.h"
+
+#include "application.h"
+
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
 #include <cmath>
-
-#include "application.h"
-#include "sqlrelationaltablemodel.h"
 
 SqlRelationalTableModel::SqlRelationalTableModel(const int limit, QObject *parent) : QSqlRelationalTableModel(parent), limit(limit) {}
 

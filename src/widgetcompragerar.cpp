@@ -1,10 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QSqlError>
+#include "widgetcompragerar.h"
+#include "ui_widgetcompragerar.h"
 
 #include "application.h"
 #include "excel.h"
@@ -12,10 +7,16 @@
 #include "reaisdelegate.h"
 #include "sendmail.h"
 #include "sql.h"
-#include "ui_widgetcompragerar.h"
 #include "usersession.h"
-#include "widgetcompragerar.h"
 #include "xlsxdocument.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSqlError>
 
 WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);

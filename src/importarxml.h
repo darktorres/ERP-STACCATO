@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QDate>
-#include <QDialog>
-
 #include "estoqueproxymodel.h"
 #include "sqlrelationaltablemodel.h"
 #include "xml.h"
+
+#include <QDate>
+#include <QDialog>
 
 namespace Ui {
 class ImportarXML;

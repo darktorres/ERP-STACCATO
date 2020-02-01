@@ -1,3 +1,15 @@
+#include "widgetlogisticaagendarcoleta.h"
+#include "ui_widgetlogisticaagendarcoleta.h"
+
+#include "acbr.h"
+#include "application.h"
+#include "doubledelegate.h"
+#include "estoqueprazoproxymodel.h"
+#include "inputdialog.h"
+#include "log.h"
+#include "usersession.h"
+#include "venda.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
@@ -8,17 +20,6 @@
 #include <QSqlQuery>
 #include <QStandardItemModel>
 #include <QUrl>
-
-#include "acbr.h"
-#include "application.h"
-#include "doubledelegate.h"
-#include "estoqueprazoproxymodel.h"
-#include "inputdialog.h"
-#include "log.h"
-#include "ui_widgetlogisticaagendarcoleta.h"
-#include "usersession.h"
-#include "venda.h"
-#include "widgetlogisticaagendarcoleta.h"
 
 WidgetLogisticaAgendarColeta::WidgetLogisticaAgendarColeta(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaAgendarColeta) { ui->setupUi(this); }
 

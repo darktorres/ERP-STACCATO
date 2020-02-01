@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QTreeView>
-
 #include "sqltreemodel.h"
+
+#include <QTreeView>
 
 class TreeView final : public QTreeView {
   Q_OBJECT

@@ -1,10 +1,10 @@
 #pragma once
 
+#include "sqlrelationaltablemodel.h"
+
 #include <QDataWidgetMapper>
 #include <QDialog>
 #include <QLineEdit>
-
-#include "sqlrelationaltablemodel.h"
 
 class RegisterDialog : public QDialog {
   Q_OBJECT

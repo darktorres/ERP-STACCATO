@@ -1,3 +1,15 @@
+#include "importarxml.h"
+#include "ui_importarxml.h"
+
+#include "application.h"
+#include "doubledelegate.h"
+#include "editdelegate.h"
+#include "estoqueproxymodel.h"
+#include "log.h"
+#include "noeditdelegate.h"
+#include "reaisdelegate.h"
+#include "sql.h"
+
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -5,17 +17,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "doubledelegate.h"
-#include "editdelegate.h"
-#include "estoqueproxymodel.h"
-#include "importarxml.h"
-#include "log.h"
-#include "noeditdelegate.h"
-#include "reaisdelegate.h"
-#include "sql.h"
-#include "ui_importarxml.h"
 
 ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);

@@ -1,13 +1,15 @@
+#include "impressao.h"
+
+#include "application.h"
+#include "lrreportengine.h"
+#include "usersession.h"
+
 #include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QSqlError>
 #include <QUrl>
-
-#include "application.h"
-#include "impressao.h"
-#include "usersession.h"
 
 Impressao::Impressao(const QString &id, const Tipo tipo, QObject *parent) : tipo(tipo), id(id), parent(parent) {
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));

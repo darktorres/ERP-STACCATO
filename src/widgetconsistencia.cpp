@@ -1,8 +1,9 @@
-#include <QSqlError>
+#include "widgetconsistencia.h"
+#include "ui_widgetconsistencia.h"
 
 #include "application.h"
-#include "ui_widgetconsistencia.h"
-#include "widgetconsistencia.h"
+
+#include <QSqlError>
 
 WidgetConsistencia::WidgetConsistencia(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetConsistencia) {
   ui->setupUi(this);

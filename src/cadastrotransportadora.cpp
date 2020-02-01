@@ -1,15 +1,16 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastrotransportadora.h"
+#include "ui_cadastrotransportadora.h"
 
 #include "application.h"
-#include "cadastrotransportadora.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "log.h"
 #include "searchdialog.h"
-#include "ui_cadastrotransportadora.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddressDialog("transportadora", "idTransportadora", parent), ui(new Ui::CadastroTransportadora) {
   ui->setupUi(this);

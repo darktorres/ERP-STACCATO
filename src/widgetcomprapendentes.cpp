@@ -1,8 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetcomprapendentes.h"
+#include "ui_widgetcomprapendentes.h"
 
 #include "application.h"
 #include "doubledelegate.h"
@@ -12,8 +9,12 @@
 #include "inputdialog.h"
 #include "produtospendentes.h"
 #include "reaisdelegate.h"
-#include "ui_widgetcomprapendentes.h"
-#include "widgetcomprapendentes.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetCompraPendentes::WidgetCompraPendentes(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraPendentes) { ui->setupUi(this); }
 

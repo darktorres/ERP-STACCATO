@@ -1,3 +1,16 @@
+#include "widgetnfesaida.h"
+#include "ui_widgetnfesaida.h"
+
+#include "acbr.h"
+#include "application.h"
+#include "doubledelegate.h"
+#include "log.h"
+#include "lrreportengine.h"
+#include "reaisdelegate.h"
+#include "sendmail.h"
+#include "usersession.h"
+#include "xml_viewer.h"
+
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -7,18 +20,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
-
-#include "acbr.h"
-#include "application.h"
-#include "doubledelegate.h"
-#include "log.h"
-#include "lrreportengine.h"
-#include "reaisdelegate.h"
-#include "sendmail.h"
-#include "ui_widgetnfesaida.h"
-#include "usersession.h"
-#include "widgetnfesaida.h"
-#include "xml_viewer.h"
 
 WidgetNfeSaida::WidgetNfeSaida(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfeSaida) { ui->setupUi(this); }
 

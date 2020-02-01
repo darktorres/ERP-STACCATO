@@ -1,11 +1,12 @@
+#include "excel.h"
+
+#include "application.h"
+#include "usersession.h"
+
 #include <QDesktopServices>
 #include <QDir>
 #include <QSqlError>
 #include <QUrl>
-
-#include "application.h"
-#include "excel.h"
-#include "usersession.h"
 
 Excel::Excel(const QString &id, const Tipo tipo) : tipo(tipo), id(id) {}
 

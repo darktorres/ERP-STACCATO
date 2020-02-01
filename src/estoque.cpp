@@ -1,16 +1,17 @@
+#include "estoque.h"
+#include "ui_estoque.h"
+
+#include "application.h"
+#include "doubledelegate.h"
+#include "estoqueproxymodel.h"
+#include "usersession.h"
+#include "xml_viewer.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "doubledelegate.h"
-#include "estoque.h"
-#include "estoqueproxymodel.h"
-#include "ui_estoque.h"
-#include "usersession.h"
-#include "xml_viewer.h"
 
 Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent) : QDialog(parent), idEstoque(idEstoque), ui(new Ui::Estoque) {
   ui->setupUi(this);

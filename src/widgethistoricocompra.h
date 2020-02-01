@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QWidget>
-
 #include "sqlrelationaltablemodel.h"
 #include "sqltreemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetHistoricoCompra;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "registerdialog.h"
-
 #include <QSqlRecord>
+
+#include "registerdialog.h"
 
 class RegisterAddressDialog : public RegisterDialog {
 

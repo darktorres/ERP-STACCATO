@@ -1,6 +1,5 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+#include "venda.h"
+#include "ui_venda.h"
 
 #include "application.h"
 #include "cadastrocliente.h"
@@ -17,10 +16,13 @@
 #include "orcamento.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
+#include "searchdialogproxymodel.h"
 #include "sql.h"
-#include "ui_venda.h"
 #include "usersession.h"
-#include "venda.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(new Ui::Venda) {
   ui->setupUi(this);

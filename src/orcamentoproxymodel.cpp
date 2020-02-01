@@ -1,7 +1,8 @@
-#include <QBrush>
-
 #include "orcamentoproxymodel.h"
+
 #include "usersession.h"
+
+#include <QBrush>
 
 OrcamentoProxyModel::OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("Status")), followupIndex(model->fieldIndex("Observação")),

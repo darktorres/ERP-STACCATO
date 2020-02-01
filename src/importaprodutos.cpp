@@ -1,19 +1,20 @@
+#include "importaprodutos.h"
+#include "ui_importaprodutos.h"
+
+#include "application.h"
+#include "dateformatdelegate.h"
+#include "doubledelegate.h"
+#include "importaprodutosproxymodel.h"
+#include "log.h"
+#include "porcentagemdelegate.h"
+#include "validadedialog.h"
+
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-
-#include "application.h"
-#include "dateformatdelegate.h"
-#include "doubledelegate.h"
-#include "importaprodutos.h"
-#include "importaprodutosproxymodel.h"
-#include "log.h"
-#include "porcentagemdelegate.h"
-#include "ui_importaprodutos.h"
-#include "validadedialog.h"
 
 ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::ImportaProdutos) {
   ui->setupUi(this);

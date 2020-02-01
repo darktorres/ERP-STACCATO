@@ -1,8 +1,5 @@
-#include <QDebug>
-#include <QDesktopServices>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QtMath>
+#include "orcamento.h"
+#include "ui_orcamento.h"
 
 #include "application.h"
 #include "baixaorcamento.h"
@@ -14,13 +11,17 @@
 #include "impressao.h"
 #include "log.h"
 #include "logindialog.h"
-#include "orcamento.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
-#include "ui_orcamento.h"
 #include "usersession.h"
 #include "venda.h"
+
+#include <QDebug>
+#include <QDesktopServices>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QtMath>
 
 Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento", parent), ui(new Ui::Orcamento) {
   ui->setupUi(this);

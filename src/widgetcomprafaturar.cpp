@@ -1,8 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetcomprafaturar.h"
+#include "ui_widgetcomprafaturar.h"
 
 #include "application.h"
 #include "cancelaproduto.h"
@@ -12,8 +9,12 @@
 #include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "ui_widgetcomprafaturar.h"
-#include "widgetcomprafaturar.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetCompraFaturar::WidgetCompraFaturar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraFaturar) {
   ui->setupUi(this);

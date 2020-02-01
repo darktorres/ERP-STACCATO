@@ -1,12 +1,12 @@
 #pragma once
 
+#include "acbr.h"
+#include "sqlrelationaltablemodel.h"
+
 #include <QDataWidgetMapper>
 #include <QDialog>
 #include <QSqlQuery>
 #include <QTextStream>
-
-#include "acbr.h"
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class CadastrarNFe;

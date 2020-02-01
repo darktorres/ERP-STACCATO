@@ -11,7 +11,5 @@ public:
   auto setValue(const double value) -> void;
 
 private:
-  // attributes
-  int decimais = 2;
-  // methods
+  const int decimais = 2;
 };

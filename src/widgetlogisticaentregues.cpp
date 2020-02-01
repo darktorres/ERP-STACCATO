@@ -1,15 +1,16 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetlogisticaentregues.h"
+#include "ui_widgetlogisticaentregues.h"
 
 #include "application.h"
 #include "doubledelegate.h"
 #include "log.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
-#include "ui_widgetlogisticaentregues.h"
-#include "widgetlogisticaentregues.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetLogisticaEntregues::WidgetLogisticaEntregues(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaEntregues) { ui->setupUi(this); }
 

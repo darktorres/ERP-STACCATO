@@ -1,17 +1,18 @@
-#include <QDebug>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastroloja.h"
+#include "ui_cadastroloja.h"
 
 #include "application.h"
-#include "cadastroloja.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "log.h"
 #include "porcentagemdelegate.h"
 #include "searchdialog.h"
-#include "ui_cadastroloja.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);

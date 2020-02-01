@@ -1,9 +1,10 @@
+#include "sql.h"
+
+#include "application.h"
+
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QStringList>
-
-#include "application.h"
-#include "sql.h"
 
 bool Sql::updateVendaStatus(const QStringList &idVendas) { return updateVendaStatus(idVendas.join(", ")); }
 

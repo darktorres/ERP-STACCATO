@@ -1,3 +1,7 @@
+#include "registerdialog.h"
+
+#include "application.h"
+
 #include <QCloseEvent>
 #include <QDate>
 #include <QDebug>
@@ -5,9 +9,6 @@
 #include <QShortcut>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "registerdialog.h"
 
 RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent) : QDialog(parent), primaryKey(primaryKey) {
   setWindowModality(Qt::NonModal);

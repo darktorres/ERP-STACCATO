@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QProgressDialog>
-
 #include "sqlrelationaltablemodel.h"
+
+#include <QProgressDialog>
 
 namespace Ui {
 class ImportaProdutos;

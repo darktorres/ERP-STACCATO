@@ -1,16 +1,17 @@
-#include <QDate>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastrofornecedor.h"
+#include "ui_cadastrofornecedor.h"
 
 #include "application.h"
-#include "cadastrofornecedor.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "log.h"
 #include "searchdialog.h"
-#include "ui_cadastrofornecedor.h"
 #include "usersession.h"
+
+#include <QDate>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog("fornecedor", "idFornecedor", parent), ui(new Ui::CadastroFornecedor) {
   ui->setupUi(this);

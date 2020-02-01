@@ -1,8 +1,5 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QSqlRecord>
+#include "widgetfinanceirocontas.h"
+#include "ui_widgetfinanceirocontas.h"
 
 #include "anteciparrecebimento.h"
 #include "application.h"
@@ -11,8 +8,13 @@
 #include "inserirlancamento.h"
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
-#include "ui_widgetfinanceirocontas.h"
-#include "widgetfinanceirocontas.h"
+#include "sortfilterproxymodel.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
 
 WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroContas) { ui->setupUi(this); }
 

@@ -1,5 +1,5 @@
-#include <QMessageBox>
-#include <QSqlError>
+#include "widgethistoricocompra.h"
+#include "ui_widgethistoricocompra.h"
 
 #include "acbr.h"
 #include "application.h"
@@ -7,8 +7,9 @@
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
-#include "ui_widgethistoricocompra.h"
-#include "widgethistoricocompra.h"
+
+#include <QMessageBox>
+#include <QSqlError>
 
 WidgetHistoricoCompra::WidgetHistoricoCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetHistoricoCompra) { ui->setupUi(this); }
 

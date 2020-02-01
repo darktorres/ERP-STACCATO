@@ -1,11 +1,12 @@
+#include "comboboxdelegate.h"
+
+#include "application.h"
+#include "usersession.h"
+
 #include <QComboBox>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "comboboxdelegate.h"
-#include "usersession.h"
 
 ComboBoxDelegate::ComboBoxDelegate(const Tipo tipo, QObject *parent) : QStyledItemDelegate(parent), tipo(tipo) {}
 

@@ -1,6 +1,5 @@
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "widgetcompraconsumos.h"
+#include "ui_widgetcompraconsumos.h"
 
 #include "acbr.h"
 #include "application.h"
@@ -8,8 +7,10 @@
 #include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
-#include "ui_widgetcompraconsumos.h"
-#include "widgetcompraconsumos.h"
+
+#include <QMessageBox>
+#include <QSqlError>
+#include <QSqlQuery>
 
 WidgetCompraConsumos::WidgetCompraConsumos(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraConsumos) { ui->setupUi(this); }
 

@@ -1,10 +1,11 @@
-#include <QDebug>
-#include <QFileDialog>
+#include "userconfig.h"
+#include "ui_userconfig.h"
 
 #include "cadastrousuario.h"
-#include "ui_userconfig.h"
-#include "userconfig.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QFileDialog>
 
 UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig) {
   ui->setupUi(this);

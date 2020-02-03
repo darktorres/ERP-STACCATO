@@ -19,15 +19,7 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   setWindowFlags(Qt::Window);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-
-  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
-
-  if (not lojaACBr) {
-    qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this);
-    return;
-  }
-
-  ui->itemBoxLoja->setId(lojaACBr.value());
+  ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr").value_or(""));
 
   setupTables();
 
@@ -60,9 +52,9 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   ui->itemBoxEnderecoEntrega->setSearchDialog(SearchDialog::enderecoCliente(this));
   ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
 
-  if (idVenda.isEmpty()) { qApp->enqueueError("idVenda vazio!", this); }
+  if (idVenda.isEmpty()) { qApp->enqueueError("Venda vazio!", this); }
 
-  ui->frame_2->hide();
+  ui->frameST->hide();
 
   prepararNFe(items);
 }
@@ -80,17 +72,11 @@ void CadastrarNFe::setupTables() {
 
   modelLoja.setTable("loja");
 
-  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
-
-  if (not lojaACBr) { return qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
-
-  modelLoja.setFilter("idLoja = " + lojaACBr->toString());
+  modelLoja.setFilter("idLoja = " + ui->itemBoxLoja->getId().toString());
 
   if (not modelLoja.select()) { return; }
 
   //----------------------------------------------------------
-
-  // TODO: make a table.dataChanged connection that takes the changed value and update it in the original table (only the allowed values)
 
   modelViewProdutoEstoque.setTable("view_produto_estoque");
 
@@ -112,14 +98,13 @@ void CadastrarNFe::setupTables() {
 
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
-  // TODO: these works only on some lines
-  //  ui->tableItens->setItemDelegateForColumn("vBC", new ReaisDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("pICMS", new PorcentagemDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("vICMS", new ReaisDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("pMVAST", new PorcentagemDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("vBCST", new ReaisDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("pICMSST", new PorcentagemDelegate(this));
-  //  ui->tableItens->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vBC", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pICMS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vICMS", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pMVAST", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vBCST", new ReaisDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pICMSST", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBCPIS", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vPIS", new ReaisDelegate(this));
@@ -138,7 +123,7 @@ QString CadastrarNFe::gerarNota() {
 
   QTextStream stream(&nfe);
 
-  stream << R"(NFE.CriarNFe(")" << endl;
+  stream << "NFE.CriarNFe(\"\n";
 
   writeIdentificacao(stream);
   writeEmitente(stream);
@@ -152,10 +137,10 @@ QString CadastrarNFe::gerarNota() {
   const QString infUsuario = ui->infCompUsuario->toPlainText().isEmpty() ? "" : ui->infCompUsuario->toPlainText();
   const QString infComp = (infUsuario.isEmpty() ? "" : infUsuario + ";") + ui->infCompSistema->toPlainText();
 
-  stream << "[DadosAdicionais]" << endl;
-  stream << "infCpl = " + infComp << endl;
-  //  stream << R"(",0))" << endl; // dont return xml
-  stream << R"(",1))" << endl; // return xml
+  stream << "[DadosAdicionais]\n";
+  stream << "infCpl = " + infComp + "\n";
+  //  stream << "\",0)\n"; // dont return xml
+  stream << "\",1)\n"; // return xml
 
   return nfe;
 }
@@ -286,6 +271,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
     }
   }
 
+  // TODO: send email from remote acbr to simplify
   // reread the file now authorized
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) {
     auto resposta2 = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
@@ -307,11 +293,7 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
-  // TODO: 1ao clicar em enviar abrir um dialog mostrando as informacoes base para o usuario confirmar
-  // TODO: quando clicar em enviar dar um submitAll no model para salvar os dados preenchidos? (é uma view, não pode dar submit)
-
-  // TODO: como o ACBr vai ser usado remotamente antes de enviar cada nota alterar para 'producao/4.0'
-
+  // TODO: verificar isso antes de abrir CadastrarNFe
   // se os emails nao estiverem configurados avisar antes de gerar a nota
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
 
@@ -386,7 +368,6 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   ACBr acbrLocal;
 
   // TODO: enviar email separado para cliente
-  // TODO: enviar local ou remoto?
   if (not acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath)) { return; }
 
   if (not acbrLocal.gerarDanfe(xml.toLatin1())) { return; }
@@ -418,30 +399,37 @@ bool CadastrarNFe::cadastrar(const int &idNFe) {
   return true;
 }
 
-void CadastrarNFe::updateImpostos() {
-  // TODO: receber como parametro a coluna alterada, se for por exemplo valorCOFINS deve fazer o calculo reverso da base de calculo
-  // TODO: readd IPI?
+void CadastrarNFe::updateTotais() {
   double baseICMS = 0;
   double valorICMS = 0;
-  //  double valorIPI = 0;
   double valorPIS = 0;
   double valorCOFINS = 0;
+  double valorProdutos = 0;
 
   for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
     baseICMS += modelViewProdutoEstoque.data(row, "vBC").toDouble();
     valorICMS += modelViewProdutoEstoque.data(row, "vICMS").toDouble();
-    //    valorIPI += modelProd.data(row, "vIPI").toDouble();
     valorPIS += QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2).toDouble();
     valorCOFINS += QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2).toDouble();
+    valorProdutos += modelViewProdutoEstoque.data(row, "total").toDouble();
   }
 
-  const double total = valorICMS + /*valorIPI +*/ valorPIS + valorCOFINS;
+  const double valorFrete = ui->doubleSpinBoxValorFrete->value();
+  const double valorNota = valorProdutos + valorFrete;
 
   ui->doubleSpinBoxBaseICMS->setValue(baseICMS);
   ui->doubleSpinBoxValorICMS->setValue(valorICMS);
-  //  ui->doubleSpinBoxValorIPI->setValue(valorIPI);
   ui->doubleSpinBoxValorPIS->setValue(valorPIS);
   ui->doubleSpinBoxValorCOFINS->setValue(valorCOFINS);
+  ui->doubleSpinBoxValorProdutos->setValue(valorProdutos);
+  ui->doubleSpinBoxValorNota->setValue(valorNota);
+
+  updateComplemento();
+}
+
+void CadastrarNFe::updateComplemento() {
+  const double total =
+      ui->doubleSpinBoxBaseICMS->value() + ui->doubleSpinBoxValorICMS->value() + ui->doubleSpinBoxValorPIS->value() + ui->doubleSpinBoxValorCOFINS->value(); // + ui->doubleSpinBoxValorIPI->value()
 
   const QString endereco = ui->itemBoxEnderecoEntrega->getId() == 1
                                ? "Não há/Retira"
@@ -465,7 +453,7 @@ bool CadastrarNFe::preencherNumeroNFe() {
 
   if (not queryCnpj.exec() or not queryCnpj.first()) { return qApp->enqueueError(false, "Erro buscando CNPJ: " + queryCnpj.lastError().text(), this); }
 
-  const QString cnpj = queryCnpj.value("cnpj").toString().remove(".").remove("/").remove("-");
+  const QString cnpj = clearStr(queryCnpj.value("cnpj").toString());
 
   QSqlQuery queryNfe;
 
@@ -484,24 +472,21 @@ bool CadastrarNFe::preencherNumeroNFe() {
 }
 
 void CadastrarNFe::prepararNFe(const QStringList &items) {
-  QString filter;
+  // TODO: divide into smaller functions
 
   for (const auto &item : items) {
-    QSqlQuery query;
+    QSqlQuery query; // verificando se existe consumo para cada idVendaProduto2
 
     if (not query.exec("SELECT NULL FROM estoque_has_consumo WHERE `idVendaProduto2` = " + item) or not query.first()) { return qApp->enqueueError("Erro buscando idVendaProduto2 " + item, this); }
-
-    //--------------------------------------
-
-    filter += QString(filter.isEmpty() ? "" : " OR ") + "`idVendaProduto2` = " + item;
   }
 
-  modelViewProdutoEstoque.setFilter(filter);
+  modelViewProdutoEstoque.setFilter("idVendaProduto2 IN (" + items.join(", ") + ")");
 
   if (not modelViewProdutoEstoque.select()) { return; }
 
   //--------------------------------------
 
+  // TODO: return if error?
   preencherNumeroNFe();
 
   ui->lineEditModelo->setText("55");
@@ -559,8 +544,7 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
   ui->itemBoxCliente->setId(modelVenda.data(0, "idCliente"));
 
   // endereco faturamento
-
-  ui->itemBoxEnderecoFaturamento->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoFaturamento->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
   ui->itemBoxEnderecoFaturamento->setId(modelVenda.data(0, "idEnderecoFaturamento"));
 
   QSqlQuery queryDestinatarioEndereco;
@@ -581,7 +565,7 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
   // endereco entrega
 
-  ui->itemBoxEnderecoEntrega->setFilter("idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE OR idEndereco = 1");
+  ui->itemBoxEnderecoEntrega->setFilter("(idCliente = " + modelVenda.data(0, "idCliente").toString() + " AND desativado = FALSE) OR idEndereco = 1");
   ui->itemBoxEnderecoEntrega->setId(modelVenda.data(0, "idEnderecoEntrega"));
 
   queryDestinatarioEndereco.prepare("SELECT cep, logradouro, numero, complemento, bairro, cidade, uf FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
@@ -628,7 +612,9 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
   //
 
-  const bool mesmaUf = ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text();
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+
+  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
 
   // TODO: verificar na nota futura qual transportadora preencher
   if (tipo == Tipo::Normal) {
@@ -754,25 +740,13 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
     ui->comboBoxNatureza->setCurrentText("VENDA ORIGINADA DE ENCOMENDA COM PROMESSA DE ENTREGA FUTURA");
   }
 
-  // CFOP
-
-  if (not listarCfop()) { return; }
-
   //
-
-  // TODO: place in the right place
-
-  //  ui->tabWidget_4->setTabEnabled(4, false); // hide icms interestadual
-
-  if (not ui->lineEditDestinatarioUF_2->text().isEmpty()) {
-    if (ui->lineEditDestinatarioUF_2->text() != ui->lineEditEmitenteUF->text()) { ui->comboBoxDestinoOperacao->setCurrentIndex(1); }
-  }
 
   validar();
 
-  //
+  buscarAliquotas();
 
-  updateImpostos();
+  updateTotais();
 
   setConnections();
 
@@ -815,20 +789,20 @@ bool CadastrarNFe::calculaDigitoVerificador(QString &chave) {
 }
 
 void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
-  stream << "[Identificacao]" << endl;
-  stream << "NaturezaOperacao = " + ui->comboBoxNatureza->currentText() << endl;
-  stream << "Modelo = " + ui->lineEditModelo->text() << endl;
-  stream << "Serie = " + ui->lineEditSerie->text() << endl;
-  stream << "Codigo = " << ui->lineEditCodigo->text() << endl; // 1
-  stream << "Numero = " << ui->lineEditNumero->text() << endl; // 1
-  stream << "Emissao = " + qApp->serverDate().toString("dd/MM/yyyy") << endl;
-  stream << "Saida = " + qApp->serverDate().toString("dd/MM/yyyy") << endl;
-  stream << "Tipo = " + ui->comboBoxTipo->currentText().left(1) << endl;
-  stream << "finNFe = " + ui->comboBoxFinalidade->currentText().left(1) << endl;
-  stream << "FormaPag = " + ui->lineEditFormatoPagina->text() << endl;
-  stream << "idDest = " + ui->comboBoxDestinoOperacao->currentText().left(1) << endl;
-  stream << "indPres = 1" << endl;
-  stream << "indFinal = 1" << endl;
+  stream << "[Identificacao]\n";
+  stream << "NaturezaOperacao = " + ui->comboBoxNatureza->currentText() + "\n";
+  stream << "Modelo = " + ui->lineEditModelo->text() + "\n";
+  stream << "Serie = " + ui->lineEditSerie->text() + "\n";
+  stream << "Codigo = " << ui->lineEditCodigo->text() + "\n"; // 1
+  stream << "Numero = " << ui->lineEditNumero->text() + "\n"; // 1
+  stream << "Emissao = " + qApp->serverDate().toString("dd/MM/yyyy") + "\n";
+  stream << "Saida = " + qApp->serverDate().toString("dd/MM/yyyy") + "\n";
+  stream << "Tipo = " + ui->comboBoxTipo->currentText().left(1) + "\n";
+  stream << "finNFe = " + ui->comboBoxFinalidade->currentText().left(1) + "\n";
+  stream << "FormaPag = " + ui->lineEditFormatoPagina->text() + "\n";
+  stream << "idDest = " + ui->comboBoxDestinoOperacao->currentText().left(1) + "\n";
+  stream << "indPres = 1\n";
+  stream << "indFinal = 1\n";
 
   if (tipo == Tipo::NormalAposFutura) {
     QSqlQuery query;
@@ -837,56 +811,56 @@ void CadastrarNFe::writeIdentificacao(QTextStream &stream) {
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando NFe referenciada!", this); }
 
-    stream << "[NFRef001]" << endl;
-    stream << "refNFe = " + query.value("chaveAcesso").toString() << endl;
+    stream << "[NFRef001]\n";
+    stream << "refNFe = " + query.value("chaveAcesso").toString() + "\n";
   }
 }
 
 void CadastrarNFe::writeEmitente(QTextStream &stream) const {
-  stream << "[Emitente]" << endl;
-  stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) << endl;
-  //  stream << "CNPJ = 99999090910270" << endl;
-  stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() << endl;
-  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(60) << endl;
-  stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() << endl;
-  stream << "Fone = " + modelLoja.data(0, "tel").toString() << endl;
-  stream << "CEP = " + clearStr(queryLojaEnd.value("CEP").toString()) << endl;
-  stream << "Logradouro = " + queryLojaEnd.value("logradouro").toString() << endl;
-  stream << "Numero = " + queryLojaEnd.value("numero").toString() << endl;
-  stream << "Complemento = " + queryLojaEnd.value("complemento").toString() << endl;
-  stream << "Bairro = " + queryLojaEnd.value("bairro").toString() << endl;
-  stream << "cMun = " + queryIBGEEmit.value("codigo").toString() << endl;
-  stream << "Cidade = " + queryLojaEnd.value("cidade").toString() << endl;
-  stream << "UF = " + queryLojaEnd.value("uf").toString() << endl;
+  stream << "[Emitente]\n";
+  stream << "CNPJ = " + clearStr(modelLoja.data(0, "cnpj").toString()) + "\n";
+  //  stream << "CNPJ = 99999090910270\n";
+  stream << "IE = " + modelLoja.data(0, "inscEstadual").toString() + "\n";
+  stream << "Razao = " + modelLoja.data(0, "razaoSocial").toString().left(60) + "\n";
+  stream << "Fantasia = " + modelLoja.data(0, "nomeFantasia").toString() + "\n";
+  stream << "Fone = " + modelLoja.data(0, "tel").toString() + "\n";
+  stream << "CEP = " + clearStr(queryLojaEnd.value("CEP").toString()) + "\n";
+  stream << "Logradouro = " + queryLojaEnd.value("logradouro").toString() + "\n";
+  stream << "Numero = " + queryLojaEnd.value("numero").toString() + "\n";
+  stream << "Complemento = " + queryLojaEnd.value("complemento").toString() + "\n";
+  stream << "Bairro = " + queryLojaEnd.value("bairro").toString() + "\n";
+  stream << "cMun = " + queryIBGEEmit.value("codigo").toString() + "\n";
+  stream << "Cidade = " + queryLojaEnd.value("cidade").toString() + "\n";
+  stream << "UF = " + queryLojaEnd.value("uf").toString() + "\n";
 }
 
 void CadastrarNFe::writeDestinatario(QTextStream &stream) const {
-  stream << "[Destinatario]" << endl;
+  stream << "[Destinatario]\n";
 
-  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString().replace("Ç", "C").replace("Ã", "A").left(60) << endl;
+  stream << "NomeRazao = " + queryCliente.value("nome_razao").toString().replace("Ç", "C").replace("Ã", "A").left(60) + "\n";
 
   if (queryCliente.value("pfpj").toString() == "PF") {
-    stream << "CPF = " + clearStr(queryCliente.value("cpf").toString()) << endl;
-    stream << "indIEDest = 9" << endl;
+    stream << "CPF = " + clearStr(queryCliente.value("cpf").toString()) + "\n";
+    stream << "indIEDest = 9\n";
   }
 
   if (queryCliente.value("pfpj").toString() == "PJ") {
-    stream << "CNPJ = " + clearStr(queryCliente.value("cnpj").toString()) << endl;
+    stream << "CNPJ = " + clearStr(queryCliente.value("cnpj").toString()) + "\n";
 
     const QString inscEst = queryCliente.value("inscEstadual").toString();
 
-    stream << (inscEst == "ISENTO" or inscEst.isEmpty() ? "indIEDest = 9" : "IE = " + clearStr(inscEst)) << endl;
+    stream << (inscEst == "ISENTO" or inscEst.isEmpty() ? "indIEDest = 9" : "IE = " + clearStr(inscEst)) + "\n";
   }
 
-  stream << "Fone = " + queryCliente.value("tel").toString() << endl;
-  stream << "CEP = " + clearStr(queryEndereco.value("cep").toString()) << endl;
-  stream << "Logradouro = " + queryEndereco.value("logradouro").toString().left(60) << endl;
-  stream << "Numero = " + queryEndereco.value("numero").toString() << endl;
-  stream << "Complemento = " + queryEndereco.value("complemento").toString().left(60) << endl;
-  stream << "Bairro = " + queryEndereco.value("bairro").toString() << endl;
-  stream << "cMun = " + queryIBGEDest.value("codigo").toString() << endl;
-  stream << "Cidade = " + queryEndereco.value("cidade").toString() << endl;
-  stream << "UF = " + queryEndereco.value("uf").toString() << endl;
+  stream << "Fone = " + queryCliente.value("tel").toString() + "\n";
+  stream << "CEP = " + clearStr(queryEndereco.value("cep").toString()) + "\n";
+  stream << "Logradouro = " + queryEndereco.value("logradouro").toString().left(60) + "\n";
+  stream << "Numero = " + queryEndereco.value("numero").toString() + "\n";
+  stream << "Complemento = " + queryEndereco.value("complemento").toString().left(60) + "\n";
+  stream << "Bairro = " + queryEndereco.value("bairro").toString() + "\n";
+  stream << "cMun = " + queryIBGEDest.value("codigo").toString() + "\n";
+  stream << "Cidade = " + queryEndereco.value("cidade").toString() + "\n";
+  stream << "UF = " + queryEndereco.value("uf").toString() + "\n";
 }
 
 void CadastrarNFe::writeProduto(QTextStream &stream) const {
@@ -894,25 +868,25 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 
   for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
     const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
-    stream << "[Produto" + numProd + "]" << endl;
-    stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() << endl;
-    stream << "CEST = 1003001" << endl;
-    stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() << endl;
-    stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() << endl;
+    stream << "[Produto" + numProd + "]\n";
+    stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
+    stream << "CEST = 1003001\n";
+    stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() + "\n";
+    stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() + "\n";
     const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();
-    stream << "cEAN = " + (codBarras.isEmpty() ? "" : codBarras) << endl;
-    stream << "cEANTrib = " + (codBarras.isEmpty() ? "" : codBarras) << endl;
+    stream << "cEAN = " + (codBarras.isEmpty() ? "" : codBarras) + "\n";
+    stream << "cEANTrib = " + (codBarras.isEmpty() ? "" : codBarras) + "\n";
     const QString produto = modelViewProdutoEstoque.data(row, "produto").toString();
     QString formato = modelViewProdutoEstoque.data(row, "formComercial").toString();
     formato = formato.isEmpty() ? "" : " - " + formato;
     const QString caixas = modelViewProdutoEstoque.data(row, "caixas").toString();
-    stream << "Descricao = " + produto + formato + " (" + caixas + " Cx.)" << endl;
-    stream << "Unidade = " + modelViewProdutoEstoque.data(row, "un").toString() << endl;
-    stream << "Quantidade = " + modelViewProdutoEstoque.data(row, "quant").toString() << endl;
+    stream << "Descricao = " + produto + formato + " (" + caixas + " Cx.)\n";
+    stream << "Unidade = " + modelViewProdutoEstoque.data(row, "un").toString() + "\n";
+    stream << "Quantidade = " + modelViewProdutoEstoque.data(row, "quant").toString() + "\n";
     const double total = modelViewProdutoEstoque.data(row, "total").toDouble();
     const double quant = modelViewProdutoEstoque.data(row, "quant").toDouble();
-    stream << "ValorUnitario = " + QString::number(total / quant, 'f', 10) << endl;
-    stream << "ValorTotal = " + QString::number(total, 'f', 2) << endl;
+    stream << "ValorUnitario = " + QString::number(total / quant, 'f', 10) + "\n";
+    stream << "ValorTotal = " + QString::number(total, 'f', 2) + "\n";
     const double proporcao = total / ui->doubleSpinBoxValorProdutos->value();
     const double frete = ui->checkBoxFrete->isChecked() ? ui->doubleSpinBoxValorFrete->value() * proporcao : 0;
     sumFrete += QString::number(frete, 'f', 2).toDouble();
@@ -920,50 +894,50 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     if (sumFrete > ui->doubleSpinBoxValorFrete->value()) {
       const double diff = sumFrete - ui->doubleSpinBoxValorFrete->value();
       const double frete2 = frete - diff;
-      stream << "vFrete = " + QString::number(frete2, 'f', 2) << endl;
+      stream << "vFrete = " + QString::number(frete2, 'f', 2) + "\n";
     } else {
-      stream << "vFrete = " + QString::number(frete, 'f', 2) << endl;
+      stream << "vFrete = " + QString::number(frete, 'f', 2) + "\n";
     }
 
-    stream << "[ICMS" + numProd + "]" << endl;
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstICMS").toString() << endl;
-    stream << "Modalidade = " + modelViewProdutoEstoque.data(row, "modBC").toString() << endl;
-    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBC").toString() << endl;
+    stream << "[ICMS" + numProd + "]\n";
+    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstICMS").toString() + "\n";
+    stream << "Modalidade = " + modelViewProdutoEstoque.data(row, "modBC").toString() + "\n";
+    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBC").toString() + "\n";
     const double aliquota = modelViewProdutoEstoque.data(row, "pICMS").toDouble();
-    stream << "Aliquota = " + QString::number(aliquota, 'f', 2) << endl;
-    stream << "Valor = " + modelViewProdutoEstoque.data(row, "vICMS").toString() << endl;
+    stream << "Aliquota = " + QString::number(aliquota, 'f', 2) + "\n";
+    stream << "Valor = " + modelViewProdutoEstoque.data(row, "vICMS").toString() + "\n";
 
-    stream << "[IPI" + numProd + "]" << endl;
-    stream << "ClasseEnquadramento = " + modelViewProdutoEstoque.data(row, "cEnq").toString() << endl;
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstIPI").toString() << endl;
+    stream << "[IPI" + numProd + "]\n";
+    stream << "ClasseEnquadramento = " + modelViewProdutoEstoque.data(row, "cEnq").toString() + "\n";
+    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstIPI").toString() + "\n";
 
-    stream << "[PIS" + numProd + "]" << endl;
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstPIS").toString() << endl;
-    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl;
-    stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pPIS").toString() << endl;
-    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2) << endl;
+    stream << "[PIS" + numProd + "]\n";
+    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstPIS").toString() + "\n";
+    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() + "\n";
+    stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pPIS").toString() + "\n";
+    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vPIS").toDouble(), 'f', 2) + "\n";
 
-    stream << "[COFINS" + numProd + "]" << endl;
-    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstCOFINS").toString() << endl;
-    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCCOFINS").toString() << endl;
-    stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pCOFINS").toString() << endl;
-    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2) << endl;
+    stream << "[COFINS" + numProd + "]\n";
+    stream << "CST = " + modelViewProdutoEstoque.data(row, "cstCOFINS").toString() + "\n";
+    stream << "ValorBase = " + modelViewProdutoEstoque.data(row, "vBCCOFINS").toString() + "\n";
+    stream << "Aliquota = " + modelViewProdutoEstoque.data(row, "pCOFINS").toString() + "\n";
+    stream << "Valor = " + QString::number(modelViewProdutoEstoque.data(row, "vCOFINS").toDouble(), 'f', 2) + "\n";
 
     // PARTILHA ICMS
 
     const QString inscEst = queryCliente.value("inscEstadual").toString();
 
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2") and (inscEst == "ISENTO" or inscEst.isEmpty())) {
-      stream << "[ICMSUFDest" + numProd + "]" << endl;
-      stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() << endl; // TODO: should be valorProduto + frete + ipi + outros - desconto
-      stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() << endl;
-      stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() << endl;
+      stream << "[ICMSUFDest" + numProd + "]\n";
+      stream << "vBCUFDest = " + modelViewProdutoEstoque.data(row, "vBCPIS").toString() + "\n"; // TODO: should be valorProduto + frete + ipi + outros - desconto
+      stream << "pICMSUFDest = " + queryPartilhaIntra.value("valor").toString() + "\n";
+      stream << "pICMSInter = " + queryPartilhaInter.value("valor").toString() + "\n";
 
       const double diferencaICMS = (queryPartilhaIntra.value("valor").toDouble() - queryPartilhaInter.value("valor").toDouble()) / 100.;
       const double difal = modelViewProdutoEstoque.data(row, "vBCPIS").toDouble() * diferencaICMS;
 
-      stream << "pICMSInterPart = 100" << endl;
-      stream << "vICMSUFDest = " + QString::number(difal, 'f', 2) << endl;
+      stream << "pICMSInterPart = 100\n";
+      stream << "vICMSUFDest = " + QString::number(difal, 'f', 2) + "\n";
     }
 
     //    http://www.asseinfo.com.br/blog/difal-diferencial-de-aliquota-icms/
@@ -971,15 +945,15 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
 }
 
 void CadastrarNFe::writeTotal(QTextStream &stream) const {
-  stream << "[Total]" << endl;
-  stream << "BaseICMS = " + QString::number(ui->doubleSpinBoxBaseICMS->value(), 'f', 2) << endl;
-  stream << "ValorICMS = " + QString::number(ui->doubleSpinBoxValorICMS->value(), 'f', 2) << endl;
-  stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value(), 'f', 2) << endl;
-  stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value(), 'f', 2) << endl;
-  stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value(), 'f', 2) << endl;
-  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value(), 'f', 2) << endl;
-  stream << "ValorFrete = " + QString::number(ui->checkBoxFrete->isChecked() ? ui->doubleSpinBoxValorFrete->value() : 0, 'f', 2) << endl;
-  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
+  stream << "[Total]\n";
+  stream << "BaseICMS = " + QString::number(ui->doubleSpinBoxBaseICMS->value(), 'f', 2) + "\n";
+  stream << "ValorICMS = " + QString::number(ui->doubleSpinBoxValorICMS->value(), 'f', 2) + "\n";
+  stream << "ValorIPI = " + QString::number(ui->doubleSpinBoxValorIPI->value(), 'f', 2) + "\n";
+  stream << "ValorPIS = " + QString::number(ui->doubleSpinBoxValorPIS->value(), 'f', 2) + "\n";
+  stream << "ValorCOFINS = " + QString::number(ui->doubleSpinBoxValorCOFINS->value(), 'f', 2) + "\n";
+  stream << "ValorProduto = " + QString::number(ui->doubleSpinBoxValorProdutos->value(), 'f', 2) + "\n";
+  stream << "ValorFrete = " + QString::number(ui->checkBoxFrete->isChecked() ? ui->doubleSpinBoxValorFrete->value() : 0, 'f', 2) + "\n";
+  stream << "ValorNota = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
 
   // PARTILHA ICMS
 
@@ -996,117 +970,106 @@ void CadastrarNFe::writeTotal(QTextStream &stream) const {
       totalIcmsDest += QString::number(difal, 'f', 2).toDouble();
     }
 
-    stream << "vICMSUFDest = " + QString::number(totalIcmsDest, 'f', 2) << endl;
+    stream << "vICMSUFDest = " + QString::number(totalIcmsDest, 'f', 2) + "\n";
   }
 }
 
 void CadastrarNFe::writeTransportadora(QTextStream &stream) const {
-  stream << "[Transportador]" << endl;
-  stream << "FretePorConta = " << ui->comboBoxFreteConta->currentText().left(1) << endl;
+  stream << "[Transportador]\n";
+  stream << "FretePorConta = " << ui->comboBoxFreteConta->currentText().left(1) + "\n";
 
   if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) { return; }
 
-  // TODO: se for 'CARRO EXTRA' não preencher CNPJ/Insc.
-  if (ui->lineEditTransportadorRazaoSocial->text() != "RETIRA") {
-    stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() << endl;
-    stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() << endl;
-    stream << "IE = " << ui->lineEditTransportadorInscEst->text() << endl;
-    stream << "Endereco = " << ui->lineEditTransportadorEndereco->text() << endl;
-    stream << "Cidade = " << ui->lineEditTransportadorMunicipio->text() << endl;
-    stream << "UF = " << ui->lineEditTransportadorUf->text() << endl;
-    stream << "ValorServico = " << endl;
-    stream << "ValorBase = " << endl;
-    stream << "Aliquota = " << endl;
-    stream << "Valor = " << endl;
-    stream << "CFOP = " << endl;
-    stream << "CidadeCod = " << endl;
-    stream << "Placa = " << ui->lineEditTransportadorPlaca->text().remove("-") << endl;
-    stream << "UFPlaca = " << ui->lineEditTransportadorUfPlaca->text() << endl;
-    stream << "RNTC = " << endl;
+  const QString razaoSocial = ui->lineEditTransportadorRazaoSocial->text();
+
+  if (razaoSocial != "RETIRA" and razaoSocial != "CARRO EXTRA") {
+    stream << "NomeRazao = " << ui->lineEditTransportadorRazaoSocial->text() + "\n";
+    stream << "CnpjCpf = " << ui->lineEditTransportadorCpfCnpj->text() + "\n";
+    stream << "IE = " << ui->lineEditTransportadorInscEst->text() + "\n";
+    stream << "Endereco = " << ui->lineEditTransportadorEndereco->text() + "\n";
+    stream << "Cidade = " << ui->lineEditTransportadorMunicipio->text() + "\n";
+    stream << "UF = " << ui->lineEditTransportadorUf->text() + "\n";
+    stream << "ValorServico = \n";
+    stream << "ValorBase = \n";
+    stream << "Aliquota = \n";
+    stream << "Valor = \n";
+    stream << "CFOP = \n";
+    stream << "CidadeCod = \n";
+    stream << "Placa = " << ui->lineEditTransportadorPlaca->text().remove("-") + "\n";
+    stream << "UFPlaca = " << ui->lineEditTransportadorUfPlaca->text() + "\n";
+    stream << "RNTC = \n";
   }
 }
 
 void CadastrarNFe::writePagamento(QTextStream &stream) {
-  stream << "[Pag001]" << endl;
+  stream << "[Pag001]\n";
 
-  stream << "tPag = 01" << endl;
-  stream << "vPag = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) << endl;
+  stream << "tPag = 01\n";
+  stream << "vPag = " + QString::number(ui->doubleSpinBoxValorNota->value(), 'f', 2) + "\n";
 }
 
 void CadastrarNFe::writeVolume(QTextStream &stream) const {
-  stream << "[Volume001]" << endl;
+  stream << "[Volume001]\n";
 
-  stream << "Quantidade = " << ui->spinBoxVolumesQuant->text() << endl;
-  stream << "Especie = " << ui->lineEditVolumesEspecie->text() << endl;
-  stream << "Marca = " << ui->lineEditVolumesMarca->text() << endl;
-  stream << "Numeracao = " << ui->lineEditVolumesNumeracao->text() << endl;
-  stream << "PesoLiquido = " << QString::number(ui->doubleSpinBoxVolumesPesoLiq->value(), 'f', 3) << endl;
-  stream << "PesoBruto = " << QString::number(ui->doubleSpinBoxVolumesPesoBruto->value(), 'f', 3) << endl;
+  stream << "Quantidade = " << ui->spinBoxVolumesQuant->text() + "\n";
+  stream << "Especie = " << ui->lineEditVolumesEspecie->text() + "\n";
+  stream << "Marca = " << ui->lineEditVolumesMarca->text() + "\n";
+  stream << "Numeracao = " << ui->lineEditVolumesNumeracao->text() + "\n";
+  stream << "PesoLiquido = " << QString::number(ui->doubleSpinBoxVolumesPesoLiq->value(), 'f', 3) + "\n";
+  stream << "PesoBruto = " << QString::number(ui->doubleSpinBoxVolumesPesoBruto->value(), 'f', 3) + "\n";
 }
 
 void CadastrarNFe::on_tableItens_dataChanged(const QModelIndex index) {
-  updateImpostos();
+  unsetConnections();
 
-  Q_UNUSED(index)
+  [&] {
+    const QString header = modelViewProdutoEstoque.headerData(index.column(), Qt::Horizontal).toString();
+    const int row = index.row();
 
-  //  const QString field = modelViewProdutoEstoque.record().fieldName(index.column());
+    if (header == "R$ Unit.") {
+      const double preco = modelViewProdutoEstoque.data(row, "descUnitario").toDouble() * modelViewProdutoEstoque.data(row, "quant").toDouble();
+      if (not modelViewProdutoEstoque.setData(row, "total", preco)) { return; }
+    }
 
-  //  qDebug() << "field: " << field;
+    if (header == "Total") {
+      const double preco = modelViewProdutoEstoque.data(row, "total").toDouble() / modelViewProdutoEstoque.data(row, "quant").toDouble();
+      if (not modelViewProdutoEstoque.setData(row, "descUnitario", preco)) { return; }
+    }
+  }();
 
-  //  if (field == "codBarras" or field == "ncm" or field == "cfop" or field == "unTrib" or field == "numeroPedido" or field == "itemPedido" or field == "tipoICMS" or field == "orig" or
-  //      field == "cstICMS" or field == "modBC" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == "" or field == ""
-  //      or field == "" or field == "") {}
+  setConnections();
 
-  //     `ehc`.`codBarras` AS `codBarras`,
-  //     `ehc`.`ncm` AS `ncm`,
-  //     `ehc`.`cfop` AS `cfop`,
-  //     `ehc`.`unTrib` AS `unTrib`,
-  //     `ehc`.`numeroPedido` AS `numeroPedido`,
-  //     `ehc`.`itemPedido` AS `itemPedido`,
-  //     `ehc`.`tipoICMS` AS `tipoICMS`,
-  //     `ehc`.`orig` AS `orig`,
-  //     `ehc`.`cstICMS` AS `cstICMS`,
-  //     `ehc`.`modBC` AS `modBC`,
-  //     SUM(`ehc`.`vBC`) AS `vBC`,
-  //     `ehc`.`pICMS` AS `pICMS`,
-  //     SUM(`ehc`.`vICMS`) AS `vICMS`,
-  //     `ehc`.`modBCST` AS `modBCST`,
-  //     `ehc`.`pMVAST` AS `pMVAST`,
-  //     SUM(`ehc`.`vBCST`) AS `vBCST`,
-  //     `ehc`.`pICMSST` AS `pICMSST`,
-  //     SUM(`ehc`.`vICMSST`) AS `vICMSST`,
-  //     `ehc`.`cEnq` AS `cEnq`,
-  //     `ehc`.`cstIPI` AS `cstIPI`,
-  //     `ehc`.`cstPIS` AS `cstPIS`,
-  //     SUM(`ehc`.`vBCPIS`) AS `vBCPIS`,
-  //     `ehc`.`pPIS` AS `pPIS`,
-  //     SUM(`ehc`.`vPIS`) AS `vPIS`,
-  //     `ehc`.`cstCOFINS` AS `cstCOFINS`,
-  //     SUM(`ehc`.`vBCCOFINS`) AS `vBCCOFINS`,
-  //     `ehc`.`pCOFINS` AS `pCOFINS`,
-  //     SUM(`ehc`.`vCOFINS`) AS `vCOFINS`
+  updateTotais();
 }
 
 void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
+  if (not index.isValid()) {
+    ui->frameICMS->setDisabled(true);
+    ui->frameIPI->setDisabled(true);
+    ui->framePIS->setDisabled(true);
+    ui->frameCOFINS->setDisabled(true);
+    ui->frameInterEstadual->setDisabled(true);
+    return;
+  }
 
   unsetConnections();
 
   [&] {
     const int row = index.row();
 
-    ui->frame_7->setEnabled(true);
-    ui->frame_8->setEnabled(true);
-    ui->frame_9->setEnabled(true);
-    ui->frame_10->setEnabled(true);
+    ui->frameICMS->setEnabled(true);
+    ui->frameIPI->setEnabled(true);
+    ui->framePIS->setEnabled(true);
+    ui->frameCOFINS->setEnabled(true);
 
     if (not listarCfop()) { return; }
 
     ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelViewProdutoEstoque.data(row, "cfop").toString(), Qt::MatchStartsWith));
     ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelViewProdutoEstoque.data(row, "orig").toString(), Qt::MatchStartsWith));
     ui->comboBoxSituacaoTributaria->setCurrentIndex(ui->comboBoxSituacaoTributaria->findText(modelViewProdutoEstoque.data(row, "cstICMS").toString(), Qt::MatchStartsWith));
-    // TODO: fix properly
-    this->on_comboBoxSituacaoTributaria_currentTextChanged(ui->comboBoxSituacaoTributaria->currentText());
+
+    on_comboBoxSituacaoTributaria_currentTextChanged(ui->comboBoxSituacaoTributaria->currentText());
+
     ui->comboBoxICMSModBc->setCurrentIndex(modelViewProdutoEstoque.data(row, "modBC").toInt() + 1);
     ui->comboBoxICMSModBcSt->setCurrentIndex(modelViewProdutoEstoque.data(row, "modBCST").toInt() + 1);
     ui->comboBoxIPIcst->setCurrentIndex(ui->comboBoxIPIcst->findText(modelViewProdutoEstoque.data(row, "cstIPI").toString(), Qt::MatchStartsWith));
@@ -1114,8 +1077,8 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
     ui->comboBoxCOFINScst->setCurrentIndex(ui->comboBoxCOFINScst->findText(modelViewProdutoEstoque.data(row, "cstCOFINS").toString(), Qt::MatchStartsWith));
 
     QSqlQuery queryCfop;
-    if (ui->comboBoxTipo->currentText() == "0 Entrada") queryCfop.prepare("SELECT NAT FROM cfop_entr WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop");
-    if (ui->comboBoxTipo->currentText() == "1 Saída") queryCfop.prepare("SELECT NAT FROM cfop_sai WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop");
+    if (ui->comboBoxTipo->currentText() == "0 Entrada") { queryCfop.prepare("SELECT NAT FROM cfop_entr WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop"); }
+    if (ui->comboBoxTipo->currentText() == "1 Saída") { queryCfop.prepare("SELECT NAT FROM cfop_sai WHERE CFOP_DE = :cfop OR CFOP_FE = :cfop"); }
     queryCfop.bindValue(":cfop", modelViewProdutoEstoque.data(row, "cfop"));
 
     if (not queryCfop.exec()) { return qApp->enqueueError("Erro buscando CFOP: " + queryCfop.lastError().text(), this); }
@@ -1124,9 +1087,12 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
 
     // ICMS Inter
 
+    // TODO: arrumar esse codigo, nao é mais 80%
     if (ui->comboBoxDestinoOperacao->currentText().startsWith("2")) {
+      ui->frameInterEstadual->setEnabled(true);
+
       ui->doubleSpinBoxPercentualFcpDestino->setValue(2);
-      ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelViewProdutoEstoque.data(row, "vBCPIS").toDouble());
+      ui->doubleSpinBoxBaseCalculoDestinatario->setValue(modelViewProdutoEstoque.data(row, "vBC").toDouble());
       ui->doubleSpinBoxAliquotaInternaDestinatario->setValue(queryPartilhaIntra.value("valor").toDouble());
       ui->doubleSpinBoxAliquotaInter->setValue(queryPartilhaInter.value("valor").toDouble());
       ui->doubleSpinBoxPercentualPartilha->setValue(80);
@@ -1147,31 +1113,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
   setConnections();
 }
 
-void CadastrarNFe::on_tabWidget_currentChanged(const int index) {
-  if (index == 4) { updateImpostos(); }
-}
-
-void CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxICMSvicms->setValue(ui->doubleSpinBoxICMSvbc->value() * ui->doubleSpinBoxICMSpicms->value() / 100);
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBC", ui->doubleSpinBoxICMSvbc->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pICMS", ui->doubleSpinBoxICMSpicms->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vICMS", ui->doubleSpinBoxICMSvicms->value())) { return; }
-  }();
-
-  setConnections();
-}
-
-void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) {
+void CadastrarNFe::calculaSt() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1186,14 +1128,20 @@ void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) {
     if (not modelViewProdutoEstoque.setData(row, "vBCST", ui->doubleSpinBoxICMSvbcst->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "vICMSST", ui->doubleSpinBoxICMSvicmsst->value())) { return; }
+
+    updateTotais();
   }();
 
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
-  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicms_valueChanged' function is fully equivalent to the body of
-  // 'on_doubleSpinBoxICMSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxICMSvbcst_valueChanged(const double) { calculaSt(); }
+
+void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) { calculaSt(); }
+
+void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(const double) { calculaSt(); }
+
+void CadastrarNFe::calculaIcms() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1208,12 +1156,20 @@ void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) {
     if (not modelViewProdutoEstoque.setData(row, "vBC", ui->doubleSpinBoxICMSvbc->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "pICMS", ui->doubleSpinBoxICMSpicms->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "vICMS", ui->doubleSpinBoxICMSvicms->value())) { return; }
+
+    updateTotais();
   }();
 
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxICMSvbc_valueChanged(const double) { calculaIcms(); }
+
+void CadastrarNFe::on_doubleSpinBoxICMSpicms_valueChanged(const double) { calculaIcms(); }
+
+void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(const double) { calculaIcms(); }
+
+void CadastrarNFe::calculaPis() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1228,14 +1184,20 @@ void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) {
     if (not modelViewProdutoEstoque.setData(row, "vBCPIS", ui->doubleSpinBoxPISvbc->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "pPIS", ui->doubleSpinBoxPISppis->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "vPIS", ui->doubleSpinBoxPISvpis->value())) { return; }
+
+    updateTotais();
   }();
 
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
-  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxPISppis_valueChanged' function is fully equivalent to the body of
-  // 'on_doubleSpinBoxPISvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
+void CadastrarNFe::on_doubleSpinBoxPISvbc_valueChanged(const double) { calculaPis(); }
+
+void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) { calculaPis(); }
+
+void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(const double) { calculaPis(); }
+
+void CadastrarNFe::calculaCofins() {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
@@ -1243,59 +1205,25 @@ void CadastrarNFe::on_doubleSpinBoxPISppis_valueChanged(const double) {
   unsetConnections();
 
   [&] {
-    ui->doubleSpinBoxPISvpis->setValue(ui->doubleSpinBoxPISvbc->value() * ui->doubleSpinBoxPISppis->value() / 100);
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCPIS", ui->doubleSpinBoxPISvbc->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pPIS", ui->doubleSpinBoxPISppis->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vPIS", ui->doubleSpinBoxPISvpis->value())) { return; }
-  }();
-
-  setConnections();
-}
-
-void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxCOFINSvcofins->setValue(ui->doubleSpinBoxCOFINSvbc->value() * ui->doubleSpinBoxCOFINSpcofins->value() / 100);
+    ui->doubleSpinBoxCOFINSvbc->setValue(ui->doubleSpinBoxCOFINSvcofins->value() * 100 / ui->doubleSpinBoxCOFINSpcofins->value());
 
     const int row = list.first().row();
 
     if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", ui->doubleSpinBoxCOFINSvbc->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "pCOFINS", ui->doubleSpinBoxCOFINSpcofins->value())) { return; }
     if (not modelViewProdutoEstoque.setData(row, "vCOFINS", ui->doubleSpinBoxCOFINSvcofins->value())) { return; }
+
+    updateTotais();
   }();
 
   setConnections();
 }
 
-void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
-  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxCOFINSpcofins_valueChanged' function is fully equivalent to the body of
-  // 'on_doubleSpinBoxCOFINSvbc_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
+void CadastrarNFe::on_doubleSpinBoxCOFINSvbc_valueChanged(const double) { calculaCofins(); }
 
-  if (list.isEmpty()) { return; }
+void CadastrarNFe::on_doubleSpinBoxCOFINSpcofins_valueChanged(const double) { calculaCofins(); }
 
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxCOFINSvcofins->setValue(ui->doubleSpinBoxCOFINSvbc->value() * ui->doubleSpinBoxCOFINSpcofins->value() / 100);
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", ui->doubleSpinBoxCOFINSvbc->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pCOFINS", ui->doubleSpinBoxCOFINSpcofins->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vCOFINS", ui->doubleSpinBoxCOFINSvcofins->value())) { return; }
-  }();
-
-  setConnections();
-}
+void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) { calculaCofins(); }
 
 void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   QSqlQuery queryDestinatarioEndereco;
@@ -1313,6 +1241,16 @@ void CadastrarNFe::on_itemBoxEnderecoFaturamento_textChanged(const QString &) {
   ui->lineEditDestinatarioCidade->setText(queryDestinatarioEndereco.value("cidade").toString());
   ui->lineEditDestinatarioUF->setText(queryDestinatarioEndereco.value("uf").toString());
   ui->lineEditDestinatarioCEP->setText(queryDestinatarioEndereco.value("cep").toString());
+
+  // ------------------------------------------------------------
+
+  const bool mesmaUf = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+
+  ui->comboBoxDestinoOperacao->setCurrentIndex(mesmaUf ? 0 : 1);
+
+  // ------------------------------------------------------------
+
+  buscarAliquotas();
 }
 
 void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
@@ -1332,7 +1270,7 @@ void CadastrarNFe::on_itemBoxEnderecoEntrega_textChanged(const QString &) {
   ui->lineEditDestinatarioUF_2->setText(queryDestinatarioEndereco.value("uf").toString());
   ui->lineEditDestinatarioCEP_2->setText(queryDestinatarioEndereco.value("cep").toString());
 
-  updateImpostos();
+  updateComplemento();
 }
 
 void CadastrarNFe::on_comboBoxRegime_currentTextChanged(const QString &text) {
@@ -1384,58 +1322,58 @@ void CadastrarNFe::on_comboBoxSituacaoTributaria_currentTextChanged(const QStrin
   // -------------------------------------------------------------------------
 
   if (text == "00 - Tributada integralmente") {
-    ui->frame->show();
-    ui->frame_2->hide();
+    ui->frameICMSNormal->show();
+    ui->frameST->hide();
   }
 
-  //  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {}
+  if (text == "10 - Tributada e com cobrança do ICMS por substituição tributária") {}
 
-  //  if (text == "20 - Com redução de base de cálculo") {}
+  if (text == "20 - Com redução de base de cálculo") {}
 
-  //  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {}
+  if (text == "30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária") {}
 
-  //  if (text == "40 - Isenta") {}
+  if (text == "40 - Isenta") {}
 
-  //  if (text == "41 - Não tributada") {}
+  if (text == "41 - Não tributada") {}
 
-  //  if (text == "50 - Suspensão") {}
+  if (text == "50 - Suspensão") {}
 
-  //  if (text == "51 - Diferimento") {}
+  if (text == "51 - Diferimento") {}
 
   if (text == "60 - ICMS cobrado anteriormente por substituição tributária") {
-    ui->frame->hide();
-    ui->frame_2->show();
+    ui->frameICMSNormal->hide();
+    ui->frameST->show();
 
-    ui->label_7->hide();
+    ui->labelPorcMargemIcmsSt->hide();
     ui->doubleSpinBoxICMSpmvast->hide();
     // TODO: icms retido anteriormente, é outro campo?
   }
 
-  //  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {}
+  if (text == "70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária") {}
 
-  //  if (text == "90 - Outras") {}
+  if (text == "90 - Outras") {}
 
   // simples nacional
 
-  //  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {}
+  if (text == "101 - Tributada pelo Simples Nacional com permissão de crédito") {}
 
-  //  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {}
+  if (text == "102 - Tributada pelo Simples Nacional sem permissão de crédito") {}
 
-  //  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {}
+  if (text == "103 - Isenção do ICMS no Simples Nacional para faixa de receita bruta") {}
 
-  //  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {}
+  if (text == "201 - Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária") {}
 
-  //  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {}
+  if (text == "202 - Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária") {}
 
-  //  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {}
+  if (text == "203 - Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária") {}
 
-  //  if (text == "400 - Não tributada pelo Simples Nacional") {}
+  if (text == "400 - Não tributada pelo Simples Nacional") {}
 
-  //  if (text == "300 - Imune") {}
+  if (text == "300 - Imune") {}
 
-  //  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {}
+  if (text == "500 - ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação") {}
 
-  //  if (text == "900 - Outros") {}
+  if (text == "900 - Outros") {}
 }
 
 void CadastrarNFe::on_comboBoxICMSOrig_currentIndexChanged(const int index) {
@@ -1457,17 +1395,21 @@ void CadastrarNFe::on_comboBoxICMSModBc_currentIndexChanged(const int index) {
 
   if (list.isEmpty()) { return; }
 
-  // REFAC: wrap in a unset/set so updateImpostos is called only once in the end?
-  if (not modelViewProdutoEstoque.setData(list.first().row(), "modBC", index - 1)) { return; }
+  unsetConnections();
 
-  if (ui->comboBoxICMSModBc->currentText() == "Valor da Operação") {
-    ui->doubleSpinBoxICMSvbc->setValue(modelViewProdutoEstoque.data(list.first().row(), "vBCPIS").toDouble());
-    if (not modelViewProdutoEstoque.setData(list.first().row(), "vBC", modelViewProdutoEstoque.data(list.first().row(), "vBCPIS").toDouble())) { return; }
-    if (not modelViewProdutoEstoque.setData(list.first().row(), "pICMS", 7)) { return; }
-    // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
-  }
+  [&] {
+    if (not modelViewProdutoEstoque.setData(list.first().row(), "modBC", index - 1)) { return; }
 
-  updateImpostos();
+    if (ui->comboBoxICMSModBc->currentText() == "Valor da Operação") {
+      ui->doubleSpinBoxICMSvbc->setValue(modelViewProdutoEstoque.data(list.first().row(), "vBCPIS").toDouble());
+      if (not modelViewProdutoEstoque.setData(list.first().row(), "vBC", modelViewProdutoEstoque.data(list.first().row(), "vBCPIS").toDouble())) { return; }
+      if (not modelViewProdutoEstoque.setData(list.first().row(), "pICMS", 7)) { return; }
+      calculaIcms();
+      // TODO: verificar a aliquota entre estados e setar a porcentagem (caso seja interestadual)
+    }
+  }();
+
+  setConnections();
 }
 
 void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(const int index) {
@@ -1480,46 +1422,6 @@ void CadastrarNFe::on_comboBoxICMSModBcSt_currentIndexChanged(const int index) {
   if (list.isEmpty()) { return; }
 
   if (not modelViewProdutoEstoque.setData(list.first().row(), "modBCST", index - 1)) { return; }
-}
-
-void CadastrarNFe::on_doubleSpinBoxICMSvicms_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxICMSvbc->setValue(ui->doubleSpinBoxICMSvicms->value() * 100 / ui->doubleSpinBoxICMSpicms->value());
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBC", ui->doubleSpinBoxICMSvbc->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pICMS", ui->doubleSpinBoxICMSpicms->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vICMS", ui->doubleSpinBoxICMSvicms->value())) { return; }
-  }();
-
-  setConnections();
-}
-
-void CadastrarNFe::on_doubleSpinBoxICMSvicmsst_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxICMSvbcst->setValue(ui->doubleSpinBoxICMSvicmsst->value() * 100 / ui->doubleSpinBoxICMSpicmsst->value());
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCST", ui->doubleSpinBoxICMSvbcst->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vICMSST", ui->doubleSpinBoxICMSvicmsst->value())) { return; }
-  }();
-
-  setConnections();
 }
 
 void CadastrarNFe::on_comboBoxIPIcst_currentTextChanged(const QString &text) {
@@ -1538,74 +1440,12 @@ void CadastrarNFe::on_comboBoxPIScst_currentTextChanged(const QString &text) {
   if (not modelViewProdutoEstoque.setData(list.first().row(), "cstPIS", text.left(2))) { return; }
 }
 
-void CadastrarNFe::on_doubleSpinBoxPISvpis_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxPISvbc->setValue(ui->doubleSpinBoxPISvpis->value() * 100 / ui->doubleSpinBoxPISppis->value());
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCPIS", ui->doubleSpinBoxPISvbc->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pPIS", ui->doubleSpinBoxPISppis->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vPIS", ui->doubleSpinBoxPISvpis->value())) { return; }
-  }();
-
-  setConnections();
-}
-
 void CadastrarNFe::on_comboBoxCOFINScst_currentTextChanged(const QString &text) {
   const auto list = ui->tableItens->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return; }
 
   if (not modelViewProdutoEstoque.setData(list.first().row(), "cstCOFINS", text.left(2))) { return; }
-}
-
-void CadastrarNFe::on_doubleSpinBoxCOFINSvcofins_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxCOFINSvbc->setValue(ui->doubleSpinBoxCOFINSvcofins->value() * 100 / ui->doubleSpinBoxCOFINSpcofins->value());
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCCOFINS", ui->doubleSpinBoxCOFINSvbc->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pCOFINS", ui->doubleSpinBoxCOFINSpcofins->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vCOFINS", ui->doubleSpinBoxCOFINSvcofins->value())) { return; }
-  }();
-
-  setConnections();
-}
-
-void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
-  // TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_doubleSpinBoxICMSpicmsst_valueChanged' function is fully equivalent to the body of
-  // 'on_doubleSpinBoxICMSvbcst_valueChanged' function.void CadastrarNFe::on_doubleSpinBoxICMSpicmsst_valueChanged(const double) {
-  const auto list = ui->tableItens->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return; }
-
-  unsetConnections();
-
-  [&] {
-    ui->doubleSpinBoxICMSvicmsst->setValue(ui->doubleSpinBoxICMSvbcst->value() * ui->doubleSpinBoxICMSpicmsst->value() / 100);
-
-    const int row = list.first().row();
-
-    if (not modelViewProdutoEstoque.setData(row, "vBCST", ui->doubleSpinBoxICMSvbcst->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "pICMSST", ui->doubleSpinBoxICMSpicmsst->value())) { return; }
-    if (not modelViewProdutoEstoque.setData(row, "vICMSST", ui->doubleSpinBoxICMSvicmsst->value())) { return; }
-  }();
-
-  setConnections();
 }
 
 void CadastrarNFe::on_itemBoxVeiculo_textChanged(const QString &) {
@@ -1640,7 +1480,7 @@ void CadastrarNFe::on_itemBoxCliente_textChanged(const QString &) {
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados do cliente: " + query.lastError().text(), this); }
 
   ui->lineEditDestinatarioNomeRazao->setText(query.value("nome_razao").toString());
-  ui->lineEditDestinatarioCPFCNPJ->setText(query.value(query.value("pfpj").toString() == "PF" ? "cpf" : "cnpj").toString());
+  ui->lineEditDestinatarioCPFCNPJ->setText(query.value((query.value("pfpj").toString() == "PF") ? "cpf" : "cnpj").toString());
   ui->lineEditDestinatarioInscEst->setText(query.value("inscEstadual").toString());
   ui->lineEditDestinatarioTel1->setText(query.value("tel").toString());
   ui->lineEditDestinatarioTel2->setText(query.value("telCel").toString());
@@ -1733,7 +1573,7 @@ bool CadastrarNFe::validar() {
   // [Destinatario]
 
   if (modelVenda.data(0, "idCliente").toString().isEmpty()) {
-    qApp->enqueueError("idCliente vazio!", this);
+    qApp->enqueueError("Cliente vazio!", this);
     ok = false;
   }
 
@@ -1754,7 +1594,7 @@ bool CadastrarNFe::validar() {
 
   if (queryCliente.value("pfpj").toString() == "PF") {
     if (clearStr(queryCliente.value("cpf").toString()).isEmpty()) {
-      qApp->enqueueError("CPF vazio!", this);
+      qApp->enqueueError("CPF destinatário vazio!", this);
       ok = false;
     }
   }
@@ -1832,26 +1672,6 @@ bool CadastrarNFe::validar() {
 
   // -------------------------------------------------------------------------
 
-  queryPartilhaInter.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
-  queryPartilhaInter.bindValue(":origem", queryLojaEnd.value("uf"));
-  queryPartilhaInter.bindValue(":destino", queryEndereco.value("uf"));
-
-  if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) {
-    qApp->enqueueError("Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text(), this);
-    ok = false;
-  }
-
-  // -------------------------------------------------------------------------
-
-  queryPartilhaIntra.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
-  queryPartilhaIntra.bindValue(":origem", queryEndereco.value("uf"));
-  queryPartilhaIntra.bindValue(":destino", queryEndereco.value("uf"));
-
-  if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) {
-    qApp->enqueueError("Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text(), this);
-    ok = false;
-  }
-
   // [Produto]
 
   for (int row = 0; row < modelViewProdutoEstoque.rowCount(); ++row) {
@@ -1866,6 +1686,24 @@ bool CadastrarNFe::validar() {
   }
 
   return ok;
+}
+
+bool CadastrarNFe::buscarAliquotas() {
+  queryPartilhaInter.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
+  queryPartilhaInter.bindValue(":origem", queryLojaEnd.value("uf"));
+  queryPartilhaInter.bindValue(":destino", queryEndereco.value("uf"));
+
+  if (not queryPartilhaInter.exec() or not queryPartilhaInter.first()) { return qApp->enqueueError(false, "Erro buscando partilha ICMS: " + queryPartilhaInter.lastError().text(), this); }
+
+  // -------------------------------------------------------------------------
+
+  queryPartilhaIntra.prepare("SELECT valor FROM icms WHERE origem = :origem AND destino = :destino");
+  queryPartilhaIntra.bindValue(":origem", queryEndereco.value("uf"));
+  queryPartilhaIntra.bindValue(":destino", queryEndereco.value("uf"));
+
+  if (not queryPartilhaIntra.exec() or not queryPartilhaIntra.first()) { return qApp->enqueueError(false, "Erro buscando partilha ICMS intra: " + queryPartilhaIntra.lastError().text(), this); }
+
+  return true;
 }
 
 void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
@@ -1904,10 +1742,8 @@ void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   qApp->enqueueInformation(resposta.value(), this);
 }
 
-void CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged(const double value) {
-  // TODO: 1refazer rateamento do frete
-  Q_UNUSED(value)
-}
+// TODO: 1refazer rateamento do frete
+void CadastrarNFe::on_doubleSpinBoxValorFrete_valueChanged(const double value) { Q_UNUSED(value) }
 
 void CadastrarNFe::alterarCertificado(const QString &text) {
   if (text.isEmpty()) { return; }
@@ -1930,6 +1766,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   if (not preencherNumeroNFe()) { return; }
 
+  // TODO: refactor this code with the one in prepararNFe
   QSqlQuery queryEmitente;
   queryEmitente.prepare("SELECT razaoSocial, nomeFantasia, cnpj, inscEstadual, tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryEmitente.bindValue(":idLoja", ui->itemBoxLoja->getId());
@@ -1992,7 +1829,6 @@ void CadastrarNFe::setConnections() {
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged, connectionType);
   connect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked, connectionType);
   connect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked, connectionType);
-  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged, connectionType);
   connect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked, connectionType);
   connect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged, connectionType);
 }
@@ -2029,14 +1865,13 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &CadastrarNFe::on_itemBoxVeiculo_textChanged);
   disconnect(ui->pushButtonConsultarCadastro, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonConsultarCadastro_clicked);
   disconnect(ui->pushButtonEnviarNFE, &QPushButton::clicked, this, &CadastrarNFe::on_pushButtonEnviarNFE_clicked);
-  disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &CadastrarNFe::on_tabWidget_currentChanged);
   disconnect(ui->tableItens, &TableView::clicked, this, &CadastrarNFe::on_tableItens_clicked);
   disconnect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged);
 }
 
 bool CadastrarNFe::listarCfop() {
-  const bool mesmaUF = ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text();
-  const bool entrada = ui->comboBoxTipo->currentText() == "0 Entrada";
+  const bool mesmaUF = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
+  const bool entrada = (ui->comboBoxTipo->currentText() == "0 Entrada");
 
   const QString stringUF = (mesmaUF ? "CFOP_DE" : "CFOP_FE");
   const QString stringEntrada = (entrada ? "cfop_entr" : "cfop_sai");
@@ -2069,14 +1904,9 @@ void CadastrarNFe::on_checkBoxFrete_toggled(bool checked) {
 
 // TODO: 5colocar NCM para poder ser alterado na caixinha em baixo
 // TODO: 3criar logo para nota
-// TODO: 5verificar com Anderson rateamento de frete
 // TODO: 5bloquear edicao direto na tabela
 // TODO: os produtos de reposicao devem sair na nota com o valor que foram vendidos originalmente
 // TODO: quando mudar a finalidade operacao para devolucao mudar as tabelas de cfop
-// TODO: testar a função de pré-gravar nota e consultar (não está salvando o idVenda e portanto na tela de logistica nao esta vinculando)
-// TODO: verificar notas pendentes soltas no sistema
-// TODO: replace 'endl' with newline and flush on end?
+// TODO: testar a função de pré-gravar nota e consultar
 // TODO: [Informações Adicionais de Interesse do Fisco: ICMS RECOLHIDO ANTECIPADAMENTE CONFORME ARTIGO 313Y;] não vai em operações inter e
 // precisa detalhar a partilha no complemento bem como origem e destino
-// TODO: na importacao verificar se a nota está autorizada
-// TODO: quando mudar endereco de entrega mudar a operacao para interestadual se for para outro estado

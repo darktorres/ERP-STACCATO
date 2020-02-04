@@ -235,20 +235,22 @@ bool InputDialogProduto::cadastrar() {
   if (not qApp->startTransaction()) { return false; }
 
   const bool success = [&] {
-    QSqlQuery queryUpdate;
-    queryUpdate.prepare(
-        "UPDATE pedido_fornecedor_has_produto2 SET aliquotaSt = :aliquotaSt, st = :st, quant = :quant, caixas = :caixas, prcUnitario = :prcUnitario, preco = :preco WHERE idPedidoFK = :idPedido1");
+    if (tipo == Tipo::GerarCompra) {
+      QSqlQuery queryUpdate;
+      queryUpdate.prepare(
+          "UPDATE pedido_fornecedor_has_produto2 SET aliquotaSt = :aliquotaSt, st = :st, quant = :quant, caixas = :caixas, prcUnitario = :prcUnitario, preco = :preco WHERE idPedidoFK = :idPedido1");
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      queryUpdate.bindValue(":aliquotaSt", modelPedidoFornecedor.data(row, "aliquotaSt"));
-      queryUpdate.bindValue(":st", modelPedidoFornecedor.data(row, "st"));
-      queryUpdate.bindValue(":quant", modelPedidoFornecedor.data(row, "quant"));
-      queryUpdate.bindValue(":caixas", modelPedidoFornecedor.data(row, "caixas"));
-      queryUpdate.bindValue(":prcUnitario", modelPedidoFornecedor.data(row, "prcUnitario"));
-      queryUpdate.bindValue(":preco", modelPedidoFornecedor.data(row, "preco"));
-      queryUpdate.bindValue(":idPedido1", modelPedidoFornecedor.data(row, "idPedido1"));
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+        queryUpdate.bindValue(":aliquotaSt", modelPedidoFornecedor.data(row, "aliquotaSt"));
+        queryUpdate.bindValue(":st", modelPedidoFornecedor.data(row, "st"));
+        queryUpdate.bindValue(":quant", modelPedidoFornecedor.data(row, "quant"));
+        queryUpdate.bindValue(":caixas", modelPedidoFornecedor.data(row, "caixas"));
+        queryUpdate.bindValue(":prcUnitario", modelPedidoFornecedor.data(row, "prcUnitario"));
+        queryUpdate.bindValue(":preco", modelPedidoFornecedor.data(row, "preco"));
+        queryUpdate.bindValue(":idPedido1", modelPedidoFornecedor.data(row, "idPedido1"));
 
-      if (not queryUpdate.exec()) { return qApp->enqueueError(false, "Erro copiando dados para tabela 2: " + queryUpdate.lastError().text(), this); }
+        if (not queryUpdate.exec()) { return qApp->enqueueError(false, "Erro copiando dados para tabela 2: " + queryUpdate.lastError().text(), this); }
+      }
     }
 
     return modelPedidoFornecedor.submitAll();

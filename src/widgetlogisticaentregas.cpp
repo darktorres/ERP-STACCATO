@@ -310,11 +310,11 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  const int row = list.first().row();
-
   QStringList idVendas;
 
   for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+
+  const int row = list.first().row();
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega, this);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());

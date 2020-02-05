@@ -185,6 +185,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
+  updateTables();
   qApp->enqueueInformation(resposta.value(), this);
 
   if (not gravarArquivo(resposta.value())) { return; }
@@ -363,6 +364,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
     if (not qApp->endTransaction()) { return; }
 
+    updateTables();
     qApp->enqueueInformation(resposta, this);
   }
 }

@@ -304,6 +304,8 @@ void InputDialogConfirmacao::on_pushButtonQuebrado_clicked() {
     msgBox.setButtonText(QMessageBox::Cancel, "Cancelar");
 
     choice = msgBox.exec();
+
+    if (choice == QMessageBox::Cancel) { return; }
   }
 
   bool ok;
@@ -431,7 +433,6 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   //  // perguntar se gerar credito ou reposicao
 
-  if (choice == QMessageBox::Cancel) { return false; }
 
   // TODO: marcar idRelacionado
 

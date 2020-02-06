@@ -87,7 +87,7 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("CancelaProduto::on_pushButtonSalvar")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 

@@ -1,7 +1,6 @@
 #include "acbr.h"
 
 #include "application.h"
-#include "log.h"
 #include "usersession.h"
 
 #include <QDesktopServices>
@@ -151,9 +150,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 }
 
 void ACBr::removerNota(const int idNFe) {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: ACBr::removerNota")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("ACBr::removerNota")) { return; }
 
   const bool remover = [&] {
     QSqlQuery query2a;

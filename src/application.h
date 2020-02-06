@@ -31,12 +31,13 @@ public:
   auto getUpdating() const -> bool;
   auto lightTheme() -> void;
   auto rollbackTransaction() -> void;
+  auto rollbackTransaction(const bool boolean) -> bool;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
   auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto showMessages() -> void;
-  auto startTransaction(const bool delayMessages = true) -> bool;
+  auto startTransaction(const QString &messageLog, const bool delayMessages = true) -> bool;
   auto updater() -> void;
 
 signals:

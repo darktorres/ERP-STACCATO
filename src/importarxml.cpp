@@ -5,7 +5,6 @@
 #include "doubledelegate.h"
 #include "editdelegate.h"
 #include "estoqueproxymodel.h"
-#include "log.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -441,12 +440,7 @@ void ImportarXML::on_pushButtonImportar_clicked() {
   unsetConnections();
 
   const auto ok = [&] {
-    if (not qApp->startTransaction()) { return false; }
-
-    if (not Log::createLog("Transação: ImportarXML::on_pushButtonImportar")) {
-      qApp->rollbackTransaction();
-      return false;
-    }
+    if (not qApp->startTransaction("ImportarXML::on_pushButtonImportar")) { return false; }
 
     if (not importar()) {
       qApp->rollbackTransaction();

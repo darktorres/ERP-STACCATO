@@ -232,7 +232,7 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
 }
 
 bool InputDialogProduto::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
+  if (not qApp->startTransaction("InputDialog::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::GerarCompra) {

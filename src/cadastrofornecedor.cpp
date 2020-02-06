@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "log.h"
 #include "searchdialog.h"
 #include "usersession.h"
 
@@ -179,12 +178,7 @@ void CadastroFornecedor::updateMode() {
 }
 
 bool CadastroFornecedor::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroFornecedor::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroFornecedor::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
@@ -369,9 +363,7 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
 
   if (not ok) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastroFornecedor::on_pushButtonValidade")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("CadastroFornecedor::on_pushButtonValidade")) { return; }
 
   if (not ajustarValidade(novaValidade)) { return qApp->rollbackTransaction(); }
 

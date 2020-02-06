@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "doubledelegate.h"
-#include "log.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
@@ -95,9 +94,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetNfeEntrada::on_pushButtonRemoverNFe")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetNfeEntrada::on_pushButtonRemoverNFe")) { return; }
 
   if (not remover(row)) { return qApp->rollbackTransaction(); }
 

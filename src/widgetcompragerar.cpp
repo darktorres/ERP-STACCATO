@@ -236,7 +236,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("WidgetCompraGerar::on_pushButtonGerarCompra")) { return; }
 
   if (not gerarCompra(list, dataCompra, dataPrevista, oc)) { return qApp->rollbackTransaction(); }
 
@@ -530,7 +530,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("WidgetCompraGerar::on_pushButtonCancelarCompra")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 

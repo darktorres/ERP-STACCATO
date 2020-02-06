@@ -536,7 +536,7 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   [=] {
     if (not verifyFields()) { return; }
 
-    if (not qApp->startTransaction()) { return; }
+    if (not qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar")) { return; }
 
     if (not cadastrar()) { return qApp->rollbackTransaction(); }
 

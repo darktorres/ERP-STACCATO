@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "log.h"
 #include "porcentagemdelegate.h"
 #include "searchdialog.h"
 #include "usersession.h"
@@ -402,12 +401,7 @@ bool CadastroLoja::viewRegister() {
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
 bool CadastroLoja::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroLoja::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroLoja::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
@@ -577,9 +571,7 @@ bool CadastroLoja::adicionarPagamento() {
 }
 
 void CadastroLoja::on_pushButtonAdicionarPagamento_clicked() {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastroLoja::on_pushButtonAdicionarPagamento")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("CadastroLoja::on_pushButtonAdicionarPagamento")) { return; }
 
   if (not adicionarPagamento()) { return qApp->rollbackTransaction(); }
 
@@ -672,9 +664,7 @@ bool CadastroLoja::atualizarPagamento() {
 }
 
 void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastroLoja::on_pushButtonAtualizarPagamento")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("CadastroLoja::on_pushButtonAtualizarPagamento")) { return; }
 
   if (not atualizarPagamento()) { return qApp->rollbackTransaction(); }
 

@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "checkboxdelegate.h"
-#include "log.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "sql.h"
@@ -630,9 +629,7 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   const QString idVenda = modelProdutos2.data(list.first().row(), "idVenda").toString();
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: Devolucao::on_pushButtonDevolverItem")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("Devolucao::on_pushButtonDevolverItem")) { return; }
 
   if (not devolverItem(list.first().row(), createNewId.value(), novoIdVendaProduto2.value())) { return qApp->rollbackTransaction(); }
 

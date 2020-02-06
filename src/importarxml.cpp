@@ -987,6 +987,12 @@ bool ImportarXML::parear() {
   return ok;
 }
 
+void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
+  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
+    if (not modelEstoque.setData(row, "lote", checked ? "N/D" : "")) { return; }
+  }
+}
+
 std::optional<int> ImportarXML::reservarIdEstoque() {
   if (qApp->getInTransaction()) {
     qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
@@ -1008,12 +1014,6 @@ std::optional<int> ImportarXML::reservarIdEstoque() {
   }
 
   return id;
-}
-
-void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
-  for (int row = 0; row < modelEstoque.rowCount(); ++row) {
-    if (not modelEstoque.setData(row, "lote", checked ? "N/D" : "")) { return; }
-  }
 }
 
 std::optional<int> ImportarXML::reservarIdVendaProduto2() {

@@ -592,5 +592,4 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 }
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
-// TODO: 1refazer sistema para permitir multiplas notas para uma mesma carga/pedido (notas parciais)
 // TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'

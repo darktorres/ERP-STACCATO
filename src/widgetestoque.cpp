@@ -216,9 +216,6 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
 // TODO: 5colocar um filtro para mostrar os cancelados/quebrados?
 // TODO: 2poder trocar bloco do estoque
 // TODO: -1verificar se o custo do pedido_fornecedor bate com os valores do estoque/consumo
-// TODO: reimplementar estoque_contabil
 // TODO: terminar de arrumar relatorio estoque
 // TODO: [Conrado] colocar filtro/tela para buscar por pedido e mostrar os estoques em que foi consumido
-// TODO: arrumar 'estoque contabil'
 // TODO: fix fulltext indexes (put match against inside subquery)
-// TODO: update estoque.status based on consumo

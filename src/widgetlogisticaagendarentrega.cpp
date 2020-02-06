@@ -734,6 +734,8 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
+  // TODO: bloquear se já houver nfe emitida
+
   if (not ui->tableProdutos->model()) { return; }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();

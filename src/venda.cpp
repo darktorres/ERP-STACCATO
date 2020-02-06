@@ -1335,14 +1335,11 @@ bool Venda::copiaProdutosOrcamento() {
 // TODO: 0hide 'nfe' field from tables that use conta_a_receber
 // TODO: 0nao gerar RT quando o total for zero (e apagar os zerados quando nao houver profissional)
 // TODO: 0se o pedido estiver cancelado ou devolvido bloquear os botoes correspondentes
-// TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao
-// sao de representacao
-// TODO: 5verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado'
-// ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
+// TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao
+// TODO: 5verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado' ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
 // TODO: 0quando for 'MATR' nao criar fluxo caixa
 // NOTE: prazoEntrega por produto
 // NOTE: bloquear desconto maximo por classe de funcionario
 // TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
 // REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
-// TODO: usar coluna 'idRelacionado' para vincular a linha quebrada/reposicao com a correspondente
 // TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao

@@ -5,8 +5,8 @@
 #include "usersession.h"
 
 #include <QDesktopServices>
-#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>

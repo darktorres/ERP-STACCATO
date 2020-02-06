@@ -7,7 +7,7 @@
 #include <QDate>
 #include <QDebug>
 
-SearchDialogProxyModel::SearchDialogProxyModel(SqlRelationalTableModel *model, QObject *parent)
+SearchDialogProxyModel::SearchDialogProxyModel(SqlTableModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), estoqueColumn(model->fieldIndex("estoque", true)), promocaoColumn(model->fieldIndex("promocao", true)),
       descontinuadoColumn(model->fieldIndex("descontinuado", true)), validadeColumn(model->fieldIndex("validadeProdutos", true)) {}
 

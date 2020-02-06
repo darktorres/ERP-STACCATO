@@ -14,7 +14,7 @@ protected:
   QList<QSqlRecord> backupEndereco;
   int currentRowEnd = -1;
   QDataWidgetMapper mapperEnd;
-  SqlRelationalTableModel modelEnd;
+  SqlTableModel modelEnd;
   // methods
   auto setDataEnd(const QString &key, const QVariant &value) -> bool;
   auto getCodigoUF(QString uf) const -> int;

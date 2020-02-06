@@ -4,7 +4,7 @@
 
 #include <QBrush>
 
-ImportaProdutosProxyModel::ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->fieldIndex("descontinuado")) {
+ImportaProdutosProxyModel::ImportaProdutosProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->fieldIndex("descontinuado")) {
   setSourceModel(model);
 }
 

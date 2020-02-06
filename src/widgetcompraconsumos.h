@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,8 +21,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelPedido;
-  SqlRelationalTableModel modelProduto;
+  SqlTableModel modelPedido;
+  SqlTableModel modelProduto;
   Ui::WidgetCompraConsumos *ui;
   // methods
   auto desfazerConsumo(const int row) -> bool;

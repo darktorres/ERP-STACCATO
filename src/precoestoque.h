@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -17,7 +17,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelProduto;
+  SqlTableModel modelProduto;
   Ui::PrecoEstoque *ui;
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;

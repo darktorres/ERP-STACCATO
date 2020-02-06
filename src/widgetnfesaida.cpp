@@ -214,7 +214,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   LimeReport::ReportEngine report;
   auto dataManager = report.dataManager();
 
-  SqlRelationalTableModel view;
+  SqlTableModel view;
   view.setTable("view_relatorio_nfe");
 
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");

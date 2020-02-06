@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -21,12 +21,12 @@ private:
   const QString idVenda;
   QDataWidgetMapper mapperProdutos;
   QString idDevolucao;
-  SqlRelationalTableModel modelCliente;
-  SqlRelationalTableModel modelDevolvidos1;
-  SqlRelationalTableModel modelPagamentos;
-  SqlRelationalTableModel modelProdutos2;
-  SqlRelationalTableModel modelVenda;
-  SqlRelationalTableModel modelConsumos;
+  SqlTableModel modelCliente;
+  SqlTableModel modelDevolvidos1;
+  SqlTableModel modelPagamentos;
+  SqlTableModel modelProdutos2;
+  SqlTableModel modelVenda;
+  SqlTableModel modelConsumos;
   Ui::Devolucao *ui;
   // methods
   auto atualizarDevolucao() -> bool;

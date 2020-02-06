@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QSqlQuery>
 
@@ -26,7 +26,7 @@ private:
   QSqlQuery query;
   QSqlQuery queryProfissional;
   QSqlQuery queryVendedor;
-  SqlRelationalTableModel modelItem;
+  SqlTableModel modelItem;
   // methods
   auto setQuerys() -> bool;
 };

@@ -20,7 +20,7 @@ private:
   int currentRowVeiculo = -1;
   QDataWidgetMapper mapperVeiculo;
   SearchDialog *sdTransportadora;
-  SqlRelationalTableModel modelVeiculo;
+  SqlTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
   auto cadastrar() -> bool final;

@@ -524,7 +524,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
 bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double caixasAgendar, const double caixasTotal) {
   // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
 
-  SqlRelationalTableModel modelProdutosTemp;
+  SqlTableModel modelProdutosTemp;
   modelProdutosTemp.setTable("venda_has_produto2");
 
   modelProdutosTemp.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());
@@ -583,7 +583,7 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
 }
 
 bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) {
-  SqlRelationalTableModel modelConsumoTemp;
+  SqlTableModel modelConsumoTemp;
   modelConsumoTemp.setTable("estoque_has_consumo");
 
   modelConsumoTemp.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());

@@ -173,7 +173,7 @@ SOURCES += \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
     src/sqlquerymodel.cpp \
-    src/sqlrelationaltablemodel.cpp \
+    src/sqltablemodel.cpp \
     src/sqltreemodel.cpp \
     src/tableview.cpp \
     src/treeview.cpp \
@@ -289,7 +289,7 @@ HEADERS  += \
     src/sortfilterproxymodel.h \
     src/sql.h \
     src/sqlquerymodel.h \
-    src/sqlrelationaltablemodel.h \
+    src/sqltablemodel.h \
     src/sqltreemodel.h \
     src/tableview.h \
     src/treeview.h \

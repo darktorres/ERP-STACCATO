@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -19,7 +19,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelViewLogistica;
+  SqlTableModel modelViewLogistica;
   Ui::WidgetLogistica *ui;
   // methods
   auto setConnections() -> void;

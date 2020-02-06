@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewVendaProduto;
+  SqlTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
   auto insere(const QDate &dataPrevista) -> bool;

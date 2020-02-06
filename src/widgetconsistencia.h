@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -19,14 +19,14 @@ public:
 
 private:
   bool modelIsSet = false;
-  SqlRelationalTableModel model1;
-  SqlRelationalTableModel model2;
-  SqlRelationalTableModel model3;
-  SqlRelationalTableModel model4;
-  SqlRelationalTableModel model5;
-  SqlRelationalTableModel model6;
-  SqlRelationalTableModel model7;
-  SqlRelationalTableModel model8;
+  SqlTableModel model1;
+  SqlTableModel model2;
+  SqlTableModel model3;
+  SqlTableModel model4;
+  SqlTableModel model5;
+  SqlTableModel model6;
+  SqlTableModel model7;
+  SqlTableModel model8;
 
 private:
   // attributes

@@ -142,7 +142,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
     // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total alterado
     // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
 
-    SqlRelationalTableModel modelConsumo;
+    SqlTableModel modelConsumo;
     modelConsumo.setTable("estoque_has_consumo");
     modelConsumo.setFilter("idVendaProduto2 = " + idRelacionado);
 

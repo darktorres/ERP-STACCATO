@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 #include "sqltreemodel.h"
 
 #include <QDialog>
@@ -25,9 +25,9 @@ private:
   // attributes
   bool representacao;
   const Tipo tipo;
-  SqlRelationalTableModel modelPedidoFornecedor;
-  SqlRelationalTableModel modelPedidoFornecedor2;
-  SqlRelationalTableModel modelFluxoCaixa;
+  SqlTableModel modelPedidoFornecedor;
+  SqlTableModel modelPedidoFornecedor2;
+  SqlTableModel modelFluxoCaixa;
   SqlTreeModel modelTree;
   Ui::InputDialogFinanceiro *ui;
   // methods

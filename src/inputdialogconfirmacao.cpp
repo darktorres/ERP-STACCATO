@@ -440,7 +440,7 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   // TODO: marcar idRelacionado
 
-  SqlRelationalTableModel modelVendaProduto;
+  SqlTableModel modelVendaProduto;
   modelVendaProduto.setTable("venda_has_produto2");
 
   modelVendaProduto.setFilter("idVendaProduto2 = " + modelVeiculo.data(row, "idVendaProduto2").toString());
@@ -506,7 +506,7 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
   return modelVendaProduto.submitAll();
 }
 
-bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
+bool InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
   const QString idVenda = modelVendaProduto.data(0, "idVenda").toString();
   const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
 
@@ -514,7 +514,7 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
 
   qApp->enqueueInformation("Gerado crédito no valor de R$ " + QLocale(QLocale::Portuguese).toString(credito), this);
 
-  SqlRelationalTableModel modelCliente;
+  SqlTableModel modelCliente;
   modelCliente.setTable("cliente");
 
   QSqlQuery query;
@@ -536,7 +536,7 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlRelationalTableModel &
   return true;
 }
 
-bool InputDialogConfirmacao::criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
+bool InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) {
   const int newRow = modelVendaProduto.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto2
 

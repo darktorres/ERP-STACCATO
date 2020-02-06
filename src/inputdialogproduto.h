@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -23,7 +23,7 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel modelPedidoFornecedor;
+  SqlTableModel modelPedidoFornecedor;
   Ui::InputDialogProduto *ui;
   // methods
   auto cadastrar() -> bool;

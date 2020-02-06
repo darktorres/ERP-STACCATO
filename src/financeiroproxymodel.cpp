@@ -6,7 +6,7 @@
 #include <QBrush>
 #include <QDate>
 
-FinanceiroProxyModel::FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent)
+FinanceiroProxyModel::FinanceiroProxyModel(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), statusFinanceiro(model->fieldIndex("statusFinanceiro")), prazoEntrega(model->fieldIndex("prazoEntrega")), novoPrazoEntrega(model->fieldIndex("novoPrazoEntrega")) {
   setSourceModel(model);
 }

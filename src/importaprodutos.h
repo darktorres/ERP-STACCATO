@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QProgressDialog>
 
@@ -43,8 +43,8 @@ private:
   QString fornecedor;
   QString idsFornecedor;
   QVariantMap variantMap;
-  SqlRelationalTableModel modelProduto;
-  SqlRelationalTableModel modelErro;
+  SqlTableModel modelProduto;
+  SqlTableModel modelErro;
   const Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods

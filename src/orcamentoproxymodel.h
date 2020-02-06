@@ -1,13 +1,13 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QIdentityProxyModel>
 
 class OrcamentoProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  explicit OrcamentoProxyModel(SqlTableModel *model, QObject *parent = nullptr);
   ~OrcamentoProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

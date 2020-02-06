@@ -22,11 +22,11 @@ private:
   QDataWidgetMapper mapperConta;
   QDataWidgetMapper mapperPagamento;
   SearchDialog *sdLoja;
-  SqlRelationalTableModel modelAssocia1;
-  SqlRelationalTableModel modelAssocia2;
-  SqlRelationalTableModel modelConta;
-  SqlRelationalTableModel modelPagamentos;
-  SqlRelationalTableModel modelTaxas;
+  SqlTableModel modelAssocia1;
+  SqlTableModel modelAssocia2;
+  SqlTableModel modelConta;
+  SqlTableModel modelPagamentos;
+  SqlTableModel modelTaxas;
   Ui::CadastroLoja *ui;
   // methods
   auto adicionarPagamento() -> bool;

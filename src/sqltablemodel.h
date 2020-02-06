@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QAbstractProxyModel>
-#include <QSqlRelationalTableModel>
+#include <QSqlTableModel>
 
 class Condition {
 public:
@@ -12,11 +12,11 @@ public:
   bool equal;
 };
 
-class SqlRelationalTableModel final : public QSqlRelationalTableModel {
+class SqlTableModel final : public QSqlTableModel {
   Q_OBJECT
 
 public:
-  explicit SqlRelationalTableModel(const int limit = 0, QObject *parent = nullptr);
+  explicit SqlTableModel(const int limit = 0, QObject *parent = nullptr);
   [[nodiscard]] auto select() -> bool final;
   [[nodiscard]] auto setData(const int row, const QString &column, const QVariant &value) -> bool;
   [[nodiscard]] auto setData(const int row, const int column, const QVariant &value) -> bool;
@@ -36,11 +36,11 @@ public:
   QAbstractProxyModel *proxyModel = nullptr;
 
 private:
-  using QSqlRelationalTableModel::data;
-  using QSqlRelationalTableModel::match;
-  using QSqlRelationalTableModel::setData;
-  using QSqlRelationalTableModel::setHeaderData;
-  using QSqlRelationalTableModel::setSort;
+  using QSqlTableModel::data;
+  using QSqlTableModel::match;
+  using QSqlTableModel::setData;
+  using QSqlTableModel::setHeaderData;
+  using QSqlTableModel::setSort;
 
 protected:
   // attributes

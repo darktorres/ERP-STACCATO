@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -20,9 +20,9 @@ public:
 private:
   // attributes
   const QString idEstoque; // TODO: change this to int?
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelConsumo;
-  SqlRelationalTableModel modelViewConsumo;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelConsumo;
+  SqlTableModel modelViewConsumo;
   Ui::Estoque *ui;
 
   enum class FieldColors {

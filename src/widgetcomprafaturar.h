@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,8 +21,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewFaturamento;
-  SqlRelationalTableModel modelResumo;
+  SqlTableModel modelViewFaturamento;
+  SqlTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
   auto faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) -> bool;

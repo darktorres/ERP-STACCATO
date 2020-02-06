@@ -2,7 +2,7 @@
 
 #include "application.h"
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QClipboard>
 #include <QDebug>
@@ -79,7 +79,7 @@ void TableView::redoView() {
 void TableView::setModel(QAbstractItemModel *model) {
   if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
     QTableView::setModel(temp->proxyModel);
-  } else if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
+  } else if (auto temp2 = qobject_cast<SqlTableModel *>(model); temp2 and temp2->proxyModel) {
     QTableView::setModel(temp2->proxyModel);
   } else {
     QTableView::setModel(model);

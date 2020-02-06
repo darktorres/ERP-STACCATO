@@ -328,16 +328,14 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::usuario(QWidget *parent) {
-  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "usuario", "idUsuario", {"nome"}, "nome, tipo", "usuario.desativado = FALSE", parent);
+  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "view_usuario", "idUsuario", {"nome"}, "nome, tipo", "desativado = FALSE", parent);
 
-  sdUsuario->hideColumns({"idUsuario", "user", "passwd", "especialidade", "desativado"});
+  sdUsuario->hideColumns({"idLoja", "idUsuario", "user", "passwd", "especialidade", "desativado"});
 
-  sdUsuario->setHeaderData("idLoja", "Loja");
+  sdUsuario->setHeaderData("descricao", "Loja");
   sdUsuario->setHeaderData("tipo", "Função");
   sdUsuario->setHeaderData("nome", "Nome");
   sdUsuario->setHeaderData("email", "E-mail");
-
-  sdUsuario->model.setRelation(sdUsuario->model.fieldIndex("idLoja"), QSqlRelation("loja", "idLoja", "descricao"));
 
   return sdUsuario;
 }

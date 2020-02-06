@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -20,7 +20,7 @@ private:
   // attributes
   const QString id;
   const Tipo tipo;
-  SqlRelationalTableModel modelViewFollowup;
+  SqlTableModel modelViewFollowup;
   Ui::FollowUp *ui;
   // methods
   auto on_dateFollowup_dateChanged(const QDate &date) -> void;

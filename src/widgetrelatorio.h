@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,10 +21,10 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelOrcamento;
-  SqlRelationalTableModel modelViewRelatorio;
-  SqlRelationalTableModel modelViewRelatorioLoja;
-  SqlRelationalTableModel modelViewRelatorioVendedor;
+  SqlTableModel modelOrcamento;
+  SqlTableModel modelViewRelatorio;
+  SqlTableModel modelViewRelatorioLoja;
+  SqlTableModel modelViewRelatorioVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;

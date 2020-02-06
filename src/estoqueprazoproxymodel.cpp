@@ -6,7 +6,7 @@
 #include <QBrush>
 #include <QDate>
 
-EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlRelationalTableModel *model, QObject *parent) : QIdentityProxyModel(parent), prazoEntregaColumn(model->fieldIndex("prazoEntrega")) {
+EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), prazoEntregaColumn(model->fieldIndex("prazoEntrega")) {
   setSourceModel(model);
 }
 

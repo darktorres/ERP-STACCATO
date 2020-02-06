@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -22,7 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewRecebimento;
+  SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;

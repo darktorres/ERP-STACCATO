@@ -25,7 +25,7 @@ private:
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;
-  SqlRelationalTableModel modelItem;
+  SqlTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "estoqueproxymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 #include "xml.h"
 
 #include <QDate>
@@ -29,12 +29,12 @@ private:
   // attributes
   const QDate dataReal;
   const QStringList idsCompra;
-  SqlRelationalTableModel modelCompra;
-  SqlRelationalTableModel modelConsumo;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelVenda;
-  SqlRelationalTableModel modelEstoque_compra;
-  SqlRelationalTableModel modelNFe;
+  SqlTableModel modelCompra;
+  SqlTableModel modelConsumo;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelVenda;
+  SqlTableModel modelEstoque_compra;
+  SqlTableModel modelNFe;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {

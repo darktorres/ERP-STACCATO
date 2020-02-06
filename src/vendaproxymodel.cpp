@@ -4,7 +4,7 @@
 
 #include <QBrush>
 
-VendaProxyModel::VendaProxyModel(SqlRelationalTableModel *model, QObject *parent)
+VendaProxyModel::VendaProxyModel(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("Status")), financeiroIndex(model->fieldIndex("statusFinanceiro")) {
   setSourceModel(model);
 }

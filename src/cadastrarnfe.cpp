@@ -2,7 +2,6 @@
 #include "ui_cadastrarnfe.h"
 
 #include "application.h"
-#include "log.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "usersession.h"
@@ -209,9 +208,7 @@ std::optional<int> CadastrarNFe::preCadastrarNota() {
 }
 
 void CadastrarNFe::removerNota(const int idNFe) {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastrarNFe::removerNota")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("CadastrarNFe::removerNota")) { return; }
 
   const bool remover = [&] {
     QSqlQuery query2a;
@@ -334,9 +331,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   qDebug() << "filePath: " << filePath;
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastrarNFe::on_pushButtonEnviarNFe_precadastrar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("CadastrarNFe::on_pushButtonEnviarNFe_precadastrar")) { return; }
 
   const auto idNFe = preCadastrarNota();
   qDebug() << "precadastrar";
@@ -353,9 +348,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not processarResposta(resposta2.value(), filePath, idNFe.value(), acbrRemoto)) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastrarNFe::on_pushButtonEnviarNFe_cadastrar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("CadastrarNFe::on_pushButtonEnviarNFe_cadastrar")) { return; }
 
   if (not cadastrar(idNFe.value())) { return qApp->rollbackTransaction(); }
 

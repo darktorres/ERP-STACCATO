@@ -5,7 +5,6 @@
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "importaprodutosproxymodel.h"
-#include "log.h"
 #include "porcentagemdelegate.h"
 #include "validadedialog.h"
 
@@ -35,9 +34,7 @@ void ImportaProdutos::importarTabela() {
   if (not readFile()) { return; }
   if (not readValidade()) { return; }
 
-  if (not qApp->startTransaction(false)) { return; }
-
-  if (not Log::createLog("Transação: ImportaProdutos::importaTabela")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("ImportaProdutos::importaTabela", false)) { return; }
 
   if (not importar()) {
     db.close();

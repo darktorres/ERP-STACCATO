@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cancelaproduto.h"
 #include "inputdialogfinanceiro.h"
-#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 
@@ -92,9 +91,7 @@ void WidgetCompraConfirmar::on_pushButtonConfirmarCompra_clicked() {
   const QDate dataPrevista = inputDlg.getDate();
   const QDate dataConf = inputDlg.getNextDate();
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetCompraConfirmar::on_pushButtonConfirmarCompra")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetCompraConfirmar::on_pushButtonConfirmarCompra")) { return; }
 
   if (not confirmarCompra(idCompra, dataPrevista, dataConf)) { return qApp->rollbackTransaction(); }
 

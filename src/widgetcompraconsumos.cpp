@@ -4,7 +4,6 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
-#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 
@@ -97,9 +96,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetCompraConsumos::on_pushButtonDesfazerConsumo")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo")) { return; }
 
   if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
 

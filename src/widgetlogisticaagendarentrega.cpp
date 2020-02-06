@@ -7,7 +7,6 @@
 #include "financeiroproxymodel.h"
 #include "followup.h"
 #include "inputdialog.h"
-#include "log.h"
 #include "sql.h"
 #include "usersession.h"
 #include "xml.h"
@@ -266,9 +265,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { idVendas << modelTranspAtual.data(row, "idVenda").toString(); }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga")) { return; }
 
   if (not processRows()) { return qApp->rollbackTransaction(); }
 
@@ -473,9 +470,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   if (qFuzzyIsNull(caixasAgendar) or not ok) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial")) { return; }
 
   if (not adicionarProdutoParcial(row, caixasAgendar, caixasTotal)) { return qApp->rollbackTransaction(); }
 
@@ -677,9 +672,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido")) { return; }
 
   if (not reagendar(list, input.getNextDate(), input.getObservacao())) { return qApp->rollbackTransaction(); }
 

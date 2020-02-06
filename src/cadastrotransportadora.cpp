@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "log.h"
 #include "searchdialog.h"
 #include "usersession.h"
 
@@ -354,12 +353,7 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroTransportadora::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroTransportadora::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }

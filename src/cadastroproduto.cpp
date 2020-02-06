@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "cadastrofornecedor.h"
-#include "log.h"
 #include "usersession.h"
 
 #include <QDebug>
@@ -230,12 +229,7 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroProduto::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroProduto::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }

@@ -5,7 +5,6 @@
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "itembox.h"
-#include "log.h"
 #include "usersession.h"
 
 #include <QDebug>
@@ -164,12 +163,7 @@ bool CadastroProfissional::viewRegister() {
 }
 
 bool CadastroProfissional::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroProfissional::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroProfissional::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }

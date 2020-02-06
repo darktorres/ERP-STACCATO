@@ -5,7 +5,6 @@
 #include "doubledelegate.h"
 #include "estoque.h"
 #include "inputdialog.h"
-#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 
@@ -171,9 +170,7 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: ProdutosPendentes::on_pushButtonComprar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("ProdutosPendentes::on_pushButtonComprar")) { return; }
 
   if (not comprar(list, inputDlg.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -228,9 +225,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: ProdutosPendentes::on_pushButtonConsumirEstoque")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("ProdutosPendentes::on_pushButtonConsumirEstoque")) { return; }
 
   if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) { return qApp->rollbackTransaction(); }
 

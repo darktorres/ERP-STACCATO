@@ -6,7 +6,6 @@
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
-#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 
@@ -127,8 +126,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {
-    if (not qApp->startTransaction()) { return; }
-    if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return qApp->rollbackTransaction(); }
+    if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return; }
     if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
     if (not qApp->endTransaction()) { return; }
   } else {
@@ -139,8 +137,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (not qApp->startTransaction()) { return; }
-  if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return; }
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
   if (not qApp->endTransaction()) { return; }
 

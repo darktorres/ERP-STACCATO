@@ -2,7 +2,6 @@
 #include "ui_inserirtransferencia.h"
 
 #include "application.h"
-#include "log.h"
 
 #include <QMessageBox>
 #include <QSqlError>
@@ -27,9 +26,7 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: InserirTransferencia::on_pushButtonSalvar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar")) { return; }
 
   if (not cadastrar()) { return qApp->rollbackTransaction(); }
 

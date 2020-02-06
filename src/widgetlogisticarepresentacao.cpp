@@ -4,7 +4,6 @@
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialogconfirmacao.h"
-#include "log.h"
 #include "sql.h"
 
 #include <QDate>
@@ -87,9 +86,7 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   if (input.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue")) { return; }
 
   if (not processRows(list, input.getDate(), input.getRecebeu())) { return qApp->rollbackTransaction(); }
 

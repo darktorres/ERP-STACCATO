@@ -117,7 +117,7 @@ bool WidgetCompraConsumos::desfazerConsumo(const int row) {
 
   // REFAC: pass this responsability to Estoque class?
 
-  // NOTE: estoque_has_consumo may have the same idVendaProduto2 in more than one row
+  // NOTE: estoque_has_consumo may have the same idVendaProduto2 in more than one row (only until the field is made UNIQUE)
   QSqlQuery queryDelete;
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
   queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
@@ -153,3 +153,4 @@ void WidgetCompraConsumos::montaFiltro() {
 
 // TODO: converter tabela inferior para arvore e permitir o desconsumo apenas das sublinhas (vp2)
 // TODO: ao selecionar uma linha na tabela superior mostrar apenas os produtos da dupla idVenda/idCompra ou juntar todos os idCompra com um group_concat
+// TODO: refazer o agrupamento porque tem venda que aparece 3 vezes em cima e nos 3 casos mostra os mesmos itens em baixo (GABR-163619)

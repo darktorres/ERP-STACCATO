@@ -352,5 +352,3 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
 
   montaFiltro();
 }
-
-// TODO: verificar os pedidos de devolucao que estao com o status errado (update_venda_status)

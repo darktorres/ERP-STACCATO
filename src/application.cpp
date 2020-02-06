@@ -158,8 +158,6 @@ void Application::startSqlPing() {
   timer->start(60000);
 
   // TODO: se ping falhar marcar 'desconectado'?
-
-  // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
 }
 
 void Application::startUpdaterPing() {

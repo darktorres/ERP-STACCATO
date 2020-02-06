@@ -201,12 +201,9 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-// TODO: 4quando importar nota vincular com as contas_pagar
-// TODO: 5reimportar nota id 4936 que veio com o produto dividido para testar o quantConsumido
-// TODO: 5reestruturar na medida do possivel de forma que cada estoque tenha apenas uma nota/compra
-// TODO: 0colocar tela de busca
-
 void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
   ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NFe");
   montaFiltro();
 }
+
+// TODO: 4quando importar nota vincular com as contas_pagar

@@ -381,9 +381,6 @@ bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
 }
 
 bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a
-  // nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
-
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
@@ -419,9 +416,5 @@ bool WidgetNfeSaida::gravarArquivo(const QString &resposta) {
   return true;
 }
 
-// TODO: guardar idVenda/outros dados na nfe para quando cancelar nao perder os vinculos
 // TODO: 2tela para importar notas de amostra (aba separada)
-// TODO: 0nao estou guardando o valor na nota
-// TODO: 0algumas notas nao estao mostrando valor
 // TODO: nesta tela colocar um campo dizendo qual loja que emitiu a nota (nao precisa mostrar o cnpj, apenas o nome da loja) (e talvez poder filtrar pela loja)
-// TODO: fazer sistema para trocar notas futuras pela nota real

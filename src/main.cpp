@@ -35,19 +35,12 @@ int main(int argc, char *argv[]) {
 
 // ----------------- SERVIDOR ----------------------
 
-// TODO: set ftp server on each server to replace ssh on backup
-// TODO: ubuntu 14.04 parou de receber atualizações, atualizar para a versão mais recente
 // TODO: colocar pelo menos as ultimas copias do backup do mysql na nuvem
 
 // -------------------------------------------------
 
 // TODO: test changing table header to resizeToContents
-// TODO: criar uma branch 'audit' para criar um log para cada operacao feita pelo usuario, com data e hora,
-// um para cada funcao basicamente e salvar em um arquivo audit.log
-// TODO: sempre que precisar verificar se algo está dentro da validade pegar data do servidor e desconsiderar data do pc
 // REFAC: evitar divisoes por zero
-// REFAC: pesquisar selects/submits sem verificacao
 // REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?
 // REFAC: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
 // REFAC: use initializer lists?
-// TODO: verificar doubles comparados com zero (>/>=) e trocar por qFuzzy

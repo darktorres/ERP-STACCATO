@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewNFeSaida;
+  SqlTableModel modelViewNFeSaida;
   Ui::WidgetNfeSaida *ui;
   // methods
   auto atualizarNFe(const int idNFe, const QString &xml) -> bool;

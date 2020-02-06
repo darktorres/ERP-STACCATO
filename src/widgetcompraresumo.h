@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,7 +21,7 @@ private:
   // attributes
   bool modelIsSet = false;
   Ui::WidgetCompraResumo *ui;
-  SqlRelationalTableModel modelResumo;
+  SqlTableModel modelResumo;
   // methods
   auto setupTables() -> void;
 };

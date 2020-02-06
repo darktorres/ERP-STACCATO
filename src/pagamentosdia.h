@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -18,7 +18,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelViewFluxoCaixa;
+  SqlTableModel modelViewFluxoCaixa;
   Ui::PagamentosDia *ui;
   // methods
   auto setupTables() -> void;

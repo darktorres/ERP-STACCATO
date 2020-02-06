@@ -269,7 +269,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
 
   //--------------------------------------------------------------------
 
-  SqlRelationalTableModel modelCompra;
+  SqlTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
   modelCompra.setFilter("idCompra IN (" + idCompra + ") AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto2 IS NULL");

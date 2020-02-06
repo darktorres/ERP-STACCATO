@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -17,7 +17,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelOrcamento;
+  SqlTableModel modelOrcamento;
   Ui::BaixaOrcamento *ui;
   // methods
   auto setupTables(const QString &idOrcamento) -> void;

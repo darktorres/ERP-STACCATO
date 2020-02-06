@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -20,8 +20,8 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel modelPendentes;
-  SqlRelationalTableModel modelProcessados;
+  SqlTableModel modelPendentes;
+  SqlTableModel modelProcessados;
   Ui::Contas *ui;
   // methods
   auto on_pushButtonSalvar_clicked() -> void;

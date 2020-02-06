@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
 
 #include <QWidget>
 

@@ -1,7 +1,6 @@
 #include "dateformatdelegate.h"
 
 #include "application.h"
-#include "sqlrelationaltablemodel.h"
 
 #include <QDateEdit>
 

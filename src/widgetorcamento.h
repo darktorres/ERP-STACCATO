@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewOrcamento;
+  SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
   auto montaFiltro() -> void;

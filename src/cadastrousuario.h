@@ -18,7 +18,7 @@ public:
 private:
   // attributes
   SearchDialog *sdUsuario;
-  SqlRelationalTableModel modelPermissoes;
+  SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
   auto cadastrar() -> bool final;

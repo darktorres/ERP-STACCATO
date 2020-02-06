@@ -1,7 +1,7 @@
 #pragma once
 
 #include "acbr.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -35,9 +35,9 @@ private:
   QString arquivo;
   QString chaveNum;
   QString xml;
-  SqlRelationalTableModel modelLoja;
-  SqlRelationalTableModel modelViewProdutoEstoque;
-  SqlRelationalTableModel modelVenda;
+  SqlTableModel modelLoja;
+  SqlTableModel modelViewProdutoEstoque;
+  SqlTableModel modelVenda;
   Ui::CadastrarNFe *ui;
   // methods
   auto alterarCertificado(const QString &text) -> void;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
-
 #include <QDialog>
 
 namespace Ui {

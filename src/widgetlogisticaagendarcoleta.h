@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -23,9 +23,9 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   QString fornecedor;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelTranspAtual;
-  SqlRelationalTableModel modelTranspAgend;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelTranspAtual;
+  SqlTableModel modelTranspAgend;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> bool;

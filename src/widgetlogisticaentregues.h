@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -23,7 +23,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   SqlQueryModel modelProdutos;
-  SqlRelationalTableModel modelVendas;
+  SqlTableModel modelVendas;
   Ui::WidgetLogisticaEntregues *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;

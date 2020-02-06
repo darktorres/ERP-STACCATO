@@ -215,7 +215,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
 
   //----------------------------------
 
-  SqlRelationalTableModel modelContaPagar;
+  SqlTableModel modelContaPagar;
   modelContaPagar.setTable("conta_a_pagar_has_pagamento");
 
   QSqlQuery query;

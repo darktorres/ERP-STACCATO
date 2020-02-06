@@ -26,10 +26,10 @@ private:
   bool canChangeFrete = false;
   double minimoFrete;
   double porcFrete;
-  SqlRelationalTableModel modelFluxoCaixa;
-  SqlRelationalTableModel modelFluxoCaixa2;
-  SqlRelationalTableModel modelItem;
-  SqlRelationalTableModel modelItem2;
+  SqlTableModel modelFluxoCaixa;
+  SqlTableModel modelFluxoCaixa2;
+  SqlTableModel modelItem;
+  SqlTableModel modelItem2;
   SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -17,8 +17,8 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelDe;
-  SqlRelationalTableModel modelPara;
+  SqlTableModel modelDe;
+  SqlTableModel modelPara;
   Ui::InserirTransferencia *ui;
   // methods
   auto cadastrar() -> bool;

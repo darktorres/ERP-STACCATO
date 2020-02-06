@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -17,7 +17,7 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelContaReceber;
+  SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
   auto cadastrar(const QModelIndexList &list) -> bool;

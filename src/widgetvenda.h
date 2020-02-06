@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -23,7 +23,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   bool financeiro = false;
-  SqlRelationalTableModel modelViewVenda;
+  SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
   auto montaFiltro() -> void;

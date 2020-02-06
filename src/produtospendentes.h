@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -18,8 +18,8 @@ public:
 
 private:
   // attributes
-  SqlRelationalTableModel modelProdutos;
-  SqlRelationalTableModel modelViewProdutos;
+  SqlTableModel modelProdutos;
+  SqlTableModel modelViewProdutos;
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods

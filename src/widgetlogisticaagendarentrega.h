@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -21,10 +21,10 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelTranspAtual;
-  SqlRelationalTableModel modelTranspAgend;
-  SqlRelationalTableModel modelVendas;
-  SqlRelationalTableModel modelProdutos;
+  SqlTableModel modelTranspAtual;
+  SqlTableModel modelTranspAgend;
+  SqlTableModel modelVendas;
+  SqlTableModel modelProdutos;
   Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> bool;

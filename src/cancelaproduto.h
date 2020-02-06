@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -20,7 +20,7 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel model;
+  SqlTableModel model;
   Ui::CancelaProduto *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;

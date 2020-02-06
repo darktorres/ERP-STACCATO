@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -22,7 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewLogisticaRepresentacao;
+  SqlTableModel modelViewLogisticaRepresentacao;
   Ui::WidgetLogisticaRepresentacao *ui;
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;

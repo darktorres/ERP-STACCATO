@@ -785,7 +785,6 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
 // NOTE: 3colocar tabela relacao para precos diferenciados por loja (associar produto_has_preco <->
 // produto_has_preco_has_loja ou guardar idLoja em produto_has_preco)
 // NOTE: remover idProdutoRelacionado?
-// TODO: 2unificar m2cx/pccx em uncx, podendo ter uma segunda coluna pccx/kgcx
 
 // TODO: 4markup esta exibindo errado ou salvando errado
 // TODO: 4nao mostrar promocao descontinuado
@@ -795,10 +794,9 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
 // TODO: mostrar os totais na tela e nao apenas na caixa de dialogo
 
 // NOTE: para arrumar o problema da ambiguidade m2cx/pccx:
-//       -colocar uma coluna 'unCaixa' na tabela de produtos para dizer qual a unidade da caixa;
 //       -usar uma segunda coluna 'pccx' tambem
 //       -no caso dos produtos por metro é usado ambas as colunas m2cx/pccx mas nos outros produtos apenas o 'pccx'
-//       -para minimo/multiplo usar em relacao a 'unCaixa' de forma que se o minimo for uma caixa, entao o minimo é 1,
+//       -para minimo/multiplo usar a relacao 'quantCaixa' de forma que se o minimo for uma caixa, entao o minimo é 1,
 //        e o multiplo sendo 1/4 de caixa será 0,25. esses numeros serão portanto os valores de minimo e singlestep respectivamente
 //        do spinbox.
 

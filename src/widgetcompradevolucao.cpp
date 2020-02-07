@@ -55,7 +55,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("caixas", "Cx.");
   modelVendaProduto.setHeaderData("quant", "Quant.");
   modelVendaProduto.setHeaderData("un", "Un.");
-  modelVendaProduto.setHeaderData("unCaixa", "Un./Cx.");
+  modelVendaProduto.setHeaderData("quantCaixa", "Quant./Cx.");
   modelVendaProduto.setHeaderData("codComercial", "Cód. Com.");
   modelVendaProduto.setHeaderData("formComercial", "Form. Com.");
 

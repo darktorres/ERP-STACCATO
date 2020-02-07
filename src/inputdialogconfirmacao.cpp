@@ -201,7 +201,7 @@ void InputDialogConfirmacao::setupTables() {
     modelVeiculo.setHeaderData("kg", "Kg.");
     modelVeiculo.setHeaderData("quant", "Quant.");
     modelVeiculo.setHeaderData("un", "Un.");
-    modelVeiculo.setHeaderData("unCaixa", "Un./Cx.");
+    modelVeiculo.setHeaderData("quantCaixa", "Quant./Cx.");
     modelVeiculo.setHeaderData("codComercial", "Cód. Com.");
     modelVeiculo.setHeaderData("formComercial", "Form. Com.");
 
@@ -432,7 +432,6 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
   if (not modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO")) { return false; }
 
   //  // perguntar se gerar credito ou reposicao
-
 
   // TODO: marcar idRelacionado
 

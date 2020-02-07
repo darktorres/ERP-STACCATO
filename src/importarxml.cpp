@@ -304,11 +304,11 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
   QSqlQuery query;
   query.prepare(
       "INSERT INTO produto SELECT NULL, p.idProdutoUpd, :idEstoque, p.idFornecedor, p.idFornecedorUpd, p.fornecedor, p.fornecedorUpd, CONCAT(p.descricao, ' (ESTOQUE)'), p.descricaoUpd, "
-      ":estoqueRestante, p.estoqueRestanteUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, p.multiploUpd, p.m2cx, p.m2cxUpd, "
-      "p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, p.ncmEx, p.ncmExUpd, p.cfop, "
-      "p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, :custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, p.mvaUpd, p.precoVenda, "
-      "p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, NULL, p.validadeUpd, "
-      ":descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
+      ":estoqueRestante, p.estoqueRestanteUpd, p.quantCaixa, p.quantCaixaUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, "
+      "p.multiploUpd, p.m2cx, p.m2cxUpd, p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, "
+      "p.ncmEx, p.ncmExUpd, p.cfop, p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, :custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, "
+      "p.mvaUpd, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, "
+      "NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
 
   for (const auto &tuple : tuples) {
     const auto [idProduto, idEstoque, estoqueRestante, valorUnid] = tuple;
@@ -502,23 +502,19 @@ void ImportarXML::on_pushButtonProcurar_clicked() {
 
 std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
   QSqlQuery query;
-  query.prepare("SELECT m2cx, pccx FROM produto WHERE codComercial = :codComercial");
+  query.prepare("SELECT quantCaixa FROM produto WHERE codComercial = :codComercial");
   query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
   if (not query.exec()) {
-    qApp->enqueueError("Erro lendo tabela produto: " + query.lastError().text(), this);
+    qApp->enqueueError("Erro buscando produto: " + query.lastError().text(), this);
     return {};
   }
 
   if (not query.first()) { return {}; }
 
-  const QString un = modelEstoque.data(rowEstoque, "un").toString();
-
-  const double quantCaixa = un == "M2" or un == "M²" or un == "ML" ? query.value("m2cx").toDouble() : query.value("pccx").toDouble();
-
+  const double quantCaixa = query.value("quantCaixa").toDouble();
   const double quant = modelEstoque.data(rowEstoque, "quant").toDouble();
-
-  const double caixas = qRound(quant / quantCaixa * 100) / 100.;
+  const double caixas = quant / quantCaixa;
 
   return caixas;
 }
@@ -766,9 +762,9 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const int rowVenda = list.first();
 
-  const double quantVenda = qRound(modelVenda.data(rowVenda, "quant").toDouble() * 100) / 100.;
-  const double restanteEstoque = qRound(modelEstoque.data(rowEstoque, "restante").toDouble() * 100) / 100.;
-  const double quantConsumo = qRound(qMin(quantVenda, restanteEstoque) * 100) / 100.;
+  const double quantVenda = SqlTableModel::roundDouble(modelVenda.data(rowVenda, "quant").toDouble());
+  const double restanteEstoque = SqlTableModel::roundDouble(modelEstoque.data(rowEstoque, "restante").toDouble());
+  const double quantConsumo = SqlTableModel::roundDouble(qMin(quantVenda, restanteEstoque));
 
   if (qFuzzyIsNull(quantConsumo)) { return qApp->enqueueError(false, "quantConsumo = 0!", this); }
   if (quantConsumo < quantVenda) { return qApp->enqueueError(false, "quantConsumo < quantVenda", this); }
@@ -799,18 +795,14 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   // -------------------------------------
 
   QSqlQuery queryProduto;
-  queryProduto.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+  queryProduto.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   queryProduto.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
   if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
 
-  const QString un = queryProduto.value("un").toString();
-  const double m2cx = queryProduto.value("m2cx").toDouble();
-  const double pccx = queryProduto.value("pccx").toDouble();
+  const double quantCaixa = queryProduto.value("quantCaixa").toDouble();
 
-  const double unCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
-
-  const double caixas = qRound(quantConsumo / unCaixa * 100) / 100.;
+  const double caixas = quantConsumo / quantCaixa;
 
   if (not modelConsumo.setData(rowConsumo, "status", "PRÉ-CONSUMO")) { return false; }
   if (not modelConsumo.setData(rowConsumo, "quant", quantConsumo * -1)) { return false; }
@@ -844,7 +836,7 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
   }
 
   const double quantVenda = modelVenda.data(rowVenda, "quant").toDouble();
-  const double unCaixa = modelVenda.data(rowVenda, "unCaixa").toDouble();
+  const double quantCaixa = modelVenda.data(rowVenda, "quantCaixa").toDouble();
 
   const double proporcao = quantAdicionar / quantVenda;
   const double parcial = modelVenda.data(rowVenda, "parcial").toDouble() * proporcao;
@@ -852,7 +844,7 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
   const double total = modelVenda.data(rowVenda, "total").toDouble() * proporcao;
 
   if (not modelVenda.setData(rowVenda, "quant", quantAdicionar)) { return {}; }
-  if (not modelVenda.setData(rowVenda, "caixas", quantAdicionar / unCaixa)) { return {}; }
+  if (not modelVenda.setData(rowVenda, "caixas", quantAdicionar / quantCaixa)) { return {}; }
   if (not modelVenda.setData(rowVenda, "parcial", parcial)) { return {}; }
   if (not modelVenda.setData(rowVenda, "parcialDesc", parcialDesc)) { return {}; }
   if (not modelVenda.setData(rowVenda, "total", total)) { return {}; }
@@ -866,7 +858,7 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
   if (not modelVenda.setData(newRowVenda, "idVendaProduto2", novoIdVendaProduto2.value())) { return {}; }
   if (not modelVenda.setData(newRowVenda, "idRelacionado", modelVenda.data(rowVenda, "idVendaProduto2"))) { return {}; }
   if (not modelVenda.setData(newRowVenda, "quant", quantNovo)) { return {}; }
-  if (not modelVenda.setData(newRowVenda, "caixas", quantNovo / unCaixa)) { return {}; }
+  if (not modelVenda.setData(newRowVenda, "caixas", quantNovo / quantCaixa)) { return {}; }
   if (not modelVenda.setData(newRowVenda, "parcial", parcialNovo)) { return {}; }
   if (not modelVenda.setData(newRowVenda, "parcialDesc", parcialDescNovo)) { return {}; }
   if (not modelVenda.setData(newRowVenda, "total", totalNovo)) { return {}; }

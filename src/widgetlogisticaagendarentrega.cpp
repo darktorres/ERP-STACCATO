@@ -58,7 +58,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelProdutos.setHeaderData("caixas", "Caixas");
   modelProdutos.setHeaderData("quant", "Quant.");
   modelProdutos.setHeaderData("un", "Un.");
-  modelProdutos.setHeaderData("unCaixa", "Un./Cx.");
+  modelProdutos.setHeaderData("quantCaixa", "Quant./Cx.");
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
 
@@ -83,7 +83,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelTranspAtual.setHeaderData("kg", "Kg.");
   modelTranspAtual.setHeaderData("quant", "Quant.");
   modelTranspAtual.setHeaderData("un", "Un.");
-  modelTranspAtual.setHeaderData("unCaixa", "Un./Cx.");
+  modelTranspAtual.setHeaderData("quantCaixa", "Quant./Cx.");
   modelTranspAtual.setHeaderData("codComercial", "Cód. Com.");
   modelTranspAtual.setHeaderData("formComercial", "Form. Com.");
 
@@ -117,7 +117,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
   modelTranspAgend.setHeaderData("kg", "Kg.");
   modelTranspAgend.setHeaderData("quant", "Quant.");
   modelTranspAgend.setHeaderData("un", "Un.");
-  modelTranspAgend.setHeaderData("unCaixa", "Un./Cx.");
+  modelTranspAgend.setHeaderData("quantCaixa", "Quant./Cx.");
   modelTranspAgend.setHeaderData("codComercial", "Cód. Com.");
   modelTranspAgend.setHeaderData("formComercial", "Form. Com.");
 
@@ -341,7 +341,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
     const int newRow = modelTranspAtual.insertRowAtEnd();
 
     if (not modelTranspAtual.setData(newRow, "fornecedor", modelProdutos.data(row, "fornecedor"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "unCaixa", modelProdutos.data(row, "unCaixa"))) { return false; }
+    if (not modelTranspAtual.setData(newRow, "quantCaixa", modelProdutos.data(row, "quantCaixa"))) { return false; }
     if (not modelTranspAtual.setData(newRow, "formComercial", modelProdutos.data(row, "formComercial"))) { return false; }
     if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
     if (not modelTranspAtual.setData(newRow, "idVenda", modelProdutos.data(row, "idVenda"))) { return false; }
@@ -493,13 +493,13 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
 
-  const double unCaixa = modelProdutos.data(row, "unCaixa").toDouble();
+  const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
   const double kg = query.value("kgcx").toDouble();
 
   const int newRow = modelTranspAtual.insertRowAtEnd();
 
   if (not modelTranspAtual.setData(newRow, "fornecedor", modelProdutos.data(row, "fornecedor"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "unCaixa", modelProdutos.data(row, "unCaixa"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "quantCaixa", modelProdutos.data(row, "quantCaixa"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "formComercial", modelProdutos.data(row, "formComercial"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
   if (not modelTranspAtual.setData(newRow, "idVenda", modelProdutos.data(row, "idVenda"))) { return false; }
@@ -510,7 +510,7 @@ bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const
   if (not modelTranspAtual.setData(newRow, "un", modelProdutos.data(row, "un"))) { return false; }
   if (not modelTranspAtual.setData(newRow, "caixas", caixasAgendar)) { return false; }
   if (not modelTranspAtual.setData(newRow, "kg", kg * caixasAgendar)) { return false; }
-  if (not modelTranspAtual.setData(newRow, "quant", caixasAgendar * unCaixa)) { return false; }
+  if (not modelTranspAtual.setData(newRow, "quant", caixasAgendar * quantCaixa)) { return false; }
   if (not modelTranspAtual.setData(newRow, "status", "ENTREGA AGEND.")) { return false; }
 
   return true;
@@ -543,14 +543,14 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
   const double caixasAgendar2 = caixasAgendar;
   const double caixasTotal2 = caixasTotal;
 
-  const double unCaixa = modelProdutosTemp.data(0, "unCaixa").toDouble();
+  const double quantCaixa = modelProdutosTemp.data(0, "quantCaixa").toDouble();
 
   const double proporcao = caixasAgendar2 / caixasTotal2;
   const double parcial = double(modelProdutosTemp.data(0, "parcial").toDouble()) * proporcao;
   const double parcialDesc = double(modelProdutosTemp.data(0, "parcialDesc").toDouble()) * proporcao;
   const double total = double(modelProdutosTemp.data(0, "total").toDouble()) * proporcao;
 
-  if (not modelProdutosTemp.setData(0, "quant", (caixasAgendar2 * unCaixa))) { return false; }
+  if (not modelProdutosTemp.setData(0, "quant", (caixasAgendar2 * quantCaixa))) { return false; }
   if (not modelProdutosTemp.setData(0, "caixas", caixasAgendar2)) { return false; }
   if (not modelProdutosTemp.setData(0, "parcial", parcial)) { return false; }
   if (not modelProdutosTemp.setData(0, "parcialDesc", parcialDesc)) { return false; }
@@ -563,7 +563,7 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
   const double totalNovo = double(modelProdutosTemp.data(newRow, "total").toDouble()) * proporcaoNovo;
 
   if (not modelProdutosTemp.setData(newRow, "idRelacionado", modelProdutosTemp.data(0, "idVendaProduto2"))) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * unCaixa))) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * quantCaixa))) { return false; }
   if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal2 - caixasAgendar2))) { return false; }
   if (not modelProdutosTemp.setData(newRow, "parcial", parcialNovo)) { return false; }
   if (not modelProdutosTemp.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }

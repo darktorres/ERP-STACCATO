@@ -703,7 +703,7 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("un", "Un.");
   modelItem.setHeaderData("codComercial", "Código");
   modelItem.setHeaderData("formComercial", "Formato");
-  modelItem.setHeaderData("unCaixa", "Un./Caixa");
+  modelItem.setHeaderData("quantCaixa", "Quant./Cx.");
   modelItem.setHeaderData("parcial", "Subtotal");
   modelItem.setHeaderData("desconto", "Desc. %");
   modelItem.setHeaderData("parcialDesc", "Total");
@@ -716,7 +716,7 @@ void Orcamento::setupTables() {
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idOrcamento");
   ui->tableProdutos->hideColumn("idLoja");
-  ui->tableProdutos->hideColumn("unCaixa");
+  ui->tableProdutos->hideColumn("quantCaixa");
   ui->tableProdutos->hideColumn("descUnitario");
   ui->tableProdutos->hideColumn("descGlobal");
   ui->tableProdutos->hideColumn("total");
@@ -752,7 +752,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
     if (not modelItem.setData(currentRowItem, "prcUnitario", ui->lineEditPrecoUn->getValue())) { return; }
     if (not modelItem.setData(currentRowItem, "caixas", ui->doubleSpinBoxCaixas->value())) { return; }
     if (not modelItem.setData(currentRowItem, "quant", ui->doubleSpinBoxQuant->value())) { return; }
-    if (not modelItem.setData(currentRowItem, "unCaixa", ui->doubleSpinBoxQuant->singleStep())) { return; }
+    if (not modelItem.setData(currentRowItem, "quantCaixa", ui->doubleSpinBoxQuant->singleStep())) { return; }
     if (not modelItem.setData(currentRowItem, "un", ui->lineEditUn->text())) { return; }
     if (not modelItem.setData(currentRowItem, "codComercial", ui->lineEditCodComercial->text())) { return; }
     if (not modelItem.setData(currentRowItem, "formComercial", ui->lineEditFormComercial->text())) { return; }

@@ -57,12 +57,12 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
 
   QSqlQuery query;
-  query.prepare("SELECT unCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
+  query.prepare("SELECT quantCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando unCaixa: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando quantCaixa: " + query.lastError().text(), this); }
 
-  const double step = query.value("unCaixa").toDouble();
+  const double step = query.value("quantCaixa").toDouble();
 
   ui->doubleSpinBoxQuantTotal->setSingleStep(step);
   ui->doubleSpinBoxComprar->setSingleStep(step);
@@ -70,9 +70,9 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   const QString fornecedor = modelViewProdutos.data(0, "fornecedor").toString();
 
   modelEstoque.setQuery(
-      "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, e.restante, `e`.`un` AS `unEst`, IF(((`p`.`un` = 'M²') OR (`p`.`un` = 'M2') "
-      "OR (`p`.`un` = 'ML')), (e.restante / `p`.`m2cx`), (e.restante / `p`.`pccx`)) AS `Caixas`, `e`.`lote` AS `lote`, `e`.`local` AS `local`, `e`.`bloco` AS `bloco`, "
-      "`e`.`codComercial` AS `codComercial` FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` WHERE e.status NOT IN ('CANCELADO' , 'QUEBRADO') AND p.fornecedor = '" +
+      "SELECT `e`.`status` AS `status`, `e`.`idEstoque` AS `idEstoque`, `e`.`descricao` AS `descricao`, e.restante, `e`.`un` AS `unEst`, e.restante / p.quantCaixa AS `Caixas`, `e`.`lote` AS `lote`, "
+      "`e`.`local` AS `local`, `e`.`bloco` AS `bloco`, `e`.`codComercial` AS `codComercial` FROM `estoque` `e` LEFT JOIN `produto` `p` ON `e`.`idProduto` = `p`.`idProduto` WHERE e.status NOT IN "
+      "('CANCELADO' , 'QUEBRADO') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
   if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
@@ -253,7 +253,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":quant", excedente);
     query.bindValue(":un", modelViewProdutos.data(row, "un"));
     query.bindValue(":un2", modelViewProdutos.data(row, "un2"));
-    query.bindValue(":caixas", excedente / modelProdutos.data(row, "unCaixa").toDouble());
+    query.bindValue(":caixas", excedente / modelProdutos.data(row, "quantCaixa").toDouble());
     query.bindValue(":prcUnitario", modelViewProdutos.data(row, "custo"));
     query.bindValue(":preco", modelViewProdutos.data(row, "custo").toDouble() * excedente);
     query.bindValue(":kgcx", modelViewProdutos.data(row, "kgcx"));
@@ -337,7 +337,7 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
     if (not modelProdutos.setData(newRow, column, value)) { return false; }
   }
 
-  const double unCaixa = modelProdutos.data(rowProduto, "unCaixa").toDouble();
+  const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
 
   const double proporcao = quantSeparar / quantVenda;
   const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble() * proporcao;
@@ -345,7 +345,7 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
   const double total = modelProdutos.data(rowProduto, "total").toDouble() * proporcao;
 
   if (not modelProdutos.setData(rowProduto, "quant", quantSeparar)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / unCaixa))) { return false; }
+  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa))) { return false; }
   if (not modelProdutos.setData(rowProduto, "parcial", parcial)) { return false; }
   if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc)) { return false; }
   if (not modelProdutos.setData(rowProduto, "total", total)) { return false; }
@@ -358,7 +358,7 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
   if (not modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"))) { return false; }
   if (not modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar))) { return false; }
-  if (not modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / unCaixa)) { return false; }
+  if (not modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / quantCaixa)) { return false; }
   if (not modelProdutos.setData(newRow, "parcial", parcialNovo)) { return false; }
   if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
   if (not modelProdutos.setData(newRow, "total", totalNovo)) { return false; }

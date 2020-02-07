@@ -85,7 +85,7 @@ void CadastrarNFe::setupTables() {
   modelViewProdutoEstoque.setHeaderData("descUnitario", "R$ Unit.");
   modelViewProdutoEstoque.setHeaderData("quant", "Quant.");
   modelViewProdutoEstoque.setHeaderData("un", "Un.");
-  modelViewProdutoEstoque.setHeaderData("unCaixa", "Un./Caixa");
+  modelViewProdutoEstoque.setHeaderData("quantCaixa", "Quant./Cx.");
   modelViewProdutoEstoque.setHeaderData("codComercial", "Cód. Com.");
   modelViewProdutoEstoque.setHeaderData("formComercial", "Form. Com.");
   modelViewProdutoEstoque.setHeaderData("total", "Total");

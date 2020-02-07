@@ -76,7 +76,7 @@ void Devolucao::setupTables() {
   modelProdutos2.setHeaderData("caixas", "Caixas");
   modelProdutos2.setHeaderData("quant", "Quant.");
   modelProdutos2.setHeaderData("un", "Un.");
-  modelProdutos2.setHeaderData("unCaixa", "Un. Caixa");
+  modelProdutos2.setHeaderData("quantCaixa", "Quant./Cx.");
   modelProdutos2.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos2.setHeaderData("formComercial", "Form. Com.");
   modelProdutos2.setHeaderData("total", "Total");
@@ -140,7 +140,7 @@ void Devolucao::setupTables() {
   modelDevolvidos1.setHeaderData("caixas", "Caixas");
   modelDevolvidos1.setHeaderData("quant", "Quant.");
   modelDevolvidos1.setHeaderData("un", "Un.");
-  modelDevolvidos1.setHeaderData("unCaixa", "Un. Caixa");
+  modelDevolvidos1.setHeaderData("quantCaixa", "Quant./Cx.");
   modelDevolvidos1.setHeaderData("codComercial", "Cód. Com.");
   modelDevolvidos1.setHeaderData("formComercial", "Form. Com.");
   modelDevolvidos1.setHeaderData("total", "Total");
@@ -291,7 +291,7 @@ void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 }
 
 void Devolucao::on_doubleSpinBoxQuant_valueChanged(double) {
-  const double caixas = qRound(ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep() * 100) / 100.;
+  const double caixas = ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep();
 
   if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
 }

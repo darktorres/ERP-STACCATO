@@ -79,7 +79,7 @@ void Venda::setTreeView() {
   modelTree.setHeaderData("caixas", "Caixas");
   modelTree.setHeaderData("quant", "Quant.");
   modelTree.setHeaderData("un", "Un.");
-  modelTree.setHeaderData("unCaixa", "Un./Cx.");
+  modelTree.setHeaderData("quantCaixa", "Quant./Cx.");
   modelTree.setHeaderData("codComercial", "Código");
   modelTree.setHeaderData("formComercial", "Formato");
   modelTree.setHeaderData("parcial", "Subtotal");

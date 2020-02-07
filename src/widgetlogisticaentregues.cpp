@@ -90,7 +90,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setQuery(
       "SELECT `vp2`.`idVendaProduto2` AS `idVendaProduto2`, `vp2`.`idProduto` AS `idProduto`, `vp2`.`dataPrevEnt` AS `dataPrevEnt`, `vp2`.`dataRealEnt` AS `dataRealEnt`, `vp2`.`status` "
       "AS `status`, `vp2`.`fornecedor` AS `fornecedor`, `vp2`.`idVenda` AS `idVenda`, `vp2`.`produto` AS `produto`, `vp2`.`caixas` AS `caixas`, `vp2`.`quant` AS `quant`, `vp2`.`un` AS "
-      "`un`, `vp2`.`unCaixa` AS `unCaixa`, `vp2`.`codComercial` AS `codComercial`, `vp2`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
+      "`un`, `vp2`.`quantCaixa` AS `quantCaixa`, `vp2`.`codComercial` AS `codComercial`, `vp2`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
       "FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
@@ -103,7 +103,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setHeaderData("caixas", "Caixas");
   modelProdutos.setHeaderData("quant", "Quant.");
   modelProdutos.setHeaderData("un", "Un.");
-  modelProdutos.setHeaderData("unCaixa", "Un./Cx.");
+  modelProdutos.setHeaderData("quantCaixa", "Quant./Cx.");
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");

@@ -24,14 +24,15 @@ public:
   auto data(const int row, const QString &column) const -> QVariant;
   auto data(const int row, const int column) const -> QVariant;
   auto fieldIndex(const QString &fieldName, const bool silent = false) const -> int;
+  auto insertRowAtEnd() -> int;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
+  auto static roundDouble(const double value) -> double;
   auto setFilter(const QString &filter) -> void final;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setSort(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;
   auto setTable(const QString &tableName) -> void final;
   auto supportedDropActions() const -> Qt::DropActions final;
-  auto insertRowAtEnd() -> int;
 
   QAbstractProxyModel *proxyModel = nullptr;
 
@@ -47,7 +48,6 @@ protected:
   const int limit;
   // methods
   auto selectStatement() const -> QString final;
-  auto roundDouble(const double value) const -> double;
 };
 
 // TODO: add a readOnly attribute for when table is a view?

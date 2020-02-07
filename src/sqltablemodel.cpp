@@ -56,7 +56,7 @@ bool SqlTableModel::submitAll() {
 
 QString SqlTableModel::selectStatement() const { return QSqlTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
 
-double SqlTableModel::roundDouble(const double value) const { return std::round(value * 10000.) / 10000.; }
+double SqlTableModel::roundDouble(const double value) { return std::round(value * 10000.) / 10000.; }
 
 QModelIndexList SqlTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
   if (proxyModel) { return proxyModel->match(QSqlTableModel::index(0, fieldIndex(column)), Qt::DisplayRole, value, hits, flags); }

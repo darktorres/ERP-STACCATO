@@ -206,18 +206,13 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   }
 
   QSqlQuery query;
-  query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
+  query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
 
-  const QString un = query.value("un").toString();
-  const double m2cx = query.value("m2cx").toDouble();
-  const double pccx = query.value("pccx").toDouble();
-
-  const double unCaixa = un == "M2" or un == "M²" or un == "ML" ? m2cx : pccx;
-
-  const double caixas = qRound(quant / unCaixa * 100) / 100.;
+  const double quantCaixa = query.value("quantCaixa").toDouble();
+  const double caixas = quant / quantCaixa;
 
   if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) { return false; }

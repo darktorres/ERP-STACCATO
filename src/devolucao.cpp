@@ -282,6 +282,9 @@ void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
   const double quant = modelProdutos2.data(row, "quant").toDouble();
   const double caixas = modelProdutos2.data(row, "caixas").toDouble();
 
+  ui->doubleSpinBoxCaixas->setMaximum(caixas);
+  ui->doubleSpinBoxQuant->setMaximum(quant);
+
   ui->doubleSpinBoxQuant->setSingleStep(quant / caixas);
 
   mapperProdutos.setCurrentModelIndex(index);

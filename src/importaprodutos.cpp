@@ -221,6 +221,7 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idEstoque");
   ui->tableProdutos->hideColumn("estoqueRestante");
+  ui->tableProdutos->hideColumn("quantCaixa");
   ui->tableProdutos->hideColumn("idFornecedor");
   ui->tableProdutos->hideColumn("desativado");
   ui->tableProdutos->hideColumn("descontinuado");
@@ -422,9 +423,6 @@ void ImportaProdutos::contaProdutos() {
 }
 
 void ImportaProdutos::consistenciaDados() {
-  // TODO: colocar unCaixa nos produtos usando a lógica:
-  //  const double unCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
-
   const auto keys = variantMap.keys();
 
   for (const auto &key : keys) {
@@ -450,6 +448,11 @@ void ImportaProdutos::consistenciaDados() {
 
   variantMap.insert("un", (un == "M2" or un == "M²") ? "M²" : un);
 
+  const double m2cx = variantMap.value("m2cx").toDouble();
+  const double pccx = variantMap.value("pccx").toDouble();
+
+  variantMap.insert("quantCaixa", (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx);
+
   variantMap.insert("ncm", variantMap.value("ncm").toString().remove(".").remove(",").remove("-").remove(" "));
   variantMap.insert("codBarras", variantMap.value("codBarras").toString().remove(".").remove(","));
   variantMap.insert("codComercial", variantMap.value("codComercial").toString().remove(".").remove(","));
@@ -468,6 +471,7 @@ void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &r
   for (const auto &key : keys) {
     if (key == "ncmEx") { continue; }
     if (key == "multiplo") { continue; }
+    if (key == "quantCaixa") { continue; }
 
     QVariant value = query.value(record.indexOf(key));
 

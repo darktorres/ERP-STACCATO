@@ -18,12 +18,7 @@
 Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
-  connect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
-  connect(ui->doubleSpinBoxQuant, &QDoubleSpinBox::editingFinished, this, &Devolucao::on_doubleSpinBoxQuant_editingFinished);
-  connect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
-  connect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxTotalItem_valueChanged);
-  connect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked);
-  connect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked);
+  setConnections();
 
   setWindowFlags(Qt::Window);
 
@@ -31,6 +26,24 @@ Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent),
 }
 
 Devolucao::~Devolucao() { delete ui; }
+
+void Devolucao::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged, connectionType);
+  connect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxTotalItem_valueChanged, connectionType);
+  connect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked, connectionType);
+  connect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked, connectionType);
+}
+
+void Devolucao::unsetConnections() {
+  disconnect(ui->doubleSpinBoxCaixas, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxCaixas_valueChanged);
+  disconnect(ui->doubleSpinBoxQuant, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxQuant_valueChanged);
+  disconnect(ui->doubleSpinBoxTotalItem, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Devolucao::on_doubleSpinBoxTotalItem_valueChanged);
+  disconnect(ui->pushButtonDevolverItem, &QPushButton::clicked, this, &Devolucao::on_pushButtonDevolverItem_clicked);
+  disconnect(ui->tableProdutos, &TableView::clicked, this, &Devolucao::on_tableProdutos_clicked);
+}
 
 std::optional<bool> Devolucao::determinarIdDevolucao() {
   QSqlQuery query;
@@ -283,20 +296,33 @@ void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
 void Devolucao::calcPrecoItemTotal() { ui->doubleSpinBoxTotalItem->setValue(ui->doubleSpinBoxQuant->value() * ui->doubleSpinBoxPrecoUn->value()); }
 
 void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
-  const double quant = caixas * ui->doubleSpinBoxQuant->singleStep();
+  const double step = ui->doubleSpinBoxCaixas->singleStep();
+  const double resto = fmod(caixas, step);
+  const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+  const double quant = caixas2 * ui->doubleSpinBoxQuant->singleStep();
 
-  if (not qFuzzyCompare(ui->doubleSpinBoxQuant->value(), quant)) { ui->doubleSpinBoxQuant->setValue(quant); }
+  if (not qFuzzyCompare(caixas, caixas2)) { ui->doubleSpinBoxQuant->setValue(quant); }
+
+  unsetConnections();
+
+  ui->doubleSpinBoxQuant->setValue(quant);
+
+  setConnections();
 
   calcPrecoItemTotal();
 }
 
-void Devolucao::on_doubleSpinBoxQuant_valueChanged(double) {
-  const double caixas = ui->doubleSpinBoxQuant->value() / ui->doubleSpinBoxQuant->singleStep();
+void Devolucao::on_doubleSpinBoxQuant_valueChanged(const double quant) {
+  const double step = ui->doubleSpinBoxQuant->singleStep();
+  const double resto = fmod(quant, step);
+  const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
+
+  if (not qFuzzyCompare(quant, quant2)) { ui->doubleSpinBoxQuant->setValue(quant2); }
+
+  const double caixas = quant2 / step;
 
   if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
 }
-
-void Devolucao::on_doubleSpinBoxQuant_editingFinished() { ui->doubleSpinBoxQuant->setValue(ui->doubleSpinBoxCaixas->value() * ui->doubleSpinBoxQuant->singleStep()); }
 
 bool Devolucao::criarDevolucao() {
   const int newRow = modelVenda.insertRowAtEnd();

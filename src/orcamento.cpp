@@ -216,7 +216,7 @@ bool Orcamento::viewRegister() {
       ui->doubleSpinBoxQuant->hide();
       ui->doubleSpinBoxCaixas->hide();
       ui->labelCaixa->hide();
-      ui->spinBoxUnCx->hide();
+      ui->spinBoxQuantCx->hide();
       ui->doubleSpinBoxDesconto->hide();
       ui->doubleSpinBoxTotalItem->hide();
       ui->labelCaixas->hide();
@@ -317,8 +317,8 @@ void Orcamento::novoItem() {
   ui->lineEditUn->setDisabled(true);
   ui->spinBoxMinimo->clear();
   ui->spinBoxMinimo->setDisabled(true);
-  ui->spinBoxUnCx->clear();
-  ui->spinBoxUnCx->setDisabled(true);
+  ui->spinBoxQuantCx->clear();
+  ui->spinBoxQuantCx->setDisabled(true);
 }
 
 void Orcamento::setupMapper() {
@@ -849,12 +849,12 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditPrecoUn->clear();
   ui->lineEditUn->clear();
   ui->spinBoxMinimo->clear();
-  ui->spinBoxUnCx->clear();
+  ui->spinBoxQuantCx->clear();
 
   // -------------------------------------------------------------------------
 
   QSqlQuery query;
-  query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, m2cx, pccx, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
+  query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, quantCaixa, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro na busca do produto: " + query.lastError().text(), this); }
@@ -868,24 +868,22 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditCodComercial->setText(query.value("codComercial").toString());
   ui->lineEditFormComercial->setText(query.value("formComercial").toString());
 
-  const QString uncxString = un.contains("M2") or un.contains("M²") or un.contains("ML") ? "m2cx" : "pccx";
-
-  ui->spinBoxUnCx->setValue(query.value(uncxString).toDouble());
-
   const double minimo = query.value("minimo").toDouble();
   const double multiplo = query.value("multiplo").toDouble();
-  const double uncx = query.value(uncxString).toDouble();
+  const double quantCaixa = query.value("quantCaixa").toDouble();
+
+  ui->spinBoxQuantCx->setValue(quantCaixa);
 
   ui->spinBoxMinimo->setValue(minimo);
   ui->doubleSpinBoxQuant->setMinimum(minimo);
-  ui->doubleSpinBoxCaixas->setMinimum(minimo / uncx);
+  ui->doubleSpinBoxCaixas->setMinimum(minimo / quantCaixa);
 
   currentItemIsEstoque = query.value("estoque").toBool();
   currentItemIsPromocao = query.value("promocao").toInt();
 
   if (currentItemIsEstoque) {
     ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
-    ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / uncx);
+    ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / quantCaixa);
   } else {
     ui->doubleSpinBoxQuant->setMaximum(9999999.000000);
     ui->doubleSpinBoxCaixas->setMaximum(9999999.000000);
@@ -899,15 +897,15 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditPrecoUn->setEnabled(true);
   ui->lineEditUn->setEnabled(true);
   ui->spinBoxMinimo->setEnabled(true);
-  ui->spinBoxUnCx->setEnabled(true);
+  ui->spinBoxQuantCx->setEnabled(true);
 
   ui->doubleSpinBoxCaixas->setSingleStep(1.);
-  ui->doubleSpinBoxQuant->setSingleStep(uncx);
+  ui->doubleSpinBoxQuant->setSingleStep(quantCaixa);
 
   // TODO: 0verificar se preciso tratar os casos sem multiplo
   // if (minimo != 0) ...
   if (not qFuzzyIsNull(minimo) and not qFuzzyIsNull(multiplo)) {
-    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / uncx);
+    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / quantCaixa);
     ui->doubleSpinBoxQuant->setSingleStep(multiplo);
   }
 
@@ -1129,7 +1127,7 @@ void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   const double caixas = ui->doubleSpinBoxCaixas->value();
   const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
-  const double quant = caixas2 * ui->spinBoxUnCx->value();
+  const double quant = caixas2 * ui->spinBoxQuantCx->value();
 
   unsetConnections();
 

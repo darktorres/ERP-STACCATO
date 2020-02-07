@@ -988,7 +988,7 @@
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="1" column="5">
-             <widget class="QDoubleSpinBox" name="spinBoxUnCx">
+             <widget class="QDoubleSpinBox" name="spinBoxQuantCx">
               <property name="maximumSize">
                <size>
                 <width>55</width>
@@ -1037,7 +1037,7 @@
             <item row="0" column="5">
              <widget class="QLabel" name="labelCaixa">
               <property name="text">
-               <string>Un./Cx.</string>
+               <string>Quant./Cx.</string>
               </property>
              </widget>
             </item>
@@ -1505,7 +1505,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>doubleSpinBoxCaixas</tabstop>
   <tabstop>doubleSpinBoxQuant</tabstop>
   <tabstop>spinBoxMinimo</tabstop>
-  <tabstop>spinBoxUnCx</tabstop>
+  <tabstop>spinBoxQuantCx</tabstop>
   <tabstop>lineEditUn</tabstop>
   <tabstop>doubleSpinBoxDesconto</tabstop>
   <tabstop>doubleSpinBoxTotalItem</tabstop>

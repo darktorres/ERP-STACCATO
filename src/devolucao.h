@@ -42,7 +42,6 @@ private:
   auto on_doubleSpinBoxTotalItem_valueChanged(double value) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
-  auto reservarIdVendaProduto2() -> std::optional<int>;
   auto salvarCredito() -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

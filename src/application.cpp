@@ -362,3 +362,74 @@ QDate Application::serverDate() {
 
   return serverDateCache.date();
 }
+
+double Application::roundDouble(const double value) { return std::round(value * 10000.) / 10000.; }
+
+std::optional<int> Application::reservarIdEstoque() {
+  if (qApp->getInTransaction()) {
+    qApp->enqueueError("Erro ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
+    qApp->enqueueError("Erro reservar id estoque: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) {
+    qApp->enqueueError("Erro reservar id estoque: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
+std::optional<int> Application::reservarIdVendaProduto2() {
+  if (qApp->getInTransaction()) {
+    qApp->enqueueError("Erro ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
+    qApp->enqueueError("Erro reservar id venda: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
+    qApp->enqueueError("Erro reservar id venda: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
+std::optional<int> Application::reservarIdPedido2() {
+  if (qApp->getInTransaction()) {
+    qApp->enqueueError("Erro ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
+    qApp->enqueueError("Erro reservar id compra: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) {
+    qApp->enqueueError("Erro reservar id compra: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}

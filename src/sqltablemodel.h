@@ -27,7 +27,6 @@ public:
   auto insertRowAtEnd() -> int;
   auto match(const QString &column, const QVariant &value, int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const -> QModelIndexList;
   auto multiMatch(const QVector<Condition> conditions, bool allHits = true) const -> QVector<int>;
-  auto static roundDouble(const double value) -> double;
   auto setFilter(const QString &filter) -> void final;
   auto setHeaderData(const QString &column, const QVariant &value) -> bool;
   auto setSort(const QString &column, Qt::SortOrder order = Qt::AscendingOrder) -> void;

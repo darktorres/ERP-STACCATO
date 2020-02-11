@@ -671,7 +671,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
 }
 
 bool ImportarXML::inserirItemModel(const XML &xml) {
-  const auto idEstoque = reservarIdEstoque();
+  const auto idEstoque = qApp->reservarIdEstoque();
 
   if (not idEstoque) { return false; }
 
@@ -762,9 +762,9 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const int rowVenda = list.first();
 
-  const double quantVenda = SqlTableModel::roundDouble(modelVenda.data(rowVenda, "quant").toDouble());
-  const double restanteEstoque = SqlTableModel::roundDouble(modelEstoque.data(rowEstoque, "restante").toDouble());
-  const double quantConsumo = SqlTableModel::roundDouble(qMin(quantVenda, restanteEstoque));
+  const double quantVenda = qApp->roundDouble(modelVenda.data(rowVenda, "quant").toDouble());
+  const double restanteEstoque = qApp->roundDouble(modelEstoque.data(rowEstoque, "restante").toDouble());
+  const double quantConsumo = qApp->roundDouble(qMin(quantVenda, restanteEstoque));
 
   if (qFuzzyIsNull(quantConsumo)) { return qApp->enqueueError(false, "quantConsumo = 0!", this); }
   if (quantConsumo < quantVenda) { return qApp->enqueueError(false, "quantConsumo < quantVenda", this); }
@@ -819,7 +819,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
 std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {
   // NOTE: *quebralinha venda_has_produto2
-  const auto novoIdVendaProduto2 = reservarIdVendaProduto2();
+  const auto novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
 
   if (not novoIdVendaProduto2) { return {}; }
 
@@ -870,7 +870,7 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
 
 bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar) {
   // NOTE: *quebralinha pedido_fornecedor2
-  const auto novoIdPedido2 = reservarIdPedido2();
+  const auto novoIdPedido2 = qApp->reservarIdPedido2();
 
   if (not novoIdPedido2) { return false; }
 
@@ -983,75 +983,6 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     if (not modelEstoque.setData(row, "lote", checked ? "N/D" : "")) { return; }
   }
-}
-
-std::optional<int> ImportarXML::reservarIdEstoque() {
-  if (qApp->getInTransaction()) {
-    qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
-    return {};
-  }
-
-  QSqlQuery query;
-
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
-    qApp->enqueueError("Erro reservar id estoque: " + query.lastError().text(), this);
-    return {};
-  }
-
-  const int id = query.value("auto_increment").toInt();
-
-  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) {
-    qApp->enqueueError("Erro reservar id estoque: " + query.lastError().text(), this);
-    return {};
-  }
-
-  return id;
-}
-
-std::optional<int> ImportarXML::reservarIdVendaProduto2() {
-  if (qApp->getInTransaction()) {
-    qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
-    return {};
-  }
-
-  QSqlQuery query;
-
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
-    qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
-    return {};
-  }
-
-  const int id = query.value("auto_increment").toInt();
-
-  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
-    return {};
-  }
-
-  return id;
-}
-
-std::optional<int> ImportarXML::reservarIdPedido2() {
-  if (qApp->getInTransaction()) {
-    qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
-    return {};
-  }
-
-  QSqlQuery query;
-
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
-    qApp->enqueueError("Erro reservar id compra: " + query.lastError().text(), this);
-    return {};
-  }
-
-  const int id = query.value("auto_increment").toInt();
-
-  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    qApp->enqueueError("Erro reservar id compra: " + query.lastError().text(), this);
-    return {};
-  }
-
-  return id;
 }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque

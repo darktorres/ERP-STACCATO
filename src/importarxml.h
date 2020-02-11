@@ -68,9 +68,6 @@ private:
   auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
-  auto reservarIdPedido2() -> std::optional<int>;
-  auto reservarIdEstoque() -> std::optional<int>;
-  auto reservarIdVendaProduto2() -> std::optional<int>;
   auto salvarDadosVenda() -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

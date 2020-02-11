@@ -261,9 +261,13 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
 
   if (modelTranspAtual.rowCount() == 0) { return qApp->enqueueError("Carga vazia!", this); }
 
+  // -------------------------------------------------------------------------
+
   QStringList idVendas;
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { idVendas << modelTranspAtual.data(row, "idVenda").toString(); }
+
+  // -------------------------------------------------------------------------
 
   if (not qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga")) { return; }
 
@@ -272,6 +276,8 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
+
+  // -------------------------------------------------------------------------
 
   updateTables();
   qApp->enqueueInformation("Confirmado agendamento!", this);
@@ -326,35 +332,38 @@ bool WidgetLogisticaAgendarEntrega::adicionarProduto(const QModelIndexList &list
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
 
   for (const auto &index : list) {
-    const int row = index.row();
-
-    query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
-
-    if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
-
-    const double kg = query.value("kgcx").toDouble();
-    const double caixas = modelProdutos.data(row, "caixas").toDouble();
-    const double peso = kg * caixas;
-
-    // -------------------------------------------------------------------------
-
-    const int newRow = modelTranspAtual.insertRowAtEnd();
-
-    if (not modelTranspAtual.setData(newRow, "fornecedor", modelProdutos.data(row, "fornecedor"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "quantCaixa", modelProdutos.data(row, "quantCaixa"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "formComercial", modelProdutos.data(row, "formComercial"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
-    if (not modelTranspAtual.setData(newRow, "idVenda", modelProdutos.data(row, "idVenda"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "idProduto", modelProdutos.data(row, "idProduto"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "produto", modelProdutos.data(row, "produto"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "codComercial", modelProdutos.data(row, "codComercial"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "un", modelProdutos.data(row, "un"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "caixas", modelProdutos.data(row, "caixas"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "kg", peso)) { return false; }
-    if (not modelTranspAtual.setData(newRow, "quant", modelProdutos.data(row, "quant"))) { return false; }
-    if (not modelTranspAtual.setData(newRow, "status", "ENTREGA AGEND.")) { return false; }
+    if (not adicionaProdutoNoModel(index.row(), modelProdutos.data(index.row(), "caixas").toDouble())) { return false; }
   }
+
+  return true;
+}
+
+bool WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const double caixas) {
+  QSqlQuery query;
+  query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
+  query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
+
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
+
+  const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
+  const double kg = query.value("kgcx").toDouble();
+
+  const int newRow = modelTranspAtual.insertRowAtEnd();
+
+  if (not modelTranspAtual.setData(newRow, "fornecedor", modelProdutos.data(row, "fornecedor"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "quantCaixa", modelProdutos.data(row, "quantCaixa"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "formComercial", modelProdutos.data(row, "formComercial"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
+  if (not modelTranspAtual.setData(newRow, "idVenda", modelProdutos.data(row, "idVenda"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "idProduto", modelProdutos.data(row, "idProduto"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "produto", modelProdutos.data(row, "produto"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "codComercial", modelProdutos.data(row, "codComercial"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "un", modelProdutos.data(row, "un"))) { return false; }
+  if (not modelTranspAtual.setData(newRow, "caixas", caixas)) { return false; }
+  if (not modelTranspAtual.setData(newRow, "kg", kg * caixas)) { return false; }
+  if (not modelTranspAtual.setData(newRow, "quant", caixas * quantCaixa)) { return false; }
+  if (not modelTranspAtual.setData(newRow, "status", "ENTREGA AGEND.")) { return false; }
 
   return true;
 }
@@ -382,7 +391,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
     if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
   }
 
-  if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
+  if (not adicionarProduto(list)) { return; }
 
   ui->tableProdutos->clearSelection();
 }
@@ -461,8 +470,10 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
 
+  // -------------------------------------------------------------------------
+
   // perguntar quantidade
-  const double caixasTotal = modelProdutos.data(row, "caixas").toInt();
+  const double caixasTotal = modelProdutos.data(row, "caixas").toDouble();
 
   bool ok;
 
@@ -470,61 +481,56 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
 
   if (qFuzzyIsNull(caixasAgendar) or not ok) { return; }
 
+  const auto novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
+
+  if (not novoIdVendaProduto2) { return; }
+
+  // -------------------------------------------------------------------------
+
   if (not qApp->startTransaction("WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial")) { return; }
 
-  if (not adicionarProdutoParcial(row, caixasAgendar, caixasTotal)) { return qApp->rollbackTransaction(); }
+  if (not adicionarProdutoParcial(row, caixasAgendar, caixasTotal, *novoIdVendaProduto2)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
-  // update this table to show the newly divided lines
-  void(modelProdutos.select());
+  // -------------------------------------------------------------------------
 
-  ui->tableProdutos->clearSelection();
+  updateTables();
 }
 
-bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const double caixasAgendar, const double caixasTotal) {
+bool WidgetLogisticaAgendarEntrega::adicionarProdutoParcial(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) {
   if (caixasAgendar < caixasTotal) {
-    if (not dividirVenda(row, caixasAgendar, caixasTotal)) { return false; }
+    if (not dividirVenda(row, caixasAgendar, caixasTotal, novoIdVendaProduto2)) { return false; }
   }
 
-  QSqlQuery query;
-  query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
-  query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
-
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
-
-  const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
-  const double kg = query.value("kgcx").toDouble();
-
-  const int newRow = modelTranspAtual.insertRowAtEnd();
-
-  if (not modelTranspAtual.setData(newRow, "fornecedor", modelProdutos.data(row, "fornecedor"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "quantCaixa", modelProdutos.data(row, "quantCaixa"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "formComercial", modelProdutos.data(row, "formComercial"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
-  if (not modelTranspAtual.setData(newRow, "idVenda", modelProdutos.data(row, "idVenda"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "idProduto", modelProdutos.data(row, "idProduto"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "produto", modelProdutos.data(row, "produto"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "codComercial", modelProdutos.data(row, "codComercial"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "un", modelProdutos.data(row, "un"))) { return false; }
-  if (not modelTranspAtual.setData(newRow, "caixas", caixasAgendar)) { return false; }
-  if (not modelTranspAtual.setData(newRow, "kg", kg * caixasAgendar)) { return false; }
-  if (not modelTranspAtual.setData(newRow, "quant", caixasAgendar * quantCaixa)) { return false; }
-  if (not modelTranspAtual.setData(newRow, "status", "ENTREGA AGEND.")) { return false; }
+  adicionaProdutoNoModel(row, caixasAgendar);
 
   return true;
 }
 
-bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double caixasAgendar, const double caixasTotal) {
-  // TODO: quebrar linha em pedido_fornecedor tambem para manter 1:1
-
+bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) {
   SqlTableModel modelProdutosTemp;
   modelProdutosTemp.setTable("venda_has_produto2");
 
   modelProdutosTemp.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());
 
   if (not modelProdutosTemp.select()) { return false; }
+
+  // -------------------------------------------------------------------------
+
+  const double quantCaixa = modelProdutosTemp.data(0, "quantCaixa").toDouble();
+  const double proporcao = caixasAgendar / caixasTotal;
+  const double parcial = modelProdutosTemp.data(0, "parcial").toDouble();
+  const double parcialDesc = modelProdutosTemp.data(0, "parcialDesc").toDouble();
+  const double total = modelProdutosTemp.data(0, "total").toDouble();
+
+  if (not modelProdutosTemp.setData(0, "quant", (caixasAgendar * quantCaixa))) { return false; }
+  if (not modelProdutosTemp.setData(0, "caixas", caixasAgendar)) { return false; }
+  if (not modelProdutosTemp.setData(0, "parcial", parcial * proporcao)) { return false; }
+  if (not modelProdutosTemp.setData(0, "parcialDesc", parcialDesc * proporcao)) { return false; }
+  if (not modelProdutosTemp.setData(0, "total", total * proporcao)) { return false; }
+
+  // -------------------------------------------------------------------------
 
   const int newRow = modelProdutosTemp.insertRowAtEnd();
   // NOTE: *quebralinha venda_produto2
@@ -540,39 +546,29 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
     if (not modelProdutosTemp.setData(newRow, column, value)) { return false; }
   }
 
-  const double caixasAgendar2 = caixasAgendar;
-  const double caixasTotal2 = caixasTotal;
-
-  const double quantCaixa = modelProdutosTemp.data(0, "quantCaixa").toDouble();
-
-  const double proporcao = caixasAgendar2 / caixasTotal2;
-  const double parcial = double(modelProdutosTemp.data(0, "parcial").toDouble()) * proporcao;
-  const double parcialDesc = double(modelProdutosTemp.data(0, "parcialDesc").toDouble()) * proporcao;
-  const double total = double(modelProdutosTemp.data(0, "total").toDouble()) * proporcao;
-
-  if (not modelProdutosTemp.setData(0, "quant", (caixasAgendar2 * quantCaixa))) { return false; }
-  if (not modelProdutosTemp.setData(0, "caixas", caixasAgendar2)) { return false; }
-  if (not modelProdutosTemp.setData(0, "parcial", parcial)) { return false; }
-  if (not modelProdutosTemp.setData(0, "parcialDesc", parcialDesc)) { return false; }
-  if (not modelProdutosTemp.setData(0, "total", total)) { return false; }
-
   // alterar quant, precos, etc da linha nova
-  const double proporcaoNovo = (caixasTotal2 - caixasAgendar2) / caixasTotal2;
-  const double parcialNovo = double(modelProdutosTemp.data(newRow, "parcial").toDouble()) * proporcaoNovo;
-  const double parcialDescNovo = double(modelProdutosTemp.data(newRow, "parcialDesc").toDouble()) * proporcaoNovo;
-  const double totalNovo = double(modelProdutosTemp.data(newRow, "total").toDouble()) * proporcaoNovo;
+  const double proporcaoNovo = (caixasTotal - caixasAgendar) / caixasTotal;
 
+  if (not modelProdutosTemp.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
   if (not modelProdutosTemp.setData(newRow, "idRelacionado", modelProdutosTemp.data(0, "idVendaProduto2"))) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal2 - caixasAgendar2) * quantCaixa))) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal2 - caixasAgendar2))) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "parcial", parcialNovo)) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
-  if (not modelProdutosTemp.setData(newRow, "total", totalNovo)) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "quant", ((caixasTotal - caixasAgendar) * quantCaixa))) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "caixas", (caixasTotal - caixasAgendar))) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "parcial", parcial * proporcaoNovo)) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo)) { return false; }
+  if (not modelProdutosTemp.setData(newRow, "total", total * proporcaoNovo)) { return false; }
 
   if (not modelProdutosTemp.submitAll()) { return false; }
 
+  // -------------------------------------------------------------------------
+
   // TODO: em vez de quebrar consumo, mandar para a funcao Estoque::criarConsumo?
   if (not dividirConsumo(row, proporcao, proporcaoNovo, modelProdutosTemp.query().lastInsertId().toInt())) { return false; }
+
+  // -------------------------------------------------------------------------
+
+  if (not dividirCompra(row, caixasAgendar, caixasTotal, novoIdVendaProduto2)) { return false; }
+
+  // -------------------------------------------------------------------------
 
   return true;
 }
@@ -585,7 +581,41 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
 
   if (not modelConsumoTemp.select()) { return false; }
 
+  // -------------------------------------------------------------------------
+
   const int rowConsumo = modelConsumoTemp.insertRowAtEnd();
+
+  // alterar quant, caixas, valor
+
+  const double quantConsumo = modelConsumoTemp.data(0, "quant").toDouble();
+  const double caixasConsumo = modelConsumoTemp.data(0, "caixas").toDouble();
+  const double valorConsumo = modelConsumoTemp.data(0, "valor").toDouble();
+
+  const double desconto = modelConsumoTemp.data(0, "desconto").toDouble();
+  const double vBC = modelConsumoTemp.data(0, "vBC").toDouble();
+  const double vICMS = modelConsumoTemp.data(0, "vICMS").toDouble();
+  const double vBCST = modelConsumoTemp.data(0, "vBCST").toDouble();
+  const double vICMSST = modelConsumoTemp.data(0, "vICMSST").toDouble();
+  const double vBCPIS = modelConsumoTemp.data(0, "vBCPIS").toDouble();
+  const double vPIS = modelConsumoTemp.data(0, "vPIS").toDouble();
+  const double vBCCOFINS = modelConsumoTemp.data(0, "vBCCOFINS").toDouble();
+  const double vCOFINS = modelConsumoTemp.data(0, "vCOFINS").toDouble();
+
+  if (not modelConsumoTemp.setData(0, "quant", quantConsumo * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "caixas", caixasConsumo * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "valor", valorConsumo * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "desconto", desconto * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBC", vBC * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vICMS", vICMS * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBCST", vBCST * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vICMSST", vICMSST * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBCPIS", vBCPIS * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vPIS", vPIS * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vBCCOFINS", vBCCOFINS * proporcao)) { return false; }
+  if (not modelConsumoTemp.setData(0, "vCOFINS", vCOFINS * proporcao)) { return false; }
+
+  // -------------------------------------------------------------------------
+  // alterar linha nova
 
   for (int column = 0, columnCount = modelConsumoTemp.columnCount(); column < columnCount; ++column) {
     if (modelConsumoTemp.fieldIndex("idConsumo") == column) { continue; }
@@ -598,65 +628,67 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
     if (not modelConsumoTemp.setData(rowConsumo, column, value)) { return false; }
   }
 
-  // alterar quant, caixas, valor
-
-  const double quantConsumo = double(modelConsumoTemp.data(0, "quant").toDouble()) * proporcao;
-  const double caixasConsumo = double(modelConsumoTemp.data(0, "caixas").toDouble()) * proporcao;
-  const double valorConsumo = double(modelConsumoTemp.data(0, "valor").toDouble()) * proporcao;
-
-  const double desconto = double(modelConsumoTemp.data(0, "desconto").toDouble()) * proporcao;
-  const double vBC = double(modelConsumoTemp.data(0, "vBC").toDouble()) * proporcao;
-  const double vICMS = double(modelConsumoTemp.data(0, "vICMS").toDouble()) * proporcao;
-  const double vBCST = double(modelConsumoTemp.data(0, "vBCST").toDouble()) * proporcao;
-  const double vICMSST = double(modelConsumoTemp.data(0, "vICMSST").toDouble()) * proporcao;
-  const double vBCPIS = double(modelConsumoTemp.data(0, "vBCPIS").toDouble()) * proporcao;
-  const double vPIS = double(modelConsumoTemp.data(0, "vPIS").toDouble()) * proporcao;
-  const double vBCCOFINS = double(modelConsumoTemp.data(0, "vBCCOFINS").toDouble()) * proporcao;
-  const double vCOFINS = double(modelConsumoTemp.data(0, "vCOFINS").toDouble()) * proporcao;
-
-  if (not modelConsumoTemp.setData(0, "quant", quantConsumo)) { return false; }
-  if (not modelConsumoTemp.setData(0, "caixas", caixasConsumo)) { return false; }
-  if (not modelConsumoTemp.setData(0, "valor", valorConsumo)) { return false; }
-  if (not modelConsumoTemp.setData(0, "desconto", desconto)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBC", vBC)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vICMS", vICMS)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBCST", vBCST)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vICMSST", vICMSST)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBCPIS", vBCPIS)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vPIS", vPIS)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vBCCOFINS", vBCCOFINS)) { return false; }
-  if (not modelConsumoTemp.setData(0, "vCOFINS", vCOFINS)) { return false; }
-
-  // alterar linha nova
-  const double quantConsumo2 = double(modelConsumoTemp.data(rowConsumo, "quant").toDouble()) * proporcaoNovo;
-  const double caixasConsumo2 = double(modelConsumoTemp.data(rowConsumo, "caixas").toDouble()) * proporcaoNovo;
-  const double valorConsumo2 = double(modelConsumoTemp.data(rowConsumo, "valor").toDouble()) * proporcaoNovo;
-
-  const double desconto2 = double(modelConsumoTemp.data(rowConsumo, "desconto").toDouble()) * proporcaoNovo;
-  const double vBC2 = double(modelConsumoTemp.data(rowConsumo, "vBC").toDouble()) * proporcaoNovo;
-  const double vICMS2 = double(modelConsumoTemp.data(rowConsumo, "vICMS").toDouble()) * proporcaoNovo;
-  const double vBCST2 = double(modelConsumoTemp.data(rowConsumo, "vBCST").toDouble()) * proporcaoNovo;
-  const double vICMSST2 = double(modelConsumoTemp.data(rowConsumo, "vICMSST").toDouble()) * proporcaoNovo;
-  const double vBCPIS2 = double(modelConsumoTemp.data(rowConsumo, "vBCPIS").toDouble()) * proporcaoNovo;
-  const double vPIS2 = double(modelConsumoTemp.data(rowConsumo, "vPIS").toDouble()) * proporcaoNovo;
-  const double vBCCOFINS2 = double(modelConsumoTemp.data(rowConsumo, "vBCCOFINS").toDouble()) * proporcaoNovo;
-  const double vCOFINS2 = double(modelConsumoTemp.data(rowConsumo, "vCOFINS").toDouble()) * proporcaoNovo;
-
   if (not modelConsumoTemp.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "quant", quantConsumo2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "caixas", caixasConsumo2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "valor", valorConsumo2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "desconto", desconto2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBC", vBC2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vICMS", vICMS2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCST", vBCST2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vICMSST", vICMSST2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCPIS", vBCPIS2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vPIS", vPIS2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCCOFINS", vBCCOFINS2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vCOFINS", vCOFINS2)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "quant", quantConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "caixas", caixasConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "valor", valorConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "desconto", desconto * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBC", vBC * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vICMS", vICMS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBCST", vBCST * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vICMSST", vICMSST * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBCPIS", vBCPIS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vPIS", vPIS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(rowConsumo, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
 
   if (not modelConsumoTemp.submitAll()) { return false; }
+
+  return true;
+}
+
+bool WidgetLogisticaAgendarEntrega::dividirCompra(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) {
+  SqlTableModel modelCompra;
+  modelCompra.setTable("pedido_fornecedor_has_produto2");
+
+  modelCompra.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());
+
+  if (not modelCompra.select()) { return false; }
+  // TODO: verificar se rowCount > 0?
+
+  // -------------------------------------------------------------------------
+
+  const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
+  const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
+  const double quantAgendar = caixasAgendar * quantCaixa;
+
+  if (not modelCompra.setData(0, "quant", quantAgendar)) { return false; }
+  if (not modelCompra.setData(0, "caixas", caixasAgendar)) { return false; }
+  if (not modelCompra.setData(0, "preco", quantAgendar * prcUnitario)) { return false; }
+
+  // -------------------------------------------------------------------------
+  // copiar linha
+  const int newRow = modelCompra.insertRowAtEnd();
+
+  for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
+    if (column == modelCompra.fieldIndex("idPedido2")) { continue; }
+    if (column == modelCompra.fieldIndex("created")) { continue; }
+    if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
+
+    const QVariant value = modelCompra.data(0, column);
+
+    if (not modelCompra.setData(newRow, column, value)) { return false; }
+  }
+
+  const double caixasRestante = caixasTotal - caixasAgendar;
+
+  if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
+  if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
+  if (not modelCompra.setData(newRow, "quant", caixasRestante * quantCaixa)) { return false; }
+  if (not modelCompra.setData(newRow, "caixas", caixasRestante)) { return false; }
+  if (not modelCompra.setData(newRow, "preco", caixasRestante * quantCaixa * prcUnitario)) { return false; }
+
+  if (not modelCompra.submitAll()) { return false; }
 
   return true;
 }

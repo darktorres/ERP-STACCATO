@@ -34,11 +34,6 @@ void PrecoEstoque::setupTables() {
   modelProduto.setHeaderData("un2", "Un.2");
   modelProduto.setHeaderData("colecao", "Coleção");
   modelProduto.setHeaderData("tipo", "Tipo");
-  modelProduto.setHeaderData("minimo", "Mínimo");
-  modelProduto.setHeaderData("multiplo", "Múltiplo");
-  modelProduto.setHeaderData("m2cx", "M/Cx.");
-  modelProduto.setHeaderData("pccx", "Pç./Cx.");
-  modelProduto.setHeaderData("kgcx", "Kg./Cx.");
   modelProduto.setHeaderData("formComercial", "Form. Com.");
   modelProduto.setHeaderData("codComercial", "Cód. Com.");
   modelProduto.setHeaderData("precoVenda", "R$");
@@ -52,36 +47,40 @@ void PrecoEstoque::setupTables() {
 
   ui->table->setModel(&modelProduto);
 
+  ui->table->hideColumn("idProduto");
   ui->table->hideColumn("idEstoque");
-  ui->table->hideColumn("atualizarTabelaPreco");
-  ui->table->hideColumn("cfop");
-  ui->table->hideColumn("codBarras");
-  ui->table->hideColumn("comissao");
-  ui->table->hideColumn("cst");
-  ui->table->hideColumn("custo");
+  ui->table->hideColumn("idFornecedor");
+  ui->table->hideColumn("quantCaixa");
   ui->table->hideColumn("minimo");
   ui->table->hideColumn("multiplo");
-  ui->table->hideColumn("desativado");
-  ui->table->hideColumn("descontinuado");
-  ui->table->hideColumn("estoque");
-  ui->table->hideColumn("promocao");
-  ui->table->hideColumn("icms");
-  ui->table->hideColumn("idFornecedor");
-  ui->table->hideColumn("idProduto");
-  ui->table->hideColumn("idProdutoRelacionado");
-  ui->table->hideColumn("ipi");
-  ui->table->hideColumn("markup");
+  ui->table->hideColumn("m2cx");
+  ui->table->hideColumn("pccx");
+  ui->table->hideColumn("kgcx");
+  ui->table->hideColumn("codBarras");
   ui->table->hideColumn("ncm");
   ui->table->hideColumn("ncmEx");
-  ui->table->hideColumn("observacoes");
-  ui->table->hideColumn("origem");
+  ui->table->hideColumn("cfop");
+  ui->table->hideColumn("icms");
+  ui->table->hideColumn("cst");
   ui->table->hideColumn("qtdPallet");
-  ui->table->hideColumn("representacao");
+  ui->table->hideColumn("custo");
+  ui->table->hideColumn("ipi");
   ui->table->hideColumn("st");
-  ui->table->hideColumn("temLote");
   ui->table->hideColumn("sticms");
   ui->table->hideColumn("mva");
+  ui->table->hideColumn("markup");
+  ui->table->hideColumn("comissao");
+  ui->table->hideColumn("observacoes");
+  ui->table->hideColumn("origem");
+  ui->table->hideColumn("temLote");
   ui->table->hideColumn("validade");
+  ui->table->hideColumn("descontinuado");
+  ui->table->hideColumn("atualizarTabelaPreco");
+  ui->table->hideColumn("representacao");
+  ui->table->hideColumn("estoque");
+  ui->table->hideColumn("promocao");
+  ui->table->hideColumn("idProdutoRelacionado");
+  ui->table->hideColumn("desativado");
 
   for (int column = 0, columnCount = modelProduto.columnCount(); column < columnCount; ++column) {
     if (modelProduto.record().fieldName(column).endsWith("Upd")) { ui->table->setColumnHidden(column, true); }

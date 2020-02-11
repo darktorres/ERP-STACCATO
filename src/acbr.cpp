@@ -133,7 +133,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e")) {
+  if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e") and not resposta2->contains("xEvento=Cancelamento registrado")) {
     qApp->enqueueError(resposta2.value());
     return {};
   }

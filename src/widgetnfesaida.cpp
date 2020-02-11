@@ -355,7 +355,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
     if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe")) { return; }
 
-    if (not atualizarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
+    if (not atualizarNFe(resposta, idNFe, xml)) { return qApp->rollbackTransaction(); }
 
     if (not qApp->endTransaction()) { return; }
 
@@ -364,13 +364,21 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
   }
 }
 
-bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
+bool WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
+  QString status;
+
+  if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
+  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CAMCELADO"; }
+
+  if (status.isEmpty()) { return false; }
+
   QSqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  query.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE idNFe = :idNFe");
+  query.bindValue(":status", status);
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando xml da nota: " + query.lastError().text(), this); }
 
   return true;
 }

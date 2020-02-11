@@ -24,7 +24,7 @@ bool SqlTableModel::setData(const int row, const int column, const QVariant &val
 
   QVariant adjustedValue = value;
 
-  if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(roundDouble(adjustedValue.toDouble())); }
+  if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
 
   if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), adjustedValue); }
 
@@ -55,8 +55,6 @@ bool SqlTableModel::submitAll() {
 }
 
 QString SqlTableModel::selectStatement() const { return QSqlTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
-
-double SqlTableModel::roundDouble(const double value) { return std::round(value * 10000.) / 10000.; }
 
 QModelIndexList SqlTableModel::match(const QString &column, const QVariant &value, int hits, Qt::MatchFlags flags) const {
   if (proxyModel) { return proxyModel->match(QSqlTableModel::index(0, fieldIndex(column)), Qt::DisplayRole, value, hits, flags); }

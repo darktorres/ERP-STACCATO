@@ -262,7 +262,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         const int part2 = static_cast<int>(part1 * 100);
         const double part3 = static_cast<double>(part2) / 100;
 
-        const double parcela = static_cast<double>(ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito" ? part3 : SqlTableModel::roundDouble(valor / parcelas));
+        const double parcela = static_cast<double>(ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito" ? part3 : qApp->roundDouble(valor / parcelas));
         const double resto = static_cast<double>(valor - (parcela * parcelas));
 
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {

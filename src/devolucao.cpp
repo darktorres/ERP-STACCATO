@@ -653,7 +653,7 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   if (not createNewId) { return qApp->enqueueError("Não foi possível determinar o código da devolução!", this); }
 
-  const auto novoIdVendaProduto2 = reservarIdVendaProduto2();
+  const auto novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
 
   if (not novoIdVendaProduto2) { return; }
 
@@ -694,29 +694,6 @@ bool Devolucao::atualizarDevolucao() {
 void Devolucao::on_doubleSpinBoxTotalItem_valueChanged(double value) {
   ui->doubleSpinBoxCredito->setMaximum(value);
   ui->doubleSpinBoxCredito->setValue(value);
-}
-
-std::optional<int> Devolucao::reservarIdVendaProduto2() {
-  if (qApp->getInTransaction()) {
-    qApp->enqueueError("Erro ALTER TABLE durante transação!", this);
-    return {};
-  }
-
-  QSqlQuery query;
-
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
-    qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
-    return {};
-  }
-
-  const int id = query.value("auto_increment").toInt();
-
-  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    qApp->enqueueError("Erro reservar id venda: " + query.lastError().text(), this);
-    return {};
-  }
-
-  return id;
 }
 
 // TODO: 2nao criar linha conta

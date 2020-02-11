@@ -235,4 +235,4 @@ bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   return true;
 }
 
-// NOTE: notas versão 3.1 ou menor não podem ser acessadas pelo servidor 4.0
+// NOTE: se uma nota der erro na consulta o xml armazenado provavelmente está errado, nesses casos baixar o xml pelo DANFE ONLINE e substituir no sistema

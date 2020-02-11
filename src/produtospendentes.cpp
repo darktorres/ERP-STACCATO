@@ -241,7 +241,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) {
   const double excedente = ui->doubleSpinBoxComprar->value() - ui->doubleSpinBoxQuantTotal->value();
 
-  if (excedente > 0.) {
+  if (excedente > 0.) { // TODO: replace query with model so values can be correctly rounded (Application::roundDouble)
     QSqlQuery query;
     query.prepare("INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
                   "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, "
@@ -269,6 +269,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
 }
 
 bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
+  // TODO: replace query with model so values can be correctly rounded (Application::roundDouble)
   QSqlQuery query;
   query.prepare("INSERT INTO pedido_fornecedor_has_produto (idVenda, idVendaProduto1, idVendaProduto2, fornecedor, idProduto, descricao, obs, colecao, quant, un, un2, caixas, prcUnitario, preco, "
                 "kgcx, formComercial, codComercial, codBarras, dataPrevCompra) VALUES (:idVenda, :idVendaProduto1, :idVendaProduto2, :fornecedor, :idProduto, :descricao, :obs, :colecao, :quant, :un, "

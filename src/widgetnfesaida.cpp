@@ -133,6 +133,8 @@ void WidgetNfeSaida::montaFiltro() {
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
+  // TODO: como no cancelamento o acbr nao atualiza o xml, fazer a consulta para atualizar o xml como cancelado antes de enviar para a contabilidade?
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
@@ -141,11 +143,11 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
 
-  if (not emailContabilidade) { return qApp->enqueueError("A chave 'emailContabilidade' não está configurada!", this); }
+  if (not emailContabilidade) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
 
-  if (not emailLogistica) { return qApp->enqueueError("A chave 'emailLogistica' não está configurada!", this); }
+  if (not emailLogistica) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   // -------------------------------------------------------------------------
 

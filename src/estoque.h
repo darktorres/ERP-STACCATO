@@ -37,7 +37,7 @@ private:
   // methods
   auto buscarRestante() -> void;
   auto desfazerConsumo() -> bool;
-  auto dividirCompra(const int idVendaProduto2, const double quant) -> std::optional<int>;
+  auto dividirCompra(const int idVendaProduto2, const double quant) -> bool;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto setupTables() -> void;

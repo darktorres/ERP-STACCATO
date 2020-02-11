@@ -186,7 +186,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
   // -------------------------------------------------------------------------
 
-  const auto idPedido2 = dividirCompra(idVendaProduto2, quant);
+  if (not dividirCompra(idVendaProduto2, quant)) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -219,7 +219,6 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
-  if (idPedido2 and not modelConsumo.setData(rowConsumo, "idPedido2", idPedido2.value())) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
@@ -243,7 +242,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   return true;
 }
 
-std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
+bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
   // senao fazer a quebra
 
@@ -252,15 +251,12 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
                  "pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc.idPedido2 WHERE e.idEstoque = :idEstoque");
   query1.bindValue(":idEstoque", idEstoque);
 
-  if (not query1.exec() or not query1.first()) {
-    qApp->enqueueError("Erro buscando compra relacionada ao estoque: " + query1.lastError().text(), this);
-    return {};
-  }
+  if (not query1.exec() or not query1.first()) { return qApp->enqueueError(false, "Erro buscando compra relacionada ao estoque: " + query1.lastError().text(), this); }
 
   const QString idCompra = query1.value("idCompra").toString();
   const QString codComercial = query1.value("codComercial").toString();
 
-  if (idCompra.isEmpty() or codComercial.isEmpty()) { return {}; }
+  if (idCompra.isEmpty() or codComercial.isEmpty()) { return false; }
 
   //--------------------------------------------------------------------
 
@@ -269,30 +265,24 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
 
   modelCompra.setFilter("idCompra IN (" + idCompra + ") AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto2 IS NULL");
 
-  if (not modelCompra.select()) { return {}; }
+  if (not modelCompra.select()) { return false; }
 
-  if (modelCompra.rowCount() == 0) { return {}; }
+  if (modelCompra.rowCount() == 0) { return false; }
 
   QSqlQuery query;
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not query.exec() or not query.first()) {
-    qApp->enqueueError("Erro buscando idVenda: " + query.lastError().text(), this);
-    return {};
-  }
+  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVenda: " + query.lastError().text(), this); }
 
   const int row = 0;
   const double quantCompra = modelCompra.data(row, "quant").toDouble();
 
-  if (quant > quantCompra) {
-    qApp->enqueueError("Erro quant > quantCompra", this);
-    return {};
-  }
+  if (quant > quantCompra) { return qApp->enqueueError(false, "Erro quant > quantCompra", this); }
 
   if (qFuzzyCompare(quant, quantCompra)) {
-    if (not modelCompra.setData(row, "idVenda", query.value("idVenda"))) { return {}; }
-    if (not modelCompra.setData(row, "idVendaProduto2", idVendaProduto2)) { return {}; }
+    if (not modelCompra.setData(row, "idVenda", query.value("idVenda"))) { return false; }
+    if (not modelCompra.setData(row, "idVendaProduto2", idVendaProduto2)) { return false; }
   }
 
   const bool dividir = quant < quantCompra;
@@ -308,7 +298,7 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
 
       const QVariant value = modelCompra.data(row, column);
 
-      if (not modelCompra.setData(newRow, column, value)) { return {}; }
+      if (not modelCompra.setData(newRow, column, value)) { return false; }
     }
 
     const double caixas = modelCompra.data(row, "caixas").toDouble();
@@ -317,23 +307,21 @@ std::optional<int> Estoque::dividirCompra(const int idVendaProduto2, const doubl
     const double proporcaoNovo = quant / quantOriginal;
     const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
 
-    if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(row, "idPedido2"))) { return {}; }
-    if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return {}; }
-    if (not modelCompra.setData(newRow, "idVendaProduto2", idVendaProduto2)) { return {}; }
-    if (not modelCompra.setData(newRow, "quant", quant)) { return {}; }
-    if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) { return {}; }
-    if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) { return {}; }
+    if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(row, "idPedido2"))) { return false; }
+    if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return false; }
+    if (not modelCompra.setData(newRow, "idVendaProduto2", idVendaProduto2)) { return false; }
+    if (not modelCompra.setData(newRow, "quant", quant)) { return false; }
+    if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) { return false; }
+    if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) { return false; }
 
-    if (not modelCompra.setData(row, "quant", quantOriginal - quant)) { return {}; }
-    if (not modelCompra.setData(row, "caixas", caixas * proporcaoAntigo)) { return {}; }
-    if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return {}; }
+    if (not modelCompra.setData(row, "quant", quantOriginal - quant)) { return false; }
+    if (not modelCompra.setData(row, "caixas", caixas * proporcaoAntigo)) { return false; }
+    if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return false; }
   }
 
-  const int id = modelCompra.data(row, "idPedido2").toInt();
+  if (not modelCompra.submitAll()) { return false; }
 
-  if (not modelCompra.submitAll()) { return {}; }
-
-  return dividir ? modelCompra.query().lastInsertId().toInt() : id;
+  return true;
 }
 
 bool Estoque::desfazerConsumo() {

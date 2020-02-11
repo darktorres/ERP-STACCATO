@@ -173,10 +173,7 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
   ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
-  ui->tableConsumo->hideColumn("idVendaProduto1");
   ui->tableConsumo->hideColumn("idVendaProduto2");
-  ui->tableConsumo->hideColumn("idPedido1");
-  ui->tableConsumo->hideColumn("idPedido2");
   ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("quantUpd");
   ui->tableConsumo->hideColumn("idEstoque");
@@ -810,7 +807,6 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idPedido2", modelCompra.data(rowCompra, "idPedido2"))) { return false; }
 
   // -------------------------------------
 

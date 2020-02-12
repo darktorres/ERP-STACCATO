@@ -186,7 +186,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
   // -------------------------------------------------------------------------
 
-  if (not dividirCompra(idVendaProduto2, quant)) { return false; }
+  dividirCompra(idVendaProduto2, quant);
 
   // -------------------------------------------------------------------------
 

@@ -194,6 +194,13 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("st", ui->doubleSpinBoxST->value())) { return false; }
   if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) { return false; }
   if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) { return false; }
+
+  const QString un = ui->comboBoxUn->currentText();
+  const double m2cx = ui->doubleSpinBoxM2Cx->value();
+  const double pccx = ui->doubleSpinBoxPcCx->value();
+  const double quantCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
+
+  if (not setData("quantCaixa", quantCaixa)) { return false; }
   if (not setData("un", ui->comboBoxUn->currentText())) { return false; }
   if (not setData("validade", ui->dateEditValidade->date())) { return false; }
 

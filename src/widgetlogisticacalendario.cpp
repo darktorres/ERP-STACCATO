@@ -61,8 +61,7 @@ void WidgetLogisticaCalendario::updateTables() {
 
   if (not modelIsSet) { modelIsSet = true; }
 
-  const QDate date = ui->calendarWidget->selectedDate();
-  updateCalendar(date.addDays(date.dayOfWeek() * -1));
+  updateFilter();
 }
 
 void WidgetLogisticaCalendario::resetTables() { modelIsSet = false; }

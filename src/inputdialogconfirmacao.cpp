@@ -769,7 +769,6 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   for (int column = 0, columnCount = modelConsumo.columnCount(); column < columnCount; ++column) {
     if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
     if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
-    if (modelConsumo.fieldIndex("idPedido2") == column) { continue; }
     if (modelConsumo.fieldIndex("created") == column) { continue; }
     if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
 

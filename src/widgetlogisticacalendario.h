@@ -24,9 +24,11 @@ private:
   auto listarVeiculos() -> void;
   auto on_calendarWidget_selectionChanged() -> void;
   auto on_checkBoxMostrarFiltros_toggled(bool checked) -> void;
+  auto on_groupBoxVeiculos_toggled(const bool enabled) -> void;
   auto on_pushButtonAnterior_clicked() -> void;
   auto on_pushButtonProximo_clicked() -> void;
   auto setConnections() -> void;
+  auto unsetConnections() -> void;
   auto updateCalendar(const QDate &startDate) -> void;
   auto updateFilter() -> void;
 };

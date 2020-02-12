@@ -133,19 +133,19 @@ void WidgetHistoricoCompra::setTreeView() {
 void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString idCompra = modelViewComprasFinanceiro.data(index.row(), "Compra").toString();
+  const QString ordemCompra = modelViewComprasFinanceiro.data(index.row(), "OC").toString();
 
-  modelProdutos.setFilter("idCompra = " + idCompra);
+  modelProdutos.setFilter("ordemCompra = " + ordemCompra);
 
   if (not modelProdutos.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
 
-  modelProdutos2.setFilter("idCompra = " + idCompra);
+  modelProdutos2.setFilter("ordemCompra = " + ordemCompra);
 
   if (not modelProdutos2.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos2.lastError().text(), this); }
 
   setTreeView();
 
-  modelNFe.setFilter("idCompra = " + idCompra);
+  modelNFe.setFilter("ordemCompra = " + ordemCompra);
 
   if (not modelNFe.select()) { return qApp->enqueueError("Erro buscando NFe: " + modelNFe.lastError().text(), this); }
 }

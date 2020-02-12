@@ -618,10 +618,10 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   // alterar linha nova
 
   for (int column = 0, columnCount = modelConsumoTemp.columnCount(); column < columnCount; ++column) {
-    if (modelConsumoTemp.fieldIndex("idConsumo") == column) { continue; }
-    if (modelConsumoTemp.fieldIndex("idVendaProduto2") == column) { continue; }
-    if (modelConsumoTemp.fieldIndex("created") == column) { continue; }
-    if (modelConsumoTemp.fieldIndex("lastUpdated") == column) { continue; }
+    if (column == modelConsumoTemp.fieldIndex("idConsumo")) { continue; }
+    if (column == modelConsumoTemp.fieldIndex("idVendaProduto2")) { continue; }
+    if (column == modelConsumoTemp.fieldIndex("created")) { continue; }
+    if (column == modelConsumoTemp.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelConsumoTemp.data(0, column);
 

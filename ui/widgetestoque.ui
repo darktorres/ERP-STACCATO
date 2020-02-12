@@ -57,7 +57,7 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="groupBoxRelatorio">
      <property name="title">
       <string>Relatório Contábil</string>
      </property>
@@ -93,7 +93,7 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="groupBoxFiltros">
      <property name="title">
       <string>Filtros</string>
      </property>

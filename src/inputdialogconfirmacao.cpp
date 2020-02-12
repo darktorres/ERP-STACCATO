@@ -750,7 +750,7 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
   const double proporcao = caixasRestante / caixas;
 
-  if (not modelConsumo.setData(0, "quant", quantRestante)) { return false; }
+  if (not modelConsumo.setData(0, "quant", quantRestante * -1)) { return false; }
   if (not modelConsumo.setData(0, "caixas", caixasRestante)) { return false; }
   if (not modelConsumo.setData(0, "valor", valorConsumo * proporcao)) { return false; }
   if (not modelConsumo.setData(0, "desconto", desconto * proporcao)) { return false; }
@@ -781,7 +781,7 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
   if (not modelConsumo.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
   if (not modelConsumo.setData(newRow, "status", "QUEBRADO")) { return false; }
-  if (not modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa)) { return false; }
+  if (not modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa * -1)) { return false; }
   if (not modelConsumo.setData(newRow, "caixas", caixasDefeito)) { return false; }
   if (not modelConsumo.setData(newRow, "valor", valorConsumo * proporcaoNovo)) { return false; }
   if (not modelConsumo.setData(newRow, "desconto", desconto * proporcaoNovo)) { return false; }

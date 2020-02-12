@@ -35,7 +35,8 @@ void WidgetLogisticaCalendario::unsetConnections() {
 void WidgetLogisticaCalendario::listarVeiculos() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
+  if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora WHERE t.desativado = FALSE AND "
+                     "tv.desativado = FALSE ORDER BY razaoSocial, modelo")) {
     return qApp->enqueueError("Erro buscando veiculos: " + query.lastError().text(), this);
   }
 

@@ -132,7 +132,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
       }
     }
 
-    if (row == -1) { return qApp->enqueueError("Erro procurando transportadora!", this); }
+    if (row == -1) { continue; }
 
     const int diaSemana = query.value("data").toDate().dayOfWeek();
 

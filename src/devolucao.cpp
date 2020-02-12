@@ -332,9 +332,9 @@ bool Devolucao::criarDevolucao() {
   const int newRow = modelVenda.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
-    if (modelVenda.fieldIndex("idVendaBase") == column) { continue; }
-    if (modelVenda.fieldIndex("created") == column) { continue; }
-    if (modelVenda.fieldIndex("lastUpdated") == column) { continue; }
+    if (column == modelVenda.fieldIndex("idVendaBase")) { continue; }
+    if (column == modelVenda.fieldIndex("created")) { continue; }
+    if (column == modelVenda.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelVenda.data(0, column);
 
@@ -376,11 +376,11 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
   const int rowDevolucao = modelDevolvidos1.insertRowAtEnd();
 
   for (int column = 0; column < modelProdutos2.columnCount(); ++column) {
-    if (modelProdutos2.fieldIndex("idVendaProduto2") == column) { continue; }
-    if (modelProdutos2.fieldIndex("idVendaProdutoFK") == column) { continue; }
-    if (modelProdutos2.fieldIndex("idNFeSaida") == column) { continue; }
-    if (modelProdutos2.fieldIndex("created") == column) { continue; }
-    if (modelProdutos2.fieldIndex("lastUpdated") == column) { continue; }
+    if (column == modelProdutos2.fieldIndex("idVendaProduto2")) { continue; }
+    if (column == modelProdutos2.fieldIndex("idVendaProdutoFK")) { continue; }
+    if (column == modelProdutos2.fieldIndex("idNFeSaida")) { continue; }
+    if (column == modelProdutos2.fieldIndex("created")) { continue; }
+    if (column == modelProdutos2.fieldIndex("lastUpdated")) { continue; }
 
     const QString fieldNameSrc = modelProdutos2.record().fieldName(column);
     const int fieldNameDest = modelDevolvidos1.fieldIndex(fieldNameSrc);
@@ -448,9 +448,9 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
     // NOTE: *quebralinha venda_produto2
 
     for (int column = 0; column < modelProdutos2.columnCount(); ++column) {
-      if (modelProdutos2.fieldIndex("idVendaProduto2") == column) { continue; }
-      if (modelProdutos2.fieldIndex("created") == column) { continue; }
-      if (modelProdutos2.fieldIndex("lastUpdated") == column) { continue; }
+      if (column == modelProdutos2.fieldIndex("idVendaProduto2")) { continue; }
+      if (column == modelProdutos2.fieldIndex("created")) { continue; }
+      if (column == modelProdutos2.fieldIndex("lastUpdated")) { continue; }
 
       const QVariant value = modelProdutos2.data(currentRow, column);
 
@@ -483,9 +483,9 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
       const int newRowConsumo = modelConsumos.insertRowAtEnd();
 
       for (int column = 0; column < modelConsumos.columnCount(); ++column) {
-        if (modelConsumos.fieldIndex("idConsumo") == column) { continue; }
-        if (modelConsumos.fieldIndex("created") == column) { continue; }
-        if (modelConsumos.fieldIndex("lastUpdated") == column) { continue; }
+        if (column == modelConsumos.fieldIndex("idConsumo")) { continue; }
+        if (column == modelConsumos.fieldIndex("created")) { continue; }
+        if (column == modelConsumos.fieldIndex("lastUpdated")) { continue; }
 
         const QVariant value = modelConsumos.data(0, column);
 

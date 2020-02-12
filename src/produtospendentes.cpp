@@ -329,9 +329,9 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
   // copiar colunas
   for (int column = 0, columnCount = modelProdutos.columnCount(); column < columnCount; ++column) {
-    if (modelProdutos.fieldIndex("idVendaProduto2") == column) { continue; }
-    if (modelProdutos.fieldIndex("created") == column) { continue; }
-    if (modelProdutos.fieldIndex("lastUpdated") == column) { continue; }
+    if (column == modelProdutos.fieldIndex("idVendaProduto2")) { continue; }
+    if (column == modelProdutos.fieldIndex("created")) { continue; }
+    if (column == modelProdutos.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelProdutos.data(rowProduto, column);
 

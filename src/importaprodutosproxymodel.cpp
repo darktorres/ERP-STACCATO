@@ -19,7 +19,7 @@ QVariant ImportaProdutosProxyModel::data(const QModelIndex &proxyIndex, const in
       }
 
       for (int column = 0, columns = columnCount(); column < columns; ++column) {
-        if (proxyIndex.column() == column) {
+        if (column == proxyIndex.column()) {
           const Status value = static_cast<Status>(proxyIndex.siblingAtColumn(proxyIndex.column() + 1).data().toInt());
 
           if (value == Status::Novo) {

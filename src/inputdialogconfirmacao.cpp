@@ -767,10 +767,10 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   const int newRow = modelConsumo.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelConsumo.columnCount(); column < columnCount; ++column) {
-    if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
-    if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
-    if (modelConsumo.fieldIndex("created") == column) { continue; }
-    if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
+    if (column == modelConsumo.fieldIndex("idConsumo")) { continue; }
+    if (column == modelConsumo.fieldIndex("idVendaProduto2")) { continue; }
+    if (column == modelConsumo.fieldIndex("created")) { continue; }
+    if (column == modelConsumo.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelConsumo.data(0, column);
 

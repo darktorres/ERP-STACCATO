@@ -819,6 +819,23 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
 
   if (not novoIdVendaProduto2) { return {}; }
 
+  // -------------------------------------
+
+  const double quantVenda = modelVenda.data(rowVenda, "quant").toDouble();
+  const double quantCaixa = modelVenda.data(rowVenda, "quantCaixa").toDouble();
+  const double proporcao = quantAdicionar / quantVenda;
+  const double parcial = modelVenda.data(rowVenda, "parcial").toDouble();
+  const double parcialDesc = modelVenda.data(rowVenda, "parcialDesc").toDouble();
+  const double total = modelVenda.data(rowVenda, "total").toDouble();
+
+  if (not modelVenda.setData(rowVenda, "quant", quantAdicionar)) { return {}; }
+  if (not modelVenda.setData(rowVenda, "caixas", quantAdicionar / quantCaixa)) { return {}; }
+  if (not modelVenda.setData(rowVenda, "parcial", parcial * proporcao)) { return {}; }
+  if (not modelVenda.setData(rowVenda, "parcialDesc", parcialDesc * proporcao)) { return {}; }
+  if (not modelVenda.setData(rowVenda, "total", total * proporcao)) { return {}; }
+
+  // -------------------------------------
+
   const int newRowVenda = modelVenda.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelVenda.columnCount(); column < columnCount; ++column) {
@@ -831,33 +848,16 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
     if (not modelVenda.setData(newRowVenda, column, value)) { return {}; }
   }
 
-  const double quantVenda = modelVenda.data(rowVenda, "quant").toDouble();
-  const double quantCaixa = modelVenda.data(rowVenda, "quantCaixa").toDouble();
-
-  const double proporcao = quantAdicionar / quantVenda;
-  const double parcial = modelVenda.data(rowVenda, "parcial").toDouble() * proporcao;
-  const double parcialDesc = modelVenda.data(rowVenda, "parcialDesc").toDouble() * proporcao;
-  const double total = modelVenda.data(rowVenda, "total").toDouble() * proporcao;
-
-  if (not modelVenda.setData(rowVenda, "quant", quantAdicionar)) { return {}; }
-  if (not modelVenda.setData(rowVenda, "caixas", quantAdicionar / quantCaixa)) { return {}; }
-  if (not modelVenda.setData(rowVenda, "parcial", parcial)) { return {}; }
-  if (not modelVenda.setData(rowVenda, "parcialDesc", parcialDesc)) { return {}; }
-  if (not modelVenda.setData(rowVenda, "total", total)) { return {}; }
-
   const double quantNovo = quantVenda - quantAdicionar;
   const double proporcaoNovo = quantNovo / quantVenda;
-  const double parcialNovo = modelVenda.data(newRowVenda, "parcial").toDouble() * proporcaoNovo;
-  const double parcialDescNovo = modelVenda.data(newRowVenda, "parcialDesc").toDouble() * proporcaoNovo;
-  const double totalNovo = modelVenda.data(newRowVenda, "total").toDouble() * proporcaoNovo;
 
   if (not modelVenda.setData(newRowVenda, "idVendaProduto2", novoIdVendaProduto2.value())) { return {}; }
   if (not modelVenda.setData(newRowVenda, "idRelacionado", modelVenda.data(rowVenda, "idVendaProduto2"))) { return {}; }
   if (not modelVenda.setData(newRowVenda, "quant", quantNovo)) { return {}; }
   if (not modelVenda.setData(newRowVenda, "caixas", quantNovo / quantCaixa)) { return {}; }
-  if (not modelVenda.setData(newRowVenda, "parcial", parcialNovo)) { return {}; }
-  if (not modelVenda.setData(newRowVenda, "parcialDesc", parcialDescNovo)) { return {}; }
-  if (not modelVenda.setData(newRowVenda, "total", totalNovo)) { return {}; }
+  if (not modelVenda.setData(newRowVenda, "parcial", parcial * proporcaoNovo)) { return {}; }
+  if (not modelVenda.setData(newRowVenda, "parcialDesc", parcialDesc * proporcaoNovo)) { return {}; }
+  if (not modelVenda.setData(newRowVenda, "total", total * proporcaoNovo)) { return {}; }
 
   // -------------------------------------
 
@@ -869,6 +869,19 @@ bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
   const auto novoIdPedido2 = qApp->reservarIdPedido2();
 
   if (not novoIdPedido2) { return false; }
+
+  // -------------------------------------
+
+  const double quantOriginal = modelCompra.data(rowCompra, "quant").toDouble();
+  const double proporcaoAntigo = quantAdicionar / quantOriginal;
+  const double caixas = modelCompra.data(rowCompra, "caixas").toDouble();
+  const double prcUnitario = modelCompra.data(rowCompra, "prcUnitario").toDouble();
+
+  if (not modelCompra.setData(rowCompra, "quant", quantAdicionar)) { return false; }
+  if (not modelCompra.setData(rowCompra, "caixas", caixas * proporcaoAntigo)) { return false; }
+  if (not modelCompra.setData(rowCompra, "preco", prcUnitario * quantAdicionar)) { return false; }
+
+  // -------------------------------------
 
   const int newRow = modelCompra.insertRowAtEnd();
 
@@ -882,16 +895,8 @@ bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
 
-  const double caixas = modelCompra.data(rowCompra, "caixas").toDouble();
-  const double prcUnitario = modelCompra.data(rowCompra, "prcUnitario").toDouble();
-  const double quantOriginal = modelCompra.data(rowCompra, "quant").toDouble();
   const double quantNovo = quantOriginal - quantAdicionar;
-  const double proporcaoAntigo = quantAdicionar / quantOriginal;
   const double proporcaoNovo = quantNovo / quantOriginal;
-
-  if (not modelCompra.setData(rowCompra, "quant", quantAdicionar)) { return false; }
-  if (not modelCompra.setData(rowCompra, "caixas", caixas * proporcaoAntigo)) { return false; }
-  if (not modelCompra.setData(rowCompra, "preco", prcUnitario * quantAdicionar)) { return false; }
 
   if (not modelCompra.setData(newRow, "idPedido2", novoIdPedido2.value())) { return false; }
   if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(rowCompra, "idPedido2"))) { return false; }
@@ -954,8 +959,8 @@ bool ImportarXML::parear() {
       bool repareado = false;
       double estoquePareado = 0;
 
-      for (const auto &row : diferentes) {
-        if (not associarDiferente(row, rowEstoque, estoquePareado, repareado)) { return false; }
+      for (const auto &rowCompra : diferentes) {
+        if (not associarDiferente(rowCompra, rowEstoque, estoquePareado, repareado)) { return false; }
         if (repareado) { return true; }
         if (qFuzzyCompare(quantEstoque, estoquePareado)) { break; }
       }

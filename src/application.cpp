@@ -411,6 +411,29 @@ std::optional<int> Application::reservarIdVendaProduto2() {
   return id;
 }
 
+std::optional<int> Application::reservarIdNFe() {
+  if (qApp->getInTransaction()) {
+    qApp->enqueueError("Erro ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
+    qApp->enqueueError("Erro reservar id nfe: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) {
+    qApp->enqueueError("Erro reservar id nfe: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
 std::optional<int> Application::reservarIdPedido2() {
   if (qApp->getInTransaction()) {
     qApp->enqueueError("Erro ALTER TABLE durante transação!");

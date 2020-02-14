@@ -31,6 +31,7 @@ public:
   auto getWebDavIp() const -> QString;
   auto lightTheme() -> void;
   auto reservarIdEstoque() -> std::optional<int>;
+  auto reservarIdNFe() -> std::optional<int>;
   auto reservarIdPedido2() -> std::optional<int>;
   auto reservarIdVendaProduto2() -> std::optional<int>;
   auto rollbackTransaction() -> void;

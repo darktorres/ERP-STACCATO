@@ -352,7 +352,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   ACBr acbrRemoto;
 
-  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
     const auto [xml, resposta] = tuple.value();
 
     if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe")) { return; }

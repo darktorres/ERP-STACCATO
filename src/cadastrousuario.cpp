@@ -74,7 +74,7 @@ bool CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
   const auto children = ui->tab->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
@@ -116,7 +116,7 @@ bool CadastroUsuario::savingProcedures() {
   if (not setData("email", ui->lineEditEmail->text())) { return false; }
   if (not setData("user", ui->lineEditUser->text())) { return false; }
 
-  // NOTE: change this when upgrading for MySQL 8
+  // NOTE: change this when upgrading to MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
     QSqlQuery query;
 
@@ -194,11 +194,9 @@ bool CadastroUsuario::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 

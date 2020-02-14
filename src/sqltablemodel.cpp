@@ -10,7 +10,10 @@
 SqlTableModel::SqlTableModel(const int limit, QObject *parent) : QSqlTableModel(parent), limit(limit) {}
 
 QVariant SqlTableModel::data(const int row, const int column) const {
-  if (row == -1 or column == -1) { return qApp->enqueueError(false, "Erro: linha/coluna -1 SqlTableModel"); }
+  if (row == -1 or column == -1) {
+    qApp->enqueueError("Erro: linha/coluna -1 SqlTableModel");
+    return QVariant();
+  }
 
   if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
 
@@ -25,6 +28,7 @@ bool SqlTableModel::setData(const int row, const int column, const QVariant &val
   QVariant adjustedValue = value;
 
   if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
+  if (adjustedValue.type() == QVariant::String) { adjustedValue.setValue(adjustedValue.toString().toUpper()); }
 
   if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), adjustedValue); }
 

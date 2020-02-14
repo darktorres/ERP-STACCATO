@@ -7,7 +7,7 @@
 class RegisterAddressDialog : public RegisterDialog {
 
 public:
-  explicit RegisterAddressDialog(const QString &table, const QString &primaryKey, QWidget *parent = nullptr);
+  explicit RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent = nullptr);
 
 protected:
   // attributes
@@ -17,7 +17,7 @@ protected:
   SqlTableModel modelEnd;
   // methods
   auto setDataEnd(const QString &key, const QVariant &value) -> bool;
-  auto getCodigoUF(QString uf) const -> int;
+  auto getCodigoUF(const QString &uf) const -> int;
   virtual auto newRegister() -> bool override;
 
 private:

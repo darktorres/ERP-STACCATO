@@ -85,7 +85,7 @@ bool CadastroProduto::verifyFields() {
   const auto children = findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->comboBoxUn->currentText().isEmpty()) {
@@ -243,11 +243,9 @@ bool CadastroProduto::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 

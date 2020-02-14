@@ -172,7 +172,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   if (query.value("representacao").toBool() and tipo == Tipo::Faturamento) { ui->lineEditCodRep->show(); }
 
-  if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário.", this); }
+  if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário!", this); }
 
   return true;
 }

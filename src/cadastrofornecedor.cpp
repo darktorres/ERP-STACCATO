@@ -4,10 +4,8 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "searchdialog.h"
 #include "usersession.h"
 
-#include <QDate>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
@@ -93,7 +91,7 @@ bool CadastroFornecedor::verifyFields() {
   const auto children = ui->frameCadastro->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
@@ -153,12 +151,12 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->doubleSpinBoxComissao, "comissao1");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
-  mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
   mapperEnd.addMapping(ui->lineEditCEP, modelEnd.fieldIndex("CEP"));
-  mapperEnd.addMapping(ui->lineEditCidade, modelEnd.fieldIndex("cidade"));
-  mapperEnd.addMapping(ui->lineEditComp, modelEnd.fieldIndex("complemento"));
   mapperEnd.addMapping(ui->lineEditEndereco, modelEnd.fieldIndex("logradouro"));
   mapperEnd.addMapping(ui->lineEditNro, modelEnd.fieldIndex("numero"));
+  mapperEnd.addMapping(ui->lineEditComp, modelEnd.fieldIndex("complemento"));
+  mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
+  mapperEnd.addMapping(ui->lineEditCidade, modelEnd.fieldIndex("cidade"));
   mapperEnd.addMapping(ui->lineEditUF, modelEnd.fieldIndex("uf"));
 }
 
@@ -185,11 +183,9 @@ bool CadastroFornecedor::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
@@ -244,7 +240,9 @@ void CadastroFornecedor::on_lineEditContatoCPF_textEdited(const QString &text) {
   ui->lineEditContatoCPF->setStyleSheet(validaCPF(QString(text).remove(".").remove("-")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 }
 
-void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço.", this); }
+void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
+  if (cadastrarEndereco()) { novoEndereco(); }
+}
 
 bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
@@ -265,8 +263,6 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
-
-  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
@@ -289,7 +285,9 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   }
 }
 
-void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
+void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {
+  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+}
 
 void CadastroFornecedor::on_tableEndereco_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoEndereco(); }
@@ -321,11 +319,7 @@ bool CadastroFornecedor::viewRegister() {
 }
 
 void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) { return; }
 
     if (not modelEnd.submitAll()) { return; }
@@ -380,6 +374,5 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
   if (not modelEnd.select()) { return; }
 }
 
-// TODO: 5criar um tipo 'serviço' para atelier (fluxo pagamento é loja mas segue como representacao)
 // TODO: 5poder alterar na tela 'comissao'
 // TODO: quando for novo cadastro permitir marcar flag de representacao

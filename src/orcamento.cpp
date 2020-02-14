@@ -152,7 +152,7 @@ bool Orcamento::viewRegister() {
   auto load = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
-    modelItem.setFilter("idOrcamento = '" + data(0, "idOrcamento").toString() + "'");
+    modelItem.setFilter("idOrcamento = '" + model.data(0, "idOrcamento").toString() + "'");
 
     if (not modelItem.select()) { return false; }
 

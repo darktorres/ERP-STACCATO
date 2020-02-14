@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  if (const auto hostname = UserSession::getSetting("Login/hostname"); hostname) {
+  if (const auto hostname = UserSession::getSetting("Login/hostname")) {
     const QString hostnameText = qApp->getMapLojas().key(hostname->toString());
 
     setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));

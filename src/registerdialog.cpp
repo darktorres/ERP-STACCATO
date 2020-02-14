@@ -3,14 +3,11 @@
 #include "application.h"
 
 #include <QCloseEvent>
-#include <QDate>
 #include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
-#include <QSqlError>
-#include <QSqlQuery>
 
-RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent) : QDialog(parent), primaryKey(primaryKey) {
+RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : QDialog(parent), primaryKey(primaryKeyStr) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 
@@ -39,7 +36,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   if (model.rowCount() == 0) {
     close();
-    return qApp->enqueueError(false, "Item não encontrado.", this);
+    return qApp->enqueueError(false, "Item não encontrado!", this);
   }
 
   isDirty = false;
@@ -63,7 +60,7 @@ bool RegisterDialog::viewRegister() {
 
 bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   for (const auto &line : list) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   return true;
@@ -77,38 +74,9 @@ bool RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
   return true;
 }
 
-bool RegisterDialog::columnsToUpper(SqlTableModel &someModel, const int row) {
-  for (int column = 0, columnCount = someModel.columnCount(); column < columnCount; ++column) {
-    const QVariant dado = someModel.data(row, column);
+bool RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
 
-    if (dado.type() == QVariant::String) {
-      if (not someModel.setData(row, column, dado.toString().toUpper())) { return false; }
-    }
-  }
-
-  return true;
-}
-
-bool RegisterDialog::setData(const QString &key, const QVariant &value) {
-  if (value.isNull()) { return true; }
-  if (value.type() == QVariant::String and value.toString().isEmpty()) { return true; }
-  if (value.type() == QVariant::String and value.toString().remove(".").remove("/").remove("-").isEmpty()) { return true; }
-
-  if (currentRow == -1) { return qApp->enqueueError(false, "Erro linha -1", this); }
-
-  return model.setData(currentRow, key, value);
-}
-
-QVariant RegisterDialog::data(const QString &key) {
-  if (currentRow == -1) {
-    qApp->enqueueError("Erro linha -1", this);
-    return QVariant();
-  }
-
-  return model.data(currentRow, key);
-}
-
-QVariant RegisterDialog::data(const int row, const QString &key) { return model.data(row, key); }
+QVariant RegisterDialog::data(const QString &key) { return model.data(currentRow, key); }
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
   if (model.fieldIndex(key) == -1) { return qApp->enqueueError("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
@@ -139,20 +107,20 @@ void RegisterDialog::show() {
   adjustSize();
 }
 
-bool RegisterDialog::verifyRequiredField(QLineEdit *line, const bool silent) {
-  if (not line->styleSheet().contains(requiredStyle())) { return true; }
-  if (not line->isVisible()) { return true; }
+bool RegisterDialog::verifyRequiredField(QLineEdit &line, const bool silent) {
+  if (not line.styleSheet().contains(requiredStyle())) { return true; }
+  if (not line.isVisible()) { return true; }
 
-  const bool isEmpty = line->text().isEmpty();
-  const bool isZero = line->text() == "0,00";
-  const bool isSymbols = line->text() == "../-";
-  const bool isLessMask = line->text().size() < line->inputMask().remove(";").remove(">").remove("_").size();
-  const bool isLessPlcH = line->text().size() < line->placeholderText().size() - 1;
+  const bool isEmpty = (line.text().isEmpty());
+  const bool isZero = (line.text() == "0,00");
+  const bool isSymbols = (line.text() == "../-");
+  const bool isLessMask = (line.text().size() < line.inputMask().remove(";").remove(">").remove("_").size());
+  const bool isLessPlaceHolder = (line.text().size() < line.placeholderText().size() - 1);
 
-  if (isEmpty or isZero or isSymbols or isLessMask or isLessPlcH) {
+  if (isEmpty or isZero or isSymbols or isLessMask or isLessPlaceHolder) {
     if (not silent) {
-      qApp->enqueueError("Você não preencheu um campo obrigatório: " + line->accessibleName(), this);
-      line->setFocus();
+      qApp->enqueueError("Você não preencheu um campo obrigatório: " + line.accessibleName(), this);
+      line.setFocus();
     }
 
     return false;
@@ -215,12 +183,16 @@ void RegisterDialog::clearFields() {
   }
 }
 
-void RegisterDialog::remove() {
+int RegisterDialog::removeBox() {
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Remover");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
-  if (msgBox.exec() == QMessageBox::Yes) {
+  return msgBox.exec();
+}
+
+void RegisterDialog::remove() {
+  if (removeBox() == QMessageBox::Yes) {
     if (not setData("desativado", true)) { return; }
 
     if (not model.submitAll()) { return; }

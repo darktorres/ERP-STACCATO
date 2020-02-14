@@ -415,7 +415,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   ACBr acbrRemoto;
 
-  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
     const auto [xml, resposta] = *tuple;
 
     if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonConsultarNFe")) { return; }
@@ -567,7 +567,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     xlsx.write("I17", queryEndereco.value("cep"));
   }
 
-  for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row = row + 2, ++index) {
+  for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row += 2, ++index) {
     xlsx.write("D" + QString::number(row), modelProdutosAgrupado.data(index, "fornecedor"));
     xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto").toString() + " - " + modelProdutosAgrupado.data(index, "codComercial").toString()); // produto
     xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString());               // quant
@@ -576,7 +576,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo!", this); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);

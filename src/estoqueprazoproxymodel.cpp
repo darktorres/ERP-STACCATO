@@ -6,9 +6,7 @@
 #include <QBrush>
 #include <QDate>
 
-EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), prazoEntregaColumn(model->fieldIndex("prazoEntrega")) {
-  setSourceModel(model);
-}
+EstoquePrazoProxyModel::EstoquePrazoProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), prazoEntregaColumn(model->fieldIndex("prazoEntrega")) { setSourceModel(model); }
 
 QVariant EstoquePrazoProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

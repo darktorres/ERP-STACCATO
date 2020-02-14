@@ -581,15 +581,11 @@ bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
 }
 
 bool ImportarXML::cadastrarNFe(XML &xml) {
-  QSqlQuery query;
+  const auto id = qApp->reservarIdNFe();
 
-  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) { return false; }
+  if (not id) { return false; }
 
-  const int id = query.value("auto_increment").toInt();
-
-  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) { return false; }
-
-  xml.idNFe = id;
+  xml.idNFe = id.value();
 
   const int row = modelNFe.insertRowAtEnd();
 
@@ -959,7 +955,7 @@ bool ImportarXML::parear() {
       bool repareado = false;
       double estoquePareado = 0;
 
-      for (const auto &rowCompra : diferentes) {
+      for (const auto rowCompra : diferentes) {
         if (not associarDiferente(rowCompra, rowEstoque, estoquePareado, repareado)) { return false; }
         if (repareado) { return true; }
         if (qFuzzyCompare(quantEstoque, estoquePareado)) { break; }

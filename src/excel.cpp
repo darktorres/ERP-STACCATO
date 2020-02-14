@@ -182,7 +182,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   hideUnusedRows(xlsx);
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo."); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo!"); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName);

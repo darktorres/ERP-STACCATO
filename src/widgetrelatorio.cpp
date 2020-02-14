@@ -208,7 +208,7 @@ void WidgetRelatorio::setResumoOrcamento() {
   modelOrcamento.setFilter("");
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
+    if (const auto descricaoLoja = UserSession::fromLoja("descricao")) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
   }
 
   if (not modelOrcamento.select()) { return; }
@@ -297,7 +297,7 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo.", this); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo!", this); }
 
   return true;
 }

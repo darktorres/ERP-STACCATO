@@ -221,7 +221,7 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo.", this); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo!", this); }
 
   return true;
 }

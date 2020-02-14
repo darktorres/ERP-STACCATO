@@ -5,11 +5,9 @@
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "porcentagemdelegate.h"
-#include "searchdialog.h"
 #include "usersession.h"
 
 #include <QDebug>
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -162,7 +160,7 @@ bool CadastroLoja::verifyFields() {
   const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   return true;
@@ -262,16 +260,16 @@ void CadastroLoja::on_lineEditCNPJ_textEdited(const QString &text) {
                                                                                                 : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
 }
 
-void CadastroLoja::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroLoja::on_pushButtonAdicionarEnd_clicked() {
+  if (cadastrarEndereco()) { novoEndereco(); }
+}
 
-void CadastroLoja::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroLoja::on_pushButtonAtualizarEnd_clicked() {
+  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+}
 
 void CadastroLoja::on_pushButtonRemoverEnd_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) { return; }
 
     if (not modelEnd.submitAll()) { return; }
@@ -307,8 +305,6 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
-
-  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
@@ -408,11 +404,9 @@ bool CadastroLoja::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
@@ -496,8 +490,6 @@ bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
   if (not modelConta.setData(currentRowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
   if (not modelConta.setData(currentRowConta, "conta", ui->lineEditConta->text())) { return false; }
 
-  if (not columnsToUpper(modelConta, currentRowConta)) { return false; }
-
   if (tipoConta == Tipo::Cadastrar) { backupConta.append(modelConta.record(currentRowConta)); }
 
   isDirty = true;
@@ -519,16 +511,16 @@ void CadastroLoja::clearConta() {
   ui->lineEditConta->clear();
 }
 
-void CadastroLoja::on_pushButtonAdicionarConta_clicked() { cadastrarConta() ? novaConta() : qApp->enqueueError("Não foi possível cadastrar esta conta.", this); }
+void CadastroLoja::on_pushButtonAdicionarConta_clicked() {
+  if (cadastrarConta()) { novaConta(); }
+}
 
-void CadastroLoja::on_pushButtonAtualizarConta_clicked() { cadastrarConta(Tipo::Atualizar) ? novaConta() : qApp->enqueueError("Não foi possível cadastrar esta conta.", this); }
+void CadastroLoja::on_pushButtonAtualizarConta_clicked() {
+  if (cadastrarConta(Tipo::Atualizar)) { novaConta(); }
+}
 
 void CadastroLoja::on_pushButtonRemoverConta_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not modelConta.setData(mapperConta.currentIndex(), "desativado", true)) { return; }
 
     if (not modelConta.submitAll()) { return; }

@@ -13,6 +13,7 @@ public:
   auto columnIndex(const QString &column, const bool silent = false) const -> int;
   auto hideColumn(const QString &column) -> void;
   auto openPersistentEditor(const int row, const int column) -> void;
+  auto resort() -> void;
   auto rowCount() const -> int;
   auto setAutoResize(const bool value) -> void;
   auto setItemDelegateForColumn(const QString &column, QAbstractItemDelegate *delegate) -> void;

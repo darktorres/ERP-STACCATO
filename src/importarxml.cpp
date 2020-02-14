@@ -962,6 +962,8 @@ bool ImportarXML::parear() {
       }
     }
 
+    ui->tableCompra->resort();
+
     ui->tableEstoque->clearSelection();
     ui->tableConsumo->clearSelection();
     ui->tableCompra->clearSelection();

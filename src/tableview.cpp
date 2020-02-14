@@ -64,6 +64,8 @@ void TableView::openPersistentEditor(const int row, const QString &column) { QTa
 
 void TableView::openPersistentEditor(const int row, const int column) { QTableView::openPersistentEditor(QTableView::model()->index(row, column)); }
 
+void TableView::resort() { model()->sort(horizontalHeader()->sortIndicatorSection(), horizontalHeader()->sortIndicatorOrder()); }
+
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(columnIndex(column), order); }
 
 int TableView::rowCount() const { return model()->rowCount(); }

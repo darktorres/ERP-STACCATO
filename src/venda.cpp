@@ -704,7 +704,7 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
         if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
         if (modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
-        if (modelFluxoCaixa.data(z, "tipo").toString().contains("Conta Cliente")) { continue; }
+        if (modelFluxoCaixa.data(z, "tipo").toString().contains("CONTA CLIENTE")) { continue; }
 
         QSqlQuery query;
         query.prepare("SELECT taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento WHERE pagamento = :pagamento AND parcela = :parcela");
@@ -1060,7 +1060,7 @@ bool Venda::cancelamento() {
   if (not query5.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query5.lastError().text(), this); }
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-    if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) {
+    if (modelFluxoCaixa.data(row, "tipo").toString().contains("CONTA CLIENTE")) {
       // TODO: é gerado crédito mesmo se a conta nao chegou a ser paga?
       if (modelFluxoCaixa.data(row, "status").toString() == "CANCELADO") { continue; }
       const double credito = modelFluxoCaixa.data(row, "valor").toDouble();
@@ -1227,7 +1227,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   double credito = queryPag.value("credito").toDouble();
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
-    if (modelFluxoCaixa.data(row, "tipo").toString().contains("Conta Cliente")) { credito += modelFluxoCaixa.data(row, "valor").toDouble(); }
+    if (modelFluxoCaixa.data(row, "tipo").toString().contains("CONTA CLIENTE")) { credito += modelFluxoCaixa.data(row, "valor").toDouble(); }
   }
 
   ui->widgetPgts->setCredito(credito);

@@ -164,7 +164,7 @@ void Application::startSqlPing() {
 void Application::startUpdaterPing() {
   auto *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
-  timer->start(3600000);
+  timer->start(600000);
 }
 
 void Application::darkTheme() {

@@ -514,7 +514,7 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
 
   modelProdutosTemp.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());
 
-  if (not modelProdutosTemp.select()) { return false; }
+  if (not modelProdutosTemp.select() or modelProdutosTemp.rowCount() == 0) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -579,7 +579,7 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
 
   modelConsumoTemp.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());
 
-  if (not modelConsumoTemp.select()) { return false; }
+  if (not modelConsumoTemp.select() or modelConsumoTemp.rowCount() == 0) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -654,7 +654,8 @@ bool WidgetLogisticaAgendarEntrega::dividirCompra(const int row, const double ca
   modelCompra.setFilter("idVendaProduto2 = " + modelProdutos.data(row, "idVendaProduto2").toString());
 
   if (not modelCompra.select()) { return false; }
-  // TODO: verificar se rowCount > 0?
+
+  if (modelCompra.rowCount() == 0) { return true; }
 
   // -------------------------------------------------------------------------
 

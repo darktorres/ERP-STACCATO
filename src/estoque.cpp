@@ -267,7 +267,7 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
 
   if (not modelCompra.select()) { return false; }
 
-  if (modelCompra.rowCount() == 0) { return false; }
+  if (modelCompra.rowCount() == 0) { return true; }
 
   QSqlQuery query;
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");

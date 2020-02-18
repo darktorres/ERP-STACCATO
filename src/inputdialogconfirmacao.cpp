@@ -413,7 +413,7 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   modelVendaProduto.setFilter("idVendaProduto2 = " + modelVeiculo.data(row, "idVendaProduto2").toString());
 
-  if (not modelVendaProduto.select()) { return false; }
+  if (not modelVendaProduto.select() or modelVendaProduto.rowCount() == 0) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -732,7 +732,8 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   modelConsumo.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
   if (not modelConsumo.select()) { return false; }
-  // TODO: verificar se rowCount > 0?
+
+  if (modelConsumo.rowCount() == 0) { return true; }
 
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
@@ -806,7 +807,8 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
   modelCompra.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
   if (not modelCompra.select()) { return false; }
-  // TODO: verificar se rowCount > 0?
+
+  if (modelCompra.rowCount() == 0) { return true; }
 
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double caixasRestante = caixas - caixasDefeito;

@@ -9,10 +9,10 @@
 #include "editdelegate.h"
 #include "estoque.h"
 #include "excel.h"
-#include "impressao.h"
 #include "logindialog.h"
 #include "noeditdelegate.h"
 #include "orcamento.h"
+#include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
@@ -152,7 +152,7 @@ void Venda::setConnections() {
   connect(ui->pushButtonDevolucao, &QPushButton::clicked, this, &Venda::on_pushButtonDevolucao_clicked, connectionType);
   connect(ui->pushButtonFinanceiroSalvar, &QPushButton::clicked, this, &Venda::on_pushButtonFinanceiroSalvar_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked, connectionType);
-  connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Venda::on_pushButtonImprimir_clicked, connectionType);
+  connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
 }
 
@@ -173,7 +173,7 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonDevolucao, &QPushButton::clicked, this, &Venda::on_pushButtonDevolucao_clicked);
   disconnect(ui->pushButtonFinanceiroSalvar, &QPushButton::clicked, this, &Venda::on_pushButtonFinanceiroSalvar_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked);
-  disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Venda::on_pushButtonImprimir_clicked);
+  disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
 }
 
@@ -465,7 +465,7 @@ bool Venda::savingProcedures() {
 void Venda::registerMode() {
   ui->framePagamentos->show();
   ui->pushButtonGerarExcel->hide();
-  ui->pushButtonImprimir->hide();
+  ui->pushButtonGerarPdf->hide();
   ui->pushButtonCancelamento->hide();
   ui->pushButtonDevolucao->hide();
   ui->pushButtonCadastrarPedido->show();
@@ -483,7 +483,7 @@ void Venda::updateMode() {
   ui->tableFluxoCaixa2->hide();
   ui->widgetPgts->hide();
   ui->pushButtonGerarExcel->show();
-  ui->pushButtonImprimir->show();
+  ui->pushButtonGerarPdf->show();
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
   ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
@@ -850,9 +850,9 @@ void Venda::on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descon
   setConnections();
 }
 
-void Venda::on_pushButtonImprimir_clicked() {
-  Impressao impressao(data("idVenda").toString(), Impressao::Tipo::Venda, this);
-  impressao.print();
+void Venda::on_pushButtonGerarPdf_clicked() {
+  PDF pdf(data("idVenda").toString(), PDF::Tipo::Venda, this);
+  pdf.gerarPdf();
 }
 
 void Venda::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Venda cadastrada com sucesso!", this); }

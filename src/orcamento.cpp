@@ -8,8 +8,8 @@
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
-#include "impressao.h"
 #include "logindialog.h"
+#include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
@@ -111,7 +111,7 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked, connectionType);
-  connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked, connectionType);
+  connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked, connectionType);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked, connectionType);
   connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked, connectionType);
@@ -140,7 +140,7 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
-  disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked);
+  disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   disconnect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
@@ -364,7 +364,7 @@ void Orcamento::registerMode() {
 
   ui->pushButtonApagarOrc->setDisabled(true);
   ui->pushButtonGerarExcel->setDisabled(true);
-  ui->pushButtonImprimir->setDisabled(true);
+  ui->pushButtonGerarPdf->setDisabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
   //  ui->itemBoxEndereco->setDisabled(true);
 }
@@ -376,7 +376,7 @@ void Orcamento::updateMode() {
 
   ui->pushButtonApagarOrc->setEnabled(true);
   ui->pushButtonGerarExcel->setEnabled(true);
-  ui->pushButtonImprimir->setEnabled(true);
+  ui->pushButtonGerarPdf->setEnabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
   ui->itemBoxEndereco->show();
   ui->spinBoxValidade->setDisabled(true);
@@ -687,9 +687,9 @@ void Orcamento::calcPrecoGlobalTotal() {
   ui->doubleSpinBoxTotal->setValue(subTotalItens * (1 - (descGlobal / 100)) + frete);
 }
 
-void Orcamento::on_pushButtonImprimir_clicked() {
-  Impressao impressao(data("idOrcamento").toString(), Impressao::Tipo::Orcamento, this);
-  impressao.print();
+void Orcamento::on_pushButtonGerarPdf_clicked() {
+  PDF pdf(data("idOrcamento").toString(), PDF::Tipo::Orcamento, this);
+  pdf.gerarPdf();
 }
 
 void Orcamento::setupTables() {

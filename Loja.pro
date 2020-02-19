@@ -139,7 +139,6 @@ SOURCES += \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
-    src/impressao.cpp \
     src/inputdialog.cpp \
     src/inputdialogconfirmacao.cpp \
     src/inputdialogfinanceiro.cpp \
@@ -160,6 +159,7 @@ SOURCES += \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
     src/pagamentosdia.cpp \
+    src/pdf.cpp \
     src/porcentagemdelegate.cpp \
     src/precoestoque.cpp \
     src/produtospendentes.cpp \
@@ -256,7 +256,6 @@ HEADERS  += \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
-    src/impressao.h \
     src/inputdialog.h \
     src/inputdialogconfirmacao.h \
     src/inputdialogfinanceiro.h \
@@ -276,6 +275,7 @@ HEADERS  += \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
     src/pagamentosdia.h \
+    src/pdf.h \
     src/porcentagemdelegate.h \
     src/precoestoque.h \
     src/produtospendentes.h \

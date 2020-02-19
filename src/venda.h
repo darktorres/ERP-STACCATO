@@ -59,7 +59,7 @@ private:
   auto on_pushButtonDevolucao_clicked() -> void;
   auto on_pushButtonFinanceiroSalvar_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
-  auto on_pushButtonImprimir_clicked() -> void;
+  auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;

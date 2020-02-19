@@ -157,12 +157,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonImprimir">
+      <widget class="QPushButton" name="pushButtonGerarPdf">
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Imprimir orçamento&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Imprimir</string>
+        <string>Gerar PDF</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -1540,7 +1540,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>pushButtonCadastrarOrcamento</tabstop>
   <tabstop>pushButtonAtualizarOrcamento</tabstop>
   <tabstop>pushButtonGerarExcel</tabstop>
-  <tabstop>pushButtonImprimir</tabstop>
+  <tabstop>pushButtonGerarPdf</tabstop>
   <tabstop>pushButtonApagarOrc</tabstop>
  </tabstops>
  <resources>

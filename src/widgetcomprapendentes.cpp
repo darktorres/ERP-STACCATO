@@ -5,7 +5,7 @@
 #include "doubledelegate.h"
 #include "excel.h"
 #include "financeiroproxymodel.h"
-#include "impressao.h"
+#include "pdf.h"
 #include "inputdialog.h"
 #include "produtospendentes.h"
 #include "reaisdelegate.h"
@@ -260,8 +260,8 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  Impressao impressao(idVenda, Impressao::Tipo::Venda, this);
-  impressao.print();
+  PDF impressao(idVenda, PDF::Tipo::Venda, this);
+  impressao.gerarPdf();
 }
 
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para

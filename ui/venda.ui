@@ -1016,9 +1016,9 @@ color: rgb(0, 0, 0);</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonImprimir">
+       <widget class="QPushButton" name="pushButtonGerarPdf">
         <property name="text">
-         <string>Imprimir</string>
+         <string>Gerar PDF</string>
         </property>
         <property name="autoDefault">
          <bool>false</bool>
@@ -1086,12 +1086,6 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>WidgetPagamentos</class>
-   <extends>QWidget</extends>
-   <header>src/widgetpagamentos.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header>src/treeview.h</header>
@@ -1100,6 +1094,12 @@ color: rgb(0, 0, 0);</string>
    <class>ItemBox</class>
    <extends>QLineEdit</extends>
    <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>WidgetPagamentos</class>
+   <extends>QWidget</extends>
+   <header>src/widgetpagamentos.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1134,7 +1134,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>doubleSpinBoxTotal</tabstop>
   <tabstop>pushButtonCadastrarPedido</tabstop>
   <tabstop>pushButtonGerarExcel</tabstop>
-  <tabstop>pushButtonImprimir</tabstop>
+  <tabstop>pushButtonGerarPdf</tabstop>
   <tabstop>pushButtonDevolucao</tabstop>
   <tabstop>pushButtonCancelamento</tabstop>
   <tabstop>pushButtonVoltar</tabstop>

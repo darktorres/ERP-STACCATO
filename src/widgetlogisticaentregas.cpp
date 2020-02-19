@@ -307,6 +307,7 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  // TODO: see if this can be read after InputDialogConfirmacao and place inside confirmarEntrega
   QStringList idVendas;
 
   for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }

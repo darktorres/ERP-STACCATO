@@ -82,17 +82,23 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  //------------------------------------
+
   const int row = list.first().row();
 
   const QString status = modelProduto.data(row, "status").toString();
 
   if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
 
+  //------------------------------------
+
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Continuar");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
 
   if (msgBox.exec() == QMessageBox::No) { return; }
+
+  //------------------------------------
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
 
@@ -103,6 +109,8 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
+
+  //------------------------------------
 
   updateTables();
 

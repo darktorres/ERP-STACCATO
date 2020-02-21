@@ -446,10 +446,6 @@ color: rgb(0, 0, 0);</string>
                  <property name="accessibleName">
                   <string>CNPJ</string>
                  </property>
-                 <property name="styleSheet">
-                  <string notr="true">background-color: rgb(255, 255, 127);
-color: rgb(0, 0, 0);</string>
-                 </property>
                 </widget>
                </item>
                <item row="2" column="1">

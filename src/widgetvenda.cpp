@@ -126,50 +126,56 @@ void WidgetVenda::on_groupBoxStatus_toggled(const bool enabled) {
 }
 
 void WidgetVenda::setPermissions() {
-  const QString tipoUsuario = UserSession::tipoUsuario();
+  unsetConnections();
 
-  if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") {
-    QSqlQuery query;
+  [&] {
+    const QString tipoUsuario = UserSession::tipoUsuario();
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
+    if (tipoUsuario == "ADMINISTRADOR" or tipoUsuario == "ADMINISTRATIVO" or tipoUsuario == "DIRETOR") {
+      QSqlQuery query;
 
-    while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
-  }
+      if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
-  if (tipoUsuario == "GERENTE LOJA") {
-    ui->groupBoxLojas->hide();
-
-    ui->comboBoxVendedores->clear();
-
-    QSqlQuery query;
-
-    if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) {
-      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+      while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
     }
 
-    ui->comboBoxVendedores->addItem("");
+    if (tipoUsuario == "GERENTE LOJA") {
+      ui->groupBoxLojas->hide();
 
-    while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
-  }
+      ui->comboBoxVendedores->clear();
 
-  if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
-    QSqlQuery query;
+      QSqlQuery query;
 
-    if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
+      if (not query.exec("SELECT idUsuario, user FROM usuario WHERE desativado = FALSE AND idLoja = " + QString::number(UserSession::idLoja()) + " ORDER BY nome")) {
+        return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+      }
 
-    while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
+      ui->comboBoxVendedores->addItem("");
 
-    ui->radioButtonProprios->click();
+      while (query.next()) { ui->comboBoxVendedores->addItem(query.value("user").toString(), query.value("idUsuario")); }
+    }
 
-    ui->groupBoxVendedores->hide();
-  } else {
-    ui->radioButtonTodos->click();
-  }
+    if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
+      QSqlQuery query;
 
-  ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
+      if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError("Erro: " + query.lastError().text(), this); }
 
-  ui->dateEditMes->setDate(qApp->serverDate());
-  ui->dateEditDia->setDate(qApp->serverDate());
+      while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
+
+      ui->radioButtonProprios->click();
+
+      ui->groupBoxVendedores->hide();
+    } else {
+      ui->radioButtonTodos->click();
+    }
+
+    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
+
+    ui->dateEditMes->setDate(qApp->serverDate());
+    ui->dateEditDia->setDate(qApp->serverDate());
+  }();
+
+  setConnections();
 }
 
 void WidgetVenda::setConnections() {
@@ -265,15 +271,21 @@ void WidgetVenda::updateTables() {
 }
 
 void WidgetVenda::setComboBoxFornecedores() {
-  ui->comboBoxFornecedores->clear();
+  unsetConnections();
 
-  QSqlQuery query;
+  [&] {
+    ui->comboBoxFornecedores->clear();
 
-  if (not query.exec("SELECT razaoSocial FROM fornecedor")) { return qApp->enqueueError("Erro buscando fornecedores: " + query.lastError().text(), this); }
+    QSqlQuery query;
 
-  ui->comboBoxFornecedores->addItem("");
+    if (not query.exec("SELECT razaoSocial FROM fornecedor")) { return qApp->enqueueError("Erro buscando fornecedores: " + query.lastError().text(), this); }
 
-  while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
+    ui->comboBoxFornecedores->addItem("");
+
+    while (query.next()) { ui->comboBoxFornecedores->addItem(query.value("razaoSocial").toString()); }
+  }();
+
+  setConnections();
 }
 
 void WidgetVenda::on_table_activated(const QModelIndex index) {

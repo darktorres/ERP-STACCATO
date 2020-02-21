@@ -810,7 +810,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 }
 
 std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double quantAdicionar) {
-  // NOTE: *quebralinha venda_has_produto2
+  // NOTE: *quebralinha venda_produto2
   const auto novoIdVendaProduto2 = qApp->reservarIdVendaProduto2();
 
   if (not novoIdVendaProduto2) { return {}; }

@@ -13,8 +13,7 @@ void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
 
   for (; not child.isNull(); child = child.nextSiblingElement()) {
     if (child.firstChild().isText()) {
-      QStandardItem *childItem = new QStandardItem(child.nodeName() + " - " + child.text());
-      elementItem->appendRow(childItem);
+      elementItem->appendRow(new QStandardItem(child.nodeName() + " - " + child.text()));
       continue;
     }
 
@@ -261,3 +260,5 @@ bool XML::verificaValido() {
 
   return true;
 }
+
+// TODO: replace all these text.left with text.contains?

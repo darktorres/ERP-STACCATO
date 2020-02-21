@@ -202,7 +202,7 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   lista.removeDuplicates();
 
-  const CadastrarNFe::Tipo tipo = modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0 ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
+  const CadastrarNFe::Tipo tipo = (modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0) ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
 
   auto *nfe = new CadastrarNFe(idVenda, lista, tipo, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);

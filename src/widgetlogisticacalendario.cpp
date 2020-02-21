@@ -126,7 +126,7 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     for (int i = 0; i < list.size(); ++i) {
       if (list.at(i).contains(transportadora)) {
-        row = query.value("data").toTime().hour() < 12 ? i : i + 1; // manha/tarde
+        row = (query.value("data").toTime().hour() < 12) ? i : i + 1; // manha/tarde
         break;
       }
     }

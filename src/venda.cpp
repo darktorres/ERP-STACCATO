@@ -633,7 +633,7 @@ void Venda::montarFluxoCaixa() {
     if (ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
       const int parcelas = ui->widgetPgts->listComboParc.at(i)->currentIndex() + 1;
       const double valor = ui->widgetPgts->listDoubleSpinPgt.at(i)->value();
-      const int cartao = ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito" ? 1 : 0;
+      const int cartao = (ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito") ? 1 : 0;
 
       const double part1 = valor / parcelas;
       const int part2 = static_cast<int>(part1 * 100); // truncate with 2 decimals
@@ -680,7 +680,7 @@ void Venda::montarFluxoCaixa() {
         const double taxaComissao = query.value("comissaoLoja").toDouble() / 100;
         const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
 
-        const bool isFreteLoja = ui->widgetPgts->listLinePgt.at(0)->text() == "Frete";
+        const bool isFreteLoja = (ui->widgetPgts->listLinePgt.at(0)->text() == "Frete");
 
         const double valorAjustado = isFreteLoja ? valorComissao * taxaComissao : taxaComissao * (valorComissao - (valorComissao / totalVenda * frete));
 

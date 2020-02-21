@@ -207,7 +207,7 @@ void WidgetOrcamento::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroFollowup = ui->comboBoxFollowup->currentIndex() > 0 ? "(semaforo = " + QString::number(ui->comboBoxFollowup->currentIndex()) + ")" : "";
+  const QString filtroFollowup = (ui->comboBoxFollowup->currentIndex() > 0) ? "(semaforo = " + QString::number(ui->comboBoxFollowup->currentIndex()) + ")" : "";
   if (not filtroFollowup.isEmpty()) { filtros << filtroFollowup; }
 
   //-------------------------------------

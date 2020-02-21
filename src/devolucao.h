@@ -2,7 +2,6 @@
 
 #include "sqltablemodel.h"
 
-#include <QDataWidgetMapper>
 #include <QDialog>
 
 namespace Ui {
@@ -19,27 +18,34 @@ public:
 private:
   // attributes
   const QString idVenda;
-  QDataWidgetMapper mapperProdutos;
   QString idDevolucao;
   SqlTableModel modelCliente;
   SqlTableModel modelDevolvidos1;
   SqlTableModel modelPagamentos;
   SqlTableModel modelProdutos2;
   SqlTableModel modelVenda;
+  SqlTableModel modelCompra;
   SqlTableModel modelConsumos;
   Ui::Devolucao *ui;
   // methods
+  auto alterarLinhaOriginal(const int currentRow) -> bool;
   auto atualizarDevolucao() -> bool;
-  auto calcPrecoItemTotal() -> void;
+  auto atualizarIdRelacionado(const int currentRow) -> bool;
+  auto copiarConsumo(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto copiarProduto(const int currentRow) -> bool;
   auto criarContas() -> bool;
   auto criarDevolucao() -> bool;
-  auto determinarIdDevolucao() -> std::optional<bool>;
-  auto devolverItem(const int currentRow, const bool createNewId, const int novoIdVendaProduto2) -> bool;
+  auto determinarIdDevolucao() -> bool;
+  auto devolverItem(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto dividirCompra(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto dividirVenda(const int currentRow, const int novoIdVendaProduto2) -> bool;
   auto inserirItens(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto lerConsumos(const int currentRow) -> bool;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
+  auto on_doubleSpinBoxCredito_valueChanged(const double credito) -> void;
+  auto on_doubleSpinBoxPorcentagem_valueChanged(const double porcentagem) -> void;
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
-  auto on_doubleSpinBoxTotalItem_valueChanged(double value) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
   auto salvarCredito() -> bool;

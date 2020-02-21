@@ -90,7 +90,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
-  const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid() ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
+  const QString filtroConta2 = (ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
 
   modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
                        "WHERE " +

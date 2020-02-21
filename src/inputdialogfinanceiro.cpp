@@ -262,7 +262,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         const int part2 = static_cast<int>(part1 * 100);
         const double part3 = static_cast<double>(part2) / 100;
 
-        const double parcela = static_cast<double>(ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito" ? part3 : qApp->roundDouble(valor / parcelas));
+        const double parcela = static_cast<double>((ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito") ? part3 : qApp->roundDouble(valor / parcelas));
         const double resto = static_cast<double>(valor - (parcela * parcelas));
 
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
@@ -275,7 +275,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
           const QString currentText = ui->widgetPgts->listComboData.at(i)->currentText();
           const QDate currentDate = ui->widgetPgts->listDatePgt.at(i)->date();
-          const QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : currentText == "Data Mês" ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+          const QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
 
           if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
           if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
@@ -681,8 +681,7 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
 // REFAC: refatorar o frame pagamentos para um widget para nao duplicar codigo
 
-// TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo
-// que vem do fornecedor)
+// TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo que vem do fornecedor)
 // TODO: 3quando for representacao mostrar fluxo de comissao
 // TODO: 3colocar possibilidade de ajustar valor total para as compras (contabilizar quanto de ajuste foi feito)
 // TODO: gerar lancamentos da st por produto

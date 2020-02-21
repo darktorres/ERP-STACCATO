@@ -156,7 +156,7 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 
   ui->doubleSpinBoxPeso->setValue(peso);
 
-  ui->doubleSpinBoxPeso->setStyleSheet(ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value() ? "color: rgb(255, 0, 0);" : "");
+  ui->doubleSpinBoxPeso->setStyleSheet((ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) ? "color: rgb(255, 0, 0);" : "");
 }
 
 void WidgetLogisticaAgendarEntrega::setConnections() {
@@ -226,7 +226,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
 
   if (not modelProdutos.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos.lastError().text()); }
 
-  ui->lineEditAviso->setText(modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO" ? "Financeiro não liberou!" : "");
+  ui->lineEditAviso->setText((modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") ? "Financeiro não liberou!" : "");
 }
 
 void WidgetLogisticaAgendarEntrega::montaFiltro() {

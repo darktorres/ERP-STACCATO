@@ -97,7 +97,7 @@
           <x>0</x>
           <y>0</y>
           <width>174</width>
-          <height>982</height>
+          <height>988</height>
          </rect>
         </property>
         <property name="autoFillBackground">
@@ -244,6 +244,32 @@
                <bool>true</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_41">
+               <item row="2" column="0">
+                <widget class="QCheckBox" name="checkBoxConferido">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Conferido</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QCheckBox" name="checkBoxLiberado">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>Liberado</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
                <item row="0" column="0">
                 <widget class="QCheckBox" name="checkBoxPendente2">
                  <property name="enabled">
@@ -257,29 +283,16 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0">
-                <widget class="QCheckBox" name="checkBoxConferido">
+               <item row="3" column="0">
+                <widget class="QCheckBox" name="checkBoxCancelado2">
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
                  <property name="text">
-                  <string>Conferido</string>
+                  <string>Cancelado</string>
                  </property>
                  <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QCheckBox" name="checkBoxLiberado">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="text">
-                  <string>Liberado</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>

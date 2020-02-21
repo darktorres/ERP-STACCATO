@@ -176,6 +176,7 @@ void WidgetVenda::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
+  connect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
   connect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro, connectionType);
@@ -211,6 +212,7 @@ void WidgetVenda::setConnections() {
 
 void WidgetVenda::unsetConnections() {
   disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
+  disconnect(ui->checkBoxCancelado2, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxConferido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);
   disconnect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetVenda::montaFiltro);

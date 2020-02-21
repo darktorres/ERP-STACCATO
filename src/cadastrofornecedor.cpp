@@ -116,6 +116,7 @@ bool CadastroFornecedor::savingProcedures() {
   if (not setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value())) { return false; }
   if (not setData("st", ui->comboBoxSt->currentText())) { return false; }
   if (not setData("comissao1", ui->doubleSpinBoxComissao->value())) { return false; }
+  if (not setData("comissao2", ui->doubleSpinBoxComissaoEspecial->value())) { return false; }
   if (not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
 
   return true;
@@ -149,6 +150,7 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->comboBoxSt, "st");
   addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");
   addMapping(ui->doubleSpinBoxComissao, "comissao1");
+  addMapping(ui->doubleSpinBoxComissaoEspecial, "comissao2");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditCEP, modelEnd.fieldIndex("CEP"));

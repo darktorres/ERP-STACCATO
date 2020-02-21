@@ -26,6 +26,7 @@ private:
   SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
+  auto listarLojas() -> bool;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatusFinanceiro_toggled(const bool enabled) -> void;

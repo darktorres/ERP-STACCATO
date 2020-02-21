@@ -29,6 +29,8 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
+  Log::createLog("Erro: " + error, true);
+
   if (not updating) { showMessages(); }
 }
 

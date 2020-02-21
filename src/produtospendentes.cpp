@@ -211,6 +211,8 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   if (listEstoque.isEmpty()) { return qApp->enqueueError("Nenhum estoque selecionado!", this); }
 
+  //--------------------------------------------------------------------
+
   const int rowProduto = listProduto.first().row();
   const int rowEstoque = listEstoque.first().row();
 
@@ -221,9 +223,12 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   const double quantConsumir =
       QInputDialog::getDouble(this, "Consumo", "Quantidade a consumir: ", quantVenda, 0, qMin(quantVenda, quantEstoque), 3, &ok, Qt::WindowFlags(), ui->doubleSpinBoxComprar->singleStep());
+
   if (not ok) { return; }
 
   const QString idVenda = modelViewProdutos.data(rowProduto, "idVenda").toString();
+
+  //--------------------------------------------------------------------
 
   if (not qApp->startTransaction("ProdutosPendentes::on_pushButtonConsumirEstoque")) { return; }
 
@@ -232,6 +237,8 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
+
+  //--------------------------------------------------------------------
 
   qApp->enqueueInformation("Consumo criado com sucesso!", this);
 

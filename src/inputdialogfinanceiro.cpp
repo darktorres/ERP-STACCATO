@@ -317,14 +317,14 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
       const QString tipoSt = modelPedidoFornecedor2.data(row, "st").toString();
 
-      if (tipoSt == "Sem ST") { continue; }
+      if (tipoSt == "SEM ST") { continue; }
 
       const double aliquotaSt = modelPedidoFornecedor2.data(row, "aliquotaSt").toDouble();
       const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
       const double valorSt = preco * (aliquotaSt / 100);
 
-      if (tipoSt == "ST Fornecedor") { stForn += valorSt; }
-      if (tipoSt == "ST Loja") { stLoja += valorSt; }
+      if (tipoSt == "ST FORNECEDOR") { stForn += valorSt; }
+      if (tipoSt == "ST LOJA") { stLoja += valorSt; }
     }
 
     // TODO: 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos

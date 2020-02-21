@@ -24,6 +24,7 @@ private:
   SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
+  auto listarLojas() -> bool;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;

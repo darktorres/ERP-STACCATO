@@ -247,27 +247,25 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   // senao fazer a quebra
 
   QSqlQuery query1;
-  query1.prepare("SELECT pf2.codComercial, GROUP_CONCAT(pf2.idCompra SEPARATOR ', ') AS idCompra, pf2.quant FROM estoque e LEFT JOIN estoque_has_compra ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN "
-                 "pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc.idPedido2 WHERE e.idEstoque = :idEstoque");
+  query1.prepare("SELECT GROUP_CONCAT(DISTINCT idPedido2) AS ids FROM estoque_has_compra WHERE idEstoque = :idEstoque");
   query1.bindValue(":idEstoque", idEstoque);
 
   if (not query1.exec() or not query1.first()) { return qApp->enqueueError(false, "Erro buscando compra relacionada ao estoque: " + query1.lastError().text(), this); }
 
-  const QString idCompra = query1.value("idCompra").toString();
-  const QString codComercial = query1.value("codComercial").toString();
+  if (query1.size() == 0) { return true; }
 
-  if (idCompra.isEmpty() or codComercial.isEmpty()) { return false; }
-
-  //--------------------------------------------------------------------
+  const QString ids = query1.value("ids").toString();
 
   SqlTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
-  modelCompra.setFilter("idCompra IN (" + idCompra + ") AND codComercial = '" + codComercial + "' AND quant >= " + QString::number(quant) + " AND idVenda IS NULL AND idVendaProduto2 IS NULL");
+  modelCompra.setFilter("(idPedido2 IN (" + ids + ") OR idRelacionado IN (" + ids + ")) AND idVenda IS NULL AND idVendaProduto2 IS NULL");
 
   if (not modelCompra.select()) { return false; }
 
   if (modelCompra.rowCount() == 0) { return true; }
+
+  //--------------------------------------------------------------------
 
   QSqlQuery query;
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");

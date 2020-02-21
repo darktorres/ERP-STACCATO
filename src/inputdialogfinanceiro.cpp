@@ -477,6 +477,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   QString filtro = "idCompra = " + idCompra;
 
   if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
+  if (tipo == Tipo::Financeiro) { filtro += " AND status != 'CANCELADO'"; }
 
   modelPedidoFornecedor.setFilter(filtro);
 

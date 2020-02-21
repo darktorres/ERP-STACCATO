@@ -259,7 +259,7 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   SqlTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
-  modelCompra.setFilter("(idPedido2 IN (" + ids + ") OR idRelacionado IN (" + ids + ")) AND idVenda IS NULL AND idVendaProduto2 IS NULL");
+  modelCompra.setFilter("(idPedido2 IN (" + ids + ") OR idRelacionado IN (" + ids + ")) AND idVenda IS NULL AND idVendaProduto2 IS NULL AND quant >= " + QString::number(quant));
 
   if (not modelCompra.select()) { return false; }
 

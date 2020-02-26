@@ -71,7 +71,6 @@ void Devolucao::setupTables() {
   modelProdutos2.setHeaderData("produto", "Produto");
   modelProdutos2.setHeaderData("obs", "Obs.");
   modelProdutos2.setHeaderData("lote", "Lote");
-  modelProdutos2.setHeaderData("descUnitario", "R$ Unit.");
   modelProdutos2.setHeaderData("caixas", "Caixas");
   modelProdutos2.setHeaderData("quant", "Quant.");
   modelProdutos2.setHeaderData("un", "Un.");
@@ -100,6 +99,7 @@ void Devolucao::setupTables() {
   ui->tableProdutos->hideColumn("idLoja");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("prcUnitario");
+  ui->tableProdutos->hideColumn("descUnitario");
   ui->tableProdutos->hideColumn("parcial");
   ui->tableProdutos->hideColumn("desconto");
   ui->tableProdutos->hideColumn("parcialDesc");
@@ -270,12 +270,13 @@ void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
   const double quant = modelProdutos2.data(row, "quant").toDouble();
   const double caixas = modelProdutos2.data(row, "caixas").toDouble();
   const double quantCaixa = modelProdutos2.data(row, "quantCaixa").toDouble();
-  const double descUnitario = modelProdutos2.data(row, "descUnitario").toDouble();
-  const double credito = quant * descUnitario;
+  const double total = modelProdutos2.data(row, "total").toDouble();
+  const double prcUnitario = total / quant;
+  const double credito = quant * prcUnitario;
 
   unsetConnections();
 
-  ui->doubleSpinBoxPrecoUn->setValue(descUnitario);
+  ui->doubleSpinBoxPrecoUn->setValue(prcUnitario);
 
   ui->doubleSpinBoxCaixas->setMaximum(caixas);
   ui->doubleSpinBoxQuant->setMaximum(quant);
@@ -589,15 +590,15 @@ bool Devolucao::copiarProduto(const int currentRow) {
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
   const double caixas = quantDevolvida / stepQuant * -1;
   const double quantDevolvidaInvertida = quantDevolvida * -1;
-  const double descUnitario = modelDevolvidos1.data(newRow, "descUnitario").toDouble() * -1;
-  const double total = descUnitario * quantDevolvida;
+  const double prcUnitario = modelProdutos2.data(currentRow, "total").toDouble() / modelProdutos2.data(currentRow, "quant").toDouble() * -1;
+  const double total = prcUnitario * quantDevolvida;
 
   if (not modelDevolvidos1.setData(newRow, "idVenda", idDevolucao)) { return false; }
   if (not modelDevolvidos1.setData(newRow, "idRelacionado", modelProdutos2.data(currentRow, "idVendaProdutoFK"))) { return false; }
   if (not modelDevolvidos1.setData(newRow, "status", "PENDENTE DEV.")) { return false; }
   if (not modelDevolvidos1.setData(newRow, "statusOriginal", modelProdutos2.data(currentRow, "status"))) { return false; }
-  if (not modelDevolvidos1.setData(newRow, "prcUnitario", descUnitario)) { return false; }
-  if (not modelDevolvidos1.setData(newRow, "descUnitario", descUnitario)) { return false; }
+  if (not modelDevolvidos1.setData(newRow, "prcUnitario", prcUnitario)) { return false; }
+  if (not modelDevolvidos1.setData(newRow, "descUnitario", prcUnitario)) { return false; }
   if (not modelDevolvidos1.setData(newRow, "caixas", caixas)) { return false; }
   if (not modelDevolvidos1.setData(newRow, "quant", quantDevolvidaInvertida)) { return false; }
   if (not modelDevolvidos1.setData(newRow, "parcial", total)) { return false; }

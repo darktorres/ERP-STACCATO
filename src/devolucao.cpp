@@ -294,7 +294,7 @@ void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
 }
 
 void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
-  const double descUnitario = ui->doubleSpinBoxPrecoUn->value();
+  const double prcUnitario = ui->doubleSpinBoxPrecoUn->value();
   const double stepCaixas = ui->doubleSpinBoxCaixas->singleStep();
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
   const double caixasCorrigido = round(caixas / stepCaixas) * stepCaixas;
@@ -305,14 +305,14 @@ void Devolucao::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
   ui->doubleSpinBoxCaixas->setValue(caixasCorrigido);
   ui->doubleSpinBoxQuant->setValue(quantCorrigido);
-  ui->doubleSpinBoxCredito->setMaximum(quantCorrigido * descUnitario);
-  ui->doubleSpinBoxCredito->setValue(quantCorrigido * descUnitario * porcentagem);
+  ui->doubleSpinBoxCredito->setMaximum(quantCorrigido * prcUnitario);
+  ui->doubleSpinBoxCredito->setValue(quantCorrigido * prcUnitario * porcentagem);
 
   setConnections();
 }
 
 void Devolucao::on_doubleSpinBoxQuant_valueChanged(const double quant) {
-  const double descUnitario = ui->doubleSpinBoxPrecoUn->value();
+  const double prcUnitario = ui->doubleSpinBoxPrecoUn->value();
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
   const double quantCorrigido = round(quant / stepQuant) * stepQuant;
   const double caixasCorrigido = quantCorrigido / stepQuant;
@@ -322,16 +322,16 @@ void Devolucao::on_doubleSpinBoxQuant_valueChanged(const double quant) {
 
   ui->doubleSpinBoxCaixas->setValue(caixasCorrigido);
   ui->doubleSpinBoxQuant->setValue(quantCorrigido);
-  ui->doubleSpinBoxCredito->setMaximum(quantCorrigido * descUnitario);
-  ui->doubleSpinBoxCredito->setValue(quantCorrigido * descUnitario * porcentagem);
+  ui->doubleSpinBoxCredito->setMaximum(quantCorrigido * prcUnitario);
+  ui->doubleSpinBoxCredito->setValue(quantCorrigido * prcUnitario * porcentagem);
 
   setConnections();
 }
 
 void Devolucao::on_doubleSpinBoxPorcentagem_valueChanged(const double porcentagem) {
-  const double descUnitario = ui->doubleSpinBoxPrecoUn->value();
+  const double prcUnitario = ui->doubleSpinBoxPrecoUn->value();
   const double quant = ui->doubleSpinBoxQuant->value();
-  const double total = quant * descUnitario;
+  const double total = quant * prcUnitario;
   const double credito = total * (porcentagem / 100.);
 
   unsetConnections();
@@ -342,9 +342,9 @@ void Devolucao::on_doubleSpinBoxPorcentagem_valueChanged(const double porcentage
 }
 
 void Devolucao::on_doubleSpinBoxCredito_valueChanged(const double credito) {
-  const double descUnitario = ui->doubleSpinBoxPrecoUn->value();
+  const double prcUnitario = ui->doubleSpinBoxPrecoUn->value();
   const double quant = ui->doubleSpinBoxQuant->value();
-  const double total = quant * descUnitario;
+  const double total = quant * prcUnitario;
   const double porcentagem = (credito / total) * 100;
 
   unsetConnections();

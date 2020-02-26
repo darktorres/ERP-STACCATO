@@ -458,7 +458,7 @@ bool Orcamento::generateId() {
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando próxima revisão disponível: " + query.lastError().text(), this); }
 
-    id = replica.left(replica.indexOf("-Rev")) + "-Rev" + query.value("revisao").toString();
+    id = replica.left(replica.indexOf("-REV")) + "-REV" + query.value("revisao").toString();
   }
 
   ui->lineEditOrcamento->setText(id);

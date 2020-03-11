@@ -577,7 +577,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   if (not file->open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file->errorString(), this); }
 
-  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+  auto *manager = new QNetworkAccessManager(this);
 
   const QString ip = qApp->getWebDavIp();
   const QString idVenda = modelVeiculo.data(0, "idVenda").toString();
@@ -594,19 +594,17 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
   ui->lineEditFoto->setText("Enviando...");
 
   connect(reply, &QNetworkReply::finished, [=] {
-    ui->lineEditFoto->setText((reply->error() == QNetworkReply::NoError) ? url : "Erro enviando foto: " + reply->errorString());
-
-    if (reply->error() == QNetworkReply::NoError) {
-      ui->lineEditFoto->setText(url);
-      ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
-
-      for (int row = 0; row < modelVeiculo.rowCount(); ++row) {
-        if (not modelVeiculo.setData(row, "fotoEntrega", url)) { return; }
-      }
-
-    } else {
+    if (reply->error() != QNetworkReply::NoError) {
       ui->lineEditFoto->setText("Erro enviando foto: " + reply->errorString());
       ui->lineEditFoto->setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(0, 0, 0);");
+      return;
+    }
+
+    ui->lineEditFoto->setText(url);
+    ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
+
+    for (int row = 0; row < modelVeiculo.rowCount(); ++row) {
+      if (not modelVeiculo.setData(row, "fotoEntrega", url)) { return; }
     }
   });
 }

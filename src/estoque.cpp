@@ -198,7 +198,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
     const int index = modelConsumo.fieldIndex(field, true);
 
     if (index == -1) { continue; }
-    if (column == modelEstoque.fieldIndex("cfop")) { break; }
+    if (column == modelEstoque.fieldIndex("valor")) { break; }
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
@@ -214,12 +214,14 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double caixas = quant / quantCaixa;
 
-  if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "idEstoque", modelEstoque.data(rowEstoque, "idEstoque"))) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "CONSUMO")) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "quant", quant * -1)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) { return false; }
+  const double valorUnid = modelConsumo.data(rowConsumo, "valorUnid").toDouble();
+  if (not modelConsumo.setData(rowConsumo, "valor", quant * valorUnid)) { return false; }
 
   if (not modelConsumo.submitAll()) { return false; }
 

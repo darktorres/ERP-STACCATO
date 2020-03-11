@@ -752,7 +752,6 @@ bool Devolucao::copiarConsumo(const int currentRow, const int novoIdVendaProduto
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
 
   if (not modelConsumos.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelConsumos.setData(newRow, "status", "CONSUMO")) { return false; }
   if (not modelConsumos.setData(newRow, "quant", restante * -1)) { return false; }
   if (not modelConsumos.setData(newRow, "caixas", (restante / stepQuant))) { return false; }
 

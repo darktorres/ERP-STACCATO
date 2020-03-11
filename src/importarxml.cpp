@@ -170,9 +170,6 @@ void ImportarXML::setupTables() {
 
   ui->tableConsumo->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableConsumo->setItemDelegateForColumn("valorUnid", new ReaisDelegate(this));
-  ui->tableConsumo->setItemDelegateForColumn("valor", new ReaisDelegate(this));
-
   ui->tableConsumo->hideColumn("idVendaProduto2");
   ui->tableConsumo->hideColumn("idConsumo");
   ui->tableConsumo->hideColumn("quantUpd");
@@ -778,7 +775,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
     const int index = modelConsumo.fieldIndex(field, true);
 
     if (index == -1) { continue; }
-    if (column == modelEstoque.fieldIndex("cfop")) { break; }
+    if (column == modelEstoque.fieldIndex("valor")) { break; }
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
@@ -797,12 +794,14 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const double caixas = quantConsumo / quantCaixa;
 
+  if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "status", "PRÉ-CONSUMO")) { return false; }
   if (not modelConsumo.setData(rowConsumo, "quant", quantConsumo * -1)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) { return false; }
   if (not modelConsumo.setData(rowConsumo, "quantUpd", static_cast<int>(FieldColors::DarkGreen))) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
-  if (not modelConsumo.setData(rowConsumo, "idEstoque", idEstoque)) { return false; }
+  if (not modelConsumo.setData(rowConsumo, "caixas", caixas)) { return false; }
+  const double valorUnid = modelConsumo.data(rowConsumo, "valorUnid").toDouble();
+  if (not modelConsumo.setData(rowConsumo, "valor", quantConsumo * valorUnid)) { return false; }
 
   // -------------------------------------
 

@@ -24,7 +24,7 @@ private:
   Ui::CancelaProduto *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;
-  auto on_pushButtonCancelar_clicked() -> void;
+  auto on_pushButtonVoltar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;
 };

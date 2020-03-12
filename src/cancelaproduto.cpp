@@ -10,7 +10,7 @@
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonVoltar_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonSalvar_clicked);
 
   setWindowModality(Qt::NonModal);
@@ -98,7 +98,7 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void CancelaProduto::on_pushButtonCancelar_clicked() { close(); }
+void CancelaProduto::on_pushButtonVoltar_clicked() { close(); }
 
 bool CancelaProduto::cancelar(const QModelIndexList &list) {
   QSqlQuery queryCompra;

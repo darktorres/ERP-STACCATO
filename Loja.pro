@@ -124,6 +124,7 @@ SOURCES += \
     src/collapsiblewidget.cpp \
     src/combobox.cpp \
     src/comboboxdelegate.cpp \
+    src/comprovantes.cpp \
     src/contas.cpp \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
@@ -241,6 +242,7 @@ HEADERS  += \
     src/collapsiblewidget.h \
     src/combobox.h \
     src/comboboxdelegate.h \
+    src/comprovantes.h \
     src/contas.h \
     src/dateformatdelegate.h \
     src/devolucao.h \
@@ -349,6 +351,7 @@ FORMS += \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
     ui/collapsiblewidget.ui \
+    ui/comprovantes.ui \
     ui/contas.ui \
     ui/devolucao.ui \
     ui/estoque.ui \

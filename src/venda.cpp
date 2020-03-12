@@ -4,6 +4,7 @@
 #include "application.h"
 #include "cadastrocliente.h"
 #include "checkboxdelegate.h"
+#include "comprovantes.h"
 #include "devolucao.h"
 #include "doubledelegate.h"
 #include "editdelegate.h"
@@ -148,6 +149,7 @@ void Venda::setConnections() {
   connect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged, connectionType);
   connect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked, connectionType);
   connect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked, connectionType);
+  connect(ui->pushButtonComprovantes, &QPushButton::clicked, this, &Venda::on_pushButtonComprovantes_clicked, connectionType);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &Venda::on_pushButtonCorrigirFluxo_clicked, connectionType);
   connect(ui->pushButtonDevolucao, &QPushButton::clicked, this, &Venda::on_pushButtonDevolucao_clicked, connectionType);
   connect(ui->pushButtonFinanceiroSalvar, &QPushButton::clicked, this, &Venda::on_pushButtonFinanceiroSalvar_clicked, connectionType);
@@ -169,6 +171,7 @@ void Venda::unsetConnections() {
   disconnect(ui->itemBoxProfissional, &ItemBox::textChanged, this, &Venda::on_itemBoxProfissional_textChanged);
   disconnect(ui->pushButtonCadastrarPedido, &QPushButton::clicked, this, &Venda::on_pushButtonCadastrarPedido_clicked);
   disconnect(ui->pushButtonCancelamento, &QPushButton::clicked, this, &Venda::on_pushButtonCancelamento_clicked);
+  disconnect(ui->pushButtonComprovantes, &QPushButton::clicked, this, &Venda::on_pushButtonComprovantes_clicked);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &Venda::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonDevolucao, &QPushButton::clicked, this, &Venda::on_pushButtonDevolucao_clicked);
   disconnect(ui->pushButtonFinanceiroSalvar, &QPushButton::clicked, this, &Venda::on_pushButtonFinanceiroSalvar_clicked);
@@ -466,6 +469,7 @@ void Venda::registerMode() {
   ui->framePagamentos->show();
   ui->pushButtonGerarExcel->hide();
   ui->pushButtonGerarPdf->hide();
+  ui->pushButtonComprovantes->hide();
   ui->pushButtonCancelamento->hide();
   ui->pushButtonDevolucao->hide();
   ui->pushButtonCadastrarPedido->show();
@@ -551,6 +555,7 @@ bool Venda::viewRegister() {
     ui->plainTextEdit->setReadOnly(true);
     ui->plainTextEdit->setPlainText(data("observacao").toString());
 
+    ui->pushButtonComprovantes->show();
     ui->pushButtonCancelamento->show();
     ui->pushButtonDevolucao->show();
 
@@ -1320,6 +1325,11 @@ bool Venda::copiaProdutosOrcamento() {
   for (int row = 0; row < modelItem.rowCount(); ++row) { backupItem.append(modelItem.record(row)); }
 
   return true;
+}
+
+void Venda::on_pushButtonComprovantes_clicked() {
+  auto *comprovantes = new Comprovantes(ui->lineEditVenda->text(), this);
+  comprovantes->show();
 }
 
 // TODO: 0hide 'nfe' field from tables that use conta_a_receber

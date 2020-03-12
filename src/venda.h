@@ -55,6 +55,7 @@ private:
   auto on_itemBoxProfissional_textChanged(const QString &) -> void;
   auto on_pushButtonCadastrarPedido_clicked() -> void;
   auto on_pushButtonCancelamento_clicked() -> void;
+  auto on_pushButtonComprovantes_clicked() -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonDevolucao_clicked() -> void;
   auto on_pushButtonFinanceiroSalvar_clicked() -> void;

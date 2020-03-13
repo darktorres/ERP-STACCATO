@@ -46,10 +46,12 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
   // --------------------------------------------------------------------------
 
-  const QString url = selection.first().data().toString();
+  const QString url = selection.first().data().toString().replace("WEBDAV", "webdav");
 
   auto *manager = new QNetworkAccessManager(this);
-  auto reply = manager->get(QNetworkRequest(QUrl(url)));
+  auto request = QNetworkRequest(QUrl(url));
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+  auto reply = manager->get(request);
 
   connect(reply, &QNetworkReply::finished, [=] {
     if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueError("Erro ao baixar arquivo: " + reply->errorString()); }

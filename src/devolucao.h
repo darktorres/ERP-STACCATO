@@ -31,8 +31,8 @@ private:
   auto alterarLinhaOriginal(const int currentRow) -> bool;
   auto atualizarDevolucao() -> bool;
   auto atualizarIdRelacionado(const int currentRow) -> bool;
-  auto copiarConsumo(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto copiarProduto(const int currentRow) -> bool;
+  auto dividirConsumo(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto copiarProdutoParaDevolucao(const int currentRow) -> bool;
   auto criarContas() -> bool;
   auto criarDevolucao() -> bool;
   auto determinarIdDevolucao() -> bool;

@@ -395,7 +395,7 @@ bool Devolucao::criarDevolucao() {
 }
 
 bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2) {
-  if (not copiarProduto(currentRow)) { return false; }
+  if (not copiarProdutoParaDevolucao(currentRow)) { return false; }
 
   if (not lerConsumos(currentRow)) { return false; }
 
@@ -419,7 +419,7 @@ bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2
     //------------------------------------
 
     if (modelConsumos.rowCount() > 0) {
-      if (not copiarConsumo(currentRow, novoIdVendaProduto2)) { return false; }
+      if (not dividirConsumo(currentRow, novoIdVendaProduto2)) { return false; }
     }
   }
 
@@ -564,7 +564,7 @@ bool Devolucao::atualizarDevolucao() {
   return true;
 }
 
-bool Devolucao::copiarProduto(const int currentRow) {
+bool Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
   // copiar linha vp2 para vp1
   const int newRow = modelDevolvidos1.insertRowAtEnd();
 
@@ -731,7 +731,7 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   return true;
 }
 
-bool Devolucao::copiarConsumo(const int currentRow, const int novoIdVendaProduto2) {
+bool Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProduto2) {
   const int newRow = modelConsumos.insertRowAtEnd();
 
   for (int column = 0; column < modelConsumos.columnCount(); ++column) {

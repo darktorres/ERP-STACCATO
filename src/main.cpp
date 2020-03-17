@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
 
 // -------------------------------------------------
 
+// TODO: replace insert querys with model so values can be correctly rounded (Application::roundDouble)
 // TODO: test changing table header to resizeToContents
 // REFAC: evitar divisoes por zero
 // REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?

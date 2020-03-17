@@ -159,12 +159,11 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
       if (not modelConsumo.setData(newRow, column, value)) { return false; }
     }
 
-    // TODO: update other fields
     if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(row, "idVendaProduto2"))) { return false; }
     if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
-    if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(row, "caixas").toDouble() * -1)) { return false; }
     if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(row, "quant").toDouble() * -1)) { return false; }
     if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
+    if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(row, "caixas").toDouble() * -1)) { return false; }
 
     if (not modelConsumo.submitAll()) { return false; }
   }

@@ -102,7 +102,7 @@ void CancelaProduto::on_pushButtonVoltar_clicked() { close(); }
 
 bool CancelaProduto::cancelar(const QModelIndexList &list) {
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE `idPedido2` = :idPedido2");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO', idVenda = NULL, idVendaProduto2 = NULL WHERE `idPedido2` = :idPedido2");
 
   const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 

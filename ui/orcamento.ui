@@ -1008,7 +1008,7 @@
                <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
               </property>
               <property name="decimals">
-               <number>3</number>
+               <number>4</number>
               </property>
              </widget>
             </item>

@@ -27,6 +27,8 @@ ProdutosPendentes::ProdutosPendentes(const QString &codComercial, const QString 
   connect(ui->pushButtonConsumirEstoque, &QPushButton::clicked, this, &ProdutosPendentes::on_pushButtonConsumirEstoque_clicked);
   connect(ui->tableProdutos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProdutosPendentes::recalcularQuantidade);
 
+  setWindowTitle("Venda " + idVenda);
+
   viewProduto(codComercial, idVenda);
 
   show();
@@ -105,7 +107,6 @@ void ProdutosPendentes::setupTables() {
 
   modelViewProdutos.setHeaderData("status", "Status");
   modelViewProdutos.setHeaderData("fornecedor", "Fornecedor");
-  modelViewProdutos.setHeaderData("idVenda", "Venda");
   modelViewProdutos.setHeaderData("produto", "Descrição");
   modelViewProdutos.setHeaderData("colecao", "Coleção");
   modelViewProdutos.setHeaderData("formComercial", "Form. Com.");
@@ -124,6 +125,7 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
 
+  ui->tableProdutos->hideColumn("idVenda");
   ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("idVendaProdutoFK");
   ui->tableProdutos->hideColumn("idProduto");

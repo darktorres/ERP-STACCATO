@@ -115,14 +115,23 @@ bool CadastroCliente::savingProcedures() {
   const QDate aniversario = ui->dateEdit->date();
   if (aniversario.toString("yyyy-MM-dd") != "1900-01-01" and not setData("dataNasc", aniversario)) { return false; }
 
+  if (not ui->lineEditContatoCPF->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("contatoCPF", ui->lineEditContatoCPF->text())) { return false; }
+  }
+
+  if (not ui->lineEditCPF->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("cpf", ui->lineEditCPF->text())) { return false; }
+  }
+
+  if (not ui->lineEditCNPJ->text().remove(".").remove("/").remove("-").isEmpty()) {
+    if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
+  }
+
   if (not setData("nome_razao", ui->lineEditCliente->text())) { return false; }
   if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
-  if (not setData("cpf", ui->lineEditCPF->text().remove(".").remove("-"))) { return false; }
   if (not setData("contatoNome", ui->lineEditContatoNome->text())) { return false; }
-  if (not setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"))) { return false; }
   if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) { return false; }
   if (not setData("contatoRG", ui->lineEditContatoRG->text())) { return false; }
-  if (not setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"))) { return false; }
   if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
   if (not setData("tel", ui->lineEditTel_Res->text())) { return false; }
   if (not setData("telCel", ui->lineEditTel_Cel->text())) { return false; }

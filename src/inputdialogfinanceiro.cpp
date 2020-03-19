@@ -202,7 +202,6 @@ void InputDialogFinanceiro::setupTables() {
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->table->setItemDelegateForColumn("quant", new EditDelegate(this));
 
   //--------------------------------------------------
 

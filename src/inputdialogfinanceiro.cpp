@@ -390,14 +390,32 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
     const QString header = modelPedidoFornecedor2.headerData(topLeft.column(), Qt::Horizontal).toString();
     const int row = topLeft.row();
 
+    const double quant = modelPedidoFornecedor2.data(row, "quant").toDouble();
+
+    const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
+
+    if (match.isEmpty()) { return qApp->enqueueError("Erro atualizando valores na linha mãe!", this); }
+
+    const int rowMae = match.first().row();
+
     if (header == "Quant." or header == "$ Unit.") {
-      const double preco = modelPedidoFornecedor2.data(row, "quant").toDouble() * modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
+      const double prcUnitario = modelPedidoFornecedor2.data(row, "prcUnitario").toDouble();
+      const double preco = quant * prcUnitario;
+
       if (not modelPedidoFornecedor2.setData(row, "preco", preco)) { return; }
+
+      if (not modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario)) { return; }
+      if (not modelPedidoFornecedor.setData(rowMae, "preco", preco)) { return; }
     }
 
     if (header == "Total") {
-      const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble() / modelPedidoFornecedor2.data(row, "quant").toDouble();
-      if (not modelPedidoFornecedor2.setData(row, "prcUnitario", preco)) { return; }
+      const double preco = modelPedidoFornecedor2.data(row, "preco").toDouble();
+      const double prcUnitario = preco / quant;
+
+      if (not modelPedidoFornecedor2.setData(row, "prcUnitario", prcUnitario)) { return; }
+
+      if (not modelPedidoFornecedor.setData(rowMae, "prcUnitario", prcUnitario)) { return; }
+      if (not modelPedidoFornecedor.setData(rowMae, "preco", preco)) { return; }
     }
   }();
 
@@ -581,6 +599,8 @@ bool InputDialogFinanceiro::cadastrar() {
       if (not modelPedidoFornecedor2.setData(index.row(), "statusFinanceiro", ui->comboBoxFinanceiro->currentText())) { return false; }
     }
   }
+
+  if (not modelPedidoFornecedor.submitAll()) { return false; }
 
   if (not modelPedidoFornecedor2.submitAll()) { return false; }
 

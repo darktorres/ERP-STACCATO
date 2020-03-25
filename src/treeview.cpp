@@ -125,7 +125,7 @@ void TreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &options, c
 
   const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
 
-  const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
+  const QColor color = (tema == "claro") ? QColor(200, 200, 200) : QColor(44, 44, 44);
   painter->setPen(color);
   int top = options.rect.top();
 

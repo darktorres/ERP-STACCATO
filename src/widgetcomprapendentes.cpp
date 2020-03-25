@@ -35,8 +35,9 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando produto: " + query.lastError().text(), this); }
 
+  // TODO: change this to use quantCaixa?
   const QString un = query.value("un").toString();
-  const QString un2 = un == "M2" or un == "M²" or un == "ML" ? "m2cx" : "pccx";
+  const QString un2 = (un == "M2") or (un == "M²") or (un == "ML") ? "m2cx" : "pccx";
 
   ui->doubleSpinBoxQuantAvulso->setSingleStep(query.value(un2).toDouble());
 

@@ -43,8 +43,8 @@ void PDF::gerarPdf() {
 
   dataManager->setReportVariable("Data", query.value("data").toDate().toString("dd-MM-yyyy"));
   dataManager->setReportVariable("Cliente", queryCliente.value("nome_razao"));
-  const QString cpfcnpj = queryCliente.value("pfpj") == "PF" ? "CPF: " : "CNPJ: ";
-  dataManager->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value(queryCliente.value("pfpj") == "PF" ? "cpf" : "cnpj").toString());
+  const QString cpfcnpj = (queryCliente.value("pfpj") == "PF") ? "CPF: " : "CNPJ: ";
+  dataManager->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value((queryCliente.value("pfpj") == "PF") ? "cpf" : "cnpj").toString());
   dataManager->setReportVariable("EmailCliente", queryCliente.value("email"));
   dataManager->setReportVariable("Tel1", queryCliente.value("tel"));
   dataManager->setReportVariable("Tel2", queryCliente.value("telCel"));

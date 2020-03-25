@@ -103,7 +103,7 @@ void SendMail::on_pushButtonEnviar_clicked() {
 
 void SendMail::mailSent(const QString &status) {
   progress->cancel();
-  status == "Message sent" ? successStatus() : failureStatus(status);
+  (status == "Message sent") ? successStatus() : failureStatus(status);
 }
 
 void SendMail::successStatus() {

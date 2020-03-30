@@ -360,9 +360,6 @@ void ImportaProdutos::setVariantMap() {
   variantMap.insert("precoVenda", QVariant(QVariant::Double));
   variantMap.insert("ui", QVariant(QVariant::String));
   variantMap.insert("un2", QVariant(QVariant::String));
-  variantMap.insert("mva", QVariant(QVariant::Double));
-  variantMap.insert("st", QVariant(QVariant::Double));
-  variantMap.insert("sticms", QVariant(QVariant::Double));
 }
 
 bool ImportaProdutos::cadastraFornecedores() {

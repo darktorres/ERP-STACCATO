@@ -92,8 +92,8 @@ bool Application::setDatabase() {
   db.setDatabaseName("staccato");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1");
-  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
+  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=3");
 
   return true;
 }
@@ -122,8 +122,11 @@ bool Application::dbConnect() {
     QString message = "Erro conectando no banco de dados: " + error;
 
     if (error.contains("Access denied for user")) { message = "Login inválido!"; }
+    if (error.contains("Can't connect to MySQL server on")) { message = "Não foi possível conectar ao servidor!"; }
 
-    return qApp->enqueueError(false, message);
+    QMessageBox::critical(nullptr, "Erro!", message);
+
+    return false;
   }
 
   isConnected = true;

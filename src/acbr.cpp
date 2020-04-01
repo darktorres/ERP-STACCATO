@@ -196,6 +196,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   recebido = false;
   enviado = false;
   resposta.clear();
+  progressDialog->reset();
 
   if (local) {
     progressDialog->show();

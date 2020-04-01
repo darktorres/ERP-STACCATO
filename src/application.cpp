@@ -65,13 +65,13 @@ void Application::readSettingsFile() {
 
 bool Application::setDatabase() {
   if (not QSqlDatabase::drivers().contains("QMYSQL")) {
-    qApp->enqueueError("Este aplicativo requer o driver QMYSQL.");
+    QMessageBox::critical(nullptr, "Erro!", "Este aplicativo requer o driver QMYSQL!");
     exit(1);
   }
 
   const auto hostname = UserSession::getSetting("Login/hostname");
 
-  if (not hostname) { return qApp->enqueueError(false, "A chave 'hostname' não está configurada!"); }
+  if (not hostname) { return false; }
 
   const auto lastuser = UserSession::getSetting("User/lastuser");
 
@@ -81,7 +81,10 @@ bool Application::setDatabase() {
 
   QFile file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro lendo mysql.txt: " + file.errorString());
+    return false;
+  }
 
   const QString password = file.readAll();
 
@@ -142,17 +145,29 @@ bool Application::dbConnect() {
 bool Application::runSqlJobs() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { return qApp->enqueueError(false, "Erro verificando lastInvalidated: " + query.lastError().text()); }
+  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro verificando lastInvalidated: " + query.lastError().text());
+    return false;
+  }
 
   if (query.value("lastInvalidated").toDate() < qApp->serverDateTime().date()) {
-    if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
+    if (not query.exec("CALL invalidar_produtos_expirados()")) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_produtos_expirados: " + query.lastError().text());
+      return false;
+    }
 
-    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text());
+      return false;
+    }
 
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
     query.bindValue(":lastInvalidated", qApp->serverDateTime().toString("yyyy-MM-dd"));
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando lastInvalidated: " + query.lastError().text()); }
+    if (not query.exec()) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro atualizando lastInvalidated: " + query.lastError().text());
+      return false;
+    }
   }
 
   return true;

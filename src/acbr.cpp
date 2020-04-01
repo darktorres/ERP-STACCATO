@@ -216,13 +216,22 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
     socket.connectToHost(servidor, porta->toByteArray().toUShort());
   }
 
-  while (not pronto) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+  while (not pronto) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    if (progressDialog->wasCanceled()) { return {}; }
+  }
 
   socket.write(comando.toUtf8() + "\r\n.\r\n");
 
-  while (not enviado and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+  while (not enviado and conectado) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    if (progressDialog->wasCanceled()) { return {}; }
+  }
 
-  while (not recebido and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+  while (not recebido and conectado) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    if (progressDialog->wasCanceled()) { return {}; }
+  }
 
   progressDialog->cancel();
 

@@ -74,8 +74,8 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   }
 
   if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
-    qApp->enqueueError("Login inválido!", this);
     ui->lineEditPass->setFocus();
+    QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
     return;
   }
 

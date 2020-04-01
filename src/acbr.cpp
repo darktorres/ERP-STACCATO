@@ -193,27 +193,28 @@ bool ACBr::abrirPdf(const QString &filePath) {
 }
 
 std::optional<QString> ACBr::enviarComando(const QString &comando, const bool local) {
-  const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
-  const auto porta = UserSession::getSetting("User/portaACBr");
-
-  if (not servidorConfig or not porta) {
-    qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
-    return {};
-  }
-
   recebido = false;
   enviado = false;
   resposta.clear();
-  progressDialog->show();
 
-  const auto servidor = local ? "localhost" : servidorConfig->toString();
+  if (local) {
+    progressDialog->show();
 
-  if (lastHost != servidor) { socket.disconnectFromHost(); }
+    if (not conectado) { socket.connectToHost("localhost", 3434); }
+  }
 
-  if (not conectado) {
-    lastHost = servidor;
+  if (not local) {
+    const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
+    const auto porta = UserSession::getSetting("User/portaACBr");
 
-    socket.connectToHost(servidor, porta->toByteArray().toUShort());
+    if (not servidorConfig or not porta) {
+      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
+      return {};
+    }
+
+    progressDialog->show();
+
+    if (not conectado) { socket.connectToHost(servidorConfig->toString(), porta->toByteArray().toUShort()); }
   }
 
   while (not pronto) {

@@ -220,6 +220,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
 
   while (not pronto) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(10);
     if (progressDialog->wasCanceled()) { return {}; }
   }
 
@@ -227,11 +228,13 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
 
   while (not enviado and conectado) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(10);
     if (progressDialog->wasCanceled()) { return {}; }
   }
 
   while (not recebido and conectado) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(10);
     if (progressDialog->wasCanceled()) { return {}; }
   }
 

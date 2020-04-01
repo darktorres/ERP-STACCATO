@@ -27,7 +27,14 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
 }
 
 void ACBr::error() {
-  qApp->enqueueError("Erro socket: " + socket.errorString());
+  const QString errorString = socket.errorString();
+
+  if (errorString == "Connection refused") {
+    qApp->enqueueError("Erro conectando ao ACBr! Verifique se ele está aberto!");
+  } else {
+    qApp->enqueueError("Erro socket: " + socket.errorString());
+  }
+
   progressDialog->cancel();
 }
 

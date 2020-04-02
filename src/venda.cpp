@@ -353,6 +353,18 @@ void Venda::prepararVenda(const QString &idOrcamento) {
 
   // -------------------------------------------------------------------------
 
+  QSqlQuery queryFornecedor;
+  queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
+  queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
+
+  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueError("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+
+  const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
+
+  if (fretePagoLoja) { ui->widgetPgts->setFretePagoLoja(); }
+
+  // -------------------------------------------------------------------------
+
   setConnections();
 }
 

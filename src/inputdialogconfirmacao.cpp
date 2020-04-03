@@ -733,6 +733,9 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
   if (modelConsumo.rowCount() == 0) { return true; }
 
+  // -------------------------------------------------------------------------
+  // NOTE: *quebralinha estoque_has_consumo
+
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
   const double valorConsumo = modelConsumo.data(0, "valor").toDouble();
@@ -762,6 +765,8 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   if (not modelConsumo.setData(0, "vBCCOFINS", vBCCOFINS * proporcao)) { return false; }
   if (not modelConsumo.setData(0, "vCOFINS", vCOFINS * proporcao)) { return false; }
 
+  // -------------------------------------------------------------------------
+
   // copiar linha
   const int newRow = modelConsumo.insertRowAtEnd();
 
@@ -775,6 +780,8 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
     if (not modelConsumo.setData(newRow, column, value)) { return false; }
   }
+
+  // -------------------------------------------------------------------------
 
   const double proporcaoNovo = caixasDefeito / caixas;
 
@@ -793,6 +800,8 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
   if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
   if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
 
+  // -------------------------------------------------------------------------
+
   if (not modelConsumo.submitAll()) { return false; }
 
   return true;
@@ -808,6 +817,9 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
 
   if (modelCompra.rowCount() == 0) { return true; }
 
+  // -------------------------------------------------------------------------
+  // NOTE: *quebralinha pedido_fornecedor2
+
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
@@ -815,6 +827,8 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
   if (not modelCompra.setData(0, "quant", quantRestante)) { return false; }
   if (not modelCompra.setData(0, "caixas", caixasRestante)) { return false; }
   if (not modelCompra.setData(0, "preco", quantRestante * prcUnitario)) { return false; }
+
+  // -------------------------------------------------------------------------
 
   // copiar linha
   const int newRow = modelCompra.insertRowAtEnd();
@@ -829,11 +843,15 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
 
+  // -------------------------------------------------------------------------
+
   if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
   if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
   if (not modelCompra.setData(newRow, "quant", caixasDefeito * quantCaixa)) { return false; }
   if (not modelCompra.setData(newRow, "caixas", caixasDefeito)) { return false; }
   if (not modelCompra.setData(newRow, "preco", caixasDefeito * quantCaixa * prcUnitario)) { return false; }
+
+  // -------------------------------------------------------------------------
 
   if (not modelCompra.submitAll()) { return false; }
 

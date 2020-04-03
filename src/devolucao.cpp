@@ -692,6 +692,20 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   if (modelCompra.rowCount() == 0) { return true; }
 
   //--------------------------------------------------------------------
+
+  const double quantOriginal = modelCompra.data(0, "quant").toDouble();
+  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
+  const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
+  const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
+  const double quantRestante = quantOriginal - quantDevolvida;
+  const QString status = modelCompra.data(0, "status").toString();
+
+  if (not modelCompra.setData(0, "status", "DEVOLVIDO")) { return false; }
+  if (not modelCompra.setData(0, "quant", quantDevolvida)) { return false; }
+  if (not modelCompra.setData(0, "caixas", quantDevolvida / stepQuant)) { return false; }
+  if (not modelCompra.setData(0, "preco", prcUnitario * quantDevolvida)) { return false; }
+
+  //--------------------------------------------------------------------
   // NOTE: *quebralinha pedido_fornecedor2
   const int newRow = modelCompra.insertRowAtEnd();
 
@@ -705,26 +719,12 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
 
-  //--------------------------------------------------------------------
-
-  const double quantOriginal = modelCompra.data(0, "quant").toDouble();
-  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
-  const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
-  const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
-  const double quantRestante = quantOriginal - quantDevolvida;
-
   if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
   if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
+  if (not modelCompra.setData(newRow, "status", status)) { return false; }
   if (not modelCompra.setData(newRow, "quant", quantRestante)) { return false; }
   if (not modelCompra.setData(newRow, "caixas", quantRestante / stepQuant)) { return false; }
   if (not modelCompra.setData(newRow, "preco", prcUnitario * quantRestante)) { return false; }
-
-  //--------------------------------------------------------------------
-
-  if (not modelCompra.setData(0, "status", "DEVOLVIDO")) { return false; }
-  if (not modelCompra.setData(0, "quant", quantDevolvida)) { return false; }
-  if (not modelCompra.setData(0, "caixas", quantDevolvida / stepQuant)) { return false; }
-  if (not modelCompra.setData(0, "preco", prcUnitario * quantDevolvida)) { return false; }
 
   //--------------------------------------------------------------------
 

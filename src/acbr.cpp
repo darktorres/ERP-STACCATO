@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QThread>
 #include <QUrl>
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {

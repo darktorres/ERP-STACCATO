@@ -90,6 +90,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
 
+  if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { return qApp->enqueueError("Não permitido!", this); }
   //------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);

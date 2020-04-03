@@ -582,8 +582,9 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   if (not modelConsumoTemp.select() or modelConsumoTemp.rowCount() == 0) { return false; }
 
   // -------------------------------------------------------------------------
+  // NOTE: *quebralinha estoque_has_consumo
 
-  const int rowConsumo = modelConsumoTemp.insertRowAtEnd();
+  const int newRow = modelConsumoTemp.insertRowAtEnd();
 
   // alterar quant, caixas, valor
 
@@ -625,22 +626,22 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
 
     const QVariant value = modelConsumoTemp.data(0, column);
 
-    if (not modelConsumoTemp.setData(rowConsumo, column, value)) { return false; }
+    if (not modelConsumoTemp.setData(newRow, column, value)) { return false; }
   }
 
-  if (not modelConsumoTemp.setData(rowConsumo, "idVendaProduto2", idVendaProduto2)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "quant", quantConsumo * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "caixas", caixasConsumo * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "valor", valorConsumo * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "desconto", desconto * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBC", vBC * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vICMS", vICMS * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCST", vBCST * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vICMSST", vICMSST * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCPIS", vBCPIS * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vPIS", vPIS * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
-  if (not modelConsumoTemp.setData(rowConsumo, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "idVendaProduto2", idVendaProduto2)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "quant", quantConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "caixas", caixasConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "valor", valorConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "desconto", desconto * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vBC", vBC * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vICMS", vICMS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vBCST", vBCST * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vICMSST", vICMSST * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vBCPIS", vBCPIS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vPIS", vPIS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
+  if (not modelConsumoTemp.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
 
   if (not modelConsumoTemp.submitAll()) { return false; }
 
@@ -658,6 +659,7 @@ bool WidgetLogisticaAgendarEntrega::dividirCompra(const int row, const double ca
   if (modelCompra.rowCount() == 0) { return true; }
 
   // -------------------------------------------------------------------------
+  // NOTE: *quebralinha pedido_fornecedor2
 
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();

@@ -289,6 +289,19 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
 
   if (dividir) {
     // NOTE: *quebralinha pedido_fornecedor2
+
+    const double caixas = modelCompra.data(row, "caixas").toDouble();
+    const double prcUnitario = modelCompra.data(row, "prcUnitario").toDouble();
+    const double quantOriginal = modelCompra.data(row, "quant").toDouble();
+    const double proporcaoNovo = quant / quantOriginal;
+    const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
+
+    if (not modelCompra.setData(row, "quant", quantOriginal - quant)) { return false; }
+    if (not modelCompra.setData(row, "caixas", caixas * proporcaoAntigo)) { return false; }
+    if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return false; }
+
+    // -------------------------------------------------------------------------
+
     const int newRow = modelCompra.insertRowAtEnd();
 
     for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
@@ -301,11 +314,7 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
       if (not modelCompra.setData(newRow, column, value)) { return false; }
     }
 
-    const double caixas = modelCompra.data(row, "caixas").toDouble();
-    const double prcUnitario = modelCompra.data(row, "prcUnitario").toDouble();
-    const double quantOriginal = modelCompra.data(row, "quant").toDouble();
-    const double proporcaoNovo = quant / quantOriginal;
-    const double proporcaoAntigo = (quantOriginal - quant) / quantOriginal;
+    // -------------------------------------------------------------------------
 
     if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(row, "idPedido2"))) { return false; }
     if (not modelCompra.setData(newRow, "idVenda", query.value("idVenda"))) { return false; }
@@ -313,10 +322,6 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
     if (not modelCompra.setData(newRow, "quant", quant)) { return false; }
     if (not modelCompra.setData(newRow, "caixas", caixas * proporcaoNovo)) { return false; }
     if (not modelCompra.setData(newRow, "preco", prcUnitario * quant)) { return false; }
-
-    if (not modelCompra.setData(row, "quant", quantOriginal - quant)) { return false; }
-    if (not modelCompra.setData(row, "caixas", caixas * proporcaoAntigo)) { return false; }
-    if (not modelCompra.setData(row, "preco", prcUnitario * (quantOriginal - quant))) { return false; }
   }
 
   if (not modelCompra.submitAll()) { return false; }

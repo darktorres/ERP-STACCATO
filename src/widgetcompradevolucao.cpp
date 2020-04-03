@@ -126,6 +126,8 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
 
+  // TODO: ao retornar para estoque criar linha livre no pf2 para consumos posteriores (ou agrupar com linha livre existente)
+
   for (const auto &index : list) {
     const int row = index.row();
 
@@ -138,6 +140,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
     // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total alterado
     // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
 
+    // NOTE: *quebralinha estoque_has_consumo
     SqlTableModel modelConsumo;
     modelConsumo.setTable("estoque_has_consumo");
     modelConsumo.setFilter("idVendaProduto2 = " + idRelacionado);

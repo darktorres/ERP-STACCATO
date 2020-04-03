@@ -324,6 +324,22 @@ bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
 }
 
 bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
+  // NOTE: *quebralinha venda_has_produto2
+
+  const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
+  const double proporcao = quantSeparar / quantVenda;
+  const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble() * proporcao;
+  const double parcialDesc = modelProdutos.data(rowProduto, "parcialDesc").toDouble() * proporcao;
+  const double total = modelProdutos.data(rowProduto, "total").toDouble() * proporcao;
+
+  if (not modelProdutos.setData(rowProduto, "quant", quantSeparar)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa))) { return false; }
+  if (not modelProdutos.setData(rowProduto, "parcial", parcial)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "total", total)) { return false; }
+
+  // -------------------------------------------------------------------------
+
   const int newRow = modelProdutos.insertRowAtEnd();
 
   // copiar colunas
@@ -337,18 +353,7 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
     if (not modelProdutos.setData(newRow, column, value)) { return false; }
   }
 
-  const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
-
-  const double proporcao = quantSeparar / quantVenda;
-  const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble() * proporcao;
-  const double parcialDesc = modelProdutos.data(rowProduto, "parcialDesc").toDouble() * proporcao;
-  const double total = modelProdutos.data(rowProduto, "total").toDouble() * proporcao;
-
-  if (not modelProdutos.setData(rowProduto, "quant", quantSeparar)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa))) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcial", parcial)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "total", total)) { return false; }
+  // -------------------------------------------------------------------------
 
   // alterar quant, precos, etc da linha nova
   const double proporcaoNovo = (quantVenda - quantSeparar) / quantVenda;

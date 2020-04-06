@@ -87,6 +87,8 @@ void FollowUp::setupTables() {
 
   modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
+  modelViewFollowup.setSort("dataFollowup");
+
   if (not modelViewFollowup.select()) { return; }
 
   modelViewFollowup.proxyModel = new FollowUpProxyModel(&modelViewFollowup, this);

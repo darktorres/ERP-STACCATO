@@ -271,7 +271,7 @@ void Venda::setupTables() {
 void Venda::prepararVenda(const QString &idOrcamento) {
   ui->lineEditIdOrcamento->setText(idOrcamento);
   ui->lineEditVenda->setText("Auto gerado");
-  ui->dateTimeEdit->setDateTime(qApp->serverDateTime());
+  ui->dateTimeEdit->setDate(qApp->serverDate());
 
   if (not copiaProdutosOrcamento()) { return; }
 
@@ -449,7 +449,7 @@ void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 bool Venda::savingProcedures() {
   // TODO: remove novoPrazoEntrega from DB?
 
-  if (not setData("data", ui->dateTimeEdit->dateTime())) { return false; }
+  if (not setData("data", qApp->serverDateTime())) { return false; }
   if (not setData("dataOrc", ui->dateTimeEditOrc->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxDescontoGlobalReais->value())) { return false; }

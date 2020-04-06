@@ -390,7 +390,7 @@ bool Orcamento::newRegister() {
   if (not RegisterDialog::newRegister()) { return false; }
 
   ui->lineEditOrcamento->setText("Auto gerado");
-  ui->dataEmissao->setDateTime(qApp->serverDateTime());
+  ui->dataEmissao->setDate(qApp->serverDate());
   on_dataEmissao_dateChanged(ui->dataEmissao->date());
   ui->spinBoxValidade->setValue(7);
   novoItem();
@@ -553,7 +553,7 @@ bool Orcamento::savingProcedures() {
 
   if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
-  if (not setData("data", ui->dataEmissao->dateTime())) { return false; }
+  if (not setData("data", qApp->serverDateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.)) { return false; }
   if (not setData("frete", ui->doubleSpinBoxFrete->value())) { return false; }
@@ -1006,7 +1006,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   replica->ui->itemBoxVendedor->setId(data("idUsuario"));
   replica->ui->itemBoxEndereco->setId(data("idEnderecoEntrega"));
   replica->ui->spinBoxValidade->setValue(data("validade").toInt());
-  replica->ui->dataEmissao->setDateTime(qApp->serverDateTime());
+  replica->ui->dataEmissao->setDate(qApp->serverDate());
   replica->ui->checkBoxRepresentacao->setChecked(ui->checkBoxRepresentacao->isChecked());
   replica->ui->lineEditReplicaDe->setText(data("idOrcamento").toString());
   replica->ui->plainTextEditObs->setPlainText(data("observacao").toString());

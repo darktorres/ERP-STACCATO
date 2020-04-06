@@ -160,6 +160,10 @@ bool Orcamento::viewRegister() {
 
     novoItem();
 
+    const int validade = data("validade").toInt();
+    ui->spinBoxValidade->setMaximum(validade);
+    ui->spinBoxValidade->setValue(validade);
+
     const QString status = data("status").toString();
 
     if (status == "FECHADO" or status == "PERDIDO") { ui->pushButtonApagarOrc->hide(); }

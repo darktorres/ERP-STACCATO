@@ -248,20 +248,11 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
   // senao fazer a quebra
 
-  QSqlQuery query1;
-  query1.prepare("SELECT GROUP_CONCAT(DISTINCT idPedido2) AS ids FROM estoque_has_compra WHERE idEstoque = :idEstoque");
-  query1.bindValue(":idEstoque", idEstoque);
-
-  if (not query1.exec() or not query1.first()) { return qApp->enqueueError(false, "Erro buscando compra relacionada ao estoque: " + query1.lastError().text(), this); }
-
-  if (query1.size() == 0) { return true; }
-
-  const QString ids = query1.value("ids").toString();
-
   SqlTableModel modelCompra;
   modelCompra.setTable("pedido_fornecedor_has_produto2");
 
-  modelCompra.setFilter("(idPedido2 IN (" + ids + ") OR idRelacionado IN (" + ids + ")) AND idVenda IS NULL AND idVendaProduto2 IS NULL AND quant >= " + QString::number(quant));
+  const QString subQuery = "SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = " + idEstoque;
+  modelCompra.setFilter("(idPedido2 IN (" + subQuery + ") OR idRelacionado IN (" + subQuery + ")) AND idVenda IS NULL AND idVendaProduto2 IS NULL AND quant >= " + QString::number(quant));
 
   if (not modelCompra.select()) { return false; }
 

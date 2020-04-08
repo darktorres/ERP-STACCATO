@@ -97,7 +97,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Data ST:</string>
+                   <string>Data ST Loja:</string>
                   </property>
                  </widget>
                 </item>
@@ -352,6 +352,9 @@
           </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::MultiSelection</enum>
           </property>
           <property name="selectionBehavior">
            <enum>QAbstractItemView::SelectRows</enum>

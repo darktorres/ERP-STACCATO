@@ -21,6 +21,7 @@
 #include "usersession.h"
 
 #include <QDebug>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
 

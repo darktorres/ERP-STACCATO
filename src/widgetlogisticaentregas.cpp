@@ -362,9 +362,15 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+
   if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonCancelarEntrega")) { return; }
 
   if (not cancelarEntrega(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

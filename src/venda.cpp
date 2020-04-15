@@ -1109,6 +1109,7 @@ bool Venda::cancelamento() {
 
 void Venda::on_pushButtonCancelamento_clicked() {
   // TODO: perguntar e salvar motivo do cancelamento
+  // TODO: caso haja agendamento de entrega cancelar o agendamento primeiro?
 
   // caso pedido nao seja do mes atual, bloquear se nao estiver no primeiro dia util
   const QDate dataVenda = data("data").toDate();

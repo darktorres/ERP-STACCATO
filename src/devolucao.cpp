@@ -706,6 +706,7 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   if (not modelCompra.setData(0, "preco", prcUnitario * quantDevolvida)) { return false; }
 
   //--------------------------------------------------------------------
+
   // NOTE: *quebralinha pedido_fornecedor2
   const int newRow = modelCompra.insertRowAtEnd();
 
@@ -718,6 +719,8 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
 
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
+
+  //--------------------------------------------------------------------
 
   if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
   if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }

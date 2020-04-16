@@ -4,6 +4,7 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
+#include "estoque.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 
@@ -88,6 +89,8 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   const QString status = modelProduto.data(row, "status").toString();
 
+  if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { return qApp->enqueueError("Produto ainda não foi comprado!", this); }
+
   if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
 
   if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { return qApp->enqueueError("Não permitido!", this); }
@@ -121,30 +124,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 bool WidgetCompraConsumos::desfazerConsumo(const int row) {
   const int idVendaProduto2 = modelProduto.data(row, "idVendaProduto2").toInt();
 
-  // REFAC: pass this responsability to Estoque class?
-
-  // NOTE: estoque_has_consumo may have the same idVendaProduto2 in more than one row (only until the field is made UNIQUE)
-  QSqlQuery queryDelete;
-  queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
-  queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
-
-  if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
-
-  // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
-  QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
-  queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
-
-  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), this); }
-
-  QSqlQuery queryVenda;
-  queryVenda.prepare(
-      "UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END, idCompra = NULL, lote = NULL, "
-      "dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = "
-      "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
-
-  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text(), this); }
+  if (not Estoque::desfazerConsumo(idVendaProduto2)) { return false; }
 
   return true;
 }

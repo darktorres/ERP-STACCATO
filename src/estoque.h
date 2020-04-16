@@ -16,6 +16,7 @@ public:
   explicit Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
   auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> bool;
+  static auto desfazerConsumo(const int idVendaProduto2) -> bool;
 
 private:
   // attributes
@@ -36,7 +37,6 @@ private:
 
   // methods
   auto buscarRestante() -> void;
-  auto desfazerConsumo() -> bool;
   auto dividirCompra(const int idVendaProduto2, const double quant) -> bool;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;

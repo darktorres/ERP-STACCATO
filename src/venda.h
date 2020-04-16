@@ -53,6 +53,7 @@ private:
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxProfissional_textChanged(const QString &) -> void;
+  auto on_pushButtonAdicionarObservacao_clicked() -> void;
   auto on_pushButtonCadastrarPedido_clicked() -> void;
   auto on_pushButtonCancelamento_clicked() -> void;
   auto on_pushButtonComprovantes_clicked() -> void;

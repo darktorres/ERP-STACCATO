@@ -21,6 +21,7 @@
 #include "usersession.h"
 
 #include <QDebug>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -54,6 +55,8 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
 
   ui->groupBoxFinanceiro->hide();
   ui->tableFluxoCaixa2->hide();
+
+  ui->pushButtonAdicionarObservacao->hide();
 
   for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
 
@@ -156,6 +159,7 @@ void Venda::setConnections() {
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked, connectionType);
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked, connectionType);
+  connect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked, connectionType);
 }
 
 void Venda::unsetConnections() {
@@ -178,6 +182,7 @@ void Venda::unsetConnections() {
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Venda::on_pushButtonGerarExcel_clicked);
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Venda::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonVoltar, &QPushButton::clicked, this, &Venda::on_pushButtonVoltar_clicked);
+  disconnect(ui->pushButtonAdicionarObservacao, &QPushButton::clicked, this, &Venda::on_pushButtonAdicionarObservacao_clicked);
 }
 
 void Venda::setupTables() {
@@ -570,6 +575,7 @@ bool Venda::viewRegister() {
     ui->pushButtonComprovantes->show();
     ui->pushButtonCancelamento->show();
     ui->pushButtonDevolucao->show();
+    ui->pushButtonAdicionarObservacao->show();
 
     ui->doubleSpinBoxFrete->setReadOnly(true);
     ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -1103,6 +1109,7 @@ bool Venda::cancelamento() {
 
 void Venda::on_pushButtonCancelamento_clicked() {
   // TODO: perguntar e salvar motivo do cancelamento
+  // TODO: caso haja agendamento de entrega cancelar o agendamento primeiro?
 
   // caso pedido nao seja do mes atual, bloquear se nao estiver no primeiro dia util
   const QDate dataVenda = data("data").toDate();
@@ -1342,6 +1349,35 @@ bool Venda::copiaProdutosOrcamento() {
 void Venda::on_pushButtonComprovantes_clicked() {
   auto *comprovantes = new Comprovantes(ui->lineEditVenda->text(), this);
   comprovantes->show();
+}
+
+void Venda::on_pushButtonAdicionarObservacao_clicked() {
+  const auto selection = ui->treeView->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  //------------------------------------------------------
+
+  for (const auto &index : selection) {
+    if (not index.parent().isValid()) { return qApp->enqueueError("Deve selecionar apenas sublinhas!", this); }
+  }
+
+  const QString observacao = QInputDialog::getText(this, "Observação", "Obs: ");
+
+  if (observacao.isEmpty()) { return; }
+
+  //------------------------------------------------------
+
+  for (const auto &index : selection) {
+    const auto index2 = modelTree.proxyModel->mapToSource(index);
+    const auto row = modelTree.mappedRow(index2);
+
+    if (not modelItem2.setData(row, "obs", observacao)) { return; }
+  }
+
+  if (not modelItem2.submitAll()) { return; }
+
+  modelTree.updateData();
 }
 
 // TODO: 0hide 'nfe' field from tables that use conta_a_receber

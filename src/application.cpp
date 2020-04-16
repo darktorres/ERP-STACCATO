@@ -56,7 +56,10 @@ QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo
 void Application::readSettingsFile() {
   QFile file("lojas.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo configurações: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro lendo configurações: " + file.errorString());
+    return;
+  }
 
   const QStringList lines = QString(file.readAll()).split("\r\n", QString::SkipEmptyParts);
 
@@ -106,7 +109,10 @@ bool Application::dbReconnect(const bool silent) {
 
   isConnected = db.open();
 
-  if (not isConnected) { return (silent) ? false : qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text()); }
+  if (not isConnected) {
+    if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
+    return false;
+  }
 
   return db.isOpen();
 }

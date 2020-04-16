@@ -36,7 +36,7 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked, connectionType);
   connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked, connectionType);
-  connect(ui->pushButtonGerarNFeEntregar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked, connectionType);
+  connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked, connectionType);
   connect(ui->pushButtonImprimirDanfe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked, connectionType);
   connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
@@ -185,7 +185,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
   return true;
 }
 
-void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
@@ -226,7 +226,7 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   ui->pushButtonReagendar->setDisabled(true);
   ui->pushButtonConfirmarEntrega->setDisabled(true);
-  ui->pushButtonGerarNFeEntregar->setDisabled(true);
+  ui->pushButtonGerarNFe->setDisabled(true);
   ui->pushButtonImprimirDanfe->setDisabled(true);
   ui->pushButtonCancelarEntrega->setDisabled(true);
 }
@@ -246,19 +246,19 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->pushButtonCancelarEntrega->setEnabled(true);
 
   if (status == "ENTREGA AGEND.") {
-    ui->pushButtonGerarNFeEntregar->setEnabled(true);
+    ui->pushButtonGerarNFe->setEnabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
   if (status == "EM ENTREGA") {
-    ui->pushButtonGerarNFeEntregar->setDisabled(true);
+    ui->pushButtonGerarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setEnabled(true);
   }
 
   if (status == "NOTA PENDENTE") {
-    ui->pushButtonGerarNFeEntregar->setDisabled(true);
+    ui->pushButtonGerarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setDisabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
@@ -362,9 +362,15 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+
   if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonCancelarEntrega")) { return; }
 
   if (not cancelarEntrega(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 

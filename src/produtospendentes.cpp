@@ -328,15 +328,15 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
   const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
   const double proporcao = quantSeparar / quantVenda;
-  const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble() * proporcao;
-  const double parcialDesc = modelProdutos.data(rowProduto, "parcialDesc").toDouble() * proporcao;
-  const double total = modelProdutos.data(rowProduto, "total").toDouble() * proporcao;
+  const double parcial = modelProdutos.data(rowProduto, "parcial").toDouble();
+  const double parcialDesc = modelProdutos.data(rowProduto, "parcialDesc").toDouble();
+  const double total = modelProdutos.data(rowProduto, "total").toDouble();
 
   if (not modelProdutos.setData(rowProduto, "quant", quantSeparar)) { return false; }
   if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa))) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcial", parcial)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "total", total)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "parcial", parcial * proporcao)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc * proporcao)) { return false; }
+  if (not modelProdutos.setData(rowProduto, "total", total * proporcao)) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -357,16 +357,13 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
   // alterar quant, precos, etc da linha nova
   const double proporcaoNovo = (quantVenda - quantSeparar) / quantVenda;
-  const double parcialNovo = modelProdutos.data(newRow, "parcial").toDouble() * proporcaoNovo;
-  const double parcialDescNovo = modelProdutos.data(newRow, "parcialDesc").toDouble() * proporcaoNovo;
-  const double totalNovo = modelProdutos.data(newRow, "total").toDouble() * proporcaoNovo;
 
   if (not modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"))) { return false; }
   if (not modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar))) { return false; }
   if (not modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / quantCaixa)) { return false; }
-  if (not modelProdutos.setData(newRow, "parcial", parcialNovo)) { return false; }
-  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDescNovo)) { return false; }
-  if (not modelProdutos.setData(newRow, "total", totalNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "parcial", parcial * proporcaoNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo)) { return false; }
+  if (not modelProdutos.setData(newRow, "total", total * proporcaoNovo)) { return false; }
 
   return true;
 }

@@ -127,7 +127,7 @@ bool CadastroCliente::savingProcedures() {
     if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
   }
 
-  if (not setData("nome_razao", ui->lineEditCliente->text())) { return false; }
+  if (not setData("nome_razao", ui->lineEditCliente->text().remove("\r").remove("\n"))) { return false; }
   if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
   if (not setData("contatoNome", ui->lineEditContatoNome->text())) { return false; }
   if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) { return false; }

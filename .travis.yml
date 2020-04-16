@@ -9,8 +9,8 @@ addons:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
     - sourceline: 'ppa:beineri/opt-qt-5.14.0-bionic'
     packages:
-    - gcc-9
-    - g++-9
+    - gcc-10
+    - g++-10
     - qt514base
     - qt514charts-no-lgpl
     - qt514script

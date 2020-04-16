@@ -48,10 +48,10 @@ contains(CONFIG, deploy){
     QMAKE_LFLAGS_RELEASE *= -O0
 }
 
-win32-g++{
-    PRECOMPILED_HEADER = pch.h
-    CONFIG *= precompile_header
-}
+#win32-g++{
+#    PRECOMPILED_HEADER = pch.h
+#    CONFIG *= precompile_header
+#}
 
 *-g++{
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing

@@ -818,7 +818,6 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
   if (modelCompra.rowCount() == 0) { return true; }
 
   // -------------------------------------------------------------------------
-  // NOTE: *quebralinha pedido_fornecedor2
 
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double caixasRestante = caixas - caixasDefeito;
@@ -830,7 +829,7 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
 
   // -------------------------------------------------------------------------
 
-  // copiar linha
+  // NOTE: *quebralinha pedido_fornecedor2
   const int newRow = modelCompra.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {

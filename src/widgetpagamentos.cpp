@@ -255,7 +255,6 @@ void WidgetPagamentos::resetarPagamentos() {
 
   calculaCreditoRestante();
 
-  if (fretePagoLoja) { ui->pushButtonFreteLoja->click(); }
 
   emit montarFluxoCaixa();
 }
@@ -267,7 +266,7 @@ void WidgetPagamentos::prepararPagamentosRep() {
 
   on_pushButtonAdicionarPagamento_clicked();
 
-  listCheckBoxRep.at(0)->setChecked(true);
+  listCheckBoxRep.at(0)->setChecked(not fretePagoLoja);
   listLinePgt.at(0)->setText("Frete");
   listLinePgt.at(0)->setReadOnly(true);
   listDoubleSpinPgt.at(0)->setValue(frete);
@@ -311,7 +310,6 @@ void WidgetPagamentos::setFretePagoLoja() {
   fretePagoLoja = true;
 
   ui->pushButtonFreteLoja->setDisabled(true);
-  ui->pushButtonPgtLoja->setDisabled(true);
 }
 
 void WidgetPagamentos::setIdOrcamento(const QString &value) { idOrcamento = value; }

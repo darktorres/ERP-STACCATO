@@ -34,7 +34,7 @@ WidgetPagamentos::~WidgetPagamentos() { delete ui; }
 
 void WidgetPagamentos::labelPagamento(QHBoxLayout *layout) {
   auto *labelPagamento = new QLabel(this);
-  labelPagamento->setText("Pgt." + QString::number(ui->scrollArea->widget()->children().size()));
+  labelPagamento->setText("Pgt." + QString::number(pagamentos + 1));
   layout->addWidget(labelPagamento);
 }
 
@@ -68,7 +68,7 @@ void WidgetPagamentos::on_doubleSpinBoxPgt_valueChanged(const int index) {
 void WidgetPagamentos::calculaCreditoRestante() {
   double creditoUsado = 0;
 
-  for (int i = 0; i < listComboPgt.size(); ++i) {
+  for (int i = 0; i < pagamentos; ++i) {
     if (listComboPgt.at(i)->currentText() == "Conta Cliente") { creditoUsado += listDoubleSpinPgt.at(i)->value(); }
   }
 
@@ -251,10 +251,11 @@ void WidgetPagamentos::resetarPagamentos() {
   listDoubleSpinPgt.clear();
   listLinePgt.clear();
 
+  pagamentos = 0;
+
   ui->doubleSpinBoxTotalPag->setValue(0);
 
   calculaCreditoRestante();
-
 
   emit montarFluxoCaixa();
 }
@@ -382,19 +383,21 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
 
   ui->scrollArea->widget()->layout()->addWidget(frame);
 
+  pagamentos += 1;
+
   //---------------------------------------------------
 
   calcularTotal();
 
   //---------------------------------------------------
 
-  if (representacao and addFrete and listDatePgt.size() == 1) { prepararPagamentosRep(); }
+  if (representacao and addFrete and pagamentos == 1) { prepararPagamentosRep(); }
 }
 
 void WidgetPagamentos::on_pushButtonLimparPag_clicked() { resetarPagamentos(); }
 
 void WidgetPagamentos::on_pushButtonPgtLoja_clicked() {
-  if (listCheckBoxRep.isEmpty()) { return qApp->enqueueError("Preencha os pagamentos primeiro!", this); }
+  if (pagamentos == 0) { return qApp->enqueueError("Preencha os pagamentos primeiro!", this); }
 
   LoginDialog dialog(LoginDialog::Tipo::Autorizacao, this);
 
@@ -419,7 +422,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 }
 
 bool WidgetPagamentos::verifyFields() {
-  for (int i = 0; i < listCheckBoxRep.size(); ++i) {
+  for (int i = 0; i < pagamentos; ++i) {
     if (listComboPgt.at(i)->currentText() != "Escolha uma opção!" and listLinePgt.at(i)->text().isEmpty()) {
       qApp->enqueueError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
       listLinePgt.at(i)->setFocus();

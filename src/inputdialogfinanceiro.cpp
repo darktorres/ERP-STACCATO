@@ -255,15 +255,15 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
     }
 
     for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
-      if (ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
-        const int parcelas = ui->widgetPgts->listComboParc.at(i)->currentIndex() + 1;
-        const double valor = ui->widgetPgts->listDoubleSpinPgt.at(i)->value();
+      if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Escolha uma opção!") {
+        const int parcelas = ui->widgetPgts->listParcela.at(i)->currentIndex() + 1;
+        const double valor = ui->widgetPgts->listValorPgt.at(i)->value();
 
         const double part1 = valor / parcelas;
         const int part2 = static_cast<int>(part1 * 100);
         const double part3 = static_cast<double>(part2) / 100;
 
-        const double parcela = static_cast<double>((ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito") ? part3 : qApp->roundDouble(valor / parcelas));
+        const double parcela = static_cast<double>((ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Cartão de crédito") ? part3 : qApp->roundDouble(valor / parcelas));
         const double resto = static_cast<double>(valor - (parcela * parcelas));
 
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
@@ -274,15 +274,15 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
           if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
           if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
 
-          const QString currentText = ui->widgetPgts->listComboData.at(i)->currentText();
-          const QDate currentDate = ui->widgetPgts->listDatePgt.at(i)->date();
+          const QString currentText = ui->widgetPgts->listTipoData.at(i)->currentText();
+          const QDate currentDate = ui->widgetPgts->listDataPgt.at(i)->date();
           const QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
 
           if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
           if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
-          if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) { return; }
+          if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listTipoPgt.at(i)->currentText())) { return; }
           if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) { return; }
-          if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text())) { return; }
+          if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listObservacao.at(i)->text())) { return; }
         }
       }
     }
@@ -303,12 +303,12 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
     // set st date
     if (updateDate) {
-      if (not ui->widgetPgts->listDatePgt.isEmpty()) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDatePgt.at(0)->date()); }
+      if (not ui->widgetPgts->listDataPgt.isEmpty()) { ui->dateEditPgtSt->setDate(ui->widgetPgts->listDataPgt.at(0)->date()); }
     }
 
     //----------------------------------------------
 
-    if (ui->widgetPgts->listDatePgt.size() > 0) {
+    if (ui->widgetPgts->listDataPgt.size() > 0) {
       double stForn = 0;
       double stLoja = 0;
 
@@ -331,9 +331,9 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
       // 'ST Loja' tem a data do faturamento, 'ST Fornecedor' segue as datas dos pagamentos
 
-      const QString currentText = ui->widgetPgts->listComboData.at(0)->currentText();
-      const QDate currentDate = ui->widgetPgts->listDatePgt.at(0)->date();
-      const int parcelas = ui->widgetPgts->listComboParc.at(0)->currentIndex() + 1;
+      const QString currentText = ui->widgetPgts->listTipoData.at(0)->currentText();
+      const QDate currentDate = ui->widgetPgts->listDataPgt.at(0)->date();
+      const int parcelas = ui->widgetPgts->listParcela.at(0)->currentIndex() + 1;
 
       if (stForn > 0) {
         if (ui->checkBoxParcelarSt->isChecked()) {

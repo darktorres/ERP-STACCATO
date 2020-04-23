@@ -32,12 +32,12 @@ public:
   // attributes
   int pagamentos = 0;
   QList<QCheckBox *> listCheckBoxRep;
-  QList<QComboBox *> listComboData;
-  QList<QComboBox *> listComboParc;
-  QList<QComboBox *> listComboPgt;
-  QList<QDateEdit *> listDatePgt;
-  QList<QDoubleSpinBox *> listDoubleSpinPgt;
-  QList<QLineEdit *> listLinePgt;
+  QList<QComboBox *> listTipoPgt;
+  QList<QComboBox *> listTipoData;
+  QList<QComboBox *> listParcela;
+  QList<QDoubleSpinBox *> listValorPgt;
+  QList<QDateEdit *> listDataPgt;
+  QList<QLineEdit *> listObservacao;
 
 signals:
   void montarFluxoCaixa();

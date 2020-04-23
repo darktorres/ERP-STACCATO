@@ -30,6 +30,7 @@ public:
   auto verifyFields() -> bool;
 
   // attributes
+  int pagamentos = 0;
   QList<QCheckBox *> listCheckBoxRep;
   QList<QComboBox *> listComboData;
   QList<QComboBox *> listComboParc;

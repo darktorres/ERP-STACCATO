@@ -254,7 +254,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       }
     }
 
-    for (int i = 0; i < ui->widgetPgts->listComboData.size(); ++i) {
+    for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
       if (ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
         const int parcelas = ui->widgetPgts->listComboParc.at(i)->currentIndex() + 1;
         const double valor = ui->widgetPgts->listDoubleSpinPgt.at(i)->value();

@@ -423,7 +423,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
 bool WidgetPagamentos::verifyFields() {
   for (int i = 0; i < pagamentos; ++i) {
-    if (listComboPgt.at(i)->currentText() != "Escolha uma opção!" and listLinePgt.at(i)->text().isEmpty()) {
+    if (tipo == Tipo::Venda and listComboPgt.at(i)->currentText() != "Escolha uma opção!" and listLinePgt.at(i)->text().isEmpty()) {
       qApp->enqueueError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
       listLinePgt.at(i)->setFocus();
       return false;

@@ -653,10 +653,10 @@ void Venda::montarFluxoCaixa() {
   }
 
   for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
-    if (ui->widgetPgts->listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
-      const int parcelas = ui->widgetPgts->listComboParc.at(i)->currentIndex() + 1;
-      const double valor = ui->widgetPgts->listDoubleSpinPgt.at(i)->value();
-      const int cartao = (ui->widgetPgts->listComboPgt.at(i)->currentText() == "Cartão de crédito") ? 1 : 0;
+    if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Escolha uma opção!") {
+      const int parcelas = ui->widgetPgts->listParcela.at(i)->currentIndex() + 1;
+      const double valor = ui->widgetPgts->listValorPgt.at(i)->value();
+      const int cartao = (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Cartão de crédito") ? 1 : 0;
 
       const double part1 = valor / parcelas;
       const int part2 = static_cast<int>(part1 * 100); // truncate with 2 decimals
@@ -672,11 +672,11 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
         if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
         if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
-        if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->widgetPgts->listDatePgt.at(i)->date().addMonths(x + cartao))) { return; }
+        if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->widgetPgts->listDataPgt.at(i)->date().addMonths(x + cartao))) { return; }
         if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
-        if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listComboPgt.at(i)->currentText())) { return; }
+        if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listTipoPgt.at(i)->currentText())) { return; }
         if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) { return; }
-        if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listLinePgt.at(i)->text())) { return; }
+        if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listObservacao.at(i)->text())) { return; }
         if (not modelFluxoCaixa.setData(row, "representacao", ui->widgetPgts->listCheckBoxRep.at(i)->isChecked())) { return; }
         if (not modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda")) { return; }
         if (not modelFluxoCaixa.setData(row, "subGrupo", "")) { return; }
@@ -703,7 +703,7 @@ void Venda::montarFluxoCaixa() {
         const double taxaComissao = query.value("comissaoLoja").toDouble() / 100;
         const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
 
-        const bool isFreteLoja = (ui->widgetPgts->listLinePgt.at(0)->text() == "Frete");
+        const bool isFreteLoja = (ui->widgetPgts->listObservacao.at(0)->text() == "Frete");
 
         const double valorAjustado = isFreteLoja ? valorComissao * taxaComissao : taxaComissao * (valorComissao - (valorComissao / totalVenda * frete));
 
@@ -731,8 +731,8 @@ void Venda::montarFluxoCaixa() {
 
         QSqlQuery query;
         query.prepare("SELECT taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento WHERE pagamento = :pagamento AND parcela = :parcela");
-        query.bindValue(":pagamento", ui->widgetPgts->listComboPgt.at(i)->currentText());
-        query.bindValue(":parcela", ui->widgetPgts->listComboParc.at(i)->currentText().remove("x").toInt());
+        query.bindValue(":pagamento", ui->widgetPgts->listTipoPgt.at(i)->currentText());
+        query.bindValue(":parcela", ui->widgetPgts->listParcela.at(i)->currentText().remove("x").toInt());
 
         if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando taxa: " + query.lastError().text(), this); }
 
@@ -890,8 +890,8 @@ bool Venda::atualizarCredito() {
   bool update = false;
 
   for (int i = 0; i < ui->widgetPgts->listCheckBoxRep.size(); ++i) {
-    if (ui->widgetPgts->listComboPgt.at(i)->currentText() == "Conta Cliente") {
-      creditoRestante -= ui->widgetPgts->listDoubleSpinPgt.at(i)->value();
+    if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Conta Cliente") {
+      creditoRestante -= ui->widgetPgts->listValorPgt.at(i)->value();
       update = true;
     }
   }

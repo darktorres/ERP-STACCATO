@@ -423,21 +423,21 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
 bool WidgetPagamentos::verifyFields() {
   for (int i = 0; i < pagamentos; ++i) {
-    if (tipo == Tipo::Venda and listComboPgt.at(i)->currentText() != "Escolha uma opção!" and listLinePgt.at(i)->text().isEmpty()) {
-      qApp->enqueueError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
-      listLinePgt.at(i)->setFocus();
-      return false;
-    }
-
-    if (listDoubleSpinPgt.at(i)->value() > 0 and listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
+    if (listComboPgt.at(i)->currentText() == "Escolha uma opção!") {
       qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
       listComboPgt.at(i)->setFocus();
       return false;
     }
 
-    if (qFuzzyIsNull(listDoubleSpinPgt.at(i)->value()) and listComboPgt.at(i)->currentText() != "Escolha uma opção!") {
+    if (qFuzzyIsNull(listDoubleSpinPgt.at(i)->value())) {
       qApp->enqueueError("Pagamento " + QString::number(i + 1) + " está com valor 0!", this);
       listDoubleSpinPgt.at(i)->setFocus();
+      return false;
+    }
+
+    if (tipo == Tipo::Venda and listLinePgt.at(i)->text().isEmpty()) {
+      qApp->enqueueError("Faltou preencher observação do pagamento " + QString::number(i + 1) + "!", this);
+      listLinePgt.at(i)->setFocus();
       return false;
     }
   }

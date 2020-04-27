@@ -512,7 +512,7 @@ void InputDialogFinanceiro::setTreeView() {
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   if (idCompra.isEmpty()) { return qApp->enqueueError(false, "IdCompra vazio!", this); }
 
-  QString filtro = "idCompra = " + idCompra;
+  QString filtro = "idCompra IN (" + idCompra + ")";
 
   if (tipo == Tipo::ConfirmarCompra) { filtro += " AND status = 'EM COMPRA'"; }
   if (tipo == Tipo::Financeiro) { filtro += " AND status != 'CANCELADO'"; }
@@ -528,7 +528,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   setTreeView();
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
-    modelFluxoCaixa.setFilter(tipo == Tipo::ConfirmarCompra ? "0" : "idCompra = " + idCompra + " AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");
+    modelFluxoCaixa.setFilter((tipo == Tipo::ConfirmarCompra) ? "0" : "idCompra IN (" + idCompra + ") AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");
 
     if (not modelFluxoCaixa.select()) { return false; }
 

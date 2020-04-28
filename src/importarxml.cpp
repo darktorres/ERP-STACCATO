@@ -578,12 +578,6 @@ bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
 }
 
 bool ImportarXML::cadastrarNFe(XML &xml) {
-  const auto id = qApp->reservarIdNFe();
-
-  if (not id) { return false; }
-
-  xml.idNFe = id.value();
-
   const int row = modelNFe.insertRowAtEnd();
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
@@ -595,6 +589,12 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
+
+  const auto gare = calculaGare(xml);
+
+  if (not gare) { return false; }
+
+  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
 
   return true;
 }
@@ -612,11 +612,19 @@ bool ImportarXML::lerXML() {
 
   auto fileContent = file.readAll();
 
+  file.close();
+
   if (fileContent.left(3) == "o;?") { fileContent.remove(0, 3); }
 
   XML xml(fileContent, file.fileName());
 
-  file.close();
+  const auto id = qApp->reservarIdNFe();
+
+  if (not id) { return false; }
+
+  xml.idNFe = id.value();
+
+  if (not verificaTabelaIBPT(xml.dataHoraEmissao)) { return false; }
 
   if (not xml.validar(XML::Tipo::Entrada)) { return false; }
 
@@ -624,9 +632,19 @@ bool ImportarXML::lerXML() {
 
   if (not perguntarLocal(xml)) { return false; }
 
+  if (not percorrerXml(xml, xml.model.item(0, 0))) { return false; }
+
   if (not cadastrarNFe(xml)) { return false; }
 
-  if (not percorrerXml(xml, xml.model.item(0, 0))) { return false; }
+  return true;
+}
+
+bool ImportarXML::verificaTabelaIBPT(const QString dataEmissao) {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT * FROM ibpt WHERE '" + dataEmissao.left(10) + "' BETWEEN vigenciainicio AND vigenciafim LIMIT 1")) { return qApp->enqueueError(false, "", this); }
+
+  if (not query.first()) { return qApp->enqueueError(false, "Tabela IBPT para a data da NFe não cadastrado!", this); }
 
   return true;
 }
@@ -981,6 +999,148 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
     if (not modelEstoque.setData(row, "lote", checked ? "N/D" : "")) { return; }
   }
+}
+
+std::optional<double> ImportarXML::calculaGare(const XML &xml) {
+  const auto match = modelEstoque.multiMatch({{"idNFe", xml.idNFe}, {"tipoICMS", "ICMS00"}});
+
+  if (match.isEmpty()) {
+    qDebug() << "Nenhum produto tipo00 para esta nota!";
+    return 0;
+  }
+
+  const QString dataEmissao = xml.dataHoraEmissao.left(10);
+
+  double total = 0;
+
+  for (const auto row : match) {
+    const double baseCalculo = modelEstoque.data(row, "vBC").toDouble();
+    const double icmsProprio = modelEstoque.data(row, "vICMS").toDouble();
+    const double icmsInter = modelEstoque.data(row, "pICMS").toDouble() / 100;
+    const double ipi = modelEstoque.data(row, "vIPI").toDouble();
+    const QString ncm = modelEstoque.data(row, "ncm").toString();
+
+    auto mva = buscaMVA(ncm);
+
+    if (not mva) { mva = 0.6943; }
+
+    QSqlQuery queryIBPT;
+
+    if (not queryIBPT.exec("SELECT estadual FROM ibpt WHERE codigo = '" + ncm + "' AND '" + dataEmissao + "' BETWEEN vigenciainicio AND vigenciafim")) {
+      qApp->enqueueError("Erro pesquisando na tabela IBPT: " + queryIBPT.lastError().text(), this);
+      return {};
+    }
+
+    if (not queryIBPT.first()) {
+      qApp->enqueueError("Não encontrado na tabela IBPT o ncm: " + ncm, this);
+      return {};
+    }
+
+    const double icmsIntra = queryIBPT.value("estadual").toDouble() / 100.;
+
+    if (qFuzzyIsNull(icmsIntra)) {
+      qDebug() << "ICMS 0% de acordo com tabela IBPT.";
+      continue;
+    }
+
+    // calcular mva ajustado
+    if (not qFuzzyCompare(icmsInter, icmsIntra)) { mva = ((1 + mva.value()) * (1 - icmsInter) / (1 - icmsIntra)) - 1; }
+
+    const double baseST = (baseCalculo + ipi) * (1 + mva.value());
+    const double icmsST = (baseST * icmsIntra) - icmsProprio;
+    total += icmsST;
+
+    //    qDebug() << "id: " << modelEstoque.data(row, "idEstoque");
+    //    qDebug() << "baseCalculo: " << baseCalculo;
+    //    qDebug() << "ipi: " << ipi;
+    //    qDebug() << "mva: " << mva.value();
+    //    qDebug() << "icmsIntra: " << icmsIntra;
+    //    qDebug() << "icmsInter: " << icmsInter;
+    //    qDebug() << "icmsProprio: " << icmsProprio;
+    //    qDebug() << "baseST: " << baseST;
+    //    qDebug() << "icmsST: " << icmsST;
+  }
+
+  //  qDebug() << "gare: " << total;
+
+  return total;
+}
+
+std::optional<double> ImportarXML::buscaMVA(const QString ncm) {
+  QSqlQuery query1;
+
+  if (not query1.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(4) + "%'")) {
+    qDebug() << "erro query3: " + query1.lastError().text();
+    return {};
+  }
+
+  if (query1.size() == 1) {
+    query1.first();
+    return query1.value("iva_st").toDouble() / 100;
+  }
+
+  if (query1.size() > 1) {
+    QSqlQuery query2;
+
+    if (not query2.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(5) + "%'")) {
+      qDebug() << "erro query4: " + query2.lastError().text();
+      return {};
+    }
+
+    if (query2.size() == 1) {
+      query2.first();
+      return query2.value("iva_st").toDouble() / 100;
+    }
+
+    if (query2.size() > 1) {
+      QSqlQuery query3;
+
+      if (not query3.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(6) + "%'")) {
+        qDebug() << "erro query5: " + query3.lastError().text();
+        return {};
+      }
+
+      if (query3.size() == 1) {
+        query3.first();
+        return query3.value("iva_st").toDouble() / 100;
+      }
+
+      if (query3.size() > 1) {
+        QSqlQuery query4;
+
+        if (not query4.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(7) + "%'")) {
+          qDebug() << "erro query6: " + query4.lastError().text();
+          return {};
+        }
+
+        if (query4.size() == 1) {
+          query4.first();
+          return query4.value("iva_st").toDouble() / 100;
+        }
+
+        if (query4.size() > 1) {
+          QSqlQuery query5;
+
+          if (not query5.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(8) + "%'")) {
+            qDebug() << "erro query7: " + query5.lastError().text();
+            return {};
+          }
+
+          if (query5.size() == 1) {
+            query5.first();
+            return query5.value("iva_st").toDouble() / 100;
+          }
+
+          if (query5.size() == 0) {
+            qDebug() << "ncm não encontrado: " + ncm;
+            return {};
+          }
+        }
+      }
+    }
+  }
+
+  return {};
 }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque

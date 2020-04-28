@@ -48,10 +48,11 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
-  auto salvarDadosCompra() -> bool;
+  auto buscaMVA(const QString ncm) -> std::optional<double>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto cadastrarNFe(XML &xml) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
+  auto calculaGare(const XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
   auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
@@ -68,11 +69,13 @@ private:
   auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
+  auto salvarDadosCompra() -> bool;
   auto salvarDadosVenda() -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
   auto verificaExiste(const QString &chaveAcesso) -> bool;
+  auto verificaTabelaIBPT(const QString dataEmissao) -> bool;
   auto verifyFields() -> bool;
 };

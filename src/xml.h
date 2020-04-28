@@ -35,6 +35,7 @@ public:
   QString codBarras;
   QString descricao;
   QString ncm;
+  QString cest;
   QString cfop;
   QString un;
   double quant = 0;
@@ -44,6 +45,7 @@ public:
   QString unTrib;
   double quantTrib = 0;
   double valorUnidTrib = 0;
+  double frete = 0;
   double desconto = 0;
   bool compoeTotal = false;
   QString numeroPedido;

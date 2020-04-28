@@ -5,10 +5,10 @@
 
 class Condition {
 public:
-  Condition(const QString &column, const QVariant &condition, const bool equal = true) : column(column), condition(condition), equal(equal) {}
+  Condition(const QString &column, const QVariant &value, const bool equal = true) : column(column), value(value), equal(equal) {}
 
   QString column;
-  QVariant condition;
+  QVariant value;
   bool equal;
 };
 

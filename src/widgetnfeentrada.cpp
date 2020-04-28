@@ -2,7 +2,9 @@
 #include "ui_widgetnfeentrada.h"
 
 #include "application.h"
+#include "dateformatdelegate.h"
 #include "doubledelegate.h"
+#include "reaisdelegate.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
@@ -42,11 +44,15 @@ void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
 
+  modelViewNFeEntrada.setHeaderData("GARE", "GARE (Estimado)");
+
   ui->table->setModel(&modelViewNFeEntrada);
 
   ui->table->hideColumn("idNFe");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
+  ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("GARE Pago Em", new DateFormatDelegate(this));
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {

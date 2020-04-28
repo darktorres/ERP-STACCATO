@@ -43,7 +43,7 @@ public:
   QString codBarrasTrib;
   QString unTrib;
   double quantTrib = 0;
-  double valorTrib = 0;
+  double valorUnidTrib = 0;
   double desconto = 0;
   bool compoeTotal = false;
   QString numeroPedido;

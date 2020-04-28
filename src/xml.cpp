@@ -44,7 +44,7 @@ void XML::limparValores() {
   codBarrasTrib = "";
   unTrib = "";
   quantTrib = 0;
-  valorTrib = 0;
+  valorUnidTrib = 0;
   desconto = 0;
   compoeTotal = false;
   numeroPedido = "";
@@ -126,7 +126,7 @@ void XML::lerDadosProduto(const QStandardItem *child) {
   if (text.left(10) == "cEANTrib -") { codBarrasTrib = text.remove(0, 11); }
   if (text.left(7) == "uTrib -") { unTrib = text.remove(0, 8); }
   if (text.left(7) == "qTrib -") { quantTrib = text.remove(0, 8).toDouble(); }
-  if (text.left(9) == "vUnTrib -") { valorTrib = text.remove(0, 10).toDouble(); }
+  if (text.left(9) == "vUnTrib -") { valorUnidTrib = text.remove(0, 10).toDouble(); }
   if (text.left(7) == "vDesc -") { desconto = text.remove(0, 8).toDouble(); }
   if (text.left(8) == "indTot -") { compoeTotal = static_cast<bool>(text.remove(0, 9).toInt()); }
   if (text.left(6) == "xPed -") { numeroPedido = text.remove(0, 7); }

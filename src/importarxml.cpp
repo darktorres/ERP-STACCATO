@@ -684,7 +684,7 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorTrib", xml.valorTrib)) { return false; }
+  if (not modelEstoque.setData(newRow, "valorTrib", xml.valorUnidTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "desconto", xml.desconto)) { return false; }
   if (not modelEstoque.setData(newRow, "compoeTotal", xml.compoeTotal)) { return false; }
   if (not modelEstoque.setData(newRow, "numeroPedido", xml.numeroPedido)) { return false; }

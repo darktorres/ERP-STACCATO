@@ -22,14 +22,41 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="styleSheet">
-       <string notr="true">QTabBar::tab:disabled { width: 0; height: 0; margin: 0; padding: 0; border: none; }
-</string>
+       <string notr="true">QTabBar::tab:disabled {
+	 width: 0;
+	 height: 0;
+	 margin: 0;
+	 padding: 0;
+	 border: none;
+ 
+}
+QTabWidget::pane {
+	margin: -13px -9px -13px -9px; 
+}</string>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
       </property>
       <widget class="QWidget" name="tabOrcamentos">
        <attribute name="title">

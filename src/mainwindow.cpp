@@ -11,6 +11,7 @@
 #include "cadastrousuario.h"
 #include "calculofrete.h"
 #include "importaprodutos.h"
+#include "importatabelaibpt.h"
 #include "orcamento.h"
 #include "precoestoque.h"
 #include "userconfig.h"
@@ -37,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
+  connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
   connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
   connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered);
   connect(ui->actionSobre, &QAction::triggered, this, &MainWindow::on_actionSobre_triggered);
@@ -268,6 +270,11 @@ void MainWindow::on_actionCalcular_frete_triggered() {
   auto *frete = new CalculoFrete(this);
   frete->setAttribute(Qt::WA_DeleteOnClose);
   frete->show();
+}
+
+void MainWindow::on_actionImportar_tabela_IBPT_triggered() {
+  ImportaTabelaIBPT ibpt(this);
+  ibpt.importar();
 }
 
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc

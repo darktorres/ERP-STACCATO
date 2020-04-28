@@ -36,6 +36,7 @@ void XML::limparValores() {
   codBarras = "";
   descricao = "";
   ncm = "";
+  cest = "";
   cfop = "";
   un = "";
   quant = 0;
@@ -45,6 +46,7 @@ void XML::limparValores() {
   unTrib = "";
   quantTrib = 0;
   valorUnidTrib = 0;
+  frete = 0;
   desconto = 0;
   compoeTotal = false;
   numeroPedido = "";

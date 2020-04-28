@@ -115,11 +115,13 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("ajuste");
   ui->tableEstoque->hideColumn("ncm");
+  ui->tableEstoque->hideColumn("cest");
   ui->tableEstoque->hideColumn("cfop");
   ui->tableEstoque->hideColumn("codBarrasTrib");
   ui->tableEstoque->hideColumn("unTrib");
   ui->tableEstoque->hideColumn("quantTrib");
-  ui->tableEstoque->hideColumn("valorTrib");
+  ui->tableEstoque->hideColumn("valorUnidTrib");
+  ui->tableEstoque->hideColumn("frete");
   ui->tableEstoque->hideColumn("desconto");
   ui->tableEstoque->hideColumn("compoeTotal");
   ui->tableEstoque->hideColumn("numeroPedido");
@@ -182,7 +184,7 @@ void ImportarXML::setupTables() {
   ui->tableConsumo->hideColumn("codBarrasTrib");
   ui->tableConsumo->hideColumn("unTrib");
   ui->tableConsumo->hideColumn("quantTrib");
-  ui->tableConsumo->hideColumn("valorTrib");
+  ui->tableConsumo->hideColumn("valorUnidTrib");
   ui->tableConsumo->hideColumn("desconto");
   ui->tableConsumo->hideColumn("compoeTotal");
   ui->tableConsumo->hideColumn("numeroPedido");
@@ -696,13 +698,15 @@ bool ImportarXML::inserirItemModel(const XML &xml) {
   if (not modelEstoque.setData(newRow, "codBarras", xml.codBarras)) { return false; }
   if (not modelEstoque.setData(newRow, "codComercial", xml.codProd)) { return false; }
   if (not modelEstoque.setData(newRow, "ncm", xml.ncm)) { return false; }
+  if (not modelEstoque.setData(newRow, "cest", xml.cest)) { return false; }
   if (not modelEstoque.setData(newRow, "cfop", xml.cfop)) { return false; }
   if (not modelEstoque.setData(newRow, "valorUnid", (xml.valor + xml.vIPI - xml.desconto) / xml.quant)) { return false; }
   if (not modelEstoque.setData(newRow, "valor", xml.valor + xml.vIPI - xml.desconto)) { return false; }
   if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) { return false; }
   if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorTrib", xml.valorUnidTrib)) { return false; }
+  if (not modelEstoque.setData(newRow, "valorUnidTrib", xml.valorUnidTrib)) { return false; }
+  if (not modelEstoque.setData(newRow, "frete", xml.frete)) { return false; }
   if (not modelEstoque.setData(newRow, "desconto", xml.desconto)) { return false; }
   if (not modelEstoque.setData(newRow, "compoeTotal", xml.compoeTotal)) { return false; }
   if (not modelEstoque.setData(newRow, "numeroPedido", xml.numeroPedido)) { return false; }
@@ -1049,6 +1053,8 @@ std::optional<double> ImportarXML::calculaGare(const XML &xml) {
     const double baseST = (baseCalculo + ipi) * (1 + mva.value());
     const double icmsST = (baseST * icmsIntra) - icmsProprio;
     total += icmsST;
+
+    if (not modelEstoque.setData(row, "valorGare", icmsST)) { return {}; }
 
     //    qDebug() << "id: " << modelEstoque.data(row, "idEstoque");
     //    qDebug() << "baseCalculo: " << baseCalculo;

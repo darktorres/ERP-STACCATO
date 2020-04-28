@@ -74,9 +74,8 @@ QVector<int> SqlTableModel::multiMatch(const QVector<Condition> conditions, bool
 
     for (const auto &condition : conditions) {
       const QVariant value = data(row, condition.column);
-      const QVariant condition_ = condition.condition;
 
-      if ((condition.equal and value != condition_) or (not condition.equal and value == condition_)) { ok = false; }
+      if ((condition.equal and value != condition.value) or (not condition.equal and value == condition.value)) { ok = false; }
     }
 
     if (ok) {

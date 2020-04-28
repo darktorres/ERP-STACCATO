@@ -140,6 +140,7 @@ SOURCES += \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
+    src/importatabelaibpt.cpp \
     src/inputdialog.cpp \
     src/inputdialogconfirmacao.cpp \
     src/inputdialogfinanceiro.cpp \
@@ -258,6 +259,7 @@ HEADERS  += \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
+    src/importatabelaibpt.h \
     src/inputdialog.h \
     src/inputdialogconfirmacao.h \
     src/inputdialogfinanceiro.h \

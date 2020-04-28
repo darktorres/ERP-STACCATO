@@ -182,6 +182,7 @@
      <addaction name="actionPromocao"/>
     </widget>
     <addaction name="menuImportar_tabela_fornecedor"/>
+    <addaction name="actionImportar_tabela_IBPT"/>
     <addaction name="menuTema"/>
     <addaction name="actionConfiguracoes"/>
    </widget>
@@ -334,6 +335,11 @@
   <action name="actionCalcular_frete">
    <property name="text">
     <string>Calcular frete</string>
+   </property>
+  </action>
+  <action name="actionImportar_tabela_IBPT">
+   <property name="text">
+    <string>Importar tabela IBPT</string>
    </property>
   </action>
  </widget>

@@ -17,13 +17,18 @@ public:
   QStandardItemModel model;
   QString local;
 
+  // xml
+  int idNFe = 0;
+
   QString chaveAcesso;
+  // identificacao
   QString nNF;
-  // emit
+  QString dataHoraEmissao;
+  // emitente
   QString xFant;
   QString xNome;
   QString cnpjOrig;
-  // dest
+  // destinatario
   QString cnpjDest;
   // produto
   QString codProd;
@@ -89,9 +94,6 @@ public:
   double vNF_Total = 0;
   // transportadora
   QString xNomeTransp;
-
-  // xml
-  int idNFe = 0;
 
   // methods
 private:

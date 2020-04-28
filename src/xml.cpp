@@ -89,6 +89,7 @@ void XML::lerValores(const QStandardItem *item) {
 
       if (text.left(6) == "infNFe") { chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44); }
       if (text.left(3) == "nNF") { nNF = text.remove(0, 6); }
+      if (text.left(5) == "dhEmi") { dataHoraEmissao = text.remove(0, 8); }
 
       if (parentText == "emit" and text.left(7) == "xFant -") { xFant = text.remove(0, 8); }
       if (parentText == "emit" and text.left(7) == "xNome -") { xNome = text.remove(0, 8); }

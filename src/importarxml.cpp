@@ -1028,6 +1028,10 @@ std::optional<double> ImportarXML::calculaGare(const XML &xml) {
 
     if (not mva) { mva = 0.6943; }
 
+    //    qDebug() << "id: " << modelEstoque.data(row, "idEstoque");
+    //    qDebug() << "ncm: " << ncm;
+    //    qDebug() << "mvaOriginal: " << mva.value();
+
     QSqlQuery queryIBPT;
 
     if (not queryIBPT.exec("SELECT estadual FROM ibpt WHERE codigo = '" + ncm + "' AND '" + dataEmissao + "' BETWEEN vigenciainicio AND vigenciafim")) {
@@ -1056,10 +1060,9 @@ std::optional<double> ImportarXML::calculaGare(const XML &xml) {
 
     if (not modelEstoque.setData(row, "valorGare", icmsST)) { return {}; }
 
-    //    qDebug() << "id: " << modelEstoque.data(row, "idEstoque");
     //    qDebug() << "baseCalculo: " << baseCalculo;
     //    qDebug() << "ipi: " << ipi;
-    //    qDebug() << "mva: " << mva.value();
+    //    qDebug() << "mvaAjustado: " << mva.value();
     //    qDebug() << "icmsIntra: " << icmsIntra;
     //    qDebug() << "icmsInter: " << icmsInter;
     //    qDebug() << "icmsProprio: " << icmsProprio;

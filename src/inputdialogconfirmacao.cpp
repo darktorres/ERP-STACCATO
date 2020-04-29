@@ -164,7 +164,7 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("codBarrasTrib");
     ui->tableLogistica->hideColumn("unTrib");
     ui->tableLogistica->hideColumn("quantTrib");
-    ui->tableLogistica->hideColumn("valorTrib");
+    ui->tableLogistica->hideColumn("valorUnidTrib");
     ui->tableLogistica->hideColumn("desconto");
     ui->tableLogistica->hideColumn("compoeTotal");
     ui->tableLogistica->hideColumn("numeroPedido");

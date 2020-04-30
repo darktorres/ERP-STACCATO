@@ -199,9 +199,12 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <property name="tabBarAutoHide">
+      <bool>true</bool>
+     </property>
      <widget class="QWidget" name="tabNovoOrc">
       <attribute name="title">
-       <string>Novo orçamento</string>
+       <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_10">
        <item row="6" column="1">

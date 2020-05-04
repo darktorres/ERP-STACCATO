@@ -385,6 +385,8 @@ bool ImportarXML::importar() {
 
   if (not modelEstoque_compra.submitAll()) { return false; }
 
+  if (not modelPagamento.submitAll()) { return false; }
+
   return true;
 }
 
@@ -595,6 +597,8 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   const auto gare = calculaGare(xml);
 
   if (not gare) { return false; }
+
+  if (not criarPagamentoGare(gare.value(), xml)) { return false; }
 
   if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
 
@@ -1150,6 +1154,26 @@ std::optional<double> ImportarXML::buscaMVA(const QString ncm) {
   }
 
   return {};
+}
+
+bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
+  const int row = modelPagamento.insertRowAtEnd();
+
+  if (not modelPagamento.setData(row, "dataEmissao", qApp->serverDate())) { return false; }
+  if (not modelPagamento.setData(row, "idLoja", 1)) { return false; }
+  if (not modelPagamento.setData(row, "contraParte", "GARE")) { return false; }
+  if (not modelPagamento.setData(row, "idNFe", xml.idNFe)) { return false; }
+  if (not modelPagamento.setData(row, "nfe", xml.nNF)) { return false; }
+  if (not modelPagamento.setData(row, "valor", valor)) { return false; }
+  if (not modelPagamento.setData(row, "tipo", "Boleto")) { return false; }
+  if (not modelPagamento.setData(row, "dataPagamento", "-")) { return false; }
+  if (not modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF)) { return false; }
+  if (not modelPagamento.setData(row, "status", "Pendente - Gerado Sistema")) { return false; }
+  if (not modelPagamento.setData(row, "contaDestino", 3)) { return false; }
+  if (not modelPagamento.setData(row, "centroCusto", 1)) { return false; }
+  if (not modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS")) { return false; }
+
+  return true;
 }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque

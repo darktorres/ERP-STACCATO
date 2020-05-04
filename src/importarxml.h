@@ -35,6 +35,7 @@ private:
   SqlTableModel modelVenda;
   SqlTableModel modelEstoque_compra;
   SqlTableModel modelNFe;
+  SqlTableModel modelPagamento;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {
@@ -54,6 +55,7 @@ private:
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
   auto calculaGare(const XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
+  auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
   auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
   auto importar() -> bool;

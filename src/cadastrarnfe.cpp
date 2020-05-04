@@ -324,13 +324,17 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not resposta) { return; }
 
-  qDebug() << "gerarNota: " << resposta.value();
+  const QString respostaCopy = resposta.value();
 
-  if (resposta->contains("Alertas:") or not resposta->contains("OK")) { return qApp->enqueueError(resposta.value(), this); }
+  qDebug() << "gerarNota: " << respostaCopy;
 
   const QStringList respostaSplit = resposta->remove("OK: ").split("\r\n");
 
   qDebug() << "split: " << respostaSplit;
+
+  if (respostaCopy.contains("Alertas:")) { return qApp->enqueueError(respostaSplit.at(1), this); }
+
+  if (not respostaCopy.contains("OK")) { return qApp->enqueueError(respostaCopy, this); }
 
   const QString filePath = respostaSplit.at(0);
   xml = respostaSplit.at(1);
@@ -870,7 +874,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
     stream << "[Produto" + numProd + "]\n";
     stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
-    stream << "CEST = 1003001\n";
+    stream << "CEST = 1003001\n"; // TODO: usar o CEST correto
     stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() + "\n";
     stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() + "\n";
     const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();

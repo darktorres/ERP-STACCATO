@@ -880,7 +880,8 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     QString formato = modelViewProdutoEstoque.data(row, "formComercial").toString();
     formato = formato.isEmpty() ? "" : " - " + formato;
     const QString caixas = modelViewProdutoEstoque.data(row, "caixas").toString();
-    stream << "Descricao = " + produto + formato + " (" + caixas + " Cx.)\n";
+    const QString descricao = produto + formato;
+    stream << "Descricao = " + descricao.left(100) + " (" + caixas + " Cx.)\n";
     stream << "Unidade = " + modelViewProdutoEstoque.data(row, "un").toString() + "\n";
     stream << "Quantidade = " + modelViewProdutoEstoque.data(row, "quant").toString() + "\n";
     const double total = modelViewProdutoEstoque.data(row, "total").toDouble();

@@ -22,9 +22,12 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <property name="tabBarAutoHide">
+      <bool>true</bool>
+     </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Venda</string>
+       <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
@@ -71,6 +74,16 @@
            </item>
            <item row="3" column="0" colspan="2">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QPushButton" name="pushButtonAdicionarObservacao">
+               <property name="text">
+                <string>Adicionar observação</string>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QLineEdit" name="lineEditEstoque_2">
                <property name="sizePolicy">
@@ -454,16 +467,6 @@ color: rgb(0, 0, 0);</string>
              </property>
              <property name="text">
               <string>Prazo de entrega:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="pushButtonAdicionarObservacao">
-             <property name="text">
-              <string>Adicionar observação</string>
-             </property>
-             <property name="autoDefault">
-              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -1109,6 +1112,11 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>WidgetPagamentos</class>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
@@ -1118,11 +1126,6 @@ color: rgb(0, 0, 0);</string>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header>src/treeview.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

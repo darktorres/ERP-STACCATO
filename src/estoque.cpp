@@ -67,7 +67,7 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("codBarrasTrib");
   ui->tableEstoque->hideColumn("unTrib");
   ui->tableEstoque->hideColumn("quantTrib");
-  ui->tableEstoque->hideColumn("valorTrib");
+  ui->tableEstoque->hideColumn("valorUnidTrib");
   ui->tableEstoque->hideColumn("desconto");
   ui->tableEstoque->hideColumn("compoeTotal");
   ui->tableEstoque->hideColumn("numeroPedido");

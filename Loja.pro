@@ -198,6 +198,7 @@ SOURCES += \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
+    src/widgetgare.cpp \
     src/widgetgraficos.cpp \
     src/widgethistoricocompra.cpp \
     src/widgetlogistica.cpp \
@@ -316,6 +317,7 @@ HEADERS  += \
     src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
+    src/widgetgare.h \
     src/widgetgraficos.h \
     src/widgethistoricocompra.h \
     src/widgetlogistica.h \
@@ -391,6 +393,7 @@ FORMS += \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
+    ui/widgetgare.ui \
     ui/widgetgraficos.ui \
     ui/widgethistoricocompra.ui \
     ui/widgetlogistica.ui \

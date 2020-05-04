@@ -94,6 +94,16 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>GARE</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="WidgetGare" name="widgetGare" native="true"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabVendas">
       <attribute name="title">
        <string>Vendas</string>
@@ -171,6 +181,12 @@
    <class>WidgetFinanceiroCompra</class>
    <extends>QWidget</extends>
    <header>src/widgetfinanceirocompra.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetGare</class>
+   <extends>QWidget</extends>
+   <header>src/widgetgare.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

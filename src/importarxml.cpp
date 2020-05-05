@@ -592,11 +592,11 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
 
-  const auto gare = calculaGare(xml);
+  //  const auto gare = calculaGare(xml);
 
-  if (not gare) { return false; }
+  //  if (not gare) { return false; }
 
-  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
+  //  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
 
   return true;
 }
@@ -626,7 +626,7 @@ bool ImportarXML::lerXML() {
 
   xml.idNFe = id.value();
 
-  if (not verificaTabelaIBPT(xml.dataHoraEmissao)) { return false; }
+  //  if (not verificaTabelaIBPT(xml.dataHoraEmissao)) { return false; }
 
   if (not xml.validar(XML::Tipo::Entrada)) { return false; }
 

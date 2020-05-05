@@ -37,6 +37,7 @@ private:
   auto clearConta() -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
+  auto limparSelecao() -> void;
   auto newRegister() -> bool final;
   auto novaConta() -> void;
   auto novoEndereco() -> void;
@@ -55,7 +56,6 @@ private:
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
-  auto on_pushButtonLimparSelecao_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonRemoveAssociacao_clicked() -> void;
   auto on_pushButtonRemoverConta_clicked() -> void;

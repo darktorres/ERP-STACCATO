@@ -18,6 +18,9 @@
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);
 
+  if (tipo == Tipo::Pagar) { setWindowTitle("Contas a pagar"); }
+  if (tipo == Tipo::Receber) { setWindowTitle("Contas a receber"); }
+
   setWindowFlags(Qt::Window);
 
   setupTables();

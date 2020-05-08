@@ -283,11 +283,11 @@ void MainWindow::on_actionImportar_tabela_IBPT_triggered() {
 // NOTE: prioridades atuais:
 // TODO: logistica da devolucao
 
-// TASK: cancelamento de nfe: terminar de arrumar formato do email
-// TASK: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
-// TASK: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
-// TASK: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
-// TASK: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
-// TASK: terminar de implantar quebra/reposicao
-// TASK: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
+// TODO: cancelamento de nfe: terminar de arrumar formato do email
+// TODO: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
+// TODO: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
+// TODO: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
+// TODO: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
+// TODO: terminar de implantar quebra/reposicao
+// TODO: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
 // NOTE: add logging to the terminal so qdebug logging can be seen on the user pc when needed

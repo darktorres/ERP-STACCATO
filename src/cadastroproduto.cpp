@@ -263,10 +263,10 @@ bool CadastroProduto::cadastrar() {
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
-// REFAC: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
+// TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
-// REFAC: 4verificar se posso remover 'un2' de produto
+// TODO: 4verificar se posso remover 'un2' de produto
 // TODO: colocar logica para trabalhar a tabela produto_has_preco para que os produtos nao sejam descontinuados com validade ativa
 // TODO: validar entrada do campo icms para apenas numeros
-// REFAC: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
+// TODO: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
 // TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto

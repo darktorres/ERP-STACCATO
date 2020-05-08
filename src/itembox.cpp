@@ -124,4 +124,4 @@ void ItemBox::setFilter(const QString &filter) { searchDialog->setFilter(filter)
 
 void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFornecedorRep(fornecedor); }
 
-// REFAC: replace this with eliding? https://wiki.qt.io/Elided_Label
+// TODO: replace this with eliding? https://wiki.qt.io/Elided_Label

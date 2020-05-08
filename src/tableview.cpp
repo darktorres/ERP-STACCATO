@@ -15,15 +15,14 @@
 TableView::TableView(QWidget *parent) : QTableView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
-  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
-  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
-
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);
 
   verticalHeader()->setDefaultSectionSize(20);
-
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
 }
 
 void TableView::resizeColumnsToContents() {
@@ -42,6 +41,12 @@ void TableView::showContextMenu(const QPoint &pos) {
   contextMenu.addAction(&action);
 
   contextMenu.exec(mapToGlobal(pos));
+}
+
+void TableView::resizeEvent(QResizeEvent *event) {
+  redoView();
+
+  QTableView::resizeEvent(event);
 }
 
 int TableView::columnIndex(const QString &column, const bool silent) const {
@@ -72,8 +77,19 @@ int TableView::rowCount() const { return model()->rowCount(); }
 
 void TableView::redoView() {
   if (persistentColumns.isEmpty()) { return; }
+  if (rowCount() == 0) { return; }
 
-  for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
+  const int firstRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().y() + 5)).row();
+  int lastRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().height() - 5)).row();
+
+  if (firstRowIndex == -1) { return; }
+
+  int count = 0;
+
+  // subtrair uma linha de altura por vez até achar uma linha
+  while (lastRowIndex == -1) { lastRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().height() - 5 - rowHeight(0) * ++count)).row(); }
+
+  for (int row = firstRowIndex; row <= lastRowIndex; ++row) {
     for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
   }
 }
@@ -96,6 +112,7 @@ void TableView::setModel(QAbstractItemModel *model) {
   connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::redoView);
 
   //---------------------------------------
 

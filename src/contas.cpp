@@ -286,50 +286,12 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
-    QSqlQuery query;
-    query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
 void Contas::viewConta(const QString &column, const QString &value) {
   modelPendentes.setFilter(column + " = '" + value + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
-
-    const QString idVenda = query.value("idVenda").toString();
-
-    setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
-
-    modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                               : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
-
-    // -------------------------------------------------------------------------
-
-    modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                                 : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
-  }
-
-  if (tipo == Tipo::Pagar) {
-    QSqlQuery query;
-    query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN pedido_fornecedor_has_produto2 pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", idPagamento);
-
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
-
-    const QString idCompra = query.value("idCompra").toString();
-    const QString ordemCompra = query.value("ordemCompra").toString();
-
-    setWindowTitle("Contas A Pagar - " + contraparte + (ordemCompra == "0" ? "" : " OC " + ordemCompra));
-
-    modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE"
-                                             : "idCompra = '" + idCompra + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
-
-    // -------------------------------------------------------------------------
-
-    modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE"
-                                               : "idCompra = " + idCompra + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE");
-  }
+  modelProcessados.setFilter(column + " = '" + value + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE");
 
   if (not modelPendentes.select()) { return; }
-
-  // -------------------------------------------------------------------------
 
   if (not modelProcessados.select()) { return; }
 }

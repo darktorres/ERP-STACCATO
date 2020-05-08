@@ -341,7 +341,7 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
 
-  // TASK: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
+  // TODO: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
 
   const auto list = ui->table->selectionModel()->selectedRows();

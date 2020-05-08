@@ -1389,5 +1389,5 @@ void Venda::on_pushButtonAdicionarObservacao_clicked() {
 // NOTE: prazoEntrega por produto
 // NOTE: bloquear desconto maximo por classe de funcionario
 // TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
-// REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
+// TODO: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
 // TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao

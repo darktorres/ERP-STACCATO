@@ -358,7 +358,7 @@ bool InputDialogConfirmacao::dividirRecebimento(const int row, const double caix
   // TODO: ao dividir linha fazer prepend '(REPO. ENTREGA/RECEB.)' na observacao do produto
   // TODO: nao dividir linha do estoque, apenas criar um consumo 'quebrado' para inutilizar a parte que foi quebrada (a mesma coisa para faltando)
 
-  // REFAC: 0finish this part
+  // TODO: 0finish this part
 
   const int idEstoque = modelEstoque.data(row, "idEstoque").toInt();
   const double caixas = modelEstoque.data(row, "caixas").toDouble();
@@ -519,7 +519,7 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
 }
 
 bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
-  // REFAC: pass this responsability to Estoque class
+  // TODO: pass this responsability to Estoque class
   // NOTE: verificar WidgetCompraConsumos::desfazerConsumo
 
   QSqlQuery query;

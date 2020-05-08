@@ -14,7 +14,7 @@
 #include <QSqlRecord>
 #include <cmath>
 
-Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Devolucao) {
+Devolucao::Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent) : QDialog(parent), idVenda(idVenda), isRepresentacao(isRepresentacao), ui(new Ui::Devolucao) {
   ui->setupUi(this);
 
   setConnections();
@@ -22,6 +22,12 @@ Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent),
   setWindowFlags(Qt::Window);
 
   setWindowTitle(idVenda);
+
+  if (isRepresentacao) {
+    ui->doubleSpinBoxPorcentagem->setDisabled(true);
+    ui->doubleSpinBoxCredito->setDisabled(true);
+  }
+
   setupTables();
 }
 
@@ -290,6 +296,11 @@ void Devolucao::on_tableProdutos_clicked(const QModelIndex &index) {
 
   ui->doubleSpinBoxQuant->setSingleStep(quantCaixa);
   ui->doubleSpinBoxQuant->setSuffix(" " + modelProdutos2.data(row, "un").toString());
+
+  if (isRepresentacao) {
+    ui->doubleSpinBoxPorcentagem->setValue(0);
+    ui->doubleSpinBoxCredito->setValue(0);
+  }
 
   setConnections();
 }

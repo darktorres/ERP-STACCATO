@@ -1193,7 +1193,7 @@ bool Venda::generateId() {
 }
 
 void Venda::on_pushButtonDevolucao_clicked() {
-  auto *devolucao = new Devolucao(data("idVenda").toString(), this);
+  auto *devolucao = new Devolucao(data("idVenda").toString(), data("representacao").toBool(), this);
   connect(devolucao, &Devolucao::finished, [&] { viewRegisterById(ui->lineEditVenda->text()); });
   devolucao->show();
 }

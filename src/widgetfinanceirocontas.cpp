@@ -114,11 +114,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
 
   auto *contas = new Contas((tipo == Tipo::Receber) ? Contas::Tipo::Receber : Contas::Tipo::Pagar, this);
   contas->setAttribute(Qt::WA_DeleteOnClose);
-  const QString idPagamento = model.data(index.row(), "idPagamento").toString();
-  const QString contraparte = model.data(index.row(), "Contraparte").toString();
-  contas->viewConta(idPagamento, contraparte);
-  // TODO: 2poder selecionar mais de um idPagamento (contraParte é estético)
-  // ajustar para selecionar mais de uma linha e ajustar no filtro da Contas
+  contas->viewConta(model.record().fieldName(index.column()), index.data().toString());
 }
 
 void WidgetFinanceiroContas::montaFiltro() {

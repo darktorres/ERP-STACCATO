@@ -289,10 +289,18 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void Contas::viewConta(const QString &column, const QString &value) {
-  modelPendentes.setFilter(column + " = '" + value + "' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+void Contas::viewConta(const QString &dataPagamento) {
+  if (tipo == Tipo::Receber) {
+    modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
 
-  modelProcessados.setFilter(column + " = '" + value + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+    modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND representacao = FALSE AND desativado = FALSE");
+  }
+
+  if (tipo == Tipo::Pagar) {
+    modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
+
+    modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND desativado = FALSE");
+  }
 
   if (not modelPendentes.select()) { return; }
 

@@ -287,9 +287,9 @@ void Contas::on_pushButtonSalvar_clicked() {
 }
 
 void Contas::viewConta(const QString &column, const QString &value) {
-  modelPendentes.setFilter(column + " = '" + value + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
+  modelPendentes.setFilter(column + " = '" + value + "' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
 
-  modelProcessados.setFilter(column + " = '" + value + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE");
+  modelProcessados.setFilter(column + " = '" + value + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
 
   if (not modelPendentes.select()) { return; }
 

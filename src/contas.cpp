@@ -147,7 +147,8 @@ void Contas::preencher(const QModelIndex &index) {
 }
 
 void Contas::setupTables() {
-  modelPendentes.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
+  if (tipo == Tipo::Receber) { modelPendentes.setTable("conta_a_receber_has_pagamento"); }
+  if (tipo == Tipo::Pagar) { modelPendentes.setTable("conta_a_pagar_has_pagamento"); }
 
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
@@ -181,19 +182,11 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
-  // TODO: 3dateEditDelegate para vencimento
   ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
   ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
 
-  if (tipo == Tipo::Receber) {
-    //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraParteReceber, this));
-    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
-  }
-
-  if (tipo == Tipo::Pagar) {
-    //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
-    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusPagar, this));
-  }
+  if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
+  if (tipo == Tipo::Pagar) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
 
   ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
@@ -218,7 +211,8 @@ void Contas::setupTables() {
 
   // -------------------------------------------------------------------------
 
-  modelProcessados.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
+  if (tipo == Tipo::Receber) { modelProcessados.setTable("conta_a_receber_has_pagamento"); }
+  if (tipo == Tipo::Pagar) { modelProcessados.setTable("conta_a_pagar_has_pagamento"); }
 
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
@@ -245,7 +239,6 @@ void Contas::setupTables() {
 
   ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
 
@@ -293,11 +286,10 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
-  if (tipo == Tipo::Receber) {
     QSqlQuery query;
     query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", idPagamento);
+void Contas::viewConta(const QString &column, const QString &value) {
+  modelPendentes.setFilter(column + " = '" + value + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
 

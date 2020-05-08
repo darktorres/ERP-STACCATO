@@ -21,6 +21,7 @@ Devolucao::Devolucao(const QString &idVenda, QWidget *parent) : QDialog(parent),
 
   setWindowFlags(Qt::Window);
 
+  setWindowTitle(idVenda);
   setupTables();
 }
 

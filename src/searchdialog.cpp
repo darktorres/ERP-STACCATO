@@ -167,10 +167,6 @@ QString SearchDialog::getText(const QVariant &id) {
 
   queryText = "SELECT " + queryText + " FROM " + model.tableName() + " WHERE " + primaryKey + " = '" + id.toString() + "'";
 
-  static QHash<QString, QString> cache;
-
-  if (cache.contains(queryText)) { return cache.value(queryText); }
-
   QSqlQuery query;
 
   if (not query.exec(queryText) or not query.first()) {
@@ -183,8 +179,6 @@ QString SearchDialog::getText(const QVariant &id) {
   for (const auto &key : std::as_const(textKeys)) {
     if (query.value(key).isValid() and not query.value(key).toString().isEmpty()) { res += (res.isEmpty() ? "" : " - ") + query.value(key).toString(); }
   }
-
-  cache.insert(queryText, res);
 
   return res;
 }

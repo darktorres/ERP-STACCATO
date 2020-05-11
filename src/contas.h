@@ -15,7 +15,8 @@ public:
   enum class Tipo { Pagar, Receber };
   explicit Contas(const Tipo tipo, QWidget *parent = nullptr);
   ~Contas();
-  auto viewConta(const QString &dataPagamento) -> void;
+  auto viewContaPagar(const QString &dataPagamento) -> void;
+  auto viewContaReceber(const QString &idPagamento, const QString &contraparte) -> void;
 
 private:
   // attributes

@@ -112,9 +112,17 @@ void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
 
-  auto *contas = new Contas((tipo == Tipo::Receber) ? Contas::Tipo::Receber : Contas::Tipo::Pagar, this);
-  contas->setAttribute(Qt::WA_DeleteOnClose);
-  contas->viewConta(model.data(index.row(), "dataPagamento").toString());
+  if (tipo == Tipo::Receber) {
+    auto *contas = new Contas(Contas::Tipo::Receber, this);
+    contas->setAttribute(Qt::WA_DeleteOnClose);
+    contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "ContraParte").toString());
+  }
+
+  if (tipo == Tipo::Pagar) {
+    auto *contas = new Contas(Contas::Tipo::Pagar, this);
+    contas->setAttribute(Qt::WA_DeleteOnClose);
+    contas->viewContaPagar(model.data(index.row(), "dataPagamento").toString());
+  }
 }
 
 void WidgetFinanceiroContas::montaFiltro() {

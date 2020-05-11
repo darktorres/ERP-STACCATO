@@ -289,18 +289,36 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void Contas::viewConta(const QString &dataPagamento) {
-  if (tipo == Tipo::Receber) {
-    modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+void Contas::viewContaPagar(const QString &dataPagamento) {
+  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
 
-    modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND representacao = FALSE AND desativado = FALSE");
-  }
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND desativado = FALSE");
 
-  if (tipo == Tipo::Pagar) {
-    modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
+  if (not modelPendentes.select()) { return; }
 
-    modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND desativado = FALSE");
-  }
+  if (not modelProcessados.select()) { return; }
+}
+
+void Contas::viewContaReceber(const QString &idPagamento, const QString &contraparte) {
+  QSqlQuery query;
+  query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
+  query.bindValue(":idPagamento", idPagamento);
+
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
+
+  const QString idVenda = query.value("idVenda").toString();
+
+  setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
+
+  modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                             : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+
+  // -------------------------------------------------------------------------
+
+  modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                               : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+
+  // -------------------------------------------------------------------------
 
   if (not modelPendentes.select()) { return; }
 

@@ -3,38 +3,14 @@
 #include <QDomElement>
 #include <QStandardItemModel>
 
-class XML final {
-
-public:
-  enum class Tipo { Entrada, Saida };
-  explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
-  auto lerValores(const QStandardItem *item) -> void;
-  auto limparValores() -> void;
-  auto validar(const Tipo tipo) -> bool;
-
-  const QByteArray fileContent;
-  const QString fileName;
-  QStandardItemModel model;
-  QString local;
-
-  // xml
-  int idNFe = 0;
-
-  QString chaveAcesso;
-  // identificacao
-  QString nNF;
-  QString dataHoraEmissao;
-  // emitente
-  QString xFant;
-  QString xNome;
-  QString cnpjOrig;
-  // destinatario
-  QString cnpjDest;
+struct Produto {
   // produto
   QString codProd;
   QString codBarras;
   QString descricao;
   QString ncm;
+  QString nve;
+  QString extipi;
   QString cest;
   QString cfop;
   QString un;
@@ -46,7 +22,9 @@ public:
   double quantTrib = 0;
   double valorUnidTrib = 0;
   double frete = 0;
+  double seguro = 0;
   double desconto = 0;
+  double outros = 0;
   bool compoeTotal = false;
   QString numeroPedido;
   int itemPedido = 0;
@@ -79,6 +57,36 @@ public:
   double vBCCOFINS = 0;
   double pCOFINS = 0;
   double vCOFINS = 0;
+};
+
+class XML final {
+
+public:
+  enum class Tipo { Entrada, Saida };
+  explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
+  auto validar(const Tipo tipo) -> bool;
+  bool error = false;
+
+  QVector<Produto> produtos;
+
+  const QByteArray fileContent;
+  const QString fileName;
+  QStandardItemModel model;
+  QString local;
+
+  // xml
+  int idNFe = 0;
+
+  QString chaveAcesso;
+  // identificacao
+  QString nNF;
+  QString dataHoraEmissao;
+  // emitente
+  QString xFant;
+  QString xNome;
+  QString cnpjOrig;
+  // destinatario
+  QString cnpjDest;
   // total
   double vBC_Total = 0;
   double vICMS_Total = 0;
@@ -97,14 +105,18 @@ public:
   // transportadora
   QString xNomeTransp;
 
-  // methods
 private:
+  // attributes
+  Produto produto;
+  // methods
   auto lerCOFINSProduto(const QStandardItem *child) -> void;
   auto lerDadosProduto(const QStandardItem *child) -> void;
   auto lerICMSProduto(const QStandardItem *child) -> void;
   auto lerIPIProduto(const QStandardItem *child) -> void;
   auto lerPISProduto(const QStandardItem *child) -> void;
   auto lerTotais(const QStandardItem *child) -> void;
+  auto lerValores(const QStandardItem *item) -> void;
+  auto limparValores() -> void;
   auto montarArvore() -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
   auto verificaCNPJ(const Tipo tipo) -> bool;

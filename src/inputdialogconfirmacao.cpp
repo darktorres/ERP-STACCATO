@@ -150,7 +150,6 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("vBCIPI");
     ui->tableLogistica->hideColumn("pIPI");
     ui->tableLogistica->hideColumn("vIPI");
-    ui->tableLogistica->hideColumn("valorGare");
     ui->tableLogistica->hideColumn("idEstoque");
     ui->tableLogistica->hideColumn("idNFe");
     ui->tableLogistica->hideColumn("recebidoPor");
@@ -158,6 +157,9 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("quantUpd");
     ui->tableLogistica->hideColumn("codBarras");
     ui->tableLogistica->hideColumn("ncm");
+    ui->tableLogistica->hideColumn("nve");
+    ui->tableLogistica->hideColumn("extipi");
+    ui->tableLogistica->hideColumn("cest");
     ui->tableLogistica->hideColumn("cfop");
     ui->tableLogistica->hideColumn("valor");
     ui->tableLogistica->hideColumn("valorUnid");
@@ -165,7 +167,10 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("unTrib");
     ui->tableLogistica->hideColumn("quantTrib");
     ui->tableLogistica->hideColumn("valorUnidTrib");
+    ui->tableLogistica->hideColumn("frete");
+    ui->tableLogistica->hideColumn("seguro");
     ui->tableLogistica->hideColumn("desconto");
+    ui->tableLogistica->hideColumn("outros");
     ui->tableLogistica->hideColumn("compoeTotal");
     ui->tableLogistica->hideColumn("numeroPedido");
     ui->tableLogistica->hideColumn("itemPedido");

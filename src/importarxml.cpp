@@ -723,8 +723,8 @@ bool ImportarXML::percorrerXml(XML &xml) {
     if (not modelEstoque.setData(newRow, "extipi", produto.extipi)) { return false; }
     if (not modelEstoque.setData(newRow, "cest", produto.cest)) { return false; }
     if (not modelEstoque.setData(newRow, "cfop", produto.cfop)) { return false; }
-    if (not modelEstoque.setData(newRow, "valorUnid", (produto.valor + produto.vIPI - produto.desconto) / produto.quant)) { return false; }
-    if (not modelEstoque.setData(newRow, "valor", produto.valor + produto.vIPI - produto.desconto)) { return false; }
+    if (not modelEstoque.setData(newRow, "valorUnid", (produto.valor + produto.vIPI - desconto) / produto.quant)) { return false; }
+    if (not modelEstoque.setData(newRow, "valor", produto.valor + produto.vIPI - desconto)) { return false; }
     if (not modelEstoque.setData(newRow, "codBarrasTrib", produto.codBarrasTrib)) { return false; }
     if (not modelEstoque.setData(newRow, "unTrib", produto.unTrib)) { return false; }
     if (not modelEstoque.setData(newRow, "quantTrib", produto.quantTrib)) { return false; }

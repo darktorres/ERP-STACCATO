@@ -72,7 +72,11 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("idPagamento");
-  if (tipo == Tipo::Pagar) { ui->table->hideColumn("idCompra"); }
+
+  if (tipo == Tipo::Pagar) {
+    ui->table->hideColumn("idCompra");
+    ui->table->hideColumn("idNFe");
+  }
 
   if (tipo == Tipo::Receber) {
     ui->table->hideColumn("idVenda");

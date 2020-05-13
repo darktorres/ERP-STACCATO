@@ -595,11 +595,11 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
 
-  //  const auto gare = calculaGare(xml);
+  const auto gare = calculaGare(xml);
 
-  //  if (not gare) { return false; }
+  if (not gare) { return false; }
 
-  //  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
+  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
 
   return true;
 }
@@ -628,6 +628,8 @@ bool ImportarXML::lerXML() {
   if (not xml.validar(XML::Tipo::Entrada)) { return false; }
 
   if (verificaExiste(xml.chaveAcesso)) { return false; }
+
+  if (not xml.verificaNCMs()) { return false; }
 
   // TODO: verificar se todos os ncms do xml estao tabelados
 

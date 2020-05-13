@@ -65,9 +65,10 @@ public:
   enum class Tipo { Entrada, Saida };
   explicit XML(const QByteArray &fileContent, const QString &fileName = QString());
   auto validar(const Tipo tipo) -> bool;
-  bool error = false;
+  auto verificaNCMs() -> bool;
 
   QVector<Produto> produtos;
+  bool error = false;
 
   const QByteArray fileContent;
   const QString fileName;

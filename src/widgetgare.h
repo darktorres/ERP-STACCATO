@@ -25,5 +25,7 @@ private:
   SqlTableModel model;
   Ui::WidgetGare *ui;
   // methods
+  auto on_pushButtonBaixaCNAB_clicked() -> void;
+  auto on_pushButtonGerarCNAB_clicked() -> void;
   auto setupTables() -> void;
 };

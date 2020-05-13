@@ -352,6 +352,9 @@ void Application::updater() {
 
   updaterOpen = true;
 
+  // TODO: add timeout in Qt 5.15 to avoid waiting for non available hosts
+  // (quickly changing hosts dont work as updater is still waiting for the first one to respond)
+
   auto *updater = new QSimpleUpdater(this);
   connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
   updater->setApplicationVersion(qApp->applicationVersion());

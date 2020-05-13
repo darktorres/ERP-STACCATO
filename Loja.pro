@@ -111,6 +111,7 @@ SOURCES += \
     src/cadastrocliente.cpp \
     src/cadastrofornecedor.cpp \
     src/cadastroloja.cpp \
+    src/cadastroncm.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
@@ -230,6 +231,7 @@ HEADERS  += \
     src/cadastrocliente.h \
     src/cadastrofornecedor.h \
     src/cadastroloja.h \
+    src/cadastroncm.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
@@ -346,6 +348,7 @@ FORMS += \
     ui/cadastrocliente.ui \
     ui/cadastrofornecedor.ui \
     ui/cadastroloja.ui \
+    ui/cadastroncm.ui \
     ui/cadastroproduto.ui \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \

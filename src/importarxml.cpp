@@ -297,6 +297,10 @@ void ImportarXML::setupTables() {
   modelVenda.setFilter("idVendaProduto2 IN (" + idVendas.join(", ") + ") AND status = 'EM FATURAMENTO'");
 
   if (not modelVenda.select()) { return; }
+
+  // -------------------------------------------------------------------------
+
+  modelPagamento.setTable("conta_a_pagar_has_pagamento");
 }
 
 bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) {
@@ -584,7 +588,7 @@ bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
   return false;
 }
 
-bool ImportarXML::cadastrarNFe(XML &xml) {
+bool ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   const int row = modelNFe.insertRowAtEnd();
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
@@ -596,12 +600,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
-
-  const auto gare = calculaGare(xml);
-
-  if (not gare) { return false; }
-
-  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
+  if (not modelNFe.setData(row, "gare", gare)) { return false; }
 
   return true;
 }
@@ -610,6 +609,8 @@ bool ImportarXML::lerXML() {
   const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
 
   if (filePath.isEmpty()) { return false; }
+
+  // ----------------------------------------------------------------
 
   ui->lineEdit->setText(filePath);
 
@@ -623,6 +624,8 @@ bool ImportarXML::lerXML() {
 
   if (fileContent.left(3) == "o;?") { fileContent.remove(0, 3); }
 
+  // ----------------------------------------------------------------
+
   XML xml(fileContent, file.fileName());
 
   if (xml.error) { return false; }
@@ -633,7 +636,15 @@ bool ImportarXML::lerXML() {
 
   if (not xml.verificaNCMs()) { return false; }
 
-  // TODO: verificar se todos os ncms do xml estao tabelados
+  // ----------------------------------------------------------------
+
+  const auto gare = calculaGare(xml);
+
+  if (not gare) { return false; }
+
+  if (not criarPagamentoGare(gare.value(), xml)) { return false; }
+
+  // ----------------------------------------------------------------
 
   const auto id = qApp->reservarIdNFe();
 
@@ -641,23 +652,13 @@ bool ImportarXML::lerXML() {
 
   xml.idNFe = id.value();
 
-  //  if (not verificaTabelaIBPT(xml.dataHoraEmissao)) { return false; }
+  // ----------------------------------------------------------------
 
   if (not perguntarLocal(xml)) { return false; }
 
   if (not percorrerXml(xml)) { return false; }
 
-  if (not cadastrarNFe(xml)) { return false; }
-
-  return true;
-}
-
-bool ImportarXML::verificaTabelaIBPT(const QString dataEmissao) {
-  QSqlQuery query;
-
-  if (not query.exec("SELECT * FROM ibpt WHERE '" + dataEmissao.left(10) + "' BETWEEN vigenciainicio AND vigenciafim LIMIT 1")) { return qApp->enqueueError(false, "", this); }
-
-  if (not query.first()) { return qApp->enqueueError(false, "Tabela IBPT para a data da NFe não cadastrado!", this); }
+  if (not cadastrarNFe(xml, gare.value())) { return false; }
 
   return true;
 }
@@ -1072,9 +1073,9 @@ bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   if (not modelPagamento.setData(row, "nfe", xml.nNF)) { return false; }
   if (not modelPagamento.setData(row, "valor", valor)) { return false; }
   if (not modelPagamento.setData(row, "tipo", "Boleto")) { return false; }
-  if (not modelPagamento.setData(row, "dataPagamento", "-")) { return false; }
+  if (not modelPagamento.setData(row, "dataPagamento", dataFaturamento)) { return false; }
   if (not modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF)) { return false; }
-  if (not modelPagamento.setData(row, "status", "Pendente - Gerado Sistema")) { return false; }
+  if (not modelPagamento.setData(row, "status", "PENDENTE GARE")) { return false; }
   if (not modelPagamento.setData(row, "contaDestino", 3)) { return false; }
   if (not modelPagamento.setData(row, "centroCusto", 1)) { return false; }
   if (not modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS")) { return false; }

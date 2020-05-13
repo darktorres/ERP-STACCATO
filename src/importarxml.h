@@ -11,6 +11,19 @@ namespace Ui {
 class ImportarXML;
 }
 
+struct NCM {
+  double mva4;
+  double mva12;
+  double aliq;
+};
+
+struct ProdutoEstoque {
+  int idProduto;
+  int idEstoque;
+  double estoqueRestante;
+  double valorUnid;
+};
+
 class ImportarXML final : public QDialog {
   Q_OBJECT
 
@@ -19,13 +32,6 @@ public:
   ~ImportarXML();
 
 private:
-  struct ProdutoEstoque {
-    int idProduto;
-    int idEstoque;
-    double estoqueRestante;
-    double valorUnid;
-  };
-
   // attributes
   const QDate dataReal;
   const QStringList idsCompra;
@@ -49,7 +55,7 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
-  auto buscaMVA(const QString ncm) -> std::optional<double>;
+  auto buscaNCM(const QString &ncm) -> std::optional<NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto cadastrarNFe(XML &xml) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
@@ -59,7 +65,6 @@ private:
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
   auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
   auto importar() -> bool;
-  auto inserirItemModel(const XML &xml) -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
   auto mapTuples() -> QVector<ProdutoEstoque>;
@@ -68,7 +73,7 @@ private:
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;
   auto parear() -> bool;
-  auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
+  auto percorrerXml(XML &xml) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
   auto salvarDadosCompra() -> bool;

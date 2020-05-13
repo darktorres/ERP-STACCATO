@@ -35,7 +35,7 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
 
-    // REFAC: 0dont hardcode magic numbers
+    // TODO: 0dont hardcode magic numbers
     const int contaSantander = 3;
     const int contaItau = 33;
 

@@ -10,9 +10,6 @@
     <height>661</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Contas A Receber</string>
-  </property>
   <property name="locale">
    <locale language="Portuguese" country="Brazil"/>
   </property>
@@ -20,7 +17,7 @@
    <item row="2" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Eventos recebidos</string>
+      <string>Eventos processados</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">

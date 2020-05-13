@@ -56,7 +56,7 @@ private:
 
   // attributes
   QMap<QString, QString> mapLojas;
-  QSqlDatabase db;
+  QSqlDatabase db; // TODO: doc says not to store database as class member
   QVector<Message> errorQueue;
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;

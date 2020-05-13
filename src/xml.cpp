@@ -15,11 +15,11 @@ void XML::montarArvore() {
   }
 
   QDomDocument document;
-  QString error;
+  QString errorText;
 
-  if (not document.setContent(fileContent, &error)) {
+  if (not document.setContent(fileContent, &errorText)) {
     error = true;
-    return qApp->enqueueError("Erro lendo arquivo: " + error);
+    return qApp->enqueueError("Erro lendo arquivo: " + errorText);
   }
 
   QDomElement root = document.firstChildElement();
@@ -37,6 +37,8 @@ void XML::montarArvore() {
   readChild(root, rootItem);
 
   lerValores(model.item(0, 0));
+
+  if (produtos.isEmpty()) { error = true; }
 }
 
 void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
@@ -223,6 +225,18 @@ bool XML::verificaExiste() {
 
 bool XML::verificaValido() {
   if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!"); }
+
+  return true;
+}
+
+bool XML::verificaNCMs() {
+  for (const auto &produto : produtos) {
+    QSqlQuery query;
+
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueError(false, "Erro buscando ncm: " + query.lastError().text()); }
+
+    if (not query.first()) { return qApp->enqueueError(false, "NCM " + produto.ncm + " não encontrado na tabela! Cadastre ele em \"Gerenciar NCMs\"!"); }
+  }
 
   return true;
 }

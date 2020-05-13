@@ -27,5 +27,6 @@ private:
   // methods
   auto on_pushButtonBaixaCNAB_clicked() -> void;
   auto on_pushButtonGerarCNAB_clicked() -> void;
+  auto on_table_activated(const QModelIndex &index) -> void;
   auto setupTables() -> void;
 };

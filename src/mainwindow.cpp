@@ -5,6 +5,7 @@
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"
 #include "cadastroloja.h"
+#include "cadastroncm.h"
 #include "cadastroproduto.h"
 #include "cadastroprofissional.h"
 #include "cadastrotransportadora.h"
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
   connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
+  connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
   connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
@@ -277,17 +279,23 @@ void MainWindow::on_actionImportar_tabela_IBPT_triggered() {
   ibpt.importar();
 }
 
+void MainWindow::on_actionGerenciar_NCMs_triggered() {
+  auto *cadastroNCM = new CadastroNCM(this);
+  cadastroNCM->setAttribute(Qt::WA_DeleteOnClose);
+  cadastroNCM->show();
+}
+
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
 // NOTE: colocar logo da staccato na mainwindow
 
 // NOTE: prioridades atuais:
 // TODO: logistica da devolucao
 
-// TASK: cancelamento de nfe: terminar de arrumar formato do email
-// TASK: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
-// TASK: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
-// TASK: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
-// TASK: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
-// TASK: terminar de implantar quebra/reposicao
-// TASK: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
+// TODO: cancelamento de nfe: terminar de arrumar formato do email
+// TODO: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
+// TODO: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
+// TODO: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
+// TODO: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
+// TODO: terminar de implantar quebra/reposicao
+// TODO: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
 // NOTE: add logging to the terminal so qdebug logging can be seen on the user pc when needed

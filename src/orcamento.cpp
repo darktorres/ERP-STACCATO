@@ -1069,7 +1069,7 @@ bool Orcamento::cadastrar() {
 bool Orcamento::verificaCadastroCliente() {
   const int idCliente = ui->itemBoxCliente->getId().toInt();
 
-  // REFAC: simplify this function
+  // TODO: simplify this function
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");

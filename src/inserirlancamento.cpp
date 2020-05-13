@@ -31,7 +31,8 @@ InserirLancamento::InserirLancamento(const Tipo tipo, QWidget *parent) : QDialog
 InserirLancamento::~InserirLancamento() { delete ui; }
 
 void InserirLancamento::setupTables() {
-  modelContaPagamento.setTable(tipo == Tipo::Pagar ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento");
+  if (tipo == Tipo::Pagar) { modelContaPagamento.setTable("conta_a_pagar_has_pagamento"); }
+  if (tipo == Tipo::Receber) { modelContaPagamento.setTable("conta_a_receber_has_pagamento"); }
 
   modelContaPagamento.setHeaderData("dataEmissao", "Data Emissão");
   modelContaPagamento.setHeaderData("idLoja", "Centro Custo");
@@ -41,6 +42,7 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setHeaderData("tipo", "Tipo");
   modelContaPagamento.setHeaderData("dataPagamento", "Vencimento");
   modelContaPagamento.setHeaderData("observacao", "Obs.");
+  modelContaPagamento.setHeaderData("status", "Status");
   modelContaPagamento.setHeaderData("grupo", "Grupo");
   modelContaPagamento.setHeaderData("subGrupo", "SubGrupo");
 
@@ -48,7 +50,10 @@ void InserirLancamento::setupTables() {
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
   ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
-  ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
+
+  if (tipo == Tipo::Pagar) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
+  if (tipo == Tipo::Receber) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
+
   ui->table->setItemDelegateForColumn("contaDestino", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
@@ -56,10 +61,9 @@ void InserirLancamento::setupTables() {
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
 
-  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo"});
+  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo", "status"});
 
   ui->table->hideColumn("parcela");
-  ui->table->hideColumn("status");
   ui->table->hideColumn("dataRealizado");
   ui->table->hideColumn("valorReal");
   ui->table->hideColumn("tipoReal");
@@ -68,12 +72,15 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("idPagamento");
-  ui->table->hideColumn(tipo == Tipo::Pagar ? "idCompra" : "idVenda");
+  if (tipo == Tipo::Pagar) { ui->table->hideColumn("idCompra"); }
+
   if (tipo == Tipo::Receber) {
+    ui->table->hideColumn("idVenda");
     ui->table->hideColumn("taxa");
     ui->table->hideColumn("comissao");
     ui->table->hideColumn("representacao");
   }
+
   ui->table->hideColumn("desativado");
 }
 
@@ -95,17 +102,17 @@ void InserirLancamento::on_pushButtonSalvar_clicked() {
 
 bool InserirLancamento::verifyFields() {
   for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
-    if (modelContaPagamento.data(row, "dataEmissao").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "dataEmissao").toDate().isNull()) { return qApp->enqueueError(false, "Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "idLoja").toInt() == 0) { return qApp->enqueueError(false, "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "idLoja").toUInt() == 0) { return qApp->enqueueError(false, "Faltou preencher 'Centro Custo' na linha: " + QString::number(row + 1), this); }
 
     if (modelContaPagamento.data(row, "contraParte").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'ContraParte' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "valor").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
+    if (qFuzzyIsNull(modelContaPagamento.data(row, "valor").toDouble())) { return qApp->enqueueError(false, "Faltou preencher 'R$' na linha: " + QString::number(row + 1), this); }
 
     if (modelContaPagamento.data(row, "tipo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Tipo' na linha: " + QString::number(row + 1), this); }
 
-    if (modelContaPagamento.data(row, "dataPagamento").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
+    if (modelContaPagamento.data(row, "dataPagamento").toDate().isNull()) { return qApp->enqueueError(false, "Faltou preencher 'Vencimento' na linha: " + QString::number(row + 1), this); }
 
     if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
   }

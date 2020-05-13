@@ -732,7 +732,7 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled(bool) { montarFluxoCaixa(); }
 
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
-// REFAC: refatorar o frame pagamentos para um widget para nao duplicar codigo
+// TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo
 
 // TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo que vem do fornecedor)
 // TODO: 3quando for representacao mostrar fluxo de comissao

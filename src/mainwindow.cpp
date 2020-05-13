@@ -5,6 +5,7 @@
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"
 #include "cadastroloja.h"
+#include "cadastroncm.h"
 #include "cadastroproduto.h"
 #include "cadastroprofissional.h"
 #include "cadastrotransportadora.h"
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
   connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
+  connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
   connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
@@ -275,6 +277,12 @@ void MainWindow::on_actionCalcular_frete_triggered() {
 void MainWindow::on_actionImportar_tabela_IBPT_triggered() {
   ImportaTabelaIBPT ibpt(this);
   ibpt.importar();
+}
+
+void MainWindow::on_actionGerenciar_NCMs_triggered() {
+  auto *cadastroNCM = new CadastroNCM(this);
+  cadastroNCM->setAttribute(Qt::WA_DeleteOnClose);
+  cadastroNCM->show();
 }
 
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc

@@ -98,17 +98,17 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBC", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pICMS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pICMS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vICMS", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pMVAST", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pMVAST", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vBCST", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pICMSST", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pICMSST", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBCPIS", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vPIS", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBCCOFINS", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
 
   ui->tableItens->hideColumn("idProduto");

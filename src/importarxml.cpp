@@ -17,7 +17,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent) : QDialog(parent), dataFaturamento(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
   setupTables();
@@ -400,7 +400,7 @@ bool ImportarXML::salvarDadosCompra() {
 
   for (const auto &row : list) {
     if (not modelCompra.setData(row, "status", "EM COLETA")) { return false; }
-    if (not modelCompra.setData(row, "dataRealFat", dataReal)) { return false; }
+    if (not modelCompra.setData(row, "dataRealFat", dataFaturamento)) { return false; }
   }
 
   if (not modelCompra.submitAll()) { return false; }
@@ -788,7 +788,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   if (quantConsumo < quantVenda) { return qApp->enqueueError(false, "quantConsumo < quantVenda", this); }
 
   if (not modelVenda.setData(rowVenda, "status", "EM COLETA")) { return false; }
-  if (not modelVenda.setData(rowVenda, "dataRealFat", dataReal)) { return false; }
+  if (not modelVenda.setData(rowVenda, "dataRealFat", dataFaturamento)) { return false; }
 
   // -------------------------------------
 

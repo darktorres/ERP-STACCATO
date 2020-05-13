@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.71
+VERSION = 0.8.72
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)

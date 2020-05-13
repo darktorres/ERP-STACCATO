@@ -638,19 +638,19 @@ bool ImportarXML::lerXML() {
 
   // ----------------------------------------------------------------
 
-  const auto gare = calculaGare(xml);
-
-  if (not gare) { return false; }
-
-  if (not criarPagamentoGare(gare.value(), xml)) { return false; }
-
-  // ----------------------------------------------------------------
-
   const auto id = qApp->reservarIdNFe();
 
   if (not id) { return false; }
 
   xml.idNFe = id.value();
+
+  // ----------------------------------------------------------------
+
+  const auto gare = calculaGare(xml);
+
+  if (not gare) { return false; }
+
+  if (not criarPagamentoGare(gare.value(), xml)) { return false; }
 
   // ----------------------------------------------------------------
 

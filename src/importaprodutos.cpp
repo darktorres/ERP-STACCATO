@@ -250,11 +250,11 @@ void ImportaProdutos::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("custo", doubledelegate);
   ui->tableProdutos->setItemDelegateForColumn("precoVenda", doubledelegate);
 
-  auto *porcDelegate = new PorcentagemDelegate(this);
+  auto *porcDelegate = new PorcentagemDelegate(false, this);
   ui->tableProdutos->setItemDelegateForColumn("icms", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("ipi", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("markup", porcDelegate);
-  ui->tableProdutos->setItemDelegateForColumn("st", porcDelegate);
+  ui->tableProdutos->setItemDelegateForColumn("st", new PorcentagemDelegate(true, this));
   ui->tableProdutos->setItemDelegateForColumn("sticms", porcDelegate);
   ui->tableProdutos->setItemDelegateForColumn("mva", porcDelegate);
 

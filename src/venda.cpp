@@ -132,8 +132,8 @@ void Venda::setTreeView() {
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
-  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(false, this));
+  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(false, this));
   ui->treeView->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
 

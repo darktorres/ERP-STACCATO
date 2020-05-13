@@ -142,7 +142,7 @@ void CadastroLoja::setupTables() {
   ui->tableTaxas->hideColumn("idTaxa");
   ui->tableTaxas->hideColumn("idPagamento");
 
-  ui->tableTaxas->setItemDelegateForColumn("taxa", new PorcentagemDelegate(this));
+  ui->tableTaxas->setItemDelegateForColumn("taxa", new PorcentagemDelegate(false, this));
 }
 
 void CadastroLoja::clearFields() {

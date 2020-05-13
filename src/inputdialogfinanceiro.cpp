@@ -198,7 +198,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
-  ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+  ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
@@ -503,7 +503,7 @@ void InputDialogFinanceiro::setTreeView() {
 
   ui->treeView->setItemDelegate(new NoEditDelegate(this));
 
-  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));

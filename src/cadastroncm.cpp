@@ -40,9 +40,9 @@ void CadastroNCM::setupTables() {
 
   ui->table->hideColumn("idncm");
 
-  ui->table->setItemDelegateForColumn("mva4", new PorcentagemDelegate(this));
-  ui->table->setItemDelegateForColumn("mva12", new PorcentagemDelegate(this));
-  ui->table->setItemDelegateForColumn("aliq", new PorcentagemDelegate(this));
+  ui->table->setItemDelegateForColumn("mva4", new PorcentagemDelegate(false, this));
+  ui->table->setItemDelegateForColumn("mva12", new PorcentagemDelegate(false, this));
+  ui->table->setItemDelegateForColumn("aliq", new PorcentagemDelegate(false, this));
 }
 
 void CadastroNCM::on_pushButtonSalvar_clicked() {

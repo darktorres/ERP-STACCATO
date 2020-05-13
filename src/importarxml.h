@@ -57,7 +57,7 @@ private:
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
   auto buscaNCM(const QString &ncm) -> std::optional<NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
-  auto cadastrarNFe(XML &xml) -> bool;
+  auto cadastrarNFe(XML &xml, const double gare) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
   auto calculaGare(const XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
@@ -83,6 +83,5 @@ private:
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
   auto verificaExiste(const QString &chaveAcesso) -> bool;
-  auto verificaTabelaIBPT(const QString dataEmissao) -> bool;
   auto verifyFields() -> bool;
 };

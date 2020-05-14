@@ -74,13 +74,11 @@ bool ImportaProdutos::atualizaProduto() {
 bool ImportaProdutos::importar() {
   db = QSqlDatabase::contains("Excel Connection") ? QSqlDatabase::database("Excel Connection") : QSqlDatabase::addDatabase("QODBC", "Excel Connection");
 
-  db.setDatabaseName("DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};HDR=Yes;MaxScanRows=0;DBQ=" + file);
+  db.setDatabaseName("DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};HDR=Yes;DBQ=" + file);
 
   if (not db.open()) { return qApp->enqueueError(false, "Ocorreu um erro ao abrir o arquivo, verifique se o mesmo não está aberto: " + db.lastError().text(), this); }
 
-  const QSqlRecord record = db.record("BASE$");
-
-  if (not verificaTabela(record)) { return false; }
+  if (not verificaTabela()) { return false; }
   if (not cadastraFornecedores()) { return false; }
   if (not verificaSeRepresentacao()) { return false; }
   if (not marcaTodosProdutosDescontinuados()) { return false; }
@@ -106,12 +104,13 @@ bool ImportaProdutos::importar() {
       break;
     }
 
-    if (query.value(record.indexOf("fornecedor")).toString().isEmpty()) { continue; }
+    if (query.value("fornecedor").toString().isEmpty()) { continue; }
+    if (query.value("fornecedor").toString() == "TEXTO") { continue; }
 
-    variantMap.insert("fornecedor", query.value(record.indexOf("fornecedor")));
+    variantMap.insert("fornecedor", query.value("fornecedor"));
     progressDialog->setValue(current++);
 
-    leituraProduto(query, record);
+    leituraProduto(query);
     consistenciaDados();
 
     if (camposForaDoPadrao()) {
@@ -350,7 +349,6 @@ void ImportaProdutos::setVariantMap() {
   variantMap.insert("m2cx", QVariant(QVariant::Double));
   variantMap.insert("pccx", QVariant(QVariant::Double));
   variantMap.insert("kgcx", QVariant(QVariant::Double));
-  variantMap.insert("minimo", QVariant(QVariant::Double));
   variantMap.insert("formComercial", QVariant(QVariant::String));
   variantMap.insert("codComercial", QVariant(QVariant::String));
   variantMap.insert("codBarras", QVariant(QVariant::String));
@@ -360,6 +358,9 @@ void ImportaProdutos::setVariantMap() {
   variantMap.insert("precoVenda", QVariant(QVariant::Double));
   variantMap.insert("ui", QVariant(QVariant::String));
   variantMap.insert("un2", QVariant(QVariant::String));
+  variantMap.insert("minimo", QVariant(QVariant::Double));
+  variantMap.insert("st", QVariant(QVariant::Double));
+  variantMap.insert("sticms", QVariant(QVariant::Double));
 }
 
 bool ImportaProdutos::cadastraFornecedores() {
@@ -458,11 +459,9 @@ void ImportaProdutos::consistenciaDados() {
 
   if (qFuzzyIsNull(variantMap.value("minimo").toDouble())) { variantMap.insert("minimo", QVariant()); }
   if (qFuzzyIsNull(variantMap.value("multiplo").toDouble())) { variantMap.insert("multiplo", QVariant()); }
-
-  // NOTE: cast other fields to the correct type?
 }
 
-void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &record) {
+void ImportaProdutos::leituraProduto(const QSqlQuery &query) {
   const auto keys = variantMap.keys();
 
   for (const auto &key : keys) {
@@ -470,7 +469,7 @@ void ImportaProdutos::leituraProduto(const QSqlQuery &query, const QSqlRecord &r
     if (key == "multiplo") { continue; }
     if (key == "quantCaixa") { continue; }
 
-    QVariant value = query.value(record.indexOf(key));
+    QVariant value = query.value(key);
 
     if (value.type() == QVariant::Double) { value = QString::number(value.toDouble(), 'f', 4).toDouble(); }
 
@@ -752,7 +751,9 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
   close();
 }
 
-bool ImportaProdutos::verificaTabela(const QSqlRecord &record) {
+bool ImportaProdutos::verificaTabela() {
+  const QSqlRecord record = db.record("BASE$");
+
   const auto keys = variantMap.keys();
 
   for (const auto &key : keys) {

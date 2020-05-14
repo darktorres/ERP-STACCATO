@@ -60,7 +60,7 @@ private:
   auto importar() -> bool;
   auto insereEmErro() -> bool;
   auto insereEmOk() -> bool;
-  auto leituraProduto(const QSqlQuery &query, const QSqlRecord &record) -> void;
+  auto leituraProduto(const QSqlQuery &query) -> void;
   auto marcaProdutoNaoDescontinuado() -> bool;
   auto marcaTodosProdutosDescontinuados() -> bool;
   auto mostraApenasEstesFornecedores() -> bool;
@@ -75,5 +75,5 @@ private:
   auto setupTables() -> void;
   auto verificaSeProdutoJaCadastrado() -> bool;
   auto verificaSeRepresentacao() -> bool;
-  auto verificaTabela(const QSqlRecord &record) -> bool;
+  auto verificaTabela() -> bool;
 };

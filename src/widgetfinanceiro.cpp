@@ -21,6 +21,7 @@ void WidgetFinanceiro::updateTables() {
   if (currentText == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
   if (currentText == "Contas a Pagar") { ui->widgetPagar->updateTables(); }
   if (currentText == "Contas a Receber") { ui->widgetReceber->updateTables(); }
+  if (currentText == "GARE") { ui->widgetGare->updateTables(); }
   if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
   if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
 }
@@ -29,6 +30,7 @@ void WidgetFinanceiro::resetTables() {
   ui->widgetFluxoCaixa->resetTables();
   ui->widgetPagar->resetTables();
   ui->widgetReceber->resetTables();
+  ui->widgetGare->resetTables();
   ui->widgetVenda->resetTables();
   ui->widgetCompra->resetTables();
 }

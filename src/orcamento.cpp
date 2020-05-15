@@ -735,7 +735,7 @@ void Orcamento::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(false, this));
 }
 
 void Orcamento::atualizarItem() { adicionarItem(Tipo::Atualizar); }
@@ -1069,7 +1069,7 @@ bool Orcamento::cadastrar() {
 bool Orcamento::verificaCadastroCliente() {
   const int idCliente = ui->itemBoxCliente->getId().toInt();
 
-  // REFAC: simplify this function
+  // TODO: simplify this function
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");

@@ -48,8 +48,8 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
       do { ui->comboBoxDest->addItem(query.value("email").toString()); } while (query.next());
     }
 
-    // REFAC: 5dont hardcode this
-    // REFAC:__project public code
+    // TODO: 5dont hardcode this
+    // TODO:__project public code
     ui->textEdit->setHtml(
         R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"><html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;"><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;">)" +
         QString(QTime::currentTime().hour() > 12 ? "Boa tarde" : "Bom dia") + " prezado(a) " + (representante.isEmpty() ? "parceiro(a)" : representante) +

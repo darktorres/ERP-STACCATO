@@ -17,7 +17,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent) : QDialog(parent), dataReal(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
+ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent) : QDialog(parent), dataFaturamento(dataReal), idsCompra(idsCompra), ui(new Ui::ImportarXML) {
   ui->setupUi(this);
 
   setupTables();
@@ -115,6 +115,8 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("quantUpd");
   ui->tableEstoque->hideColumn("ajuste");
   ui->tableEstoque->hideColumn("ncm");
+  ui->tableEstoque->hideColumn("nve");
+  ui->tableEstoque->hideColumn("extipi");
   ui->tableEstoque->hideColumn("cest");
   ui->tableEstoque->hideColumn("cfop");
   ui->tableEstoque->hideColumn("codBarrasTrib");
@@ -122,7 +124,9 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("quantTrib");
   ui->tableEstoque->hideColumn("valorUnidTrib");
   ui->tableEstoque->hideColumn("frete");
+  ui->tableEstoque->hideColumn("seguro");
   ui->tableEstoque->hideColumn("desconto");
+  ui->tableEstoque->hideColumn("outros");
   ui->tableEstoque->hideColumn("compoeTotal");
   ui->tableEstoque->hideColumn("numeroPedido");
   ui->tableEstoque->hideColumn("itemPedido");
@@ -150,7 +154,6 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
-  ui->tableEstoque->hideColumn("valorGare");
 
   // -------------------------------------------------------------------------
 
@@ -294,6 +297,10 @@ void ImportarXML::setupTables() {
   modelVenda.setFilter("idVendaProduto2 IN (" + idVendas.join(", ") + ") AND status = 'EM FATURAMENTO'");
 
   if (not modelVenda.select()) { return; }
+
+  // -------------------------------------------------------------------------
+
+  modelPagamento.setTable("conta_a_pagar_has_pagamento");
 }
 
 bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) {
@@ -322,7 +329,7 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
   return true;
 }
 
-QVector<ImportarXML::ProdutoEstoque> ImportarXML::mapTuples() {
+QVector<ProdutoEstoque> ImportarXML::mapTuples() {
   QVector<ProdutoEstoque> produtos;
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
@@ -385,6 +392,8 @@ bool ImportarXML::importar() {
 
   if (not modelEstoque_compra.submitAll()) { return false; }
 
+  if (not modelPagamento.submitAll()) { return false; }
+
   return true;
 }
 
@@ -395,7 +404,7 @@ bool ImportarXML::salvarDadosCompra() {
 
   for (const auto &row : list) {
     if (not modelCompra.setData(row, "status", "EM COLETA")) { return false; }
-    if (not modelCompra.setData(row, "dataRealFat", dataReal)) { return false; }
+    if (not modelCompra.setData(row, "dataRealFat", dataFaturamento)) { return false; }
   }
 
   if (not modelCompra.submitAll()) { return false; }
@@ -579,7 +588,7 @@ bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
   return false;
 }
 
-bool ImportarXML::cadastrarNFe(XML &xml) {
+bool ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   const int row = modelNFe.insertRowAtEnd();
 
   if (not modelNFe.setData(row, "idNFe", xml.idNFe)) { return false; }
@@ -591,12 +600,7 @@ bool ImportarXML::cadastrarNFe(XML &xml) {
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
-
-  const auto gare = calculaGare(xml);
-
-  if (not gare) { return false; }
-
-  if (not modelNFe.setData(row, "gare", gare.value())) { return false; }
+  if (not modelNFe.setData(row, "gare", gare)) { return false; }
 
   return true;
 }
@@ -605,6 +609,8 @@ bool ImportarXML::lerXML() {
   const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
 
   if (filePath.isEmpty()) { return false; }
+
+  // ----------------------------------------------------------------
 
   ui->lineEdit->setText(filePath);
 
@@ -618,7 +624,19 @@ bool ImportarXML::lerXML() {
 
   if (fileContent.left(3) == "o;?") { fileContent.remove(0, 3); }
 
+  // ----------------------------------------------------------------
+
   XML xml(fileContent, file.fileName());
+
+  if (xml.error) { return false; }
+
+  if (not xml.validar(XML::Tipo::Entrada)) { return false; }
+
+  if (verificaExiste(xml.chaveAcesso)) { return false; }
+
+  if (not xml.verificaNCMs()) { return false; }
+
+  // ----------------------------------------------------------------
 
   const auto id = qApp->reservarIdNFe();
 
@@ -626,27 +644,21 @@ bool ImportarXML::lerXML() {
 
   xml.idNFe = id.value();
 
-  if (not verificaTabelaIBPT(xml.dataHoraEmissao)) { return false; }
+  // ----------------------------------------------------------------
 
-  if (not xml.validar(XML::Tipo::Entrada)) { return false; }
+  const auto gare = calculaGare(xml);
 
-  if (verificaExiste(xml.chaveAcesso)) { return false; }
+  if (not gare) { return false; }
+
+  if (not criarPagamentoGare(gare.value(), xml)) { return false; }
+
+  // ----------------------------------------------------------------
 
   if (not perguntarLocal(xml)) { return false; }
 
-  if (not percorrerXml(xml, xml.model.item(0, 0))) { return false; }
+  if (not percorrerXml(xml)) { return false; }
 
-  if (not cadastrarNFe(xml)) { return false; }
-
-  return true;
-}
-
-bool ImportarXML::verificaTabelaIBPT(const QString dataEmissao) {
-  QSqlQuery query;
-
-  if (not query.exec("SELECT * FROM ibpt WHERE '" + dataEmissao.left(10) + "' BETWEEN vigenciainicio AND vigenciafim LIMIT 1")) { return qApp->enqueueError(false, "", this); }
-
-  if (not query.first()) { return qApp->enqueueError(false, "Tabela IBPT para a data da NFe não cadastrado!", this); }
+  if (not cadastrarNFe(xml, gare.value())) { return false; }
 
   return true;
 }
@@ -680,81 +692,76 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   return true;
 }
 
-bool ImportarXML::inserirItemModel(const XML &xml) {
-  const auto idEstoque = qApp->reservarIdEstoque();
+bool ImportarXML::percorrerXml(XML &xml) {
+  for (const auto &produto : xml.produtos) {
+    const auto idEstoque = qApp->reservarIdEstoque();
 
-  if (not idEstoque) { return false; }
+    if (not idEstoque) { return false; }
 
-  const int newRow = modelEstoque.insertRowAtEnd();
+    const int newRow = modelEstoque.insertRowAtEnd();
 
-  if (not modelEstoque.setData(newRow, "idEstoque", idEstoque.value())) { return false; }
-  if (not modelEstoque.setData(newRow, "idNFe", xml.idNFe)) { return false; }
-  if (not modelEstoque.setData(newRow, "fornecedor", xml.xNome)) { return false; }
-  if (not modelEstoque.setData(newRow, "local", xml.local)) { return false; }
-  if (not modelEstoque.setData(newRow, "descricao", xml.descricao)) { return false; }
-  if (not modelEstoque.setData(newRow, "quant", xml.quant)) { return false; }
-  if (not modelEstoque.setData(newRow, "restante", xml.quant)) { return false; }
-  if (not modelEstoque.setData(newRow, "un", xml.un)) { return false; }
-  if (not modelEstoque.setData(newRow, "codBarras", xml.codBarras)) { return false; }
-  if (not modelEstoque.setData(newRow, "codComercial", xml.codProd)) { return false; }
-  if (not modelEstoque.setData(newRow, "ncm", xml.ncm)) { return false; }
-  if (not modelEstoque.setData(newRow, "cest", xml.cest)) { return false; }
-  if (not modelEstoque.setData(newRow, "cfop", xml.cfop)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorUnid", (xml.valor + xml.vIPI - xml.desconto) / xml.quant)) { return false; }
-  if (not modelEstoque.setData(newRow, "valor", xml.valor + xml.vIPI - xml.desconto)) { return false; }
-  if (not modelEstoque.setData(newRow, "codBarrasTrib", xml.codBarrasTrib)) { return false; }
-  if (not modelEstoque.setData(newRow, "unTrib", xml.unTrib)) { return false; }
-  if (not modelEstoque.setData(newRow, "quantTrib", xml.quantTrib)) { return false; }
-  if (not modelEstoque.setData(newRow, "valorUnidTrib", xml.valorUnidTrib)) { return false; }
-  if (not modelEstoque.setData(newRow, "frete", xml.frete)) { return false; }
-  if (not modelEstoque.setData(newRow, "desconto", xml.desconto)) { return false; }
-  if (not modelEstoque.setData(newRow, "compoeTotal", xml.compoeTotal)) { return false; }
-  if (not modelEstoque.setData(newRow, "numeroPedido", xml.numeroPedido)) { return false; }
-  if (not modelEstoque.setData(newRow, "itemPedido", xml.itemPedido)) { return false; }
-  if (not modelEstoque.setData(newRow, "tipoICMS", xml.tipoICMS)) { return false; }
-  if (not modelEstoque.setData(newRow, "orig", xml.orig)) { return false; }
-  if (not modelEstoque.setData(newRow, "cstICMS", xml.cstICMS)) { return false; }
-  if (not modelEstoque.setData(newRow, "modBC", xml.modBC)) { return false; }
-  if (not modelEstoque.setData(newRow, "vBC", xml.vBC)) { return false; }
-  if (not modelEstoque.setData(newRow, "pICMS", xml.pICMS)) { return false; }
-  if (not modelEstoque.setData(newRow, "vICMS", xml.vICMS)) { return false; }
-  if (not modelEstoque.setData(newRow, "modBCST", xml.modBCST)) { return false; }
-  if (not modelEstoque.setData(newRow, "pMVAST", xml.pMVAST)) { return false; }
-  if (not modelEstoque.setData(newRow, "vBCST", xml.vBCST)) { return false; }
-  if (not modelEstoque.setData(newRow, "pICMSST", xml.pICMSST)) { return false; }
-  if (not modelEstoque.setData(newRow, "vICMSST", xml.vICMSST)) { return false; }
-  if (not modelEstoque.setData(newRow, "cEnq", xml.cEnq)) { return false; }
-  if (not modelEstoque.setData(newRow, "cstIPI", xml.cstIPI)) { return false; }
-  if (not modelEstoque.setData(newRow, "vBCIPI", xml.vBCIPI)) { return false; }
-  if (not modelEstoque.setData(newRow, "pIPI", xml.pIPI)) { return false; }
-  if (not modelEstoque.setData(newRow, "vIPI", xml.vIPI)) { return false; }
-  if (not modelEstoque.setData(newRow, "cstPIS", xml.cstPIS)) { return false; }
-  if (not modelEstoque.setData(newRow, "vBCPIS", xml.vBCPIS)) { return false; }
-  if (not modelEstoque.setData(newRow, "pPIS", xml.pPIS)) { return false; }
-  if (not modelEstoque.setData(newRow, "vPIS", xml.vPIS)) { return false; }
-  if (not modelEstoque.setData(newRow, "cstCOFINS", xml.cstCOFINS)) { return false; }
-  if (not modelEstoque.setData(newRow, "vBCCOFINS", xml.vBCCOFINS)) { return false; }
-  if (not modelEstoque.setData(newRow, "pCOFINS", xml.pCOFINS)) { return false; }
-  if (not modelEstoque.setData(newRow, "vCOFINS", xml.vCOFINS)) { return false; }
-  if (not modelEstoque.setData(newRow, "status", "EM COLETA")) { return false; }
+    double desconto = produto.desconto;
+    QString codigo = produto.codProd;
 
-  return true;
-}
-
-bool ImportarXML::percorrerXml(XML &xml, const QStandardItem *item) {
-  for (int row = 0; row < item->rowCount(); ++row) {
-    for (int col = 0; col < item->columnCount(); ++col) {
-      const QStandardItem *child = item->child(row, col);
-      const QString text = child->text();
-
-      if (text.mid(0, 10) == "det nItem=") {
-        xml.limparValores();
-        xml.lerValores(child);
-        if (not inserirItemModel(xml)) { return false; }
-      }
-
-      if (child->hasChildren()) { percorrerXml(xml, child); }
+    if (xml.xNome == "CECRISA REVEST. CERAMICOS S.A.") {
+      if (codigo.endsWith("A")) { codigo = codigo.left(codigo.size() - 1); }
+      desconto = 0;
     }
+
+    if (not modelEstoque.setData(newRow, "idEstoque", idEstoque.value())) { return false; }
+    if (not modelEstoque.setData(newRow, "idNFe", xml.idNFe)) { return false; }
+    if (not modelEstoque.setData(newRow, "fornecedor", xml.xNome)) { return false; }
+    if (not modelEstoque.setData(newRow, "local", xml.local)) { return false; }
+    if (not modelEstoque.setData(newRow, "descricao", produto.descricao)) { return false; }
+    if (not modelEstoque.setData(newRow, "quant", produto.quant)) { return false; }
+    if (not modelEstoque.setData(newRow, "restante", produto.quant)) { return false; }
+    if (not modelEstoque.setData(newRow, "un", produto.un)) { return false; }
+    if (not modelEstoque.setData(newRow, "codBarras", produto.codBarras)) { return false; }
+    if (not modelEstoque.setData(newRow, "codComercial", codigo)) { return false; }
+    if (not modelEstoque.setData(newRow, "ncm", produto.ncm)) { return false; }
+    if (not modelEstoque.setData(newRow, "nve", produto.nve)) { return false; }
+    if (not modelEstoque.setData(newRow, "extipi", produto.extipi)) { return false; }
+    if (not modelEstoque.setData(newRow, "cest", produto.cest)) { return false; }
+    if (not modelEstoque.setData(newRow, "cfop", produto.cfop)) { return false; }
+    if (not modelEstoque.setData(newRow, "valorUnid", (produto.valor + produto.vIPI - desconto) / produto.quant)) { return false; }
+    if (not modelEstoque.setData(newRow, "valor", produto.valor + produto.vIPI - desconto)) { return false; }
+    if (not modelEstoque.setData(newRow, "codBarrasTrib", produto.codBarrasTrib)) { return false; }
+    if (not modelEstoque.setData(newRow, "unTrib", produto.unTrib)) { return false; }
+    if (not modelEstoque.setData(newRow, "quantTrib", produto.quantTrib)) { return false; }
+    if (not modelEstoque.setData(newRow, "valorUnidTrib", produto.valorUnidTrib)) { return false; }
+    if (not modelEstoque.setData(newRow, "frete", produto.frete)) { return false; }
+    if (not modelEstoque.setData(newRow, "seguro", produto.seguro)) { return false; }
+    if (not modelEstoque.setData(newRow, "desconto", desconto)) { return false; }
+    if (not modelEstoque.setData(newRow, "outros", produto.outros)) { return false; }
+    if (not modelEstoque.setData(newRow, "compoeTotal", produto.compoeTotal)) { return false; }
+    if (not modelEstoque.setData(newRow, "numeroPedido", produto.numeroPedido)) { return false; }
+    if (not modelEstoque.setData(newRow, "itemPedido", produto.itemPedido)) { return false; }
+    if (not modelEstoque.setData(newRow, "tipoICMS", produto.tipoICMS)) { return false; }
+    if (not modelEstoque.setData(newRow, "orig", produto.orig)) { return false; }
+    if (not modelEstoque.setData(newRow, "cstICMS", produto.cstICMS)) { return false; }
+    if (not modelEstoque.setData(newRow, "modBC", produto.modBC)) { return false; }
+    if (not modelEstoque.setData(newRow, "vBC", produto.vBC)) { return false; }
+    if (not modelEstoque.setData(newRow, "pICMS", produto.pICMS)) { return false; }
+    if (not modelEstoque.setData(newRow, "vICMS", produto.vICMS)) { return false; }
+    if (not modelEstoque.setData(newRow, "modBCST", produto.modBCST)) { return false; }
+    if (not modelEstoque.setData(newRow, "pMVAST", produto.pMVAST)) { return false; }
+    if (not modelEstoque.setData(newRow, "vBCST", produto.vBCST)) { return false; }
+    if (not modelEstoque.setData(newRow, "pICMSST", produto.pICMSST)) { return false; }
+    if (not modelEstoque.setData(newRow, "vICMSST", produto.vICMSST)) { return false; }
+    if (not modelEstoque.setData(newRow, "cEnq", produto.cEnq)) { return false; }
+    if (not modelEstoque.setData(newRow, "cstIPI", produto.cstIPI)) { return false; }
+    if (not modelEstoque.setData(newRow, "vBCIPI", produto.vBCIPI)) { return false; }
+    if (not modelEstoque.setData(newRow, "pIPI", produto.pIPI)) { return false; }
+    if (not modelEstoque.setData(newRow, "vIPI", produto.vIPI)) { return false; }
+    if (not modelEstoque.setData(newRow, "cstPIS", produto.cstPIS)) { return false; }
+    if (not modelEstoque.setData(newRow, "vBCPIS", produto.vBCPIS)) { return false; }
+    if (not modelEstoque.setData(newRow, "pPIS", produto.pPIS)) { return false; }
+    if (not modelEstoque.setData(newRow, "vPIS", produto.vPIS)) { return false; }
+    if (not modelEstoque.setData(newRow, "cstCOFINS", produto.cstCOFINS)) { return false; }
+    if (not modelEstoque.setData(newRow, "vBCCOFINS", produto.vBCCOFINS)) { return false; }
+    if (not modelEstoque.setData(newRow, "pCOFINS", produto.pCOFINS)) { return false; }
+    if (not modelEstoque.setData(newRow, "vCOFINS", produto.vCOFINS)) { return false; }
+    if (not modelEstoque.setData(newRow, "status", "EM COLETA")) { return false; }
   }
 
   return true;
@@ -782,7 +789,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   if (quantConsumo < quantVenda) { return qApp->enqueueError(false, "quantConsumo < quantVenda", this); }
 
   if (not modelVenda.setData(rowVenda, "status", "EM COLETA")) { return false; }
-  if (not modelVenda.setData(rowVenda, "dataRealFat", dataReal)) { return false; }
+  if (not modelVenda.setData(rowVenda, "dataRealFat", dataFaturamento)) { return false; }
 
   // -------------------------------------
 
@@ -1006,150 +1013,74 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
 }
 
 std::optional<double> ImportarXML::calculaGare(const XML &xml) {
-  const auto match = modelEstoque.multiMatch({{"idNFe", xml.idNFe}, {"tipoICMS", "ICMS00"}});
-
-  if (match.isEmpty()) {
-    qDebug() << "Nenhum produto tipo00 para esta nota!";
-    return 0;
-  }
-
   const QString dataEmissao = xml.dataHoraEmissao.left(10);
 
   double total = 0;
 
-  for (const auto row : match) {
-    const double baseCalculo = modelEstoque.data(row, "vBC").toDouble();
-    const double icmsProprio = modelEstoque.data(row, "vICMS").toDouble();
-    const double icmsInter = modelEstoque.data(row, "pICMS").toDouble() / 100;
-    const double ipi = modelEstoque.data(row, "vIPI").toDouble();
-    const QString ncm = modelEstoque.data(row, "ncm").toString();
+  for (const auto &produto : xml.produtos) {
+    qDebug() << "tipoICMS: " << produto.tipoICMS;
+    if (produto.tipoICMS != "ICMS00") { continue; }
+    // TODO: tratar quando for simples nacional
 
-    auto mva = buscaMVA(ncm);
+    const auto ncm = buscaNCM(produto.ncm);
 
-    if (not mva) { mva = 0.6943; }
+    if (not ncm) { return {}; }
 
-    //    qDebug() << "id: " << modelEstoque.data(row, "idEstoque");
-    //    qDebug() << "ncm: " << ncm;
-    //    qDebug() << "mvaOriginal: " << mva.value();
+    const double icmsIntra = ncm->aliq;
+    const double mva = (qFuzzyCompare(produto.pICMS, 4)) ? ncm->mva4 : ncm->mva12;
+    const double icmsInter = produto.pICMS / 100;
 
-    QSqlQuery queryIBPT;
-
-    if (not queryIBPT.exec("SELECT estadual FROM ibpt WHERE codigo = '" + ncm + "' AND '" + dataEmissao + "' BETWEEN vigenciainicio AND vigenciafim")) {
-      qApp->enqueueError("Erro pesquisando na tabela IBPT: " + queryIBPT.lastError().text(), this);
-      return {};
-    }
-
-    if (not queryIBPT.first()) {
-      qApp->enqueueError("Não encontrado na tabela IBPT o ncm: " + ncm, this);
-      return {};
-    }
-
-    const double icmsIntra = queryIBPT.value("estadual").toDouble() / 100.;
-
-    if (qFuzzyIsNull(icmsIntra)) {
-      qDebug() << "ICMS 0% de acordo com tabela IBPT.";
-      continue;
-    }
-
-    // calcular mva ajustado
-    if (not qFuzzyCompare(icmsInter, icmsIntra)) { mva = ((1 + mva.value()) * (1 - icmsInter) / (1 - icmsIntra)) - 1; }
-
-    const double baseST = (baseCalculo + ipi) * (1 + mva.value());
+    const double baseCalculo = produto.valor + produto.vIPI + produto.outros + produto.frete + produto.seguro - produto.desconto;
+    const double icmsProprio = produto.vICMS;
+    const double baseST = (baseCalculo) * (1 + mva);
     const double icmsST = (baseST * icmsIntra) - icmsProprio;
     total += icmsST;
 
-    if (not modelEstoque.setData(row, "valorGare", icmsST)) { return {}; }
-
-    //    qDebug() << "baseCalculo: " << baseCalculo;
-    //    qDebug() << "ipi: " << ipi;
-    //    qDebug() << "mvaAjustado: " << mva.value();
-    //    qDebug() << "icmsIntra: " << icmsIntra;
-    //    qDebug() << "icmsInter: " << icmsInter;
-    //    qDebug() << "icmsProprio: " << icmsProprio;
-    //    qDebug() << "baseST: " << baseST;
-    //    qDebug() << "icmsST: " << icmsST;
+    qDebug() << "baseCalculo: " << baseCalculo;
+    qDebug() << "mvaAjustado: " << mva;
+    qDebug() << "icmsIntra: " << icmsIntra;
+    qDebug() << "icmsInter: " << icmsInter;
+    qDebug() << "icmsProprio: " << icmsProprio;
+    qDebug() << "baseST: " << baseST;
+    qDebug() << "icmsST: " << icmsST;
   }
 
-  //  qDebug() << "gare: " << total;
+  qDebug() << "gare: " << total;
 
   return total;
 }
 
-std::optional<double> ImportarXML::buscaMVA(const QString ncm) {
-  QSqlQuery query1;
+std::optional<NCM> ImportarXML::buscaNCM(const QString &ncm) {
+  QSqlQuery query;
 
-  if (not query1.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(4) + "%'")) {
-    qDebug() << "erro query3: " + query1.lastError().text();
+  if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'") or not query.first()) {
+    qApp->enqueueError("Erro buscando ncm: " + query.lastError().text(), this);
     return {};
   }
 
-  if (query1.size() == 1) {
-    query1.first();
-    return query1.value("iva_st").toDouble() / 100;
-  }
+  NCM ncm2{query.value("mva4").toDouble() / 100, query.value("mva12").toDouble() / 100, query.value("aliq").toDouble() / 100};
 
-  if (query1.size() > 1) {
-    QSqlQuery query2;
+  return ncm2;
+}
 
-    if (not query2.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(5) + "%'")) {
-      qDebug() << "erro query4: " + query2.lastError().text();
-      return {};
-    }
+bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
+  const int row = modelPagamento.insertRowAtEnd();
 
-    if (query2.size() == 1) {
-      query2.first();
-      return query2.value("iva_st").toDouble() / 100;
-    }
+  if (not modelPagamento.setData(row, "dataEmissao", qApp->serverDate())) { return false; }
+  if (not modelPagamento.setData(row, "idLoja", 1)) { return false; }
+  if (not modelPagamento.setData(row, "contraParte", "GARE")) { return false; }
+  if (not modelPagamento.setData(row, "idNFe", xml.idNFe)) { return false; }
+  if (not modelPagamento.setData(row, "nfe", xml.nNF)) { return false; }
+  if (not modelPagamento.setData(row, "valor", valor)) { return false; }
+  if (not modelPagamento.setData(row, "tipo", "Boleto")) { return false; }
+  if (not modelPagamento.setData(row, "dataPagamento", dataFaturamento)) { return false; }
+  if (not modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF)) { return false; }
+  if (not modelPagamento.setData(row, "status", "PENDENTE GARE")) { return false; }
+  if (not modelPagamento.setData(row, "contaDestino", 3)) { return false; }
+  if (not modelPagamento.setData(row, "centroCusto", 1)) { return false; }
+  if (not modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS")) { return false; }
 
-    if (query2.size() > 1) {
-      QSqlQuery query3;
-
-      if (not query3.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(6) + "%'")) {
-        qDebug() << "erro query5: " + query3.lastError().text();
-        return {};
-      }
-
-      if (query3.size() == 1) {
-        query3.first();
-        return query3.value("iva_st").toDouble() / 100;
-      }
-
-      if (query3.size() > 1) {
-        QSqlQuery query4;
-
-        if (not query4.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(7) + "%'")) {
-          qDebug() << "erro query6: " + query4.lastError().text();
-          return {};
-        }
-
-        if (query4.size() == 1) {
-          query4.first();
-          return query4.value("iva_st").toDouble() / 100;
-        }
-
-        if (query4.size() > 1) {
-          QSqlQuery query5;
-
-          if (not query5.exec("SELECT * FROM mva WHERE ncm LIKE '" + ncm.left(8) + "%'")) {
-            qDebug() << "erro query7: " + query5.lastError().text();
-            return {};
-          }
-
-          if (query5.size() == 1) {
-            query5.first();
-            return query5.value("iva_st").toDouble() / 100;
-          }
-
-          if (query5.size() == 0) {
-            qDebug() << "ncm não encontrado: " + ncm;
-            return {};
-          }
-        }
-      }
-    }
-  }
-
-  return {};
+  return true;
 }
 
 // NOTE: 5utilizar tabela em arvore (qtreeview) para agrupar consumos com seu estoque

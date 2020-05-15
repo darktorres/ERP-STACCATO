@@ -121,16 +121,16 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (not inputDlg.setFilter(idsCompra)) { return; }
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
-  const QDate dataReal = inputDlg.getDate();
+  const QDate dataFaturamento = inputDlg.getDate();
 
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {
     if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return; }
-    if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
+    if (not faturarRepresentacao(dataFaturamento, idsCompra)) { return qApp->rollbackTransaction(); }
     if (not qApp->endTransaction()) { return; }
   } else {
-    auto *import = new ImportarXML(idsCompra, dataReal, this);
+    auto *import = new ImportarXML(idsCompra, dataFaturamento, this);
     import->setAttribute(Qt::WA_DeleteOnClose);
     import->showMaximized();
 

@@ -61,6 +61,9 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("codBarras");
   ui->tableEstoque->hideColumn("ncm");
+  ui->tableEstoque->hideColumn("nve");
+  ui->tableEstoque->hideColumn("extipi");
+  ui->tableEstoque->hideColumn("cest");
   ui->tableEstoque->hideColumn("cfop");
   ui->tableEstoque->hideColumn("valorUnid");
   ui->tableEstoque->hideColumn("valor");
@@ -68,7 +71,10 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("unTrib");
   ui->tableEstoque->hideColumn("quantTrib");
   ui->tableEstoque->hideColumn("valorUnidTrib");
+  ui->tableEstoque->hideColumn("frete");
+  ui->tableEstoque->hideColumn("seguro");
   ui->tableEstoque->hideColumn("desconto");
+  ui->tableEstoque->hideColumn("outros");
   ui->tableEstoque->hideColumn("compoeTotal");
   ui->tableEstoque->hideColumn("numeroPedido");
   ui->tableEstoque->hideColumn("itemPedido");
@@ -97,7 +103,6 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
-  ui->tableEstoque->hideColumn("valorGare");
 
   //--------------------------------------------------------------------
 

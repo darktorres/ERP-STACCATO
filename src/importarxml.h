@@ -11,23 +11,29 @@ namespace Ui {
 class ImportarXML;
 }
 
+struct NCM {
+  double mva4;
+  double mva12;
+  double aliq;
+};
+
+struct ProdutoEstoque {
+  int idProduto;
+  int idEstoque;
+  double estoqueRestante;
+  double valorUnid;
+};
+
 class ImportarXML final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent = nullptr);
+  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent = nullptr);
   ~ImportarXML();
 
 private:
-  struct ProdutoEstoque {
-    int idProduto;
-    int idEstoque;
-    double estoqueRestante;
-    double valorUnid;
-  };
-
   // attributes
-  const QDate dataReal;
+  const QDate dataFaturamento;
   const QStringList idsCompra;
   SqlTableModel modelCompra;
   SqlTableModel modelConsumo;
@@ -35,6 +41,7 @@ private:
   SqlTableModel modelVenda;
   SqlTableModel modelEstoque_compra;
   SqlTableModel modelNFe;
+  SqlTableModel modelPagamento;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {
@@ -48,16 +55,16 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
-  auto buscaMVA(const QString ncm) -> std::optional<double>;
+  auto buscaNCM(const QString &ncm) -> std::optional<NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
-  auto cadastrarNFe(XML &xml) -> bool;
+  auto cadastrarNFe(XML &xml, const double gare) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
   auto calculaGare(const XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
+  auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
   auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
   auto importar() -> bool;
-  auto inserirItemModel(const XML &xml) -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
   auto mapTuples() -> QVector<ProdutoEstoque>;
@@ -66,7 +73,7 @@ private:
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;
   auto parear() -> bool;
-  auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
+  auto percorrerXml(XML &xml) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
   auto salvarDadosCompra() -> bool;
@@ -76,6 +83,5 @@ private:
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
   auto verificaExiste(const QString &chaveAcesso) -> bool;
-  auto verificaTabelaIBPT(const QString dataEmissao) -> bool;
   auto verifyFields() -> bool;
 };

@@ -6,7 +6,7 @@
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.63
+VERSION = 0.8.75
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -111,6 +111,7 @@ SOURCES += \
     src/cadastrocliente.cpp \
     src/cadastrofornecedor.cpp \
     src/cadastroloja.cpp \
+    src/cadastroncm.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
@@ -198,6 +199,7 @@ SOURCES += \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
+    src/widgetgare.cpp \
     src/widgetgraficos.cpp \
     src/widgethistoricocompra.cpp \
     src/widgetlogistica.cpp \
@@ -230,6 +232,7 @@ HEADERS  += \
     src/cadastrocliente.h \
     src/cadastrofornecedor.h \
     src/cadastroloja.h \
+    src/cadastroncm.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
@@ -316,6 +319,7 @@ HEADERS  += \
     src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
+    src/widgetgare.h \
     src/widgetgraficos.h \
     src/widgethistoricocompra.h \
     src/widgetlogistica.h \
@@ -346,6 +350,7 @@ FORMS += \
     ui/cadastrocliente.ui \
     ui/cadastrofornecedor.ui \
     ui/cadastroloja.ui \
+    ui/cadastroncm.ui \
     ui/cadastroproduto.ui \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \
@@ -391,6 +396,7 @@ FORMS += \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
+    ui/widgetgare.ui \
     ui/widgetgraficos.ui \
     ui/widgethistoricocompra.ui \
     ui/widgetlogistica.ui \

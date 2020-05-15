@@ -18,6 +18,9 @@
 Contas::Contas(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::Contas) {
   ui->setupUi(this);
 
+  if (tipo == Tipo::Pagar) { setWindowTitle("Contas a pagar"); }
+  if (tipo == Tipo::Receber) { setWindowTitle("Contas a receber"); }
+
   setWindowFlags(Qt::Window);
 
   setupTables();
@@ -147,7 +150,8 @@ void Contas::preencher(const QModelIndex &index) {
 }
 
 void Contas::setupTables() {
-  modelPendentes.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
+  if (tipo == Tipo::Receber) { modelPendentes.setTable("conta_a_receber_has_pagamento"); }
+  if (tipo == Tipo::Pagar) { modelPendentes.setTable("conta_a_pagar_has_pagamento"); }
 
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
@@ -181,19 +185,11 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
-  // TODO: 3dateEditDelegate para vencimento
   ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
   ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
 
-  if (tipo == Tipo::Receber) {
-    //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraParteReceber, this));
-    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
-  }
-
-  if (tipo == Tipo::Pagar) {
-    //    ui->tablePendentes->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::ContraPartePagar, this));
-    ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusPagar, this));
-  }
+  if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
+  if (tipo == Tipo::Pagar) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
 
   ui->tablePendentes->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->tablePendentes->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
@@ -208,7 +204,10 @@ void Contas::setupTables() {
     ui->tablePendentes->hideColumn("taxa");
   }
 
-  if (tipo == Tipo::Pagar) { ui->tablePendentes->hideColumn("idCompra"); }
+  if (tipo == Tipo::Pagar) {
+    ui->tablePendentes->hideColumn("idCompra");
+    ui->tablePendentes->hideColumn("idNFe");
+  }
 
   ui->tablePendentes->hideColumn("idPagamento");
   ui->tablePendentes->hideColumn("idLoja");
@@ -218,7 +217,8 @@ void Contas::setupTables() {
 
   // -------------------------------------------------------------------------
 
-  modelProcessados.setTable(tipo == Tipo::Receber ? "conta_a_receber_has_pagamento" : "conta_a_pagar_has_pagamento");
+  if (tipo == Tipo::Receber) { modelProcessados.setTable("conta_a_receber_has_pagamento"); }
+  if (tipo == Tipo::Pagar) { modelProcessados.setTable("conta_a_pagar_has_pagamento"); }
 
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
@@ -245,7 +245,6 @@ void Contas::setupTables() {
 
   ui->tableProcessados->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tableProcessados->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tableProcessados->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::StatusReceber, this));
   ui->tableProcessados->setItemDelegateForColumn("contaDestino", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
   ui->tableProcessados->setItemDelegateForColumn("centroCusto", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, true, this));
 
@@ -258,7 +257,10 @@ void Contas::setupTables() {
     ui->tableProcessados->hideColumn("taxa");
   }
 
-  if (tipo == Tipo::Pagar) { ui->tableProcessados->hideColumn("idCompra"); }
+  if (tipo == Tipo::Pagar) {
+    ui->tableProcessados->hideColumn("idCompra");
+    ui->tableProcessados->hideColumn("idNFe");
+  }
 
   ui->tableProcessados->hideColumn("idPagamento");
   ui->tableProcessados->hideColumn("idLoja");
@@ -293,51 +295,38 @@ void Contas::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
-  if (tipo == Tipo::Receber) {
-    QSqlQuery query;
-    query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", idPagamento);
+void Contas::viewContaPagar(const QString &dataPagamento) {
+  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
-
-    const QString idVenda = query.value("idVenda").toString();
-
-    setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
-
-    modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                               : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
-
-    // -------------------------------------------------------------------------
-
-    modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
-                                                 : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
-  }
-
-  if (tipo == Tipo::Pagar) {
-    QSqlQuery query;
-    query.prepare("SELECT cp.idCompra, pf.ordemCompra FROM conta_a_pagar_has_pagamento cp LEFT JOIN pedido_fornecedor_has_produto2 pf ON cp.idCompra = pf.idCompra WHERE idPagamento = :idPagamento");
-    query.bindValue(":idPagamento", idPagamento);
-
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
-
-    const QString idCompra = query.value("idCompra").toString();
-    const QString ordemCompra = query.value("ordemCompra").toString();
-
-    setWindowTitle("Contas A Pagar - " + contraparte + (ordemCompra == "0" ? "" : " OC " + ordemCompra));
-
-    modelPendentes.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE"
-                                             : "idCompra = '" + idCompra + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
-
-    // -------------------------------------------------------------------------
-
-    modelProcessados.setFilter(idCompra == "0" ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE"
-                                               : "idCompra = " + idCompra + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND desativado = FALSE");
-  }
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND desativado = FALSE");
 
   if (not modelPendentes.select()) { return; }
 
+  if (not modelProcessados.select()) { return; }
+}
+
+void Contas::viewContaReceber(const QString &idPagamento, const QString &contraparte) {
+  QSqlQuery query;
+  query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
+  query.bindValue(":idPagamento", idPagamento);
+
+  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
+
+  const QString idVenda = query.value("idVenda").toString();
+
+  setWindowTitle("Contas A Receber - " + contraparte + " " + idVenda);
+
+  modelPendentes.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                             : "idVenda LIKE '" + idVenda + "%' AND status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+
   // -------------------------------------------------------------------------
+
+  modelProcessados.setFilter(idVenda.isEmpty() ? "idPagamento = " + idPagamento + " AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE"
+                                               : "idVenda = '" + idVenda + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO') AND representacao = FALSE AND desativado = FALSE");
+
+  // -------------------------------------------------------------------------
+
+  if (not modelPendentes.select()) { return; }
 
   if (not modelProcessados.select()) { return; }
 }
@@ -350,3 +339,5 @@ void Contas::viewConta(const QString &idPagamento, const QString &contraparte) {
 // TODO: 5funcao de marcar 'conferido' marca na linha de baixo
 
 // FIXME: quando cancelar uma transferencia cancelar a outra ponta tambem
+// TODO: pagamentos que são agendados para o final de semana devem pular para segunda
+// TODO: parametrizar as regras de cada operadora de cartao e cadastrar uma forma de pagamento para cada

@@ -98,17 +98,17 @@ void CadastrarNFe::setupTables() {
   ui->tableItens->setItemDelegateForColumn("descUnitario", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("total", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBC", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pICMS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pICMS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vICMS", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pMVAST", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pMVAST", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vBCST", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pICMSST", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pICMSST", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vICMSST", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBCPIS", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pPIS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vPIS", new ReaisDelegate(this));
   ui->tableItens->setItemDelegateForColumn("vBCCOFINS", new ReaisDelegate(this));
-  ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(this));
+  ui->tableItens->setItemDelegateForColumn("pCOFINS", new PorcentagemDelegate(false, this));
   ui->tableItens->setItemDelegateForColumn("vCOFINS", new ReaisDelegate(this));
 
   ui->tableItens->hideColumn("idProduto");
@@ -324,13 +324,17 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not resposta) { return; }
 
-  qDebug() << "gerarNota: " << resposta.value();
+  const QString respostaCopy = resposta.value();
 
-  if (resposta->contains("Alertas:") or not resposta->contains("OK")) { return qApp->enqueueError(resposta.value(), this); }
+  qDebug() << "gerarNota: " << respostaCopy;
 
   const QStringList respostaSplit = resposta->remove("OK: ").split("\r\n");
 
   qDebug() << "split: " << respostaSplit;
+
+  if (respostaCopy.contains("Alertas:")) { return qApp->enqueueError(respostaSplit.at(1), this); }
+
+  if (not respostaCopy.contains("OK")) { return qApp->enqueueError(respostaCopy, this); }
 
   const QString filePath = respostaSplit.at(0);
   xml = respostaSplit.at(1);
@@ -870,7 +874,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
     stream << "[Produto" + numProd + "]\n";
     stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
-    stream << "CEST = 1003001\n";
+    stream << "CEST = 1003001\n"; // TODO: usar o CEST correto
     stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() + "\n";
     stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() + "\n";
     const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();
@@ -880,7 +884,8 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     QString formato = modelViewProdutoEstoque.data(row, "formComercial").toString();
     formato = formato.isEmpty() ? "" : " - " + formato;
     const QString caixas = modelViewProdutoEstoque.data(row, "caixas").toString();
-    stream << "Descricao = " + produto + formato + " (" + caixas + " Cx.)\n";
+    const QString descricao = produto + formato;
+    stream << "Descricao = " + descricao.left(100).remove("\"") + " (" + caixas + " Cx.)\n";
     stream << "Unidade = " + modelViewProdutoEstoque.data(row, "un").toString() + "\n";
     stream << "Quantidade = " + modelViewProdutoEstoque.data(row, "quant").toString() + "\n";
     const double total = modelViewProdutoEstoque.data(row, "total").toDouble();

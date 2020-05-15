@@ -48,7 +48,7 @@ void WidgetRh::setupTables() {
 
   ui->table->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->table->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->table->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
 
   ui->table->hideColumn("idVendaProduto1");
   ui->table->hideColumn("idComissao");
@@ -63,7 +63,7 @@ void WidgetRh::setupTables() {
 
   ui->tableTotal->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotal->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotal->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableTotal->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
 
   ui->tableTotal->hideColumn("idUsuario");
   ui->tableTotal->hideColumn("Mês");

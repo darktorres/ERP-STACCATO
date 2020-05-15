@@ -725,3 +725,6 @@ void CadastroLoja::limparSelecao() {
 
   modelTaxas.setFilter("0");
 }
+
+// TODO: cadastrar formas de pagamento especificas para cada cartao (regras de centavos, taxas, etc)
+// TODO: colocar flag para indicar se pula ou nao para o proximo dia util (só 'dinheiro' nao pula)

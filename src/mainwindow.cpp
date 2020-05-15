@@ -251,7 +251,7 @@ void MainWindow::on_actionConfiguracoes_triggered() {
 void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
 
 void MainWindow::on_actionProdutos_triggered() {
-  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Produto, this);
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Normal, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
   importa->importarTabela();
 }

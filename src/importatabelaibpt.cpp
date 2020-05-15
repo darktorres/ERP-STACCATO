@@ -19,6 +19,8 @@ void ImportaTabelaIBPT::importar() {
 
   QFileInfo fileInfo(filePath);
 
+  if (not fileInfo.completeBaseName().contains("SP")) { return qApp->enqueueError("Tabela escolhida não é de SP!", this); }
+
   const QString versao = fileInfo.completeBaseName().right(6);
 
   QSqlQuery queryVersao;
@@ -75,7 +77,14 @@ void ImportaTabelaIBPT::importar() {
     progressDialog.setValue(size - remains);
   }
 
-  if (not model.submitAll()) { return qApp->enqueueError("Erro salvando dados: " + model.lastError().text(), this); }
+  if (not qApp->startTransaction("ImportaTabelaIBPT::importar")) { return; }
+
+  if (not model.submitAll()) {
+    qApp->rollbackTransaction();
+    return qApp->enqueueError("Erro salvando dados: " + model.lastError().text(), this);
+  }
+
+  if (not qApp->endTransaction()) { return; }
 
   progressDialog.cancel();
 

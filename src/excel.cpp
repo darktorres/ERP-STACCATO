@@ -15,7 +15,7 @@ void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
 }
 
 bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &representacao) {
-  // REFAC: dear god, divide this into smaller funcs
+  // TODO: dear god, divide this into smaller funcs
 
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 

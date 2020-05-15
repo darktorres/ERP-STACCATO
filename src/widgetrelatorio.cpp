@@ -74,7 +74,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
 
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
@@ -87,7 +87,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
 
   ui->tableTotalVendedor->hideColumn("idUsuario");
   ui->tableTotalVendedor->hideColumn("Mês");
@@ -100,7 +100,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
 
   ui->tableTotalLoja->hideColumn("Mês");

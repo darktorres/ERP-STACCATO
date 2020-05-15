@@ -137,7 +137,7 @@ void InputDialogProduto::setupTables() {
   if (tipo == Tipo::GerarCompra) {
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-    ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+    ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
     ui->table->setItemDelegateForColumn("quant", new EditDelegate(this));
     ui->table->setItemDelegateForColumn("caixas", new EditDelegate(this));
   }

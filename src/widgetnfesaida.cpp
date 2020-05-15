@@ -79,6 +79,8 @@ void WidgetNfeSaida::setupTables() {
 
   modelViewNFeSaida.setHeaderData("valor", "R$");
 
+  modelViewNFeSaida.setSort("Criado em");
+
   ui->table->setModel(&modelViewNFeSaida);
 
   ui->table->hideColumn("idNFe");
@@ -101,8 +103,6 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetNfeSaida::montaFiltro() {
-  // TODO: 5ordenar por 'data criado'
-
   QStringList filtros;
 
   const QString text = ui->lineEditBusca->text();

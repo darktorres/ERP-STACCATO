@@ -866,6 +866,9 @@ color: rgb(0, 0, 0);</string>
               <string>Tipos de pagamentos:</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_10">
+              <item row="4" column="2">
+               <widget class="TableView" name="tableTaxas"/>
+              </item>
               <item row="4" column="0">
                <widget class="TableView" name="tablePagamentos">
                 <property name="editTriggers">
@@ -883,33 +886,39 @@ color: rgb(0, 0, 0);</string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="2">
-               <widget class="TableView" name="tableTaxas"/>
-              </item>
-              <item row="3" column="0">
-               <widget class="QPushButton" name="pushButtonRemoverPagamento">
-                <property name="text">
-                 <string>Remover pagamento</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QFrame" name="frame">
                 <property name="frameShape">
                  <enum>QFrame::StyledPanel</enum>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_15">
+                 <item row="0" column="3" rowspan="2">
+                  <widget class="QPushButton" name="pushButtonAtualizarPagamento">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Atualizar pagamento</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Tipo</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLineEdit" name="lineEditPagamento"/>
+                 </item>
                  <item row="0" column="1">
                   <widget class="QLabel" name="label_7">
                    <property name="text">
                     <string>Parcelas</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QSpinBox" name="spinBoxParcelas">
-                   <property name="minimum">
-                    <number>1</number>
                    </property>
                   </widget>
                  </item>
@@ -926,46 +935,24 @@ color: rgb(0, 0, 0);</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>Tipo</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLineEdit" name="lineEditPagamento"/>
-                 </item>
-                 <item row="0" column="3" rowspan="2">
-                  <widget class="QPushButton" name="pushButtonAtualizarPagamento">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Atualizar pagamento</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="4" rowspan="2">
-                  <widget class="QPushButton" name="pushButtonLimparSelecao">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Limpar seleção</string>
+                 <item row="1" column="1">
+                  <widget class="QSpinBox" name="spinBoxParcelas">
+                   <property name="minimum">
+                    <number>1</number>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="3" column="2">
+              <item row="5" column="0">
+               <widget class="QPushButton" name="pushButtonRemoverPagamento">
+                <property name="text">
+                 <string>Remover pagamento</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="2">
                <widget class="QPushButton" name="pushButtonAtualizarTaxas">
                 <property name="text">
                  <string>Atualizar taxas</string>
@@ -982,7 +969,7 @@ color: rgb(0, 0, 0);</string>
            <string>Associar loja-pagamento</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_19">
-           <item row="0" column="0" rowspan="2">
+           <item row="1" column="0" rowspan="2">
             <widget class="TableView" name="tableAssocia1">
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
@@ -995,7 +982,7 @@ color: rgb(0, 0, 0);</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2" rowspan="2">
+           <item row="1" column="2" rowspan="2">
             <widget class="TableView" name="tableAssocia2">
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
@@ -1008,23 +995,49 @@ color: rgb(0, 0, 0);</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1" rowspan="2">
+           <item row="1" column="1" rowspan="2">
             <layout class="QGridLayout" name="gridLayout_12">
              <item row="0" column="0">
               <widget class="QPushButton" name="pushButtonAdicionaAssociacao">
                <property name="text">
-                <string>&gt;&gt;</string>
+                <string>Associar &gt;&gt;</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QPushButton" name="pushButtonRemoveAssociacao">
                <property name="text">
-                <string>&lt;&lt;</string>
+                <string>Desassociar &lt;&lt;</string>
                </property>
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_13">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Pagamentos não associados</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_14">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Pagamentos associados</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1172,10 +1185,7 @@ color: rgb(0, 0, 0);</string>
   <tabstop>spinBoxParcelas</tabstop>
   <tabstop>pushButtonAdicionarPagamento</tabstop>
   <tabstop>pushButtonAtualizarPagamento</tabstop>
-  <tabstop>pushButtonLimparSelecao</tabstop>
-  <tabstop>pushButtonRemoverPagamento</tabstop>
   <tabstop>tablePagamentos</tabstop>
-  <tabstop>pushButtonAtualizarTaxas</tabstop>
   <tabstop>tableTaxas</tabstop>
   <tabstop>tableAssocia1</tabstop>
   <tabstop>tableAssocia2</tabstop>

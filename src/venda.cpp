@@ -132,8 +132,8 @@ void Venda::setTreeView() {
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
-  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("desconto", new PorcentagemDelegate(false, this));
+  ui->treeView->setItemDelegateForColumn("descGlobal", new PorcentagemDelegate(false, this));
   ui->treeView->setItemDelegateForColumn("total", new ReaisDelegate(this));
 }
 
@@ -1193,7 +1193,7 @@ bool Venda::generateId() {
 }
 
 void Venda::on_pushButtonDevolucao_clicked() {
-  auto *devolucao = new Devolucao(data("idVenda").toString(), this);
+  auto *devolucao = new Devolucao(data("idVenda").toString(), data("representacao").toBool(), this);
   connect(devolucao, &Devolucao::finished, [&] { viewRegisterById(ui->lineEditVenda->text()); });
   devolucao->show();
 }
@@ -1389,5 +1389,5 @@ void Venda::on_pushButtonAdicionarObservacao_clicked() {
 // NOTE: prazoEntrega por produto
 // NOTE: bloquear desconto maximo por classe de funcionario
 // TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
-// REFAC: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
+// TODO: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
 // TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao

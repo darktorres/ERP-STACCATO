@@ -198,7 +198,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
-  ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+  ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
@@ -216,6 +216,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
+  ui->tableFluxoCaixa->hideColumn("idNFe");
   ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("contraParte");
   ui->tableFluxoCaixa->hideColumn("idCompra");
@@ -502,7 +503,7 @@ void InputDialogFinanceiro::setTreeView() {
 
   ui->treeView->setItemDelegate(new NoEditDelegate(this));
 
-  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+  ui->treeView->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->treeView->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
@@ -732,7 +733,7 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled(bool) { montarFluxoCaixa(); }
 
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
-// REFAC: refatorar o frame pagamentos para um widget para nao duplicar codigo
+// TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo
 
 // TODO: 1quando for confirmacao de representacao perguntar qual o id para colocar na observacao das comissoes (codigo que vem do fornecedor)
 // TODO: 3quando for representacao mostrar fluxo de comissao

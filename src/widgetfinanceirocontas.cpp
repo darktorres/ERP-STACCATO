@@ -112,13 +112,17 @@ void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
   if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
 
-  auto *contas = new Contas((tipo == Tipo::Receber) ? Contas::Tipo::Receber : Contas::Tipo::Pagar, this);
-  contas->setAttribute(Qt::WA_DeleteOnClose);
-  const QString idPagamento = model.data(index.row(), "idPagamento").toString();
-  const QString contraparte = model.data(index.row(), "Contraparte").toString();
-  contas->viewConta(idPagamento, contraparte);
-  // TODO: 2poder selecionar mais de um idPagamento (contraParte é estético)
-  // ajustar para selecionar mais de uma linha e ajustar no filtro da Contas
+  if (tipo == Tipo::Receber) {
+    auto *contas = new Contas(Contas::Tipo::Receber, this);
+    contas->setAttribute(Qt::WA_DeleteOnClose);
+    contas->viewContaReceber(model.data(index.row(), "idPagamento").toString(), model.data(index.row(), "ContraParte").toString());
+  }
+
+  if (tipo == Tipo::Pagar) {
+    auto *contas = new Contas(Contas::Tipo::Pagar, this);
+    contas->setAttribute(Qt::WA_DeleteOnClose);
+    contas->viewContaPagar(model.data(index.row(), "dataPagamento").toString());
+  }
 }
 
 void WidgetFinanceiroContas::montaFiltro() {
@@ -177,8 +181,8 @@ void WidgetFinanceiroContas::montaFiltro() {
     model.setQuery(
         "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS `dataPagamento`, "
         "`cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT `pf`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
-        "GROUP_CONCAT(DISTINCT `pf`.`idVenda` SEPARATOR ', ') AS `idVenda`, GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS "
-        "`parcela`, `cp`.`observacao` AS `observacao`, GROUP_CONCAT(DISTINCT `pf`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro` FROM `conta_a_pagar_has_pagamento` `cp` "
+        "GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS `parcela`, `cp`.`observacao` AS `observacao`, GROUP_CONCAT(DISTINCT "
+        "`pf`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf`.`idVenda` SEPARATOR ', ') AS `idVenda` FROM `conta_a_pagar_has_pagamento` `cp` "
         "LEFT JOIN `pedido_fornecedor_has_produto2` `pf` ON `cp`.`idCompra` = `pf`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf`.`idPedido2` LEFT JOIN `estoque` "
         "`e` ON `ehc`.`idEstoque` = `e`.`idEstoque` LEFT JOIN `nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` WHERE " +
         filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
@@ -345,7 +349,7 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
 
-  // TASK: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
+  // TODO: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
 
   const auto list = ui->table->selectionModel()->selectedRows();

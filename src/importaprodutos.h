@@ -3,6 +3,7 @@
 #include "sqltablemodel.h"
 
 #include <QProgressDialog>
+#include <xlsxdocument.h>
 
 namespace Ui {
 class ImportaProdutos;
@@ -34,8 +35,8 @@ private:
   int itensNotChanged = 0;
   int itensUpdated = 0;
   int validade;
-  QHash<int, bool> hashAtualizado;
-  QHash<QString, int> hash;
+  QHash<int, bool> hashImportacao;
+  QHash<QString, int> hashTodos;
   QMap<QString, int> fornecedores;
   QProgressDialog *progressDialog;
   QSqlDatabase db;
@@ -51,7 +52,7 @@ private:
   auto atualizaCamposProduto() -> bool;
   auto atualizaProduto() -> bool;
   auto buscarCadastrarFornecedor() -> std::optional<int>;
-  auto cadastraFornecedores() -> bool;
+  auto cadastraFornecedores(QXlsx::Document &xlsx) -> bool;
   auto cadastraProduto() -> bool;
   auto camposForaDoPadrao() -> bool;
   auto closeEvent(QCloseEvent *event) -> void final;
@@ -60,7 +61,7 @@ private:
   auto importar() -> bool;
   auto insereEmErro() -> bool;
   auto insereEmOk() -> bool;
-  auto leituraProduto(const QSqlQuery &query) -> void;
+  auto leituraProduto(QXlsx::Document &xlsx, const int row) -> void;
   auto marcaProdutoNaoDescontinuado() -> bool;
   auto marcaTodosProdutosDescontinuados() -> bool;
   auto mostraApenasEstesFornecedores() -> bool;
@@ -72,8 +73,9 @@ private:
   auto salvar() -> bool;
   auto setProgressDialog() -> void;
   auto setVariantMap() -> void;
+  auto setupModels() -> void;
   auto setupTables() -> void;
   auto verificaSeProdutoJaCadastrado() -> bool;
   auto verificaSeRepresentacao() -> bool;
-  auto verificaTabela() -> bool;
+  auto verificaTabela(QXlsx::Document &xlsx) -> bool;
 };

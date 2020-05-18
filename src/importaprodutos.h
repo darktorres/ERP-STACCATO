@@ -1,13 +1,41 @@
 #pragma once
 
 #include "sqltablemodel.h"
+#include "xlsxdocument.h"
 
+#include <QDialog>
 #include <QProgressDialog>
-#include <xlsxdocument.h>
 
 namespace Ui {
 class ImportaProdutos;
 }
+
+struct Produto {
+  int idFornecedor;
+  QString fornecedor;
+  QString descricao;
+  QString un;
+  QString colecao;
+  double m2cx;
+  double pccx;
+  double kgcx;
+  QString formComercial;
+  QString codComercial;
+  QString codBarras;
+  QString ncm;
+  QString ncmEx;
+  double qtdPallet;
+  double custo;
+  double precoVenda;
+  QString ui;
+  QString un2;
+  double minimo;
+  double mva;
+  double st;
+  double sticms;
+  double quantCaixa;
+  double markup;
+};
 
 class ImportaProdutos final : public QDialog {
   Q_OBJECT
@@ -28,41 +56,39 @@ private:
   };
 
   // attributes
-  int currentRow = 0;
   int itensError = 0;
   int itensExpired = 0;
   int itensImported = 0;
   int itensNotChanged = 0;
   int itensUpdated = 0;
   int validade;
-  QHash<int, bool> hashImportacao;
-  QHash<QString, int> hashTodos;
+  Produto produto;
+  QVector<int> vectorProdutosImportados;
+  QHash<QString, int> hashModel;
   QMap<QString, int> fornecedores;
   QProgressDialog *progressDialog;
   QSqlDatabase db;
   QString file;
   QString fornecedor;
   QString idsFornecedor;
-  QVariantMap variantMap;
+  QString validadeString;
   SqlTableModel modelProduto;
   SqlTableModel modelErro;
   const Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods
-  auto atualizaCamposProduto() -> bool;
+  auto atualizaCamposProduto(const int row) -> bool;
   auto atualizaProduto() -> bool;
   auto buscarCadastrarFornecedor() -> std::optional<int>;
   auto cadastraFornecedores(QXlsx::Document &xlsx) -> bool;
-  auto cadastraProduto() -> bool;
   auto camposForaDoPadrao() -> bool;
   auto closeEvent(QCloseEvent *event) -> void final;
-  auto consistenciaDados() -> void;
   auto contaProdutos() -> void;
   auto importar() -> bool;
   auto insereEmErro() -> bool;
   auto insereEmOk() -> bool;
   auto leituraProduto(QXlsx::Document &xlsx, const int row) -> void;
-  auto marcaProdutoNaoDescontinuado() -> bool;
+  auto marcaProdutoNaoDescontinuado(const int row) -> bool;
   auto marcaTodosProdutosDescontinuados() -> bool;
   auto mostraApenasEstesFornecedores() -> bool;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
@@ -72,10 +98,8 @@ private:
   auto readValidade() -> bool;
   auto salvar() -> bool;
   auto setProgressDialog() -> void;
-  auto setVariantMap() -> void;
   auto setupModels() -> void;
   auto setupTables() -> void;
-  auto verificaSeProdutoJaCadastrado() -> bool;
   auto verificaSeRepresentacao() -> bool;
   auto verificaTabela(QXlsx::Document &xlsx) -> bool;
 };

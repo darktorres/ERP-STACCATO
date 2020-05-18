@@ -24,7 +24,6 @@ ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(par
 
   setWindowFlags(Qt::Window);
 
-  setVariantMap();
   setProgressDialog();
   setupModels();
 }
@@ -57,17 +56,17 @@ bool ImportaProdutos::verificaSeRepresentacao() {
 }
 
 bool ImportaProdutos::atualizaProduto() {
-  currentRow = hashTodos.value(variantMap.value("fornecedor").toString() + variantMap.value("codComercial").toString() + variantMap.value("ui").toString() + QString::number(static_cast<int>(tipo)));
+  const int row = hashModel.value(produto.fornecedor + produto.codComercial + produto.ui + QString::number(static_cast<int>(tipo)));
 
-  if (hashImportacao.value(currentRow)) {
-    variantMap.insert("fornecedor", "PRODUTO REPETIDO NA TABELA");
+  if (vectorProdutosImportados.contains(row)) {
+    produto.fornecedor = "PRODUTO REPETIDO NA TABELA";
     return insereEmErro();
   }
 
-  hashImportacao[currentRow] = true;
+  vectorProdutosImportados << row;
 
-  if (not atualizaCamposProduto()) { return false; }
-  if (not marcaProdutoNaoDescontinuado()) { return false; }
+  if (not atualizaCamposProduto(row)) { return false; }
+  if (not marcaProdutoNaoDescontinuado(row)) { return false; }
 
   return true;
 }
@@ -88,7 +87,7 @@ bool ImportaProdutos::importar() {
   itensExpired = modelProduto.rowCount();
 
   for (int row = 0, rowCount = modelProduto.rowCount(); row < rowCount; ++row) {
-    hashTodos[modelProduto.data(row, "fornecedor").toString() + modelProduto.data(row, "codComercial").toString() + modelProduto.data(row, "ui").toString() +
+    hashModel[modelProduto.data(row, "fornecedor").toString() + modelProduto.data(row, "codComercial").toString() + modelProduto.data(row, "ui").toString() +
               modelProduto.data(row, "promocao").toString()] = row;
   }
 
@@ -114,7 +113,7 @@ bool ImportaProdutos::importar() {
       continue;
     }
 
-    const bool existeNoModel = verificaSeProdutoJaCadastrado();
+    const bool existeNoModel = hashModel.contains(produto.fornecedor + produto.codComercial + produto.ui + QString::number(static_cast<int>(tipo)));
     const bool success = existeNoModel ? atualizaProduto() : insereEmOk();
 
     if (not success) { return false; }
@@ -164,6 +163,7 @@ bool ImportaProdutos::readValidade() {
   if (not validadeDlg->exec()) { return false; }
 
   validade = validadeDlg->getValidade();
+  validadeString = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd");
 
   return true;
 }
@@ -342,28 +342,6 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->setItemDelegateForColumn("mva", porcDelegate);
 }
 
-void ImportaProdutos::setVariantMap() {
-  variantMap.insert("fornecedor", QVariant(QVariant::String));
-  variantMap.insert("descricao", QVariant(QVariant::String));
-  variantMap.insert("un", QVariant(QVariant::String));
-  variantMap.insert("colecao", QVariant(QVariant::String));
-  variantMap.insert("m2cx", QVariant(QVariant::Double));
-  variantMap.insert("pccx", QVariant(QVariant::Double));
-  variantMap.insert("kgcx", QVariant(QVariant::Double));
-  variantMap.insert("formComercial", QVariant(QVariant::String));
-  variantMap.insert("codComercial", QVariant(QVariant::String));
-  variantMap.insert("codBarras", QVariant(QVariant::String));
-  variantMap.insert("ncm", QVariant(QVariant::String));
-  variantMap.insert("qtdPallet", QVariant(QVariant::Double));
-  variantMap.insert("custo", QVariant(QVariant::Double));
-  variantMap.insert("precoVenda", QVariant(QVariant::Double));
-  variantMap.insert("ui", QVariant(QVariant::String));
-  variantMap.insert("un2", QVariant(QVariant::String));
-  variantMap.insert("minimo", QVariant(QVariant::Double));
-  variantMap.insert("st", QVariant(QVariant::Double));
-  variantMap.insert("sticms", QVariant(QVariant::Double));
-}
-
 bool ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
   const int rows = xlsx.dimension().rowCount();
 
@@ -434,229 +412,327 @@ void ImportaProdutos::contaProdutos() {
   progressDialog->setMaximum(queryProdSize.value(0).toInt());
 }
 
-void ImportaProdutos::consistenciaDados() {
-  const auto keys = variantMap.keys();
-
-  for (const auto &key : keys) {
-    if (variantMap.value(key).toString().contains("*")) { variantMap.insert(key, variantMap.value(key).toString().remove("*")); }
-  }
-
-  variantMap.insert("m2cx", variantMap.value("m2cx").toString().replace(",", ".").toDouble());
-  variantMap.insert("pccx", variantMap.value("pccx").toString().replace(",", ".").toDouble());
-  variantMap.insert("kgcx", variantMap.value("kgcx").toString().replace(",", ".").toDouble());
-  variantMap.insert("minimo", variantMap.value("minimo").toString().replace(",", ".").toDouble());
-  variantMap.insert("qtdPallet", variantMap.value("qtdPallet").toString().replace(",", ".").toDouble());
-  variantMap.insert("custo", variantMap.value("custo").toString().replace(",", ".").toDouble());
-  variantMap.insert("precoVenda", variantMap.value("precoVenda").toString().replace(",", ".").toDouble());
-
-  if (variantMap.value("ui").isNull()) { variantMap.insert("ui", 0); }
-
-  if (variantMap.value("ncm").toString().length() == 10) {
-    variantMap.insert("ncmEx", variantMap.value("ncm").toString().right(2));
-    variantMap.insert("ncm", variantMap.value("ncm").toString().left(8));
-  }
-
-  const QString un = variantMap.value("un").toString().toUpper();
-
-  variantMap.insert("un", (un == "M2" or un == "M²") ? "M²" : un);
-
-  const double m2cx = variantMap.value("m2cx").toDouble();
-  const double pccx = variantMap.value("pccx").toDouble();
-
-  variantMap.insert("quantCaixa", (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx);
-
-  variantMap.insert("ncm", variantMap.value("ncm").toString().remove(".").remove(",").remove("-").remove(" "));
-  variantMap.insert("codBarras", variantMap.value("codBarras").toString().remove(".").remove(","));
-  variantMap.insert("codComercial", variantMap.value("codComercial").toString().remove(".").remove(","));
-
-  variantMap.insert("minimo", variantMap.value("minimo").toDouble());
-
-  if (qFuzzyIsNull(variantMap.value("minimo").toDouble())) { variantMap.insert("minimo", QVariant()); }
-  if (qFuzzyIsNull(variantMap.value("multiplo").toDouble())) { variantMap.insert("multiplo", QVariant()); }
-}
-
 void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
-  QString m_fornecedor = xlsx.read(row, 1).toString();
-  QString m_descricao = xlsx.read(row, 2).toString().remove("*");
-  QString m_un = xlsx.read(row, 3).toString().remove("*");
-  QString m_colecao = xlsx.read(row, 4).toString().remove("*");
-  double m_m2cx = xlsx.read(row, 5).toDouble();
-  double m_pccx = xlsx.read(row, 6).toDouble();
-  double m_kgcx = xlsx.read(row, 7).toDouble();
-  QString m_formComercial = xlsx.read(row, 8).toString().remove("*");
-  QString m_codComercial = xlsx.read(row, 9).toString().remove("*").remove(".").remove(",");
-  QString m_codBarras = xlsx.read(row, 10).toString().remove("*").remove(".").remove(",");
-  QString m_ncm = xlsx.read(row, 11).toString().remove("*").remove(".").remove(",").remove("-").remove(" ");
-  double m_qtdPallet = xlsx.read(row, 12).toDouble();
-  double m_custo = xlsx.read(row, 13).toDouble();
-  double m_precoVenda = xlsx.read(row, 14).toDouble();
-  QString m_ui = xlsx.read(row, 15).toString().remove("*");
-  QString m_un2 = xlsx.read(row, 16).toString().remove("*");
-  double m_minimo = xlsx.read(row, 17).toDouble();
-  double m_mva = xlsx.read(row, 18).toDouble();
-  double m_st = xlsx.read(row, 19).toDouble();
-  double m_sticms = xlsx.read(row, 20).toDouble();
+  produto = {};
+
+  produto.idFornecedor = fornecedores.value(xlsx.read(row, 1).toString());
+  produto.fornecedor = xlsx.read(row, 1).toString().toUpper();
+  produto.descricao = xlsx.read(row, 2).toString().remove("*").toUpper();
+  produto.un = xlsx.read(row, 3).toString().remove("*").toUpper().toUpper();
+  produto.colecao = xlsx.read(row, 4).toString().remove("*").toUpper();
+  produto.m2cx = qApp->roundDouble(xlsx.read(row, 5).toDouble());
+  produto.pccx = qApp->roundDouble(xlsx.read(row, 6).toDouble());
+  produto.kgcx = qApp->roundDouble(xlsx.read(row, 7).toDouble());
+  produto.formComercial = xlsx.read(row, 8).toString().remove("*").toUpper();
+  produto.codComercial = xlsx.read(row, 9).toString().remove("*").remove(".").remove(",").toUpper();
+  produto.codBarras = xlsx.read(row, 10).toString().remove("*").remove(".").remove(",").toUpper();
+  produto.ncm = xlsx.read(row, 11).toString().remove("*").remove(".").remove(",").remove("-").remove(" ").toUpper();
+  produto.qtdPallet = qApp->roundDouble(xlsx.read(row, 12).toDouble());
+  produto.custo = qApp->roundDouble(xlsx.read(row, 13).toDouble());
+  produto.precoVenda = qApp->roundDouble(xlsx.read(row, 14).toDouble());
+  produto.ui = xlsx.read(row, 15).toString().remove("*").toUpper();
+  produto.un2 = xlsx.read(row, 16).toString().remove("*").toUpper();
+  produto.minimo = qApp->roundDouble(xlsx.read(row, 17).toDouble());
+  produto.mva = qApp->roundDouble(xlsx.read(row, 18).toDouble());
+  produto.st = qApp->roundDouble(xlsx.read(row, 19).toDouble());
+  produto.sticms = qApp->roundDouble(xlsx.read(row, 20).toDouble());
+  produto.markup = qApp->roundDouble(((produto.precoVenda / produto.custo) - 1.) * 100);
 
   // consistencia dados
 
-  if (m_ui.isEmpty()) { m_ui = "0"; }
+  if (produto.ui.isEmpty()) { produto.ui = "0"; }
 
   QString m_ncmEx;
 
-  if (m_ncm.length() == 10) {
-    m_ncmEx = m_ncm.right(2);
-    m_ncm = m_ncm.left(8);
+  if (produto.ncm.length() == 10) {
+    produto.ncmEx = produto.ncm.right(2);
+    produto.ncm = produto.ncm.left(8);
   }
 
-  if (m_un == "M²") { m_un = "M2"; }
+  if (produto.un == "M²") { produto.un = "M2"; }
 
-  double m_quantCaixa = (m_un == "M2" or m_un == "ML") ? m_m2cx : m_pccx;
+  const double quantCaixa = (produto.un == "M2" or produto.un == "ML") ? produto.m2cx : produto.pccx;
 
-  // insere no variantMap
-
-  variantMap.insert("fornecedor", m_fornecedor);
-  variantMap.insert("descricao", m_descricao);
-  variantMap.insert("un", m_un);
-  variantMap.insert("colecao", m_colecao);
-  variantMap.insert("m2cx", m_m2cx);
-  variantMap.insert("pccx", m_pccx);
-  variantMap.insert("kgcx", m_kgcx);
-  variantMap.insert("formComercial", m_formComercial);
-  variantMap.insert("codComercial", m_codComercial);
-  variantMap.insert("codBarras", m_codBarras);
-  variantMap.insert("ncm", m_ncm);
-  variantMap.insert("ncmEx", m_ncmEx);
-  variantMap.insert("qtdPallet", m_qtdPallet);
-  variantMap.insert("custo", m_custo);
-  variantMap.insert("precoVenda", m_precoVenda);
-  variantMap.insert("ui", m_ui);
-  variantMap.insert("un2", m_un2);
-  variantMap.insert("minimo", m_minimo);
-  variantMap.insert("mva", m_mva);
-  variantMap.insert("st", m_st);
-  variantMap.insert("sticms", m_sticms);
-  variantMap.insert("quantCaixa", m_quantCaixa);
+  produto.quantCaixa = quantCaixa;
 }
 
-bool ImportaProdutos::atualizaCamposProduto() {
+bool ImportaProdutos::atualizaCamposProduto(const int row) {
   bool changed = false;
 
-  const auto keys = variantMap.keys();
+  if (not modelProduto.setData(row, "atualizarTabelaPreco", true)) { return false; }
 
-  for (const auto &key : keys) {
-    if (not variantMap.value(key).isNull() and modelProduto.data(currentRow, key) != variantMap.value(key)) {
-      if (not modelProduto.setData(currentRow, key, variantMap.value(key))) { return false; }
-      if (not modelProduto.setData(currentRow, key + "Upd", static_cast<int>(FieldColors::Yellow))) { return false; }
-    } else {
-      if (not modelProduto.setData(currentRow, key + "Upd", static_cast<int>(FieldColors::White))) { return false; }
-    }
-  }
+  const int yellow = static_cast<int>(FieldColors::Yellow);
+  const int white = static_cast<int>(FieldColors::White);
 
-  if (not modelProduto.setData(currentRow, "atualizarTabelaPreco", true)) { return false; }
-
-  if (modelProduto.data(currentRow, "ncmEx").toString().isEmpty()) {
-    if (not modelProduto.setData(currentRow, "ncmExUpd", static_cast<int>(FieldColors::White))) { return false; }
-  }
-
-  const QString validadeStr = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd");
-
-  if (modelProduto.data(currentRow, "validade") != validadeStr) {
-    if (not modelProduto.setData(currentRow, "validade", validadeStr)) { return false; }
-    if (not modelProduto.setData(currentRow, "validadeUpd", static_cast<int>(FieldColors::Yellow))) { return false; }
+  if (modelProduto.data(row, "fornecedor") != produto.fornecedor) {
+    if (not modelProduto.setData(row, "fornecedor", produto.fornecedor)) { return false; }
+    if (not modelProduto.setData(row, "fornecedorUpd", yellow)) { return false; }
     changed = true;
   } else {
-    if (not modelProduto.setData(currentRow, "validadeUpd", static_cast<int>(FieldColors::White))) { return false; }
+    if (not modelProduto.setData(row, "fornecedorUpd", white)) { return false; }
   }
 
-  double markup = 100 * ((variantMap.value("precoVenda").toDouble() / variantMap.value("custo").toDouble()) - 1.);
-  const QString markupRound = QString::number(markup, 'f', 4);
-  markup = markupRound.toDouble();
-
-  if (not qFuzzyCompare(modelProduto.data(currentRow, "markup").toDouble(), markup)) {
-    if (not modelProduto.setData(currentRow, "markup", markup)) { return false; }
-    if (not modelProduto.setData(currentRow, "markupUpd", static_cast<int>(FieldColors::Yellow))) { return false; }
+  if (modelProduto.data(row, "descricao") != produto.descricao) {
+    if (not modelProduto.setData(row, "descricao", produto.descricao)) { return false; }
+    if (not modelProduto.setData(row, "descricaoUpd", yellow)) { return false; }
     changed = true;
   } else {
-    if (not modelProduto.setData(currentRow, "markupUpd", static_cast<int>(FieldColors::White))) { return false; }
+    if (not modelProduto.setData(row, "descricaoUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "un") != produto.un) {
+    if (not modelProduto.setData(row, "un", produto.un)) { return false; }
+    if (not modelProduto.setData(row, "unUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "unUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "colecao") != produto.colecao) {
+    if (not modelProduto.setData(row, "colecao", produto.colecao)) { return false; }
+    if (not modelProduto.setData(row, "colecaoUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "colecaoUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "m2cx") != produto.m2cx) {
+    if (not modelProduto.setData(row, "m2cx", produto.m2cx)) { return false; }
+    if (not modelProduto.setData(row, "m2cxUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "m2cxUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "pccx") != produto.pccx) {
+    if (not modelProduto.setData(row, "pccx", produto.pccx)) { return false; }
+    if (not modelProduto.setData(row, "pccxUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "pccxUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "kgcx") != produto.kgcx) {
+    if (not modelProduto.setData(row, "kgcx", produto.kgcx)) { return false; }
+    if (not modelProduto.setData(row, "kgcxUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "kgcxUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "formComercial") != produto.formComercial) {
+    if (not modelProduto.setData(row, "formComercial", produto.formComercial)) { return false; }
+    if (not modelProduto.setData(row, "formComercialUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "formComercialUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "codComercial") != produto.codComercial) {
+    if (not modelProduto.setData(row, "codComercial", produto.codComercial)) { return false; }
+    if (not modelProduto.setData(row, "codComercialUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "codComercialUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "codBarras") != produto.codBarras) {
+    if (not modelProduto.setData(row, "codBarras", produto.codBarras)) { return false; }
+    if (not modelProduto.setData(row, "codBarrasUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "codBarrasUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "ncm") != produto.ncm) {
+    if (not modelProduto.setData(row, "ncm", produto.ncm)) { return false; }
+    if (not modelProduto.setData(row, "ncmUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "ncmUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "ncmEx") != produto.ncmEx) {
+    if (not modelProduto.setData(row, "ncmEx", produto.ncmEx)) { return false; }
+    if (not modelProduto.setData(row, "ncmExUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "ncmExUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "qtdPallet") != produto.qtdPallet) {
+    if (not modelProduto.setData(row, "qtdPallet", produto.qtdPallet)) { return false; }
+    if (not modelProduto.setData(row, "qtdPalletUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "qtdPalletUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "custo") != produto.custo) {
+    if (not modelProduto.setData(row, "custo", produto.custo)) { return false; }
+    if (not modelProduto.setData(row, "custoUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "custoUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "precoVenda") != produto.precoVenda) {
+    if (not modelProduto.setData(row, "precoVenda", produto.precoVenda)) { return false; }
+    if (not modelProduto.setData(row, "precoVendaUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "precoVendaUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "ui") != produto.ui) {
+    if (not modelProduto.setData(row, "ui", produto.ui)) { return false; }
+    if (not modelProduto.setData(row, "uiUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "uiUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "un2") != produto.un2) {
+    if (not modelProduto.setData(row, "un2", produto.un2)) { return false; }
+    if (not modelProduto.setData(row, "un2Upd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "un2Upd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "minimo") != produto.minimo) {
+    if (not modelProduto.setData(row, "minimo", produto.minimo)) { return false; }
+    if (not modelProduto.setData(row, "minimoUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "minimoUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "mva") != produto.mva) {
+    if (not modelProduto.setData(row, "mva", produto.mva)) { return false; }
+    if (not modelProduto.setData(row, "mvaUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "mvaUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "st") != produto.st) {
+    if (not modelProduto.setData(row, "st", produto.st)) { return false; }
+    if (not modelProduto.setData(row, "stUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "stUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "sticms") != produto.sticms) {
+    if (not modelProduto.setData(row, "sticms", produto.sticms)) { return false; }
+    if (not modelProduto.setData(row, "sticmsUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "sticmsUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "quantCaixa") != produto.quantCaixa) {
+    if (not modelProduto.setData(row, "quantCaixa", produto.quantCaixa)) { return false; }
+    if (not modelProduto.setData(row, "quantCaixaUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "quantCaixaUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "markup") != produto.markup) {
+    if (not modelProduto.setData(row, "markup", produto.markup)) { return false; }
+    if (not modelProduto.setData(row, "markupUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "markupUpd", white)) { return false; }
+  }
+
+  if (modelProduto.data(row, "validade") != validadeString) {
+    if (not modelProduto.setData(row, "validade", validadeString)) { return false; }
+    if (not modelProduto.setData(row, "validadeUpd", yellow)) { return false; }
+    changed = true;
+  } else {
+    if (not modelProduto.setData(row, "validadeUpd", white)) { return false; }
   }
 
   changed ? itensUpdated++ : itensNotChanged++;
 
-  variantMap.clear();
-
   return true;
 }
 
-bool ImportaProdutos::marcaProdutoNaoDescontinuado() {
-  if (not modelProduto.setData(currentRow, "descontinuado", false)) { return false; }
+bool ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
+  if (not modelProduto.setData(row, "descontinuado", false)) { return false; }
 
   itensExpired--;
 
   return true;
 }
 
-bool ImportaProdutos::verificaSeProdutoJaCadastrado() {
-  return hashTodos.contains(variantMap.value("fornecedor").toString() + variantMap.value("codComercial").toString() + variantMap.value("ui").toString() + QString::number(static_cast<int>(tipo)));
-}
-
 bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
+  const QString ncm = produto.ncm;
+  const QString codBarras = produto.codBarras;
+  const QString fornecedor = produto.fornecedor;
+  const QString un = produto.un;
+  const QString codComercial = produto.codComercial;
+  const double m2cx = produto.m2cx;
+  const double pccx = produto.pccx;
+  const double custo = produto.custo;
+  const double precoVenda = produto.precoVenda;
+
+  const int gray = static_cast<int>(FieldColors::Gray);
+  const int red = static_cast<int>(FieldColors::Red);
+
   // Fora do padrão
-  if (variantMap.value("ncm").toString() == "0" or variantMap.value("ncm").toString().isEmpty() or
-      (variantMap.value("ncm").toString().length() != 8 and variantMap.value("ncm").toString().length() != 10)) {
-    if (not modelErro.setData(row, "ncmUpd", static_cast<int>(FieldColors::Gray))) { return false; }
+
+  if (ncm == "0" or ncm.isEmpty() or (ncm.length() != 8 and ncm.length() != 10)) {
+    if (not modelErro.setData(row, "ncmUpd", gray)) { return false; }
   }
 
-  if (variantMap.value("codBarras").toString() == "0" or variantMap.value("codBarras").toString().isEmpty()) {
-    if (not modelErro.setData(row, "codBarrasUpd", static_cast<int>(FieldColors::Gray))) { return false; }
+  if (codBarras == "0" or codBarras.isEmpty()) {
+    if (not modelErro.setData(row, "codBarrasUpd", gray)) { return false; }
   }
 
   // Errados
-  if (variantMap.value("fornecedor").toString() == "PRODUTO REPETIDO NA TABELA") {
-    if (not modelErro.setData(row, "fornecedorUpd", static_cast<int>(FieldColors::Red))) { return false; }
+
+  if (fornecedor == "PRODUTO REPETIDO NA TABELA") {
+    if (not modelErro.setData(row, "fornecedorUpd", red)) { return false; }
   }
 
-  if ((variantMap.value("un").toString() == "M2" or variantMap.value("un").toString() == "M²" or variantMap.value("un").toString() == "ML") and variantMap.value("m2cx").toDouble() <= 0.) {
-    if (not modelErro.setData(row, "m2cxUpd", static_cast<int>(FieldColors::Red))) { return false; }
+  if ((un == "M2" or un == "ML") and m2cx <= 0.) {
+    if (not modelErro.setData(row, "m2cxUpd", red)) { return false; }
   }
 
-  if (variantMap.value("un").toString() != "M2" and variantMap.value("un").toString() != "M²" and variantMap.value("un").toString() != "ML" and variantMap.value("pccx").toDouble() < 1) {
-    if (not modelErro.setData(row, "pccxUpd", static_cast<int>(FieldColors::Red))) { return false; }
+  if (un != "M2" and un != "ML" and pccx < 1) {
+    if (not modelErro.setData(row, "pccxUpd", red)) { return false; }
   }
 
-  if (variantMap.value("codComercial").toString() == "0" or variantMap.value("codComercial").toString().isEmpty()) {
-    if (not modelErro.setData(row, "codComercialUpd", static_cast<int>(FieldColors::Red))) { return false; }
+  if (codComercial == "0" or codComercial.isEmpty()) {
+    if (not modelErro.setData(row, "codComercialUpd", red)) { return false; }
   }
 
-  if (variantMap.value("custo").toDouble() <= 0.) {
-    if (not modelErro.setData(row, "custoUpd", static_cast<int>(FieldColors::Red))) { return false; }
+  if (custo <= 0.) {
+    if (not modelErro.setData(row, "custoUpd", red)) { return false; }
   }
 
-  if (variantMap.value("precoVenda").toDouble() <= 0.) {
-    if (not modelErro.setData(row, "precoVendaUpd", static_cast<int>(FieldColors::Red))) { return false; }
+  if (precoVenda <= 0.) {
+    if (not modelErro.setData(row, "precoVendaUpd", red)) { return false; }
   }
 
-  if (variantMap.value("precoVenda").toDouble() < variantMap.value("custo").toDouble()) {
-    if (not modelErro.setData(row, "precoVendaUpd", static_cast<int>(FieldColors::Red))) { return false; }
+  if (precoVenda < custo) {
+    if (not modelErro.setData(row, "precoVendaUpd", red)) { return false; }
   }
 
   return true;
 }
 
 bool ImportaProdutos::camposForaDoPadrao() {
-  // Errados
-  const QString un = variantMap.value("un").toString();
-  const double m2cx = variantMap.value("m2cx").toDouble();
-  const double pccx = variantMap.value("pccx").toDouble();
-  const QString codComercial = variantMap.value("codComercial").toString();
-  const double custo = variantMap.value("custo").toDouble();
-  const double precoVenda = variantMap.value("precoVenda").toDouble();
-
-  if ((un == "M2" or un == "ML") and m2cx <= 0.) { return true; }
-  if (un != "M2" and un != "ML" and pccx < 1) { return true; }
-  if (codComercial == "0" or codComercial.isEmpty()) { return true; }
-  if (custo <= 0.) { return true; }
-  if (precoVenda <= 0.) { return true; }
-  if (precoVenda < custo) { return true; }
+  if ((produto.un == "M2" or produto.un == "ML") and produto.m2cx <= 0.) { return true; }
+  if (produto.un != "M2" and produto.un != "ML" and produto.pccx < 1) { return true; }
+  if (produto.codComercial == "0" or produto.codComercial.isEmpty()) { return true; }
+  if (produto.custo <= 0.) { return true; }
+  if (produto.precoVenda <= 0.) { return true; }
+  if (produto.precoVenda < produto.custo) { return true; }
 
   return false;
 }
@@ -664,37 +740,67 @@ bool ImportaProdutos::camposForaDoPadrao() {
 bool ImportaProdutos::insereEmErro() {
   const int row = modelErro.insertRowAtEnd();
 
-  const auto keys = variantMap.keys();
-
-  for (const auto &key : keys) {
-    if (not modelErro.setData(row, key, variantMap.value(key))) { return false; }
-    if (not modelErro.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) { return false; }
-  }
-
-  if (not modelErro.setData(row, "idFornecedor", fornecedores.value(variantMap.value("fornecedor").toString()))) { return false; }
-
   if (not modelErro.setData(row, "atualizarTabelaPreco", true)) { return false; }
-  const QString data = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd");
-  if (not modelErro.setData(row, "validade", data)) { return false; }
-  if (not modelErro.setData(row, "validadeUpd", static_cast<int>(FieldColors::Green))) { return false; }
 
-  const double markup = 100 * ((variantMap.value("precoVenda").toDouble() / variantMap.value("custo").toDouble()) - 1.);
-  if (not modelErro.setData(row, "markup", markup)) { return false; }
-  if (not modelErro.setData(row, "markupUpd", static_cast<int>(FieldColors::Green))) { return false; }
+  if (not modelErro.setData(row, "idFornecedor", produto.idFornecedor)) { return false; }
+  if (not modelErro.setData(row, "fornecedor", produto.fornecedor)) { return false; }
+  if (not modelErro.setData(row, "descricao", produto.descricao)) { return false; }
+  if (not modelErro.setData(row, "un", produto.un)) { return false; }
+  if (not modelErro.setData(row, "colecao", produto.colecao)) { return false; }
+  if (not modelErro.setData(row, "m2cx", produto.m2cx)) { return false; }
+  if (not modelErro.setData(row, "pccx", produto.pccx)) { return false; }
+  if (not modelErro.setData(row, "kgcx", produto.kgcx)) { return false; }
+  if (not modelErro.setData(row, "formComercial", produto.formComercial)) { return false; }
+  if (not modelErro.setData(row, "codComercial", produto.codComercial)) { return false; }
+  if (not modelErro.setData(row, "codBarras", produto.codBarras)) { return false; }
+  if (not modelErro.setData(row, "ncm", produto.ncm)) { return false; }
+  if (not modelErro.setData(row, "ncmEx", produto.ncmEx)) { return false; }
+  if (not modelErro.setData(row, "qtdPallet", produto.qtdPallet)) { return false; }
+  if (not modelErro.setData(row, "custo", produto.custo)) { return false; }
+  if (not modelErro.setData(row, "precoVenda", produto.precoVenda)) { return false; }
+  if (not modelErro.setData(row, "ui", produto.ui)) { return false; }
+  if (not modelErro.setData(row, "un2", produto.un2)) { return false; }
+  if (not modelErro.setData(row, "minimo", produto.minimo)) { return false; }
+  if (not modelErro.setData(row, "mva", produto.mva)) { return false; }
+  if (not modelErro.setData(row, "st", produto.st)) { return false; }
+  if (not modelErro.setData(row, "sticms", produto.sticms)) { return false; }
+  if (not modelErro.setData(row, "quantCaixa", produto.quantCaixa)) { return false; }
+  if (not modelErro.setData(row, "markup", produto.markup)) { return false; }
+  if (not modelErro.setData(row, "validade", validadeString)) { return false; }
 
-  if (variantMap.value("ncm").toString().length() == 10) {
-    if (not modelErro.setData(row, "ncmEx", variantMap.value("ncm").toString().right(2))) { return false; }
-    if (not modelErro.setData(row, "ncmExUpd", static_cast<int>(FieldColors::Green))) { return false; }
-    variantMap.insert("ncm", variantMap.value("ncm").toString().left(8));
-  } else {
-    if (not modelErro.setData(row, "ncmExUpd", static_cast<int>(FieldColors::Green))) { return false; }
-  }
+  // paint cells
+  const int green = static_cast<int>(FieldColors::Green);
+
+  if (not modelErro.setData(row, "fornecedorUpd", green)) { return false; }
+  if (not modelErro.setData(row, "descricaoUpd", green)) { return false; }
+  if (not modelErro.setData(row, "unUpd", green)) { return false; }
+  if (not modelErro.setData(row, "colecaoUpd", green)) { return false; }
+  if (not modelErro.setData(row, "m2cxUpd", green)) { return false; }
+  if (not modelErro.setData(row, "pccxUpd", green)) { return false; }
+  if (not modelErro.setData(row, "kgcxUpd", green)) { return false; }
+  if (not modelErro.setData(row, "formComercialUpd", green)) { return false; }
+  if (not modelErro.setData(row, "codComercialUpd", green)) { return false; }
+  if (not modelErro.setData(row, "codBarrasUpd", green)) { return false; }
+  if (not modelErro.setData(row, "ncmUpd", green)) { return false; }
+  if (not modelErro.setData(row, "ncmExUpd", green)) { return false; }
+  if (not modelErro.setData(row, "qtdPalletUpd", green)) { return false; }
+  if (not modelErro.setData(row, "custoUpd", green)) { return false; }
+  if (not modelErro.setData(row, "precoVendaUpd", green)) { return false; }
+  if (not modelErro.setData(row, "uiUpd", green)) { return false; }
+  if (not modelErro.setData(row, "un2Upd", green)) { return false; }
+  if (not modelErro.setData(row, "minimoUpd", green)) { return false; }
+  if (not modelErro.setData(row, "mvaUpd", green)) { return false; }
+  if (not modelErro.setData(row, "stUpd", green)) { return false; }
+  if (not modelErro.setData(row, "sticmsUpd", green)) { return false; }
+  if (not modelErro.setData(row, "quantCaixaUpd", green)) { return false; }
+  if (not modelErro.setData(row, "markupUpd", green)) { return false; }
+  if (not modelErro.setData(row, "validadeUpd", green)) { return false; }
+
+  // -------------------------------------------------
 
   if (not pintarCamposForaDoPadrao(row)) { return false; }
 
   itensError++;
-
-  variantMap.clear();
 
   return true;
 }
@@ -702,19 +808,67 @@ bool ImportaProdutos::insereEmErro() {
 bool ImportaProdutos::insereEmOk() {
   const int row = modelProduto.insertRowAtEnd();
 
-  const auto keys = variantMap.keys();
-
-  for (const auto &key : keys) {
-    if (not modelProduto.setData(row, key, variantMap.value(key))) { return false; }
-    if (not modelProduto.setData(row, key + "Upd", static_cast<int>(FieldColors::Green))) { return false; }
-  }
-
+  if (not modelProduto.setData(row, "atualizarTabelaPreco", true)) { return false; }
   if (not modelProduto.setData(row, "promocao", static_cast<int>(tipo))) { return false; }
+
+  if (not modelProduto.setData(row, "idFornecedor", produto.idFornecedor)) { return false; }
+  if (not modelProduto.setData(row, "fornecedor", produto.fornecedor)) { return false; }
+  if (not modelProduto.setData(row, "descricao", produto.descricao)) { return false; }
+  if (not modelProduto.setData(row, "un", produto.un)) { return false; }
+  if (not modelProduto.setData(row, "colecao", produto.colecao)) { return false; }
+  if (not modelProduto.setData(row, "m2cx", produto.m2cx)) { return false; }
+  if (not modelProduto.setData(row, "pccx", produto.pccx)) { return false; }
+  if (not modelProduto.setData(row, "kgcx", produto.kgcx)) { return false; }
+  if (not modelProduto.setData(row, "formComercial", produto.formComercial)) { return false; }
+  if (not modelProduto.setData(row, "codComercial", produto.codComercial)) { return false; }
+  if (not modelProduto.setData(row, "codBarras", produto.codBarras)) { return false; }
+  if (not modelProduto.setData(row, "ncm", produto.ncm)) { return false; }
+  if (not modelProduto.setData(row, "ncmEx", produto.ncmEx)) { return false; }
+  if (not modelProduto.setData(row, "qtdPallet", produto.qtdPallet)) { return false; }
+  if (not modelProduto.setData(row, "custo", produto.custo)) { return false; }
+  if (not modelProduto.setData(row, "precoVenda", produto.precoVenda)) { return false; }
+  if (not modelProduto.setData(row, "ui", produto.ui)) { return false; }
+  if (not modelProduto.setData(row, "un2", produto.un2)) { return false; }
+  if (not modelProduto.setData(row, "minimo", produto.minimo)) { return false; }
+  if (not modelProduto.setData(row, "mva", produto.mva)) { return false; }
+  if (not modelProduto.setData(row, "st", produto.st)) { return false; }
+  if (not modelProduto.setData(row, "sticms", produto.sticms)) { return false; }
+  if (not modelProduto.setData(row, "quantCaixa", produto.quantCaixa)) { return false; }
+  if (not modelProduto.setData(row, "markup", produto.markup)) { return false; }
+  if (not modelProduto.setData(row, "validade", validadeString)) { return false; }
+
+  // paint cells
+  const int green = static_cast<int>(FieldColors::Green);
+
+  if (not modelProduto.setData(row, "fornecedorUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "descricaoUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "unUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "colecaoUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "m2cxUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "pccxUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "kgcxUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "formComercialUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "codComercialUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "codBarrasUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "ncmUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "ncmExUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "qtdPalletUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "custoUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "precoVendaUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "uiUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "un2Upd", green)) { return false; }
+  if (not modelProduto.setData(row, "minimoUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "mvaUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "stUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "sticmsUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "quantCaixaUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "markupUpd", green)) { return false; }
+  if (not modelProduto.setData(row, "validadeUpd", green)) { return false; }
 
   if (tipo == Tipo::Promocao) {
     QSqlQuery query;
     query.prepare("SELECT idProduto FROM produto WHERE idFornecedor = :idFornecedor AND codComercial = :codComercial AND promocao = FALSE AND estoque = FALSE");
-    query.bindValue(":idFornecedor", fornecedores.value(variantMap.value("fornecedor").toString()));
+    query.bindValue(":idFornecedor", produto.idFornecedor);
     query.bindValue(":codComercial", modelProduto.data(row, "codComercial"));
 
     if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produto relacionado: " + query.lastError().text(), this); }
@@ -722,38 +876,14 @@ bool ImportaProdutos::insereEmOk() {
     if (query.first() and not modelProduto.setData(row, "idProdutoRelacionado", query.value("idProduto"))) { return false; }
   }
 
-  const int idFornecedor = fornecedores.value(variantMap.value("fornecedor").toString());
-  if (not modelProduto.setData(row, "idFornecedor", idFornecedor)) { return false; }
+  hashModel[produto.fornecedor + produto.codComercial + produto.ui + QString::number(static_cast<int>(tipo))] = row;
 
-  if (not modelProduto.setData(row, "atualizarTabelaPreco", true)) { return false; }
-  if (not modelProduto.setData(row, "validade", qApp->serverDate().addDays(validade).toString("yyyy-MM-dd"))) { return false; }
-  if (not modelProduto.setData(row, "validadeUpd", static_cast<int>(FieldColors::Green))) { return false; }
-
-  const double markup = 100 * ((variantMap.value("precoVenda").toDouble() / variantMap.value("custo").toDouble()) - 1.);
-  if (not modelProduto.setData(row, "markup", markup)) { return false; }
-  if (not modelProduto.setData(row, "markupUpd", static_cast<int>(FieldColors::Green))) { return false; }
-
-  if (variantMap.value("ncm").toString().length() == 10) {
-    if (not modelProduto.setData(row, "ncmEx", variantMap.value("ncm").toString().right(2))) { return false; }
-    if (not modelProduto.setData(row, "ncmExUpd", static_cast<int>(FieldColors::Green))) { return false; }
-    variantMap.insert("ncm", variantMap.value("ncm").toString().left(8));
-  } else {
-    if (not modelProduto.setData(row, "ncmExUpd", static_cast<int>(FieldColors::Green))) { return false; }
-  }
-
-  hashTodos[modelProduto.data(row, "fornecedor").toString() + modelProduto.data(row, "codComercial").toString() + modelProduto.data(row, "ui").toString() +
-            modelProduto.data(row, "promocao").toString()] = row;
-
-  hashImportacao[row] = true;
+  vectorProdutosImportados << row;
 
   itensImported++;
 
-  variantMap.clear();
-
   return true;
 }
-
-bool ImportaProdutos::cadastraProduto() { return insereEmOk(); }
 
 std::optional<int> ImportaProdutos::buscarCadastrarFornecedor() {
   QSqlQuery queryFornecedor;
@@ -792,7 +922,7 @@ bool ImportaProdutos::salvar() {
   queryPrecos.prepare("INSERT INTO produto_has_preco (idProduto, preco, validadeInicio, validadeFim) SELECT idProduto, precoVenda, :validadeInicio AS validadeInicio, :validadeFim AS validadeFim FROM "
                       "produto WHERE atualizarTabelaPreco = TRUE");
   queryPrecos.bindValue(":validadeInicio", qApp->serverDate().toString("yyyy-MM-dd"));
-  queryPrecos.bindValue(":validadeFim", qApp->serverDate().addDays(validade).toString("yyyy-MM-dd"));
+  queryPrecos.bindValue(":validadeFim", validadeString);
 
   if (not queryPrecos.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text(), this); }
 

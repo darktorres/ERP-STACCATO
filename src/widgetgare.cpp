@@ -37,7 +37,7 @@ void WidgetGare::updateTables() {
 void WidgetGare::setupTables() {
   model.setTable("conta_a_pagar_has_pagamento");
 
-  model.setFilter("status = 'PENDENTE GARE'");
+  model.setFilter("status IN ('PENDENTE GARE', 'LIBERADO GARE')");
 
   model.setHeaderData("dataEmissao", "Data Emissão");
   model.setHeaderData("nfe", "NFe");

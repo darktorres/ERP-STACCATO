@@ -329,7 +329,7 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
   return true;
 }
 
-QVector<ProdutoEstoque> ImportarXML::mapTuples() {
+QVector<ImportarXML::ProdutoEstoque> ImportarXML::mapTuples() {
   QVector<ProdutoEstoque> produtos;
 
   for (int row = 0; row < modelEstoque.rowCount(); ++row) {
@@ -1050,7 +1050,7 @@ std::optional<double> ImportarXML::calculaGare(const XML &xml) {
   return total;
 }
 
-std::optional<NCM> ImportarXML::buscaNCM(const QString &ncm) {
+std::optional<ImportarXML::NCM> ImportarXML::buscaNCM(const QString &ncm) {
   QSqlQuery query;
 
   if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'") or not query.first()) {

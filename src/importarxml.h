@@ -11,21 +11,21 @@ namespace Ui {
 class ImportarXML;
 }
 
-struct NCM {
-  double mva4;
-  double mva12;
-  double aliq;
-};
-
-struct ProdutoEstoque {
-  int idProduto;
-  int idEstoque;
-  double estoqueRestante;
-  double valorUnid;
-};
-
 class ImportarXML final : public QDialog {
   Q_OBJECT
+
+  struct NCM {
+    double mva4;
+    double mva12;
+    double aliq;
+  };
+
+  struct ProdutoEstoque {
+    int idProduto;
+    int idEstoque;
+    double estoqueRestante;
+    double valorUnid;
+  };
 
 public:
   explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent = nullptr);
@@ -55,7 +55,7 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
-  auto buscaNCM(const QString &ncm) -> std::optional<NCM>;
+  auto buscaNCM(const QString &ncm) -> std::optional<ImportarXML::NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto cadastrarNFe(XML &xml, const double gare) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
@@ -67,7 +67,7 @@ private:
   auto importar() -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
-  auto mapTuples() -> QVector<ProdutoEstoque>;
+  auto mapTuples() -> QVector<ImportarXML::ProdutoEstoque>;
   auto on_checkBoxSemLote_toggled(const bool checked) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonImportar_clicked() -> void;

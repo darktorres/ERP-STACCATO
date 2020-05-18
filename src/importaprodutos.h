@@ -10,35 +10,35 @@ namespace Ui {
 class ImportaProdutos;
 }
 
-struct Produto {
-  int idFornecedor;
-  QString fornecedor;
-  QString descricao;
-  QString un;
-  QString colecao;
-  double m2cx;
-  double pccx;
-  double kgcx;
-  QString formComercial;
-  QString codComercial;
-  QString codBarras;
-  QString ncm;
-  QString ncmEx;
-  double qtdPallet;
-  double custo;
-  double precoVenda;
-  QString ui;
-  QString un2;
-  double minimo;
-  double mva;
-  double st;
-  double sticms;
-  double quantCaixa;
-  double markup;
-};
-
 class ImportaProdutos final : public QDialog {
   Q_OBJECT
+
+  struct Produto {
+    int idFornecedor;
+    QString fornecedor;
+    QString descricao;
+    QString un;
+    QString colecao;
+    double m2cx;
+    double pccx;
+    double kgcx;
+    QString formComercial;
+    QString codComercial;
+    QString codBarras;
+    QString ncm;
+    QString ncmEx;
+    double qtdPallet;
+    double custo;
+    double precoVenda;
+    QString ui;
+    QString un2;
+    double minimo;
+    double mva;
+    double st;
+    double sticms;
+    double quantCaixa;
+    double markup;
+  };
 
 public:
   enum class Tipo { Normal = 0, Promocao = 1 };

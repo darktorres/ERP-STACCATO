@@ -1073,7 +1073,6 @@ bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   if (not modelPagamento.setData(row, "nfe", xml.nNF)) { return false; }
   if (not modelPagamento.setData(row, "valor", valor)) { return false; }
   if (not modelPagamento.setData(row, "tipo", "Boleto")) { return false; }
-  if (not modelPagamento.setData(row, "dataPagamento", dataFaturamento)) { return false; }
   if (not modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF)) { return false; }
   if (not modelPagamento.setData(row, "status", "PENDENTE GARE")) { return false; }
   if (not modelPagamento.setData(row, "contaDestino", 3)) { return false; }

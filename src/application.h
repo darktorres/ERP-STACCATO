@@ -15,6 +15,7 @@ class Application : public QApplication {
 
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
+  auto ajustarDiaUtil(const QDate &date) -> QDate;
   auto darkTheme() -> void;
   auto dbConnect() -> bool;
   auto dbReconnect(const bool silent = false) -> bool;

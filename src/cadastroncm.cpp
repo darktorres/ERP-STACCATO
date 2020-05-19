@@ -28,6 +28,7 @@ void CadastroNCM::setupTables() {
   model.setSort("ncm");
 
   model.setHeaderData("ncm", "NCM");
+  model.setHeaderData("cest", "CEST");
   model.setHeaderData("mva4", "MVA 4%");
   model.setHeaderData("mva12", "MVA 12%");
   model.setHeaderData("aliq", "Alíq. ICMS");
@@ -48,6 +49,7 @@ void CadastroNCM::setupTables() {
 void CadastroNCM::on_pushButtonSalvar_clicked() {
   for (int row = 0; row < model.rowCount(); ++row) {
     if (model.data(row, "ncm").toString().length() != 8) { return qApp->enqueueError("NCM deve ter 8 dígitos!", this); }
+    if (model.data(row, "cest").toString().length() != 7) { return qApp->enqueueError("CEST deve ter 7 dígitos!", this); }
   }
 
   if (not model.submitAll()) { return; }

@@ -38,6 +38,7 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
   ui->dateEditEvento->setDate(qApp->serverDate());
   ui->dateEditProximo->setDate(qApp->serverDate());
   ui->dateEditPgtSt->setDate(qApp->serverDate());
+  ui->dateEditFrete->setDate(qApp->serverDate());
 
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
@@ -277,7 +278,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
           const QString currentText = ui->widgetPgts->listTipoData.at(i)->currentText();
           const QDate currentDate = ui->widgetPgts->listDataPgt.at(i)->date();
-          const QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+          QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+          if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Dinheiro") { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
 
           if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
           if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
@@ -294,8 +296,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "contraParte", modelPedidoFornecedor2.data(0, "fornecedor"))) { return; }
       if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date())) { return; }
       if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
-      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; }                         // Geral
-      if (not modelFluxoCaixa.setData(row, "dataPagamento", qApp->serverDate())) { return; } // TODO: 5redo this with a editable date
+      if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditFrete->date()))) { return; }
       if (not modelFluxoCaixa.setData(row, "valor", ui->doubleSpinBoxFrete->value())) { return; }
       if (not modelFluxoCaixa.setData(row, "tipo", "Frete")) { return; }
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
@@ -346,7 +348,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
             if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
             if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
 
-            const QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+            QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+            dataPgt = qApp->ajustarDiaUtil(dataPgt);
             if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
 
             if (not modelFluxoCaixa.setData(row, "valor", stForn / parcelas)) { return; }
@@ -361,7 +364,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
           if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date())) { return; }
           if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
           if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
-          if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) { return; }
+          if (not modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()))) { return; }
           if (not modelFluxoCaixa.setData(row, "valor", stForn)) { return; }
           if (not modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor")) { return; }
           if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
@@ -376,7 +379,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         if (not modelFluxoCaixa.setData(row, "dataEmissao", ui->dateEditEvento->date())) { return; }
         if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
         if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
-        if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->dateEditPgtSt->date())) { return; }
+        if (not modelFluxoCaixa.setData(row, "dataPagamento", qApp->ajustarDiaUtil(ui->dateEditPgtSt->date()))) { return; }
         if (not modelFluxoCaixa.setData(row, "valor", stLoja)) { return; }
         if (not modelFluxoCaixa.setData(row, "tipo", "ST Loja")) { return; }
         if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }

@@ -672,7 +672,11 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
         if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
         if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
-        if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->widgetPgts->listDataPgt.at(i)->date().addMonths(x + cartao))) { return; }
+
+        QDate dataPgt = ui->widgetPgts->listDataPgt.at(i)->date().addMonths(x + cartao);
+        if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Dinheiro") { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
+
+        if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
         if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
         if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listTipoPgt.at(i)->currentText())) { return; }
         if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) { return; }

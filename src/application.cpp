@@ -485,3 +485,13 @@ std::optional<int> Application::reservarIdPedido2() {
 
   return id;
 }
+
+QDate Application::ajustarDiaUtil(const QDate &date) {
+  // TODO: adicionar feriados bancarios
+
+  QDate newDate = date;
+
+  while (newDate.dayOfWeek() > 5) { newDate = newDate.addDays(1); }
+
+  return newDate;
+}

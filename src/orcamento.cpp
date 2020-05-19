@@ -957,6 +957,8 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
   ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
 
   if (not checked) { ui->doubleSpinBoxFrete->setValue(frete); }
+
+  ui->doubleSpinBoxFrete->setFocus();
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {

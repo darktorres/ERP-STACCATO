@@ -91,6 +91,7 @@ void CadastrarNFe::setupTables() {
   modelViewProdutoEstoque.setHeaderData("total", "Total");
   modelViewProdutoEstoque.setHeaderData("codBarras", "Cód. Barras");
   modelViewProdutoEstoque.setHeaderData("ncm", "NCM");
+  modelViewProdutoEstoque.setHeaderData("cest", "CEST");
   modelViewProdutoEstoque.setHeaderData("cfop", "CFOP");
 
   ui->tableItens->setModel(&modelViewProdutoEstoque);
@@ -874,7 +875,7 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
     stream << "[Produto" + numProd + "]\n";
     stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
-    stream << "CEST = 1003001\n"; // TODO: usar o CEST correto
+    stream << "CEST = " + modelViewProdutoEstoque.data(row, "cest").toString() + "\n";
     stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() + "\n";
     stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() + "\n";
     const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();

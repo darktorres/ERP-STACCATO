@@ -492,10 +492,8 @@ void Venda::registerMode() {
   ui->pushButtonCadastrarPedido->show();
   ui->pushButtonVoltar->show();
   ui->doubleSpinBoxDescontoGlobal->setReadOnly(false);
-  ui->doubleSpinBoxDescontoGlobal->setFrame(true);
   ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   ui->doubleSpinBoxTotal->setReadOnly(false);
-  ui->doubleSpinBoxTotal->setFrame(true);
   ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   ui->checkBoxFreteManual->show();
 }
@@ -508,13 +506,10 @@ void Venda::updateMode() {
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
   ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
-  ui->doubleSpinBoxDescontoGlobal->setFrame(false);
   ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
   ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
-  ui->doubleSpinBoxDescontoGlobalReais->setFrame(false);
   ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
   ui->doubleSpinBoxTotal->setReadOnly(true);
-  ui->doubleSpinBoxTotal->setFrame(false);
   ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
   ui->checkBoxFreteManual->setDisabled(true);
 }

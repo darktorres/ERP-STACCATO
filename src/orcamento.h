@@ -10,7 +10,7 @@ class Orcamento final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Orcamento(QWidget *parent = nullptr);
+  explicit Orcamento(QWidget *parent);
   ~Orcamento();
   auto show() -> void;
 

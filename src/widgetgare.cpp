@@ -53,7 +53,7 @@ void WidgetGare::setupTables() {
   ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
-  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
+  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");

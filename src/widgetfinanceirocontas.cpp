@@ -269,7 +269,7 @@ void WidgetFinanceiroContas::montaFiltro() {
   ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
-  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
+  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
   if (tipo == Tipo::Receber) { ui->table->hideColumn("representacao"); }
   ui->table->hideColumn("idPagamento");

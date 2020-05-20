@@ -120,6 +120,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 }
 
+MainWindow::MainWindow() : MainWindow(nullptr) {}
+
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::reconnectDb() {

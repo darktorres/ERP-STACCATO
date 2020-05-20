@@ -12,7 +12,7 @@ class Devolucao final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent = nullptr);
+  explicit Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent);
   ~Devolucao();
 
 private:

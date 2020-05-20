@@ -48,7 +48,7 @@ void InserirLancamento::setupTables() {
 
   ui->table->setModel(&modelContaPagamento);
 
-  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this, 2));
+  ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->table->setItemDelegateForColumn("tipo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagamento, this));
 
   if (tipo == Tipo::Pagar) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }

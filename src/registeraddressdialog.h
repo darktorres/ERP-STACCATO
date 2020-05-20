@@ -7,7 +7,7 @@
 class RegisterAddressDialog : public RegisterDialog {
 
 public:
-  explicit RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent = nullptr);
+  explicit RegisterAddressDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
 
 protected:
   // attributes

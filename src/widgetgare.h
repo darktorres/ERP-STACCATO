@@ -8,12 +8,11 @@ namespace Ui {
 class WidgetGare;
 }
 
-class WidgetGare : public QWidget
-{
+class WidgetGare : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetGare(QWidget *parent = nullptr);
+  explicit WidgetGare(QWidget *parent);
   ~WidgetGare();
   auto resetTables() -> void;
   auto updateTables() -> void;

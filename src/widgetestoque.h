@@ -12,7 +12,7 @@ class WidgetEstoque final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetEstoque(QWidget *parent = nullptr);
+  explicit WidgetEstoque(QWidget *parent);
   ~WidgetEstoque();
   auto resetTables() -> void;
   auto updateTables() -> void;

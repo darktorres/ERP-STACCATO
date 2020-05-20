@@ -49,6 +49,8 @@ void TableView::resizeEvent(QResizeEvent *event) {
   QTableView::resizeEvent(event);
 }
 
+int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }
+
 int TableView::columnIndex(const QString &column, const bool silent) const {
   int columnIndex = -1;
 

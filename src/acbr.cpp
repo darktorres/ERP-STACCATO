@@ -27,6 +27,8 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
   progressDialog->setMinimum(0);
 }
 
+ACBr::ACBr() : ACBr(nullptr) {}
+
 void ACBr::error() {
   const QString errorString = socket.errorString();
 

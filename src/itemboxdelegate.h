@@ -6,12 +6,12 @@ class ItemBoxDelegate final : public QStyledItemDelegate {
 
 public:
   enum class Tipo { Loja, Conta };
-  ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent = nullptr);
+  ItemBoxDelegate(const Tipo tipo, const bool readOnly, QObject *parent);
   ~ItemBoxDelegate() final = default;
 
 private:
   // attributes
-  const bool isReadOnly;
+  const bool readOnly;
   const Tipo tipo;
   // methods
   auto createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const -> QWidget * final;

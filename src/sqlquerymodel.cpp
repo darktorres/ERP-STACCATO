@@ -7,6 +7,8 @@
 
 SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 
+SqlQueryModel::SqlQueryModel() : SqlQueryModel(nullptr) {}
+
 QVariant SqlQueryModel::data(const int row, const int column) const {
   if (row == -1 or column == -1) {
     qApp->enqueueError("Erro: linha/coluna -1 SqlQueryModel");

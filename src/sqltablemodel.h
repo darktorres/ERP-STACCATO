@@ -16,7 +16,9 @@ class SqlTableModel final : public QSqlTableModel {
   Q_OBJECT
 
 public:
-  explicit SqlTableModel(const int limit = 0, QObject *parent = nullptr);
+  explicit SqlTableModel(const int limit, QObject *parent);
+  explicit SqlTableModel(const int limit);
+  explicit SqlTableModel();
   [[nodiscard]] auto select() -> bool final;
   [[nodiscard]] auto setData(const int row, const QString &column, const QVariant &value) -> bool;
   [[nodiscard]] auto setData(const int row, const int column, const QVariant &value) -> bool;
@@ -44,7 +46,7 @@ private:
 
 protected:
   // attributes
-  const int limit;
+  const int limit = 0;
   // methods
   auto selectStatement() const -> QString final;
 };

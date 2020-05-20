@@ -278,8 +278,8 @@ void ImportaProdutos::setupTables() {
 
   ui->tableProdutos->setItemDelegateForColumn("validade", new DateFormatDelegate(this));
 
-  auto *doubleDelegate = new DoubleDelegate(this, 4);
-  auto *reaisDelegate = new ReaisDelegate(this, 4);
+  auto *doubleDelegate = new DoubleDelegate(4, this);
+  auto *reaisDelegate = new ReaisDelegate(4, true, this);
   ui->tableProdutos->setItemDelegateForColumn("m2cx", doubleDelegate);
   ui->tableProdutos->setItemDelegateForColumn("kgcx", doubleDelegate);
   ui->tableProdutos->setItemDelegateForColumn("qtdPallet", doubleDelegate);

@@ -13,7 +13,7 @@ class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent = nullptr);
+  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent);
   ~ProdutosPendentes();
 
 private:

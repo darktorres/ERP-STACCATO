@@ -52,7 +52,7 @@ void Estoque::setupTables() {
 
   ui->tableEstoque->setModel(&modelEstoque);
 
-  ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
 
   ui->tableEstoque->hideColumn("restante");
   ui->tableEstoque->hideColumn("ajuste");
@@ -128,7 +128,7 @@ void Estoque::setupTables() {
 
   ui->tableConsumo->setModel(&modelViewConsumo);
 
-  ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
 
   ui->tableConsumo->showColumn("created");
   ui->tableConsumo->hideColumn("idEstoque");

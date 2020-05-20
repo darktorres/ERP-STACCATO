@@ -12,7 +12,7 @@ class XML_Viewer final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit XML_Viewer(const QByteArray &content, QWidget *parent = nullptr);
+  explicit XML_Viewer(const QByteArray &content, QWidget *parent);
   ~XML_Viewer();
 
 private:

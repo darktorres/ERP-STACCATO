@@ -17,7 +17,7 @@ class CadastrarNFe final : public QDialog {
 
 public:
   enum class Tipo { Futura, Normal, NormalAposFutura };
-  explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent = nullptr);
+  explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();
 
 private:

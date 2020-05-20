@@ -9,7 +9,7 @@ QT_CHARTS_USE_NAMESPACE
 
 class ChartView : public QGraphicsView {
 public:
-  explicit ChartView(QChart *chart, QWidget *parent = nullptr);
+  explicit ChartView(QChart *chart, QWidget *parent);
   auto keepTooltip() -> void;
   auto removeTooltips() -> void;
   auto tooltip(const QPointF point, const bool state) -> void;

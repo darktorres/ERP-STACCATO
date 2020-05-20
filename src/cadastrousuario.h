@@ -11,7 +11,7 @@ class CadastroUsuario final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroUsuario(QWidget *parent = nullptr);
+  explicit CadastroUsuario(QWidget *parent);
   ~CadastroUsuario();
   auto modificarUsuario() -> void;
 

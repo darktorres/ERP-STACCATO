@@ -4,12 +4,12 @@
 
 #include <QDebug>
 
-ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), isReadOnly(isReadOnly), tipo(tipo) {}
+ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), readOnly(isReadOnly), tipo(tipo) {}
 
 QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
   auto *editor = new ItemBox(parent);
 
-  editor->setReadOnlyItemBox(isReadOnly);
+  editor->setReadOnlyItemBox(readOnly);
 
   if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); }
   if (tipo == Tipo::Conta) { editor->setSearchDialog(SearchDialog::conta(parent)); }

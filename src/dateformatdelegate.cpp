@@ -6,7 +6,7 @@
 
 DateFormatDelegate::DateFormatDelegate(const int vencimentoColumn, QObject *parent) : QStyledItemDelegate(parent), vencimentoColumn(vencimentoColumn) {}
 
-DateFormatDelegate::DateFormatDelegate(QObject *parent) { DateFormatDelegate(-1, parent); }
+DateFormatDelegate::DateFormatDelegate(QObject *parent) : DateFormatDelegate(-1, parent) {}
 
 QString DateFormatDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toDate().toString("dd/MM/yyyy"); }
 

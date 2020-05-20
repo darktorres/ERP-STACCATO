@@ -12,7 +12,7 @@ class AnteciparRecebimento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit AnteciparRecebimento(QWidget *parent = nullptr);
+  explicit AnteciparRecebimento(QWidget *parent);
   ~AnteciparRecebimento();
 
 private:

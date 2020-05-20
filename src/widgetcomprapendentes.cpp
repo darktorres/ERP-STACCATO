@@ -120,7 +120,7 @@ void WidgetCompraPendentes::setupTables() {
 
   ui->table->setModel(&modelViewVendaProduto);
 
-  ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
+  ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {

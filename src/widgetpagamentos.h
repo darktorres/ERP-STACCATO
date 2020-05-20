@@ -15,7 +15,7 @@ class WidgetPagamentos final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Compra, Venda };
-  explicit WidgetPagamentos(QWidget *parent = nullptr);
+  explicit WidgetPagamentos(QWidget *parent);
   ~WidgetPagamentos();
   auto getCredito() const -> double;
   auto getTotalPag() -> double;

@@ -6,7 +6,7 @@
 class EstoqueProxyModel final : public SortFilterProxyModel {
 
 public:
-  explicit EstoqueProxyModel(SqlTableModel *model, QObject *parent = nullptr);
+  explicit EstoqueProxyModel(SqlTableModel *model, QObject *parent);
   ~EstoqueProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

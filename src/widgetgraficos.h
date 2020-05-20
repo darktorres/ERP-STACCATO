@@ -16,7 +16,7 @@ class WidgetGraficos : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetGraficos(QWidget *parent = nullptr);
+  explicit WidgetGraficos(QWidget *parent);
   ~WidgetGraficos();
   auto resetTables() -> void;
   auto updateTables() -> void;

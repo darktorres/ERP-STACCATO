@@ -128,7 +128,7 @@ void Venda::setTreeView() {
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
@@ -229,9 +229,9 @@ void Venda::setupTables() {
 
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableFluxoCaixa->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("representacao", new CheckBoxDelegate(true, this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
-  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 
   ui->tableFluxoCaixa->setPersistentColumns({"representacao"});
 

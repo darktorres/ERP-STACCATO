@@ -9,6 +9,10 @@
 
 SqlTableModel::SqlTableModel(const int limit, QObject *parent) : QSqlTableModel(parent), limit(limit) {}
 
+SqlTableModel::SqlTableModel(const int limit) : SqlTableModel(limit, nullptr) {}
+
+SqlTableModel::SqlTableModel() : SqlTableModel(0, nullptr) {}
+
 QVariant SqlTableModel::data(const int row, const int column) const {
   if (row == -1 or column == -1) {
     qApp->enqueueError("Erro: linha/coluna -1 SqlTableModel");

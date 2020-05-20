@@ -42,7 +42,8 @@ public:
    * Constructor.
    * @param parent The parent object.
    */
-  explicit SqlTreeModel(QObject *parent = nullptr);
+  explicit SqlTreeModel(QObject *parent);
+  explicit SqlTreeModel();
 
   /**
    * Destructor.

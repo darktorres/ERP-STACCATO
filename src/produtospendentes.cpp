@@ -90,7 +90,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   modelEstoque.setHeaderData("bloco", "Bloco");
 
   ui->tableEstoque->setModel(&modelEstoque);
-  ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(this, 3));
+  ui->tableEstoque->setItemDelegateForColumn("restante", new DoubleDelegate(3, this));
 
   //-----------------------------------------------
 
@@ -122,7 +122,7 @@ void ProdutosPendentes::setupTables() {
 
   ui->tableProdutos->setModel(&modelViewProdutos);
 
-  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
+  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
   ui->tableProdutos->setItemDelegateForColumn("custo", new ReaisDelegate(this));
 
   ui->tableProdutos->hideColumn("idVenda");

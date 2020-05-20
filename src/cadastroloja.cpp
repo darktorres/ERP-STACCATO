@@ -97,7 +97,7 @@ void CadastroLoja::setupTables() {
   ui->tableEndereco->hideColumn("idLoja");
   ui->tableEndereco->hideColumn("codUF");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 
@@ -115,7 +115,7 @@ void CadastroLoja::setupTables() {
   ui->tableConta->hideColumn("idConta");
   ui->tableConta->hideColumn("idLoja");
 
-  ui->tableConta->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableConta->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableConta->setPersistentColumns({"desativado"});
 

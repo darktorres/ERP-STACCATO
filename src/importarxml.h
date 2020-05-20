@@ -28,7 +28,7 @@ class ImportarXML final : public QDialog {
   };
 
 public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent = nullptr);
+  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent);
   ~ImportarXML();
 
 private:

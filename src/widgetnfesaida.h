@@ -12,7 +12,7 @@ class WidgetNfeSaida final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfeSaida(QWidget *parent = nullptr);
+  explicit WidgetNfeSaida(QWidget *parent);
   ~WidgetNfeSaida();
   auto resetTables() -> void;
   auto updateTables() -> void;

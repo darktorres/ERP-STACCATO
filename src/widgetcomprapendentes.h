@@ -12,7 +12,7 @@ class WidgetCompraPendentes final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraPendentes(QWidget *parent = nullptr);
+  explicit WidgetCompraPendentes(QWidget *parent);
   ~WidgetCompraPendentes();
   auto resetTables() -> void;
   auto updateTables() -> void;

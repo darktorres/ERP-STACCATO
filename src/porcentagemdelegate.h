@@ -10,5 +10,5 @@ public:
   auto displayText(const QVariant &value, const QLocale &locale) const -> QString;
 
 private:
-  bool multiplicar;
+  const bool multiplicar;
 };

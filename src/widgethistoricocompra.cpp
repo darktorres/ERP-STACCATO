@@ -124,10 +124,10 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(4, this));
 }
 
 void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {

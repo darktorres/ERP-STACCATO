@@ -6,7 +6,7 @@ class LineEditCEP final : public QLineEdit {
   Q_OBJECT
 
 public:
-  explicit LineEditCEP(QWidget *parent = nullptr);
+  explicit LineEditCEP(QWidget *parent);
   ~LineEditCEP() = default;
   auto isValid() const -> bool;
 

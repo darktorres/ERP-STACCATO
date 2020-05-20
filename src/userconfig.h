@@ -10,7 +10,7 @@ class UserConfig final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit UserConfig(QWidget *parent = nullptr);
+  explicit UserConfig(QWidget *parent);
   ~UserConfig();
 
 private:

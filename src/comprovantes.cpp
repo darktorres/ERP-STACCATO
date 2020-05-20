@@ -9,9 +9,9 @@
 #include <QNetworkReply>
 #include <QSqlError>
 
-CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
+Comprovantes::CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
-QString CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
+QString Comprovantes::CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
 
 // --------------------------------------------------------------------------
 

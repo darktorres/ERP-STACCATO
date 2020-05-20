@@ -7,10 +7,11 @@ class TableView final : public QTableView {
   Q_OBJECT
 
 public:
-  explicit TableView(QWidget *parent = nullptr);
+  explicit TableView(QWidget *parent);
   ~TableView() final = default;
   auto columnCount() const -> int;
-  auto columnIndex(const QString &column, const bool silent = false) const -> int;
+  auto columnIndex(const QString &column) const -> int;
+  auto columnIndex(const QString &column, const bool silent) const -> int;
   auto hideColumn(const QString &column) -> void;
   auto openPersistentEditor(const int row, const int column) -> void;
   auto resort() -> void;

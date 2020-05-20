@@ -55,7 +55,7 @@ void CadastroFornecedor::setupTables() {
   ui->tableEndereco->hideColumn("idFornecedor");
   ui->tableEndereco->hideColumn("codUF");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 }

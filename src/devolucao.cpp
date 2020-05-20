@@ -237,7 +237,7 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->hideColumn("desativado");
 
   ui->tablePagamentos->setItemDelegateForColumn("valor", new ReaisDelegate(this));
-  ui->tablePagamentos->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
+  ui->tablePagamentos->setItemDelegateForColumn("representacao", new CheckBoxDelegate(true, this));
 
   ui->tablePagamentos->setPersistentColumns({"representacao"});
 

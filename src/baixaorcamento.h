@@ -12,7 +12,7 @@ class BaixaOrcamento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit BaixaOrcamento(const QString &idOrcamento, QWidget *parent = nullptr);
+  explicit BaixaOrcamento(const QString &idOrcamento, QWidget *parent);
   ~BaixaOrcamento();
 
 private:

@@ -12,7 +12,7 @@ class WidgetRh : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetRh(QWidget *parent = nullptr);
+  explicit WidgetRh(QWidget *parent);
   ~WidgetRh();
   auto resetTables() -> void;
   auto updateTables() -> void;

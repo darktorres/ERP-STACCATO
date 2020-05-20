@@ -731,7 +731,7 @@ void Orcamento::setupTables() {
 
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
 
-  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));

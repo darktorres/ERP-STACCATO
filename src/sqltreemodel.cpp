@@ -85,6 +85,8 @@ public:
 
 SqlTreeModel::SqlTreeModel(QObject *parent) : QAbstractItemModel(parent), d(new SqlTreeModelPrivate(this)) {}
 
+SqlTreeModel::SqlTreeModel() : SqlTreeModel(nullptr) {}
+
 SqlTreeModel::~SqlTreeModel() { delete d; }
 
 void SqlTreeModel::appendModel(QSqlQueryModel *model) { insertModel(model, d->m_levelData.count() - 1); }

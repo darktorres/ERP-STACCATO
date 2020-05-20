@@ -12,7 +12,7 @@ class WidgetConsistencia : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetConsistencia(QWidget *parent = nullptr);
+  explicit WidgetConsistencia(QWidget *parent);
   ~WidgetConsistencia();
   auto resetTables() -> void;
   auto updateTables() -> void;

@@ -5,18 +5,6 @@
 #include <QDialog>
 #include <QStyledItemDelegate>
 
-class CustomDelegate final : public QStyledItemDelegate {
-
-public:
-  explicit CustomDelegate(QObject *parent = nullptr);
-  ~CustomDelegate() = default;
-
-private:
-  auto displayText(const QVariant &value, const QLocale &) const -> QString final;
-};
-
-// --------------------------------------------------------------------------
-
 namespace Ui {
 class Comprovantes;
 }
@@ -24,8 +12,20 @@ class Comprovantes;
 class Comprovantes : public QDialog {
   Q_OBJECT
 
+  class CustomDelegate final : public QStyledItemDelegate {
+
+  public:
+    explicit CustomDelegate(QObject *parent);
+    ~CustomDelegate() = default;
+
+  private:
+    auto displayText(const QVariant &value, const QLocale &) const -> QString final;
+  };
+
+  // --------------------------------------------------------------------------
+
 public:
-  explicit Comprovantes(const QString &idVenda, QWidget *parent = nullptr);
+  explicit Comprovantes(const QString &idVenda, QWidget *parent);
   ~Comprovantes();
 
 private:

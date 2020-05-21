@@ -21,7 +21,7 @@ RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeySt
 }
 
 bool RegisterDialog::viewRegisterById(const QVariant &id) {
-  if (model.tableName() == "profissional" and id == "1") {
+  if (model.tableName() == "profissional" and id == "1") { // não permitir alterar o cadastro do 'NÃO HÁ'
     newRegister();
     return false;
   }

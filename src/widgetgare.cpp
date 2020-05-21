@@ -22,9 +22,7 @@ WidgetGare::~WidgetGare() { delete ui; }
 void WidgetGare::resetTables() { modelIsSet = false; }
 
 void WidgetGare::updateTables() {
-  if (not isSet) {
-    isSet = true;
-  }
+  if (not isSet) { isSet = true; }
 
   if (not modelIsSet) {
     setupTables();
@@ -62,7 +60,7 @@ void WidgetGare::setupTables() {
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("tipoReal");
   ui->table->hideColumn("parcelaReal");
-  ui->table->hideColumn("contaDestino");
+  ui->table->hideColumn("idConta");
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("grupo");

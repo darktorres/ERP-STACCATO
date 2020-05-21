@@ -112,23 +112,14 @@ void AnteciparRecebimento::setupTables() {
 
   modelContaReceber.setHeaderData("dataEmissao", "Data Emissão");
   modelContaReceber.setHeaderData("idVenda", "Código");
+  modelContaReceber.setHeaderData("contraParte", "Contraparte");
   modelContaReceber.setHeaderData("valor", "R$");
   modelContaReceber.setHeaderData("tipo", "Tipo");
   modelContaReceber.setHeaderData("parcela", "Parcela");
   modelContaReceber.setHeaderData("dataPagamento", "Data Pag.");
   modelContaReceber.setHeaderData("observacao", "Obs.");
   modelContaReceber.setHeaderData("status", "Status");
-  modelContaReceber.setHeaderData("representacao", "Representação");
-  modelContaReceber.setHeaderData("dataRealizado", "Data Realizado");
-  modelContaReceber.setHeaderData("valorReal", "Valor Real");
-  modelContaReceber.setHeaderData("tipoReal", "Tipo Real");
-  modelContaReceber.setHeaderData("parcelaReal", "Parcela Real");
-  modelContaReceber.setHeaderData("contaDestino", "Conta Destino");
-  modelContaReceber.setHeaderData("tipoDet", "Tipo Det");
-  modelContaReceber.setHeaderData("centroCusto", "Centro Custo");
   modelContaReceber.setHeaderData("grupo", "Grupo");
-  modelContaReceber.setHeaderData("subGrupo", "SubGrupo");
-  modelContaReceber.setHeaderData("contraParte", "Contraparte");
 
   modelContaReceber.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
 
@@ -136,15 +127,15 @@ void AnteciparRecebimento::setupTables() {
 
   ui->table->setModel(&modelContaReceber);
 
-  ui->table->hideColumn("representacao");
   ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idLoja");
   ui->table->hideColumn("nfe");
+  ui->table->hideColumn("representacao");
   ui->table->hideColumn("dataRealizado");
   ui->table->hideColumn("valorReal");
   ui->table->hideColumn("tipoReal");
   ui->table->hideColumn("parcelaReal");
-  ui->table->hideColumn("contaDestino");
+  ui->table->hideColumn("idConta");
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("subGrupo");
@@ -201,7 +192,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
     if (not modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"))) { return false; }
     if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(row, "contaDestino", ui->itemBoxConta->getId())) { return false; }
+    if (not modelContaReceber.setData(row, "idConta", ui->itemBoxConta->getId())) { return false; }
 
     if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
 
@@ -237,7 +228,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaPagar.setData(rowPagar1, "dataRealizado", ui->dateEditEvento->date())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "valorReal", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "tipoReal", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "contaDestino", ui->itemBoxConta->getId())) { return false; }
+    if (not modelContaPagar.setData(rowPagar1, "idConta", ui->itemBoxConta->getId())) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "centroCusto", "1")) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "grupo", "Despesas Financeiras")) { return false; }
     if (not modelContaPagar.setData(rowPagar1, "subGrupo", "Juros")) { return false; }
@@ -259,7 +250,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaPagar.setData(rowPagar2, "dataRealizado", ui->dateEditEvento->date())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "valorReal", ui->doubleSpinBoxIOF->value())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "tipoReal", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "contaDestino", ui->itemBoxConta->getId())) { return false; }
+    if (not modelContaPagar.setData(rowPagar2, "idConta", ui->itemBoxConta->getId())) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "centroCusto", "1")) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "grupo", "Despesas Financeiras")) { return false; }
     if (not modelContaPagar.setData(rowPagar2, "subGrupo", "IOF")) { return false; }

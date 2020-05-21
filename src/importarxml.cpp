@@ -1076,7 +1076,8 @@ bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   if (not modelPagamento.setData(row, "tipo", "Boleto")) { return false; }
   if (not modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF)) { return false; }
   if (not modelPagamento.setData(row, "status", "PENDENTE GARE")) { return false; }
-  if (not modelPagamento.setData(row, "contaDestino", 3)) { return false; }
+  const int contaSantander = 3;
+  if (not modelPagamento.setData(row, "idConta", contaSantander)) { return false; }
   if (not modelPagamento.setData(row, "centroCusto", 1)) { return false; }
   if (not modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS")) { return false; }
 

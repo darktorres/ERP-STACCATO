@@ -85,6 +85,18 @@ linux-clang{
     #QMAKE_LFLAGS *= -flto=thin
 }
 
+win32{
+    exists($(QTDIR)/bin/ccache.exe){
+        message("using ccache")
+        QMAKE_CC = ccache $$QMAKE_CC
+        QMAKE_CXX = ccache $$QMAKE_CXX
+        message($$QMAKE_CC)
+        message($$QMAKE_CXX)
+
+        QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
+    }
+}
+
 linux{
     CCACHE_BIN = $$system(which ccache)
 

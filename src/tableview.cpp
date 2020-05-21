@@ -89,7 +89,15 @@ void TableView::redoView() {
   int count = 0;
 
   // subtrair uma linha de altura por vez até achar uma linha
-  while (lastRowIndex == -1) { lastRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().height() - 5 - rowHeight(0) * ++count)).row(); }
+  while (lastRowIndex == -1) {
+    int xpos = viewport()->rect().x() + 5;
+    int ypos = viewport()->rect().height() - 5 - rowHeight(0) * count;
+
+    if (ypos < 0) { return; }
+
+    lastRowIndex = indexAt(QPoint(xpos, ypos)).row();
+    ++count;
+  }
 
   for (int row = firstRowIndex; row <= lastRowIndex; ++row) {
     for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }

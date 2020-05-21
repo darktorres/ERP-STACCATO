@@ -38,6 +38,7 @@ public:
   auto rollbackTransaction() -> void;
   auto rollbackTransaction(const bool boolean) -> bool;
   auto roundDouble(const double value) -> double;
+  auto roundDouble(const double value, const int decimais) -> double;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
   auto setInTransaction(const bool value) -> void;

@@ -8,7 +8,6 @@
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
-#include "logindialog.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
@@ -45,10 +44,6 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   setupMapper();
   newRegister();
 
-  ui->labelConsultor->hide();
-  ui->itemBoxConsultor->hide();
-  ui->itemBoxConsultor->setReadOnlyItemBox(true);
-
   if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO") {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
@@ -56,18 +51,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   if (UserSession::tipoUsuario() == "VENDEDOR") { buscarParametrosFrete(); }
 
-  on_checkBoxRepresentacao_toggled(false);
-
-  ui->labelBaixa->hide();
-  ui->plainTextEditBaixa->hide();
-  ui->labelReplicaDe->hide();
-  ui->labelReplicadoEm->hide();
-  ui->lineEditReplicaDe->hide();
-  ui->lineEditReplicadoEm->hide();
-
   setConnections();
-
-  ui->pushButtonCalcularFrete->hide();
 }
 
 Orcamento::~Orcamento() { delete ui; }
@@ -152,9 +136,13 @@ bool Orcamento::viewRegister() {
   auto load = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
+    //-----------------------------------------------------------------
+
     modelItem.setFilter("idOrcamento = '" + model.data(0, "idOrcamento").toString() + "'");
 
     if (not modelItem.select()) { return false; }
+
+    //-----------------------------------------------------------------
 
     if (not buscarParametrosFrete()) { return false; }
 
@@ -180,14 +168,44 @@ bool Orcamento::viewRegister() {
     if (expirado or status != "ATIVO") {
       isReadOnly = true;
 
-      ui->pushButtonGerarVenda->hide();
-      ui->pushButtonAtualizarOrcamento->hide();
       ui->pushButtonReplicar->show();
 
+      ui->doubleSpinBoxCaixas->hide();
+      ui->doubleSpinBoxDesconto->hide();
+      ui->doubleSpinBoxQuant->hide();
+      ui->doubleSpinBoxTotalItem->hide();
+      ui->itemBoxProduto->hide();
+      ui->labelCaixa->hide();
+      ui->labelCaixas->hide();
+      ui->labelCodComercial->hide();
+      ui->labelDesconto->hide();
+      ui->labelEstoque->hide();
+      ui->labelFormComercial->hide();
+      ui->labelFornecedor->hide();
+      ui->labelMinimo->hide();
+      ui->labelObs->hide();
+      ui->labelPrecoUn->hide();
+      ui->labelProduto->hide();
+      ui->labelQuant->hide();
+      ui->labelTotalItem->hide();
+      ui->labelUn->hide();
+      ui->lineEditCodComercial->hide();
+      ui->lineEditEstoque->hide();
+      ui->lineEditFormComercial->hide();
+      ui->lineEditFornecedor->hide();
+      ui->lineEditObs->hide();
+      ui->lineEditPrecoUn->hide();
+      ui->lineEditUn->hide();
       ui->pushButtonAdicionarItem->hide();
       ui->pushButtonAtualizarItem->hide();
-      ui->pushButtonRemoverItem->hide();
+      ui->pushButtonAtualizarOrcamento->hide();
       ui->pushButtonCalculadora->hide();
+      ui->pushButtonGerarVenda->hide();
+      ui->pushButtonRemoverItem->hide();
+      ui->spinBoxMinimo->hide();
+      ui->spinBoxQuantCx->hide();
+
+      ui->checkBoxFreteManual->setDisabled(true);
 
       ui->itemBoxCliente->setReadOnlyItemBox(true);
       ui->itemBoxEndereco->setReadOnlyItemBox(true);
@@ -195,61 +213,26 @@ bool Orcamento::viewRegister() {
       ui->itemBoxProfissional->setReadOnlyItemBox(true);
       ui->itemBoxVendedor->setReadOnlyItemBox(true);
 
-      ui->spinBoxPrazoEntrega->setReadOnly(true);
       ui->dataEmissao->setReadOnly(true);
-
       ui->doubleSpinBoxDesconto->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
       ui->doubleSpinBoxFrete->setReadOnly(true);
-      ui->doubleSpinBoxTotalItem->setReadOnly(true);
       ui->doubleSpinBoxQuant->setReadOnly(true);
       ui->doubleSpinBoxSubTotalBruto->setReadOnly(true);
       ui->doubleSpinBoxSubTotalLiq->setReadOnly(true);
       ui->doubleSpinBoxTotal->setReadOnly(true);
-
-      ui->lineEditCodComercial->hide();
-      ui->lineEditEstoque->hide();
-      ui->lineEditFormComercial->hide();
-      ui->lineEditFornecedor->hide();
-      ui->spinBoxMinimo->hide();
-      ui->lineEditObs->hide();
-      ui->lineEditPrecoUn->hide();
-      ui->lineEditUn->hide();
-      ui->itemBoxProduto->hide();
-      ui->doubleSpinBoxQuant->hide();
-      ui->doubleSpinBoxCaixas->hide();
-      ui->labelCaixa->hide();
-      ui->spinBoxQuantCx->hide();
-      ui->doubleSpinBoxDesconto->hide();
-      ui->doubleSpinBoxTotalItem->hide();
-      ui->labelCaixas->hide();
-      ui->labelCodComercial->hide();
-      ui->labelProduto->hide();
-      ui->labelDesconto->hide();
-      ui->labelTotalItem->hide();
-      ui->labelUn->hide();
-      ui->labelPrecoUn->hide();
-      ui->labelFornecedor->hide();
-      ui->labelQuant->hide();
-      ui->labelEstoque->hide();
-      ui->labelFormComercial->hide();
-      ui->labelMinimo->hide();
-      ui->labelObs->hide();
-
+      ui->doubleSpinBoxTotalItem->setReadOnly(true);
       ui->plainTextEditObs->setReadOnly(true);
+      ui->spinBoxPrazoEntrega->setReadOnly(true);
 
-      ui->checkBoxFreteManual->setDisabled(true);
+      ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+      ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
+      ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
+      ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
     } else {
       ui->pushButtonGerarVenda->show();
     }
-
-    ui->lineEditReplicaDe->setReadOnly(true);
-    ui->lineEditReplicadoEm->setReadOnly(true);
-
-    ui->checkBoxRepresentacao->setDisabled(true);
-
-    ui->plainTextEditObs->setPlainText(data("observacao").toString());
 
     const bool freteManual = ui->checkBoxFreteManual->isChecked();
 
@@ -363,8 +346,20 @@ void Orcamento::setupMapper() {
 
 void Orcamento::registerMode() {
   ui->pushButtonCadastrarOrcamento->show();
+
+  ui->itemBoxConsultor->hide();
+  ui->labelBaixa->hide();
+  ui->labelConsultor->hide();
+  ui->labelReplicaDe->hide();
+  ui->labelReplicadoEm->hide();
+  ui->lineEditReplicaDe->hide();
+  ui->lineEditReplicadoEm->hide();
+  ui->plainTextEditBaixa->hide();
   ui->pushButtonAtualizarOrcamento->hide();
+  ui->pushButtonCalcularFrete->hide();
   ui->pushButtonReplicar->hide();
+
+  ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
   ui->pushButtonApagarOrc->setDisabled(true);
   ui->pushButtonGerarExcel->setDisabled(true);
@@ -374,16 +369,22 @@ void Orcamento::registerMode() {
 }
 
 void Orcamento::updateMode() {
-  ui->pushButtonCadastrarOrcamento->hide();
+  ui->itemBoxEndereco->show();
   ui->pushButtonAtualizarOrcamento->show();
   ui->pushButtonReplicar->show();
+
+  ui->pushButtonCadastrarOrcamento->hide();
 
   ui->pushButtonApagarOrc->setEnabled(true);
   ui->pushButtonGerarExcel->setEnabled(true);
   ui->pushButtonGerarPdf->setEnabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
-  ui->itemBoxEndereco->show();
+
   ui->spinBoxValidade->setDisabled(true);
+  ui->checkBoxRepresentacao->setDisabled(true);
+
+  ui->lineEditReplicaDe->setReadOnly(true);
+  ui->lineEditReplicadoEm->setReadOnly(true);
 }
 
 bool Orcamento::newRegister() {
@@ -1372,6 +1373,7 @@ bool Orcamento::verificaDisponibilidadeEstoque() {
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
 // TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/
+//       para permitir reordenar os produtos colocar um campo oculto 'item' numerado sequencialmente, ai quando ler a tabela ordenar por essa coluna
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
 // TODO: limitar validade para o fim do mes
 // FIXME: adicionar novamente botao para limpar selecao para quando a tabela de itens está cheia e não tem como clicar no espaço vazio

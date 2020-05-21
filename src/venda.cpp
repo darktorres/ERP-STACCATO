@@ -49,17 +49,6 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   setupMapper();
   newRegister();
 
-  ui->labelConsultor->hide();
-  ui->itemBoxConsultor->hide();
-  ui->itemBoxConsultor->setReadOnlyItemBox(true);
-
-  ui->groupBoxFinanceiro->hide();
-  ui->tableFluxoCaixa2->hide();
-
-  ui->pushButtonAdicionarObservacao->hide();
-
-  for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
-
   ui->splitter->setStretchFactor(0, 255);
   ui->splitter->setStretchFactor(1, 1);
 
@@ -429,6 +418,7 @@ void Venda::clearFields() {}
 
 void Venda::setupMapper() {
   addMapping(ui->checkBoxFreteManual, "freteManual");
+  addMapping(ui->comboBoxFinanceiro, "statusFinanceiro");
   addMapping(ui->dateTimeEdit, "data");
   addMapping(ui->dateTimeEditOrc, "dataOrc");
   addMapping(ui->doubleSpinBoxDescontoGlobal, "descontoPorc");
@@ -483,35 +473,78 @@ bool Venda::savingProcedures() {
 }
 
 void Venda::registerMode() {
+  ui->checkBoxFreteManual->show();
   ui->framePagamentos->show();
-  ui->pushButtonGerarExcel->hide();
-  ui->pushButtonGerarPdf->hide();
-  ui->pushButtonComprovantes->hide();
-  ui->pushButtonCancelamento->hide();
-  ui->pushButtonDevolucao->hide();
   ui->pushButtonCadastrarPedido->show();
   ui->pushButtonVoltar->show();
+
+  ui->groupBoxFinanceiro->hide();
+  ui->itemBoxConsultor->hide();
+  ui->labelConsultor->hide();
+  ui->pushButtonAdicionarObservacao->hide();
+  ui->pushButtonCancelamento->hide();
+  ui->pushButtonComprovantes->hide();
+  ui->pushButtonDevolucao->hide();
+  ui->pushButtonGerarExcel->hide();
+  ui->pushButtonGerarPdf->hide();
+  ui->tableFluxoCaixa2->hide();
+
+  ui->itemBoxConsultor->setReadOnlyItemBox(true);
+
   ui->doubleSpinBoxDescontoGlobal->setReadOnly(false);
-  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   ui->doubleSpinBoxTotal->setReadOnly(false);
+
+  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
-  ui->checkBoxFreteManual->show();
+
+  for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
 }
 
 void Venda::updateMode() {
-  ui->tableFluxoCaixa2->hide();
-  ui->widgetPgts->hide();
+  ui->pushButtonAdicionarObservacao->show();
+  ui->pushButtonCancelamento->show();
+  ui->pushButtonComprovantes->show();
+  ui->pushButtonDevolucao->show();
   ui->pushButtonGerarExcel->show();
   ui->pushButtonGerarPdf->show();
+
+  ui->checkBoxRT->hide();
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
-  ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
-  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
-  ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
-  ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
-  ui->doubleSpinBoxTotal->setReadOnly(true);
-  ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->tableFluxoCaixa2->hide();
+  ui->tableFluxoCaixa2->hide();
+  ui->widgetPgts->hide();
+  ui->widgetPgts->hide();
+
   ui->checkBoxFreteManual->setDisabled(true);
+
+  ui->checkBoxRT->setChecked(false);
+
+  ui->itemBoxCliente->setReadOnlyItemBox(true);
+  ui->itemBoxEndereco->setReadOnlyItemBox(true);
+  ui->itemBoxEnderecoFat->setReadOnlyItemBox(true);
+  ui->itemBoxProfissional->setReadOnlyItemBox(true);
+  ui->itemBoxVendedor->setReadOnlyItemBox(true);
+
+  ui->dateTimeEdit->setReadOnly(true);
+  ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
+  ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
+  ui->doubleSpinBoxFrete->setReadOnly(true);
+  ui->doubleSpinBoxTotal->setReadOnly(true);
+  ui->plainTextEdit->setReadOnly(true);
+  ui->spinBoxPrazoEntrega->setReadOnly(true);
+
+  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+  ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+  ui->dateTimeEdit->setCalendarPopup(false);
+  ui->dateTimeEdit->setButtonSymbols(QDateTimeEdit::NoButtons);
+
+  ui->framePagamentos->adjustSize();
 }
 
 bool Venda::viewRegister() {
@@ -520,7 +553,7 @@ bool Venda::viewRegister() {
   const auto ok = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
-    ui->doubleSpinBoxDescontoGlobalReais->setMinimum(-9999999);
+    //-----------------------------------------------------------------
 
     modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
 
@@ -532,13 +565,6 @@ bool Venda::viewRegister() {
 
     setTreeView();
 
-    calcPrecoGlobalTotal();
-
-    const QString idCliente = ui->itemBoxCliente->getId().toString();
-
-    ui->itemBoxEndereco->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-    ui->itemBoxEnderecoFat->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE");
 
     if (not modelFluxoCaixa.select()) { return false; }
@@ -548,32 +574,9 @@ bool Venda::viewRegister() {
       modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND (comissao = TRUE OR taxa = TRUE)");
 
       if (not modelFluxoCaixa2.select()) { return false; }
-
-      ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
     }
 
-    ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    ui->spinBoxPrazoEntrega->setReadOnly(true);
-
-    ui->itemBoxCliente->setReadOnlyItemBox(true);
-    ui->itemBoxEndereco->setReadOnlyItemBox(true);
-    ui->itemBoxEnderecoFat->setReadOnlyItemBox(true);
-    ui->itemBoxProfissional->setReadOnlyItemBox(true);
-    ui->itemBoxVendedor->setReadOnlyItemBox(true);
-
-    ui->dateTimeEdit->setReadOnly(true);
-
-    ui->plainTextEdit->setReadOnly(true);
-    ui->plainTextEdit->setPlainText(data("observacao").toString());
-
-    ui->pushButtonComprovantes->show();
-    ui->pushButtonCancelamento->show();
-    ui->pushButtonDevolucao->show();
-    ui->pushButtonAdicionarObservacao->show();
-
-    ui->doubleSpinBoxFrete->setReadOnly(true);
-    ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
+    //-----------------------------------------------------------------
 
     if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
       ui->pushButtonCancelamento->hide();
@@ -586,11 +589,6 @@ bool Venda::viewRegister() {
       ui->pushButtonDevolucao->hide();
       ui->pushButtonCancelamento->hide();
     }
-
-    ui->framePagamentos->adjustSize();
-
-    ui->checkBoxRT->setChecked(false);
-    ui->checkBoxRT->setHidden(true);
 
     if (data("devolucao").toBool()) { ui->pushButtonDevolucao->hide(); }
 
@@ -606,9 +604,6 @@ bool Venda::viewRegister() {
     ui->widgetPgts->setRepresentacao(representacao);
     ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
-
-    ui->tableFluxoCaixa2->hide();
-    ui->widgetPgts->hide();
 
     return true;
   }();
@@ -631,6 +626,7 @@ void Venda::montarFluxoCaixa() {
   // TODO: 0nao calcular comissao para profissional 'NAO HA'
   // TODO: verificar se esta funcao nao está rodando mais de uma vez por operacao
   // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
+  // TODO: colocar lógica igual da compra para poder escolher as linhas que serão substituidas
 
   if (ui->widgetPgts->isHidden()) { return; }
 
@@ -647,10 +643,16 @@ void Venda::montarFluxoCaixa() {
     }
   }
 
+  // TODO: para calcular a taxao do cartao deve calcular a porcentagem sobre o valor total do pagamento
+  // e depois dividir essa taxa nas parcelas e ai coloca o centavo sobressalente na primeira/ultima
+  // parcela, de acordo com a regra de cada operadora
+
   for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
     if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Escolha uma opção!") {
       const int parcelas = ui->widgetPgts->listParcela.at(i)->currentIndex() + 1;
       const double valor = ui->widgetPgts->listValorPgt.at(i)->value();
+      // TODO: alterar para upperCase no banco de dados e aqui
+      // TODO: colocar uma flag na tabela de pagamento para indicar quando se é cartao de credito
       const int cartao = (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Cartão de crédito") ? 1 : 0;
 
       const double part1 = valor / parcelas;

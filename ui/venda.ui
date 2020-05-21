@@ -570,7 +570,7 @@ color: rgb(0, 0, 0);</string>
                  <number>4</number>
                 </property>
                 <property name="minimum">
-                 <double>-100.000000000000000</double>
+                 <double>-9999999.000000000000000</double>
                 </property>
                 <property name="maximum">
                  <double>100.000000000000000</double>
@@ -1109,11 +1109,6 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
-  </customwidget>
-  <customwidget>
    <class>WidgetPagamentos</class>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
@@ -1123,6 +1118,11 @@ color: rgb(0, 0, 0);</string>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header>src/treeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

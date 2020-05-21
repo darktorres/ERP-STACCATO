@@ -392,7 +392,13 @@ QDate Application::serverDate() {
   return serverDateCache.date();
 }
 
-double Application::roundDouble(const double value) { return std::round(value * 10000.) / 10000.; }
+double Application::roundDouble(const double value) { return roundDouble(value, 4); }
+
+double Application::roundDouble(const double value, const int decimais) {
+  const double multiploDez = std::pow(10, decimais);
+
+  return std::round(value * multiploDez) / multiploDez;
+}
 
 std::optional<int> Application::reservarIdEstoque() {
   if (qApp->getInTransaction()) {

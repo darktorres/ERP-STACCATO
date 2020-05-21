@@ -226,7 +226,7 @@ void Devolucao::setupTables() {
   ui->tablePagamentos->hideColumn("valorReal");
   ui->tablePagamentos->hideColumn("tipoReal");
   ui->tablePagamentos->hideColumn("parcelaReal");
-  ui->tablePagamentos->hideColumn("contaDestino");
+  ui->tablePagamentos->hideColumn("idConta");
   ui->tablePagamentos->hideColumn("tipoDet");
   ui->tablePagamentos->hideColumn("centroCusto");
   ui->tablePagamentos->hideColumn("grupo");
@@ -474,7 +474,7 @@ bool Devolucao::criarContas() {
   if (not modelPagamentos.setData(newRow, "valorReal", ui->doubleSpinBoxCredito->value() * -1)) { return false; }
 
   const int contaCreditos = 11;
-  if (not modelPagamentos.setData(newRow, "contaDestino", contaCreditos)) { return false; }
+  if (not modelPagamentos.setData(newRow, "idConta", contaCreditos)) { return false; }
 
   if (not modelPagamentos.submitAll()) { return false; }
 

@@ -52,7 +52,7 @@ bool InserirTransferencia::cadastrar() {
   if (not modelDe.setData(rowDe, "valorReal", ui->doubleSpinBoxValor->value())) { return false; }
   if (not modelDe.setData(rowDe, "tipoReal", "1. Transf. Banc.")) { return false; }
   if (not modelDe.setData(rowDe, "parcelaReal", "1")) { return false; }
-  if (not modelDe.setData(rowDe, "contaDestino", ui->itemBoxDe->getId())) { return false; }
+  if (not modelDe.setData(rowDe, "idConta", ui->itemBoxDe->getId())) { return false; }
   if (not modelDe.setData(rowDe, "centroCusto", 1)) { return false; } // Geral
   if (not modelDe.setData(rowDe, "grupo", "Transferência")) { return false; }
   if (not modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text())) { return false; }
@@ -72,7 +72,7 @@ bool InserirTransferencia::cadastrar() {
   if (not modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value())) { return false; }
   if (not modelPara.setData(rowPara, "tipoReal", "1. Transf. Banc.")) { return false; }
   if (not modelPara.setData(rowPara, "parcelaReal", "1")) { return false; }
-  if (not modelPara.setData(rowPara, "contaDestino", ui->itemBoxPara->getId())) { return false; }
+  if (not modelPara.setData(rowPara, "idConta", ui->itemBoxPara->getId())) { return false; }
   if (not modelPara.setData(rowPara, "centroCusto", 1)) { return false; } // Geral
   if (not modelPara.setData(rowPara, "grupo", "Transferência")) { return false; }
   if (not modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text())) { return false; }

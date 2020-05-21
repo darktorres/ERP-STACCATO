@@ -207,7 +207,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->hideColumn("valorReal");
   ui->tableFluxoCaixa->hideColumn("tipoReal");
   ui->tableFluxoCaixa->hideColumn("parcelaReal");
-  ui->tableFluxoCaixa->hideColumn("contaDestino");
+  ui->tableFluxoCaixa->hideColumn("idConta");
   ui->tableFluxoCaixa->hideColumn("tipoDet");
   ui->tableFluxoCaixa->hideColumn("centroCusto");
   ui->tableFluxoCaixa->hideColumn("grupo");
@@ -250,7 +250,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa2->hideColumn("valorReal");
   ui->tableFluxoCaixa2->hideColumn("tipoReal");
   ui->tableFluxoCaixa2->hideColumn("parcelaReal");
-  ui->tableFluxoCaixa2->hideColumn("contaDestino");
+  ui->tableFluxoCaixa2->hideColumn("idConta");
   ui->tableFluxoCaixa2->hideColumn("tipoDet");
   ui->tableFluxoCaixa2->hideColumn("centroCusto");
   ui->tableFluxoCaixa2->hideColumn("grupo");

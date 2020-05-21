@@ -54,7 +54,7 @@ void InserirLancamento::setupTables() {
   if (tipo == Tipo::Pagar) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
   if (tipo == Tipo::Receber) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
 
-  ui->table->setItemDelegateForColumn("contaDestino", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
+  ui->table->setItemDelegateForColumn("idConta", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
@@ -68,7 +68,7 @@ void InserirLancamento::setupTables() {
   ui->table->hideColumn("valorReal");
   ui->table->hideColumn("tipoReal");
   ui->table->hideColumn("parcelaReal");
-  ui->table->hideColumn("contaDestino");
+  ui->table->hideColumn("idConta");
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("idPagamento");

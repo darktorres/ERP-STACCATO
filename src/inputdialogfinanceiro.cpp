@@ -228,7 +228,7 @@ void InputDialogFinanceiro::setupTables() {
   ui->tableFluxoCaixa->hideColumn("valorReal");
   ui->tableFluxoCaixa->hideColumn("tipoReal");
   ui->tableFluxoCaixa->hideColumn("parcelaReal");
-  ui->tableFluxoCaixa->hideColumn("contaDestino");
+  ui->tableFluxoCaixa->hideColumn("idConta");
   ui->tableFluxoCaixa->hideColumn("tipoDet");
   ui->tableFluxoCaixa->hideColumn("centroCusto");
   ui->tableFluxoCaixa->hideColumn("grupo");

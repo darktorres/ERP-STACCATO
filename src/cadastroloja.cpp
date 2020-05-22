@@ -479,18 +479,6 @@ bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
     return false;
   }
 
-  if (ui->lineEditAgencia->text().isEmpty()) {
-    qApp->enqueueError("Agência inválida!", this);
-    ui->lineEditAgencia->setFocus();
-    return false;
-  }
-
-  if (ui->lineEditConta->text().isEmpty()) {
-    qApp->enqueueError("Conta inválida!", this);
-    ui->lineEditConta->setFocus();
-    return false;
-  }
-
   if (tipoConta == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
 
   if (not modelConta.setData(currentRowConta, "banco", ui->lineEditBanco->text())) { return false; }

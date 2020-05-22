@@ -1,13 +1,13 @@
 language: cpp
 compiler: gcc
-dist: bionic
+dist: focal
 cache: ccache
 
 addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:beineri/opt-qt-5.14.0-bionic'
+    - sourceline: 'ppa:beineri/opt-qt-5.14.2-focal'
     packages:
     - gcc-10
     - g++-10

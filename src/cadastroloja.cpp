@@ -153,6 +153,9 @@ void CadastroLoja::clearFields() {
 }
 
 bool CadastroLoja::verifyFields() {
+  // Loja Geral
+  if (data("idLoja").toInt() == 1) { return true; }
+
   const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
@@ -390,6 +393,10 @@ bool CadastroLoja::viewRegister() {
 
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabParametros), true);
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabPagamentos), true);
+
+  // -------------------------------------------------------------------------
+
+  if (data("idLoja").toInt() == 1) { ui->groupBoxCadastro->setDisabled(true); }
 
   return true;
 }

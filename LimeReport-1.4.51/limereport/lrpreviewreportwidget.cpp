@@ -74,7 +74,7 @@ PreviewReportWidget::~PreviewReportWidget() {
 
 void PreviewReportWidget::initPreview() {
   if (ui->graphicsView->scene() != d_ptr->m_previewPage) ui->graphicsView->setScene(d_ptr->m_previewPage);
-  ui->graphicsView->resetMatrix();
+  ui->graphicsView->resetTransform();
   ui->graphicsView->centerOn(0, 0);
   setScalePercent(d_ptr->m_scalePercent);
 }
@@ -174,7 +174,7 @@ void PreviewReportWidget::saveToFile() {
 }
 
 void PreviewReportWidget::setScalePercent(int percent) {
-  ui->graphicsView->resetMatrix();
+  ui->graphicsView->resetTransform();
   d_ptr->m_scalePercent = percent;
   qreal scaleSize = percent / 100.0;
   ui->graphicsView->scale(scaleSize, scaleSize);
@@ -243,7 +243,7 @@ void PreviewReportWidget::reportEngineDestroyed(QObject *object) {
 }
 
 void PreviewReportWidget::slotZoomed(double) {
-  d_ptr->m_scalePercent = ui->graphicsView->matrix().m11() * 100;
+  d_ptr->m_scalePercent = ui->graphicsView->transform().m11() * 100;
   emit scalePercentChanged(d_ptr->m_scalePercent);
 }
 

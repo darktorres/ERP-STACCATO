@@ -9,7 +9,7 @@
 bool Sql::updateVendaStatus(const QStringList &idVendas) { return updateVendaStatus(idVendas.join(", ")); }
 
 bool Sql::updateVendaStatus(const QString &idVendas) {
-  QStringList list = idVendas.split(", ", QString::SkipEmptyParts);
+  QStringList list = idVendas.split(", ", Qt::SkipEmptyParts);
   list.removeDuplicates();
 
   for (auto const &idVenda : list) {

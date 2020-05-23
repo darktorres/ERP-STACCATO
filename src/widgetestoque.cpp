@@ -133,7 +133,7 @@ QString WidgetEstoque::getMatch() const {
 
   if (text.isEmpty()) { return QString(); }
 
-  QStringList strings = text.split(" ", QString::SkipEmptyParts);
+  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
   for (auto &string : strings) {
     if (string.contains("-")) {

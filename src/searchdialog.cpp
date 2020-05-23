@@ -65,7 +65,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
     return;
   }
 
-  QStringList strings = text.split(" ", QString::SkipEmptyParts);
+  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
   for (auto &string : strings) {
     if (string.contains("-")) {

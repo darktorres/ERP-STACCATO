@@ -230,13 +230,23 @@ bool XML::verificaValido() {
 }
 
 bool XML::verificaNCMs() {
+  QStringList ncms;
+  bool erro = false;
+
   for (const auto &produto : produtos) {
     QSqlQuery query;
 
     if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueError(false, "Erro buscando ncm: " + query.lastError().text()); }
 
-    if (not query.first()) { return qApp->enqueueError(false, "NCM " + produto.ncm + " não encontrado na tabela! Cadastre ele em \"Gerenciar NCMs\"!"); }
+    if (not query.first()) {
+      ncms << produto.ncm;
+      erro = true;
+    }
   }
+
+  ncms.removeDuplicates();
+
+  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -")); }
 
   return true;
 }

@@ -1027,6 +1027,8 @@ std::optional<double> ImportarXML::calculaGare(const XML &xml) {
 
     if (not ncm) { return {}; }
 
+    if (qFuzzyIsNull(ncm->aliq)) { continue; }
+
     const double icmsIntra = ncm->aliq;
     const double mva = (qFuzzyCompare(produto.pICMS, 4)) ? ncm->mva4 : ncm->mva12;
     const double icmsInter = produto.pICMS / 100;

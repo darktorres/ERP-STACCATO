@@ -126,6 +126,45 @@ MainWindow::MainWindow() : MainWindow(nullptr) {}
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::resetTables() {
+  ui->widgetOrcamento->resetTables();
+  ui->widgetVenda->resetTables();
+  ui->widgetCompra->resetTables();
+  ui->widgetLogistica->resetTables();
+  ui->widgetNfe->resetTables();
+  ui->widgetEstoque->resetTables();
+  ui->widgetFinanceiro->resetTables();
+  ui->widgetRelatorio->resetTables();
+  ui->widgetGraficos->resetTables();
+  ui->widgetConsistencia->resetTables();
+
+  updateTables();
+}
+
+void MainWindow::updateTables() {
+  if (qApp->getUpdating()) { return; }
+  if (not qApp->getIsConnected()) { return; }
+  if (qApp->getShowingErrors()) { return; }
+
+  qApp->setUpdating(true);
+
+  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+
+  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
+  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
+  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
+  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
+  if (currentText == "RH") { ui->widgetRh->updateTables(); }
+  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
+
+  qApp->setUpdating(false);
+}
+
 void MainWindow::reconnectDb() {
   const bool conectado = qApp->dbReconnect();
 
@@ -138,6 +177,18 @@ void MainWindow::verifyDb(const bool conectado) {
 
   if (conectado) { resetTables(); }
 }
+
+bool MainWindow::event(QEvent *event) {
+  switch (event->type()) {
+  case QEvent::WindowActivate: updateTables(); break;
+
+  default: break;
+  }
+
+  return QMainWindow::event(event);
+}
+
+void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);
@@ -181,62 +232,11 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
   cad->show();
 }
 
-void MainWindow::resetTables() {
-  ui->widgetOrcamento->resetTables();
-  ui->widgetVenda->resetTables();
-  ui->widgetCompra->resetTables();
-  ui->widgetLogistica->resetTables();
-  ui->widgetNfe->resetTables();
-  ui->widgetEstoque->resetTables();
-  ui->widgetFinanceiro->resetTables();
-  ui->widgetRelatorio->resetTables();
-  ui->widgetGraficos->resetTables();
-  ui->widgetConsistencia->resetTables();
-
-  updateTables();
-}
-
-void MainWindow::updateTables() {
-  if (qApp->getUpdating()) { return; }
-  if (not qApp->getIsConnected()) { return; }
-  if (qApp->getShowingErrors()) { return; }
-
-  qApp->setUpdating(true);
-
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
-
-  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
-  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
-  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
-  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
-  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
-  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
-  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
-  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
-  if (currentText == "RH") { ui->widgetRh->updateTables(); }
-  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
-
-  qApp->setUpdating(false);
-}
-
 void MainWindow::on_actionCadastrarFornecedor_triggered() {
   auto *cad = new CadastroFornecedor(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
   cad->show();
 }
-
-bool MainWindow::event(QEvent *event) {
-  switch (event->type()) {
-  case QEvent::WindowActivate: updateTables(); break;
-
-  default: break;
-  }
-
-  return QMainWindow::event(event);
-}
-
-void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionSobre_triggered() {
   QMessageBox::about(this, "Sobre ERP Staccato", "Versão " + qApp->applicationVersion() + "\nDesenvolvedor: Rodrigo Torres\nCelular/WhatsApp: (12)98138-3504\nE-mail: torres.dark@gmail.com");

@@ -125,3 +125,4 @@ void ItemBox::setFilter(const QString &filter) { searchDialog->setFilter(filter)
 void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFornecedorRep(fornecedor); }
 
 // TODO: replace this with eliding? https://wiki.qt.io/Elided_Label
+// TODO: ajustar o tamanho do widget de acordo com o tamanho do texto para o autodimensionar funcionar corretamente na tableView (usar sizeHint?)

@@ -311,7 +311,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
     //----------------------------------------------
 
-    if (ui->widgetPgts->listDataPgt.size() > 0) {
+    if (ui->widgetPgts->listDataPgt.size() > 0) { // TODO: replace with widgetPgts->pagamentos?
       double stForn = 0;
       double stLoja = 0;
 

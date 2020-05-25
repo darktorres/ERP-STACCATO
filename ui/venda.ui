@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1374</width>
+    <width>1489</width>
     <height>690</height>
    </rect>
   </property>
@@ -1109,6 +1109,11 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>WidgetPagamentos</class>
    <extends>QWidget</extends>
    <header>src/widgetpagamentos.h</header>
@@ -1118,11 +1123,6 @@ color: rgb(0, 0, 0);</string>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header>src/treeview.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

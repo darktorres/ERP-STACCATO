@@ -43,6 +43,7 @@ void InserirLancamento::setupTables() {
   modelContaPagamento.setHeaderData("dataPagamento", "Vencimento");
   modelContaPagamento.setHeaderData("observacao", "Obs.");
   modelContaPagamento.setHeaderData("status", "Status");
+  modelContaPagamento.setHeaderData("idConta", "Conta");
   modelContaPagamento.setHeaderData("grupo", "Grupo");
   modelContaPagamento.setHeaderData("subGrupo", "SubGrupo");
 
@@ -54,21 +55,20 @@ void InserirLancamento::setupTables() {
   if (tipo == Tipo::Pagar) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
   if (tipo == Tipo::Receber) { ui->table->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
 
-  ui->table->setItemDelegateForColumn("idConta", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Conta, this));
+  ui->table->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, false, this));
   ui->table->setItemDelegateForColumn("idLoja", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Loja, false, this));
   ui->table->setItemDelegateForColumn("grupo", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Grupo, this));
   ui->table->setItemDelegateForColumn("contraParte", new LineEditDelegate(LineEditDelegate::Tipo::ContraPartePagar, this));
   ui->table->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(this));
   // TODO: 5colocar lineEditDelegate para subgrupo
 
-  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo", "status"});
+  ui->table->setPersistentColumns({"idLoja", "tipo", "grupo", "status", "idConta"});
 
   ui->table->hideColumn("parcela");
   ui->table->hideColumn("dataRealizado");
   ui->table->hideColumn("valorReal");
   ui->table->hideColumn("tipoReal");
   ui->table->hideColumn("parcelaReal");
-  ui->table->hideColumn("idConta");
   ui->table->hideColumn("tipoDet");
   ui->table->hideColumn("centroCusto");
   ui->table->hideColumn("idPagamento");

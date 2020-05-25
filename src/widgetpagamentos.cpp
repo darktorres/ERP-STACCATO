@@ -60,7 +60,7 @@ QDateEdit *WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
 }
 
 void WidgetPagamentos::on_doubleSpinBoxPgt_valueChanged(const int index) {
-  if (listTipoPgt.at(index)->currentText() == "Conta Cliente") { calculaCreditoRestante(); }
+  if (listTipoPgt.at(index)->currentText() == "CONTA CLIENTE") { calculaCreditoRestante(); }
 
   calcularTotal();
 }
@@ -69,7 +69,7 @@ void WidgetPagamentos::calculaCreditoRestante() {
   double creditoUsado = 0;
 
   for (int i = 0; i < pagamentos; ++i) {
-    if (listTipoPgt.at(i)->currentText() == "Conta Cliente") { creditoUsado += listValorPgt.at(i)->value(); }
+    if (listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") { creditoUsado += listValorPgt.at(i)->value(); }
   }
 
   creditoRestante = credito - creditoUsado;
@@ -181,13 +181,13 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
   if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
 
   const QStringList list([&queryPag]() {
-    QStringList temp("Escolha uma opção!");
+    QStringList temp("ESCOLHA UMA OPÇÃO!");
     while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());
 
   comboBoxPgt->insertItems(0, list);
-  if (credito > 0) { comboBoxPgt->addItem("Conta Cliente"); }
+  if (credito > 0) { comboBoxPgt->addItem("CONTA CLIENTE"); }
   layout->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listTipoPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listTipoPgt << comboBoxPgt;
@@ -196,9 +196,9 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
-  if (text == "Escolha uma opção!") { return; }
+  if (text == "ESCOLHA UMA OPÇÃO!") { return; }
 
-  if (text == "Conta Cliente") {
+  if (text == "CONTA CLIENTE") {
     if (qFuzzyIsNull(ui->doubleSpinBoxCreditoDisponivel->value())) {
       listTipoPgt.at(index)->setCurrentIndex(0);
       return qApp->enqueueError("Não há saldo cliente restante!", this);
@@ -224,10 +224,13 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
 
   const int parcelas = query.value("parcelas").toInt();
 
-  listParcela.at(index)->clear();
+  { // NOTE: avoid sending signal before widgets are all set
+    const QSignalBlocker blocker(listParcela.at(index));
 
-  // NOTE: this emits montarFluxoCaixa
-  for (int i = 0; i < parcelas; ++i) { listParcela.at(index)->addItem(QString::number(i + 1) + "x"); }
+    listParcela.at(index)->clear();
+
+    for (int i = 0; i < parcelas; ++i) { listParcela.at(index)->addItem(QString::number(i + 1) + "x"); }
+  }
 
   listParcela.at(index)->setEnabled(true);
 
@@ -268,7 +271,7 @@ void WidgetPagamentos::prepararPagamentosRep() {
   on_pushButtonAdicionarPagamento_clicked();
 
   listCheckBoxRep.at(0)->setChecked(not fretePagoLoja);
-  listObservacao.at(0)->setText("Frete");
+  listObservacao.at(0)->setText("FRETE");
   listObservacao.at(0)->setReadOnly(true);
   listValorPgt.at(0)->setValue(frete);
   listValorPgt.at(0)->setReadOnly(true);
@@ -369,9 +372,9 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
       const QDate currentDate = qApp->serverDate();
       QDate dataPgt;
 
-      if (currentText == "Data + 1 Mês") {
+      if (currentText == "DATA + 1 MÊS") {
         dataPgt = currentDate.addMonths(1);
-      } else if (currentText == "Data Mês") {
+      } else if (currentText == "DATA MÊS") {
         dataPgt = currentDate;
       } else {
         dataPgt = currentDate.addDays(currentText.toInt());
@@ -415,7 +418,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
   on_pushButtonAdicionarPagamento_clicked(false);
 
   listCheckBoxRep.at(0)->setChecked(false);
-  listObservacao.at(0)->setText("Frete");
+  listObservacao.at(0)->setText("FRETE");
   listObservacao.at(0)->setReadOnly(true);
   listValorPgt.at(0)->setValue(frete);
   listValorPgt.at(0)->setReadOnly(true);
@@ -423,7 +426,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
 bool WidgetPagamentos::verifyFields() {
   for (int i = 0; i < pagamentos; ++i) {
-    if (listTipoPgt.at(i)->currentText() == "Escolha uma opção!") {
+    if (listTipoPgt.at(i)->currentText() == "ESCOLHA UMA OPÇÃO!") {
       qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
       listTipoPgt.at(i)->setFocus();
       return false;

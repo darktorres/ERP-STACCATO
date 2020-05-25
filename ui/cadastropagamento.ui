@@ -91,7 +91,7 @@
                  <item row="0" column="2">
                   <widget class="QCheckBox" name="checkBoxCentavoSobressalente">
                    <property name="text">
-                    <string>Centavo na 1ª parcela</string>
+                    <string>Centavos na 1ª parcela</string>
                    </property>
                   </widget>
                  </item>

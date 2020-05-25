@@ -4,6 +4,14 @@
 #
 #-------------------------------------------------
 
+!versionAtLeast(QT_VERSION, 5.14.0) {
+    error("Use Qt 5.14 ou mais novo")
+}
+
+win32-msvc* {
+    error("Não compatível com VisualStudio, use MinGW")
+}
+
 TARGET = Loja
 TEMPLATE = app
 VERSION = 0.8.77

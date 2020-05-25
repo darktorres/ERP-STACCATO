@@ -91,6 +91,8 @@ void CadastroPagamento::setupTables() {
   ui->tableAssocia1->hideColumn("idConta");
   ui->tableAssocia1->hideColumn("prazoRecebe");
   ui->tableAssocia1->hideColumn("ajustaDiaUtil");
+  ui->tableAssocia1->hideColumn("dMaisUm");
+  ui->tableAssocia1->hideColumn("centavoSobressalente");
 
   // -------------------------------------------------------------------------
 
@@ -128,6 +130,8 @@ void CadastroPagamento::limparSelecao() {
   ui->itemBoxContaDestino->clear();
   ui->spinBoxPrazo->setValue(0);
   ui->checkBoxDiaUtil->setChecked(false);
+  ui->checkBoxDMaisUm->setChecked(false);
+  ui->checkBoxCentavoSobressalente->setChecked(false);
 
   //--------------------------------------
 

@@ -133,6 +133,7 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
   const int newRow = modelContaPagamento.insertRowAtEnd();
 
   for (int col = 0; col < modelContaPagamento.columnCount(); ++col) {
+    if (modelContaPagamento.fieldIndex("nfe") == col) { continue; }
     if (modelContaPagamento.fieldIndex("valor") == col) { continue; }
     if (modelContaPagamento.fieldIndex("desativado") == col) { continue; }
     if (modelContaPagamento.fieldIndex("created") == col) { continue; }

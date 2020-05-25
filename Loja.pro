@@ -130,6 +130,7 @@ SOURCES += \
     src/cadastrofornecedor.cpp \
     src/cadastroloja.cpp \
     src/cadastroncm.cpp \
+    src/cadastropagamento.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
@@ -251,6 +252,7 @@ HEADERS  += \
     src/cadastrofornecedor.h \
     src/cadastroloja.h \
     src/cadastroncm.h \
+    src/cadastropagamento.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
@@ -369,6 +371,7 @@ FORMS += \
     ui/cadastrofornecedor.ui \
     ui/cadastroloja.ui \
     ui/cadastroncm.ui \
+    ui/cadastropagamento.ui \
     ui/cadastroproduto.ui \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \

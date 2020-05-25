@@ -943,6 +943,11 @@ color: rgb(0, 0, 0);</string>
           <string>LIBERADO</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>CANCELADO</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="3" column="1">

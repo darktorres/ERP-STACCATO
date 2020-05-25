@@ -113,7 +113,7 @@ void Contas::preencher(const QModelIndex &index) {
 
       // -------------------------------------------------------------------------
 
-      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", modelPendentes.data(row, "parcela")}});
+      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
         if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"))) { return; }
@@ -130,7 +130,7 @@ void Contas::preencher(const QModelIndex &index) {
     if (index.column() == ui->tablePendentes->columnIndex("idConta")) {
       if (index.data() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
 
-      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". Taxa Cartão"}, {"parcela", modelPendentes.data(row, "parcela")}});
+      const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
         if (not modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta"))) { return; }

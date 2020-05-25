@@ -35,6 +35,7 @@ private:
   auto on_actionEscuro_triggered() -> void;
   auto on_actionGerenciar_Lojas_triggered() -> void;
   auto on_actionGerenciar_NCMs_triggered() -> void;
+  auto on_actionGerenciar_Pagamentos_triggered() -> void;
   auto on_actionGerenciar_Transportadoras_triggered() -> void;
   auto on_actionGerenciar_preco_estoque_triggered() -> void;
   auto on_actionImportar_tabela_IBPT_triggered() -> void;

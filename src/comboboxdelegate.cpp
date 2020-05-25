@@ -41,7 +41,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     while (query.next()) { list << query.value("pagamento").toString(); }
 
-    list << "Conta Cliente";
+    list << "CONTA CLIENTE";
   }
 
   if (tipo == Tipo::Conta) {
@@ -76,7 +76,6 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 }
 
 void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
-  qDebug() << "setEditorData";
   if (auto *cb = qobject_cast<QComboBox *>(editor)) {
     const int cbIndex = cb->findText(index.data(Qt::EditRole).toString());
 
@@ -89,7 +88,6 @@ void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 }
 
 void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
-  qDebug() << "setModelData";
   if (auto *cb = qobject_cast<QComboBox *>(editor)) {
     model->setData(index, cb->currentText(), Qt::EditRole);
     return;

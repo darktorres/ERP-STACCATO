@@ -670,6 +670,29 @@ void Venda::montarFluxoCaixa() {
 
     //-----------------------------------------------------------------
 
+    if (tipoPgt == "CONTA CLIENTE") {
+      const int row = modelFluxoCaixa.insertRowAtEnd();
+
+      const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
+
+      if (not modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
+      if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
+      if (not modelFluxoCaixa.setData(row, "valor", ui->widgetPgts->listValorPgt.at(pagamento)->value())) { return; }
+      if (not modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt)) { return; }
+      if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
+      if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listObservacao.at(pagamento)->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "representacao", false)) { return; }
+      const int creditoClientes = 11;
+      if (not modelFluxoCaixa.setData(row, "idConta", creditoClientes)) { return; }
+      if (not modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda")) { return; }
+      if (not modelFluxoCaixa.setData(row, "subGrupo", "")) { return; }
+      if (not modelFluxoCaixa.setData(row, "centroCusto", idLoja)) { return; }
+
+      continue;
+    }
+
     QSqlQuery query2;
     query2.prepare("SELECT idConta, prazoRecebe, ajustaDiaUtil, dMaisUm, centavoSobressalente, taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento "
                    "WHERE pagamento = :pagamento AND parcela = :parcela");

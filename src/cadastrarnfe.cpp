@@ -875,7 +875,8 @@ void CadastrarNFe::writeProduto(QTextStream &stream) const {
     const QString numProd = QString("%1").arg(row + 1, 3, 10, QChar('0')); // padding with zeros
     stream << "[Produto" + numProd + "]\n";
     stream << "CFOP = " + modelViewProdutoEstoque.data(row, "cfop").toString() + "\n";
-    stream << "CEST = " + modelViewProdutoEstoque.data(row, "cest").toString() + "\n";
+    const QString cest = modelViewProdutoEstoque.data(row, "cest").toString();
+    if (cest != "0") { stream << "CEST = " + cest + "\n"; }
     stream << "NCM = " + modelViewProdutoEstoque.data(row, "ncm").toString() + "\n";
     stream << "Codigo = " + modelViewProdutoEstoque.data(row, "codComercial").toString() + "\n";
     const QString codBarras = modelViewProdutoEstoque.data(row, "codBarras").toString();

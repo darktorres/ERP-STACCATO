@@ -104,11 +104,14 @@ void Contas::preencher(const QModelIndex &index) {
 
       const int idConta = (tipo == Tipo::Receber and modelPendentes.data(row, "tipo").toString().contains("BOLETO")) ? contaItau : contaSantander;
 
+      if (modelPendentes.data(row, "idConta").toInt() == 0) {
+        if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+      }
+
       if (not modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
       if (not modelPendentes.setData(row, "valorReal", modelPendentes.data(row, "valor"))) { return; }
       if (not modelPendentes.setData(row, "tipoReal", modelPendentes.data(row, "tipo"))) { return; }
       if (not modelPendentes.setData(row, "parcelaReal", modelPendentes.data(row, "parcela"))) { return; }
-      if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
       if (not modelPendentes.setData(row, "centroCusto", modelPendentes.data(row, "idLoja"))) { return; }
 
       // -------------------------------------------------------------------------

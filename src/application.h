@@ -17,7 +17,7 @@ public:
   Application(int &argc, char **argv, int = ApplicationFlags);
   auto ajustarDiaUtil(const QDate &date) -> QDate;
   auto darkTheme() -> void;
-  auto dbConnect() -> bool;
+  auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
   auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> bool;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
@@ -41,9 +41,7 @@ public:
   auto roundDouble(const double value, const int decimais) -> double;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
-  auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
-  auto showMessages() -> void;
   auto startTransaction(const QString &messageLog, const bool delayMessages = true) -> bool;
   auto updater() -> void;
 
@@ -72,10 +70,14 @@ private:
   QDateTime serverDateCache;
   QDate systemDate = QDate::currentDate();
   // methods
+  auto genericLogin(const QString &hostname) -> bool;
+  auto loginError() -> void;
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> bool;
-  auto setDatabase() -> bool;
+  auto setConnectOptions() -> void;
+  auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;
   auto storeSelection() -> void;
+  auto userLogin(const QString &user) -> bool;
 };

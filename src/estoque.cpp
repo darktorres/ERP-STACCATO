@@ -103,6 +103,7 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   //--------------------------------------------------------------------
 

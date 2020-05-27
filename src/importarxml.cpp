@@ -155,6 +155,7 @@ void ImportarXML::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   // -------------------------------------------------------------------------
 
@@ -763,6 +764,7 @@ bool ImportarXML::percorrerXml(XML &xml) {
     if (not modelEstoque.setData(newRow, "pCOFINS", produto.pCOFINS)) { return false; }
     if (not modelEstoque.setData(newRow, "vCOFINS", produto.vCOFINS)) { return false; }
     if (not modelEstoque.setData(newRow, "status", "EM COLETA")) { return false; }
+    if (not modelEstoque.setData(newRow, "valorGare", produto.valorGare)) { return false; }
   }
 
   return true;
@@ -1013,12 +1015,12 @@ void ImportarXML::on_checkBoxSemLote_toggled(const bool checked) {
   }
 }
 
-std::optional<double> ImportarXML::calculaGare(const XML &xml) {
+std::optional<double> ImportarXML::calculaGare(XML &xml) {
   const QString dataEmissao = xml.dataHoraEmissao.left(10);
 
   double total = 0;
 
-  for (const auto &produto : xml.produtos) {
+  for (auto &produto : xml.produtos) {
     qDebug() << "tipoICMS: " << produto.tipoICMS;
     if (produto.tipoICMS != "ICMS00") { continue; }
     // TODO: tratar quando for simples nacional
@@ -1037,7 +1039,10 @@ std::optional<double> ImportarXML::calculaGare(const XML &xml) {
     const double icmsProprio = produto.vICMS;
     const double baseST = (baseCalculo) * (1 + mva);
     const double icmsST = (baseST * icmsIntra) - icmsProprio;
+
     total += icmsST;
+
+    produto.valorGare = icmsST;
 
     qDebug() << "baseCalculo: " << baseCalculo;
     qDebug() << "mvaAjustado: " << mva;

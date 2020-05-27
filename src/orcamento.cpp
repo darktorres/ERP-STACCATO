@@ -64,8 +64,11 @@ void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoItem(); }
 
   ui->pushButtonAtualizarItem->show();
-  ui->pushButtonAdicionarItem->hide();
   ui->pushButtonRemoverItem->show();
+  ui->pushButtonLimparSelecao->show();
+
+  ui->pushButtonAdicionarItem->hide();
+
   mapperItem.setCurrentModelIndex(index);
   currentRowItem = index.row();
 }
@@ -94,8 +97,9 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked, connectionType);
   connect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked, connectionType);
-  connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked, connectionType);
   connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked, connectionType);
+  connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked, connectionType);
+  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::novoItem, connectionType);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked, connectionType);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked, connectionType);
   connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked, connectionType);
@@ -123,8 +127,9 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
   disconnect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
-  disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
   disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked);
+  disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
+  disconnect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::novoItem);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   disconnect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
@@ -170,40 +175,9 @@ bool Orcamento::viewRegister() {
 
       ui->pushButtonReplicar->show();
 
-      ui->doubleSpinBoxCaixas->hide();
-      ui->doubleSpinBoxDesconto->hide();
-      ui->doubleSpinBoxQuant->hide();
-      ui->doubleSpinBoxTotalItem->hide();
-      ui->itemBoxProduto->hide();
-      ui->labelCaixa->hide();
-      ui->labelCaixas->hide();
-      ui->labelCodComercial->hide();
-      ui->labelDesconto->hide();
-      ui->labelEstoque->hide();
-      ui->labelFormComercial->hide();
-      ui->labelFornecedor->hide();
-      ui->labelMinimo->hide();
-      ui->labelObs->hide();
-      ui->labelPrecoUn->hide();
-      ui->labelProduto->hide();
-      ui->labelQuant->hide();
-      ui->labelTotalItem->hide();
-      ui->labelUn->hide();
-      ui->lineEditCodComercial->hide();
-      ui->lineEditEstoque->hide();
-      ui->lineEditFormComercial->hide();
-      ui->lineEditFornecedor->hide();
-      ui->lineEditObs->hide();
-      ui->lineEditPrecoUn->hide();
-      ui->lineEditUn->hide();
-      ui->pushButtonAdicionarItem->hide();
-      ui->pushButtonAtualizarItem->hide();
-      ui->pushButtonAtualizarOrcamento->hide();
-      ui->pushButtonCalculadora->hide();
+      ui->frameProduto->hide();
+
       ui->pushButtonGerarVenda->hide();
-      ui->pushButtonRemoverItem->hide();
-      ui->spinBoxMinimo->hide();
-      ui->spinBoxQuantCx->hide();
 
       ui->checkBoxFreteManual->setDisabled(true);
 
@@ -277,35 +251,41 @@ bool Orcamento::viewRegister() {
 
 void Orcamento::novoItem() {
   ui->pushButtonAdicionarItem->show();
+
   ui->pushButtonAtualizarItem->hide();
   ui->pushButtonRemoverItem->hide();
+  ui->pushButtonLimparSelecao->hide();
+
   ui->itemBoxProduto->clear();
   ui->tableProdutos->clearSelection();
+
   // -----------------------
 
   ui->doubleSpinBoxCaixas->setDisabled(true);
-  ui->doubleSpinBoxCaixas->setSingleStep(1.);
-  ui->doubleSpinBoxCaixas->clear();
   ui->doubleSpinBoxDesconto->setDisabled(true);
-  ui->doubleSpinBoxDesconto->clear();
   ui->doubleSpinBoxQuant->setDisabled(true);
+  ui->doubleSpinBoxTotalItem->setDisabled(true);
+  ui->lineEditPrecoUn->setDisabled(true);
+  ui->lineEditUn->setDisabled(true);
+  ui->spinBoxMinimo->setDisabled(true);
+  ui->spinBoxQuantCx->setDisabled(true);
+
+  ui->doubleSpinBoxCaixas->setSingleStep(1.);
   ui->doubleSpinBoxQuant->setSingleStep(1.);
+
+  ui->doubleSpinBoxCaixas->clear();
+  ui->doubleSpinBoxDesconto->clear();
   ui->doubleSpinBoxQuant->clear();
   ui->doubleSpinBoxTotalItem->clear();
-  ui->doubleSpinBoxTotalItem->setDisabled(true);
   ui->lineEditCodComercial->clear();
   ui->lineEditEstoque->clear();
   ui->lineEditFormComercial->clear();
   ui->lineEditFornecedor->clear();
   ui->lineEditObs->clear();
   ui->lineEditPrecoUn->clear();
-  ui->lineEditPrecoUn->setDisabled(true);
   ui->lineEditUn->clear();
-  ui->lineEditUn->setDisabled(true);
   ui->spinBoxMinimo->clear();
-  ui->spinBoxMinimo->setDisabled(true);
   ui->spinBoxQuantCx->clear();
-  ui->spinBoxQuantCx->setDisabled(true);
 }
 
 void Orcamento::setupMapper() {

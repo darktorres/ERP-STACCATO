@@ -137,7 +137,7 @@ bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
 
   const QStringList list([&queryPag]() {
-    QStringList temp("Escolha uma opção!");
+    QStringList temp("ESCOLHA UMA OPÇÃO!");
     while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());

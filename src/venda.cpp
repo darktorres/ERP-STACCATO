@@ -372,11 +372,11 @@ bool Venda::verifyFields() {
 
   if (ui->widgetPgts->isHidden()) { return true; }
 
-  if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
-
   if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
 
   if (not ui->widgetPgts->verifyFields()) { return false; }
+
+  if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
 
   if (ui->spinBoxPrazoEntrega->value() == 0) {
     qApp->enqueueError("Por favor preencha o prazo de entrega!", this);

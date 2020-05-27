@@ -59,6 +59,8 @@ class XML final {
     double vBCCOFINS = 0;
     double pCOFINS = 0;
     double vCOFINS = 0;
+    // gare
+    double valorGare = 0;
   };
 
 public:

@@ -59,7 +59,7 @@ private:
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto cadastrarNFe(XML &xml, const double gare) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
-  auto calculaGare(const XML &xml) -> std::optional<double>;
+  auto calculaGare(XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
   auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;

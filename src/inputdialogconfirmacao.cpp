@@ -196,6 +196,7 @@ void InputDialogConfirmacao::setupTables() {
     ui->tableLogistica->hideColumn("vBCCOFINS");
     ui->tableLogistica->hideColumn("pCOFINS");
     ui->tableLogistica->hideColumn("vCOFINS");
+    ui->tableLogistica->hideColumn("valorGare");
   }
 
   if (tipo == Tipo::Entrega) {

@@ -605,6 +605,8 @@ bool InputDialogFinanceiro::verifyFields() {
     if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { return qApp->enqueueError(false, "Soma dos pagamentos difere do total! Favor verificar!", this); }
 
     if (not ui->widgetPgts->verifyFields()) { return false; }
+
+    if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
   }
 
   return true;

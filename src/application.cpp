@@ -219,8 +219,6 @@ void Application::startUpdaterPing() {
 }
 
 void Application::darkTheme() {
-  setStyle("Fusion");
-
   QPalette darkPalette;
   darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
   darkPalette.setColor(QPalette::WindowText, Qt::white);
@@ -249,7 +247,6 @@ void Application::darkTheme() {
 }
 
 void Application::lightTheme() {
-  setStyle("Fusion");
   setPalette(defaultPalette);
   setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 

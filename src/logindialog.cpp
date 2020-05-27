@@ -45,8 +45,8 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
       ui->checkBoxSalvarSenha->setChecked(salvarSenha);
 
       if (salvarSenha) {
-        if (const auto key = UserSession::getSetting("User/passwd")) {
-          ui->lineEditPass->setText(key->toString());
+        if (const auto key2 = UserSession::getSetting("User/passwd")) {
+          ui->lineEditPass->setText(key2->toString());
           ui->pushButtonLogin->setFocus();
         }
       }

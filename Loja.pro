@@ -14,7 +14,7 @@ win32-msvc* {
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.85
+VERSION = 0.8.87
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)

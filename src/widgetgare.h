@@ -24,8 +24,12 @@ private:
   SqlTableModel model;
   Ui::WidgetGare *ui;
   // methods
-  auto on_pushButtonBaixaCNAB_clicked() -> void;
-  auto on_pushButtonGerarCNAB_clicked() -> void;
+  auto montaFiltro() -> void;
+  auto on_pushButtonDarBaixa_clicked() -> void;
+  auto on_pushButtonRemessaItau_clicked() -> void;
+  auto on_pushButtonRemessaSantander_clicked() -> void;
+  auto on_pushButtonRetornoItau_clicked() -> void;
+  auto on_pushButtonRetornoSantander_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setupTables() -> void;
 };

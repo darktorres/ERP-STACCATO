@@ -141,6 +141,7 @@ SOURCES += \
     src/charttooltip.cpp \
     src/chartview.cpp \
     src/checkboxdelegate.cpp \
+    src/cnab.cpp \
     src/collapsiblewidget.cpp \
     src/combobox.cpp \
     src/comboboxdelegate.cpp \
@@ -263,6 +264,7 @@ HEADERS  += \
     src/charttooltip.h \
     src/chartview.h \
     src/checkboxdelegate.h \
+    src/cnab.h \
     src/collapsiblewidget.h \
     src/combobox.h \
     src/comboboxdelegate.h \
@@ -378,6 +380,7 @@ FORMS += \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
+    ui/cnab.ui \
     ui/collapsiblewidget.ui \
     ui/comprovantes.ui \
     ui/contas.ui \

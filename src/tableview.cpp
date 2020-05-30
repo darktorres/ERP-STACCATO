@@ -2,7 +2,7 @@
 
 #include "application.h"
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QClipboard>
 #include <QDebug>
@@ -15,15 +15,14 @@
 TableView::TableView(QWidget *parent) : QTableView(parent) {
   setContextMenuPolicy(Qt::CustomContextMenu);
 
-  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
-  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
-
   verticalHeader()->setResizeContentsPrecision(0);
   horizontalHeader()->setResizeContentsPrecision(0);
 
   verticalHeader()->setDefaultSectionSize(20);
-
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+  connect(this, &QWidget::customContextMenuRequested, this, &TableView::showContextMenu);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::resizeColumnsToContents);
 }
 
 void TableView::resizeColumnsToContents() {
@@ -43,6 +42,14 @@ void TableView::showContextMenu(const QPoint &pos) {
 
   contextMenu.exec(mapToGlobal(pos));
 }
+
+void TableView::resizeEvent(QResizeEvent *event) {
+  redoView();
+
+  QTableView::resizeEvent(event);
+}
+
+int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }
 
 int TableView::columnIndex(const QString &column, const bool silent) const {
   int columnIndex = -1;
@@ -64,14 +71,35 @@ void TableView::openPersistentEditor(const int row, const QString &column) { QTa
 
 void TableView::openPersistentEditor(const int row, const int column) { QTableView::openPersistentEditor(QTableView::model()->index(row, column)); }
 
+void TableView::resort() { model()->sort(horizontalHeader()->sortIndicatorSection(), horizontalHeader()->sortIndicatorOrder()); }
+
 void TableView::sortByColumn(const QString &column, Qt::SortOrder order) { QTableView::sortByColumn(columnIndex(column), order); }
 
 int TableView::rowCount() const { return model()->rowCount(); }
 
 void TableView::redoView() {
   if (persistentColumns.isEmpty()) { return; }
+  if (rowCount() == 0) { return; }
 
-  for (int row = 0, rowCount = model()->rowCount(); row < rowCount; ++row) {
+  const int firstRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().y() + 5)).row();
+  int lastRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().height() - 5)).row();
+
+  if (firstRowIndex == -1) { return; }
+
+  int count = 0;
+
+  // subtrair uma linha de altura por vez até achar uma linha
+  while (lastRowIndex == -1) {
+    int xpos = viewport()->rect().x() + 5;
+    int ypos = viewport()->rect().height() - 5 - rowHeight(0) * count;
+
+    if (ypos < 0) { return; }
+
+    lastRowIndex = indexAt(QPoint(xpos, ypos)).row();
+    ++count;
+  }
+
+  for (int row = firstRowIndex; row <= lastRowIndex; ++row) {
     for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
   }
 }
@@ -79,7 +107,7 @@ void TableView::redoView() {
 void TableView::setModel(QAbstractItemModel *model) {
   if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
     QTableView::setModel(temp->proxyModel);
-  } else if (auto temp2 = qobject_cast<SqlRelationalTableModel *>(model); temp2 and temp2->proxyModel) {
+  } else if (auto temp2 = qobject_cast<SqlTableModel *>(model); temp2 and temp2->proxyModel) {
     QTableView::setModel(temp2->proxyModel);
   } else {
     QTableView::setModel(model);
@@ -94,6 +122,7 @@ void TableView::setModel(QAbstractItemModel *model) {
   connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);
+  connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &TableView::redoView);
 
   //---------------------------------------
 

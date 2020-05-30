@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetCompraResumo : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraResumo(QWidget *parent = nullptr);
+  explicit WidgetCompraResumo(QWidget *parent);
   ~WidgetCompraResumo();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,7 +21,7 @@ private:
   // attributes
   bool modelIsSet = false;
   Ui::WidgetCompraResumo *ui;
-  SqlRelationalTableModel modelResumo;
+  SqlTableModel modelResumo;
   // methods
   auto setupTables() -> void;
 };

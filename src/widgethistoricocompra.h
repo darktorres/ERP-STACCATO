@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 #include "sqltreemodel.h"
 
 #include <QWidget>
@@ -13,7 +13,7 @@ class WidgetHistoricoCompra final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetHistoricoCompra(QWidget *parent = nullptr);
+  explicit WidgetHistoricoCompra(QWidget *parent);
   ~WidgetHistoricoCompra();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -22,10 +22,10 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewComprasFinanceiro;
-  SqlRelationalTableModel modelProdutos;
-  SqlRelationalTableModel modelProdutos2;
-  SqlRelationalTableModel modelNFe;
+  SqlTableModel modelViewComprasFinanceiro;
+  SqlTableModel modelProdutos;
+  SqlTableModel modelProdutos2;
+  SqlTableModel modelNFe;
   SqlTreeModel modelTree;
   Ui::WidgetHistoricoCompra *ui;
   // methods

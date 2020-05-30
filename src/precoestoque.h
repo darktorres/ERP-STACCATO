@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -12,12 +12,12 @@ class PrecoEstoque final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PrecoEstoque(QWidget *parent = nullptr);
+  explicit PrecoEstoque(QWidget *parent);
   ~PrecoEstoque();
 
 private:
   // attributes
-  SqlRelationalTableModel modelProduto;
+  SqlTableModel modelProduto;
   Ui::PrecoEstoque *ui;
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;

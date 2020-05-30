@@ -1,4 +1,4 @@
-#include "impressao.h"
+#include "pdf.h"
 
 #include "application.h"
 #include "lrreportengine.h"
@@ -11,7 +11,7 @@
 #include <QSqlError>
 #include <QUrl>
 
-Impressao::Impressao(const QString &id, const Tipo tipo, QObject *parent) : tipo(tipo), id(id), parent(parent) {
+PDF::PDF(const QString &id, const Tipo tipo, QObject *parent) : tipo(tipo), id(id), parent(parent) {
   modelItem.setTable((tipo == Tipo::Orcamento ? "orcamento" : "venda") + QString("_has_produto"));
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
@@ -19,7 +19,7 @@ Impressao::Impressao(const QString &id, const Tipo tipo, QObject *parent) : tipo
   if (not modelItem.select()) { return; }
 }
 
-void Impressao::print() {
+void PDF::gerarPdf() {
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
   const auto folderKey = UserSession::getSetting(folder);
@@ -43,8 +43,8 @@ void Impressao::print() {
 
   dataManager->setReportVariable("Data", query.value("data").toDate().toString("dd-MM-yyyy"));
   dataManager->setReportVariable("Cliente", queryCliente.value("nome_razao"));
-  const QString cpfcnpj = queryCliente.value("pfpj") == "PF" ? "CPF: " : "CNPJ: ";
-  dataManager->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value(queryCliente.value("pfpj") == "PF" ? "cpf" : "cnpj").toString());
+  const QString cpfcnpj = (queryCliente.value("pfpj") == "PF") ? "CPF: " : "CNPJ: ";
+  dataManager->setReportVariable("CPFCNPJ", cpfcnpj + queryCliente.value((queryCliente.value("pfpj") == "PF") ? "cpf" : "cnpj").toString());
   dataManager->setReportVariable("EmailCliente", queryCliente.value("email"));
   dataManager->setReportVariable("Tel1", queryCliente.value("tel"));
   dataManager->setReportVariable("Tel2", queryCliente.value("telCel"));
@@ -139,7 +139,7 @@ void Impressao::print() {
   qApp->enqueueInformation("Arquivo salvo como " + fileName);
 }
 
-bool Impressao::setQuerys() {
+bool PDF::setQuerys() {
   if (tipo == Tipo::Orcamento) {
     query.prepare("SELECT idCliente, idProfissional, idUsuario, idLoja, data, validade, idEnderecoFaturamento, idEnderecoEntrega, subTotalLiq, descontoPorc, descontoReais, frete, total, observacao, "
                   "prazoEntrega FROM orcamento WHERE idOrcamento = :idOrcamento");

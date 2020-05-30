@@ -4,7 +4,6 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "log.h"
 #include "searchdialog.h"
 #include "usersession.h"
 
@@ -67,7 +66,7 @@ void CadastroTransportadora::setupTables() {
   ui->tableVeiculo->hideColumn("idVeiculo");
   ui->tableVeiculo->hideColumn("idTransportadora");
 
-  ui->tableVeiculo->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableVeiculo->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableVeiculo->setPersistentColumns({"desativado"});
 
@@ -79,7 +78,7 @@ void CadastroTransportadora::setupTables() {
   ui->tableEndereco->hideColumn("idTransportadora");
   ui->tableEndereco->hideColumn("codUF");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 }
@@ -95,7 +94,7 @@ bool CadastroTransportadora::verifyFields() {
   const auto children = ui->groupBox_7->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   return true;
@@ -125,6 +124,7 @@ void CadastroTransportadora::setupMapper() {
   mapperVeiculo.addMapping(ui->lineEditModelo, modelVeiculo.fieldIndex("modelo"));
   mapperVeiculo.addMapping(ui->lineEditCarga, modelVeiculo.fieldIndex("capacidade"));
   mapperVeiculo.addMapping(ui->lineEditPlaca, modelVeiculo.fieldIndex("placa"));
+  mapperVeiculo.addMapping(ui->lineEditUfPlaca, modelVeiculo.fieldIndex("ufPlaca"));
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditBairro, modelEnd.fieldIndex("bairro"));
@@ -158,6 +158,7 @@ void CadastroTransportadora::on_pushButtonAtualizar_clicked() { save(); }
 
 void CadastroTransportadora::on_pushButtonNovoCad_clicked() { newRegister(); }
 
+// TODO: ao desativar uma transportadora desativar cada um de seus veiculos senao eles continuam a aparecer no SearchDialog/Calendario
 void CadastroTransportadora::on_pushButtonRemover_clicked() { remove(); }
 
 void CadastroTransportadora::on_pushButtonBuscar_clicked() {
@@ -171,16 +172,16 @@ void CadastroTransportadora::on_lineEditCNPJ_textEdited(const QString &text) {
                                                                                                 : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
 }
 
-void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroTransportadora::on_pushButtonAdicionarEnd_clicked() {
+  if (cadastrarEndereco()) { novoEndereco(); }
+}
 
-void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
+  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+}
 
 void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) { return; }
 
     if (not modelEnd.submitAll()) { return; }
@@ -214,8 +215,6 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
-
-  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
@@ -311,8 +310,6 @@ bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
 
   if (not modelVeiculo.setData(currentRowVeiculo, "ufPlaca", ui->lineEditUfPlaca->text())) { return false; }
 
-  if (not columnsToUpper(modelVeiculo, currentRowVeiculo)) { return false; }
-
   if (tipoVeiculo == Tipo::Cadastrar) { backupVeiculo.append(modelVeiculo.record(currentRowVeiculo)); }
 
   isDirty = true;
@@ -320,9 +317,13 @@ bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
   return true;
 }
 
-void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() { cadastrarVeiculo() ? novoVeiculo() : qApp->enqueueError("Não foi possível atualizar este veículo!", this); }
+void CadastroTransportadora::on_pushButtonAdicionarVeiculo_clicked() {
+  if (cadastrarVeiculo()) { novoVeiculo(); }
+}
 
-void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() { cadastrarVeiculo(Tipo::Atualizar) ? novoVeiculo() : qApp->enqueueError("Não foi possível atualizar este veículo!", this); }
+void CadastroTransportadora::on_pushButtonAtualizarVeiculo_clicked() {
+  if (cadastrarVeiculo(Tipo::Atualizar)) { novoVeiculo(); }
+}
 
 void CadastroTransportadora::novoVeiculo() {
   ui->pushButtonAtualizarVeiculo->hide();
@@ -340,11 +341,7 @@ void CadastroTransportadora::clearVeiculo() {
 }
 
 void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not modelVeiculo.setData(currentRowVeiculo, "desativado", true)) { return; }
 
     if (not modelVeiculo.submitAll()) { return; }
@@ -354,23 +351,16 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
 }
 
 bool CadastroTransportadora::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroTransportadora::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroTransportadora::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 

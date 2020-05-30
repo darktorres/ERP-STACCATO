@@ -11,14 +11,14 @@ class CadastroUsuario final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroUsuario(QWidget *parent = nullptr);
+  explicit CadastroUsuario(QWidget *parent);
   ~CadastroUsuario();
   auto modificarUsuario() -> void;
 
 private:
   // attributes
   SearchDialog *sdUsuario;
-  SqlRelationalTableModel modelPermissoes;
+  SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
   auto cadastrar() -> bool final;

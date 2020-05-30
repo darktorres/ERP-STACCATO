@@ -1,13 +1,13 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QIdentityProxyModel>
 
 class ImportaProdutosProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit ImportaProdutosProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  explicit ImportaProdutosProxyModel(SqlTableModel *model, QObject *parent);
   ~ImportaProdutosProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

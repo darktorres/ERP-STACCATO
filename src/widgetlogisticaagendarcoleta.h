@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetLogisticaAgendarColeta final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaAgendarColeta(QWidget *parent = nullptr);
+  explicit WidgetLogisticaAgendarColeta(QWidget *parent);
   ~WidgetLogisticaAgendarColeta();
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
@@ -23,9 +23,9 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   QString fornecedor;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelTranspAtual;
-  SqlRelationalTableModel modelTranspAgend;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelTranspAtual;
+  SqlTableModel modelTranspAgend;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> bool;

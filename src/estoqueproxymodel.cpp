@@ -4,7 +4,7 @@
 
 #include <QBrush>
 
-EstoqueProxyModel::EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent) : SortFilterProxyModel(model, parent), quantUpdColumn(model->fieldIndex("quantUpd")) {}
+EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : SortFilterProxyModel(model, parent), quantUpdColumn(model->fieldIndex("quantUpd")) {}
 
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

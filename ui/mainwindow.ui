@@ -22,10 +22,35 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="styleSheet">
-       <string notr="true">QTabBar::tab:disabled { width: 0; height: 0; margin: 0; padding: 0; border: none; }
+       <string notr="true">QTabBar::tab:disabled {
+	 width: 0;
+	 height: 0;
+	 margin: 0;
+	 padding: 0;
+	 border: none; 
+}
+
+QTabWidget::pane {
+	margin: 0px 0px 0px 0px; 
+}
 </string>
       </property>
       <property name="currentIndex">
@@ -36,6 +61,21 @@
         <string>Orçamentos</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetOrcamento" name="widgetOrcamento" native="true"/>
         </item>
@@ -46,6 +86,21 @@
         <string>Vendas</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_20">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetVenda" name="widgetVenda" native="true"/>
         </item>
@@ -56,6 +111,21 @@
         <string>Compras</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_21">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetCompra" name="widgetCompra" native="true"/>
         </item>
@@ -66,6 +136,21 @@
         <string>Logística</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_6">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetLogistica" name="widgetLogistica" native="true"/>
         </item>
@@ -75,7 +160,22 @@
        <attribute name="title">
         <string>NFe</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_17">
+       <layout class="QGridLayout" name="gridLayout_17" columnminimumwidth="0,0">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="1">
          <widget class="WidgetNfe" name="widgetNfe" native="true"/>
         </item>
@@ -86,6 +186,21 @@
         <string>Estoque</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_22">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetEstoque" name="widgetEstoque" native="true"/>
         </item>
@@ -96,6 +211,21 @@
         <string>Financeiro</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_36">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetFinanceiro" name="widgetFinanceiro" native="true"/>
         </item>
@@ -106,6 +236,21 @@
         <string>Relatórios</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetRelatorio" name="widgetRelatorio" native="true"/>
         </item>
@@ -116,6 +261,21 @@
         <string>Gráfico</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetGraficos" name="widgetGraficos" native="true"/>
         </item>
@@ -126,6 +286,21 @@
         <string>RH</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetRh" name="widgetRh" native="true">
           <property name="enabled">
@@ -140,6 +315,21 @@
         <string>Consistência</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="WidgetConsistencia" name="widgetConsistencia" native="true"/>
         </item>
@@ -160,7 +350,7 @@
      <x>0</x>
      <y>0</y>
      <width>764</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOpcoes">
@@ -182,6 +372,7 @@
      <addaction name="actionPromocao"/>
     </widget>
     <addaction name="menuImportar_tabela_fornecedor"/>
+    <addaction name="actionImportar_tabela_IBPT"/>
     <addaction name="menuTema"/>
     <addaction name="actionConfiguracoes"/>
    </widget>
@@ -191,11 +382,13 @@
     </property>
     <addaction name="actionCadastrarProfissional"/>
     <addaction name="actionGerenciar_Lojas"/>
+    <addaction name="actionGerenciar_pagamentos"/>
     <addaction name="actionGerenciar_Transportadoras"/>
     <addaction name="actionCadastrarUsuario"/>
     <addaction name="actionCadastrarFornecedor"/>
     <addaction name="actionCadastrarProdutos"/>
     <addaction name="actionGerenciar_preco_estoque"/>
+    <addaction name="actionGerenciar_NCMs"/>
    </widget>
    <widget class="QMenu" name="menuVenda">
     <property name="title">
@@ -334,6 +527,21 @@
   <action name="actionCalcular_frete">
    <property name="text">
     <string>Calcular frete</string>
+   </property>
+  </action>
+  <action name="actionImportar_tabela_IBPT">
+   <property name="text">
+    <string>Importar tabela IBPT</string>
+   </property>
+  </action>
+  <action name="actionGerenciar_NCMs">
+   <property name="text">
+    <string>Gerenciar NCMs</string>
+   </property>
+  </action>
+  <action name="actionGerenciar_pagamentos">
+   <property name="text">
+    <string>Gerenciar pagamentos</string>
    </property>
   </action>
  </widget>

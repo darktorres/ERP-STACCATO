@@ -4,6 +4,7 @@
 #include "usersession.h"
 
 #include <QComboBox>
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -15,21 +16,14 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   QStringList list;
 
-  if (tipo == Tipo::Status) {
-    list << "PENDENTE"
-         << "COMPRAR"
-         << "PAGO"
-         << "RECEBIDO";
-  }
-
-  if (tipo == Tipo::StatusReceber) {
+  if (tipo == Tipo::Receber) {
     list << "PENDENTE"
          << "RECEBIDO"
          << "CANCELADO"
          << "CONFERIDO";
   }
 
-  if (tipo == Tipo::StatusPagar) {
+  if (tipo == Tipo::Pagar) {
     list << "PENDENTE"
          << "PAGO"
          << "CANCELADO"
@@ -47,7 +41,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     while (query.next()) { list << query.value("pagamento").toString(); }
 
-    list << "Conta Cliente";
+    list << "CONTA CLIENTE";
   }
 
   if (tipo == Tipo::Conta) {

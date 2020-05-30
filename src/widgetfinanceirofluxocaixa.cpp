@@ -35,7 +35,7 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
     ui->itemBoxCaixa1->setSearchDialog(SearchDialog::conta(this));
     ui->itemBoxCaixa2->setSearchDialog(SearchDialog::conta(this));
 
-    // REFAC: 0dont hardcode magic numbers
+    // TODO: 0dont hardcode magic numbers
     const int contaSantander = 3;
     const int contaItau = 33;
 
@@ -69,6 +69,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
                       filtroConta + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);
 
   modelCaixa.setHeaderData("dataRealizado", "Data Realizado");
+  modelCaixa.setHeaderData("contaDestino", "Conta");
 
   ui->tableCaixa->setModel(&modelCaixa);
 
@@ -77,7 +78,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
   ui->tableCaixa->setItemDelegateForColumn("R$", new ReaisDelegate(this));
   ui->tableCaixa->setItemDelegateForColumn("Acumulado", new ReaisDelegate(this));
 
-  ui->tableCaixa->hideColumn("contaDestino");
+  filtroConta.isEmpty() ? ui->tableCaixa->showColumn("contaDestino") : ui->tableCaixa->hideColumn("contaDestino");
   ui->tableCaixa->hideColumn("idConta");
 
   // calcular saldo
@@ -90,7 +91,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // ----------------------------------------------------------------------------------------------------------
 
-  const QString filtroConta2 = ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid() ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
+  const QString filtroConta2 = (ui->groupBoxCaixa2->isChecked() and ui->itemBoxCaixa2->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa2->getId().toString() + " AND " : "";
 
   modelCaixa2.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
                        "WHERE " +
@@ -170,3 +171,4 @@ void WidgetFinanceiroFluxoCaixa::on_groupBoxCaixa2_toggled(const bool checked) {
 // TODO: 0nao agrupar contas no view_fluxo_resumo (apenas quando filtrado)
 // TODO: 0fazer delegate para reduzir tamanho da fonte
 // TODO: separar a tabela 'Futuro' em duas telas, uma 'vencidos' e a outra mantem igual a atual
+// TODO: as querys dessa tela são pesadas, alterar a conta recarrega todas as tabelas, talvez alterar apenas quando o usuario clicar para atualizar

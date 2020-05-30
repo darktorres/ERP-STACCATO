@@ -2,7 +2,6 @@
 #include "ui_widgetcompradevolucao.h"
 
 #include "application.h"
-#include "log.h"
 #include "sql.h"
 
 #include <QDate>
@@ -56,7 +55,7 @@ void WidgetCompraDevolucao::setupTables() {
   modelVendaProduto.setHeaderData("caixas", "Cx.");
   modelVendaProduto.setHeaderData("quant", "Quant.");
   modelVendaProduto.setHeaderData("un", "Un.");
-  modelVendaProduto.setHeaderData("unCaixa", "Un./Cx.");
+  modelVendaProduto.setHeaderData("quantCaixa", "Quant./Cx.");
   modelVendaProduto.setHeaderData("codComercial", "Cód. Com.");
   modelVendaProduto.setHeaderData("formComercial", "Form. Com.");
 
@@ -112,9 +111,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor")) { return; }
 
   if (not retornarFornecedor(list)) { return qApp->rollbackTransaction(); }
 
@@ -122,13 +119,14 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   if (not qApp->endTransaction()) { return; }
 
-  if (not modelVendaProduto.select()) { return; }
-
+  updateTables();
   qApp->enqueueInformation("Retornado para fornecedor!", this);
 }
 
 bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
+
+  // TODO: ao retornar para estoque criar linha livre no pf2 para consumos posteriores (ou agrupar com linha livre existente)
 
   for (const auto &index : list) {
     const int row = index.row();
@@ -142,7 +140,8 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
     // TODO: 0colocar uma linha de pagamento negativa no fluxo da compra para quando corrigir fluxo ter o valor total alterado
     // TODO: 0criar uma tabelinha de coisas pendentes para o financeiro
 
-    SqlRelationalTableModel modelConsumo;
+    // NOTE: *quebralinha estoque_has_consumo
+    SqlTableModel modelConsumo;
     modelConsumo.setTable("estoque_has_consumo");
     modelConsumo.setFilter("idVendaProduto2 = " + idRelacionado);
 
@@ -153,22 +152,21 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
     const int newRow = modelConsumo.insertRowAtEnd();
 
     for (int column = 0; column < modelConsumo.columnCount(); ++column) {
-      if (modelConsumo.fieldIndex("idConsumo") == column) { continue; }
-      if (modelConsumo.fieldIndex("idVendaProduto2") == column) { continue; }
-      if (modelConsumo.fieldIndex("created") == column) { continue; }
-      if (modelConsumo.fieldIndex("lastUpdated") == column) { continue; }
+      if (column == modelConsumo.fieldIndex("idConsumo")) { continue; }
+      if (column == modelConsumo.fieldIndex("idVendaProduto2")) { continue; }
+      if (column == modelConsumo.fieldIndex("created")) { continue; }
+      if (column == modelConsumo.fieldIndex("lastUpdated")) { continue; }
 
       const QVariant value = modelConsumo.data(0, column);
 
       if (not modelConsumo.setData(newRow, column, value)) { return false; }
     }
 
-    // TODO: update other fields
     if (not modelConsumo.setData(newRow, "idVendaProduto2", modelVendaProduto.data(row, "idVendaProduto2"))) { return false; }
     if (not modelConsumo.setData(newRow, "status", "DEVOLVIDO")) { return false; }
-    if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(row, "caixas").toDouble() * -1)) { return false; }
     if (not modelConsumo.setData(newRow, "quant", modelVendaProduto.data(row, "quant").toDouble() * -1)) { return false; }
     if (not modelConsumo.setData(newRow, "quantUpd", 5)) { return false; }
+    if (not modelConsumo.setData(newRow, "caixas", modelVendaProduto.data(row, "caixas").toDouble() * -1)) { return false; }
 
     if (not modelConsumo.submitAll()) { return false; }
   }
@@ -195,9 +193,7 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetCompraDevolucao::on_pushButtonRetornarEstoque")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonRetornarEstoque")) { return; }
 
   if (not retornarEstoque(list)) { return qApp->rollbackTransaction(); }
 

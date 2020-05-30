@@ -11,7 +11,7 @@ class CadastroProfissional final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroProfissional(QWidget *parent = nullptr);
+  explicit CadastroProfissional(QWidget *parent);
   ~CadastroProfissional();
 
 private:

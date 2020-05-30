@@ -1,18 +1,18 @@
 #include "acbr.h"
 
 #include "application.h"
-#include "log.h"
 #include "usersession.h"
 
 #include <QDesktopServices>
-#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QThread>
 #include <QUrl>
 
 ACBr::ACBr(QObject *parent) : QObject(parent) {
-  connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error);
+  connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error); // TODO: change in 5.15 to errorOcurred
   connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
   connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
   connect(&socket, &QTcpSocket::readyRead, this, &ACBr::readSocket);
@@ -27,8 +27,17 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
   progressDialog->setMinimum(0);
 }
 
+ACBr::ACBr() : ACBr(nullptr) {}
+
 void ACBr::error() {
-  qApp->enqueueError("Erro socket: " + socket.errorString());
+  const QString errorString = socket.errorString();
+
+  if (errorString == "Connection refused" or errorString == "Connection timed out") {
+    qApp->enqueueError("Erro conectando ao ACBr! Verifique se ele está aberto!");
+  } else {
+    qApp->enqueueError("Erro socket: " + socket.errorString());
+  }
+
   progressDialog->cancel();
 }
 
@@ -134,7 +143,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
     return {};
   }
 
-  if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e")) {
+  if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e") and not resposta2->contains("xEvento=Cancelamento registrado")) {
     qApp->enqueueError(resposta2.value());
     return {};
   }
@@ -151,9 +160,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 }
 
 void ACBr::removerNota(const int idNFe) {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: ACBr::removerNota")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("ACBr::removerNota")) { return; }
 
   const bool remover = [&] {
     QSqlQuery query2a;
@@ -189,36 +196,50 @@ bool ACBr::abrirPdf(const QString &filePath) {
 }
 
 std::optional<QString> ACBr::enviarComando(const QString &comando, const bool local) {
-  const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
-  const auto porta = UserSession::getSetting("User/portaACBr");
-
-  if (not servidorConfig or not porta) {
-    qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
-    return {};
-  }
-
   recebido = false;
   enviado = false;
   resposta.clear();
-  progressDialog->show();
+  progressDialog->reset();
 
-  const auto servidor = local ? "localhost" : servidorConfig->toString();
+  if (local) {
+    progressDialog->show();
 
-  if (lastHost != servidor) { socket.disconnectFromHost(); }
-
-  if (not conectado) {
-    lastHost = servidor;
-
-    socket.connectToHost(servidor, porta->toByteArray().toUShort());
+    if (not conectado) { socket.connectToHost("localhost", 3434); }
   }
 
-  while (not pronto) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+  if (not local) {
+    const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
+    const auto porta = UserSession::getSetting("User/portaACBr");
+
+    if (not servidorConfig or not porta) {
+      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
+      return {};
+    }
+
+    progressDialog->show();
+
+    if (not conectado) { socket.connectToHost(servidorConfig->toString(), porta->toByteArray().toUShort()); }
+  }
+
+  while (not pronto) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(10);
+    if (progressDialog->wasCanceled()) { return {}; }
+  }
 
   socket.write(comando.toUtf8() + "\r\n.\r\n");
 
-  while (not enviado and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+  while (not enviado and conectado) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(10);
+    if (progressDialog->wasCanceled()) { return {}; }
+  }
 
-  while (not recebido and conectado) { QCoreApplication::processEvents(QEventLoop::AllEvents, 100); }
+  while (not recebido and conectado) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    QThread::msleep(10);
+    if (progressDialog->wasCanceled()) { return {}; }
+  }
 
   progressDialog->cancel();
 
@@ -238,4 +259,4 @@ bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   return true;
 }
 
-// NOTE: notas versão 3.1 ou menor não podem ser acessadas pelo servidor 4.0
+// NOTE: se uma nota der erro na consulta o xml armazenado provavelmente está errado, nesses casos baixar o xml pelo DANFE ONLINE e substituir no sistema

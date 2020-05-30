@@ -137,8 +137,9 @@ void InputDialogProduto::setupTables() {
   if (tipo == Tipo::GerarCompra) {
     ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
     ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-    ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(this));
+    ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
     ui->table->setItemDelegateForColumn("quant", new EditDelegate(this));
+    ui->table->setItemDelegateForColumn("caixas", new EditDelegate(this));
   }
 
   if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this)); }
@@ -171,7 +172,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   if (query.value("representacao").toBool() and tipo == Tipo::Faturamento) { ui->lineEditCodRep->show(); }
 
-  if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário.", this); }
+  if (tipo == Tipo::GerarCompra) { qApp->enqueueInformation("Ajustar preço e quantidade se necessário!", this); }
 
   return true;
 }
@@ -230,7 +231,39 @@ void InputDialogProduto::on_pushButtonSalvar_clicked() {
   close();
 }
 
-bool InputDialogProduto::cadastrar() { return modelPedidoFornecedor.submitAll(); }
+bool InputDialogProduto::cadastrar() {
+  if (not qApp->startTransaction("InputDialog::cadastrar")) { return false; }
+
+  const bool success = [&] {
+    if (tipo == Tipo::GerarCompra) {
+      QSqlQuery queryUpdate;
+      queryUpdate.prepare(
+          "UPDATE pedido_fornecedor_has_produto2 SET aliquotaSt = :aliquotaSt, st = :st, quant = :quant, caixas = :caixas, prcUnitario = :prcUnitario, preco = :preco WHERE idPedidoFK = :idPedido1");
+
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+        queryUpdate.bindValue(":aliquotaSt", modelPedidoFornecedor.data(row, "aliquotaSt"));
+        queryUpdate.bindValue(":st", modelPedidoFornecedor.data(row, "st"));
+        queryUpdate.bindValue(":quant", modelPedidoFornecedor.data(row, "quant"));
+        queryUpdate.bindValue(":caixas", modelPedidoFornecedor.data(row, "caixas"));
+        queryUpdate.bindValue(":prcUnitario", modelPedidoFornecedor.data(row, "prcUnitario"));
+        queryUpdate.bindValue(":preco", modelPedidoFornecedor.data(row, "preco"));
+        queryUpdate.bindValue(":idPedido1", modelPedidoFornecedor.data(row, "idPedido1"));
+
+        if (not queryUpdate.exec()) { return qApp->enqueueError(false, "Erro copiando dados para tabela 2: " + queryUpdate.lastError().text(), this); }
+      }
+    }
+
+    return modelPedidoFornecedor.submitAll();
+  }();
+
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+  } else {
+    qApp->rollbackTransaction();
+  }
+
+  return true;
+}
 
 void InputDialogProduto::on_dateEditEvento_dateChanged(const QDate &date) {
   if (ui->dateEditProximo->date() < date) { ui->dateEditProximo->setDate(date); }

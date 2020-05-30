@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -13,13 +13,13 @@ class ProdutosPendentes final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent = nullptr);
+  explicit ProdutosPendentes(const QString &codComercial, const QString &idVenda, QWidget *parent);
   ~ProdutosPendentes();
 
 private:
   // attributes
-  SqlRelationalTableModel modelProdutos;
-  SqlRelationalTableModel modelViewProdutos;
+  SqlTableModel modelProdutos;
+  SqlTableModel modelViewProdutos;
   SqlQueryModel modelEstoque;
   Ui::ProdutosPendentes *ui;
   // methods

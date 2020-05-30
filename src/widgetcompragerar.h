@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetCompraGerar final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraGerar(QWidget *parent = nullptr);
+  explicit WidgetCompraGerar(QWidget *parent);
   ~WidgetCompraGerar();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -24,8 +24,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelResumo;
-  SqlRelationalTableModel modelProdutos;
+  SqlTableModel modelResumo;
+  SqlTableModel modelProdutos;
   Ui::WidgetCompraGerar *ui;
   // methods
   auto calcularPreco() -> void;

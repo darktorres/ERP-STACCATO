@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetNfeEntrada final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfeEntrada(QWidget *parent = nullptr);
+  explicit WidgetNfeEntrada(QWidget *parent);
   ~WidgetNfeEntrada();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewNFeEntrada;
+  SqlTableModel modelViewNFeEntrada;
   Ui::WidgetNfeEntrada *ui;
   // methods
   auto remover(const int row) -> bool;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "estoqueproxymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 #include "xml.h"
 
 #include <QDate>
@@ -14,11 +14,12 @@ class ImportarXML;
 class ImportarXML final : public QDialog {
   Q_OBJECT
 
-public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataReal, QWidget *parent = nullptr);
-  ~ImportarXML();
+  struct NCM {
+    double mva4;
+    double mva12;
+    double aliq;
+  };
 
-private:
   struct ProdutoEstoque {
     int idProduto;
     int idEstoque;
@@ -26,15 +27,21 @@ private:
     double valorUnid;
   };
 
+public:
+  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent);
+  ~ImportarXML();
+
+private:
   // attributes
-  const QDate dataReal;
+  const QDate dataFaturamento;
   const QStringList idsCompra;
-  SqlRelationalTableModel modelCompra;
-  SqlRelationalTableModel modelConsumo;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelVenda;
-  SqlRelationalTableModel modelEstoque_compra;
-  SqlRelationalTableModel modelNFe;
+  SqlTableModel modelCompra;
+  SqlTableModel modelConsumo;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelVenda;
+  SqlTableModel modelEstoque_compra;
+  SqlTableModel modelNFe;
+  SqlTableModel modelPagamento;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {
@@ -48,29 +55,28 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
-  auto salvarDadosCompra() -> bool;
+  auto buscaNCM(const QString &ncm) -> std::optional<ImportarXML::NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
-  auto cadastrarNFe(XML &xml) -> bool;
+  auto cadastrarNFe(XML &xml, const double gare) -> bool;
   auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
+  auto calculaGare(XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
+  auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
   auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
   auto importar() -> bool;
-  auto inserirItemModel(const XML &xml) -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
-  auto mapTuples() -> QVector<ProdutoEstoque>;
+  auto mapTuples() -> QVector<ImportarXML::ProdutoEstoque>;
   auto on_checkBoxSemLote_toggled(const bool checked) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;
   auto parear() -> bool;
-  auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
+  auto percorrerXml(XML &xml) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
-  auto reservarIdPedido2() -> std::optional<int>;
-  auto reservarIdEstoque() -> std::optional<int>;
-  auto reservarIdVendaProduto2() -> std::optional<int>;
+  auto salvarDadosCompra() -> bool;
   auto salvarDadosVenda() -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;

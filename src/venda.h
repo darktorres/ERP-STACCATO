@@ -11,7 +11,7 @@ class Venda final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Venda(QWidget *parent = nullptr);
+  explicit Venda(QWidget *parent);
   ~Venda();
   auto prepararVenda(const QString &idOrcamento) -> void;
   auto setFinanceiro() -> void;
@@ -26,10 +26,10 @@ private:
   bool canChangeFrete = false;
   double minimoFrete;
   double porcFrete;
-  SqlRelationalTableModel modelFluxoCaixa;
-  SqlRelationalTableModel modelFluxoCaixa2;
-  SqlRelationalTableModel modelItem;
-  SqlRelationalTableModel modelItem2;
+  SqlTableModel modelFluxoCaixa;
+  SqlTableModel modelFluxoCaixa2;
+  SqlTableModel modelItem;
+  SqlTableModel modelItem2;
   SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods
@@ -53,13 +53,15 @@ private:
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxTotal_valueChanged(const double total) -> void;
   auto on_itemBoxProfissional_textChanged(const QString &) -> void;
+  auto on_pushButtonAdicionarObservacao_clicked() -> void;
   auto on_pushButtonCadastrarPedido_clicked() -> void;
   auto on_pushButtonCancelamento_clicked() -> void;
+  auto on_pushButtonComprovantes_clicked() -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonDevolucao_clicked() -> void;
   auto on_pushButtonFinanceiroSalvar_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
-  auto on_pushButtonImprimir_clicked() -> void;
+  auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;

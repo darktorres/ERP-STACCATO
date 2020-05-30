@@ -6,8 +6,8 @@
 class DateFormatDelegate final : public QStyledItemDelegate {
 
 public:
-  explicit DateFormatDelegate(const int vencimentoColumn, QObject *parent = nullptr);
-  explicit DateFormatDelegate(QObject *parent = nullptr);
+  explicit DateFormatDelegate(const int vencimentoColumn, QObject *parent);
+  explicit DateFormatDelegate(QObject *parent);
   ~DateFormatDelegate() = default;
   auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget * final;
 

@@ -4,7 +4,7 @@
 
 #include <QBrush>
 
-OrcamentoProxyModel::OrcamentoProxyModel(SqlRelationalTableModel *model, QObject *parent)
+OrcamentoProxyModel::OrcamentoProxyModel(SqlTableModel *model, QObject *parent)
     : QIdentityProxyModel(parent), diasRestantesIndex(model->fieldIndex("Dias restantes")), statusIndex(model->fieldIndex("Status")), followupIndex(model->fieldIndex("Observação")),
       semaforoIndex(model->fieldIndex("semaforo")) {
   setSourceModel(model);

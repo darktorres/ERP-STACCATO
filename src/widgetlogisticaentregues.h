@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -13,7 +13,7 @@ class WidgetLogisticaEntregues final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaEntregues(QWidget *parent = nullptr);
+  explicit WidgetLogisticaEntregues(QWidget *parent);
   ~WidgetLogisticaEntregues();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -23,7 +23,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   SqlQueryModel modelProdutos;
-  SqlRelationalTableModel modelVendas;
+  SqlTableModel modelVendas;
   Ui::WidgetLogisticaEntregues *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;

@@ -6,7 +6,6 @@
 #include "importarxml.h"
 #include "inputdialog.h"
 #include "inputdialogproduto.h"
-#include "log.h"
 #include "reaisdelegate.h"
 #include "sql.h"
 
@@ -122,25 +121,23 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (not inputDlg.setFilter(idsCompra)) { return; }
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
-  const QDate dataReal = inputDlg.getDate();
+  const QDate dataFaturamento = inputDlg.getDate();
 
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
 
   if (pularNota) {
-    if (not qApp->startTransaction()) { return; }
-    if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return qApp->rollbackTransaction(); }
-    if (not faturarRepresentacao(dataReal, idsCompra)) { return qApp->rollbackTransaction(); }
+    if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return; }
+    if (not faturarRepresentacao(dataFaturamento, idsCompra)) { return qApp->rollbackTransaction(); }
     if (not qApp->endTransaction()) { return; }
   } else {
-    auto *import = new ImportarXML(idsCompra, dataReal, this);
+    auto *import = new ImportarXML(idsCompra, dataFaturamento, this);
     import->setAttribute(Qt::WA_DeleteOnClose);
     import->showMaximized();
 
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (not qApp->startTransaction()) { return; }
-  if (not Log::createLog("Transação: WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return; }
   if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
   if (not qApp->endTransaction()) { return; }
 
@@ -201,12 +198,9 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-// TODO: 4quando importar nota vincular com as contas_pagar
-// TODO: 5reimportar nota id 4936 que veio com o produto dividido para testar o quantConsumido
-// TODO: 5reestruturar na medida do possivel de forma que cada estoque tenha apenas uma nota/compra
-// TODO: 0colocar tela de busca
-
 void WidgetCompraFaturar::on_checkBoxRepresentacao_toggled(bool checked) {
   ui->pushButtonMarcarFaturado->setText(checked ? "Marcar faturado" : "Marcar faturado - Importar NFe");
   montaFiltro();
 }
+
+// TODO: 4quando importar nota vincular com as contas_pagar

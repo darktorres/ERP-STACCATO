@@ -4,15 +4,10 @@
 #include "application.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
-#include "log.h"
-#include "porcentagemdelegate.h"
-#include "searchdialog.h"
 #include "usersession.h"
 
 #include <QDebug>
-#include <QFileDialog>
 #include <QMessageBox>
-#include <QSqlError>
 
 CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idLoja", parent), ui(new Ui::CadastroLoja) {
   ui->setupUi(this);
@@ -29,9 +24,6 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
   sdLoja = SearchDialog::loja(this);
   connect(sdLoja, &SearchDialog::itemSelected, this, &CadastroLoja::viewRegisterById);
 
-  ui->pushButtonAtualizarPagamento->hide();
-  ui->pushButtonLimparSelecao->hide();
-
   if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
@@ -41,27 +33,19 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
   connect(ui->checkBoxMostrarInativosConta, &QCheckBox::clicked, this, &CadastroLoja::on_checkBoxMostrarInativosConta_clicked);
   connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroLoja::on_lineEditCEP_textChanged);
   connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroLoja::on_lineEditCNPJ_textEdited);
-  connect(ui->pushButtonAdicionaAssociacao, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionaAssociacao_clicked);
   connect(ui->pushButtonAdicionarConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionarConta_clicked);
   connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionarEnd_clicked);
-  connect(ui->pushButtonAdicionarPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAdicionarPagamento_clicked);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizar_clicked);
   connect(ui->pushButtonAtualizarConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarConta_clicked);
   connect(ui->pushButtonAtualizarEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarEnd_clicked);
-  connect(ui->pushButtonAtualizarPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarPagamento_clicked);
-  connect(ui->pushButtonAtualizarTaxas, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonAtualizarTaxas_clicked);
   connect(ui->pushButtonBuscar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonBuscar_clicked);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonCadastrar_clicked);
-  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonLimparSelecao_clicked);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonNovoCad_clicked);
-  connect(ui->pushButtonRemoveAssociacao, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoveAssociacao_clicked);
   connect(ui->pushButtonRemover, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemover_clicked);
   connect(ui->pushButtonRemoverConta, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverConta_clicked);
   connect(ui->pushButtonRemoverEnd, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverEnd_clicked);
-  connect(ui->pushButtonRemoverPagamento, &QPushButton::clicked, this, &CadastroLoja::on_pushButtonRemoverPagamento_clicked);
   connect(ui->tableConta, &TableView::clicked, this, &CadastroLoja::on_tableConta_clicked);
   connect(ui->tableEndereco, &TableView::clicked, this, &CadastroLoja::on_tableEndereco_clicked);
-  connect(ui->tablePagamentos, &TableView::clicked, this, &CadastroLoja::on_tablePagamentos_clicked);
 }
 
 CadastroLoja::~CadastroLoja() { delete ui; }
@@ -74,43 +58,19 @@ void CadastroLoja::setupUi() {
 }
 
 void CadastroLoja::setupTables() {
-  modelAssocia1.setTable("forma_pagamento");
-
-  modelAssocia1.setHeaderData("pagamento", "Pagamento");
-  modelAssocia1.setHeaderData("parcelas", "Parcelas");
-
-  ui->tableAssocia1->setModel(&modelAssocia1);
-
-  ui->tableAssocia1->hideColumn("idPagamento");
-
-  // -------------------------------------------------------------------------
-
-  modelAssocia2.setTable("view_pagamento_loja");
-
-  modelAssocia2.setHeaderData("pagamento", "Pagamento");
-
-  ui->tableAssocia2->setModel(&modelAssocia2);
-
-  ui->tableAssocia2->hideColumn("idLoja");
-  ui->tableAssocia2->hideColumn("idPagamento");
-
-  // -------------------------------------------------------------------------
-
   ui->tableEndereco->setModel(&modelEnd);
 
   ui->tableEndereco->hideColumn("idEndereco");
   ui->tableEndereco->hideColumn("idLoja");
   ui->tableEndereco->hideColumn("codUF");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 
   // -------------------------------------------------------------------------
 
   modelConta.setTable("loja_has_conta");
-
-  modelConta.setFilter("idLoja = " + QString::number(UserSession::idLoja())); // ????????
 
   modelConta.setHeaderData("banco", "Banco");
   modelConta.setHeaderData("agencia", "Agência");
@@ -122,34 +82,9 @@ void CadastroLoja::setupTables() {
   ui->tableConta->hideColumn("idConta");
   ui->tableConta->hideColumn("idLoja");
 
-  ui->tableConta->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableConta->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableConta->setPersistentColumns({"desativado"});
-
-  // -------------------------------------------------------------------------
-
-  modelPagamentos.setTable("forma_pagamento");
-
-  modelPagamentos.setHeaderData("pagamento", "Pagamento");
-  modelPagamentos.setHeaderData("parcelas", "Parcelas");
-
-  ui->tablePagamentos->setModel(&modelPagamentos);
-
-  ui->tablePagamentos->hideColumn("idPagamento");
-
-  // -------------------------------------------------------------------------
-
-  modelTaxas.setTable("forma_pagamento_has_taxa");
-
-  modelTaxas.setHeaderData("parcela", "Quant. Parcelas");
-  modelTaxas.setHeaderData("taxa", "Taxa");
-
-  ui->tableTaxas->setModel(&modelTaxas);
-
-  ui->tableTaxas->hideColumn("idTaxa");
-  ui->tableTaxas->hideColumn("idPagamento");
-
-  ui->tableTaxas->setItemDelegateForColumn("taxa", new PorcentagemDelegate(this));
 }
 
 void CadastroLoja::clearFields() {
@@ -160,10 +95,13 @@ void CadastroLoja::clearFields() {
 }
 
 bool CadastroLoja::verifyFields() {
+  // Loja Geral
+  if (data("idLoja").toInt() == 1) { return true; }
+
   const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   return true;
@@ -198,7 +136,6 @@ void CadastroLoja::registerMode() {
   ui->pushButtonRemoverConta->hide();
 
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabParametros), false);
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabPagamentos), false);
 }
 
 void CadastroLoja::updateMode() {
@@ -237,11 +174,6 @@ void CadastroLoja::setupMapper() {
   mapperConta.addMapping(ui->lineEditBanco, modelConta.fieldIndex("banco"));
   mapperConta.addMapping(ui->lineEditAgencia, modelConta.fieldIndex("agencia"));
   mapperConta.addMapping(ui->lineEditConta, modelConta.fieldIndex("conta"));
-
-  mapperPagamento.setModel(&modelPagamentos);
-  mapperPagamento.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
-  mapperPagamento.addMapping(ui->lineEditPagamento, modelPagamentos.fieldIndex("pagamento"));
-  mapperPagamento.addMapping(ui->spinBoxParcelas, modelPagamentos.fieldIndex("parcelas"));
 }
 
 void CadastroLoja::on_pushButtonCadastrar_clicked() { save(); }
@@ -263,16 +195,16 @@ void CadastroLoja::on_lineEditCNPJ_textEdited(const QString &text) {
                                                                                                 : "background-color: rgb(255, 255, 127);color: rgb(255, 0, 0)");
 }
 
-void CadastroLoja::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroLoja::on_pushButtonAdicionarEnd_clicked() {
+  if (cadastrarEndereco()) { novoEndereco(); }
+}
 
-void CadastroLoja::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroLoja::on_pushButtonAtualizarEnd_clicked() {
+  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+}
 
 void CadastroLoja::on_pushButtonRemoverEnd_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) { return; }
 
     if (not modelEnd.submitAll()) { return; }
@@ -308,8 +240,6 @@ bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
-
-  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
 
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
@@ -379,22 +309,11 @@ bool CadastroLoja::viewRegister() {
 
   // -------------------------------------------------------------------------
 
-  if (not modelPagamentos.select()) { return false; }
-
-  // -------------------------------------------------------------------------
-
-  if (not modelAssocia1.select()) { return false; }
-
-  // -------------------------------------------------------------------------
-
-  modelAssocia2.setFilter("idLoja = " + data("idLoja").toString());
-
-  if (not modelAssocia2.select()) { return false; }
-
-  // -------------------------------------------------------------------------
-
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabParametros), true);
-  ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabPagamentos), true);
+
+  // -------------------------------------------------------------------------
+
+  if (data("idLoja").toInt() == 1) { ui->groupBoxCadastro->setDisabled(true); }
 
   return true;
 }
@@ -402,23 +321,16 @@ bool CadastroLoja::viewRegister() {
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
 bool CadastroLoja::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroLoja::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroLoja::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
@@ -433,6 +345,8 @@ bool CadastroLoja::cadastrar() {
     if (not setForeignKey(modelConta)) { return false; }
 
     if (not modelConta.submitAll()) { return false; }
+
+    // -------------------------------------------------------------------------
 
     return true;
   }();
@@ -484,25 +398,11 @@ bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
     return false;
   }
 
-  if (ui->lineEditAgencia->text().isEmpty()) {
-    qApp->enqueueError("Agência inválida!", this);
-    ui->lineEditAgencia->setFocus();
-    return false;
-  }
-
-  if (ui->lineEditConta->text().isEmpty()) {
-    qApp->enqueueError("Conta inválida!", this);
-    ui->lineEditConta->setFocus();
-    return false;
-  }
-
   if (tipoConta == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
 
   if (not modelConta.setData(currentRowConta, "banco", ui->lineEditBanco->text())) { return false; }
   if (not modelConta.setData(currentRowConta, "agencia", ui->lineEditAgencia->text())) { return false; }
   if (not modelConta.setData(currentRowConta, "conta", ui->lineEditConta->text())) { return false; }
-
-  if (not columnsToUpper(modelConta, currentRowConta)) { return false; }
 
   if (tipoConta == Tipo::Cadastrar) { backupConta.append(modelConta.record(currentRowConta)); }
 
@@ -525,16 +425,17 @@ void CadastroLoja::clearConta() {
   ui->lineEditConta->clear();
 }
 
-void CadastroLoja::on_pushButtonAdicionarConta_clicked() { cadastrarConta() ? novaConta() : qApp->enqueueError("Não foi possível cadastrar esta conta.", this); }
+void CadastroLoja::on_pushButtonAdicionarConta_clicked() {
+  // TODO: colocar flag para indicar que conta é virtual?
+  if (cadastrarConta()) { novaConta(); }
+}
 
-void CadastroLoja::on_pushButtonAtualizarConta_clicked() { cadastrarConta(Tipo::Atualizar) ? novaConta() : qApp->enqueueError("Não foi possível cadastrar esta conta.", this); }
+void CadastroLoja::on_pushButtonAtualizarConta_clicked() {
+  if (cadastrarConta(Tipo::Atualizar)) { novaConta(); }
+}
 
 void CadastroLoja::on_pushButtonRemoverConta_clicked() {
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not modelConta.setData(mapperConta.currentIndex(), "desativado", true)) { return; }
 
     if (not modelConta.submitAll()) { return; }
@@ -550,190 +451,3 @@ void CadastroLoja::on_checkBoxMostrarInativosConta_clicked(bool checked) {
 
   if (not modelConta.select()) { return; }
 }
-
-bool CadastroLoja::adicionarPagamento() {
-  const int row = modelPagamentos.insertRowAtEnd();
-
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
-
-  if (not modelPagamentos.submitAll()) { return false; }
-
-  const int id = modelPagamentos.query().lastInsertId().toInt();
-
-  for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
-    const int rowTaxas = modelTaxas.insertRowAtEnd();
-
-    if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
-  }
-
-  if (not modelTaxas.submitAll()) { return false; }
-
-  modelTaxas.setFilter("idPagamento = " + QString::number(id));
-
-  return modelTaxas.select();
-}
-
-void CadastroLoja::on_pushButtonAdicionarPagamento_clicked() {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastroLoja::on_pushButtonAdicionarPagamento")) { return qApp->rollbackTransaction(); }
-
-  if (not adicionarPagamento()) { return qApp->rollbackTransaction(); }
-
-  if (not qApp->endTransaction()) { return; }
-}
-
-void CadastroLoja::on_tablePagamentos_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return; }
-
-  const int id = modelPagamentos.data(index.row(), "idPagamento").toInt();
-
-  modelTaxas.setFilter("idPagamento = " + QString::number(id));
-
-  if (not modelTaxas.select()) { return; }
-
-  mapperPagamento.setCurrentModelIndex(index);
-
-  ui->pushButtonAdicionarPagamento->hide();
-  ui->pushButtonAtualizarPagamento->show();
-  ui->pushButtonLimparSelecao->show();
-}
-
-void CadastroLoja::on_pushButtonRemoverPagamento_clicked() {
-  const auto list = ui->tablePagamentos->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
-
-  const int id = modelPagamentos.data(list.first().row(), "idPagamento").toInt();
-
-  //--------------------------------------
-
-  QSqlQuery query;
-  query.prepare("DELETE FROM forma_pagamento WHERE idPagamento = :idPagamento");
-  query.bindValue(":idPagamento", id);
-
-  if (not query.exec()) { return qApp->enqueueError("Erro apagando pagamentos: " + query.lastError().text(), this); }
-
-  //--------------------------------------
-
-  ui->lineEditPagamento->clear();
-  ui->spinBoxParcelas->clear();
-
-  //--------------------------------------
-
-  ui->pushButtonAtualizarPagamento->hide();
-  ui->pushButtonAdicionarPagamento->show();
-}
-
-bool CadastroLoja::atualizarPagamento() {
-  const int row = mapperPagamento.currentIndex();
-
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
-
-  //--------------------------------------
-
-  if (not modelTaxas.removeRows(0, modelTaxas.rowCount())) { return qApp->enqueueError(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
-
-  //--------------------------------------
-
-  for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
-    const int rowTaxas = modelTaxas.insertRowAtEnd();
-
-    if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(rowTaxas, "idPagamento"))) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
-  }
-
-  //--------------------------------------
-
-  if (not modelPagamentos.submitAll()) { return false; }
-
-  //--------------------------------------
-
-  if (not modelTaxas.submitAll()) { return false; }
-
-  //--------------------------------------
-
-  ui->lineEditPagamento->clear();
-  ui->spinBoxParcelas->clear();
-
-  //--------------------------------------
-
-  ui->pushButtonAtualizarPagamento->hide();
-  ui->pushButtonAdicionarPagamento->show();
-
-  //--------------------------------------
-
-  return true;
-}
-
-void CadastroLoja::on_pushButtonAtualizarPagamento_clicked() {
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: CadastroLoja::on_pushButtonAtualizarPagamento")) { return qApp->rollbackTransaction(); }
-
-  if (not atualizarPagamento()) { return qApp->rollbackTransaction(); }
-
-  if (not qApp->endTransaction()) { return; }
-}
-
-void CadastroLoja::on_pushButtonAtualizarTaxas_clicked() {
-  if (not modelTaxas.submitAll()) { return; }
-
-  qApp->enqueueInformation("Taxas atualizadas!", this);
-}
-
-void CadastroLoja::on_pushButtonAdicionaAssociacao_clicked() {
-  const auto list = ui->tableAssocia1->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
-
-  QSqlQuery query;
-  query.prepare("INSERT INTO forma_pagamento_has_loja (idPagamento, idLoja) VALUES (:idPagamento, :idLoja)");
-
-  for (const auto &index : list) {
-    query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
-    query.bindValue(":idLoja", data("idLoja"));
-
-    if (not query.exec()) { qApp->enqueueError("Erro cadastrando associacao: " + query.lastError().text(), this); }
-  }
-}
-
-void CadastroLoja::on_pushButtonRemoveAssociacao_clicked() {
-  const auto list = ui->tableAssocia2->selectionModel()->selectedRows();
-
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
-
-  QSqlQuery query;
-  query.prepare("DELETE FROM forma_pagamento_has_loja WHERE idPagamento = :idPagamento AND idLoja = :idLoja");
-
-  for (const auto &index : list) {
-    query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
-    query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
-
-    if (not query.exec()) { qApp->enqueueError("Erro removendo associacao: " + query.lastError().text(), this); }
-  }
-}
-
-void CadastroLoja::on_pushButtonLimparSelecao_clicked() {
-  // TODO: remove this function and use the click outside line tableView logic
-
-  ui->lineEditPagamento->clear();
-  ui->spinBoxParcelas->clear();
-
-  //--------------------------------------
-
-  ui->pushButtonAtualizarPagamento->hide();
-  ui->pushButtonAdicionarPagamento->show();
-  ui->pushButtonLimparSelecao->hide();
-
-  //--------------------------------------
-
-  ui->tablePagamentos->clearSelection();
-}
-
-// FIXME: nao permitir associar um pagamento já associado

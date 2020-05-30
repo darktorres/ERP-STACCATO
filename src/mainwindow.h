@@ -11,7 +11,8 @@ class MainWindow final : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(QWidget *parent);
+  explicit MainWindow();
   ~MainWindow();
   auto updateTables() -> void;
 
@@ -33,8 +34,11 @@ private:
   auto on_actionCriarOrcamento_triggered() -> void;
   auto on_actionEscuro_triggered() -> void;
   auto on_actionGerenciar_Lojas_triggered() -> void;
+  auto on_actionGerenciar_NCMs_triggered() -> void;
+  auto on_actionGerenciar_Pagamentos_triggered() -> void;
   auto on_actionGerenciar_Transportadoras_triggered() -> void;
   auto on_actionGerenciar_preco_estoque_triggered() -> void;
+  auto on_actionImportar_tabela_IBPT_triggered() -> void;
   auto on_actionProdutos_triggered() -> void;
   auto on_actionPromocao_triggered() -> void;
   auto on_actionSobre_triggered() -> void;

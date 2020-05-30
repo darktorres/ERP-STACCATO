@@ -121,4 +121,4 @@ void InputDialog::on_pushButtonSalvar_clicked() {
 }
 
 // TODO: 0colocar titulo, descricao para nao perder o fluxo
-// REFAC: colocar as classes variacoes (Produto/Financeiro) como widget e colocar nesta classe
+// TODO: colocar as classes variacoes (Produto/Financeiro) como widget e colocar nesta classe

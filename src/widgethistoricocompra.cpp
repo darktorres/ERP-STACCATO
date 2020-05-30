@@ -124,28 +124,28 @@ void WidgetHistoricoCompra::setTreeView() {
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("preco", new ReaisDelegate(this));
-  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("kgcx", new DoubleDelegate(4, this));
 }
 
 void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString idCompra = modelViewComprasFinanceiro.data(index.row(), "Compra").toString();
+  const QString ordemCompra = modelViewComprasFinanceiro.data(index.row(), "OC").toString();
 
-  modelProdutos.setFilter("idCompra = " + idCompra);
+  modelProdutos.setFilter("ordemCompra = " + ordemCompra);
 
   if (not modelProdutos.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
 
-  modelProdutos2.setFilter("idCompra = " + idCompra);
+  modelProdutos2.setFilter("ordemCompra = " + ordemCompra);
 
   if (not modelProdutos2.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos2.lastError().text(), this); }
 
   setTreeView();
 
-  modelNFe.setFilter("idCompra = " + idCompra);
+  modelNFe.setFilter("ordemCompra = " + ordemCompra);
 
   if (not modelNFe.select()) { return qApp->enqueueError("Erro buscando NFe: " + modelNFe.lastError().text(), this); }
 }
@@ -168,4 +168,4 @@ void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
-// TODO: 4associar notas com cada produto? e verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota
+// TODO: 4verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota

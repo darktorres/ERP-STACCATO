@@ -6,7 +6,6 @@
 #include "doubledelegate.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
-#include "log.h"
 #include "sql.h"
 #include "sqlquerymodel.h"
 #include "usersession.h"
@@ -37,7 +36,7 @@ void WidgetLogisticaEntregas::setConnections() {
   connect(ui->pushButtonCancelarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked, connectionType);
   connect(ui->pushButtonConfirmarEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked, connectionType);
   connect(ui->pushButtonConsultarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked, connectionType);
-  connect(ui->pushButtonGerarNFeEntregar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked, connectionType);
+  connect(ui->pushButtonGerarNFe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked, connectionType);
   connect(ui->pushButtonImprimirDanfe, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked, connectionType);
   connect(ui->pushButtonProtocoloEntrega, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked, connectionType);
   connect(ui->pushButtonReagendar, &QPushButton::clicked, this, &WidgetLogisticaEntregas::on_pushButtonReagendar_clicked, connectionType);
@@ -144,9 +143,7 @@ void WidgetLogisticaEntregas::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonReagendar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonReagendar")) { return; }
 
   if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -188,7 +185,7 @@ bool WidgetLogisticaEntregas::reagendar(const QModelIndexList &list, const QDate
   return true;
 }
 
-void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
+void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
   const auto list = ui->tableCarga->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
@@ -205,7 +202,7 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFeEntregar_clicked() {
 
   lista.removeDuplicates();
 
-  const CadastrarNFe::Tipo tipo = modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0 ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
+  const CadastrarNFe::Tipo tipo = (modelCarga.data(list.first().row(), "NFe Futura").toInt() == 0) ? CadastrarNFe::Tipo::Normal : CadastrarNFe::Tipo::NormalAposFutura;
 
   auto *nfe = new CadastrarNFe(idVenda, lista, tipo, this);
   nfe->setAttribute(Qt::WA_DeleteOnClose);
@@ -229,7 +226,7 @@ void WidgetLogisticaEntregas::on_tableCalendario_clicked(const QModelIndex &inde
 
   ui->pushButtonReagendar->setDisabled(true);
   ui->pushButtonConfirmarEntrega->setDisabled(true);
-  ui->pushButtonGerarNFeEntregar->setDisabled(true);
+  ui->pushButtonGerarNFe->setDisabled(true);
   ui->pushButtonImprimirDanfe->setDisabled(true);
   ui->pushButtonCancelarEntrega->setDisabled(true);
 }
@@ -249,19 +246,19 @@ void WidgetLogisticaEntregas::on_tableCarga_clicked(const QModelIndex &index) {
   ui->pushButtonCancelarEntrega->setEnabled(true);
 
   if (status == "ENTREGA AGEND.") {
-    ui->pushButtonGerarNFeEntregar->setEnabled(true);
+    ui->pushButtonGerarNFe->setEnabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
 
   if (status == "EM ENTREGA") {
-    ui->pushButtonGerarNFeEntregar->setDisabled(true);
+    ui->pushButtonGerarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setEnabled(true);
     ui->pushButtonImprimirDanfe->setEnabled(true);
   }
 
   if (status == "NOTA PENDENTE") {
-    ui->pushButtonGerarNFeEntregar->setDisabled(true);
+    ui->pushButtonGerarNFe->setDisabled(true);
     ui->pushButtonConfirmarEntrega->setDisabled(true);
     ui->pushButtonImprimirDanfe->setDisabled(true);
   }
@@ -310,20 +307,19 @@ void WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  const int row = list.first().row();
-
+  // TODO: see if this can be read after InputDialogConfirmacao and place inside confirmarEntrega
   QStringList idVendas;
 
   for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+
+  const int row = list.first().row();
 
   InputDialogConfirmacao inputDlg(InputDialogConfirmacao::Tipo::Entrega, this);
   inputDlg.setFilterEntrega(modelCarga.data(row, "idVenda").toString(), modelCarga.data(row, "idEvento").toString());
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonConfirmarEntrega")) { return; }
 
   if (not confirmarEntrega(inputDlg.getDate(), inputDlg.getEntregou(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
 
@@ -366,11 +362,15 @@ void WidgetLogisticaEntregas::on_pushButtonCancelarEntrega_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  if (not qApp->startTransaction()) { return; }
+  QStringList idVendas;
 
-  if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonCancelarEntrega")) { return qApp->rollbackTransaction(); }
+  for (const auto &index : list) { idVendas << modelCarga.data(index.row(), "idVenda").toString(); }
+
+  if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonCancelarEntrega")) { return; }
 
   if (not cancelarEntrega(list)) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -422,12 +422,10 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   ACBr acbrRemoto;
 
-  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
     const auto [xml, resposta] = *tuple;
 
-    if (not qApp->startTransaction()) { return; }
-
-    if (not Log::createLog("Transação: WidgetLogisticaEntregas::on_pushButtonConsultarNFe")) { return qApp->rollbackTransaction(); }
+    if (not qApp->startTransaction("WidgetLogisticaEntregas::on_pushButtonConsultarNFe")) { return; }
 
     if (not processarConsultaNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
 
@@ -576,7 +574,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
     xlsx.write("I17", queryEndereco.value("cep"));
   }
 
-  for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row = row + 2, ++index) {
+  for (int row = 27, index = 0; index < modelProdutosAgrupado.rowCount(); row += 2, ++index) {
     xlsx.write("D" + QString::number(row), modelProdutosAgrupado.data(index, "fornecedor"));
     xlsx.write("I" + QString::number(row), modelProdutosAgrupado.data(index, "produto").toString() + " - " + modelProdutosAgrupado.data(index, "codComercial").toString()); // produto
     xlsx.write("Y" + QString::number(row), modelProdutosAgrupado.data(index, "quant").toString() + " " + modelProdutosAgrupado.data(index, "un").toString());               // quant
@@ -585,12 +583,11 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   for (int row = 35 + modelProdutosAgrupado.rowCount() * 2; row < 146; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo!", this); }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
 }
 
 // TODO: 2quando cancelar/devolver um produto cancelar/devolver na logistica/veiculo_has_produto
-// TODO: 1refazer sistema para permitir multiplas notas para uma mesma carga/pedido (notas parciais)
 // TODO: 0no filtro de 'parte estoque' nao considerar 'devolvido' e 'cancelado'

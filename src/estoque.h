@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -12,17 +12,18 @@ class Estoque final : public QDialog {
   Q_OBJECT
 
 public:
-  // REFAC: turn showWindow into a enum
+  // TODO: turn showWindow into a enum
   explicit Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
   ~Estoque();
   auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> bool;
+  static auto desfazerConsumo(const int idVendaProduto2) -> bool;
 
 private:
   // attributes
   const QString idEstoque; // TODO: change this to int?
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelConsumo;
-  SqlRelationalTableModel modelViewConsumo;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelConsumo;
+  SqlTableModel modelViewConsumo;
   Ui::Estoque *ui;
 
   enum class FieldColors {
@@ -36,8 +37,7 @@ private:
 
   // methods
   auto buscarRestante() -> void;
-  auto desfazerConsumo() -> bool;
-  auto dividirCompra(const int idVendaProduto2, const double quant) -> std::optional<int>;
+  auto dividirCompra(const int idVendaProduto2, const double quant) -> bool;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto setupTables() -> void;

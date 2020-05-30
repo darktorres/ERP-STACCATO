@@ -1,5 +1,7 @@
 #include "combobox.h"
 
+#include "application.h"
+
 ComboBox::ComboBox(QWidget *parent) : QComboBox(parent) {}
 
 QVariant ComboBox::getCurrentValue() const { return currentData(); }
@@ -12,5 +14,5 @@ bool ComboBox::setCurrentValue(const QVariant &value) {
     }
   }
 
-  return false;
+  return qApp->enqueueError(false, "Erro procurando " + value.toString() + "!", this);
 }

@@ -11,7 +11,7 @@ class CadastroTransportadora final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroTransportadora(QWidget *parent = nullptr);
+  explicit CadastroTransportadora(QWidget *parent);
   ~CadastroTransportadora();
 
 private:
@@ -20,7 +20,7 @@ private:
   int currentRowVeiculo = -1;
   QDataWidgetMapper mapperVeiculo;
   SearchDialog *sdTransportadora;
-  SqlRelationalTableModel modelVeiculo;
+  SqlTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
   auto cadastrar() -> bool final;

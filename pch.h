@@ -120,7 +120,7 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QSqlRecord>
-#include <QSqlRelationalTableModel>
+#include <QSqlTableModel>
 #include <QSsl>
 #include <QSslConfiguration>
 #include <QSslError>

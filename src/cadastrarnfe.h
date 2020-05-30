@@ -1,7 +1,7 @@
 #pragma once
 
 #include "acbr.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDataWidgetMapper>
 #include <QDialog>
@@ -17,7 +17,7 @@ class CadastrarNFe final : public QDialog {
 
 public:
   enum class Tipo { Futura, Normal, NormalAposFutura };
-  explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent = nullptr);
+  explicit CadastrarNFe(const QString &idVenda, const QStringList &items, const Tipo tipo, QWidget *parent);
   ~CadastrarNFe();
 
 private:
@@ -35,14 +35,19 @@ private:
   QString arquivo;
   QString chaveNum;
   QString xml;
-  SqlRelationalTableModel modelLoja;
-  SqlRelationalTableModel modelViewProdutoEstoque;
-  SqlRelationalTableModel modelVenda;
+  SqlTableModel modelLoja;
+  SqlTableModel modelViewProdutoEstoque;
+  SqlTableModel modelVenda;
   Ui::CadastrarNFe *ui;
   // methods
   auto alterarCertificado(const QString &text) -> void;
+  auto buscarAliquotas() -> bool;
   auto cadastrar(const int &idNFe) -> bool;
+  auto calculaCofins() -> void;
   auto calculaDigitoVerificador(QString &chave) -> bool;
+  auto calculaIcms() -> void;
+  auto calculaPis() -> void;
+  auto calculaSt() -> void;
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> bool;
   auto gerarNota() -> QString;
@@ -77,7 +82,6 @@ private:
   auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
   auto on_pushButtonConsultarCadastro_clicked() -> void;
   auto on_pushButtonEnviarNFE_clicked() -> void;
-  auto on_tabWidget_currentChanged(const int index) -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
   auto preCadastrarNota() -> std::optional<int>;
@@ -88,7 +92,8 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
-  auto updateImpostos() -> void;
+  auto updateComplemento() -> void;
+  auto updateTotais() -> void;
   auto validar() -> bool;
   auto writeDestinatario(QTextStream &stream) const -> void;
   auto writeEmitente(QTextStream &stream) const -> void;

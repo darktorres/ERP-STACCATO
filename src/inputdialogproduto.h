@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -14,7 +14,7 @@ class InputDialogProduto final : public QDialog {
 public:
   enum class Tipo { GerarCompra, Faturamento };
 
-  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent = nullptr);
+  explicit InputDialogProduto(const Tipo &tipo, QWidget *parent);
   ~InputDialogProduto();
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
@@ -23,7 +23,7 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel modelPedidoFornecedor;
+  SqlTableModel modelPedidoFornecedor;
   Ui::InputDialogProduto *ui;
   // methods
   auto cadastrar() -> bool;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -12,13 +12,13 @@ class InserirTransferencia final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit InserirTransferencia(QWidget *parent = nullptr);
+  explicit InserirTransferencia(QWidget *parent);
   ~InserirTransferencia();
 
 private:
   // attributes
-  SqlRelationalTableModel modelDe;
-  SqlRelationalTableModel modelPara;
+  SqlTableModel modelDe;
+  SqlTableModel modelPara;
   Ui::InserirTransferencia *ui;
   // methods
   auto cadastrar() -> bool;

@@ -4,9 +4,17 @@
 #
 #-------------------------------------------------
 
+!versionAtLeast(QT_VERSION, 5.14.0) {
+    error("Use Qt 5.14 ou mais novo")
+}
+
+win32-msvc* {
+    error("Não compatível com VisualStudio, use MinGW")
+}
+
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.28
+VERSION = 0.8.88
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -48,10 +56,8 @@ contains(CONFIG, deploy){
     QMAKE_LFLAGS_RELEASE *= -O0
 }
 
-win32-g++{
     PRECOMPILED_HEADER = pch.h
     CONFIG *= precompile_header
-}
 
 *-g++{
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
@@ -66,8 +72,8 @@ win32-g++{
 }
 
 linux-g++{
-    QMAKE_CC = gcc-9
-    QMAKE_CXX = g++-9
+    QMAKE_CC = gcc-10
+    QMAKE_CXX = g++-10
 
     QMAKE_LFLAGS *= -fuse-ld=gold
 
@@ -85,6 +91,18 @@ linux-clang{
 
     #QMAKE_CXXFLAGS *= -flto=thin
     #QMAKE_LFLAGS *= -flto=thin
+}
+
+win32{
+    exists($(QTDIR)/bin/ccache.exe){
+        message("using ccache")
+        QMAKE_CC = ccache $$QMAKE_CC
+        QMAKE_CXX = ccache $$QMAKE_CXX
+        message($$QMAKE_CC)
+        message($$QMAKE_CXX)
+
+        QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
+    }
 }
 
 linux{
@@ -111,6 +129,8 @@ SOURCES += \
     src/cadastrocliente.cpp \
     src/cadastrofornecedor.cpp \
     src/cadastroloja.cpp \
+    src/cadastroncm.cpp \
+    src/cadastropagamento.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
@@ -121,9 +141,11 @@ SOURCES += \
     src/charttooltip.cpp \
     src/chartview.cpp \
     src/checkboxdelegate.cpp \
+    src/cnab.cpp \
     src/collapsiblewidget.cpp \
     src/combobox.cpp \
     src/comboboxdelegate.cpp \
+    src/comprovantes.cpp \
     src/contas.cpp \
     src/dateformatdelegate.cpp \
     src/devolucao.cpp \
@@ -139,7 +161,7 @@ SOURCES += \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
-    src/impressao.cpp \
+    src/importatabelaibpt.cpp \
     src/inputdialog.cpp \
     src/inputdialogconfirmacao.cpp \
     src/inputdialogfinanceiro.cpp \
@@ -160,6 +182,7 @@ SOURCES += \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
     src/pagamentosdia.cpp \
+    src/pdf.cpp \
     src/porcentagemdelegate.cpp \
     src/precoestoque.cpp \
     src/produtospendentes.cpp \
@@ -173,7 +196,7 @@ SOURCES += \
     src/sortfilterproxymodel.cpp \
     src/sql.cpp \
     src/sqlquerymodel.cpp \
-    src/sqlrelationaltablemodel.cpp \
+    src/sqltablemodel.cpp \
     src/sqltreemodel.cpp \
     src/tableview.cpp \
     src/treeview.cpp \
@@ -196,6 +219,7 @@ SOURCES += \
     src/widgetfinanceirocompra.cpp \
     src/widgetfinanceirocontas.cpp \
     src/widgetfinanceirofluxocaixa.cpp \
+    src/widgetgare.cpp \
     src/widgetgraficos.cpp \
     src/widgethistoricocompra.cpp \
     src/widgetlogistica.cpp \
@@ -228,6 +252,8 @@ HEADERS  += \
     src/cadastrocliente.h \
     src/cadastrofornecedor.h \
     src/cadastroloja.h \
+    src/cadastroncm.h \
+    src/cadastropagamento.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
@@ -238,9 +264,11 @@ HEADERS  += \
     src/charttooltip.h \
     src/chartview.h \
     src/checkboxdelegate.h \
+    src/cnab.h \
     src/collapsiblewidget.h \
     src/combobox.h \
     src/comboboxdelegate.h \
+    src/comprovantes.h \
     src/contas.h \
     src/dateformatdelegate.h \
     src/devolucao.h \
@@ -256,7 +284,7 @@ HEADERS  += \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
-    src/impressao.h \
+    src/importatabelaibpt.h \
     src/inputdialog.h \
     src/inputdialogconfirmacao.h \
     src/inputdialogfinanceiro.h \
@@ -276,6 +304,7 @@ HEADERS  += \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
     src/pagamentosdia.h \
+    src/pdf.h \
     src/porcentagemdelegate.h \
     src/precoestoque.h \
     src/produtospendentes.h \
@@ -289,7 +318,7 @@ HEADERS  += \
     src/sortfilterproxymodel.h \
     src/sql.h \
     src/sqlquerymodel.h \
-    src/sqlrelationaltablemodel.h \
+    src/sqltablemodel.h \
     src/sqltreemodel.h \
     src/tableview.h \
     src/treeview.h \
@@ -312,6 +341,7 @@ HEADERS  += \
     src/widgetfinanceirocompra.h \
     src/widgetfinanceirocontas.h \
     src/widgetfinanceirofluxocaixa.h \
+    src/widgetgare.h \
     src/widgetgraficos.h \
     src/widgethistoricocompra.h \
     src/widgetlogistica.h \
@@ -342,13 +372,17 @@ FORMS += \
     ui/cadastrocliente.ui \
     ui/cadastrofornecedor.ui \
     ui/cadastroloja.ui \
+    ui/cadastroncm.ui \
+    ui/cadastropagamento.ui \
     ui/cadastroproduto.ui \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
+    ui/cnab.ui \
     ui/collapsiblewidget.ui \
+    ui/comprovantes.ui \
     ui/contas.ui \
     ui/devolucao.ui \
     ui/estoque.ui \
@@ -386,6 +420,7 @@ FORMS += \
     ui/widgetfinanceirocompra.ui \
     ui/widgetfinanceirocontas.ui \
     ui/widgetfinanceirofluxocaixa.ui \
+    ui/widgetgare.ui \
     ui/widgetgraficos.ui \
     ui/widgethistoricocompra.ui \
     ui/widgetlogistica.ui \

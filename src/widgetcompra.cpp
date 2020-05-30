@@ -17,6 +17,7 @@ void WidgetCompra::resetTables() {
   ui->widgetConfirmar->resetTables();
   ui->widgetFaturar->resetTables();
   ui->widgetOC->resetTables();
+  ui->widgetHistorico->resetTables();
 }
 
 void WidgetCompra::updateTables() {

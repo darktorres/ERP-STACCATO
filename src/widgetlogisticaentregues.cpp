@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "doubledelegate.h"
-#include "log.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
 
@@ -91,7 +90,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setQuery(
       "SELECT `vp2`.`idVendaProduto2` AS `idVendaProduto2`, `vp2`.`idProduto` AS `idProduto`, `vp2`.`dataPrevEnt` AS `dataPrevEnt`, `vp2`.`dataRealEnt` AS `dataRealEnt`, `vp2`.`status` "
       "AS `status`, `vp2`.`fornecedor` AS `fornecedor`, `vp2`.`idVenda` AS `idVenda`, `vp2`.`produto` AS `produto`, `vp2`.`caixas` AS `caixas`, `vp2`.`quant` AS `quant`, `vp2`.`un` AS "
-      "`un`, `vp2`.`unCaixa` AS `unCaixa`, `vp2`.`codComercial` AS `codComercial`, `vp2`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
+      "`un`, `vp2`.`quantCaixa` AS `quantCaixa`, `vp2`.`codComercial` AS `codComercial`, `vp2`.`formComercial` AS `formComercial`, GROUP_CONCAT(DISTINCT`ehc`.`idConsumo`) AS `idConsumo` "
       "FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
@@ -104,7 +103,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
   modelProdutos.setHeaderData("caixas", "Caixas");
   modelProdutos.setHeaderData("quant", "Quant.");
   modelProdutos.setHeaderData("un", "Un.");
-  modelProdutos.setHeaderData("unCaixa", "Un./Cx.");
+  modelProdutos.setHeaderData("quantCaixa", "Quant./Cx.");
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("formComercial", "Form. Com.");
   modelProdutos.setHeaderData("dataRealEnt", "Data Ent.");
@@ -142,9 +141,7 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   // desfazer passos da confirmacao de entrega (volta para tela de confirmar entrega)
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaEntregues::on_pushButtonCancelar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaEntregues::on_pushButtonCancelar")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
@@ -157,8 +154,6 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 }
 
 bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
-  // FIXME: ao voltar vp para ESTOQUE permite que o usuario eventualmente gere outra nota e a primeira vai ficar perdida no limbo
-
   QSqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE `idVendaProduto2` = :idVendaProduto2");
 

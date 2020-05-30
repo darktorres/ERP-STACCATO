@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include "log.h"
 #include "qsimpleupdater.h"
 #include "usersession.h"
 
@@ -23,10 +24,17 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   storeSelection();
 
   if (UserSession::getSetting("User/tema").value_or("claro").toString() == "escuro") { darkTheme(); }
+
+  if (not QSqlDatabase::drivers().contains("QMYSQL")) {
+    QMessageBox::critical(nullptr, "Erro!", "Este aplicativo requer o driver QMYSQL!");
+    exit(1);
+  }
 }
 
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
+
+  Log::createLog("Erro: " + error, true);
 
   if (not updating) { showMessages(); }
 }
@@ -53,46 +61,81 @@ QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo
 void Application::readSettingsFile() {
   QFile file("lojas.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo configurações: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro lendo configurações: " + file.errorString());
+    return;
+  }
 
-  const QStringList lines = QString(file.readAll()).split("\r\n", QString::SkipEmptyParts);
+  const QStringList lines = QString(file.readAll()).split("\r\n", Qt::SkipEmptyParts);
 
   for (int i = 0; i < lines.size(); i += 2) { mapLojas.insert(lines.at(i), lines.at(i + 1)); }
 }
 
-bool Application::setDatabase() {
-  if (not QSqlDatabase::drivers().contains("QMYSQL")) {
-    qApp->enqueueError("Este aplicativo requer o driver QMYSQL.");
-    exit(1);
+bool Application::userLogin(const QString &user) {
+  db.close();
+
+  db.setUserName(user);
+
+  setConnectOptions();
+
+  if (not db.open()) {
+    loginError();
+
+    return false;
   }
 
-  const auto hostname = UserSession::getSetting("Login/hostname");
+  return true;
+}
 
-  if (not hostname) { return qApp->enqueueError(false, "A chave 'hostname' não está configurada!"); }
+bool Application::genericLogin(const QString &hostname) {
+  QFile file("mysql.txt");
 
-  const auto lastuser = UserSession::getSetting("User/lastuser");
+  if (not file.open(QFile::ReadOnly)) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro lendo mysql.txt: " + file.errorString());
+    return false;
+  }
 
-  if (not lastuser) { return false; }
+  const QString systemPassword = file.readAll();
+
+  // ------------------------------------------------------------
 
   if (not QSqlDatabase::contains()) { db = QSqlDatabase::addDatabase("QMYSQL"); }
 
-  QFile file("mysql.txt");
-
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo mysql.txt: " + file.errorString()); }
-
-  const QString password = file.readAll();
-
-  db.setHostName(hostname->toString());
-  // TODO: to avoid getting blocked by fail2ban always login with same user?
-  db.setUserName(lastuser->toString().toLower());
-  db.setPassword(password);
+  db.setHostName(hostname);
+  db.setUserName("loginUser");
+  db.setPassword(systemPassword);
   db.setDatabaseName("staccato");
   db.setPort(3306);
 
-  db.setConnectOptions("CLIENT_COMPRESS=1");
-  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=10");
+  setConnectOptions();
+
+  if (not db.open()) {
+    loginError();
+
+    return false;
+  }
 
   return true;
+}
+
+void Application::loginError() {
+  // TODO: caso o servidor selecionado nao esteja disponivel tente os outros
+  // TODO: try local ip's first
+  isConnected = false;
+
+  const QString error = db.lastError().text();
+
+  QString message = "Erro conectando no banco de dados: " + error;
+
+  if (error.contains("Access denied for user")) { message = "Login inválido!"; }
+  if (error.contains("Can't connect to MySQL server on")) { message = "Não foi possível conectar ao servidor!"; }
+
+  QMessageBox::critical(nullptr, "Erro!", message);
+}
+
+void Application::setConnectOptions() {
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
+  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=3");
 }
 
 bool Application::dbReconnect(const bool silent) {
@@ -100,28 +143,25 @@ bool Application::dbReconnect(const bool silent) {
 
   isConnected = db.open();
 
-  if (not isConnected) { return (silent) ? false : qApp->enqueueError(false, "Erro conectando no banco de dados: " + db.lastError().text()); }
+  if (not isConnected) {
+    if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
+    return false;
+  }
 
   return db.isOpen();
 }
 
-bool Application::dbConnect() {
-  if (not setDatabase()) { return false; }
+bool Application::dbConnect(const QString &hostname, const QString &user, const QString &userPassword) {
+  if (not genericLogin(hostname)) { return false; }
 
-  if (not db.open()) {
-    // TODO: caso o servidor selecionado nao esteja disponivel tente os outros
-    // TODO: try local ip's first
-
-    isConnected = false;
-
-    const QString error = db.lastError().text();
-
-    QString message = "Erro conectando no banco de dados: " + error;
-
-    if (error.contains("Access denied for user")) { message = "Login inválido!"; }
-
-    return qApp->enqueueError(false, message);
+  if (not UserSession::login(user, userPassword)) {
+    QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
+    return false;
   }
+
+  if (not userLogin(user)) { return false; }
+
+  // ------------------------------------------------------------
 
   isConnected = true;
 
@@ -136,17 +176,29 @@ bool Application::dbConnect() {
 bool Application::runSqlJobs() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) { return qApp->enqueueError(false, "Erro verificando lastInvalidated: " + query.lastError().text()); }
+  if (not query.exec("SELECT lastInvalidated FROM maintenance") or not query.first()) {
+    QMessageBox::critical(nullptr, "Erro!", "Erro verificando lastInvalidated: " + query.lastError().text());
+    return false;
+  }
 
-  if (query.value("lastInvalidated").toDate() < qApp->serverDateTime().date()) {
-    if (not query.exec("CALL invalidar_produtos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_produtos_expirados: " + query.lastError().text()); }
+  if (query.value("lastInvalidated").toDate() < serverDateTime().date()) {
+    if (not query.exec("CALL invalidar_produtos_expirados()")) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_produtos_expirados: " + query.lastError().text());
+      return false;
+    }
 
-    if (not query.exec("CALL invalidar_orcamentos_expirados()")) { return qApp->enqueueError(false, "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text()); }
+    if (not query.exec("CALL invalidar_orcamentos_expirados()")) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_orcamentos_expirados: " + query.lastError().text());
+      return false;
+    }
 
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
-    query.bindValue(":lastInvalidated", qApp->serverDateTime().toString("yyyy-MM-dd"));
+    query.bindValue(":lastInvalidated", serverDateTime().toString("yyyy-MM-dd"));
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando lastInvalidated: " + query.lastError().text()); }
+    if (not query.exec()) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro atualizando lastInvalidated: " + query.lastError().text());
+      return false;
+    }
   }
 
   return true;
@@ -158,19 +210,15 @@ void Application::startSqlPing() {
   timer->start(60000);
 
   // TODO: se ping falhar marcar 'desconectado'?
-
-  // TODO: futuramente verificar se tem atualizacao no servidor e avisar usuario
 }
 
 void Application::startUpdaterPing() {
   auto *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
-  timer->start(3600000);
+  timer->start(600000);
 }
 
 void Application::darkTheme() {
-  qApp->setStyle("Fusion");
-
   QPalette darkPalette;
   darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
   darkPalette.setColor(QPalette::WindowText, Qt::white);
@@ -191,28 +239,29 @@ void Application::darkTheme() {
   darkPalette.setColor(QPalette::Disabled, QPalette::Base, QColor(120, 120, 120));
   darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(120, 120, 120));
 
-  qApp->setPalette(darkPalette);
+  setPalette(darkPalette);
 
-  qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+  setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
   UserSession::setSetting("User/tema", "escuro");
 }
 
 void Application::lightTheme() {
-  qApp->setStyle("Fusion");
-  qApp->setPalette(defaultPalette);
-  qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+  setPalette(defaultPalette);
+  setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
   UserSession::setSetting("User/tema", "claro");
 }
 
-bool Application::startTransaction(const bool delayMessages) {
+bool Application::startTransaction(const QString &messageLog, const bool delayMessages) {
   if (inTransaction) {
     // TODO: this message wont show due to inTransaction flag (look for other places that need to use a messagebox directly)
-    return qApp->enqueueError(false, "Transação já em execução!");
+    return enqueueError(false, "Transação já em execução!");
   }
 
-  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return qApp->enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
+
+  if (not Log::createLog("Transação: " + messageLog)) { return rollbackTransaction(false); }
 
   inTransaction = true;
   this->delayMessages = delayMessages;
@@ -221,9 +270,9 @@ bool Application::startTransaction(const bool delayMessages) {
 }
 
 bool Application::endTransaction() {
-  if (not inTransaction) { return qApp->enqueueError(false, "Não está em transação"); }
+  if (not inTransaction) { return enqueueError(false, "Não está em transação"); }
 
-  if (QSqlQuery query; not query.exec("COMMIT")) { return qApp->enqueueError(false, "Erro no commit: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("COMMIT")) { return enqueueError(false, "Erro no commit: " + query.lastError().text()); }
 
   inTransaction = false;
   delayMessages = false;
@@ -234,14 +283,19 @@ bool Application::endTransaction() {
 }
 
 void Application::rollbackTransaction() {
-  if (not inTransaction) { return qApp->enqueueError("Não está em transação!"); }
+  if (not inTransaction) { return enqueueError("Não está em transação!"); }
 
-  if (QSqlQuery query; not query.exec("ROLLBACK")) { return qApp->enqueueError("Erro rollback: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueError("Erro rollback: " + query.lastError().text()); }
 
   inTransaction = false;
   delayMessages = false;
 
   showMessages();
+}
+
+bool Application::rollbackTransaction(const bool boolean) {
+  rollbackTransaction();
+  return boolean;
 }
 
 bool Application::getShowingErrors() const { return showingErrors; }
@@ -261,10 +315,6 @@ void Application::storeSelection() {
     UserSession::setSetting("Login/hostname", mapLojas.value(loja));
   }
 }
-
-bool Application::getInTransaction() const { return inTransaction; }
-
-void Application::setInTransaction(const bool value) { inTransaction = value; }
 
 void Application::setUpdating(const bool value) {
   updating = value;
@@ -287,7 +337,7 @@ void Application::showMessages() {
     const QString message = error.message;
 
     if (message.contains(error1) or message.contains(error2)) {
-      const bool conectado = qApp->dbReconnect(true);
+      const bool conectado = dbReconnect(true);
 
       emit verifyDb(conectado);
 
@@ -320,15 +370,20 @@ void Application::updater() {
 
   updaterOpen = true;
 
+  // TODO: add timeout in Qt 5.15 to avoid waiting for non available hosts
+  // (quickly changing hosts dont work as updater is still waiting for the first one to respond)
+
   auto *updater = new QSimpleUpdater(this);
   connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
-  updater->setApplicationVersion(qApp->applicationVersion());
+  updater->setApplicationVersion(applicationVersion());
   updater->setReferenceUrl("http://" + hostname->toString() + "/versao.txt");
   updater->setDownloadUrl("http://" + hostname->toString() + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
 }
+
+bool Application::getInTransaction() const { return inTransaction; }
 
 QDateTime Application::serverDateTime() {
   QSqlQuery query;
@@ -355,4 +410,114 @@ QDate Application::serverDate() {
   }
 
   return serverDateCache.date();
+}
+
+double Application::roundDouble(const double value) { return roundDouble(value, 4); }
+
+double Application::roundDouble(const double value, const int decimais) {
+  const double multiploDez = std::pow(10, decimais);
+
+  return std::round(value * multiploDez) / multiploDez;
+}
+
+std::optional<int> Application::reservarIdEstoque() {
+  if (inTransaction) {
+    enqueueError("ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
+    enqueueError("Erro reservar id estoque: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) {
+    enqueueError("Erro reservar id estoque: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
+std::optional<int> Application::reservarIdVendaProduto2() {
+  if (inTransaction) {
+    enqueueError("ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
+    enqueueError("Erro reservar id venda: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
+    enqueueError("Erro reservar id venda: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
+std::optional<int> Application::reservarIdNFe() {
+  if (inTransaction) {
+    enqueueError("ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
+    enqueueError("Erro reservar id nfe: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) {
+    enqueueError("Erro reservar id nfe: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
+std::optional<int> Application::reservarIdPedido2() {
+  if (inTransaction) {
+    enqueueError("ALTER TABLE durante transação!");
+    return {};
+  }
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
+    enqueueError("Erro reservar id compra: " + query.lastError().text());
+    return {};
+  }
+
+  const int id = query.value("auto_increment").toInt();
+
+  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) {
+    enqueueError("Erro reservar id compra: " + query.lastError().text());
+    return {};
+  }
+
+  return id;
+}
+
+QDate Application::ajustarDiaUtil(const QDate &date) {
+  // TODO: adicionar feriados bancarios
+
+  QDate newDate = date;
+
+  while (newDate.dayOfWeek() > 5) { newDate = newDate.addDays(1); }
+
+  return newDate;
 }

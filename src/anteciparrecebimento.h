@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -12,12 +12,12 @@ class AnteciparRecebimento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit AnteciparRecebimento(QWidget *parent = nullptr);
+  explicit AnteciparRecebimento(QWidget *parent);
   ~AnteciparRecebimento();
 
 private:
   // attributes
-  SqlRelationalTableModel modelContaReceber;
+  SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
   auto cadastrar(const QModelIndexList &list) -> bool;

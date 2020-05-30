@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -50,11 +50,10 @@ private:
   bool isSet = false;
   QString filter;
   QString fornecedorRep;
-  SqlRelationalTableModel model;
+  SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
-  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
-                        QWidget *parent = nullptr);
+  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent);
   auto hideColumns(const QStringList &columns) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonSelecionar_clicked() -> void;

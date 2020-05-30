@@ -10,7 +10,7 @@ class Orcamento final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Orcamento(QWidget *parent = nullptr);
+  explicit Orcamento(QWidget *parent);
   ~Orcamento();
   auto show() -> void;
 
@@ -25,7 +25,7 @@ private:
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;
-  SqlRelationalTableModel modelItem;
+  SqlTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
@@ -62,7 +62,7 @@ private:
   auto on_pushButtonCalcularFrete_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonGerarVenda_clicked() -> void;
-  auto on_pushButtonImprimir_clicked() -> void;
+  auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;

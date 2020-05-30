@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetNfeSaida final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfeSaida(QWidget *parent = nullptr);
+  explicit WidgetNfeSaida(QWidget *parent);
   ~WidgetNfeSaida();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,10 +21,10 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewNFeSaida;
+  SqlTableModel modelViewNFeSaida;
   Ui::WidgetNfeSaida *ui;
   // methods
-  auto atualizarNFe(const int idNFe, const QString &xml) -> bool;
+  auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> bool;
   auto cancelarNFe(const QString &chaveAcesso, const int row) -> bool;
   auto gravarArquivo(const QString &resposta) -> bool;
   auto montaFiltro() -> void;

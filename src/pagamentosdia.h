@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -12,13 +12,13 @@ class PagamentosDia final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PagamentosDia(QWidget *parent = nullptr);
+  explicit PagamentosDia(QWidget *parent);
   ~PagamentosDia();
   auto setFilter(const QDate &date, const QString &idConta) -> bool;
 
 private:
   // attributes
-  SqlRelationalTableModel modelViewFluxoCaixa;
+  SqlTableModel modelViewFluxoCaixa;
   Ui::PagamentosDia *ui;
   // methods
   auto setupTables() -> void;

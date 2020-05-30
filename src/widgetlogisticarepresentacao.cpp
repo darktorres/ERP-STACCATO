@@ -4,7 +4,7 @@
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialogconfirmacao.h"
-#include "log.h"
+#include "sql.h"
 
 #include <QDate>
 #include <QDebug>
@@ -78,20 +78,24 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  QStringList idVendas;
+
+  for (const auto &index : list) { idVendas << modelViewLogisticaRepresentacao.data(index.row(), "idVenda").toString(); }
+
   InputDialogConfirmacao input(InputDialogConfirmacao::Tipo::Representacao, this);
 
   if (input.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue")) { return; }
 
   if (not processRows(list, input.getDate(), input.getRecebeu())) { return qApp->rollbackTransaction(); }
+
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
   updateTables();
-  qApp->enqueueInformation("Atualizado!", this);
+  qApp->enqueueInformation("Entrega confirmada!", this);
 }
 
 bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) {

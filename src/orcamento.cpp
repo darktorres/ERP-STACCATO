@@ -8,9 +8,7 @@
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
-#include "impressao.h"
-#include "log.h"
-#include "logindialog.h"
+#include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
@@ -46,10 +44,6 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
   setupMapper();
   newRegister();
 
-  ui->labelConsultor->hide();
-  ui->itemBoxConsultor->hide();
-  ui->itemBoxConsultor->setReadOnlyItemBox(true);
-
   if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO") {
     ui->dataEmissao->setReadOnly(false);
     ui->dataEmissao->setCalendarPopup(true);
@@ -57,18 +51,7 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
   if (UserSession::tipoUsuario() == "VENDEDOR") { buscarParametrosFrete(); }
 
-  on_checkBoxRepresentacao_toggled(false);
-
-  ui->labelBaixa->hide();
-  ui->plainTextEditBaixa->hide();
-  ui->labelReplicaDe->hide();
-  ui->labelReplicadoEm->hide();
-  ui->lineEditReplicaDe->hide();
-  ui->lineEditReplicadoEm->hide();
-
   setConnections();
-
-  ui->pushButtonCalcularFrete->hide();
 }
 
 Orcamento::~Orcamento() { delete ui; }
@@ -81,8 +64,11 @@ void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return novoItem(); }
 
   ui->pushButtonAtualizarItem->show();
-  ui->pushButtonAdicionarItem->hide();
   ui->pushButtonRemoverItem->show();
+  ui->pushButtonLimparSelecao->show();
+
+  ui->pushButtonAdicionarItem->hide();
+
   mapperItem.setCurrentModelIndex(index);
   currentRowItem = index.row();
 }
@@ -111,8 +97,9 @@ void Orcamento::setConnections() {
   connect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked, connectionType);
   connect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked, connectionType);
   connect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked, connectionType);
+  connect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked, connectionType);
   connect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked, connectionType);
-  connect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked, connectionType);
+  connect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::novoItem, connectionType);
   connect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked, connectionType);
   connect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked, connectionType);
   connect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked, connectionType);
@@ -140,8 +127,9 @@ void Orcamento::unsetConnections() {
   disconnect(ui->pushButtonCadastrarOrcamento, &QPushButton::clicked, this, &Orcamento::on_pushButtonCadastrarOrcamento_clicked);
   disconnect(ui->pushButtonCalcularFrete, &QPushButton::clicked, this, &Orcamento::on_pushButtonCalcularFrete_clicked);
   disconnect(ui->pushButtonGerarExcel, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarExcel_clicked);
+  disconnect(ui->pushButtonGerarPdf, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarPdf_clicked);
   disconnect(ui->pushButtonGerarVenda, &QPushButton::clicked, this, &Orcamento::on_pushButtonGerarVenda_clicked);
-  disconnect(ui->pushButtonImprimir, &QPushButton::clicked, this, &Orcamento::on_pushButtonImprimir_clicked);
+  disconnect(ui->pushButtonLimparSelecao, &QPushButton::clicked, this, &Orcamento::novoItem);
   disconnect(ui->pushButtonRemoverItem, &QPushButton::clicked, this, &Orcamento::on_pushButtonRemoverItem_clicked);
   disconnect(ui->pushButtonReplicar, &QPushButton::clicked, this, &Orcamento::on_pushButtonReplicar_clicked);
   disconnect(ui->tableProdutos, &TableView::clicked, this, &Orcamento::on_tableProdutos_clicked);
@@ -153,13 +141,21 @@ bool Orcamento::viewRegister() {
   auto load = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
-    modelItem.setFilter("idOrcamento = '" + data(0, "idOrcamento").toString() + "'");
+    //-----------------------------------------------------------------
+
+    modelItem.setFilter("idOrcamento = '" + model.data(0, "idOrcamento").toString() + "'");
 
     if (not modelItem.select()) { return false; }
+
+    //-----------------------------------------------------------------
 
     if (not buscarParametrosFrete()) { return false; }
 
     novoItem();
+
+    const int validade = data("validade").toInt();
+    ui->spinBoxValidade->setMaximum(validade);
+    ui->spinBoxValidade->setValue(validade);
 
     const QString status = data("status").toString();
 
@@ -177,14 +173,13 @@ bool Orcamento::viewRegister() {
     if (expirado or status != "ATIVO") {
       isReadOnly = true;
 
-      ui->pushButtonGerarVenda->hide();
-      ui->pushButtonAtualizarOrcamento->hide();
       ui->pushButtonReplicar->show();
 
-      ui->pushButtonAdicionarItem->hide();
-      ui->pushButtonAtualizarItem->hide();
-      ui->pushButtonRemoverItem->hide();
-      ui->pushButtonCalculadora->hide();
+      ui->frameProduto->hide();
+
+      ui->pushButtonGerarVenda->hide();
+
+      ui->checkBoxFreteManual->setDisabled(true);
 
       ui->itemBoxCliente->setReadOnlyItemBox(true);
       ui->itemBoxEndereco->setReadOnlyItemBox(true);
@@ -192,61 +187,26 @@ bool Orcamento::viewRegister() {
       ui->itemBoxProfissional->setReadOnlyItemBox(true);
       ui->itemBoxVendedor->setReadOnlyItemBox(true);
 
-      ui->spinBoxPrazoEntrega->setReadOnly(true);
       ui->dataEmissao->setReadOnly(true);
-
       ui->doubleSpinBoxDesconto->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
       ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
       ui->doubleSpinBoxFrete->setReadOnly(true);
-      ui->doubleSpinBoxTotalItem->setReadOnly(true);
       ui->doubleSpinBoxQuant->setReadOnly(true);
       ui->doubleSpinBoxSubTotalBruto->setReadOnly(true);
       ui->doubleSpinBoxSubTotalLiq->setReadOnly(true);
       ui->doubleSpinBoxTotal->setReadOnly(true);
-
-      ui->lineEditCodComercial->hide();
-      ui->lineEditEstoque->hide();
-      ui->lineEditFormComercial->hide();
-      ui->lineEditFornecedor->hide();
-      ui->spinBoxMinimo->hide();
-      ui->lineEditObs->hide();
-      ui->lineEditPrecoUn->hide();
-      ui->lineEditUn->hide();
-      ui->itemBoxProduto->hide();
-      ui->doubleSpinBoxQuant->hide();
-      ui->doubleSpinBoxCaixas->hide();
-      ui->labelCaixa->hide();
-      ui->spinBoxUnCx->hide();
-      ui->doubleSpinBoxDesconto->hide();
-      ui->doubleSpinBoxTotalItem->hide();
-      ui->labelCaixas->hide();
-      ui->labelCodComercial->hide();
-      ui->labelProduto->hide();
-      ui->labelDesconto->hide();
-      ui->labelTotalItem->hide();
-      ui->labelUn->hide();
-      ui->labelPrecoUn->hide();
-      ui->labelFornecedor->hide();
-      ui->labelQuant->hide();
-      ui->labelEstoque->hide();
-      ui->labelFormComercial->hide();
-      ui->labelMinimo->hide();
-      ui->labelObs->hide();
-
+      ui->doubleSpinBoxTotalItem->setReadOnly(true);
       ui->plainTextEditObs->setReadOnly(true);
+      ui->spinBoxPrazoEntrega->setReadOnly(true);
 
-      ui->checkBoxFreteManual->setDisabled(true);
+      ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+      ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
+      ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
+      ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
     } else {
       ui->pushButtonGerarVenda->show();
     }
-
-    ui->lineEditReplicaDe->setReadOnly(true);
-    ui->lineEditReplicadoEm->setReadOnly(true);
-
-    ui->checkBoxRepresentacao->setDisabled(true);
-
-    ui->plainTextEditObs->setPlainText(data("observacao").toString());
 
     const bool freteManual = ui->checkBoxFreteManual->isChecked();
 
@@ -291,35 +251,41 @@ bool Orcamento::viewRegister() {
 
 void Orcamento::novoItem() {
   ui->pushButtonAdicionarItem->show();
+
   ui->pushButtonAtualizarItem->hide();
   ui->pushButtonRemoverItem->hide();
+  ui->pushButtonLimparSelecao->hide();
+
   ui->itemBoxProduto->clear();
   ui->tableProdutos->clearSelection();
+
   // -----------------------
 
   ui->doubleSpinBoxCaixas->setDisabled(true);
-  ui->doubleSpinBoxCaixas->setSingleStep(1.);
-  ui->doubleSpinBoxCaixas->clear();
   ui->doubleSpinBoxDesconto->setDisabled(true);
-  ui->doubleSpinBoxDesconto->clear();
   ui->doubleSpinBoxQuant->setDisabled(true);
+  ui->doubleSpinBoxTotalItem->setDisabled(true);
+  ui->lineEditPrecoUn->setDisabled(true);
+  ui->lineEditUn->setDisabled(true);
+  ui->spinBoxMinimo->setDisabled(true);
+  ui->spinBoxQuantCx->setDisabled(true);
+
+  ui->doubleSpinBoxCaixas->setSingleStep(1.);
   ui->doubleSpinBoxQuant->setSingleStep(1.);
+
+  ui->doubleSpinBoxCaixas->clear();
+  ui->doubleSpinBoxDesconto->clear();
   ui->doubleSpinBoxQuant->clear();
   ui->doubleSpinBoxTotalItem->clear();
-  ui->doubleSpinBoxTotalItem->setDisabled(true);
   ui->lineEditCodComercial->clear();
   ui->lineEditEstoque->clear();
   ui->lineEditFormComercial->clear();
   ui->lineEditFornecedor->clear();
   ui->lineEditObs->clear();
   ui->lineEditPrecoUn->clear();
-  ui->lineEditPrecoUn->setDisabled(true);
   ui->lineEditUn->clear();
-  ui->lineEditUn->setDisabled(true);
   ui->spinBoxMinimo->clear();
-  ui->spinBoxMinimo->setDisabled(true);
-  ui->spinBoxUnCx->clear();
-  ui->spinBoxUnCx->setDisabled(true);
+  ui->spinBoxQuantCx->clear();
 }
 
 void Orcamento::setupMapper() {
@@ -360,34 +326,52 @@ void Orcamento::setupMapper() {
 
 void Orcamento::registerMode() {
   ui->pushButtonCadastrarOrcamento->show();
+
+  ui->itemBoxConsultor->hide();
+  ui->labelBaixa->hide();
+  ui->labelConsultor->hide();
+  ui->labelReplicaDe->hide();
+  ui->labelReplicadoEm->hide();
+  ui->lineEditReplicaDe->hide();
+  ui->lineEditReplicadoEm->hide();
+  ui->plainTextEditBaixa->hide();
   ui->pushButtonAtualizarOrcamento->hide();
+  ui->pushButtonCalcularFrete->hide();
   ui->pushButtonReplicar->hide();
+
+  ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
   ui->pushButtonApagarOrc->setDisabled(true);
   ui->pushButtonGerarExcel->setDisabled(true);
-  ui->pushButtonImprimir->setDisabled(true);
+  ui->pushButtonGerarPdf->setDisabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
   //  ui->itemBoxEndereco->setDisabled(true);
 }
 
 void Orcamento::updateMode() {
-  ui->pushButtonCadastrarOrcamento->hide();
+  ui->itemBoxEndereco->show();
   ui->pushButtonAtualizarOrcamento->show();
   ui->pushButtonReplicar->show();
 
+  ui->pushButtonCadastrarOrcamento->hide();
+
   ui->pushButtonApagarOrc->setEnabled(true);
   ui->pushButtonGerarExcel->setEnabled(true);
-  ui->pushButtonImprimir->setEnabled(true);
+  ui->pushButtonGerarPdf->setEnabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
-  ui->itemBoxEndereco->show();
+
   ui->spinBoxValidade->setDisabled(true);
+  ui->checkBoxRepresentacao->setDisabled(true);
+
+  ui->lineEditReplicaDe->setReadOnly(true);
+  ui->lineEditReplicadoEm->setReadOnly(true);
 }
 
 bool Orcamento::newRegister() {
   if (not RegisterDialog::newRegister()) { return false; }
 
   ui->lineEditOrcamento->setText("Auto gerado");
-  ui->dataEmissao->setDateTime(qApp->serverDateTime());
+  ui->dataEmissao->setDate(qApp->serverDate());
   on_dataEmissao_dateChanged(ui->dataEmissao->date());
   ui->spinBoxValidade->setValue(7);
   novoItem();
@@ -459,7 +443,7 @@ bool Orcamento::generateId() {
 
     if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando próxima revisão disponível: " + query.lastError().text(), this); }
 
-    id = replica.left(replica.indexOf("-Rev")) + "-Rev" + query.value("revisao").toString();
+    id = replica.left(replica.indexOf("-REV")) + "-REV" + query.value("revisao").toString();
   }
 
   ui->lineEditOrcamento->setText(id);
@@ -550,7 +534,7 @@ bool Orcamento::savingProcedures() {
 
   if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
-  if (not setData("data", ui->dataEmissao->dateTime())) { return false; }
+  if (not setData("data", qApp->serverDateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.)) { return false; }
   if (not setData("frete", ui->doubleSpinBoxFrete->value())) { return false; }
@@ -632,11 +616,12 @@ void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
   const double step = ui->doubleSpinBoxQuant->singleStep();
-  const double quant2 = not qFuzzyIsNull(fmod(quant, step)) ? ceil(quant / step) * step : quant;
+  const double resto = fmod(quant, step);
+  const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
 
   if (not qFuzzyCompare(quant, quant2)) { ui->doubleSpinBoxQuant->setValue(quant2); }
 
-  const double caixas = quant2 / ui->spinBoxUnCx->value();
+  const double caixas = quant2 / step;
 
   if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
 }
@@ -687,9 +672,9 @@ void Orcamento::calcPrecoGlobalTotal() {
   ui->doubleSpinBoxTotal->setValue(subTotalItens * (1 - (descGlobal / 100)) + frete);
 }
 
-void Orcamento::on_pushButtonImprimir_clicked() {
-  Impressao impressao(data("idOrcamento").toString(), Impressao::Tipo::Orcamento, this);
-  impressao.print();
+void Orcamento::on_pushButtonGerarPdf_clicked() {
+  PDF pdf(data("idOrcamento").toString(), PDF::Tipo::Orcamento, this);
+  pdf.gerarPdf();
 }
 
 void Orcamento::setupTables() {
@@ -704,7 +689,7 @@ void Orcamento::setupTables() {
   modelItem.setHeaderData("un", "Un.");
   modelItem.setHeaderData("codComercial", "Código");
   modelItem.setHeaderData("formComercial", "Formato");
-  modelItem.setHeaderData("unCaixa", "Un./Caixa");
+  modelItem.setHeaderData("quantCaixa", "Quant./Cx.");
   modelItem.setHeaderData("parcial", "Subtotal");
   modelItem.setHeaderData("desconto", "Desc. %");
   modelItem.setHeaderData("parcialDesc", "Total");
@@ -717,7 +702,7 @@ void Orcamento::setupTables() {
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("idOrcamento");
   ui->tableProdutos->hideColumn("idLoja");
-  ui->tableProdutos->hideColumn("unCaixa");
+  ui->tableProdutos->hideColumn("quantCaixa");
   ui->tableProdutos->hideColumn("descUnitario");
   ui->tableProdutos->hideColumn("descGlobal");
   ui->tableProdutos->hideColumn("total");
@@ -727,11 +712,11 @@ void Orcamento::setupTables() {
 
   ui->tableProdutos->setItemDelegate(new DoubleDelegate(this));
 
-  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableProdutos->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
-  ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(this));
+  ui->tableProdutos->setItemDelegateForColumn("desconto", new PorcentagemDelegate(false, this));
 }
 
 void Orcamento::atualizarItem() { adicionarItem(Tipo::Atualizar); }
@@ -753,7 +738,7 @@ void Orcamento::adicionarItem(const Tipo tipoItem) {
     if (not modelItem.setData(currentRowItem, "prcUnitario", ui->lineEditPrecoUn->getValue())) { return; }
     if (not modelItem.setData(currentRowItem, "caixas", ui->doubleSpinBoxCaixas->value())) { return; }
     if (not modelItem.setData(currentRowItem, "quant", ui->doubleSpinBoxQuant->value())) { return; }
-    if (not modelItem.setData(currentRowItem, "unCaixa", ui->doubleSpinBoxQuant->singleStep())) { return; }
+    if (not modelItem.setData(currentRowItem, "quantCaixa", ui->doubleSpinBoxQuant->singleStep())) { return; }
     if (not modelItem.setData(currentRowItem, "un", ui->lineEditUn->text())) { return; }
     if (not modelItem.setData(currentRowItem, "codComercial", ui->lineEditCodComercial->text())) { return; }
     if (not modelItem.setData(currentRowItem, "formComercial", ui->lineEditFormComercial->text())) { return; }
@@ -810,8 +795,10 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 }
 
 void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
-  const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
-  const double quant = caixas2 * ui->spinBoxUnCx->value();
+  const double step = ui->doubleSpinBoxCaixas->singleStep();
+  const double resto = fmod(caixas, step);
+  const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+  const double quant = caixas2 * ui->spinBoxQuantCx->value();
   const double prcUn = ui->lineEditPrecoUn->getValue();
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
   const double itemBruto = quant * prcUn;
@@ -850,12 +837,12 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditPrecoUn->clear();
   ui->lineEditUn->clear();
   ui->spinBoxMinimo->clear();
-  ui->spinBoxUnCx->clear();
+  ui->spinBoxQuantCx->clear();
 
   // -------------------------------------------------------------------------
 
   QSqlQuery query;
-  query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, m2cx, pccx, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
+  query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, quantCaixa, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro na busca do produto: " + query.lastError().text(), this); }
@@ -869,24 +856,22 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditCodComercial->setText(query.value("codComercial").toString());
   ui->lineEditFormComercial->setText(query.value("formComercial").toString());
 
-  const QString uncxString = un.contains("M2") or un.contains("M²") or un.contains("ML") ? "m2cx" : "pccx";
-
-  ui->spinBoxUnCx->setValue(query.value(uncxString).toDouble());
-
   const double minimo = query.value("minimo").toDouble();
   const double multiplo = query.value("multiplo").toDouble();
-  const double uncx = query.value(uncxString).toDouble();
+  const double quantCaixa = query.value("quantCaixa").toDouble();
+
+  ui->spinBoxQuantCx->setValue(quantCaixa);
 
   ui->spinBoxMinimo->setValue(minimo);
   ui->doubleSpinBoxQuant->setMinimum(minimo);
-  ui->doubleSpinBoxCaixas->setMinimum(minimo / uncx);
+  ui->doubleSpinBoxCaixas->setMinimum(minimo / quantCaixa);
 
   currentItemIsEstoque = query.value("estoque").toBool();
   currentItemIsPromocao = query.value("promocao").toInt();
 
   if (currentItemIsEstoque) {
     ui->doubleSpinBoxQuant->setMaximum(query.value("estoqueRestante").toDouble());
-    ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / uncx);
+    ui->doubleSpinBoxCaixas->setMaximum(query.value("estoqueRestante").toDouble() / quantCaixa);
   } else {
     ui->doubleSpinBoxQuant->setMaximum(9999999.000000);
     ui->doubleSpinBoxCaixas->setMaximum(9999999.000000);
@@ -900,15 +885,15 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   ui->lineEditPrecoUn->setEnabled(true);
   ui->lineEditUn->setEnabled(true);
   ui->spinBoxMinimo->setEnabled(true);
-  ui->spinBoxUnCx->setEnabled(true);
+  ui->spinBoxQuantCx->setEnabled(true);
 
   ui->doubleSpinBoxCaixas->setSingleStep(1.);
-  ui->doubleSpinBoxQuant->setSingleStep(uncx);
+  ui->doubleSpinBoxQuant->setSingleStep(quantCaixa);
 
   // TODO: 0verificar se preciso tratar os casos sem multiplo
   // if (minimo != 0) ...
   if (not qFuzzyIsNull(minimo) and not qFuzzyIsNull(multiplo)) {
-    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / uncx);
+    ui->doubleSpinBoxCaixas->setSingleStep(multiplo / quantCaixa);
     ui->doubleSpinBoxQuant->setSingleStep(multiplo);
   }
 
@@ -953,6 +938,8 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
   ui->doubleSpinBoxFrete->setMinimum(checked ? 0 : frete);
 
   if (not checked) { ui->doubleSpinBoxFrete->setValue(frete); }
+
+  ui->doubleSpinBoxFrete->setFocus();
 }
 
 void Orcamento::on_pushButtonReplicar_clicked() {
@@ -1002,7 +989,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   replica->ui->itemBoxVendedor->setId(data("idUsuario"));
   replica->ui->itemBoxEndereco->setId(data("idEnderecoEntrega"));
   replica->ui->spinBoxValidade->setValue(data("validade").toInt());
-  replica->ui->dataEmissao->setDateTime(qApp->serverDateTime());
+  replica->ui->dataEmissao->setDate(qApp->serverDate());
   replica->ui->checkBoxRepresentacao->setChecked(ui->checkBoxRepresentacao->isChecked());
   replica->ui->lineEditReplicaDe->setText(data("idOrcamento").toString());
   replica->ui->plainTextEditObs->setPlainText(data("observacao").toString());
@@ -1021,12 +1008,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 }
 
 bool Orcamento::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: Orcamento::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("Orcamento::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) {
@@ -1070,7 +1052,7 @@ bool Orcamento::cadastrar() {
 bool Orcamento::verificaCadastroCliente() {
   const int idCliente = ui->itemBoxCliente->getId().toInt();
 
-  // REFAC: simplify this function
+  // TODO: simplify this function
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");
@@ -1135,7 +1117,7 @@ void Orcamento::on_checkBoxRepresentacao_toggled(const bool checked) {
 void Orcamento::on_doubleSpinBoxDesconto_valueChanged(const double desconto) {
   const double caixas = ui->doubleSpinBoxCaixas->value();
   const double caixas2 = not qFuzzyIsNull(fmod(caixas, ui->doubleSpinBoxCaixas->singleStep())) ? ceil(caixas) : caixas;
-  const double quant = caixas2 * ui->spinBoxUnCx->value();
+  const double quant = caixas2 * ui->spinBoxQuantCx->value();
 
   unsetConnections();
 
@@ -1371,6 +1353,7 @@ bool Orcamento::verificaDisponibilidadeEstoque() {
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
 // TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/
+//       para permitir reordenar os produtos colocar um campo oculto 'item' numerado sequencialmente, ai quando ler a tabela ordenar por essa coluna
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
 // TODO: limitar validade para o fim do mes
 // FIXME: adicionar novamente botao para limpar selecao para quando a tabela de itens está cheia e não tem como clicar no espaço vazio

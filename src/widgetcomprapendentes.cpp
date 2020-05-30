@@ -5,8 +5,8 @@
 #include "doubledelegate.h"
 #include "excel.h"
 #include "financeiroproxymodel.h"
-#include "impressao.h"
 #include "inputdialog.h"
+#include "pdf.h"
 #include "produtospendentes.h"
 #include "reaisdelegate.h"
 
@@ -35,8 +35,9 @@ void WidgetCompraPendentes::setarDadosAvulso() {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando produto: " + query.lastError().text(), this); }
 
+  // TODO: change this to use quantCaixa?
   const QString un = query.value("un").toString();
-  const QString un2 = un == "M2" or un == "M²" or un == "ML" ? "m2cx" : "pccx";
+  const QString un2 = (un == "M2") or (un == "M²") or (un == "ML") ? "m2cx" : "pccx";
 
   ui->doubleSpinBoxQuantAvulso->setSingleStep(query.value(un2).toDouble());
 
@@ -119,7 +120,7 @@ void WidgetCompraPendentes::setupTables() {
 
   ui->table->setModel(&modelViewVendaProduto);
 
-  ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(this, 3));
+  ui->table->setItemDelegateForColumn("quant", new DoubleDelegate(3, this));
 }
 
 void WidgetCompraPendentes::on_table_activated(const QModelIndex &index) {
@@ -207,33 +208,34 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 }
 
 bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
+  SqlTableModel model;
+  model.setTable("pedido_fornecedor_has_produto");
+
+  const int newRow = model.insertRowAtEnd();
+
   QSqlQuery query;
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando produto: " + query.lastError().text(), this); }
 
-  QSqlQuery query2;
-  query2.prepare(
-      "INSERT INTO pedido_fornecedor_has_produto (fornecedor, idProduto, descricao, colecao, quant, un, un2, caixas, prcUnitario, preco, kgcx, formComercial, codComercial, codBarras, "
-      "dataPrevCompra) VALUES (:fornecedor, :idProduto, :descricao, :colecao, :quant, :un, :un2, :caixas, :prcUnitario, :preco, :kgcx, :formComercial, :codComercial, :codBarras, :dataPrevCompra)");
-  query2.bindValue(":fornecedor", query.value("fornecedor"));
-  query2.bindValue(":idProduto", query.value("idProduto"));
-  query2.bindValue(":descricao", query.value("descricao"));
-  query2.bindValue(":colecao", query.value("colecao"));
-  query2.bindValue(":quant", ui->doubleSpinBoxQuantAvulso->value());
-  query2.bindValue(":un", query.value("un"));
-  query2.bindValue(":un2", query.value("un2"));
-  query2.bindValue(":caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value());
-  query2.bindValue(":prcUnitario", query.value("custo").toDouble());
-  query2.bindValue(":preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value());
-  query2.bindValue(":kgcx", query.value("kgcx"));
-  query2.bindValue(":formComercial", query.value("formComercial"));
-  query2.bindValue(":codComercial", query.value("codComercial"));
-  query2.bindValue(":codBarras", query.value("codBarras"));
-  query2.bindValue(":dataPrevCompra", dataPrevista);
+  if (not model.setData(newRow, "fornecedor", query.value("fornecedor"))) { return false; }
+  if (not model.setData(newRow, "idProduto", query.value("idProduto"))) { return false; }
+  if (not model.setData(newRow, "descricao", query.value("descricao"))) { return false; }
+  if (not model.setData(newRow, "colecao", query.value("colecao"))) { return false; }
+  if (not model.setData(newRow, "quant", ui->doubleSpinBoxQuantAvulso->value())) { return false; }
+  if (not model.setData(newRow, "un", query.value("un"))) { return false; }
+  if (not model.setData(newRow, "un2", query.value("un2"))) { return false; }
+  if (not model.setData(newRow, "caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value())) { return false; }
+  if (not model.setData(newRow, "prcUnitario", query.value("custo").toDouble())) { return false; }
+  if (not model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value())) { return false; }
+  if (not model.setData(newRow, "kgcx", query.value("kgcx"))) { return false; }
+  if (not model.setData(newRow, "formComercial", query.value("formComercial"))) { return false; }
+  if (not model.setData(newRow, "codComercial", query.value("codComercial"))) { return false; }
+  if (not model.setData(newRow, "codBarras", query.value("codBarras"))) { return false; }
+  if (not model.setData(newRow, "dataPrevCompra", dataPrevista)) { return false; }
 
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query2.lastError().text(), this); }
+  if (not model.submitAll()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
 
   return true;
 }
@@ -260,8 +262,8 @@ void WidgetCompraPendentes::on_pushButtonPDF_clicked() {
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  Impressao impressao(idVenda, Impressao::Tipo::Venda, this);
-  impressao.print();
+  PDF impressao(idVenda, PDF::Tipo::Venda, this);
+  impressao.gerarPdf();
 }
 
 // TODO: [Conrado] quando for vendido produto_estoque marcar status como 'PRÉ-ESTOQUE' ou algo do tipo para

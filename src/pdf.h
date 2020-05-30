@@ -1,17 +1,17 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QSqlQuery>
 
-class Impressao final {
+class PDF final {
 
 public:
   enum class Tipo { Orcamento, Venda };
-  explicit Impressao(const QString &id, const Tipo tipo, QObject *parent);
-  ~Impressao() = default;
-  Impressao(const Impressao &) = delete;
-  auto print() -> void;
+  explicit PDF(const QString &id, const Tipo tipo, QObject *parent);
+  ~PDF() = default;
+  PDF(const PDF &) = delete;
+  auto gerarPdf() -> void;
 
 private:
   // attributes
@@ -26,7 +26,7 @@ private:
   QSqlQuery query;
   QSqlQuery queryProfissional;
   QSqlQuery queryVendedor;
-  SqlRelationalTableModel modelItem;
+  SqlTableModel modelItem;
   // methods
   auto setQuerys() -> bool;
 };

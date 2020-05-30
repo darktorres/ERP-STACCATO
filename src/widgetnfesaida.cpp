@@ -4,7 +4,6 @@
 #include "acbr.h"
 #include "application.h"
 #include "doubledelegate.h"
-#include "log.h"
 #include "lrreportengine.h"
 #include "reaisdelegate.h"
 #include "sendmail.h"
@@ -80,6 +79,8 @@ void WidgetNfeSaida::setupTables() {
 
   modelViewNFeSaida.setHeaderData("valor", "R$");
 
+  modelViewNFeSaida.setSort("Criado em");
+
   ui->table->setModel(&modelViewNFeSaida);
 
   ui->table->hideColumn("idNFe");
@@ -102,8 +103,6 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetNfeSaida::montaFiltro() {
-  // TODO: 5ordenar por 'data criado'
-
   QStringList filtros;
 
   const QString text = ui->lineEditBusca->text();
@@ -134,6 +133,8 @@ void WidgetNfeSaida::montaFiltro() {
 }
 
 void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
+  // TODO: como no cancelamento o acbr nao atualiza o xml, fazer a consulta para atualizar o xml como cancelado antes de enviar para a contabilidade?
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
@@ -142,11 +143,11 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
 
-  if (not emailContabilidade) { return qApp->enqueueError("A chave 'emailContabilidade' não está configurada!", this); }
+  if (not emailContabilidade) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
 
-  if (not emailLogistica) { return qApp->enqueueError("A chave 'emailLogistica' não está configurada!", this); }
+  if (not emailLogistica) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   // -------------------------------------------------------------------------
 
@@ -177,14 +178,13 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
   if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueError("Resposta: " + resposta.value(), this); }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetNfeSaida::on_pushButtonCancelarNFe")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe")) { return; }
 
   if (not cancelarNFe(chaveAcesso, row)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
+  updateTables();
   qApp->enqueueInformation(resposta.value(), this);
 
   if (not gravarArquivo(resposta.value())) { return; }
@@ -213,7 +213,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   LimeReport::ReportEngine report;
   auto dataManager = report.dataManager();
 
-  SqlRelationalTableModel view;
+  SqlTableModel view;
   view.setTable("view_relatorio_nfe");
 
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
@@ -352,36 +352,40 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   ACBr acbrRemoto;
 
-  if (auto tuple = acbrRemoto.consultarNFe(idNFe); tuple) {
+  if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
     const auto [xml, resposta] = tuple.value();
 
-    if (not qApp->startTransaction()) { return; }
+    if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe")) { return; }
 
-    if (not Log::createLog("Transação: WidgetNfeSaida::on_pushButtonConsultarNFe")) { return qApp->rollbackTransaction(); }
-
-    if (not atualizarNFe(idNFe, xml)) { return qApp->rollbackTransaction(); }
+    if (not atualizarNFe(resposta, idNFe, xml)) { return qApp->rollbackTransaction(); }
 
     if (not qApp->endTransaction()) { return; }
 
+    updateTables();
     qApp->enqueueInformation(resposta, this);
   }
 }
 
-bool WidgetNfeSaida::atualizarNFe(const int idNFe, const QString &xml) {
+bool WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
+  QString status;
+
+  if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
+  if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CAMCELADO"; }
+
+  if (status.isEmpty()) { return false; }
+
   QSqlQuery query;
-  query.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml WHERE idNFe = :idNFe");
+  query.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE idNFe = :idNFe");
+  query.bindValue(":status", status);
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como 'AUTORIZADO': " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando xml da nota: " + query.lastError().text(), this); }
 
   return true;
 }
 
 bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
-  // FIXME: como a view de nfeSaida usa o vinculo vp<>nfe para saber qual o idVenda, ao remover o vinculo aqui a
-  // nota fica no limbo, alterar para usar sempre o idVenda salvo na propria nfe
-
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
@@ -417,9 +421,5 @@ bool WidgetNfeSaida::gravarArquivo(const QString &resposta) {
   return true;
 }
 
-// TODO: guardar idVenda/outros dados na nfe para quando cancelar nao perder os vinculos
 // TODO: 2tela para importar notas de amostra (aba separada)
-// TODO: 0nao estou guardando o valor na nota
-// TODO: 0algumas notas nao estao mostrando valor
 // TODO: nesta tela colocar um campo dizendo qual loja que emitiu a nota (nao precisa mostrar o cnpj, apenas o nome da loja) (e talvez poder filtrar pela loja)
-// TODO: fazer sistema para trocar notas futuras pela nota real

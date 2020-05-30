@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetLogisticaCaminhao final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaCaminhao(QWidget *parent = nullptr);
+  explicit WidgetLogisticaCaminhao(QWidget *parent);
   ~WidgetLogisticaCaminhao();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,8 +21,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelCaminhao;
-  SqlRelationalTableModel modelCarga;
+  SqlTableModel modelCaminhao;
+  SqlTableModel modelCarga;
   Ui::WidgetLogisticaCaminhao *ui;
   // methods
   auto on_table_clicked(const QModelIndex &index) -> void;

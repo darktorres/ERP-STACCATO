@@ -5,21 +5,20 @@
 #include "cadastrocliente.h"
 #include "cadastrofornecedor.h"
 #include "cadastroloja.h"
+#include "cadastroncm.h"
+#include "cadastropagamento.h"
 #include "cadastroproduto.h"
 #include "cadastroprofissional.h"
 #include "cadastrotransportadora.h"
 #include "cadastrousuario.h"
 #include "calculofrete.h"
 #include "importaprodutos.h"
+#include "importatabelaibpt.h"
 #include "orcamento.h"
 #include "precoestoque.h"
 #include "userconfig.h"
 #include "usersession.h"
-#include "xlsxdocument.h"
 
-#include <QDesktopServices>
-#include <QMessageBox>
-#include <QShortcut>
 #include <QSqlError>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -39,8 +38,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionCriarOrcamento, &QAction::triggered, this, &MainWindow::on_actionCriarOrcamento_triggered);
   connect(ui->actionEscuro, &QAction::triggered, this, &MainWindow::on_actionEscuro_triggered);
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
+  connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
+  connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
+  connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
   connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
   connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered);
   connect(ui->actionSobre, &QAction::triggered, this, &MainWindow::on_actionSobre_triggered);
@@ -52,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  if (const auto hostname = UserSession::getSetting("Login/hostname"); hostname) {
+  if (const auto hostname = UserSession::getSetting("Login/hostname")) {
     const QString hostnameText = qApp->getMapLojas().key(hostname->toString());
 
     setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
@@ -120,7 +122,48 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 }
 
+MainWindow::MainWindow() : MainWindow(nullptr) {}
+
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::resetTables() {
+  ui->widgetOrcamento->resetTables();
+  ui->widgetVenda->resetTables();
+  ui->widgetCompra->resetTables();
+  ui->widgetLogistica->resetTables();
+  ui->widgetNfe->resetTables();
+  ui->widgetEstoque->resetTables();
+  ui->widgetFinanceiro->resetTables();
+  ui->widgetRelatorio->resetTables();
+  ui->widgetGraficos->resetTables();
+  ui->widgetConsistencia->resetTables();
+
+  updateTables();
+}
+
+void MainWindow::updateTables() {
+  if (qApp->getUpdating()) { return; }
+  if (not qApp->getIsConnected()) { return; }
+  if (qApp->getShowingErrors()) { return; }
+
+  qApp->setUpdating(true);
+
+  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+
+  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
+  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
+  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
+  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
+  if (currentText == "RH") { ui->widgetRh->updateTables(); }
+  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
+
+  qApp->setUpdating(false);
+}
 
 void MainWindow::reconnectDb() {
   const bool conectado = qApp->dbReconnect();
@@ -134,6 +177,18 @@ void MainWindow::verifyDb(const bool conectado) {
 
   if (conectado) { resetTables(); }
 }
+
+bool MainWindow::event(QEvent *event) {
+  switch (event->type()) {
+  case QEvent::WindowActivate: updateTables(); break;
+
+  default: break;
+  }
+
+  return QMainWindow::event(event);
+}
+
+void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);
@@ -177,62 +232,11 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
   cad->show();
 }
 
-void MainWindow::resetTables() {
-  ui->widgetOrcamento->resetTables();
-  ui->widgetVenda->resetTables();
-  ui->widgetCompra->resetTables();
-  ui->widgetLogistica->resetTables();
-  ui->widgetNfe->resetTables();
-  ui->widgetEstoque->resetTables();
-  ui->widgetFinanceiro->resetTables();
-  ui->widgetRelatorio->resetTables();
-  ui->widgetGraficos->resetTables();
-  ui->widgetConsistencia->resetTables();
-
-  updateTables();
-}
-
-void MainWindow::updateTables() {
-  if (qApp->getUpdating()) { return; }
-  if (not qApp->getIsConnected()) { return; }
-  if (qApp->getShowingErrors()) { return; }
-
-  qApp->setUpdating(true);
-
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
-
-  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
-  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
-  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
-  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
-  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
-  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
-  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
-  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
-  if (currentText == "RH") { ui->widgetRh->updateTables(); }
-  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
-
-  qApp->setUpdating(false);
-}
-
 void MainWindow::on_actionCadastrarFornecedor_triggered() {
   auto *cad = new CadastroFornecedor(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
   cad->show();
 }
-
-bool MainWindow::event(QEvent *event) {
-  switch (event->type()) {
-  case QEvent::WindowActivate: updateTables(); break;
-
-  default: break;
-  }
-
-  return QMainWindow::event(event);
-}
-
-void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionSobre_triggered() {
   QMessageBox::about(this, "Sobre ERP Staccato", "Versão " + qApp->applicationVersion() + "\nDesenvolvedor: Rodrigo Torres\nCelular/WhatsApp: (12)98138-3504\nE-mail: torres.dark@gmail.com");
@@ -251,7 +255,7 @@ void MainWindow::on_actionConfiguracoes_triggered() {
 void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
 
 void MainWindow::on_actionProdutos_triggered() {
-  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Produto, this);
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Normal, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
   importa->importarTabela();
 }
@@ -274,39 +278,34 @@ void MainWindow::on_actionCalcular_frete_triggered() {
   frete->show();
 }
 
+void MainWindow::on_actionImportar_tabela_IBPT_triggered() {
+  ImportaTabelaIBPT ibpt(this);
+  ibpt.importar();
+}
+
+void MainWindow::on_actionGerenciar_NCMs_triggered() {
+  auto *cadastroNCM = new CadastroNCM(this);
+  cadastroNCM->setAttribute(Qt::WA_DeleteOnClose);
+  cadastroNCM->show();
+}
+
+void MainWindow::on_actionGerenciar_Pagamentos_triggered() {
+  auto *pagamentos = new CadastroPagamento(this);
+  pagamentos->setAttribute(Qt::WA_DeleteOnClose);
+  pagamentos->show();
+}
+
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc
 // NOTE: colocar logo da staccato na mainwindow
 
 // NOTE: prioridades atuais:
 // TODO: logistica da devolucao
 
-// TASK: cancelamento de nfe: terminar de arrumar formato do email
-// TASK: arrumar cadastrarNFe para quando guardar a nota pendente associar ela com venda_has_produto para aparecer na
-// tela de consultarNFe (depois disso só vai precisar atualizar a nota com a
-// autorizacao e os status)
-// TASK: verificar porque os estoques 10649, 10650 e 10651 nao mudaram de status (pararam em 'em coleta')
-// TASK: anotar alteracoes que Anderson pediu nos audios do whats
-// TASK: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
-// TASK: arrumar items no workbench na tabela pf que possuam idVendaProduto mas nao idVenda
-// TASK: terminar a parte de alteracao de certificado
-//         alterar emitente
-//         pedir para alterar cartao
-// TASK: -reescrever view_estoque para retroativo (usar view_estoque2)
-// TASK: botao de consultarNFe nao esta atualizando corretamente o xml
-// TASK: protocolo entrega (falta o Anderson validar antes de integrar com a geracao da nota)
-// TASK: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
-// TASK: verificar load balancing com proxysql
-// TASK: montar chart do faturamento dia/mes (foto no skype)
-// TASK: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
-// TASK: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
-// TASK: pendencias conrado - nfe 118248
-// TASK: terminar funcao de marcar caixas quebradas no recebimento
-// TASK: verificar os 3 pedidos com totalItem que nao corresponde ao valor correto
-// TASK: bloquear acesso dos usuarios apenas pela intranet (permissoes mysql) precisa de ip fixo primeiro
-// TASK: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
-// TASK: alterar consumo de estoque para fazer as ligacoes idVenda/idVendaProduto na tabela de compra
-// TASK: terminar de implantar quebra/reposicao
-// TASK: reimportar notas do pedido 172646
-// TODO: na reposicao concatenar '(REPOSICAO)' no comeco da descricao do produto
-// TODO: diff defaultPalette and darkPalette to find the stuff that is missing implementing
-// NOTE: add logging everywhere so when the need for debugging on the client pc arises it can be run from the terminal to see the logs
+// TODO: cancelamento de nfe: terminar de arrumar formato do email
+// TODO: ao cancelar a nota verificar se todos os campos relacionados foram corrigidos e enviar email para contabilidade com xml de canc.
+// TODO: verificar com Conrado os itens com minimo mas sem multiplo (tabela produto)
+// TODO: caixinha na tabela 'agendar entrega' para marcar quais pedidos foram enviados pelo anderson para a edna
+// TODO: arrumar consumos em que as unidades do estoque estejam diferentes das do consumo (converter)
+// TODO: terminar de implantar quebra/reposicao
+// TODO: quando muda a validade de um produto descontinuado ele continua descontinuado porque o sistema leva em consideracao o produto_has_preco
+// NOTE: add logging to the terminal so qdebug logging can be seen on the user pc when needed

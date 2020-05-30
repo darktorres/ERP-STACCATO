@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 #include "sqltreemodel.h"
 
 #include <QDialog>
@@ -15,7 +15,7 @@ class InputDialogFinanceiro final : public QDialog {
 public:
   enum class Tipo { ConfirmarCompra, Financeiro };
 
-  explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent = nullptr);
+  explicit InputDialogFinanceiro(const Tipo &tipo, QWidget *parent);
   ~InputDialogFinanceiro();
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
@@ -25,9 +25,9 @@ private:
   // attributes
   bool representacao;
   const Tipo tipo;
-  SqlRelationalTableModel modelPedidoFornecedor;
-  SqlRelationalTableModel modelPedidoFornecedor2;
-  SqlRelationalTableModel modelFluxoCaixa;
+  SqlTableModel modelPedidoFornecedor;
+  SqlTableModel modelPedidoFornecedor2;
+  SqlTableModel modelFluxoCaixa;
   SqlTreeModel modelTree;
   Ui::InputDialogFinanceiro *ui;
   // methods
@@ -35,6 +35,7 @@ private:
   auto calcularTotal() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;
+  auto on_checkBoxParcelarSt_toggled(bool) -> void;
   auto on_comboBoxST_currentTextChanged(const QString &text) -> void;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
   auto on_dateEditPgtSt_dateChanged(const QDate &) -> void;

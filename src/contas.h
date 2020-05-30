@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -13,15 +13,16 @@ class Contas final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
-  explicit Contas(const Tipo tipo, QWidget *parent = nullptr);
+  explicit Contas(const Tipo tipo, QWidget *parent);
   ~Contas();
-  auto viewConta(const QString &idPagamento, const QString &contraparte) -> void;
+  auto viewContaPagar(const QString &dataPagamento) -> void;
+  auto viewContaReceber(const QString &idPagamento, const QString &contraparte) -> void;
 
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel modelPendentes;
-  SqlRelationalTableModel modelProcessados;
+  SqlTableModel modelPendentes;
+  SqlTableModel modelProcessados;
   Ui::Contas *ui;
   // methods
   auto on_pushButtonSalvar_clicked() -> void;

@@ -13,7 +13,10 @@
 #include <QFileDialog>
 #include <QSqlError>
 
-WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) { ui->setupUi(this); }
+WidgetRelatorio::WidgetRelatorio(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetRelatorio) {
+  ui->setupUi(this);
+  ui->groupBoxResumoOrcamento->hide();
+}
 
 WidgetRelatorio::~WidgetRelatorio() { delete ui; }
 
@@ -71,7 +74,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableRelatorio->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableRelatorio->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableRelatorio->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
 
   ui->tableRelatorio->hideColumn("Mês");
   ui->tableRelatorio->hideColumn("idUsuario");
@@ -84,7 +87,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableTotalVendedor->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalVendedor->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableTotalVendedor->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
 
   ui->tableTotalVendedor->hideColumn("idUsuario");
   ui->tableTotalVendedor->hideColumn("Mês");
@@ -97,7 +100,7 @@ void WidgetRelatorio::setupTables() {
 
   ui->tableTotalLoja->setItemDelegateForColumn("Faturamento", new ReaisDelegate(this));
   ui->tableTotalLoja->setItemDelegateForColumn("Comissão", new ReaisDelegate(this));
-  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(this));
+  ui->tableTotalLoja->setItemDelegateForColumn("%", new PorcentagemDelegate(false, this));
   ui->tableTotalLoja->setItemDelegateForColumn("Reposição", new ReaisDelegate(this));
 
   ui->tableTotalLoja->hideColumn("Mês");
@@ -199,30 +202,31 @@ void WidgetRelatorio::updateTables() {
 }
 
 void WidgetRelatorio::setResumoOrcamento() {
-  QSqlQuery query;
+  //  QSqlQuery query;
 
-  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text(), this); }
+  //  if (not query.exec("SET @mydate = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'")) { return qApp->enqueueError("Erro comunicando com o banco de dados: " + query.lastError().text(),
+  //  this); }
 
-  modelOrcamento.setTable("view_resumo_relatorio");
+  //  modelOrcamento.setTable("view_resumo_relatorio");
 
-  modelOrcamento.setFilter("");
+  //  modelOrcamento.setFilter("");
 
-  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    if (const auto descricaoLoja = UserSession::fromLoja("descricao"); descricaoLoja) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
-  }
+  //  if (UserSession::tipoUsuario() == "GERENTE LOJA") {
+  //    if (const auto descricaoLoja = UserSession::fromLoja("descricao")) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
+  //  }
 
-  if (not modelOrcamento.select()) { return; }
+  //  if (not modelOrcamento.select()) { return; }
 
-  ui->tableResumoOrcamento->setModel(&modelOrcamento);
+  //  ui->tableResumoOrcamento->setModel(&modelOrcamento);
 
-  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Anteriores", new ReaisDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("Gerados Mes", new ReaisDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("Revalidados Mes", new ReaisDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("Fechados Mes", new ReaisDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("Perdidos Mes", new ReaisDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Mes", new ReaisDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(this));
-  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Anteriores", new ReaisDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Gerados Mes", new ReaisDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Revalidados Mes", new ReaisDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Fechados Mes", new ReaisDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Perdidos Mes", new ReaisDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Mes", new ReaisDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(this));
 }
 
 void WidgetRelatorio::resetTables() { modelIsSet = false; }
@@ -297,7 +301,7 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo.", this); }
+  if (not xlsx.saveAs(fileName)) { return qApp->enqueueError(false, "Ocorreu algum erro ao salvar o arquivo!", this); }
 
   return true;
 }

@@ -6,7 +6,6 @@
 #include "doubledelegate.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
-#include "log.h"
 #include "usersession.h"
 #include "venda.h"
 
@@ -69,7 +68,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableEstoque->setItemDelegate(new DoubleDelegate(this));
 
   ui->tableEstoque->hideColumn("fornecedor");
-  ui->tableEstoque->hideColumn("unCaixa");
+  ui->tableEstoque->hideColumn("quantCaixa");
   ui->tableEstoque->hideColumn("formComercial");
   ui->tableEstoque->hideColumn("idProduto");
   ui->tableEstoque->hideColumn("idNFe");
@@ -104,7 +103,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAtual->hideColumn("idLoja");
   ui->tableTranspAtual->hideColumn("idProduto");
   ui->tableTranspAtual->hideColumn("obs");
-  ui->tableTranspAtual->hideColumn("unCaixa");
+  ui->tableTranspAtual->hideColumn("quantCaixa");
   ui->tableTranspAtual->hideColumn("formComercial");
   ui->tableTranspAtual->hideColumn("data");
 
@@ -136,7 +135,7 @@ void WidgetLogisticaAgendarColeta::setupTables() {
   ui->tableTranspAgend->hideColumn("idVenda");
   ui->tableTranspAgend->hideColumn("idLoja");
   ui->tableTranspAgend->hideColumn("idProduto");
-  ui->tableTranspAgend->hideColumn("unCaixa");
+  ui->tableTranspAgend->hideColumn("quantCaixa");
   ui->tableTranspAgend->hideColumn("obs");
   ui->tableTranspAgend->hideColumn("formComercial");
 }
@@ -203,9 +202,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga_clicked() {
 
   for (int row = 0; row < modelTranspAtual.rowCount(); ++row) { list << modelTranspAtual.index(row, 0); }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaAgendarColeta::on_pushButtonMontarCarga")) { return; }
 
   if (not processRows(list, ui->dateTimeEdit->date(), true)) { return qApp->rollbackTransaction(); }
 
@@ -229,9 +226,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaAgendarColeta::on_pushButtonAgendarColeta")) { return; }
 
   if (not processRows(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -318,7 +313,7 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
     const int row = modelTranspAtual.insertRowAtEnd();
 
     if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(index.row(), "fornecedor"))) { return false; }
-    if (not modelTranspAtual.setData(row, "unCaixa", modelEstoque.data(index.row(), "unCaixa"))) { return false; }
+    if (not modelTranspAtual.setData(row, "quantCaixa", modelEstoque.data(index.row(), "quantCaixa"))) { return false; }
     if (not modelTranspAtual.setData(row, "formComercial", modelEstoque.data(index.row(), "formComercial"))) { return false; }
     if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
     if (not modelTranspAtual.setData(row, "idEstoque", modelEstoque.data(index.row(), "idEstoque"))) { return false; }

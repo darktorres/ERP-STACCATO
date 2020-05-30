@@ -2,7 +2,6 @@
 #include "ui_inserirtransferencia.h"
 
 #include "application.h"
-#include "log.h"
 
 #include <QMessageBox>
 #include <QSqlError>
@@ -27,9 +26,7 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: InserirTransferencia::on_pushButtonSalvar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar")) { return; }
 
   if (not cadastrar()) { return qApp->rollbackTransaction(); }
 
@@ -55,7 +52,7 @@ bool InserirTransferencia::cadastrar() {
   if (not modelDe.setData(rowDe, "valorReal", ui->doubleSpinBoxValor->value())) { return false; }
   if (not modelDe.setData(rowDe, "tipoReal", "1. Transf. Banc.")) { return false; }
   if (not modelDe.setData(rowDe, "parcelaReal", "1")) { return false; }
-  if (not modelDe.setData(rowDe, "contaDestino", ui->itemBoxDe->getId())) { return false; }
+  if (not modelDe.setData(rowDe, "idConta", ui->itemBoxDe->getId())) { return false; }
   if (not modelDe.setData(rowDe, "centroCusto", 1)) { return false; } // Geral
   if (not modelDe.setData(rowDe, "grupo", "Transferência")) { return false; }
   if (not modelDe.setData(rowDe, "observacao", ui->lineEditObservacao->text())) { return false; }
@@ -75,7 +72,7 @@ bool InserirTransferencia::cadastrar() {
   if (not modelPara.setData(rowPara, "valorReal", ui->doubleSpinBoxValor->value())) { return false; }
   if (not modelPara.setData(rowPara, "tipoReal", "1. Transf. Banc.")) { return false; }
   if (not modelPara.setData(rowPara, "parcelaReal", "1")) { return false; }
-  if (not modelPara.setData(rowPara, "contaDestino", ui->itemBoxPara->getId())) { return false; }
+  if (not modelPara.setData(rowPara, "idConta", ui->itemBoxPara->getId())) { return false; }
   if (not modelPara.setData(rowPara, "centroCusto", 1)) { return false; } // Geral
   if (not modelPara.setData(rowPara, "grupo", "Transferência")) { return false; }
   if (not modelPara.setData(rowPara, "observacao", ui->lineEditObservacao->text())) { return false; }

@@ -4,14 +4,14 @@
 
 #include <QDebug>
 
-ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), isReadOnly(isReadOnly), tipo(tipo) {}
+ItemBoxDelegate::ItemBoxDelegate(const Tipo tipo, const bool isReadOnly, QObject *parent) : QStyledItemDelegate(parent), readOnly(isReadOnly), tipo(tipo) {}
 
 QWidget *ItemBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
   auto *editor = new ItemBox(parent);
 
-  editor->setReadOnlyItemBox(isReadOnly);
+  editor->setReadOnlyItemBox(readOnly);
 
-  if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); } // TODO: make those delayed init to avoid making the whole dialog slow
+  if (tipo == Tipo::Loja) { editor->setSearchDialog(SearchDialog::loja(parent)); }
   if (tipo == Tipo::Conta) { editor->setSearchDialog(SearchDialog::conta(parent)); }
 
   connect(editor, &ItemBox::textChanged, this, &ItemBoxDelegate::commitEditor);

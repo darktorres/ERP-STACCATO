@@ -65,7 +65,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
     return;
   }
 
-  QStringList strings = text.split(" ", QString::SkipEmptyParts);
+  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
   for (auto &string : strings) {
     if (string.contains("-")) {
@@ -213,7 +213,7 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
 SearchDialog *SearchDialog::loja(QWidget *parent) {
   SearchDialog *sdLoja = new SearchDialog("Buscar Loja", "loja", "idLoja", {"nomeFantasia"}, "descricao, nomeFantasia, razaoSocial", "desativado = FALSE", parent);
 
-  sdLoja->ui->table->setItemDelegateForColumn("porcentagemFrete", new PorcentagemDelegate(parent));
+  sdLoja->ui->table->setItemDelegateForColumn("porcentagemFrete", new PorcentagemDelegate(false, parent));
   sdLoja->ui->table->setItemDelegateForColumn("valorMinimoFrete", new ReaisDelegate(parent));
 
   sdLoja->hideColumns({"idLoja", "codUF", "desativado", "certificadoSerie", "certificadoSenha", "porcentagemPIS", "porcentagemCOFINS", "custoTransporteTon", "custoTransporte1", "custoTransporte2",
@@ -328,16 +328,14 @@ SearchDialog *SearchDialog::veiculo(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::usuario(QWidget *parent) {
-  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "usuario", "idUsuario", {"nome"}, "nome, tipo", "usuario.desativado = FALSE", parent);
+  SearchDialog *sdUsuario = new SearchDialog("Buscar Usuário", "view_usuario", "idUsuario", {"nome"}, "nome, tipo", "desativado = FALSE", parent);
 
-  sdUsuario->hideColumns({"idUsuario", "user", "passwd", "especialidade", "desativado"});
+  sdUsuario->hideColumns({"idLoja", "idUsuario", "user", "passwd", "especialidade", "desativado"});
 
-  sdUsuario->setHeaderData("idLoja", "Loja");
+  sdUsuario->setHeaderData("descricao", "Loja");
   sdUsuario->setHeaderData("tipo", "Função");
   sdUsuario->setHeaderData("nome", "Nome");
   sdUsuario->setHeaderData("email", "E-mail");
-
-  sdUsuario->model.setRelation(sdUsuario->model.fieldIndex("idLoja"), QSqlRelation("loja", "idLoja", "descricao"));
 
   return sdUsuario;
 }

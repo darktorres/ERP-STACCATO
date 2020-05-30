@@ -1,7 +1,5 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
-
 #include <QDialog>
 
 namespace Ui {
@@ -14,7 +12,7 @@ class InputDialog final : public QDialog {
 public:
   enum class Tipo { Carrinho, Faturamento, AgendarColeta, Coleta, AgendarRecebimento, AgendarEntrega, ReagendarPedido };
 
-  explicit InputDialog(const Tipo &tipo, QWidget *parent = nullptr);
+  explicit InputDialog(const Tipo &tipo, QWidget *parent);
   ~InputDialog();
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;

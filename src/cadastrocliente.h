@@ -11,7 +11,7 @@ class CadastroCliente final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroCliente(QWidget *parent = nullptr);
+  explicit CadastroCliente(QWidget *parent);
   ~CadastroCliente() final;
 
 private:

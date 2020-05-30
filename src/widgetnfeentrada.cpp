@@ -2,8 +2,9 @@
 #include "ui_widgetnfeentrada.h"
 
 #include "application.h"
+#include "dateformatdelegate.h"
 #include "doubledelegate.h"
-#include "log.h"
+#include "reaisdelegate.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
@@ -43,11 +44,15 @@ void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
 
+  modelViewNFeEntrada.setHeaderData("GARE", "GARE (Estimado)");
+
   ui->table->setModel(&modelViewNFeEntrada);
 
   ui->table->hideColumn("idNFe");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
+  ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("GARE Pago Em", new DateFormatDelegate(this));
 }
 
 void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
@@ -95,9 +100,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetNfeEntrada::on_pushButtonRemoverNFe")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetNfeEntrada::on_pushButtonRemoverNFe")) { return; }
 
   if (not remover(row)) { return qApp->rollbackTransaction(); }
 

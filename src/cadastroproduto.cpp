@@ -3,7 +3,6 @@
 
 #include "application.h"
 #include "cadastrofornecedor.h"
-#include "log.h"
 #include "usersession.h"
 
 #include <QDebug>
@@ -86,7 +85,7 @@ bool CadastroProduto::verifyFields() {
   const auto children = findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->comboBoxUn->currentText().isEmpty()) {
@@ -195,6 +194,13 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("st", ui->doubleSpinBoxST->value())) { return false; }
   if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) { return false; }
   if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) { return false; }
+
+  const QString un = ui->comboBoxUn->currentText();
+  const double m2cx = ui->doubleSpinBoxM2Cx->value();
+  const double pccx = ui->doubleSpinBoxPcCx->value();
+  const double quantCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
+
+  if (not setData("quantCaixa", quantCaixa)) { return false; }
   if (not setData("un", ui->comboBoxUn->currentText())) { return false; }
   if (not setData("validade", ui->dateEditValidade->date())) { return false; }
 
@@ -230,23 +236,16 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  if (not qApp->startTransaction()) { return false; }
-
-  if (not Log::createLog("Transação: CadastroProduto::cadastrar")) {
-    qApp->rollbackTransaction();
-    return false;
-  }
+  if (not qApp->startTransaction("CadastroProduto::cadastrar")) { return false; }
 
   const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
     if (not savingProcedures()) { return false; }
 
-    if (not columnsToUpper(model, currentRow)) { return false; }
-
     if (not model.submitAll()) { return false; }
 
-    primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
 
@@ -264,10 +263,10 @@ bool CadastroProduto::cadastrar() {
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
-// REFAC: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
+// TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
-// REFAC: 4verificar se posso remover 'un2' de produto
+// TODO: 4verificar se posso remover 'un2' de produto
 // TODO: colocar logica para trabalhar a tabela produto_has_preco para que os produtos nao sejam descontinuados com validade ativa
 // TODO: validar entrada do campo icms para apenas numeros
-// REFAC: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
+// TODO: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
 // TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto

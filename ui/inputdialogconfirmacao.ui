@@ -169,16 +169,6 @@
    <item row="2" column="1">
     <widget class="QFrame" name="frameQuebrado">
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QPushButton" name="pushButtonQuebrado">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Quebrado</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <spacer name="verticalSpacer">
         <property name="orientation">
@@ -192,13 +182,23 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pushButtonFaltando">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushButtonQuebradoReceb">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
-         <string>Faltando</string>
+         <string>Quebrado/Faltando</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="pushButtonQuebradoEntrega">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Quebrado/Faltando</string>
         </property>
        </widget>
       </item>

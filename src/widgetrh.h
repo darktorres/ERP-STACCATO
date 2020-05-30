@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetRh : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetRh(QWidget *parent = nullptr);
+  explicit WidgetRh(QWidget *parent);
   ~WidgetRh();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,8 +21,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelRelatorio;
-  SqlRelationalTableModel modelTotal;
+  SqlTableModel modelRelatorio;
+  SqlTableModel modelTotal;
   Ui::WidgetRh *ui;
   // methods
   auto on_dateEdit_dateChanged(const QDate &date) -> void;

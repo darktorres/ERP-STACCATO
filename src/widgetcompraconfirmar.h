@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetCompraConfirmar final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraConfirmar(QWidget *parent = nullptr);
+  explicit WidgetCompraConfirmar(QWidget *parent);
   ~WidgetCompraConfirmar();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,8 +21,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewCompras;
-  SqlRelationalTableModel modelResumo;
+  SqlTableModel modelViewCompras;
+  SqlTableModel modelResumo;
   Ui::WidgetCompraConfirmar *ui;
   // methods
   auto confirmarCompra(const QString &idCompra, const QDate &dataPrevista, const QDate &dataConf) -> bool;

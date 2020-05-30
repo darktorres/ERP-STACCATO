@@ -5,7 +5,6 @@
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
 #include "inputdialogconfirmacao.h"
-#include "log.h"
 #include "sql.h"
 #include "venda.h"
 
@@ -95,10 +94,13 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
                  "idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
-  QSqlQuery query4;
   // salvar status na venda
+  QSqlQuery query4;
   query4.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
                  "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
+
+  QSqlQuery query5;
+  query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE idNFe IN (SELECT idNFe FROM estoque WHERE idEstoque = :idEstoque)");
 
   for (const auto &index : list) {
     query1.bindValue(":recebidoPor", recebidoPor);
@@ -120,14 +122,21 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     query4.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
     if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando produtos venda: " + query4.lastError().text(), this); }
+
+    QDate dataGare = dataReceb.addDays(1);
+
+    while (dataGare.dayOfWeek() > 5) { dataGare = dataGare.addDays(1); }
+
+    query5.bindValue(":dataRealReceb", dataGare);
+    query5.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+
+    if (not query5.exec()) { return qApp->enqueueError(false, "Erro atualizando pagamento gare: " + query5.lastError().text(), this); }
   }
 
   return true;
 }
 
 void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
-  // TODO: 1gerar gare da nota de entrada
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
@@ -145,9 +154,7 @@ void WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido_clicked() {
 
   if (inputDlg.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaRecebimento::on_pushButtonMarcarRecebido")) { return; }
 
   if (not processRows(list, inputDlg.getDate(), inputDlg.getRecebeu())) { return qApp->rollbackTransaction(); }
 
@@ -178,9 +185,7 @@ void WidgetLogisticaRecebimento::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaRecebimento::on_pushButtonReagendar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaRecebimento::on_pushButtonReagendar")) { return; }
 
   if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -253,9 +258,7 @@ void WidgetLogisticaRecebimento::on_pushButtonCancelar_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaRecebimento::on_pushButtonCancelar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaRecebimento::on_pushButtonCancelar")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 

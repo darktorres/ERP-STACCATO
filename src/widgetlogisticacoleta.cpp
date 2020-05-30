@@ -4,7 +4,6 @@
 #include "application.h"
 #include "estoqueprazoproxymodel.h"
 #include "inputdialog.h"
-#include "log.h"
 #include "sql.h"
 #include "venda.h"
 
@@ -97,9 +96,7 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaColeta::on_pushButtonMarcarColetado")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonMarcarColetado")) { return; }
 
   if (not cadastrar(list, input.getDate(), input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -173,9 +170,7 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaColeta::on_pushButtonReagendar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonReagendar")) { return; }
 
   if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
 
@@ -286,9 +281,7 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  if (not qApp->startTransaction()) { return; }
-
-  if (not Log::createLog("Transação: WidgetLogisticaColeta::on_pushButtonCancelar")) { return qApp->rollbackTransaction(); }
+  if (not qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonCancelar")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 

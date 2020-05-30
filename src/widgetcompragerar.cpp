@@ -236,7 +236,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("WidgetCompraGerar::on_pushButtonGerarCompra")) { return; }
 
   if (not gerarCompra(list, dataCompra, dataPrevista, oc)) { return qApp->rollbackTransaction(); }
 
@@ -530,7 +530,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("WidgetCompraGerar::on_pushButtonCancelarCompra")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
@@ -544,7 +544,6 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes
 // TODO: 5colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas
-// TODO: avulso
 // TODO: no caso da quartzobras se for mais de um pedido deixar o campo 'PEDIDO DE VENDA NR.' vazio
 // TODO: no caso da quartzobras ordenar por cod. produto em vez de por pedido
 

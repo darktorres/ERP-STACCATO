@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -13,14 +13,14 @@ class FollowUp final : public QDialog {
 
 public:
   enum class Tipo { Orcamento, Venda };
-  explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent = nullptr);
+  explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent);
   ~FollowUp();
 
 private:
   // attributes
   const QString id;
   const Tipo tipo;
-  SqlRelationalTableModel modelViewFollowup;
+  SqlTableModel modelViewFollowup;
   Ui::FollowUp *ui;
   // methods
   auto on_dateFollowup_dateChanged(const QDate &date) -> void;

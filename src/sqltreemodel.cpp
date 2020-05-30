@@ -85,6 +85,8 @@ public:
 
 SqlTreeModel::SqlTreeModel(QObject *parent) : QAbstractItemModel(parent), d(new SqlTreeModelPrivate(this)) {}
 
+SqlTreeModel::SqlTreeModel() : SqlTreeModel(nullptr) {}
+
 SqlTreeModel::~SqlTreeModel() { delete d; }
 
 void SqlTreeModel::appendModel(QSqlQueryModel *model) { insertModel(model, d->m_levelData.count() - 1); }
@@ -361,11 +363,7 @@ QModelIndex SqlTreeModel::parent(const QModelIndex &index) const {
   return QModelIndex();
 }
 
-QVariant SqlTreeModel::data(const QModelIndex &index, int role) const {
-  //  if (index.column() == 0) { return QVariant(); }
-
-  return rawData(levelOf(index), mappedRow(index), mappedColumn(index), role);
-}
+QVariant SqlTreeModel::data(const QModelIndex &index, int role) const { return rawData(levelOf(index), mappedRow(index), mappedColumn(index), role); }
 
 bool SqlTreeModel::setData(const QModelIndex &index, const QVariant &value, int role) { return setRawData(levelOf(index), mappedRow(index), mappedColumn(index), value, role); }
 

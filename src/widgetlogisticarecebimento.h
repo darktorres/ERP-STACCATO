@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetLogisticaRecebimento final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaRecebimento(QWidget *parent = nullptr);
+  explicit WidgetLogisticaRecebimento(QWidget *parent);
   ~WidgetLogisticaRecebimento();
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
@@ -22,7 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewRecebimento;
+  SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;

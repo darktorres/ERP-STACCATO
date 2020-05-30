@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetCompraFaturar final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraFaturar(QWidget *parent = nullptr);
+  explicit WidgetCompraFaturar(QWidget *parent);
   ~WidgetCompraFaturar();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -21,8 +21,8 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewFaturamento;
-  SqlRelationalTableModel modelResumo;
+  SqlTableModel modelViewFaturamento;
+  SqlTableModel modelResumo;
   Ui::WidgetCompraFaturar *ui;
   // methods
   auto faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) -> bool;

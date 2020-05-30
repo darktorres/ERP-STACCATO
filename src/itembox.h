@@ -10,7 +10,7 @@ class ItemBox final : public QLineEdit {
   Q_OBJECT
 
 public:
-  explicit ItemBox(QWidget *parent = nullptr);
+  explicit ItemBox(QWidget *parent);
   ~ItemBox() = default;
   auto changeItem(const QVariant &newId) -> void;
   auto clear() -> void;

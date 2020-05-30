@@ -15,13 +15,14 @@ class WidgetPagamentos final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Compra, Venda };
-  explicit WidgetPagamentos(QWidget *parent = nullptr);
+  explicit WidgetPagamentos(QWidget *parent);
   ~WidgetPagamentos();
   auto getCredito() const -> double;
   auto getTotalPag() -> double;
   auto resetarPagamentos() -> void;
   auto setCredito(const double creditoCliente) -> void;
   auto setFrete(double value) -> void;
+  auto setFretePagoLoja() -> void;
   auto setIdOrcamento(const QString &value) -> void;
   auto setRepresentacao(const bool isRepresentacao) -> void;
   auto setTipo(const Tipo &novoTipo) -> void;
@@ -29,13 +30,14 @@ public:
   auto verifyFields() -> bool;
 
   // attributes
+  int pagamentos = 0; // TODO: rename this to size/count
   QList<QCheckBox *> listCheckBoxRep;
-  QList<QComboBox *> listComboData;
-  QList<QComboBox *> listComboParc;
-  QList<QComboBox *> listComboPgt;
-  QList<QDateEdit *> listDatePgt;
-  QList<QDoubleSpinBox *> listDoubleSpinPgt;
-  QList<QLineEdit *> listLinePgt;
+  QList<QComboBox *> listTipoPgt;
+  QList<QComboBox *> listTipoData;
+  QList<QComboBox *> listParcela;
+  QList<QDoubleSpinBox *> listValorPgt;
+  QList<QDateEdit *> listDataPgt;
+  QList<QLineEdit *> listObservacao;
 
 signals:
   void montarFluxoCaixa();
@@ -43,6 +45,7 @@ signals:
 private:
   // attributes
   bool representacao = false;
+  bool fretePagoLoja = false;
   double frete = 0;
   double total = 0;
   double credito = 0;

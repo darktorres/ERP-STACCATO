@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,14 +12,14 @@ class WidgetLogistica final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogistica(QWidget *parent = nullptr);
+  explicit WidgetLogistica(QWidget *parent);
   ~WidgetLogistica();
   auto resetTables() -> void;
   auto updateTables() -> void;
 
 private:
   // attributes
-  SqlRelationalTableModel modelViewLogistica;
+  SqlTableModel modelViewLogistica;
   Ui::WidgetLogistica *ui;
   // methods
   auto setConnections() -> void;

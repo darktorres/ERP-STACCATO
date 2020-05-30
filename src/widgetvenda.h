@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -12,7 +12,7 @@ class WidgetVenda final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetVenda(QWidget *parent = nullptr);
+  explicit WidgetVenda(QWidget *parent);
   ~WidgetVenda() final;
   auto resetTables() -> void;
   auto setFinanceiro() -> void;
@@ -23,9 +23,10 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   bool financeiro = false;
-  SqlRelationalTableModel modelViewVenda;
+  SqlTableModel modelViewVenda;
   Ui::WidgetVenda *ui;
   // methods
+  auto listarLojas() -> bool;
   auto montaFiltro() -> void;
   auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatusFinanceiro_toggled(const bool enabled) -> void;

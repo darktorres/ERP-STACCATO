@@ -30,7 +30,7 @@ Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const 
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
   connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived);
+  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived); // TODO: change in 5.15 to errorOcurred
   connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
@@ -57,8 +57,8 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   message.append(body);
   message.append("\n\n");
 
-  // REFAC: 5dont hardcode this
-  // REFAC:__project public code
+  // TODO: 5dont hardcode this
+  // TODO:__project public code
   //
   if (not assinatura.isEmpty()) {
     // QFile file("://assinatura conrado.png");

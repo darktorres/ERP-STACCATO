@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -12,12 +12,12 @@ class BaixaOrcamento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit BaixaOrcamento(const QString &idOrcamento, QWidget *parent = nullptr);
+  explicit BaixaOrcamento(const QString &idOrcamento, QWidget *parent);
   ~BaixaOrcamento();
 
 private:
   // attributes
-  SqlRelationalTableModel modelOrcamento;
+  SqlTableModel modelOrcamento;
   Ui::BaixaOrcamento *ui;
   // methods
   auto setupTables(const QString &idOrcamento) -> void;

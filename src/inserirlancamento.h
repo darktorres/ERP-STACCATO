@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 #include <QDialog>
 
@@ -13,13 +13,13 @@ class InserirLancamento final : public QDialog {
 
 public:
   enum class Tipo { Pagar, Receber };
-  explicit InserirLancamento(const Tipo tipo, QWidget *parent = nullptr);
+  explicit InserirLancamento(const Tipo tipo, QWidget *parent);
   ~InserirLancamento();
 
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel modelContaPagamento;
+  SqlTableModel modelContaPagamento;
   Ui::InserirLancamento *ui;
   // methods
   auto on_pushButtonCriarLancamento_clicked() -> void;

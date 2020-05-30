@@ -10,7 +10,7 @@
 CancelaProduto::CancelaProduto(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::CancelaProduto) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonCancelar_clicked);
+  connect(ui->pushButtonVoltar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonVoltar_clicked);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &CancelaProduto::on_pushButtonSalvar_clicked);
 
   setWindowModality(Qt::NonModal);
@@ -87,7 +87,7 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("CancelaProduto::on_pushButtonSalvar")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
@@ -98,11 +98,11 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
   close();
 }
 
-void CancelaProduto::on_pushButtonCancelar_clicked() { close(); }
+void CancelaProduto::on_pushButtonVoltar_clicked() { close(); }
 
 bool CancelaProduto::cancelar(const QModelIndexList &list) {
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE `idPedido2` = :idPedido2");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO', idVenda = NULL, idVendaProduto2 = NULL WHERE `idPedido2` = :idPedido2");
 
   const QString status = (tipo == Tipo::CompraConfirmar) ? "EM COMPRA" : "EM FATURAMENTO";
 

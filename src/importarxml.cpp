@@ -1074,8 +1074,10 @@ std::optional<ImportarXML::NCM> ImportarXML::buscaNCM(const QString &ncm) {
 bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   const int row = modelPagamento.insertRowAtEnd();
 
+  const int lojaGeral = 1;
+
   if (not modelPagamento.setData(row, "dataEmissao", qApp->serverDate())) { return false; }
-  if (not modelPagamento.setData(row, "idLoja", 1)) { return false; }
+  if (not modelPagamento.setData(row, "idLoja", lojaGeral)) { return false; }
   if (not modelPagamento.setData(row, "contraParte", "GARE")) { return false; }
   if (not modelPagamento.setData(row, "idNFe", xml.idNFe)) { return false; }
   if (not modelPagamento.setData(row, "nfe", xml.nNF)) { return false; }
@@ -1085,7 +1087,7 @@ bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   if (not modelPagamento.setData(row, "status", "PENDENTE GARE")) { return false; }
   const int contaSantander = 3;
   if (not modelPagamento.setData(row, "idConta", contaSantander)) { return false; }
-  if (not modelPagamento.setData(row, "centroCusto", 1)) { return false; }
+  if (not modelPagamento.setData(row, "centroCusto", lojaGeral)) { return false; }
   if (not modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS")) { return false; }
 
   return true;

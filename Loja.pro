@@ -18,7 +18,7 @@ VERSION = 0.8.88
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.5.31/limereport/limereport.pri)
+include(LimeReport-1.5.56/limereport/limereport.pri)
 
 QT *= core gui sql network xml charts widgets
 

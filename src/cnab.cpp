@@ -197,10 +197,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
 
   QFile file("cnab.txt");
 
-  if (not file.open(QFile::WriteOnly)) {
-    qDebug() << "erro: " << file.errorString();
-    return;
-  }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(file.errorString(), this); }
 
   file.write(arquivo.toUtf8());
   file.close();

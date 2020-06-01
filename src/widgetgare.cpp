@@ -154,6 +154,8 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   CNAB cnab;
   cnab.remessaGareItau240(gares);
+
+  qApp->enqueueInformation("Arquivo gerado com sucesso!", this);
 }
 
 void WidgetGare::on_pushButtonRetornoSantander_clicked() {}

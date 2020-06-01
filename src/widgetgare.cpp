@@ -14,7 +14,8 @@
 WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
   ui->setupUi(this);
 
-  connect(ui->pushButtonDarBaixa, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixa_clicked);
+  connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
+  connect(ui->pushButtonDarBaixaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaSantander_clicked);
   connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
   connect(ui->pushButtonRetornoSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoSantander_clicked);
@@ -72,7 +73,7 @@ void WidgetGare::montaFiltro() {
   model.setFilter(filtros.join(" AND "));
 }
 
-void WidgetGare::on_pushButtonDarBaixa_clicked() {
+void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
   auto selection = ui->table->selectionModel()->selectedRows();
 
   if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
@@ -83,7 +84,29 @@ void WidgetGare::on_pushButtonDarBaixa_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") + "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") + "' WHERE idNFe IN (" +
+                     ids.join(", ") + ")")) {
+    return qApp->enqueueError("Erro dando baixa nas gares: " + query.lastError().text(), this);
+  }
+
+  if (not model.select()) { qApp->enqueueError("Erro atualizando a tabela: " + model.lastError().text(), this); }
+
+  qApp->enqueueInformation("Baixa salva com sucesso!", this);
+}
+
+void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
+  auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  QStringList ids;
+
+  for (auto &index : selection) { ids << model.data(index.row(), "idNFe").toString(); }
+
+  QSqlQuery query;
+
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', idConta = 3, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") + "' WHERE idNFe IN (" +
+                     ids.join(", ") + ")")) {
     return qApp->enqueueError("Erro dando baixa nas gares: " + query.lastError().text(), this);
   }
 

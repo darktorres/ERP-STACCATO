@@ -25,7 +25,8 @@ private:
   Ui::WidgetGare *ui;
   // methods
   auto montaFiltro() -> void;
-  auto on_pushButtonDarBaixa_clicked() -> void;
+  auto on_pushButtonDarBaixaItau_clicked() -> void;
+  auto on_pushButtonDarBaixaSantander_clicked() -> void;
   auto on_pushButtonRemessaItau_clicked() -> void;
   auto on_pushButtonRemessaSantander_clicked() -> void;
   auto on_pushButtonRetornoItau_clicked() -> void;

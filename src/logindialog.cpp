@@ -88,7 +88,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
     UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
     UserSession::setSetting("User/passwd", ui->lineEditPass->text());
 
-    if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text(), ui->lineEditPass->text())) { return; }
+    if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
     if (not verificaVersao()) { return; }
   }

@@ -780,7 +780,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const auto list = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-  if (list.isEmpty()) { return qApp->enqueueError(false, "Erro procurando produto da venda!", this); }
+  if (list.isEmpty()) { return qApp->enqueueError(false, "Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
 
   const int rowVenda = list.first();
 

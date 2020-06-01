@@ -64,7 +64,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
   writeZeros(stream, 9);                                             // 9(09) complemento de registro zeros
   stream << "00000";                                                 // 9(05) densidade de gravacao do arquivo - NOTA 2
   writeBlanks(stream, 69);                                           // X(69) complemento de registro brancos
-  stream << endl;
+  stream << "\r\n";
 
   // header lote pag 34
 
@@ -95,7 +95,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
   stream << "SP";                                                    // X(02) sigla do estado
   writeBlanks(stream, 8);                                            // X(08) complemento de registro brancos
   writeBlanks(stream, 10);                                           // X(10) codigo ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
-  stream << endl;
+  stream << "\r\n";
 
   int registro = 0;
   int total = 0;
@@ -130,7 +130,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
     writeText(stream, gare.cnpjOrig + gare.numeroNF, 20);              // X(20) seu numero: numero docto atribuido pela empresa
     writeBlanks(stream, 15);                                           // X(15) nosso numero: numero atribuido pelo banco ***apenas retorno, informar com branco ou zero
     writeBlanks(stream, 10);                                           // X(10) codigo de ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
-    stream << endl;
+    stream << "\r\n";
 
     // lote Segmento B pag 36
 
@@ -151,7 +151,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
     writeNumber(stream, 0, 14);                 // 9(12)V(02) valor do acrescimo
     writeNumber(stream, 0, 14);                 // 9(12)V(02) valor do honorario
     writeBlanks(stream, 74);                    // X(74) complemento de registro brancos
-    stream << endl;
+    stream << "\r\n";
 
     // lote Segmento W pag 37
 
@@ -166,7 +166,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
     writeBlanks(stream, 40);                        // X(40) informacao complementar 3
     writeBlanks(stream, 40);                        // X(40) informacao complementar 4
     writeBlanks(stream, 64);                        // X(64) complemento de registro brancos
-    stream << endl;
+    stream << "\r\n";
   }
 
   // trailer do lote pag 39
@@ -182,7 +182,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
   writeNumber(stream, total, 14);             // 9(12)V9(02) soma valor dos pagamentos do lote
   writeBlanks(stream, 151);                   // X(151) complemento de registro brancos
   writeBlanks(stream, 10);                    // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
-  stream << endl;
+  stream << "\r\n";
 
   // trailer do arquivo pag 40
 
@@ -193,7 +193,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
   writeNumber(stream, 1, 6);                  // 9(06) quantidade lotes do arquivo - NOTA 17
   writeNumber(stream, 4 + (registro * 3), 6); // 9(06) quantidade registros do arquivo - NOTA 17
   writeBlanks(stream, 211);                   // X(211) complemento de registro brancos
-  stream << endl;
+  stream << "\r\n";
 
   QFile file("cnab.txt");
 

@@ -174,3 +174,4 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
 }
 
 // TODO: deve salvar gare/gareData em nfe
+// TODO: dar baixa automatico nas gares 0

@@ -139,7 +139,9 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
     stream << "3";                              // 9(01) registro detalhe do lote
     writeNumber(stream, ++registro, 5);         // 9(05) numero sequencial registro no lote
     stream << "B";                              // X(01) codigo segmento registro detalhe
-    writeBlanks(stream, 18);                    // X(18) complemento de registro brancos
+    writeBlanks(stream, 3);                     // X(03) complemento de registro brancos
+    stream << "2";                              // 9(01) tipo de inscricao do contribuinte
+    stream << "09375013000543";                 // 9(14) cpf ou cnpj do contribuinte
     writeText(stream, "RUA SALESOPOLIS", 30);   // X(30) nome da rua, av, pça, etc
     writeNumber(stream, 27, 5);                 // 9(05) numero do local
     writeText(stream, "", 15);                  // X(15) casa, apto, etc

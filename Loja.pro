@@ -14,7 +14,7 @@ win32-msvc* {
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.85
+VERSION = 0.8.88
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -79,8 +79,8 @@ linux-g++{
 
     QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 
-    #QMAKE_CXXFLAGS *= -flto
-    #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
+#    QMAKE_CXXFLAGS *= -flto
+#    QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
@@ -89,8 +89,8 @@ linux-clang{
 
     QMAKE_LFLAGS *= -fuse-ld=lld-9
 
-    #QMAKE_CXXFLAGS *= -flto=thin
-    #QMAKE_LFLAGS *= -flto=thin
+#    QMAKE_CXXFLAGS *= -flto=thin
+#    QMAKE_LFLAGS *= -flto=thin
 }
 
 win32{

@@ -137,7 +137,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
     stream << "341";                            // 9(03) codigo banco na compensacao
     writeNumber(stream, 1, 4);                  // 9(04) lote de servico
     stream << "3";                              // 9(01) registro detalhe do lote
-    writeNumber(stream, registro, 5);           // 9(05) numero sequencial registro no lote
+    writeNumber(stream, ++registro, 5);         // 9(05) numero sequencial registro no lote
     stream << "B";                              // X(01) codigo segmento registro detalhe
     writeBlanks(stream, 18);                    // X(18) complemento de registro brancos
     writeText(stream, "RUA SALESOPOLIS", 30);   // X(30) nome da rua, av, pça, etc
@@ -158,7 +158,7 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
     stream << "341";                                // 9(03) codigo banco na compensacao
     writeNumber(stream, 1, 4);                      // 9(04) lote de servico
     stream << "3";                                  // 9(01) registro detalhe do lote
-    writeNumber(stream, registro, 5);               // 9(05) numero sequencial registro no lote
+    writeNumber(stream, ++registro, 5);             // 9(05) numero sequencial registro no lote
     stream << "W";                                  // X(01) codigo segmento registro detalhe
     writeBlanks(stream, 2);                         // X(02) complemento de registro
     writeText(stream, "NFE " + gare.numeroNF, 40);  // X(40) informacao complementar 1

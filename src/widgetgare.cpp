@@ -2,7 +2,6 @@
 #include "ui_widgetgare.h"
 
 #include "application.h"
-#include "cnab.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
 #include "xml_viewer.h"
@@ -17,8 +16,8 @@ WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
   connect(ui->pushButtonDarBaixaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaSantander_clicked);
   connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
-  connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
   connect(ui->pushButtonRetornoSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoSantander_clicked);
+  connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
   connect(ui->pushButtonRemessaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaSantander_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
 
@@ -139,6 +138,20 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   if (selection.isEmpty()) { return; }
 
+  CNAB cnab;
+  cnab.remessaGareItau240(montarGare(selection));
+}
+
+void WidgetGare::on_pushButtonRemessaSantander_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return; }
+
+  CNAB cnab;
+  cnab.remessaGareSantander240(montarGare(selection));
+}
+
+QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
   QVector<CNAB::Gare> gares;
 
   for (const auto index : selection) {
@@ -175,17 +188,12 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
     gares << gare;
   }
 
-  CNAB cnab;
-  cnab.remessaGareItau240(gares);
-
-  qApp->enqueueInformation("Arquivo gerado com sucesso!", this);
+  return gares;
 }
 
-void WidgetGare::on_pushButtonRetornoSantander_clicked() {}
-
-void WidgetGare::on_pushButtonRemessaSantander_clicked() {}
-
 void WidgetGare::on_pushButtonRetornoItau_clicked() {}
+
+void WidgetGare::on_pushButtonRetornoSantander_clicked() {}
 
 void WidgetGare::on_table_activated(const QModelIndex &index) {
   QSqlQuery query;

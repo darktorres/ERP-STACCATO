@@ -144,3 +144,5 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
     if (not modelContaPagamento.setData(newRow, col, value)) { return; }
   }
 }
+
+// TODO: ao lançar um pagamento direto como 'PAGO' copiar os valores para valorReal, dataRealizado

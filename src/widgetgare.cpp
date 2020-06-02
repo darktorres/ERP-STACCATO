@@ -84,8 +84,8 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") + "' WHERE idNFe IN (" +
-                     ids.join(", ") + ")")) {
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
+                     "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
     return qApp->enqueueError("Erro dando baixa nas gares: " + query.lastError().text(), this);
   }
 
@@ -105,8 +105,8 @@ void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', idConta = 3, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") + "' WHERE idNFe IN (" +
-                     ids.join(", ") + ")")) {
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 3, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
+                     "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
     return qApp->enqueueError("Erro dando baixa nas gares: " + query.lastError().text(), this);
   }
 

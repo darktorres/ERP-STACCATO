@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cnab.h"
 #include "sqltablemodel.h"
 
 #include <QWidget>
@@ -25,6 +26,7 @@ private:
   Ui::WidgetGare *ui;
   // methods
   auto montaFiltro() -> void;
+  auto montarGare(const QModelIndexList selection) -> QVector<CNAB::Gare>;
   auto on_pushButtonDarBaixaItau_clicked() -> void;
   auto on_pushButtonDarBaixaSantander_clicked() -> void;
   auto on_pushButtonRemessaItau_clicked() -> void;

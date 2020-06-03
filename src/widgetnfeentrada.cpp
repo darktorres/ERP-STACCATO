@@ -75,6 +75,8 @@ void WidgetNfeEntrada::montaFiltro() {
 }
 
 void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
+  // TODO: remover GARE da tabela de contas_a_pagar
+
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }

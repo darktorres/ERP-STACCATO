@@ -33,15 +33,16 @@ void CNAB::writeNumber(QTextStream &stream, const int number, const int count) {
   stream << QString("%1").arg(number, count, 10, QChar('0')); // pad number with count zeros to the left
 }
 
-void CNAB::remessaGareSantander240(QVector<Gare> gares) {
+std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   QString arquivo;
 
   QTextStream stream(&arquivo);
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'SANTANDER'") or not query.first()) {
-    return qApp->enqueueError("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
+  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'SANTANDER'") or not query.first()) {
+    qApp->enqueueError("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
+    return {};
   }
 
   // header arquivo pag 8
@@ -218,7 +219,10 @@ void CNAB::remessaGareSantander240(QVector<Gare> gares) {
 
   QFile file("cnab" + query.value("sequencial").toString() + ".rem");
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(file.errorString(), this); }
+  if (not file.open(QFile::WriteOnly)) {
+    qApp->enqueueError(file.errorString(), this);
+    return {};
+  }
 
   file.write(arquivo.toUtf8());
   file.close();
@@ -226,27 +230,32 @@ void CNAB::remessaGareSantander240(QVector<Gare> gares) {
   QSqlQuery query2;
 
   if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'SANTANDER' AND sequencial = " + query.value("sequencial").toString())) {
-    return qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    return {};
   }
 
   if (not query2.exec("INSERT INTO cnab (banco, sequencial) VALUES ('SANTANDER', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
-    return qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    return {};
   }
 
   qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", this);
+
+  return query.value("idCnab").toString();
 }
 
 void CNAB::retornoGareSantander240() {}
 
-void CNAB::remessaGareItau240(QVector<Gare> gares) {
+std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   QString arquivo;
 
   QTextStream stream(&arquivo);
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU'") or not query.first()) {
-    return qApp->enqueueError("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
+  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU'") or not query.first()) {
+    qApp->enqueueError("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
+    return {};
   }
 
   // header arquivo pag 11
@@ -408,7 +417,10 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
 
   QFile file("cnab" + query.value("sequencial").toString() + ".rem");
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(file.errorString(), this); }
+  if (not file.open(QFile::WriteOnly)) {
+    qApp->enqueueError(file.errorString(), this);
+    return {};
+  }
 
   file.write(arquivo.toUtf8());
   file.close();
@@ -416,14 +428,18 @@ void CNAB::remessaGareItau240(QVector<Gare> gares) {
   QSqlQuery query2;
 
   if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'ITAU' AND sequencial = " + query.value("sequencial").toString())) {
-    return qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    return {};
   }
 
   if (not query2.exec("INSERT INTO cnab (banco, sequencial) VALUES ('ITAU', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
-    return qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    return {};
   }
 
   qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", this);
+
+  return query.value("idCnab").toString();
 }
 
 void CNAB::retornoGareItau240() {}

@@ -43,7 +43,7 @@ InputDialogFinanceiro::InputDialogFinanceiro(const Tipo &tipo, QWidget *parent) 
   if (tipo == Tipo::ConfirmarCompra) {
     ui->frameData->show();
     ui->frameDataPreco->show();
-    ui->frameFrete->show();
+    ui->groupBoxFrete->show();
 
     ui->labelEvento->setText("Data confirmação:");
     ui->labelProximoEvento->setText("Data prevista faturamento:");
@@ -217,6 +217,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
+  ui->tableFluxoCaixa->hideColumn("idCnab");
   ui->tableFluxoCaixa->hideColumn("idNFe");
   ui->tableFluxoCaixa->hideColumn("nfe");
   ui->tableFluxoCaixa->hideColumn("contraParte");
@@ -241,6 +242,8 @@ void InputDialogFinanceiro::setupTables() {
 }
 
 void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
+  qDebug() << "montarFluxoCaixa";
+
   unsetConnections();
 
   [=] {
@@ -256,8 +259,10 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       }
     }
 
+    //    for(int pagamento = 0; pagamento < ui->widgetPgts->pagamentos; ++pagamento){}
+
     for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
-      if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Escolha uma opção!") {
+      if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "ESCOLHA UMA OPÇÃO!") {
         const int parcelas = ui->widgetPgts->listParcela.at(i)->currentIndex() + 1;
         const double valor = ui->widgetPgts->listValorPgt.at(i)->value();
 
@@ -265,7 +270,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         const int part2 = static_cast<int>(part1 * 100);
         const double part3 = static_cast<double>(part2) / 100;
 
-        const double parcela = static_cast<double>((ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Cartão de crédito") ? part3 : qApp->roundDouble(valor / parcelas));
+        const double parcela = static_cast<double>((ui->widgetPgts->listTipoPgt.at(i)->currentText() == "CARTÃO DE CRÉDITO") ? part3 : qApp->roundDouble(valor / parcelas));
         const double resto = static_cast<double>(valor - (parcela * parcelas));
 
         for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
@@ -278,8 +283,8 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
 
           const QString currentText = ui->widgetPgts->listTipoData.at(i)->currentText();
           const QDate currentDate = ui->widgetPgts->listDataPgt.at(i)->date();
-          QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
-          if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Dinheiro") { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
+          QDate dataPgt = (currentText == "DATA + 1 MÊS" ? currentDate.addMonths(x) : (currentText == "DATA MÊS") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+          if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "DINHEIRO") { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
 
           if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
           if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
@@ -348,7 +353,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
             if (not modelFluxoCaixa.setData(row, "idCompra", modelPedidoFornecedor2.data(0, "idCompra"))) { return; }
             if (not modelFluxoCaixa.setData(row, "idLoja", 1)) { return; } // Geral
 
-            QDate dataPgt = (currentText == "Data + 1 Mês" ? currentDate.addMonths(x) : (currentText == "Data Mês") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
+            QDate dataPgt = (currentText == "DATA + 1 MÊS" ? currentDate.addMonths(x) : (currentText == "DATA MÊS") ? currentDate.addMonths(x) : currentDate.addDays(currentText.toInt() * (x)));
             dataPgt = qApp->ajustarDiaUtil(dataPgt);
             if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
 

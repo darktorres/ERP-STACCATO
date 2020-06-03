@@ -209,6 +209,7 @@ void Contas::setupTables() {
 
   if (tipo == Tipo::Pagar) {
     ui->tablePendentes->hideColumn("idCompra");
+    ui->tablePendentes->hideColumn("idCnab");
     ui->tablePendentes->hideColumn("idNFe");
   }
 
@@ -262,6 +263,7 @@ void Contas::setupTables() {
 
   if (tipo == Tipo::Pagar) {
     ui->tableProcessados->hideColumn("idCompra");
+    ui->tableProcessados->hideColumn("idCnab");
     ui->tableProcessados->hideColumn("idNFe");
   }
 

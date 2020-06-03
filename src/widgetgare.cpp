@@ -122,12 +122,14 @@ void WidgetGare::setupTables() {
   model.setHeaderData("dataPagamento", "Data Pgt.");
   model.setHeaderData("dataRealizado", "Data Realizado");
   model.setHeaderData("status", "Status");
+  model.setHeaderData("banco", "Banco");
 
   ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(this));
 
+  ui->table->hideColumn("idPagamento");
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("referencia");
   ui->table->hideColumn("cnpjOrig");
@@ -138,8 +140,21 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   if (selection.isEmpty()) { return; }
 
-  CNAB cnab;
-  cnab.remessaGareItau240(montarGare(selection));
+  CNAB cnab(this);
+  auto idCnab = cnab.remessaGareItau240(montarGare(selection));
+
+  if (not idCnab) { return; }
+
+  QStringList ids;
+
+  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
+
+  QSqlQuery query;
+
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
+                     " WHERE idPagamento IN (" + ids.join(",") + ")")) {
+    return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
+  }
 }
 
 void WidgetGare::on_pushButtonRemessaSantander_clicked() {
@@ -147,8 +162,21 @@ void WidgetGare::on_pushButtonRemessaSantander_clicked() {
 
   if (selection.isEmpty()) { return; }
 
-  CNAB cnab;
-  cnab.remessaGareSantander240(montarGare(selection));
+  CNAB cnab(this);
+  auto idCnab = cnab.remessaGareSantander240(montarGare(selection));
+
+  if (not idCnab) { return; }
+
+  QStringList ids;
+
+  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
+
+  QSqlQuery query;
+
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
+                     " WHERE idPagamento IN (" + ids.join(",") + ")")) {
+    return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
+  }
 }
 
 QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
@@ -169,7 +197,11 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
     referencia2.append(referencia.at(3));
     gare.mesAnoReferencia = referencia2.toInt();
 
-    QString dataPagamento = model.data(index.row(), "dataPagamento").toString();
+    QDate datePgt = model.data(index.row(), "dataPagamento").toDate();
+
+    if (datePgt < qApp->serverDate()) { datePgt = qApp->serverDate(); }
+
+    QString dataPagamento = datePgt.toString("yyyy-MM-dd");
     QString dataPagamento2;
     dataPagamento2.append(dataPagamento.at(8));
     dataPagamento2.append(dataPagamento.at(9));

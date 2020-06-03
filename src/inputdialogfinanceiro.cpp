@@ -534,7 +534,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
 
   if (not modelPedidoFornecedor2.select()) { return false; }
 
-  setTreeView();
+  //  setTreeView();
 
   if (tipo == Tipo::ConfirmarCompra or tipo == Tipo::Financeiro) {
     modelFluxoCaixa.setFilter((tipo == Tipo::ConfirmarCompra) ? "0" : "idCompra IN (" + idCompra + ") AND status NOT IN ('CANCELADO', 'SUBSTITUIDO')");

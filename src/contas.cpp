@@ -119,12 +119,15 @@ void Contas::preencher(const QModelIndex &index) {
       const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
+        if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) {
+          if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
+        }
+
         if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"))) { return; }
         if (not modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
         if (not modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"))) { return; }
         if (not modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"))) { return; }
         if (not modelPendentes.setData(rowMatch, "parcelaReal", modelPendentes.data(rowMatch, "parcela"))) { return; }
-        if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
         if (not modelPendentes.setData(rowMatch, "centroCusto", modelPendentes.data(rowMatch, "idLoja"))) { return; }
       }
     }

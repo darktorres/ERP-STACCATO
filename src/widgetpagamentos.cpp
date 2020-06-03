@@ -102,8 +102,8 @@ void WidgetPagamentos::comboBoxParc(QHBoxLayout *layout) {
 
 QComboBox *WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
   auto *comboBoxData = new QComboBox(this);
-  comboBoxData->insertItem(0, "Data Mês");
-  comboBoxData->insertItem(1, "Data + 1 Mês");
+  comboBoxData->insertItem(0, "DATA MÊS");
+  comboBoxData->insertItem(1, "DATA + 1 MÊS");
   comboBoxData->insertItem(2, "14");
   comboBoxData->insertItem(3, "20");
   comboBoxData->insertItem(4, "28");

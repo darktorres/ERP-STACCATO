@@ -83,15 +83,23 @@ void WidgetVenda::montaFiltro() {
 
   QStringList filtroCheck;
 
-  const auto groupBox = financeiro ? ui->groupBoxStatusFinanceiro : ui->groupBoxStatus;
-
-  for (const auto &child : groupBox->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  const QString tipoStatus = financeiro ? "statusFinanceiro" : "status";
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
 
-  if (not filtroCheck.isEmpty()) { filtros << tipoStatus + " IN (" + filtroCheck.join(", ") + ")"; }
+  //-------------------------------------
+
+  if (financeiro) {
+    QStringList filtroCheck2;
+
+    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+      if (child->isChecked()) { filtroCheck2 << "'" + child->text().toUpper() + "'"; }
+    }
+
+    if (not filtroCheck2.isEmpty()) { filtros << "statusFinanceiro IN (" + filtroCheck2.join(", ") + ")"; }
+  }
 
   //-------------------------------------
 
@@ -302,7 +310,6 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
 void WidgetVenda::setFinanceiro() {
   ui->groupBoxStatusFinanceiro->show();
-  ui->groupBoxStatus->hide();
   financeiro = true;
 }
 

@@ -86,7 +86,7 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   stream << "010";            // 9(03) numero da versao do lote
   writeBlanks(stream, 1);     // X(01) filler
   stream << "2";              // 9(01) tipo inscricao empresa 1 = CPF/2 = CNPJ
-  stream << "09375013000543"; // 9(14) numero inscricao da empresa
+  stream << "09375013000110"; // 9(14) numero inscricao da empresa
   // X(20) codigo do convenio BBBB = Numero do Banco 033 AAAA = Codigo de agencia (sem DV) CCCCCCCCCCCC = Numero do convenio (alinhado a direita com zeros a esquerda)
   writeText(stream, "00334422004900528621", 20);
   writeNumber(stream, 4422, 5);                                      // 9(05) agencia mantenedora da conta
@@ -295,7 +295,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   stream << "030";                                                   // 9(03) numero da versao do layout do lote
   writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos
   stream << "2";                                                     // 9(01) tipo inscricao empresa debitada 1 = CPF/2 = CNPJ
-  stream << "09375013000543";                                        // 9(14) cnpj empresa ou cpf debitado - NOTA 1
+  stream << "09375013000110";                                        // 9(14) cnpj empresa ou cpf debitado - NOTA 1
   writeBlanks(stream, 20);                                           // X(20) complemento de registro brancos
   stream << "04807";                                                 // 9(05) numero agencia debitada - NOTA 1
   writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos

@@ -733,7 +733,7 @@ void Venda::montarFluxoCaixa() {
 
       QDate dataPgt = ui->widgetPgts->listDataPgt.at(pagamento)->date();
       if (dMaisUm) { dataPgt = dataPgt.addDays(1); }
-      dataPgt = dataPgt.addDays((parcela + 1) * prazoRecebe);
+      dataPgt = dataPgt.addMonths(parcela + prazoRecebe);
       if (ajustaDiaUtil) { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
 
       if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }

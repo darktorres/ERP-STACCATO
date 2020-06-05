@@ -198,7 +198,7 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   writeNumber(stream, 1, 4);                  // 9(04) lote de servico
   stream << "5";                              // 9(01) tipo de registro
   writeBlanks(stream, 9);                     // X(09) filler
-  writeNumber(stream, 2 + (registro * 3), 6); // 9(06) quantidade registros do lote
+  writeNumber(stream, 2 + registro, 6);       // 9(06) quantidade registros do lote
   writeNumber(stream, total, 18);             // 9(16)V2 somatoria dos valores
   writeNumber(stream, 0, 18);                 // 9(13)V5 somatoria quantidade de moedas
   writeNumber(stream, 0, 6);                  // 9(06) numero aviso de debito
@@ -213,9 +213,16 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   stream << "9";                              // 9(01) tipo de registro
   writeBlanks(stream, 9);                     // X(09) filler
   writeNumber(stream, 1, 6);                  // 9(06) quantidade lotes do arquivo
-  writeNumber(stream, 4 + (registro * 3), 6); // 9(06) quantidade registros do arquivo
+  writeNumber(stream, 4 + registro, 6);       // 9(06) quantidade registros do arquivo
   writeBlanks(stream, 211);                   // X(211) filler
   stream << "\r\n";
+
+  QDir dir(QDir::currentPath() + "/cnab/santander/");
+
+  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/cnab/santander/")) {
+    qApp->enqueueError("Erro ao criar a pasta CNAB Santander!");
+    return {};
+  }
 
   QFile file("cnab" + query.value("sequencial").toString() + ".rem");
 
@@ -391,31 +398,38 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
 
   // trailer do lote pag 39
 
-  stream << "341";                            // 9(03) codigo banco na compensacao
-  writeNumber(stream, 1, 4);                  // 9(04) lote de servico
-  stream << "5";                              // 9(01) registro trailer de lote
-  writeBlanks(stream, 9);                     // X(09) complemento de registro brancos
-  writeNumber(stream, 2 + (registro * 3), 6); // 9(06) quantidade registros do lote
-  writeNumber(stream, total, 14);             // 9(12)V9(02) soma valor principal dos pagtos do lote
-  writeNumber(stream, 0, 14);                 // 9(12)V9(02) soma valores de outras entidades do lote
-  writeNumber(stream, 0, 14);                 // 9(12)V9(02) soma valores atualiz. monet/multa/mora
-  writeNumber(stream, total, 14);             // 9(12)V9(02) soma valor dos pagamentos do lote
-  writeBlanks(stream, 151);                   // X(151) complemento de registro brancos
-  writeBlanks(stream, 10);                    // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
+  stream << "341";                      // 9(03) codigo banco na compensacao
+  writeNumber(stream, 1, 4);            // 9(04) lote de servico
+  stream << "5";                        // 9(01) registro trailer de lote
+  writeBlanks(stream, 9);               // X(09) complemento de registro brancos
+  writeNumber(stream, 2 + registro, 6); // 9(06) quantidade registros do lote
+  writeNumber(stream, total, 14);       // 9(12)V9(02) soma valor principal dos pagtos do lote
+  writeNumber(stream, 0, 14);           // 9(12)V9(02) soma valores de outras entidades do lote
+  writeNumber(stream, 0, 14);           // 9(12)V9(02) soma valores atualiz. monet/multa/mora
+  writeNumber(stream, total, 14);       // 9(12)V9(02) soma valor dos pagamentos do lote
+  writeBlanks(stream, 151);             // X(151) complemento de registro brancos
+  writeBlanks(stream, 10);              // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
   stream << "\r\n";
 
   // trailer do arquivo pag 40
 
-  stream << "341";                            // 9(03) codigo banco na compensacao
-  stream << "9999";                           // 9(04) lote de servico
-  stream << "9";                              // 9(01) registro trailer de arquivo
-  writeBlanks(stream, 9);                     // X(09) complemento de registro brancos
-  writeNumber(stream, 1, 6);                  // 9(06) quantidade lotes do arquivo - NOTA 17
-  writeNumber(stream, 4 + (registro * 3), 6); // 9(06) quantidade registros do arquivo - NOTA 17
-  writeBlanks(stream, 211);                   // X(211) complemento de registro brancos
+  stream << "341";                      // 9(03) codigo banco na compensacao
+  stream << "9999";                     // 9(04) lote de servico
+  stream << "9";                        // 9(01) registro trailer de arquivo
+  writeBlanks(stream, 9);               // X(09) complemento de registro brancos
+  writeNumber(stream, 1, 6);            // 9(06) quantidade lotes do arquivo - NOTA 17
+  writeNumber(stream, 4 + registro, 6); // 9(06) quantidade registros do arquivo - NOTA 17
+  writeBlanks(stream, 211);             // X(211) complemento de registro brancos
   stream << "\r\n";
 
-  QFile file("cnab" + query.value("sequencial").toString() + ".rem");
+  QDir dir(QDir::currentPath() + "/cnab/itau/");
+
+  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/cnab/itau/")) {
+    qApp->enqueueError("Erro ao criar a pasta CNAB Itau!");
+    return {};
+  }
+
+  QFile file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) {
     qApp->enqueueError(file.errorString(), this);

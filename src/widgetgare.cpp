@@ -7,6 +7,7 @@
 #include "xml_viewer.h"
 
 #include <QDebug>
+#include <QFileDialog>
 #include <QSqlError>
 #include <QSqlQuery>
 
@@ -138,7 +139,11 @@ void WidgetGare::setupTables() {
 void WidgetGare::on_pushButtonRemessaItau_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return; }
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  for (const auto index : selection) {
+    if (model.data(index.row(), "status").toString() == "PAGO GARE") { return qApp->enqueueError("GARE já paga!", this); }
+  }
 
   CNAB cnab(this);
   auto idCnab = cnab.remessaGareItau240(montarGare(selection));
@@ -160,7 +165,11 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 void WidgetGare::on_pushButtonRemessaSantander_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return; }
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  for (const auto index : selection) {
+    if (model.data(index.row(), "status").toString() == "PAGO GARE") { return qApp->enqueueError("GARE já paga!", this); }
+  }
 
   CNAB cnab(this);
   auto idCnab = cnab.remessaGareSantander240(montarGare(selection));
@@ -223,7 +232,14 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
   return gares;
 }
 
-void WidgetGare::on_pushButtonRetornoItau_clicked() {}
+void WidgetGare::on_pushButtonRetornoItau_clicked() {
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo Retorno", QDir::currentPath(), "RET (*.RET)");
+
+  if (filePath.isEmpty()) { return; }
+
+  CNAB cnab;
+  cnab.retornoGareItau240(filePath);
+}
 
 void WidgetGare::on_pushButtonRetornoSantander_clicked() {}
 
@@ -239,4 +255,4 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
 }
 
 // TODO: deve salvar gare/gareData em nfe
-// TODO: dar baixa automatico nas gares 0
+// TODO: quando importar retorno com status de 'agendado' alterar a linha?

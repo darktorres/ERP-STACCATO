@@ -4,6 +4,7 @@
 #include "application.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -40,7 +41,7 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'SANTANDER'") or not query.first()) {
+  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'SANTANDER' AND tipo = 'REMESSA'") or not query.first()) {
     qApp->enqueueError("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
     return {};
   }
@@ -194,27 +195,27 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
 
   // trailer do lote pag 26
 
-  stream << "033";                            // 9(03) codigo banco
-  writeNumber(stream, 1, 4);                  // 9(04) lote de servico
-  stream << "5";                              // 9(01) tipo de registro
-  writeBlanks(stream, 9);                     // X(09) filler
-  writeNumber(stream, 2 + registro, 6);       // 9(06) quantidade registros do lote
-  writeNumber(stream, total, 18);             // 9(16)V2 somatoria dos valores
-  writeNumber(stream, 0, 18);                 // 9(13)V5 somatoria quantidade de moedas
-  writeNumber(stream, 0, 6);                  // 9(06) numero aviso de debito
-  writeBlanks(stream, 165);                   // X(165) filler
-  writeBlanks(stream, 10);                    // X(10) ocorrencias para retorno
+  stream << "033";                      // 9(03) codigo banco
+  writeNumber(stream, 1, 4);            // 9(04) lote de servico
+  stream << "5";                        // 9(01) tipo de registro
+  writeBlanks(stream, 9);               // X(09) filler
+  writeNumber(stream, 2 + registro, 6); // 9(06) quantidade registros do lote
+  writeNumber(stream, total, 18);       // 9(16)V2 somatoria dos valores
+  writeNumber(stream, 0, 18);           // 9(13)V5 somatoria quantidade de moedas
+  writeNumber(stream, 0, 6);            // 9(06) numero aviso de debito
+  writeBlanks(stream, 165);             // X(165) filler
+  writeBlanks(stream, 10);              // X(10) ocorrencias para retorno
   stream << "\r\n";
 
   // trailer do arquivo pag 33
 
-  stream << "033";                            // 9(03) codigo banco
-  stream << "9999";                           // 9(04) lote de servico
-  stream << "9";                              // 9(01) tipo de registro
-  writeBlanks(stream, 9);                     // X(09) filler
-  writeNumber(stream, 1, 6);                  // 9(06) quantidade lotes do arquivo
-  writeNumber(stream, 4 + registro, 6);       // 9(06) quantidade registros do arquivo
-  writeBlanks(stream, 211);                   // X(211) filler
+  stream << "033";                      // 9(03) codigo banco
+  stream << "9999";                     // 9(04) lote de servico
+  stream << "9";                        // 9(01) tipo de registro
+  writeBlanks(stream, 9);               // X(09) filler
+  writeNumber(stream, 1, 6);            // 9(06) quantidade lotes do arquivo
+  writeNumber(stream, 4 + registro, 6); // 9(06) quantidade registros do arquivo
+  writeBlanks(stream, 211);             // X(211) filler
   stream << "\r\n";
 
   QDir dir(QDir::currentPath() + "/cnab/santander/");
@@ -241,7 +242,7 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
     return {};
   }
 
-  if (not query2.exec("INSERT INTO cnab (banco, sequencial) VALUES ('SANTANDER', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
+  if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial) VALUES ('REMESSA', 'SANTANDER', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
     qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
     return {};
   }
@@ -260,7 +261,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU'") or not query.first()) {
+  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
     qApp->enqueueError("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
     return {};
   }
@@ -446,7 +447,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
     return {};
   }
 
-  if (not query2.exec("INSERT INTO cnab (banco, sequencial) VALUES ('ITAU', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
+  if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial) VALUES ('REMESSA', 'ITAU', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
     qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
     return {};
   }
@@ -456,4 +457,227 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   return query.value("idCnab").toString();
 }
 
-void CNAB::retornoGareItau240() {}
+void CNAB::retornoGareItau240(const QString &filePath) {
+  QFile file(filePath);
+
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file.errorString()); }
+
+  QStringList lines;
+
+  while (not file.atEnd()) { lines << file.readLine(); }
+
+  file.close();
+
+  QStringList resultado;
+
+  if (not qApp->startTransaction("CNAB::retornoGareItau240")) { return; }
+
+  for (auto const &line : lines) {
+    // ocorrencias do header lote
+    if (line.at(7) == '1') {
+
+      QString ocorrencia1 = decodeCodeItau(line.mid(230, 2));
+      if (not ocorrencia1.isEmpty()) { ocorrencia1.prepend("    -"); }
+      QString ocorrencia2 = decodeCodeItau(line.mid(232, 2));
+      if (not ocorrencia1.isEmpty() and not ocorrencia2.isEmpty()) { ocorrencia2.prepend("\n    -"); }
+      QString ocorrencia3 = decodeCodeItau(line.mid(234, 2));
+      if (not ocorrencia2.isEmpty() and not ocorrencia3.isEmpty()) { ocorrencia3.prepend("\n    -"); }
+      QString ocorrencia4 = decodeCodeItau(line.mid(236, 2));
+      if (not ocorrencia3.isEmpty() and not ocorrencia4.isEmpty()) { ocorrencia4.prepend("\n    -"); }
+      QString ocorrencia5 = decodeCodeItau(line.mid(238, 2));
+      if (not ocorrencia4.isEmpty() and not ocorrencia5.isEmpty()) { ocorrencia5.prepend("\n    -"); }
+
+      const QString header = "Ocorrências header:\n" + ocorrencia1 + ocorrencia2 + ocorrencia3 + ocorrencia4 + ocorrencia5;
+
+      if (not ocorrencia1.isEmpty()) { resultado << header; }
+    }
+
+    // ocorrencias do segmento N
+    if (line.at(13) == 'N') {
+
+      QString cnpj = line.mid(195, 14);
+      QString nfe = line.mid(209, 6).trimmed();
+
+      QString dataPgt = line.mid(150, 4) + "-" + line.mid(148, 2) + "-" + line.mid(146, 2); // DDMMAAAA
+
+      QString ocorrencia1 = decodeCodeItau(line.mid(230, 2));
+      if (not ocorrencia1.isEmpty()) { ocorrencia1.prepend("    -"); }
+      QString ocorrencia2 = decodeCodeItau(line.mid(232, 2));
+      if (not ocorrencia1.isEmpty() and not ocorrencia2.isEmpty()) { ocorrencia2.prepend("\n    -"); }
+      QString ocorrencia3 = decodeCodeItau(line.mid(234, 2));
+      if (not ocorrencia2.isEmpty() and not ocorrencia3.isEmpty()) { ocorrencia3.prepend("\n    -"); }
+      QString ocorrencia4 = decodeCodeItau(line.mid(236, 2));
+      if (not ocorrencia3.isEmpty() and not ocorrencia4.isEmpty()) { ocorrencia4.prepend("\n    -"); }
+      QString ocorrencia5 = decodeCodeItau(line.mid(238, 2));
+      if (not ocorrencia4.isEmpty() and not ocorrencia5.isEmpty()) { ocorrencia5.prepend("\n    -"); }
+
+      const QString segmentoN = "CNPJ: " + cnpj + " NFe: " + nfe + " Status:\n" + ocorrencia1 + ocorrencia2 + ocorrencia3 + ocorrencia4 + ocorrencia5;
+
+      if (not ocorrencia1.isEmpty()) { resultado << segmentoN; }
+
+      if (segmentoN.contains("PAGAMENTO EFETUADO")) {
+        QSqlQuery query1;
+
+        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND cnpjOrig = " + cnpj) or not query1.first()) {
+          qApp->enqueueError("Erro dando baixa na GARE: " + query1.lastError().text(), this);
+          return qApp->rollbackTransaction();
+        }
+
+        QSqlQuery query2;
+
+        if (not query2.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', dataRealizado = '" + dataPgt + "' WHERE idNFe = " + query1.value("idNFe").toString())) {
+          qApp->enqueueError("Erro dando baixa na GARE: " + query2.lastError().text(), this);
+          return qApp->rollbackTransaction();
+        }
+      }
+    }
+
+    // ocorrencias do trailer lote
+    if (line.at(7) == '5') {
+
+      QString ocorrencia1 = decodeCodeItau(line.mid(230, 2));
+      if (not ocorrencia1.isEmpty()) { ocorrencia1.prepend("    -"); }
+      QString ocorrencia2 = decodeCodeItau(line.mid(232, 2));
+      if (not ocorrencia1.isEmpty() and not ocorrencia2.isEmpty()) { ocorrencia2.prepend("\n    -"); }
+      QString ocorrencia3 = decodeCodeItau(line.mid(234, 2));
+      if (not ocorrencia2.isEmpty() and not ocorrencia3.isEmpty()) { ocorrencia3.prepend("\n    -"); }
+      QString ocorrencia4 = decodeCodeItau(line.mid(236, 2));
+      if (not ocorrencia3.isEmpty() and not ocorrencia4.isEmpty()) { ocorrencia4.prepend("\n    -"); }
+      QString ocorrencia5 = decodeCodeItau(line.mid(238, 2));
+      if (not ocorrencia4.isEmpty() and not ocorrencia5.isEmpty()) { ocorrencia5.prepend("\n    -"); }
+
+      const QString trailer = "Ocorrências trailer:\n" + ocorrencia1 + ocorrencia2 + ocorrencia3 + ocorrencia4 + ocorrencia5;
+
+      if (not ocorrencia1.isEmpty()) { resultado << trailer; }
+    }
+  }
+
+  QSqlQuery query2;
+
+  if (not query2.exec("INSERT INTO cnab (tipo, banco, conteudo) VALUES ('RETORNO', 'ITAU', '" + lines.join("") + "')")) {
+    qApp->enqueueError("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->rollbackTransaction();
+  }
+
+  if (not qApp->endTransaction()) { return; }
+
+  qApp->enqueueInformation(resultado.join("\n"), this);
+}
+
+QString CNAB::decodeCodeItau(const QString &code) {
+  if (code == "00") { return "PAGAMENTO EFETUADO"; }
+  if (code == "AE") { return "DATA DE PAGAMENTO ALTERADA"; }
+  if (code == "AG") { return "NÚMERO DO LOTE INVÁLIDO"; }
+  if (code == "AH") { return "NÚMERO SEQUENCIAL DO REGISTRO NO LOTE INVÁLIDO"; }
+  if (code == "AI") { return "PRODUTO DEMONSTRATIVO DE PAGAMENTO NÃO CONTRATADO"; }
+  if (code == "AJ") { return "TIPO DE MOVIMENTO INVÁLIDO"; }
+  if (code == "AL") { return "CÓDIGO DO BANCO FAVORECIDO INVÁLIDO"; }
+  if (code == "AM") { return "AGÊNCIA DO FAVORECIDO INVÁLIDA"; }
+  if (code == "AN") { return "CONTA CORRENTE DO FAVORECIDO INVÁLIDA"; }
+  if (code == "AO") { return "NOME DO FAVORECIDO INVÁLIDO"; }
+  if (code == "AP") { return "DATA DE PAGAMENTO / DATA DE VALIDADE / HORA DE LANÇAMENTO / ARRECADAÇÃO / APURAÇÃO INVÁLIDA"; }
+  if (code == "AQ") { return "QUANTIDADE DE REGISTROS MAIOR QUE 999999"; }
+  if (code == "AR") { return "VALOR ARRECADADO / LANÇAMENTO INVÁLIDO"; }
+  if (code == "BC") { return "NOSSO NÚMERO INVÁLIDO"; }
+  if (code == "BD") { return "PAGAMENTO AGENDADO"; }
+  if (code == "BE") { return "PAGAMENTO AGENDADO COM FORMA ALTERADA PARA OP"; }
+  if (code == "BI") { return "CNPJ / CPF DO FAVORECIDO NO SEGMENTO J-52 OU B INVÁLIDO"; }
+  if (code == "BL") { return "VALOR DA PARCELA INVÁLIDO"; }
+  if (code == "CD") { return "CNPJ / CPF DIVERGENTE DO CADASTRADO"; }
+  if (code == "CE") { return "PAGAMENTO CANCELADO"; }
+  if (code == "CF") { return "VALOR DO DOCUMENTO INVÁLIDO"; }
+  if (code == "CG") { return "VALOR DO ABATIMENTO INVÁLIDO"; }
+  if (code == "CH") { return "VALOR DO DESCONTO INVÁLIDO"; }
+  if (code == "CI") { return "CNPJ / CPF / IDENTIFICADOR / INSCRIÇÃO ESTADUAL / INSCRIÇÃO NO CAD / ICMS INVÁLIDO"; }
+  if (code == "CJ") { return "VALOR DA MULTA INVÁLIDO"; }
+  if (code == "CK") { return "TIPO DE INSCRIÇÃO INVÁLIDA"; }
+  if (code == "CL") { return "VALOR DO INSS INVÁLIDO"; }
+  if (code == "CM") { return "VALOR DO COFINS INVÁLIDO"; }
+  if (code == "CN") { return "CONTA NÃO CADASTRADA"; }
+  if (code == "CO") { return "VALOR DE OUTRAS ENTIDADES INVÁLIDO"; }
+  if (code == "CP") { return "CONFIRMAÇÃO DE OP CUMPRIDA"; }
+  if (code == "CQ") { return "SOMA DAS FATURAS DIFERE DO PAGAMENTO"; }
+  if (code == "CR") { return "VALOR DO CSLL INVÁLIDO"; }
+  if (code == "CS") { return "DATA DE VENCIMENTO DA FATURA INVÁLIDA"; }
+  if (code == "DA") { return "NÚMERO DE DEPEND. SALÁRIO FAMÍLIA INVÁLIDO"; }
+  if (code == "DB") { return "NÚMERO DE HORAS SEMANAIS INVÁLIDO"; }
+  if (code == "DC") { return "SALÁRIO DE CONTRIBUIÇÃO INSS INVÁLIDO"; }
+  if (code == "DD") { return "SALÁRIO DE CONTRIBUIÇÃO FGTS INVÁLIDO"; }
+  if (code == "DE") { return "VALOR TOTAL DOS PROVENTOS INVÁLIDO"; }
+  if (code == "DF") { return "VALOR TOTAL DOS DESCONTOS INVÁLIDO"; }
+  if (code == "DG") { return "VALOR LÍQUIDO NÃO NÚMERICO"; }
+  if (code == "DH") { return "VALOR LIQ. INFORMADO DIFERE DO CALCULADO"; }
+  if (code == "DI") { return "VALOR DO SALÁRIO-BASE INVÁLIDO"; }
+  if (code == "DJ") { return "BASE DE CÁLCULO IRRF INVÁLIDA"; }
+  if (code == "DK") { return "BASE DE CÁLCULO FGTS INVÁLIDA"; }
+  if (code == "DL") { return "FORMA DE PAGAMENTO INCOMPATÍVEL COM HOLERITE"; }
+  if (code == "DM") { return "E-MAIL DO FAVORECIDO INVÁLIDO"; }
+  if (code == "DV") { return "DOC / TED DEVOLVIDO PELO BANCO FAVORECIDO"; }
+  if (code == "D0") { return "FINALIDADE DO HOLERITE INVÁLIDA"; }
+  if (code == "D1") { return "MÊS DE COMPETÊNCIA DO HOLERITE INVÁLIDA"; }
+  if (code == "D2") { return "DIA DA COMPETÊNCIA DO HOLERITE INVÁLIDA"; }
+  if (code == "D3") { return "CENTRO DE CUSTO INVÁLIDO"; }
+  if (code == "D4") { return "CAMPO NUMÉRICO DA FUNCIONAL INVÁLIDO"; }
+  if (code == "D5") { return "DATA INÍCIO DE FÉRIAS NÃO NUMÉRICA"; }
+  if (code == "D6") { return "DATA INÍCIO DE FÉRIAS INCONSISTENTE"; }
+  if (code == "D7") { return "DATA FIM DE FÉRIAS NÃO NUMÉRICA"; }
+  if (code == "D8") { return "DATA FIM DE FÉRIAS INCONSISTENTE"; }
+  if (code == "D9") { return "NÚMERO DE DEPENDENTES IR INVÁLIDO"; }
+  if (code == "EM") { return "CONFIRMAÇÃO DE OP EMITIDA"; }
+  if (code == "EX") { return "DEVOLUÇÃO DE OP NÃO SACADA PELO FAVORECIDO"; }
+  if (code == "E0") { return "TIPO DE MOVIMENTO HOLERITE INVÁLIDO"; }
+  if (code == "E1") { return "VALOR 01 DO HOLERITE / INFORME INVÁLIDO"; }
+  if (code == "E2") { return "VALOR 02 DO HOLERITE / INFORME INVÁLIDO"; }
+  if (code == "E3") { return "VALOR 03 DO HOLERITE / INFORME INVÁLIDO"; }
+  if (code == "E4") { return "VALOR 04 DO HOLERITE / INFORME INVÁLIDO"; }
+  if (code == "FC") { return "PAGAMENTO EFETUADO ATRAVÉS DE FINANCIAMENTO COMPROR"; }
+  if (code == "FD") { return "PAGAMENTO EFETUADO ATRAVÉS DE FINANCIAMENTO DESCOMPROR"; }
+  if (code == "HÁ") { return "ERRO NO LOTE"; }
+  if (code == "HM") { return "ERRO NO REGISTRO HEADER DE ARQUIVO"; }
+  if (code == "IB") { return "VALOR DO DOCUMENTO INVÁLIDO"; }
+  if (code == "IC") { return "VALOR DO ABATIMENTO INVÁLIDO"; }
+  if (code == "ID") { return "VALOR DO DESCONTO INVÁLIDO"; }
+  if (code == "IE") { return "VALOR DA MORA INVÁLIDO"; }
+  if (code == "IF") { return "VALOR DA MULTA INVÁLIDO"; }
+  if (code == "IG") { return "VALOR DA DEDUÇÃO INVÁLIDO"; }
+  if (code == "IH") { return "VALOR DO ACRÉSCIMO INVÁLIDO"; }
+  if (code == "II") { return "DATA DE VENCIMENTO INVÁLIDA"; }
+  if (code == "IJ") { return "COMPETÊNCIA / PERÍODO REFERÊNCIA / PARCELA INVÁLIDA"; }
+  if (code == "IK") { return "TRIBUTO NÃO LIQUIDÁVEL VIA SISPAG OU NÃO CONVENIADO COM ITAÚ"; }
+  if (code == "IL") { return "CÓDIGO DE PAGAMENTO / EMPRESA / RECEITA INVÁLIDO"; }
+  if (code == "IM") { return "TIPO X FORMA NÃO COMPATÍVEL"; }
+  if (code == "IN") { return "BANCO / AGÊNCIA NÃO CADASTRADOS"; }
+  if (code == "IO") { return "DAC / VALOR / COMPETÊNCIA / IDENTIFICADO DO LACRE INVÁLIDO"; }
+  if (code == "IP") { return "DAC DO CÓDIGO DE BARRAS INVÁLIDO"; }
+  if (code == "IQ") { return "DÍVIDA ATIVA OU NÚMERO DE ETIQUETA INVÁLIDO"; }
+  if (code == "IR") { return "PAGAMENTO ALTERADO"; }
+  if (code == "IS") { return "CONCESSIONÁRIA NÃO CONVENIADA COM ITAÚ"; }
+  if (code == "IT") { return "VALOR DO TRIBUTO INVÁLIDO"; }
+  if (code == "IU") { return "VALOR DA RECEITA BRUTA ACUMULADA INVÁLIDO"; }
+  if (code == "IV") { return "NÚMERO DO DOCUMENTO ORIGEM / REFERÊNCIA INVÁLIDO"; }
+  if (code == "IX") { return "CÓDIGO DO PRODUTO INVÁLIDO"; }
+  if (code == "LA") { return "DATA DE PAGAMENTO DE UM LOTE ALTERADA"; }
+  if (code == "LC") { return "LOTE DE PAGAMENTOS CANCELADO"; }
+  if (code == "NA") { return "PAGAMENTO CANCELADO POR FALTA DE AUTORIZAÇÃO"; }
+  if (code == "NB") { return "IDENTIFICAÇÃO DO TRIBUTO INVÁLIDA"; }
+  if (code == "NC") { return "EXERCÍCIO (ANO BASE) INVÁLIDO"; }
+  if (code == "ND") { return "CÓDIGO RENAVAM NÃO ENCONTRADO / INVÁLIDO"; }
+  if (code == "NE") { return "UF INVÁLIDA"; }
+  if (code == "NF") { return "CÓDIGO DO MUNICÍPIO INVÁLIDO"; }
+  if (code == "NG") { return "PLACA INVÁLIDA"; }
+  if (code == "NH") { return "OPÇÃO / PARCELA DE PAGAMENTO INVÁLIDA"; }
+  if (code == "NI") { return "TRIBUTO JÁ FOI PAGO OU ESTÁ VENCIDO"; }
+  if (code == "NR") { return "OPERAÇÃO NÃO REALIZADA"; }
+  if (code == "PD") { return "AQUISIÇÃO CONFIRMADA (EQUIVALE A OCORRÊNCIA 02 NO LAYOUT DE RISCO SACADO)"; }
+  if (code == "RJ") { return "REGISTRO REJEITADO"; }
+  if (code == "RS") { return "PAGAMENTO DISPONÍVEL PARA ANTECIPAÇÃO NO RISCO SACADO - MODALIDADE RISCO SACADO PÓS AUTORIZADO"; }
+  if (code == "SS") { return "PAGAMENTO CANCELADO POR INSUFICIÊNCIA DE SALDO / LIMITE DIÁRIO DE PAGTO"; }
+  if (code == "TA") { return "LOTE NÃO ACEITO - TOTAIS DO LOTE COM DIFERENÇA"; }
+  if (code == "TI") { return "TITULARIDADE INVÁLIDA"; }
+  if (code == "X1") { return "FORMA INCOMPATÍVEL COM LAYOUT 010"; }
+  if (code == "X2") { return "NÚMERO DA NOTA FISCAL INVÁLIDO"; }
+  if (code == "X3") { return "IDENTIFICADOR DE NF / CNPJ INVÁLIDO"; }
+  if (code == "X4") { return "FORMA 32 INVÁLIDA"; }
+
+  return "";
+}

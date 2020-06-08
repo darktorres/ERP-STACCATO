@@ -24,7 +24,7 @@ public:
   auto remessaGareSantander240(QVector<Gare> gares) -> std::optional<QString>;
   auto remessaGareItau240(QVector<Gare> gares) -> std::optional<QString>;
   auto retornoGareSantander240() -> void;
-  auto retornoGareItau240() -> void;
+  auto retornoGareItau240(const QString &filePath) -> void;
   // TODO: adicionar funcoes para boleto e outros pagamentos
   ~CNAB();
 
@@ -34,4 +34,5 @@ private:
   void writeText(QTextStream &stream, const QString &text, const int count);
   void writeNumber(QTextStream &stream, const int number, const int count);
   void writeZeros(QTextStream &stream, const int count);
+  QString decodeCodeItau(const QString &code);
 };

@@ -14,7 +14,6 @@ win32-msvc* {
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.93
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -25,11 +24,7 @@ QT *= core gui sql network xml charts widgets
 DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
-versionAtLeast(QT_VERSION, 5.12){
-    CONFIG *= c++17
-    } else {
-    CONFIG *= c++1z
-    }
+CONFIG *= c++17
 
 message($$QMAKESPEC)
 
@@ -47,8 +42,8 @@ win32{
 contains(CONFIG, deploy){
     message(deploy)
     DEFINES *= DEPLOY
-    QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
-    QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
+    QMAKE_CXXFLAGS_RELEASE *= -O3
+    QMAKE_LFLAGS_RELEASE *= -O3
 } else{
     QMAKE_CXXFLAGS_DEBUG *= -O0
     QMAKE_CXXFLAGS_RELEASE *= -O0

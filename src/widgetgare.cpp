@@ -91,6 +91,8 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 
   if (not model.select()) { qApp->enqueueError("Erro atualizando a tabela: " + model.lastError().text(), this); }
 
+  updateTables();
+
   qApp->enqueueInformation("Baixa salva com sucesso!", this);
 }
 
@@ -111,6 +113,8 @@ void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
   }
 
   if (not model.select()) { qApp->enqueueError("Erro atualizando a tabela: " + model.lastError().text(), this); }
+
+  updateTables();
 
   qApp->enqueueInformation("Baixa salva com sucesso!", this);
 }
@@ -160,6 +164,8 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
   }
+
+  updateTables();
 }
 
 void WidgetGare::on_pushButtonRemessaSantander_clicked() {
@@ -186,6 +192,8 @@ void WidgetGare::on_pushButtonRemessaSantander_clicked() {
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
   }
+
+  updateTables();
 }
 
 QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
@@ -233,12 +241,16 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
 }
 
 void WidgetGare::on_pushButtonRetornoItau_clicked() {
-  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo Retorno", QDir::currentPath(), "RET (*.RET)");
+  // TODO: delete file after saving in SQL?
+
+  const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo Retorno", QDir::currentPath() + "/cnab/itau/", "RET (*.RET)");
 
   if (filePath.isEmpty()) { return; }
 
   CNAB cnab;
   cnab.retornoGareItau240(filePath);
+
+  updateTables();
 }
 
 void WidgetGare::on_pushButtonRetornoSantander_clicked() {}

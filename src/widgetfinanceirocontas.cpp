@@ -171,19 +171,19 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     const QString text = ui->lineEditBusca->text();
     const QString busca = text.isEmpty() ? ""
-                                         : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR idVenda LIKE '%" + text +
-                                               "%' OR observacao LIKE '%" + text + "%')";
+                                         : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR cp_idVenda LIKE '%" + text +
+                                               "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%')";
 
     //-------------------------------------
 
     filtros << "cp.desativado = FALSE";
 
     model.setQuery(
-        "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS `dataPagamento`, "
-        "`cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT `pf`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
+        "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, cp.idVenda AS `cp_idVenda`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS "
+        "`dataPagamento`, `cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
         "GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS `parcela`, `cp`.`observacao` AS `observacao`, GROUP_CONCAT(DISTINCT "
-        "`pf`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf`.`idVenda` SEPARATOR ', ') AS `idVenda` FROM `conta_a_pagar_has_pagamento` `cp` "
-        "LEFT JOIN `pedido_fornecedor_has_produto2` `pf` ON `cp`.`idCompra` = `pf`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf`.`idPedido2` LEFT JOIN `estoque` "
+        "`pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda` FROM `conta_a_pagar_has_pagamento` `cp` "
+        "LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON `cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` "
         "`e` ON `ehc`.`idEstoque` = `e`.`idEstoque` LEFT JOIN `nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` WHERE " +
         filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
   }
@@ -248,9 +248,12 @@ void WidgetFinanceiroContas::montaFiltro() {
   if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + model.lastError().text(), this); }
 
   model.setHeaderData("dataEmissao", "Data Emissão");
-  model.setHeaderData("idVenda", "Código");
+
+  if (tipo == Tipo::Receber) { model.setHeaderData("idVenda", "Venda"); }
 
   if (tipo == Tipo::Pagar) {
+    model.setHeaderData("cp_idVenda", "Venda");
+    model.setHeaderData("pf2_idVenda", "Venda");
     model.setHeaderData("ordemCompra", "OC");
     model.setHeaderData("numeroNFe", "NFe");
   }

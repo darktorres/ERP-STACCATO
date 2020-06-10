@@ -129,3 +129,7 @@ void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
 
   ui->lineEditEntregasPdfFolder->setText(path);
 }
+
+void UserConfig::on_pushButtonEmailTeste_clicked() {
+  // TODO: enviar email de teste para validar configuracao
+}

@@ -520,6 +520,8 @@ void Devolucao::limparCampos() {
 }
 
 void Devolucao::on_pushButtonDevolverItem_clicked() {
+  // TODO: fazer lançamento negativo da RT do profissional
+
   //  10cx
 
   //  1cx devolvido -> -1cx consumo

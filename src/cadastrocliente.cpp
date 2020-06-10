@@ -7,6 +7,7 @@
 #include "checkboxdelegate.h"
 #include "usersession.h"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -227,11 +228,34 @@ bool CadastroCliente::viewRegister() {
 
   tipoPFPJ = data("pfpj").toString();
 
-  tipoPFPJ == "PF" ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
+  (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
 
   ui->checkBoxInscEstIsento->setChecked(data("inscEstadual").toString() == "ISENTO");
 
   if (data("dataNasc").isNull()) { ui->dateEdit->setDate(QDate(1900, 1, 1)); }
+
+  ui->groupBoxPFPJ->setDisabled(true);
+
+  ui->lineEditCliente->setDisabled(true);
+  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setDisabled(true); }
+  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setDisabled(true); }
+
+  if (UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
+    if (not data("contatoNome").toString().isEmpty()) { ui->lineEditContatoNome->setDisabled(true); }
+    if (not data("contatoApelido").toString().isEmpty()) { ui->lineEditContatoApelido->setDisabled(true); }
+    if (not data("contatoRG").toString().isEmpty()) { ui->lineEditContatoRG->setDisabled(true); }
+    if (not data("inscEstadual").toString().isEmpty()) { ui->lineEditInscEstadual->setDisabled(true); }
+    if (not data("tel").toString().isEmpty()) { ui->lineEditTel_Res->setDisabled(true); }
+    if (not data("telCel").toString().isEmpty()) { ui->lineEditTel_Cel->setDisabled(true); }
+    if (not data("telCom").toString().isEmpty()) { ui->lineEditTel_Com->setDisabled(true); }
+    if (not data("nextel").toString().isEmpty()) { ui->lineEditNextel->setDisabled(true); }
+    if (not data("email").toString().isEmpty()) { ui->lineEditEmail->setDisabled(true); }
+    if (not data("idCadastroRel").toString().isEmpty()) { ui->itemBoxCliente->setDisabled(true); }
+    if (not data("idProfissionalRel").toString().isEmpty()) { ui->itemBoxProfissional->setDisabled(true); }
+    if (not data("idUsuarioRel").toString().isEmpty()) { ui->itemBoxVendedor->setDisabled(true); }
+  }
+
+  ui->pushButtonAtualizarEnd->setDisabled(true);
 
   return true;
 }

@@ -157,7 +157,13 @@ bool CadastroProfissional::viewRegister() {
 
   tipoPFPJ = data("pfpj").toString();
 
-  tipoPFPJ == "PF" ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
+  (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
+
+  ui->groupBoxPFPJ->setDisabled(true);
+
+  ui->lineEditProfissional->setDisabled(true);
+  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setDisabled(true); }
+  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setDisabled(true); }
 
   return true;
 }

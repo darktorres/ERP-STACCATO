@@ -160,7 +160,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 33, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
   }
@@ -188,7 +188,7 @@ void WidgetGare::on_pushButtonRemessaSantander_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 3, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
   }

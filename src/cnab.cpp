@@ -525,7 +525,7 @@ void CNAB::retornoGareItau240(const QString &filePath) {
 
         QSqlQuery query2;
 
-        if (not query2.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', dataRealizado = '" + dataPgt + "' WHERE idNFe = " + query1.value("idNFe").toString())) {
+        if (not query2.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', valorReal = valor, dataRealizado = '" + dataPgt + "' WHERE idNFe = " + query1.value("idNFe").toString())) {
           qApp->enqueueError("Erro dando baixa na GARE: " + query2.lastError().text(), this);
           return qApp->rollbackTransaction();
         }

@@ -81,12 +81,12 @@ void InserirLancamento::setupTables() {
   }
 
   if (tipo == Tipo::Receber) {
-    ui->table->hideColumn("idVenda");
     ui->table->hideColumn("taxa");
     ui->table->hideColumn("comissao");
     ui->table->hideColumn("representacao");
   }
 
+  ui->table->hideColumn("idVenda");
   ui->table->hideColumn("desativado");
 }
 

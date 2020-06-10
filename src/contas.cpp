@@ -160,6 +160,7 @@ void Contas::setupTables() {
   if (tipo == Tipo::Pagar) { modelPendentes.setTable("conta_a_pagar_has_pagamento"); }
 
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
+  modelPendentes.setHeaderData("idVenda", "Venda");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
   modelPendentes.setHeaderData("nfe", "NFe");
   modelPendentes.setHeaderData("valor", "R$");
@@ -228,6 +229,7 @@ void Contas::setupTables() {
   if (tipo == Tipo::Pagar) { modelProcessados.setTable("conta_a_pagar_has_pagamento"); }
 
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
+  modelProcessados.setHeaderData("idVenda", "Venda");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
   modelProcessados.setHeaderData("nfe", "NFe");
   modelProcessados.setHeaderData("valor", "R$");

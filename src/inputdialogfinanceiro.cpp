@@ -217,6 +217,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->tableFluxoCaixa->setModel(&modelFluxoCaixa);
 
+  ui->tableFluxoCaixa->hideColumn("idVenda");
   ui->tableFluxoCaixa->hideColumn("idCnab");
   ui->tableFluxoCaixa->hideColumn("idNFe");
   ui->tableFluxoCaixa->hideColumn("nfe");

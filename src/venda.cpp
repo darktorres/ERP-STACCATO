@@ -1167,7 +1167,6 @@ bool Venda::cancelamento() {
     }
   }
 
-  // TODO: 0nao deixar cancelar se tiver ocorrido algum evento de conta
   QSqlQuery query7;
   query7.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query7.bindValue(":idVenda", ui->lineEditVenda->text());
@@ -1178,6 +1177,9 @@ bool Venda::cancelamento() {
 }
 
 void Venda::on_pushButtonCancelamento_clicked() {
+  // TODO: 0nao deixar cancelar se tiver ocorrido algum evento de conta
+  // TODO: cancelar RT do profissional
+
   // TODO: perguntar e salvar motivo do cancelamento
   // TODO: caso haja agendamento de entrega cancelar o agendamento primeiro?
   // TODO: mudar o statusFinanceiro para cancelado tambem

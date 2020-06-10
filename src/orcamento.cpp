@@ -1052,7 +1052,7 @@ bool Orcamento::cadastrar() {
 bool Orcamento::verificaCadastroCliente() {
   const int idCliente = ui->itemBoxCliente->getId().toInt();
 
-  // TODO: simplify this function
+  bool incompleto = false;
 
   QSqlQuery queryCliente;
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");
@@ -1060,15 +1060,7 @@ bool Orcamento::verificaCadastroCliente() {
 
   if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text(), this); }
 
-  if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) {
-    qApp->enqueueError("Cliente não possui CPF/CNPJ cadastrado!", this);
-
-    auto *cadCliente = new CadastroCliente(this);
-    cadCliente->viewRegisterById(idCliente);
-    cadCliente->show();
-
-    return false;
-  }
+  if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) { incompleto = true; }
 
   QSqlQuery queryCadastro;
   queryCadastro.prepare("SELECT idCliente FROM cliente_has_endereco WHERE idCliente = :idCliente");
@@ -1076,23 +1068,17 @@ bool Orcamento::verificaCadastroCliente() {
 
   if (not queryCadastro.exec()) { return qApp->enqueueError(false, "Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text(), this); }
 
-  if (not queryCadastro.first()) {
-    qApp->enqueueError("Cliente não possui endereço cadastrado!", this);
-
-    auto *cadCliente = new CadastroCliente(this);
-    cadCliente->viewRegisterById(idCliente);
-    cadCliente->show();
-
-    return false;
-  }
+  if (not queryCadastro.first()) { incompleto = true; }
 
   queryCadastro.prepare("SELECT c.incompleto FROM orcamento o LEFT JOIN cliente c ON o.idCliente = c.idCliente WHERE c.idCliente = :idCliente AND c.incompleto = TRUE");
   queryCadastro.bindValue(":idCliente", idCliente);
 
   if (not queryCadastro.exec()) { return qApp->enqueueError(false, "Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text(), this); }
 
-  if (queryCadastro.first()) {
-    qApp->enqueueError("Cadastro incompleto, deve preencher pelo menos:\n  -Telefone Principal\n  -Email\n  -Endereço", this);
+  if (queryCadastro.first()) { incompleto = true; }
+
+  if (incompleto) {
+    qApp->enqueueError("Cadastro incompleto, deve preencher pelo menos:\n  -CPF/CNPJ\n  -Telefone Principal\n  -Email\n  -Endereço", this);
 
     auto *cadCliente = new CadastroCliente(this);
     cadCliente->viewRegisterById(idCliente);

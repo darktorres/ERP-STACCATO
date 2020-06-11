@@ -492,6 +492,8 @@ void CadastroCliente::on_lineEditContatoCPF_textEdited(const QString &text) {
 }
 
 void CadastroCliente::on_checkBoxMostrarInativos_clicked(const bool checked) {
+  // TODO: clicar nesse botao faz com que enderecos nao salvos sumam
+
   if (currentRow == -1) { return; }
 
   modelEnd.setFilter("idCliente = " + data("idCliente").toString() + (checked ? "" : " AND desativado = FALSE"));

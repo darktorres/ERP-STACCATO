@@ -239,14 +239,30 @@ bool CadastroProfissional::verifyFields() {
 }
 
 bool CadastroProfissional::savingProcedures() {
+  if (not ui->lineEditCPF->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("cpf", ui->lineEditCPF->text())) { return false; }
+  }
+
+  if (not ui->lineEditCNPJ->text().remove(".").remove("/").remove("-").isEmpty()) {
+    if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
+  }
+
+  if (not ui->lineEditContatoCPF->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("contatoCPF", ui->lineEditContatoCPF->text())) { return false; }
+  }
+
+  if (not ui->lineEditContatoRG->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("contatoRG", ui->lineEditContatoRG->text())) { return false; }
+  }
+
+  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) {
+    if (not setData("agencia", ui->lineEditAgencia->text())) { return false; }
+  }
+
   if (not setData("nome_razao", ui->lineEditProfissional->text())) { return false; }
   if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
-  if (not setData("cpf", ui->lineEditCPF->text())) { return false; }
   if (not setData("contatoNome", ui->lineEditContatoNome->text())) { return false; }
-  if (not setData("contatoCPF", ui->lineEditContatoCPF->text())) { return false; }
   if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) { return false; }
-  if (not setData("contatoRG", ui->lineEditContatoRG->text())) { return false; }
-  if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
   if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
   if (not setData("tel", ui->lineEditTel_Res->text())) { return false; }
   if (not setData("telCel", ui->lineEditTel_Cel->text())) { return false; }
@@ -258,13 +274,20 @@ bool CadastroProfissional::savingProcedures() {
   if (not setData("idUsuarioRel", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("idLoja", ui->itemBoxLoja->getId())) { return false; }
   if (not setData("comissao", ui->doubleSpinBoxComissao->value())) { return false; }
+
   // Dados bancários
+
+  if (not ui->lineEditCPFBancario->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("cpfBanco", ui->lineEditCPFBancario->text())) { return false; }
+  }
+
+  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) {
+    if (not setData("cnpjBanco", ui->lineEditCNPJBancario->text())) { return false; }
+  }
+
   if (not setData("banco", ui->lineEditBanco->text())) { return false; }
-  if (not setData("agencia", ui->lineEditAgencia->text())) { return false; }
   if (not setData("cc", ui->lineEditCC->text())) { return false; }
   if (not setData("nomeBanco", ui->lineEditNomeBancario->text())) { return false; }
-  if (not setData("cpfBanco", ui->lineEditCPFBancario->text())) { return false; }
-  if (not setData("cnpjBanco", ui->lineEditCNPJBancario->text())) { return false; }
   if (not setData("poupanca", ui->checkBoxPoupanca->isChecked())) { return false; }
 
   return true;

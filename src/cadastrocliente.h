@@ -43,6 +43,7 @@ private:
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
@@ -51,5 +52,4 @@ private:
   auto verificaVinculo() -> std::optional<bool>;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
-  auto setConnections() -> void;
 };

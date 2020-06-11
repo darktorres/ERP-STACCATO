@@ -161,9 +161,9 @@ bool CadastroProfissional::viewRegister() {
 
   ui->groupBoxPFPJ->setDisabled(true);
 
-  ui->lineEditProfissional->setDisabled(true);
-  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setDisabled(true); }
-  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setDisabled(true); }
+  ui->lineEditProfissional->setReadOnly(true);
+  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setReadOnly(true); }
+  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setReadOnly(true); }
 
   return true;
 }

@@ -236,23 +236,23 @@ bool CadastroCliente::viewRegister() {
 
   ui->groupBoxPFPJ->setDisabled(true);
 
-  ui->lineEditCliente->setDisabled(true);
-  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setDisabled(true); }
-  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setDisabled(true); }
+  ui->lineEditCliente->setReadOnly(true);
+  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setReadOnly(true); }
+  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setReadOnly(true); }
 
   if (UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
-    if (not data("contatoNome").toString().isEmpty()) { ui->lineEditContatoNome->setDisabled(true); }
-    if (not data("contatoApelido").toString().isEmpty()) { ui->lineEditContatoApelido->setDisabled(true); }
-    if (not data("contatoRG").toString().isEmpty()) { ui->lineEditContatoRG->setDisabled(true); }
-    if (not data("inscEstadual").toString().isEmpty()) { ui->lineEditInscEstadual->setDisabled(true); }
-    if (not data("tel").toString().isEmpty()) { ui->lineEditTel_Res->setDisabled(true); }
-    if (not data("telCel").toString().isEmpty()) { ui->lineEditTel_Cel->setDisabled(true); }
-    if (not data("telCom").toString().isEmpty()) { ui->lineEditTel_Com->setDisabled(true); }
-    if (not data("nextel").toString().isEmpty()) { ui->lineEditNextel->setDisabled(true); }
-    if (not data("email").toString().isEmpty()) { ui->lineEditEmail->setDisabled(true); }
-    if (not data("idCadastroRel").toString().isEmpty()) { ui->itemBoxCliente->setDisabled(true); }
-    if (not data("idProfissionalRel").toString().isEmpty()) { ui->itemBoxProfissional->setDisabled(true); }
-    if (not data("idUsuarioRel").toString().isEmpty()) { ui->itemBoxVendedor->setDisabled(true); }
+    if (not data("contatoNome").toString().isEmpty()) { ui->lineEditContatoNome->setReadOnly(true); }
+    if (not data("contatoApelido").toString().isEmpty()) { ui->lineEditContatoApelido->setReadOnly(true); }
+    if (not data("contatoRG").toString().isEmpty()) { ui->lineEditContatoRG->setReadOnly(true); }
+    if (not data("inscEstadual").toString().isEmpty()) { ui->lineEditInscEstadual->setReadOnly(true); }
+    if (not data("tel").toString().isEmpty()) { ui->lineEditTel_Res->setReadOnly(true); }
+    if (not data("telCel").toString().isEmpty()) { ui->lineEditTel_Cel->setReadOnly(true); }
+    if (not data("telCom").toString().isEmpty()) { ui->lineEditTel_Com->setReadOnly(true); }
+    if (not data("nextel").toString().isEmpty()) { ui->lineEditNextel->setReadOnly(true); }
+    if (not data("email").toString().isEmpty()) { ui->lineEditEmail->setReadOnly(true); }
+    if (not data("idCadastroRel").toString().isEmpty()) { ui->itemBoxCliente->setReadOnly(true); }
+    if (not data("idProfissionalRel").toString().isEmpty()) { ui->itemBoxProfissional->setReadOnly(true); }
+    if (not data("idUsuarioRel").toString().isEmpty()) { ui->itemBoxVendedor->setReadOnly(true); }
   }
 
   ui->pushButtonAtualizarEnd->setDisabled(true);

@@ -212,6 +212,17 @@ void CadastroCliente::updateMode() {
   ui->pushButtonRemover->show();
 }
 
+std::optional<bool> CadastroCliente::verificaVinculo() {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT 0 FROM orcamento WHERE idCliente = " + data("idCliente").toString())) {
+    qApp->enqueueError("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
+    return {};
+  }
+
+  return query.size() > 0;
+}
+
 bool CadastroCliente::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
@@ -236,7 +247,12 @@ bool CadastroCliente::viewRegister() {
 
   ui->groupBoxPFPJ->setDisabled(true);
 
-  ui->lineEditCliente->setReadOnly(true);
+  const auto existeVinculo = verificaVinculo();
+
+  if (not existeVinculo) { return false; }
+
+  if (existeVinculo.value()) { ui->lineEditCliente->setReadOnly(true); }
+
   if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setReadOnly(true); }
   if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setReadOnly(true); }
 

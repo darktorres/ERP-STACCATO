@@ -483,6 +483,8 @@ bool Orcamento::recalcularTotais() {
 }
 
 bool Orcamento::verifyFields() {
+  if (not verificaDisponibilidadeEstoque()) { return false; }
+
   if (not recalcularTotais()) { return false; }
 
   if (ui->itemBoxCliente->text().isEmpty()) {
@@ -786,8 +788,6 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 
   if (not verificaCadastroCliente()) { return; }
 
-  if (not verificaDisponibilidadeEstoque()) { return; }
-
   auto *venda = new Venda(parentWidget());
   venda->prepararVenda(ui->lineEditOrcamento->text());
 
@@ -945,6 +945,7 @@ void Orcamento::on_checkBoxFreteManual_clicked(const bool checked) {
 void Orcamento::on_pushButtonReplicar_clicked() {
   // passar por cada produto verificando sua validade/descontinuado
   QStringList produtos;
+  QStringList estoques;
   QVector<int> skipRows;
 
   QSqlQuery queryProduto;
@@ -952,6 +953,9 @@ void Orcamento::on_pushButtonReplicar_clicked() {
 
   QSqlQuery queryEquivalente;
   queryEquivalente.prepare("SELECT idProduto FROM produto WHERE codComercial = :codComercial AND descontinuado = FALSE AND desativado = FALSE AND estoque = FALSE");
+
+  QSqlQuery queryEstoque;
+  queryEstoque.prepare("SELECT 0 FROM produto WHERE idProduto = :idProduto AND estoqueRestante >= :quant");
 
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
@@ -964,16 +968,39 @@ void Orcamento::on_pushButtonReplicar_clicked() {
       if (not queryEquivalente.exec()) { return qApp->enqueueError("Erro procurando produto equivalente: " + queryEquivalente.lastError().text(), this); }
 
       if (queryEquivalente.first()) {
-        if (not modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"))) {}
+        if (not modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"))) { return; }
       } else {
         produtos << QString::number(row + 1) + " - " + modelItem.data(row, "produto").toString();
+        skipRows << row;
+      }
+    }
+
+    if (modelItem.data(row, "estoque").toInt() == 1) {
+      queryEstoque.bindValue(":idProduto", modelItem.data(row, "idProduto"));
+      queryEstoque.bindValue(":quant", modelItem.data(row, "quant"));
+
+      if (not queryEstoque.exec()) { return qApp->enqueueError("Erro verificando estoque: " + queryEstoque.lastError().text(), this); }
+
+      if (not queryEstoque.first()) {
+        estoques << modelItem.data(row, "produto").toString();
         skipRows << row;
       }
     }
   }
 
   if (not produtos.isEmpty()) {
-    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n" + produtos.join("\n"), QMessageBox::Yes | QMessageBox::No, this);
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Os seguintes itens estão descontinuados e serão removidos da réplica:\n    -" + produtos.join("\n    -"), QMessageBox::Yes | QMessageBox::No,
+                       this);
+    msgBox.setButtonText(QMessageBox::Yes, "Continuar");
+    msgBox.setButtonText(QMessageBox::No, "Voltar");
+
+    if (msgBox.exec() == QMessageBox::No) { return; }
+  }
+
+  if (not estoques.isEmpty()) {
+    QMessageBox msgBox(QMessageBox::Question, "Atenção!",
+                       "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada e serão removidos da réplica:\n    -" + estoques.join("\n    -"),
+                       QMessageBox::Yes | QMessageBox::No, this);
     msgBox.setButtonText(QMessageBox::Yes, "Continuar");
     msgBox.setButtonText(QMessageBox::No, "Voltar");
 
@@ -1317,16 +1344,24 @@ void Orcamento::on_dataEmissao_dateChanged(const QDate &date) { ui->spinBoxValid
 bool Orcamento::verificaDisponibilidadeEstoque() {
   QSqlQuery query;
 
+  QStringList produtos;
+
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     if (modelItem.data(row, "estoque").toInt() != 1) { continue; }
 
     const QString idProduto = modelItem.data(row, "idProduto").toString();
+    const QString quant = modelItem.data(row, "quant").toString();
 
-    if (not query.exec("SELECT descontinuado FROM produto WHERE idProduto = " + idProduto) or not query.first()) {
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
       return qApp->enqueueError(false, "Erro verificando a disponibilidade do estoque: " + query.lastError().text(), this);
     }
 
-    if (query.value("descontinuado").toBool()) { return qApp->enqueueError(false, "Item " + QString::number(row + 1) + " não está mais disponível!", this); }
+    if (not query.first()) { produtos << modelItem.data(row, "produto").toString(); }
+  }
+
+  if (not produtos.isEmpty()) {
+    return qApp->enqueueError(
+        false, "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada:\n    -" + produtos.join("\n    -") + "\n\nRemova ou diminua a quant. para prosseguir!", this);
   }
 
   return true;

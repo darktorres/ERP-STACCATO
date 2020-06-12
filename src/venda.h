@@ -72,6 +72,7 @@ private:
   auto successMessage() -> void final;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
+  auto verificaDisponibilidadeEstoque() -> bool;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

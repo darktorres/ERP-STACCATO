@@ -368,7 +368,7 @@ bool Venda::verifyFields() {
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
 
-  // TODO: copiar do orçamento a verificação de disponibilidade de estoque?
+  if (not verificaDisponibilidadeEstoque()) { return false; }
 
   if (ui->widgetPgts->isHidden()) { return true; }
 
@@ -613,6 +613,32 @@ bool Venda::viewRegister() {
   setConnections();
 
   return ok;
+}
+
+bool Venda::verificaDisponibilidadeEstoque() {
+  QSqlQuery query;
+
+  QStringList produtos;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.data(row, "estoque").toInt() != 1) { continue; }
+
+    const QString idProduto = modelItem.data(row, "idProduto").toString();
+    const QString quant = modelItem.data(row, "quant").toString();
+
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
+      return qApp->enqueueError(false, "Erro verificando a disponibilidade do estoque: " + query.lastError().text(), this);
+    }
+
+    if (not query.first()) { produtos << modelItem.data(row, "produto").toString(); }
+  }
+
+  if (not produtos.isEmpty()) {
+    return qApp->enqueueError(
+        false, "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada:\n    -" + produtos.join("\n    -") + "\n\nRemova ou diminua a quant. para prosseguir!", this);
+  }
+
+  return true;
 }
 
 void Venda::on_pushButtonVoltar_clicked() {

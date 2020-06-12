@@ -72,6 +72,16 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   progress->reset();
 }
 
+SendMail::SendMail(const SendMail::Tipo tipo, QWidget *parent) : SendMail(tipo, QString(), QString(), parent) {
+  if (tipo == Tipo::Teste) {
+    ui->comboBoxDest->setCurrentText(ui->lineEditEmail->text());
+    ui->lineEditTitulo->setText("Teste");
+    ui->textEdit->setText("Mensagem de teste");
+
+    on_pushButtonEnviar_clicked();
+  }
+}
+
 SendMail::~SendMail() { delete ui; }
 
 void SendMail::on_pushButtonBuscar_clicked() {

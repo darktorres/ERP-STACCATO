@@ -365,6 +365,9 @@ void Orcamento::updateMode() {
 
   ui->lineEditReplicaDe->setReadOnly(true);
   ui->lineEditReplicadoEm->setReadOnly(true);
+
+  ui->dataEmissao->setReadOnly(true);
+  ui->dataEmissao->setCalendarPopup(false);
 }
 
 bool Orcamento::newRegister() {

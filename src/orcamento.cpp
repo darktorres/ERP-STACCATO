@@ -365,9 +365,6 @@ void Orcamento::updateMode() {
 
   ui->lineEditReplicaDe->setReadOnly(true);
   ui->lineEditReplicadoEm->setReadOnly(true);
-
-  ui->dataEmissao->setReadOnly(true);
-  ui->dataEmissao->setCalendarPopup(false);
 }
 
 bool Orcamento::newRegister() {
@@ -537,7 +534,7 @@ bool Orcamento::savingProcedures() {
 
   if (not setData("idUsuario", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("idCliente", ui->itemBoxCliente->getId())) { return false; }
-  if (not setData("data", qApp->serverDateTime())) { return false; }
+  if (not setData("data", ui->dataEmissao->isReadOnly() ? qApp->serverDateTime() : ui->dataEmissao->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxSubTotalLiq->value() * ui->doubleSpinBoxDescontoGlobal->value() / 100.)) { return false; }
   if (not setData("frete", ui->doubleSpinBoxFrete->value())) { return false; }

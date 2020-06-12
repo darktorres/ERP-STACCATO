@@ -1,7 +1,9 @@
 #include "userconfig.h"
 #include "ui_userconfig.h"
 
+#include "application.h"
 #include "cadastrousuario.h"
+#include "sendmail.h"
 #include "usersession.h"
 
 #include <QDebug>
@@ -47,6 +49,7 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   connect(ui->pushButtonAlterarDados, &QPushButton::clicked, this, &UserConfig::on_pushButtonAlterarDados_clicked);
   connect(ui->pushButtonComprasFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonComprasFolder_clicked);
+  connect(ui->pushButtonEmailTeste, &QPushButton::clicked, this, &UserConfig::on_pushButtonEmailTeste_clicked);
   connect(ui->pushButtonEntregasPdfFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasPdfFolder_clicked);
   connect(ui->pushButtonEntregasXmlFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonEntregasXmlFolder_clicked);
   connect(ui->pushButtonOrcamentosFolder, &QPushButton::clicked, this, &UserConfig::on_pushButtonOrcamentosFolder_clicked);
@@ -131,5 +134,18 @@ void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
 }
 
 void UserConfig::on_pushButtonEmailTeste_clicked() {
-  // TODO: enviar email de teste para validar configuracao
+  if (ui->lineEditServidorSMTP->text().isEmpty() or ui->lineEditPortaSMTP->text().isEmpty() or ui->lineEditEmail->text().isEmpty() or ui->lineEditEmailSenha->text().isEmpty()) {
+    return qApp->enqueueError("Preencha os dados do email!", this);
+  }
+
+  UserSession::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
+  UserSession::setSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());
+  UserSession::setSetting("User/emailCompra", ui->lineEditEmail->text());
+  UserSession::setSetting("User/emailSenha", ui->lineEditEmailSenha->text());
+  UserSession::setSetting("User/emailCopia", ui->lineEditEmailCopia->text());
+
+  auto *mail = new SendMail(SendMail::Tipo::Teste, this);
+  mail->setAttribute(Qt::WA_DeleteOnClose);
+
+  mail->show();
 }

@@ -534,18 +534,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   QString telefones;
 
-  if (queryCliente.value("idProfissional").toInt() == 1) { // NÃO HÁ
-    const QString clienteTel = queryCliente.value("clienteTel").toString();
-    const QString clienteCel = queryCliente.value("clienteCel").toString();
-
-    if (not clienteTel.isEmpty() and not clienteCel.isEmpty()) {
-      telefones = clienteTel + " - " + clienteCel;
-    } else if (not clienteTel.isEmpty()) {
-      telefones = clienteTel;
-    } else if (not clienteCel.isEmpty()) {
-      telefones = clienteCel;
-    }
-  } else {
+  if (queryCliente.value("idProfissional").toInt() != 1) { // NÃO HÁ
     const QString profissionalTel = queryCliente.value("profissionalTel").toString();
     const QString profissionalCel = queryCliente.value("profissionalCel").toString();
 

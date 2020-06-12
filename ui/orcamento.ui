@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1337</width>
+    <width>1367</width>
     <height>879</height>
    </rect>
   </property>
@@ -542,12 +542,6 @@
                 </item>
                </layout>
               </item>
-              <item row="2" column="0">
-               <widget class="ItemBox" name="itemBoxEndereco"/>
-              </item>
-              <item row="1" column="0">
-               <widget class="ItemBox" name="itemBoxProfissional"/>
-              </item>
               <item row="0" column="0">
                <widget class="QDateTimeEdit" name="dataEmissao">
                 <property name="toolTip">
@@ -567,16 +561,22 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QCheckBox" name="checkBoxRepresentacao">
-                <property name="text">
-                 <string>Representação</string>
-                </property>
-               </widget>
+              <item row="1" column="0" colspan="2">
+               <widget class="ItemBox" name="itemBoxProfissional"/>
+              </item>
+              <item row="2" column="0" colspan="2">
+               <widget class="ItemBox" name="itemBoxEndereco"/>
               </item>
              </layout>
             </item>
            </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBoxRepresentacao">
+            <property name="text">
+             <string>Representação</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1524,7 +1524,6 @@ color: rgb(0, 0, 0);</string>
   <tabstop>itemBoxProfissional</tabstop>
   <tabstop>itemBoxEndereco</tabstop>
   <tabstop>spinBoxValidade</tabstop>
-  <tabstop>checkBoxRepresentacao</tabstop>
   <tabstop>itemBoxProduto</tabstop>
   <tabstop>lineEditPrecoUn</tabstop>
   <tabstop>doubleSpinBoxCaixas</tabstop>

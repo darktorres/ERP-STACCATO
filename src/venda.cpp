@@ -49,6 +49,11 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   setupMapper();
   newRegister();
 
+  if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO") {
+    ui->dateTimeEdit->setReadOnly(false);
+    ui->dateTimeEdit->setCalendarPopup(true);
+  }
+
   ui->splitter->setStretchFactor(0, 255);
   ui->splitter->setStretchFactor(1, 1);
 
@@ -446,7 +451,7 @@ void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 bool Venda::savingProcedures() {
   // TODO: remove novoPrazoEntrega from DB?
 
-  if (not setData("data", qApp->serverDateTime())) { return false; }
+  if (not setData("data", ui->dateTimeEdit->isReadOnly() ? qApp->serverDateTime() : ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("dataOrc", ui->dateTimeEditOrc->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxDescontoGlobalReais->value())) { return false; }

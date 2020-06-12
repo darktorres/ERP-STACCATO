@@ -178,6 +178,7 @@ bool Orcamento::viewRegister() {
       ui->frameProduto->hide();
 
       ui->pushButtonGerarVenda->hide();
+      ui->pushButtonAtualizarOrcamento->hide();
 
       ui->checkBoxFreteManual->setDisabled(true);
 
@@ -199,6 +200,12 @@ bool Orcamento::viewRegister() {
       ui->doubleSpinBoxTotalItem->setReadOnly(true);
       ui->plainTextEditObs->setReadOnly(true);
       ui->spinBoxPrazoEntrega->setReadOnly(true);
+
+      ui->dataEmissao->setReadOnly(true);
+      ui->dataEmissao->setCalendarPopup(false);
+
+      ui->spinBoxValidade->setReadOnly(true);
+      ui->spinBoxValidade->setButtonSymbols(QSpinBox::NoButtons);
 
       ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
       ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -360,7 +367,7 @@ void Orcamento::updateMode() {
   ui->pushButtonGerarPdf->setEnabled(true);
   ui->pushButtonGerarVenda->setEnabled(true);
 
-  ui->spinBoxValidade->setDisabled(true);
+  ui->spinBoxValidade->setReadOnly(true);
   ui->checkBoxRepresentacao->setDisabled(true);
 
   ui->lineEditReplicaDe->setReadOnly(true);

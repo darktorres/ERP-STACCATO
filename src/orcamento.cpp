@@ -577,6 +577,8 @@ bool Orcamento::savingProcedures() {
 }
 
 bool Orcamento::buscarCadastrarConsultor() {
+  // TODO: change this to return optional and rename to 'buscarConsultor'
+
   QStringList fornecedores;
 
   for (int row = 0, rowCount = modelItem.rowCount(); row < rowCount; ++row) { fornecedores << modelItem.data(row, "fornecedor").toString(); }
@@ -587,7 +589,7 @@ bool Orcamento::buscarCadastrarConsultor() {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT idUsuario FROM usuario WHERE especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" + fornecedores.join(", ") + "))")) {
+  if (not query.exec("SELECT idUsuario FROM usuario WHERE desativado = FALSE AND especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" + fornecedores.join(", ") + "))")) {
     return qApp->enqueueError(false, "Erro buscando consultor: " + query.lastError().text(), this);
   }
 

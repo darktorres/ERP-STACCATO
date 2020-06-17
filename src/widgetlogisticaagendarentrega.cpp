@@ -543,6 +543,8 @@ bool WidgetLogisticaAgendarEntrega::dividirVenda(const int row, const double cai
 
     const QVariant value = modelProdutosTemp.data(0, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelProdutosTemp.setData(newRow, column, value)) { return false; }
   }
 
@@ -626,6 +628,8 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
 
     const QVariant value = modelConsumoTemp.data(0, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelConsumoTemp.setData(newRow, column, value)) { return false; }
   }
 
@@ -679,6 +683,8 @@ bool WidgetLogisticaAgendarEntrega::dividirCompra(const int row, const double ca
     if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelCompra.data(0, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }

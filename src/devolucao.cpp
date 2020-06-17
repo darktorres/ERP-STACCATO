@@ -386,6 +386,8 @@ bool Devolucao::criarDevolucao() {
 
     const QVariant value = modelVenda.data(0, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelVenda.setData(newRow, column, value)) { return false; }
   }
 
@@ -595,6 +597,8 @@ bool Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
 
     const QVariant value = modelProdutos2.data(currentRow, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelDevolvidos1.setData(newRow, columnIndex, value)) { return false; }
   }
 
@@ -671,6 +675,8 @@ bool Devolucao::dividirVenda(const int currentRow, const int novoIdVendaProduto2
 
     const QVariant value = modelProdutos2.data(currentRow, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelProdutos2.setData(newRow, column, value)) { return false; }
   }
 
@@ -731,6 +737,8 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
 
     const QVariant value = modelCompra.data(0, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
 
@@ -757,6 +765,8 @@ bool Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
     if (column == modelConsumos.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelConsumos.data(0, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelConsumos.setData(newRow, column, value)) { return false; }
   }

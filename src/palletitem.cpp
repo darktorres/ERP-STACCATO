@@ -131,15 +131,17 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   qDebug() << "drop: " << event->mimeData()->text();
   qDebug() << "parent: " << event->mimeData()->parent();
 
-  EstoqueItem *item = dynamic_cast<EstoqueItem *>(event->mimeData()->parent());
-  item->setParentItem(this);
-  reorderChildren();
 
   QSqlQuery query;
 
   if (not query.exec("UPDATE estoque SET bloco = '" + label + "' WHERE idEstoque = " + event->mimeData()->text().split(" - ").first())) {
+    event->ignore();
     return qApp->enqueueError("Erro movendo estoque: " + query.lastError().text());
   }
+
+  EstoqueItem *item = dynamic_cast<EstoqueItem *>(event->mimeData()->parent());
+  item->setParentItem(this);
+  reorderChildren();
 
   event->acceptProposedAction();
 }

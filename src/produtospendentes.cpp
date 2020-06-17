@@ -350,6 +350,8 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
     const QVariant value = modelProdutos.data(rowProduto, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelProdutos.setData(newRow, column, value)) { return false; }
   }
 

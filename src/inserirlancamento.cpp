@@ -165,6 +165,8 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 
     const QVariant value = modelContaPagamento.data(row, col);
 
+    if (value.isNull()) { continue; }
+
     if (not modelContaPagamento.setData(newRow, col, value)) { return; }
   }
 }

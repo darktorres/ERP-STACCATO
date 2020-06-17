@@ -811,6 +811,8 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelConsumo.setData(rowConsumo, index, value)) { return false; }
   }
 
@@ -872,6 +874,8 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
 
     const QVariant value = modelVenda.data(rowVenda, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelVenda.setData(newRowVenda, column, value)) { return {}; }
   }
 
@@ -918,6 +922,8 @@ bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
     if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelCompra.data(rowCompra, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }

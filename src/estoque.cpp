@@ -208,6 +208,8 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelConsumo.setData(rowConsumo, index, value)) { return false; }
   }
 
@@ -307,6 +309,8 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
       if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
       const QVariant value = modelCompra.data(row, column);
+
+      if (value.isNull()) { continue; }
 
       if (not modelCompra.setData(newRow, column, value)) { return false; }
     }

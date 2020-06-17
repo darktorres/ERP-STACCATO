@@ -710,6 +710,7 @@ void Venda::montarFluxoCaixa() {
       if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
       if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
       if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao)) { return; }
       if (not modelFluxoCaixa.setData(row, "valor", ui->widgetPgts->listValorPgt.at(pagamento)->value())) { return; }
       if (not modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt)) { return; }
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }

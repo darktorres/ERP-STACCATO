@@ -159,6 +159,8 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
       const QVariant value = modelConsumo.data(0, column);
 
+      if (value.isNull()) { continue; }
+
       if (not modelConsumo.setData(newRow, column, value)) { return false; }
     }
 

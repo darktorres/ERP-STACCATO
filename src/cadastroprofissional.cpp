@@ -144,7 +144,7 @@ void CadastroProfissional::updateMode() {
 std::optional<bool> CadastroProfissional::verificaVinculo() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM orcamento WHERE idProfissional = " + data("idProfissional").toString())) {
+  if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString())) {
     qApp->enqueueError("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
     return {};
   }

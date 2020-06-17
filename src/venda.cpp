@@ -373,15 +373,15 @@ bool Venda::verifyFields() {
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
 
-  if (not verificaDisponibilidadeEstoque()) { return false; }
+  if (not financeiro and not verificaDisponibilidadeEstoque()) { return false; }
 
-  if (ui->widgetPgts->isHidden()) { return true; }
+  if (ui->widgetPgts->isVisible()) {
+    if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
 
-  if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
+    if (not ui->widgetPgts->verifyFields()) { return false; }
 
-  if (not ui->widgetPgts->verifyFields()) { return false; }
-
-  if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
+    if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
+  }
 
   if (ui->spinBoxPrazoEntrega->value() == 0) {
     qApp->enqueueError("Por favor preencha o prazo de entrega!", this);

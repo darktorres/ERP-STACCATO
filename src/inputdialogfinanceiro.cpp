@@ -320,6 +320,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         if (not modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt)) { return; }
         if (not modelFluxoCaixa.setData(row, "parcela", parcela + 1)) { return; }
         if (not modelFluxoCaixa.setData(row, "observacao", observacaoPgt)) { return; }
+        if (not modelFluxoCaixa.setData(row, "grupo", "PRODUTOS - VENDA")) { return; }
       }
     }
 
@@ -335,6 +336,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       if (not modelFluxoCaixa.setData(row, "tipo", "Frete")) { return; }
       if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
       if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
+      if (not modelFluxoCaixa.setData(row, "grupo", "LOGÍSTICA - FRETES")) { return; }
     }
 
     // set st date
@@ -398,6 +400,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
             if (not modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor")) { return; }
             if (not modelFluxoCaixa.setData(row, "parcela", parcela + 1)) { return; }
             if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
+            if (not modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS")) { return; }
           }
         } else {
           const int row = modelFluxoCaixa.insertRowAtEnd();
@@ -411,6 +414,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
           if (not modelFluxoCaixa.setData(row, "tipo", "ST Fornecedor")) { return; }
           if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
           if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
+          if (not modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS")) { return; }
         }
       }
 
@@ -426,6 +430,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         if (not modelFluxoCaixa.setData(row, "tipo", "ST Loja")) { return; }
         if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
         if (not modelFluxoCaixa.setData(row, "observacao", "")) { return; }
+        if (not modelFluxoCaixa.setData(row, "grupo", "IMPOSTOS - ICMS;ST;ISS")) { return; }
       }
     }
   }();

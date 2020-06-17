@@ -505,6 +505,8 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
 
     const QVariant value = modelVendaProduto.data(0, col);
 
+    if (value.isNull()) { continue; }
+
     if (not modelVendaProduto.setData(newRow, col, value)) { return false; }
   }
 
@@ -679,6 +681,8 @@ bool InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
 
     const QVariant value = modelVendaProduto.data(0, col);
 
+    if (value.isNull()) { continue; }
+
     if (not modelVendaProduto.setData(rowQuebrado2, col, value)) { return false; }
   }
 
@@ -714,6 +718,8 @@ bool InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
     if (modelVeiculo.fieldIndex("lastUpdated") == col) { continue; }
 
     const QVariant value = modelVeiculo.data(row, col);
+
+    if (value.isNull()) { continue; }
 
     if (not modelVeiculo.setData(rowQuebrado, col, value)) { return false; }
   }
@@ -784,6 +790,8 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
     const QVariant value = modelConsumo.data(0, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelConsumo.setData(newRow, column, value)) { return false; }
   }
 
@@ -844,6 +852,8 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
     if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelCompra.data(0, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }

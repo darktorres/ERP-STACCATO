@@ -5,11 +5,7 @@
 
 GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {}
 
-void GraphicsView::mousePressEvent(QMouseEvent *event) {
-  qDebug() << "pos: " << event->pos();
-
-  QGraphicsView::mousePressEvent(event);
-}
+void GraphicsView::mousePressEvent(QMouseEvent *event) { QGraphicsView::mousePressEvent(event); }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent *event) { QGraphicsView::mouseReleaseEvent(event); }
 

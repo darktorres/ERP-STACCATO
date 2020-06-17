@@ -21,15 +21,17 @@ void EstoqueItem::startDrag(QPointF pos) {
 
   QPixmap pixmap = QPixmap("://box_medium.png");
 
-  auto pallet = dynamic_cast<PalletItem *>(parentItem());
+  const auto pallet = dynamic_cast<PalletItem *>(parentItem());
 
   QMimeData *mimeData = new QMimeData;
   mimeData->setText(text());
   mimeData->setParent(this);
+
   QDrag *drag = new QDrag(this);
   drag->setMimeData(mimeData);
   drag->setPixmap(pixmap);
-  auto status = drag->exec();
+
+  const auto status = drag->exec();
 
   if (status != Qt::IgnoreAction) { pallet->reorderChildren(); }
 }

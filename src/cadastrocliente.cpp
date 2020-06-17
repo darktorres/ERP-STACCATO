@@ -215,7 +215,7 @@ void CadastroCliente::updateMode() {
 std::optional<bool> CadastroCliente::verificaVinculo() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM orcamento WHERE idCliente = " + data("idCliente").toString())) {
+  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString())) {
     qApp->enqueueError("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
     return {};
   }

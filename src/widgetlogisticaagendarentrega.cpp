@@ -411,11 +411,15 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString 
 
   if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
+  ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
+
+  // ------------------------------------------
+
   if (not modelTranspAtual.select()) { return; }
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
-  ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
+  // ------------------------------------------
 
   calcularDisponivel();
 }

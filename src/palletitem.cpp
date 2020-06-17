@@ -81,7 +81,6 @@ void PalletItem::reorderChildren() {
 }
 
 void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-  qDebug() << "enter: " << event->scenePos();
   flagTooltip = true;
 
   prepareGeometryChange();
@@ -90,14 +89,9 @@ void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
   QGraphicsItem::hoverEnterEvent(event);
 }
 
-void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) {
-  //  qDebug() << "move: " << event->pos();
-
-  QGraphicsItem::hoverMoveEvent(event);
-}
+void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
 
 void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
-  qDebug() << "leave: " << event->pos();
   flagTooltip = false;
 
   prepareGeometryChange();
@@ -128,9 +122,6 @@ void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(ev
 
 void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   Q_UNUSED(event);
-  qDebug() << "drop: " << event->mimeData()->text();
-  qDebug() << "parent: " << event->mimeData()->parent();
-
 
   QSqlQuery query;
 

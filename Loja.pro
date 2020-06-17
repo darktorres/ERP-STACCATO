@@ -147,12 +147,16 @@ SOURCES += \
     src/doubledelegate.cpp \
     src/editdelegate.cpp \
     src/estoque.cpp \
+    src/estoqueitem.cpp \
     src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
     src/excel.cpp \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
+    src/galpao.cpp \
+    src/graphicsscene.cpp \
+    src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
@@ -177,6 +181,7 @@ SOURCES += \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
     src/pagamentosdia.cpp \
+    src/palletitem.cpp \
     src/pdf.cpp \
     src/porcentagemdelegate.cpp \
     src/precoestoque.cpp \
@@ -270,12 +275,16 @@ HEADERS  += \
     src/doubledelegate.h \
     src/editdelegate.h \
     src/estoque.h \
+    src/estoqueitem.h \
     src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
     src/excel.h \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
+    src/galpao.h \
+    src/graphicsscene.h \
+    src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
@@ -299,6 +308,7 @@ HEADERS  += \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
     src/pagamentosdia.h \
+    src/palletitem.h \
     src/pdf.h \
     src/porcentagemdelegate.h \
     src/precoestoque.h \
@@ -382,6 +392,7 @@ FORMS += \
     ui/devolucao.ui \
     ui/estoque.ui \
     ui/followup.ui \
+    ui/galpao.ui \
     ui/importaprodutos.ui \
     ui/importarxml.ui \
     ui/inputdialog.ui \

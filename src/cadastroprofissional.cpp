@@ -52,10 +52,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
-    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false);
-    ui->pushButtonRemover->setDisabled(true);
-  }
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false); }
 }
 
 CadastroProfissional::~CadastroProfissional() { delete ui; }
@@ -170,16 +167,18 @@ bool CadastroProfissional::viewRegister() {
 
   (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
 
-  ui->groupBoxPFPJ->setDisabled(true);
-
   const auto existeVinculo = verificaVinculo();
 
   if (not existeVinculo) { return false; }
 
-  if (existeVinculo.value()) { ui->lineEditProfissional->setReadOnly(true); }
+  const bool bloquear = (existeVinculo.value() and UserSession::nome() != "CLAUDIA ZELANTE");
 
-  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setReadOnly(true); }
-  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setReadOnly(true); }
+  ui->lineEditProfissional->setReadOnly(bloquear);
+  ui->lineEditCPF->setReadOnly(existeVinculo.value());
+  ui->lineEditCNPJ->setReadOnly(existeVinculo.value());
+
+  ui->groupBoxPFPJ->setDisabled(existeVinculo.value());
+  ui->pushButtonRemover->setDisabled(existeVinculo.value());
 
   return true;
 }
@@ -239,6 +238,14 @@ bool CadastroProfissional::verifyFields() {
 }
 
 bool CadastroProfissional::savingProcedures() {
+  if (tipoPFPJ == "PF") {
+    if (not setData("cnpj", "")) { return false; }
+  }
+
+  if (tipoPFPJ == "PJ") {
+    if (not setData("cpf", "")) { return false; }
+  }
+
   if (not ui->lineEditCPF->text().remove(".").remove("-").isEmpty()) {
     if (not setData("cpf", ui->lineEditCPF->text())) { return false; }
   }

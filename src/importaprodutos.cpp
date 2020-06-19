@@ -158,6 +158,7 @@ bool ImportaProdutos::readFile() {
 }
 
 bool ImportaProdutos::readValidade() {
+  // TODO: colocar um checkbox para o usuario poder dizer se essa tabela nao tem validade (caso do atelier)
   auto *validadeDlg = new ValidadeDialog(this);
 
   if (not validadeDlg->exec()) { return false; }

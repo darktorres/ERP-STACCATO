@@ -449,8 +449,6 @@ void Venda::setupMapper() {
 void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 
 bool Venda::savingProcedures() {
-  // TODO: remove novoPrazoEntrega from DB?
-
   if (not setData("data", ui->dateTimeEdit->isReadOnly() ? qApp->serverDateTime() : ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("dataOrc", ui->dateTimeEditOrc->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
@@ -516,6 +514,7 @@ void Venda::updateMode() {
   ui->pushButtonGerarPdf->show();
 
   ui->checkBoxRT->hide();
+  ui->frameRT->hide();
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
   ui->tableFluxoCaixa2->hide();
@@ -585,7 +584,7 @@ bool Venda::viewRegister() {
 
     //-----------------------------------------------------------------
 
-    if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
+    if (data("status") == "CANCELADO" or data("status") == "DEVOLVIDO") {
       ui->pushButtonCancelamento->hide();
       ui->pushButtonDevolucao->hide();
     }
@@ -825,8 +824,6 @@ void Venda::montarFluxoCaixa() {
 
       //-----------------------------------------------------------------
       // calcular comissao loja
-
-      // TODO: 0nao calcular comissao para profissional 'NAO HA'
 
       const bool calculaComissao = (not qFuzzyIsNull(taxaComissao) and isRepresentacao and observacaoPgt != "FRETE");
 
@@ -1148,7 +1145,7 @@ bool Venda::cancelamento() {
   // -------------------------------------------------------------------------
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query2.prepare("UPDATE venda SET status = 'CANCELADO', statusFinanceiro = 'CANCELADO' WHERE idVenda = :idVenda");
   query2.bindValue(":idVenda", ui->lineEditVenda->text());
 
   if (not query2.exec()) { return qApp->enqueueError(false, "Erro marcando venda como cancelada: " + query2.lastError().text(), this); }
@@ -1205,16 +1202,18 @@ bool Venda::cancelamento() {
 
   if (not query7.exec()) { return qApp->enqueueError(false, "Erro marcando contas como canceladas: " + query7.lastError().text(), this); }
 
+  QSqlQuery query8;
+  query8.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query8.bindValue(":idVenda", ui->lineEditVenda->text());
+
+  if (not query8.exec()) { return qApp->enqueueError(false, "Erro marcando RT como cancelado: " + query8.lastError().text(), this); }
+
   return true;
 }
 
 void Venda::on_pushButtonCancelamento_clicked() {
-  // TODO: 0nao deixar cancelar se tiver ocorrido algum evento de conta
-  // TODO: cancelar RT do profissional
-
   // TODO: perguntar e salvar motivo do cancelamento
   // TODO: caso haja agendamento de entrega cancelar o agendamento primeiro?
-  // TODO: mudar o statusFinanceiro para cancelado tambem
 
   // caso pedido nao seja do mes atual, bloquear se nao estiver no primeiro dia util
   const QDate dataVenda = data("data").toDate();
@@ -1246,6 +1245,17 @@ void Venda::on_pushButtonCancelamento_clicked() {
   }
 
   if (not ok) { return qApp->enqueueError("Um ou mais produtos não estão pendentes!", this); }
+
+  // -------------------------------------------------------------------------
+
+  // TODO: readd this later
+  //  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
+  //    const QString status = modelFluxoCaixa.data(row, "status").toString();
+
+  //    if (status == "RECEBIDO") {
+  //      return qApp->enqueueError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this);
+  //    }
+  //  }
 
   // -------------------------------------------------------------------------
 
@@ -1487,14 +1497,9 @@ void Venda::on_pushButtonAdicionarObservacao_clicked() {
   modelTree.updateData();
 }
 
-// TODO: 0hide 'nfe' field from tables that use conta_a_receber
-// TODO: 0nao gerar RT quando o total for zero (e apagar os zerados quando nao houver profissional)
-// TODO: 0se o pedido estiver cancelado ou devolvido bloquear os botoes correspondentes
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao
-// TODO: 5verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado' ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
 // TODO: 0quando for 'MATR' nao criar fluxo caixa
-// NOTE: prazoEntrega por produto
-// NOTE: bloquear desconto maximo por classe de funcionario
-// TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
+// TODO: verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado' ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
+// TODO: prazoEntrega por produto
+// TODO: bloquear desconto maximo por classe de funcionario
 // TODO: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
-// TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao

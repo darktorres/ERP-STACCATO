@@ -589,7 +589,8 @@ bool Orcamento::buscarCadastrarConsultor() {
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT idUsuario FROM usuario WHERE desativado = FALSE AND especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" + fornecedores.join(", ") + "))")) {
+  if (not query.exec("SELECT idUsuario FROM usuario WHERE desativado = FALSE AND especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" +
+                     fornecedores.join(", ") + "))")) {
     return qApp->enqueueError(false, "Erro buscando consultor: " + query.lastError().text(), this);
   }
 
@@ -1382,9 +1383,8 @@ bool Orcamento::verificaDisponibilidadeEstoque() {
 // TODO: 4quando cadastrar cliente no itemBox mudar para o id dele
 // TODO: ?permitir que o usuario digite um valor e o sistema faça o calculo na linha?
 // TODO: limitar o total ao frete? se o desconto é 100% e o frete não é zero, o minimo é o frete
-// TODO: implementar mover linha para baixo/cima (talvez com drag-n-drop?) http://apocalyptech.com/linux/qt/qtableview/
-//       para permitir reordenar os produtos colocar um campo oculto 'item' numerado sequencialmente, ai quando ler a tabela ordenar por essa coluna
+// TODO: implementar mover linha para baixo/cima
+//           1. colocar um botao com seta para cima e outro para baixo
+//           2. para permitir reordenar os produtos colocar um campo oculto 'item' numerado sequencialmente, ai quando ler a tabela ordenar por essa coluna
 // TODO: após gerar id permitir mudar vendedor apenas para os da mesma loja
-// TODO: limitar validade para o fim do mes
-// FIXME: adicionar novamente botao para limpar selecao para quando a tabela de itens está cheia e não tem como clicar no espaço vazio
 // FIXME: orçamento permite adicionar o mesmo estoque duas vezes (e provavelmente faz o consumo duas vezes)

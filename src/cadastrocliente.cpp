@@ -30,11 +30,6 @@ CadastroCliente::CadastroCliente(QWidget *parent) : RegisterAddressDialog("clien
   sdCliente = SearchDialog::cliente(this);
   connect(sdCliente, &SearchDialog::itemSelected, this, &CadastroCliente::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
-    ui->pushButtonRemover->setDisabled(true);
-    ui->pushButtonRemoverEnd->setDisabled(true);
-  }
-
   ui->lineEditCliente->setFocus();
 
   setConnections();
@@ -118,6 +113,14 @@ bool CadastroCliente::savingProcedures() {
 
   if (not ui->lineEditContatoCPF->text().remove(".").remove("-").isEmpty()) {
     if (not setData("contatoCPF", ui->lineEditContatoCPF->text())) { return false; }
+  }
+
+  if (tipoPFPJ == "PF") {
+    if (not setData("cnpj", "")) { return false; }
+  }
+
+  if (tipoPFPJ == "PJ") {
+    if (not setData("cpf", "")) { return false; }
   }
 
   if (not ui->lineEditCPF->text().remove(".").remove("-").isEmpty()) {
@@ -245,18 +248,22 @@ bool CadastroCliente::viewRegister() {
 
   if (data("dataNasc").isNull()) { ui->dateEdit->setDate(QDate(1900, 1, 1)); }
 
-  ui->groupBoxPFPJ->setDisabled(true);
-
   const auto existeVinculo = verificaVinculo();
 
   if (not existeVinculo) { return false; }
 
-  if (existeVinculo.value()) { ui->lineEditCliente->setReadOnly(true); }
+  const bool bloquear = (existeVinculo.value() and UserSession::nome() != "CLAUDIA ZELANTE");
 
-  if (not data("cpf").toString().isEmpty()) { ui->lineEditCPF->setReadOnly(true); }
-  if (not data("cnpj").toString().isEmpty()) { ui->lineEditCNPJ->setReadOnly(true); }
+  ui->lineEditCliente->setReadOnly(bloquear);
+  ui->lineEditCPF->setReadOnly(existeVinculo.value());
+  ui->lineEditCNPJ->setReadOnly(existeVinculo.value());
 
-  if (UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  ui->pushButtonRemover->setDisabled(existeVinculo.value());
+  ui->pushButtonRemoverEnd->setDisabled(existeVinculo.value());
+  ui->pushButtonAtualizarEnd->setDisabled(existeVinculo.value());
+  ui->groupBoxPFPJ->setDisabled(existeVinculo.value());
+
+  if (existeVinculo.value() and UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
     if (not data("contatoNome").toString().isEmpty()) { ui->lineEditContatoNome->setReadOnly(true); }
     if (not data("contatoApelido").toString().isEmpty()) { ui->lineEditContatoApelido->setReadOnly(true); }
     if (not data("contatoRG").toString().isEmpty()) { ui->lineEditContatoRG->setReadOnly(true); }
@@ -270,8 +277,6 @@ bool CadastroCliente::viewRegister() {
     if (not data("idProfissionalRel").toString().isEmpty()) { ui->itemBoxProfissional->setReadOnly(true); }
     if (not data("idUsuarioRel").toString().isEmpty()) { ui->itemBoxVendedor->setReadOnly(true); }
   }
-
-  ui->pushButtonAtualizarEnd->setDisabled(true);
 
   return true;
 }

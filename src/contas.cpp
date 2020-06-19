@@ -99,12 +99,18 @@ void Contas::preencher(const QModelIndex &index) {
     }
 
     if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
-      const int contaSantander = 3;
-      const int contaItau = 33;
+      const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
+      const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
 
-      const int idConta = (tipo == Tipo::Receber and modelPendentes.data(row, "tipo").toString().contains("BOLETO")) ? contaItau : contaSantander;
+      QSqlQuery queryConta;
 
-      if (modelPendentes.data(row, "idConta").toInt() == 0) {
+      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'") or not queryConta.first()) {
+        return qApp->enqueueError("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+      }
+
+      const int idConta = queryConta.value("idConta").toInt();
+
+      if (idContaExistente == 0 and idConta != 0) {
         if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
       }
 

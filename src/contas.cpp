@@ -104,14 +104,16 @@ void Contas::preencher(const QModelIndex &index) {
 
       QSqlQuery queryConta;
 
-      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'") or not queryConta.first()) {
+      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
         return qApp->enqueueError("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
       }
 
-      const int idConta = queryConta.value("idConta").toInt();
+      if (queryConta.first()) {
+        const int idConta = queryConta.value("idConta").toInt();
 
-      if (idContaExistente == 0 and idConta != 0) {
-        if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+        if (idContaExistente == 0 and idConta != 0) {
+          if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+        }
       }
 
       if (not modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
@@ -125,8 +127,12 @@ void Contas::preencher(const QModelIndex &index) {
       const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
-        if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) {
-          if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
+        if (queryConta.first()) {
+          const int idConta = queryConta.value("idConta").toInt();
+
+          if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) {
+            if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
+          }
         }
 
         if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"))) { return; }

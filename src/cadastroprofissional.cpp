@@ -174,11 +174,11 @@ bool CadastroProfissional::viewRegister() {
   const bool bloquear = (existeVinculo.value() and UserSession::nome() != "CLAUDIA ZELANTE");
 
   ui->lineEditProfissional->setReadOnly(bloquear);
-  ui->lineEditCPF->setReadOnly(existeVinculo.value());
-  ui->lineEditCNPJ->setReadOnly(existeVinculo.value());
+  ui->lineEditCPF->setReadOnly(bloquear);
+  ui->lineEditCNPJ->setReadOnly(bloquear);
 
-  ui->groupBoxPFPJ->setDisabled(existeVinculo.value());
-  ui->pushButtonRemover->setDisabled(existeVinculo.value());
+  ui->groupBoxPFPJ->setDisabled(bloquear);
+  ui->pushButtonRemover->setDisabled(bloquear);
 
   return true;
 }

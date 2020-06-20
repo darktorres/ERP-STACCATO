@@ -255,15 +255,15 @@ bool CadastroCliente::viewRegister() {
   const bool bloquear = (existeVinculo.value() and UserSession::nome() != "CLAUDIA ZELANTE");
 
   ui->lineEditCliente->setReadOnly(bloquear);
-  ui->lineEditCPF->setReadOnly(existeVinculo.value());
-  ui->lineEditCNPJ->setReadOnly(existeVinculo.value());
+  ui->lineEditCPF->setReadOnly(bloquear);
+  ui->lineEditCNPJ->setReadOnly(bloquear);
 
-  ui->pushButtonRemover->setDisabled(existeVinculo.value());
-  ui->pushButtonRemoverEnd->setDisabled(existeVinculo.value());
-  ui->pushButtonAtualizarEnd->setDisabled(existeVinculo.value());
-  ui->groupBoxPFPJ->setDisabled(existeVinculo.value());
+  ui->pushButtonRemover->setDisabled(bloquear);
+  ui->pushButtonRemoverEnd->setDisabled(bloquear);
+  ui->pushButtonAtualizarEnd->setDisabled(bloquear);
+  ui->groupBoxPFPJ->setDisabled(bloquear);
 
-  if (existeVinculo.value() and UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
+  if (bloquear and UserSession::tipoUsuario() != "GERENTE LOJA" and UserSession::tipoUsuario() != "DIRETOR" and UserSession::tipoUsuario() != "ADMINISTRADOR") {
     if (not data("contatoNome").toString().isEmpty()) { ui->lineEditContatoNome->setReadOnly(true); }
     if (not data("contatoApelido").toString().isEmpty()) { ui->lineEditContatoApelido->setReadOnly(true); }
     if (not data("contatoRG").toString().isEmpty()) { ui->lineEditContatoRG->setReadOnly(true); }

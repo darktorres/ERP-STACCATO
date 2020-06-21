@@ -232,6 +232,7 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
+      venda->show();
     }
   }
 }

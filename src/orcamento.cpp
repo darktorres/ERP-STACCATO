@@ -799,7 +799,9 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
   if (not verificaCadastroCliente()) { return; }
 
   auto *venda = new Venda(parentWidget());
+  venda->setAttribute(Qt::WA_DeleteOnClose);
   venda->prepararVenda(ui->lineEditOrcamento->text());
+  venda->show();
 
   close();
 }

@@ -269,6 +269,8 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) { vendas->setFinanceiro(); }
   vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
+
+  vendas->show();
 }
 
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {

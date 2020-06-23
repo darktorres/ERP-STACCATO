@@ -105,10 +105,10 @@ void TableView::redoView() {
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
-    QTableView::setModel(temp->proxyModel);
-  } else if (auto temp2 = qobject_cast<SqlTableModel *>(model); temp2 and temp2->proxyModel) {
-    QTableView::setModel(temp2->proxyModel);
+  if (auto queryModel = qobject_cast<SqlQueryModel *>(model); queryModel and queryModel->proxyModel) {
+    QTableView::setModel(queryModel->proxyModel);
+  } else if (auto tableModel = qobject_cast<SqlTableModel *>(model); tableModel and tableModel->proxyModel) {
+    QTableView::setModel(tableModel->proxyModel);
   } else {
     QTableView::setModel(model);
   }

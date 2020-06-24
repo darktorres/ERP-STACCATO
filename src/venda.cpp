@@ -723,8 +723,8 @@ void Venda::montarFluxoCaixa() {
     }
 
     QSqlQuery query2;
-    query2.prepare("SELECT idConta, prazoRecebe, ajustaDiaUtil, dMaisUm, centavoSobressalente, taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento "
-                   "WHERE pagamento = :pagamento AND parcela = :parcela");
+    query2.prepare("SELECT fp.idConta, fp.prazoRecebe, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
+                   "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
     query2.bindValue(":pagamento", tipoPgt);
     query2.bindValue(":parcela", parcelas);
 

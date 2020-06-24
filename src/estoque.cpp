@@ -115,7 +115,7 @@ void Estoque::setupTables() {
 
   modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
   modelViewConsumo.setHeaderData("status", "Status Consumo");
-  modelViewConsumo.setHeaderData("local", "Local");
+  modelViewConsumo.setHeaderData("bloco", "Bloco");
   modelViewConsumo.setHeaderData("fornecedor", "Fornecedor");
   modelViewConsumo.setHeaderData("descricao", "Produto");
   modelViewConsumo.setHeaderData("quant", "Quant.");

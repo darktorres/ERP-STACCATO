@@ -738,6 +738,7 @@ void Venda::montarFluxoCaixa() {
     const double porcentagemTaxa = query2.value("taxa").toDouble() / 100;
 
     //-----------------------------------------------------------------
+    // calcular pagamento
 
     const bool isRepresentacao = ui->widgetPgts->listCheckBoxRep.at(pagamento)->isChecked();
     const QString observacaoPgt = ui->widgetPgts->listObservacao.at(pagamento)->text();

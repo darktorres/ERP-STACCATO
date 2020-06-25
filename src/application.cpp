@@ -31,6 +31,20 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   }
 }
 
+void Application::enqueueException(const QString &error, QWidget *parent) {
+  // TODO: nesse caso pedir para entrar em contato com o desenvolvedor?
+  exceptionQueue << Message{error, parent};
+
+  Log::createLog("Erro: " + error, true);
+
+  if (not updating) { showMessages(); }
+}
+
+bool Application::enqueueException(const bool boolean, const QString &error, QWidget *parent) {
+  enqueueException(error, parent);
+  return boolean;
+}
+
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
@@ -256,7 +270,7 @@ void Application::lightTheme() {
 bool Application::startTransaction(const QString &messageLog, const bool delayMessages) {
   if (inTransaction) {
     // TODO: this message wont show due to inTransaction flag (look for other places that need to use a messagebox directly)
-    return enqueueError(false, "Transação já em execução!");
+    return qApp->enqueueException(false, "Transação já em execução!");
   }
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
@@ -270,7 +284,7 @@ bool Application::startTransaction(const QString &messageLog, const bool delayMe
 }
 
 bool Application::endTransaction() {
-  if (not inTransaction) { return enqueueError(false, "Não está em transação"); }
+  if (not inTransaction) { return enqueueException(false, "Não está em transação"); }
 
   if (QSqlQuery query; not query.exec("COMMIT")) { return enqueueError(false, "Erro no commit: " + query.lastError().text()); }
 
@@ -283,7 +297,7 @@ bool Application::endTransaction() {
 }
 
 void Application::rollbackTransaction() {
-  if (not inTransaction) { return enqueueError("Não está em transação!"); }
+  if (not inTransaction) { return enqueueException("Não está em transação!"); }
 
   if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueError("Erro rollback: " + query.lastError().text()); }
 
@@ -330,7 +344,11 @@ void Application::showMessages() {
 
   showingErrors = true;
 
+  for (const auto &exception : std::as_const(exceptionQueue)) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
+
   for (const auto &error : std::as_const(errorQueue)) {
+    //    Log::createLog("Erro: " + error, true);
+
     const QString error1 = "MySQL server has gone away";
     const QString error2 = "Lost connection to MySQL server during query";
 
@@ -354,6 +372,7 @@ void Application::showMessages() {
   for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
   for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
 
+  exceptionQueue.clear();
   errorQueue.clear();
   warningQueue.clear();
   informationQueue.clear();

@@ -33,9 +33,9 @@ void ACBr::error() {
   const QString errorString = socket.errorString();
 
   if (errorString == "Connection refused" or errorString == "Connection timed out") {
-    qApp->enqueueError("Erro conectando ao ACBr! Verifique se ele está aberto!");
+    qApp->enqueueException("Erro conectando ao ACBr! Verifique se ele está aberto!");
   } else {
-    qApp->enqueueError("Erro socket: " + socket.errorString());
+    qApp->enqueueException("Erro socket: " + socket.errorString());
   }
 
   progressDialog->cancel();

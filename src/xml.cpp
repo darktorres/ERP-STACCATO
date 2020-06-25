@@ -11,7 +11,7 @@ XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(f
 void XML::montarArvore() {
   if (fileContent.isEmpty()) {
     error = true;
-    return qApp->enqueueError("XML vazio!");
+    return qApp->enqueueException("XML vazio!");
   }
 
   QDomDocument document;
@@ -19,7 +19,7 @@ void XML::montarArvore() {
 
   if (not document.setContent(fileContent, &errorText)) {
     error = true;
-    return qApp->enqueueError("Erro lendo arquivo: " + errorText);
+    return qApp->enqueueException("Erro lendo arquivo: " + errorText);
   }
 
   QDomElement root = document.firstChildElement();
@@ -205,8 +205,8 @@ bool XML::validar(const Tipo tipo) {
 }
 
 bool XML::verificaCNPJ(const Tipo tipo) {
-  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueError(false, "CNPJ da nota não é da Staccato!"); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueError(false, "CNPJ da nota não é da Staccato!"); }
+  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
 
   return true;
 }
@@ -216,7 +216,7 @@ bool XML::verificaExiste() {
   query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
 
   if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
 
@@ -236,7 +236,7 @@ bool XML::verificaNCMs() {
   for (const auto &produto : produtos) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueError(false, "Erro buscando ncm: " + query.lastError().text()); }
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text()); }
 
     if (not query.first()) {
       ncms << produto.ncm;

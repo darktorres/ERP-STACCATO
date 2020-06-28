@@ -124,7 +124,7 @@ bool CadastroProduto::verifyFields() {
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se produto já cadastrado!", this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se produto já cadastrado!", this); }
 
     if (query.first()) { return qApp->enqueueError(false, "Código comercial já cadastrado!", this); }
   }
@@ -208,7 +208,7 @@ bool CadastroProduto::savingProcedures() {
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
 
   const bool representacao = query.value("representacao").toBool();
 
@@ -247,7 +247,7 @@ bool CadastroProduto::cadastrar() {
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     return true;
   }();

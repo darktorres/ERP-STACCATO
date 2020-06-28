@@ -86,10 +86,10 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
                      "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
-    return qApp->enqueueError("Erro dando baixa nas gares: " + query.lastError().text(), this);
+    return qApp->enqueueException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
   }
 
-  if (not model.select()) { qApp->enqueueError("Erro atualizando a tabela: " + model.lastError().text(), this); }
+  if (not model.select()) { qApp->enqueueException("Erro atualizando a tabela: " + model.lastError().text(), this); }
 
   updateTables();
 
@@ -109,10 +109,10 @@ void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 3, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
                      "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
-    return qApp->enqueueError("Erro dando baixa nas gares: " + query.lastError().text(), this);
+    return qApp->enqueueException("Erro dando baixa nas gares: " + query.lastError().text(), this);
   }
 
-  if (not model.select()) { qApp->enqueueError("Erro atualizando a tabela: " + model.lastError().text(), this); }
+  if (not model.select()) { qApp->enqueueException("Erro atualizando a tabela: " + model.lastError().text(), this); }
 
   updateTables();
 
@@ -162,7 +162,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 33, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
+    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
   }
 
   updateTables();
@@ -190,7 +190,7 @@ void WidgetGare::on_pushButtonRemessaSantander_clicked() {
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 3, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    return qApp->enqueueError("Erro alterando gare: " + query.lastError().text(), this);
+    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
   }
 
   updateTables();
@@ -260,7 +260,7 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);

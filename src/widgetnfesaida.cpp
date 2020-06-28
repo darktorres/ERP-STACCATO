@@ -96,7 +96,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeSaida.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -176,7 +176,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   if (not resposta) { return; }
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
-  if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueError("Resposta: " + resposta.value(), this); }
+  if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueException("Resposta: " + resposta.value(), this); }
 
   if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe")) { return; }
 
@@ -222,14 +222,14 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   dataManager->addModel("view", &view, true);
 
-  if (not report.loadFromFile("relatorio_nfe.lrxml")) { return qApp->enqueueError("Não encontrou o modelo de impressão!", this); }
+  if (not report.loadFromFile("relatorio_nfe.lrxml")) { return qApp->enqueueException("Não encontrou o modelo de impressão!", this); }
 
   QSqlQuery query;
   query.prepare("SELECT SUM(icms), SUM(icmsst), SUM(frete), SUM(totalnfe), SUM(desconto), SUM(impimp), SUM(ipi), SUM(cofins), SUM(0), SUM(0), SUM(seguro), SUM(pis), SUM(0) FROM view_relatorio_nfe "
                 "WHERE DATE_FORMAT(`Criado em`, '%Y-%m') = :data AND (status = 'AUTORIZADO')");
   query.bindValue(":data", ui->dateEdit->date().toString("yyyy-MM"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados: " + query.lastError().text(), this); }
 
   dataManager->setReportVariable("TotalIcms", "R$ " + QString::number(query.value("sum(icms)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIcmsSt", "R$ " + QString::number(query.value("sum(icmsst)").toDouble(), 'f', 2));
@@ -245,10 +245,10 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
   dataManager->setReportVariable("TotalPis", "R$ " + QString::number(query.value("sum(pis)").toDouble(), 'f', 2));
   dataManager->setReportVariable("TotalIssqn", "R$ XXX");
 
-  if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) { return qApp->enqueueError("Erro gerando relatório!", this); }
+  if (not report.printToPDF(QDir::currentPath() + "/relatorio.pdf")) { return qApp->enqueueException("Erro gerando relatório!", this); }
 
   if (not QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::currentPath() + "/relatorio.pdf"))) {
-    return qApp->enqueueError("Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!", this);
+    return qApp->enqueueException("Erro abrindo arquivo: " + QDir::currentPath() + "/relatorio.pdf'!", this);
   }
 }
 
@@ -291,13 +291,13 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando xml: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml: " + query.lastError().text(), this); }
 
     QFile fileXml(xmlFolder + "/" + chaveAcesso + ".xml");
 
     qDebug() << "xml: " + xmlFolder + "/" + chaveAcesso + ".xml";
 
-    if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueError("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
+    if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
 
     fileXml.write(query.value("xml").toByteArray());
 
@@ -310,7 +310,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (not pdfOrigem) { return; }
 
-    if (pdfOrigem->isEmpty()) { return qApp->enqueueError("Resposta vazia!", this); }
+    if (pdfOrigem->isEmpty()) { return qApp->enqueueException("Resposta vazia!", this); }
 
     // copiar para pasta predefinida
 
@@ -320,7 +320,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (filePdf.exists()) { filePdf.remove(); }
 
-    if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueError("Erro copiando pdf!", this); }
+    if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueException("Erro copiando pdf!", this); }
   }
 
   qApp->enqueueInformation("Arquivos exportados com sucesso para " + pdfFolder + "!", this);
@@ -380,7 +380,7 @@ bool WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro atualizando xml da nota: " + query.lastError().text(), this); }
 
   return true;
 }
@@ -390,19 +390,19 @@ bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro marcando nota como cancelada: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro marcando nota como cancelada: " + query.lastError().text(), this); }
 
   const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
 
   query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo NFe da venda_produto: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro removendo NFe da venda_produto: " + query.lastError().text(), this); }
 
   query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro removendo NFe do veiculo_produto: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro removendo NFe do veiculo_produto: " + query.lastError().text(), this); }
 
   return true;
 }
@@ -410,7 +410,7 @@ bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
 bool WidgetNfeSaida::gravarArquivo(const QString &resposta) {
   QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
 
-  if (not arquivo.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Erro abrindo arquivo para escrita: " + arquivo.errorString(), this); }
+  if (not arquivo.open(QFile::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo para escrita: " + arquivo.errorString(), this); }
 
   QTextStream stream(&arquivo);
 

@@ -134,7 +134,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
   QSqlQuery queryId;
 
   if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
-    return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text(), this);
+    return qApp->enqueueException(false, "Erro buscando idCompra: " + queryId.lastError().text(), this);
   }
 
   const int idCompra = queryId.value("idCompra").toInt();
@@ -163,7 +163,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
       queryVenda.bindValue(":dataPrevConf", dataPrevista);
       queryVenda.bindValue(":idVendaProduto1", idVendaProduto1);
 
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text(), this); }
+      if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando status da venda: " + queryVenda.lastError().text(), this); }
     }
 
     // ---------------------------------------------------------
@@ -174,7 +174,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
     queryCompra1.bindValue(":dataPrevConf", dataPrevista);
     queryCompra1.bindValue(":idPedido1", idPedido1);
 
-    if (not queryCompra1.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra1.lastError().text(), this); }
+    if (not queryCompra1.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra1.lastError().text(), this); }
 
     // ---------------------------------------------------------
 
@@ -184,7 +184,7 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
     queryCompra2.bindValue(":dataPrevConf", dataPrevista);
     queryCompra2.bindValue(":idPedido1", idPedido1);
 
-    if (not queryCompra2.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra2.lastError().text(), this); }
+    if (not queryCompra2.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra2.lastError().text(), this); }
   }
 
   return true;
@@ -284,7 +284,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
   QSqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
-    qApp->enqueueError("Erro buscando próximo O.C.!", this);
+    qApp->enqueueException("Erro buscando próximo O.C.!", this);
     return {};
   }
 
@@ -299,7 +299,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
     query2.bindValue(":ordemCompra", oc);
 
     if (not query2.exec()) {
-      qApp->enqueueError("Erro buscando O.C.!", this);
+      qApp->enqueueException("Erro buscando O.C.!", this);
       return {};
     }
 
@@ -332,7 +332,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
   query.bindValue(":razaoSocial", fornecedor);
 
   if (not query.exec() or not query.first()) {
-    qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando dados do fornecedor: " + query.lastError().text(), this);
     return {};
   }
 
@@ -387,7 +387,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
   if (not modelo.exists()) {
-    qApp->enqueueError("Não encontrou o modelo do Excel!", this);
+    qApp->enqueueException("Não encontrou o modelo do Excel!", this);
     return {};
   }
 
@@ -400,7 +400,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this);
+    qApp->enqueueException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this);
     return {};
   }
 
@@ -411,7 +411,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
   if (not queryFornecedor.exec()) {
-    qApp->enqueueError("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text(), this);
+    qApp->enqueueException("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text(), this);
     return {};
   }
 
@@ -497,19 +497,19 @@ bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
   for (const auto &index : list) {
     query1.bindValue(":idVendaProduto1", modelProdutos.data(index.row(), "idVendaProduto1"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro voltando status do produto: " + query1.lastError().text(), this); }
 
     // ---------------------------------------------------------
 
     query2.bindValue(":idPedido1", modelProdutos.data(index.row(), "idPedido1"));
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro cancelando compra: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro cancelando compra: " + query2.lastError().text(), this); }
 
     // ---------------------------------------------------------
 
     query3.bindValue(":idPedidoFK", modelProdutos.data(index.row(), "idPedido1"));
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro cancelando compra: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro cancelando compra: " + query3.lastError().text(), this); }
   }
 
   return true;

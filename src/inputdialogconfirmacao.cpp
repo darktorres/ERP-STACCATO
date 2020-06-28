@@ -235,7 +235,7 @@ void InputDialogConfirmacao::setupTables() {
 }
 
 bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &idEvento) { // entrega
-  if (id.isEmpty()) { return qApp->enqueueError(false, "IdsCompra vazio!", this); }
+  if (id.isEmpty()) { return qApp->enqueueException(false, "IdsCompra vazio!", this); }
 
   const QString filter = "idVenda = '" + id + "' AND idEvento = " + idEvento;
 
@@ -251,7 +251,7 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 }
 
 bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebimento
-  if (ids.isEmpty()) { return qApp->enqueueError(false, "IdsCompra vazio!", this); }
+  if (ids.isEmpty()) { return qApp->enqueueException(false, "IdsCompra vazio!", this); }
 
   const QString filter = "idEstoque = " + ids.join(" OR idEstoque = ");
 
@@ -284,7 +284,7 @@ void InputDialogConfirmacao::on_pushButtonQuebradoReceb_clicked() {
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados do produto: " + query.lastError().text(), this); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
 
@@ -354,7 +354,7 @@ bool InputDialogConfirmacao::criarConsumoQuebrado(const int idEstoque, const dou
   query.bindValue(":quant", caixasDefeito * quantCaixa);
   query.bindValue(":caixas", caixasDefeito);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro criando consumo quebrado: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro criando consumo quebrado: " + query.lastError().text(), this); }
 
   return true;
 }
@@ -464,7 +464,7 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
   query.prepare("SELECT idCliente FROM venda WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idVenda);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando cliente: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando cliente: " + query.lastError().text(), this); }
 
   modelCliente.setFilter("idCliente = " + query.value("idCliente").toString());
 
@@ -534,7 +534,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
   query.prepare("SELECT restante FROM estoque WHERE idEstoque = :idEstoque");
   query.bindValue(":idEstoque", idEstoque);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando sobra estoque: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando sobra estoque: " + query.lastError().text(), this); }
 
   double restante = query.value("restante").toDouble(); // TODO: divide this by quantCaixa
   qDebug() << "sobra: " << restante;
@@ -547,7 +547,7 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
         "vp2.idVendaProduto2 LEFT JOIN venda v ON vp2.idVenda = v.idVenda WHERE ehc.idEstoque = :idEstoque ORDER BY prazoEntrega DESC");
     querySelect.bindValue(":idEstoque", idEstoque);
 
-    if (not querySelect.exec()) { return qApp->enqueueError(false, "Erro buscando consumo estoque: " + querySelect.lastError().text(), this); }
+    if (not querySelect.exec()) { return qApp->enqueueException(false, "Erro buscando consumo estoque: " + querySelect.lastError().text(), this); }
 
     QSqlQuery queryDelete;
     // TODO: 0se a parte não quebrada for suficiente nao desfazer consumos (tomar cuidado para usar o idEstoque do restante e nao do quebrado)
@@ -562,11 +562,11 @@ bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double c
 
       queryDelete.bindValue(":idConsumo", querySelect.value("idConsumo"));
 
-      if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo: " + queryDelete.lastError().text(), this); }
+      if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo: " + queryDelete.lastError().text(), this); }
 
       queryVenda.bindValue(":idVendaProduto2", querySelect.value("idVendaProduto2"));
 
-      if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro voltando produto para pendente: " + queryVenda.lastError().text(), this); }
+      if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro voltando produto para pendente: " + queryVenda.lastError().text(), this); }
 
       restante += caixas;
       if (restante >= 0) { break; }
@@ -583,7 +583,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
 
   QFile *file = new QFile(filePath);
 
-  if (not file->open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file->errorString(), this); }
+  if (not file->open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file->errorString(), this); }
 
   auto *manager = new QNetworkAccessManager(this);
 

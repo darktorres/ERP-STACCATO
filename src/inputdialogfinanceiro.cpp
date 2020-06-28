@@ -272,7 +272,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       query2.bindValue(":pagamento", tipoPgt);
       query2.bindValue(":parcela", parcelas);
 
-      if (not query2.exec() or not query2.first()) { return qApp->enqueueError("Erro buscando taxa: " + query2.lastError().text(), this); }
+      if (not query2.exec() or not query2.first()) { return qApp->enqueueException("Erro buscando taxa: " + query2.lastError().text(), this); }
 
       const int idConta = query2.value("idConta").toInt();
       const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
@@ -467,7 +467,7 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
     const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
 
-    if (match.isEmpty()) { return qApp->enqueueError("Erro atualizando valores na linha mãe!", this); }
+    if (match.isEmpty()) { return qApp->enqueueException("Erro atualizando valores na linha mãe!", this); }
 
     const int rowMae = match.first().row();
 
@@ -562,7 +562,7 @@ void InputDialogFinanceiro::setTreeView() {
 }
 
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
-  if (idCompra.isEmpty()) { return qApp->enqueueError(false, "IdCompra vazio!", this); }
+  if (idCompra.isEmpty()) { return qApp->enqueueException(false, "IdCompra vazio!", this); }
 
   QString filtro = "idCompra IN (" + idCompra + ")";
 
@@ -596,7 +596,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }
 
   representacao = query.value("representacao").toBool();
 

@@ -109,13 +109,13 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     query1.bindValue(":dataRealEnt", dataEntrega);
     query1.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
     query2.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
     query2.bindValue(":recebeu", recebeu);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
   }
 
   return true;

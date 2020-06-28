@@ -224,7 +224,7 @@ bool CadastroPagamento::atualizarPagamento() {
 
   if (novaParcelas < antigoParcelas) { // remove linhas
     for (int i = 0; i < diferenca; ++i) {
-      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { return qApp->enqueueError(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
+      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { return qApp->enqueueException(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
     }
   }
 
@@ -259,7 +259,7 @@ void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
 
   for (const auto &index : list) { modelPagamentos.removeRow(index.row()); }
 
-  if (not modelPagamentos.submitAll()) { return qApp->enqueueError("Erro removendo pagamentos: " + modelPagamentos.lastError().text(), this); }
+  if (not modelPagamentos.submitAll()) { return qApp->enqueueException("Erro removendo pagamentos: " + modelPagamentos.lastError().text(), this); }
 
   if (not modelTaxas.select()) { return; }
 
@@ -283,14 +283,14 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-    if (not query.exec()) { qApp->enqueueError("Erro cadastrando associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { qApp->enqueueException("Erro cadastrando associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
 
-  if (not modelAssocia2.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
 }
 
 void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
@@ -307,14 +307,14 @@ void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 
-    if (not query.exec()) { qApp->enqueueError("Erro removendo associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { qApp->enqueueException("Erro removendo associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
 
-  if (not modelAssocia2.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
 }
 
 void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {

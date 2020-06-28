@@ -30,7 +30,7 @@ Comprovantes::~Comprovantes() { delete ui; }
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE idVenda = '" + idVenda + "'");
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro procurando comprovantes: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { return qApp->enqueueException("Erro procurando comprovantes: " + model.lastError().text(), this); }
 
   model.setHeaderData("fotoEntrega", "Arquivo");
 
@@ -54,7 +54,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   auto reply = manager->get(request);
 
   connect(reply, &QNetworkReply::finished, [=] {
-    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueError("Erro ao baixar arquivo: " + reply->errorString()); }
+    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueException("Erro ao baixar arquivo: " + reply->errorString()); }
 
     const QString filename = url.split("/").last();
     const QString path = QDir::currentPath() + "/arquivos/";
@@ -65,7 +65,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
     QFile file(path + filename);
 
-    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString()); }
+    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString()); }
 
     file.write(reply->readAll());
 

@@ -99,7 +99,7 @@ bool CadastroCliente::verifyFields() {
     query.bindValue(":cpf", ui->lineEditCPF->text());
     query.bindValue(":cnpj", ui->lineEditCNPJ->text());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se CPF/CNPJ já cadastrado!", this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se CPF/CNPJ já cadastrado!", this); }
 
     if (query.first()) { return qApp->enqueueError(false, "CPF/CNPJ já cadastrado!", this); }
   }
@@ -219,7 +219,7 @@ std::optional<bool> CadastroCliente::verificaVinculo() {
   QSqlQuery query;
 
   if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString())) {
-    qApp->enqueueError("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
     return {};
   }
 
@@ -303,7 +303,7 @@ void CadastroCliente::on_lineEditCPF_textEdited(const QString &text) {
     query.prepare("SELECT idCliente FROM cliente WHERE cpf = :cpf");
     query.bindValue(":cpf", text);
 
-    if (not query.exec()) { return qApp->enqueueError("Erro buscando CPF: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException("Erro buscando CPF: " + query.lastError().text(), this); }
 
     if (query.first()) {
       qApp->enqueueError("CPF já cadastrado!", this);
@@ -320,7 +320,7 @@ void CadastroCliente::on_lineEditCNPJ_textEdited(const QString &text) {
     query.prepare("SELECT idCliente FROM cliente WHERE cnpj = :cnpj");
     query.bindValue(":cnpj", text);
 
-    if (not query.exec()) { return qApp->enqueueError("Erro buscando CNPJ: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException("Erro buscando CNPJ: " + query.lastError().text(), this); }
 
     if (query.first()) {
       qApp->enqueueError("CNPJ já cadastrado!", this);
@@ -375,6 +375,7 @@ bool CadastroCliente::cadastrar() {
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
     if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     // -------------------------------------------------------------------------
 

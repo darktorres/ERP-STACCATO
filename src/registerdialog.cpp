@@ -28,7 +28,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   primaryId = id.toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "primaryId vazio!", this); }
+  if (primaryId.isEmpty()) { return qApp->enqueueException(false, "primaryId vazio!", this); }
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
@@ -36,7 +36,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   if (model.rowCount() == 0) {
     close();
-    return qApp->enqueueError(false, "Item não encontrado!", this);
+    return qApp->enqueueException(false, "Item não encontrado!", this);
   }
 
   isDirty = false;
@@ -79,7 +79,7 @@ bool RegisterDialog::setData(const QString &key, const QVariant &value) { return
 QVariant RegisterDialog::data(const QString &key) { return model.data(currentRow, key); }
 
 void RegisterDialog::addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName) {
-  if (model.fieldIndex(key) == -1) { return qApp->enqueueError("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
+  if (model.fieldIndex(key) == -1) { return qApp->enqueueException("Chave " + key + " não encontrada na tabela " + model.tableName(), this); }
 
   propertyName.isNull() ? mapper.addMapping(widget, model.fieldIndex(key)) : mapper.addMapping(widget, model.fieldIndex(key), propertyName);
 }

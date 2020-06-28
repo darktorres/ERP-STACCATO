@@ -273,7 +273,7 @@ bool Application::startTransaction(const QString &messageLog, const bool delayMe
     return qApp->enqueueException(false, "Transação já em execução!");
   }
 
-  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueError(false, "Erro iniciando transaction: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueException(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
   if (not Log::createLog("Transação: " + messageLog)) { return rollbackTransaction(false); }
 
@@ -286,7 +286,7 @@ bool Application::startTransaction(const QString &messageLog, const bool delayMe
 bool Application::endTransaction() {
   if (not inTransaction) { return enqueueException(false, "Não está em transação"); }
 
-  if (QSqlQuery query; not query.exec("COMMIT")) { return enqueueError(false, "Erro no commit: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("COMMIT")) { return enqueueException(false, "Erro no commit: " + query.lastError().text()); }
 
   inTransaction = false;
   delayMessages = false;
@@ -299,7 +299,7 @@ bool Application::endTransaction() {
 void Application::rollbackTransaction() {
   if (not inTransaction) { return enqueueException("Não está em transação!"); }
 
-  if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueError("Erro rollback: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueException("Erro rollback: " + query.lastError().text()); }
 
   inTransaction = false;
   delayMessages = false;
@@ -408,7 +408,7 @@ QDateTime Application::serverDateTime() {
   QSqlQuery query;
 
   if (not query.exec("SELECT NOW()") or not query.first()) {
-    enqueueError("Erro buscando data/hora: " + query.lastError().text());
+    enqueueException("Erro buscando data/hora: " + query.lastError().text());
     return QDateTime();
   }
 
@@ -420,7 +420,7 @@ QDate Application::serverDate() {
     QSqlQuery query;
 
     if (not query.exec("SELECT NOW()") or not query.first()) {
-      enqueueError("Erro buscando data/hora: " + query.lastError().text());
+      enqueueException("Erro buscando data/hora: " + query.lastError().text());
       return QDate();
     }
 
@@ -441,21 +441,21 @@ double Application::roundDouble(const double value, const int decimais) {
 
 std::optional<int> Application::reservarIdEstoque() {
   if (inTransaction) {
-    enqueueError("ALTER TABLE durante transação!");
+    enqueueException("ALTER TABLE durante transação!");
     return {};
   }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
-    enqueueError("Erro reservar id estoque: " + query.lastError().text());
+    enqueueException("Erro reservar id estoque: " + query.lastError().text());
     return {};
   }
 
   const int id = query.value("auto_increment").toInt();
 
   if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) {
-    enqueueError("Erro reservar id estoque: " + query.lastError().text());
+    enqueueException("Erro reservar id estoque: " + query.lastError().text());
     return {};
   }
 
@@ -464,21 +464,21 @@ std::optional<int> Application::reservarIdEstoque() {
 
 std::optional<int> Application::reservarIdVendaProduto2() {
   if (inTransaction) {
-    enqueueError("ALTER TABLE durante transação!");
+    enqueueException("ALTER TABLE durante transação!");
     return {};
   }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
-    enqueueError("Erro reservar id venda: " + query.lastError().text());
+    enqueueException("Erro reservar id venda: " + query.lastError().text());
     return {};
   }
 
   const int id = query.value("auto_increment").toInt();
 
   if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    enqueueError("Erro reservar id venda: " + query.lastError().text());
+    enqueueException("Erro reservar id venda: " + query.lastError().text());
     return {};
   }
 
@@ -487,21 +487,21 @@ std::optional<int> Application::reservarIdVendaProduto2() {
 
 std::optional<int> Application::reservarIdNFe() {
   if (inTransaction) {
-    enqueueError("ALTER TABLE durante transação!");
+    enqueueException("ALTER TABLE durante transação!");
     return {};
   }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
-    enqueueError("Erro reservar id nfe: " + query.lastError().text());
+    enqueueException("Erro reservar id nfe: " + query.lastError().text());
     return {};
   }
 
   const int id = query.value("auto_increment").toInt();
 
   if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) {
-    enqueueError("Erro reservar id nfe: " + query.lastError().text());
+    enqueueException("Erro reservar id nfe: " + query.lastError().text());
     return {};
   }
 
@@ -510,21 +510,21 @@ std::optional<int> Application::reservarIdNFe() {
 
 std::optional<int> Application::reservarIdPedido2() {
   if (inTransaction) {
-    enqueueError("ALTER TABLE durante transação!");
+    enqueueException("ALTER TABLE durante transação!");
     return {};
   }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
-    enqueueError("Erro reservar id compra: " + query.lastError().text());
+    enqueueException("Erro reservar id compra: " + query.lastError().text());
     return {};
   }
 
   const int id = query.value("auto_increment").toInt();
 
   if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    enqueueError("Erro reservar id compra: " + query.lastError().text());
+    enqueueException("Erro reservar id compra: " + query.lastError().text());
     return {};
   }
 

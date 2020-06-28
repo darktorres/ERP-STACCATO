@@ -503,7 +503,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!", this); }
+  if (not dir.exists() and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!", this); }
 
   const QString arquivoModelo = "espelho_entrega.xlsx";
 

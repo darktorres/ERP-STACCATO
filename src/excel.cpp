@@ -27,7 +27,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueException(false, "Erro ao criar a pasta escolhida nas configurações!"); }
+  if (not dir.exists() and not dir.mkpath(path)) { return qApp->enqueueException(false, "Erro ao criar a pasta escolhida nas configurações!"); }
 
   const QString arquivoModelo = "modelo pedido.xlsx";
 

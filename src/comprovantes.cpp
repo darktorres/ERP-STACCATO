@@ -61,7 +61,7 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
 
     QDir dir;
 
-    if (not dir.exists(path)) { dir.mkpath(path); }
+    if (not dir.exists(path) and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta dos comprovantes!"); }
 
     QFile file(path + filename);
 

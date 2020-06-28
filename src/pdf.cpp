@@ -124,7 +124,7 @@ void PDF::gerarPdf() {
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!"); }
+  if (not dir.exists() and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta escolhida nas configurações!"); }
 
   const QString fileName = path + "/" + id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".pdf";
 

@@ -27,13 +27,13 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   QDir dir(path);
 
-  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueError(false, "Erro ao criar a pasta escolhida nas configurações!"); }
+  if (not dir.exists() and not dir.mkdir(path)) { return qApp->enqueueException(false, "Erro ao criar a pasta escolhida nas configurações!"); }
 
   const QString arquivoModelo = "modelo pedido.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) { return qApp->enqueueError(false, "Não encontrou o modelo do Excel!"); }
+  if (not modelo.exists()) { return qApp->enqueueException(false, "Não encontrou o modelo do Excel!"); }
 
   if (not setQuerys()) { return false; }
 
@@ -42,7 +42,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
@@ -126,7 +126,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
     QSqlQuery queryPgt;
 
-    if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { return qApp->enqueueError(false, "Erro buscando pagamento " + current + ": " + queryPgt.lastError().text()); }
+    if (not queryPgt.exec(pgtQuery.arg(current)) or not queryPgt.first()) { return qApp->enqueueException(false, "Erro buscando pagamento " + current + ": " + queryPgt.lastError().text()); }
 
     if (queryPgt.value("valor") == 0) { continue; }
 
@@ -150,7 +150,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   do {
     queryUi.bindValue(":idProduto", queryProduto.value("idProduto"));
 
-    if (not queryUi.exec() or not queryUi.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + queryUi.lastError().text()); }
+    if (not queryUi.exec() or not queryUi.first()) { return qApp->enqueueException(false, "Erro buscando dados do produto: " + queryUi.lastError().text()); }
 
     const QString loes = queryUi.value("ui").toString().contains("- L") ? " LOES" : "";
 
@@ -213,60 +213,60 @@ bool Excel::setQuerys() {
     queryProduto.bindValue(":idVenda", id);
   }
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dados da venda/orçamento: " + query.lastError().text()); }
 
   //------------------------------------------------------------------------
 
-  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados dos produtos: " + queryProduto.lastError().text()); }
+  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException(false, "Erro buscando dados dos produtos: " + queryProduto.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryCliente.prepare("SELECT nome_razao, email, cpf, cnpj, pfpj, tel, telCel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", query.value("idCliente"));
 
-  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro buscando cliente: " + queryCliente.lastError().text()); }
+  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueException(false, "Erro buscando cliente: " + queryCliente.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryEndEnt.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndEnt.bindValue(":idEndereco", query.value("idEnderecoEntrega"));
 
-  if (not queryEndEnt.exec() or not queryEndEnt.first()) { return qApp->enqueueError(false, "Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
+  if (not queryEndEnt.exec() or not queryEndEnt.first()) { return qApp->enqueueException(false, "Erro buscando dados do endereço entrega: " + queryEndEnt.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryEndFat.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep FROM cliente_has_endereco WHERE idEndereco = :idEndereco");
   queryEndFat.bindValue(":idEndereco", query.value(tipo == Tipo::Venda ? "idEnderecoFaturamento" : "idEnderecoEntrega"));
 
-  if (not queryEndFat.exec() or not queryEndFat.first()) { return qApp->enqueueError(false, "Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
+  if (not queryEndFat.exec() or not queryEndFat.first()) { return qApp->enqueueException(false, "Erro buscando dados do endereço: " + queryEndFat.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryProfissional.prepare("SELECT nome_razao, tel, email FROM profissional WHERE idProfissional = :idProfissional");
   queryProfissional.bindValue(":idProfissional", query.value("idProfissional"));
 
-  if (not queryProfissional.exec() or not queryProfissional.first()) { return qApp->enqueueError(false, "Erro buscando profissional: " + queryProfissional.lastError().text()); }
+  if (not queryProfissional.exec() or not queryProfissional.first()) { return qApp->enqueueException(false, "Erro buscando profissional: " + queryProfissional.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryVendedor.prepare("SELECT nome, email FROM usuario WHERE idUsuario = :idUsuario");
   queryVendedor.bindValue(":idUsuario", query.value("idUsuario"));
 
-  if (not queryVendedor.exec() or not queryVendedor.first()) { return qApp->enqueueError(false, "Erro buscando vendedor: " + queryVendedor.lastError().text()); }
+  if (not queryVendedor.exec() or not queryVendedor.first()) { return qApp->enqueueException(false, "Erro buscando vendedor: " + queryVendedor.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryLoja.prepare("SELECT tel, tel2 FROM loja WHERE idLoja = :idLoja");
   queryLoja.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLoja.exec() or not queryLoja.first()) { return qApp->enqueueError(false, "Erro buscando loja: " + queryLoja.lastError().text()); }
+  if (not queryLoja.exec() or not queryLoja.first()) { return qApp->enqueueException(false, "Erro buscando loja: " + queryLoja.lastError().text()); }
 
   //------------------------------------------------------------------------
 
   queryLojaEnd.prepare("SELECT logradouro, numero, complemento, bairro, cidade, cep, uf FROM loja_has_endereco WHERE idLoja = :idLoja");
   queryLojaEnd.bindValue(":idLoja", query.value("idLoja"));
 
-  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { return qApp->enqueueError(false, "Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }
+  if (not queryLojaEnd.exec() or not queryLojaEnd.first()) { return qApp->enqueueException(false, "Erro buscando endereço loja: " + queryLojaEnd.lastError().text()); }
 
   return true;
 }

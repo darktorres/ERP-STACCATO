@@ -25,13 +25,13 @@ void ImportaTabelaIBPT::importar() {
 
   QSqlQuery queryVersao;
 
-  if (not queryVersao.exec("SELECT versao FROM ibpt WHERE versao = '" + versao + "' LIMIT 1")) { return qApp->enqueueError("Erro verificando versão: " + queryVersao.lastError().text(), this); }
+  if (not queryVersao.exec("SELECT versao FROM ibpt WHERE versao = '" + versao + "' LIMIT 1")) { return qApp->enqueueException("Erro verificando versão: " + queryVersao.lastError().text(), this); }
 
   if (queryVersao.size() == 1) { return qApp->enqueueInformation("Tabela já cadastrada!", this); }
 
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro abrindo arquivo para leitura: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro abrindo arquivo para leitura: " + file.errorString(), this); }
 
   QProgressDialog progressDialog;
   progressDialog.reset();
@@ -81,7 +81,7 @@ void ImportaTabelaIBPT::importar() {
 
   if (not model.submitAll()) {
     qApp->rollbackTransaction();
-    return qApp->enqueueError("Erro salvando dados: " + model.lastError().text(), this);
+    return qApp->enqueueException("Erro salvando dados: " + model.lastError().text(), this);
   }
 
   if (not qApp->endTransaction()) { return; }

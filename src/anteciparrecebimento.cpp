@@ -30,7 +30,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { qApp->enqueueError("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { qApp->enqueueException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
 
   while (query.next()) { ui->comboBox->addItem(query.value("tipo").toString()); }
 
@@ -212,7 +212,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
   query.bindValue(":idConta", ui->itemBoxConta->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando 'banco': " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando 'banco': " + query.lastError().text(), this); }
 
   if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
     const int rowPagar1 = modelContaPagar.insertRowAtEnd();

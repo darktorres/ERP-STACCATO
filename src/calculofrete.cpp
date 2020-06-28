@@ -39,7 +39,7 @@ void CalculoFrete::on_pushButton_clicked() {
 
   QFile apiKeyFile("google_api.txt");
 
-  if (not apiKeyFile.open(QFile::ReadOnly)) { return qApp->enqueueError("Não conseguiu ler chave da API: " + apiKeyFile.errorString(), this); }
+  if (not apiKeyFile.open(QFile::ReadOnly)) { return qApp->enqueueException("Não conseguiu ler chave da API: " + apiKeyFile.errorString(), this); }
 
   const QString url = searchUrl.arg(ui->comboBoxOrigem->currentText().replace(" ", "+"), ui->comboBoxDestino->currentText().replace(" ", "+"), apiKeyFile.readAll());
   qDebug() << "url: " << url;
@@ -100,7 +100,7 @@ void CalculoFrete::on_itemBoxCliente_textChanged(const QString &) {
   query.prepare("SELECT logradouro, numero, cidade, uf FROM cliente_has_endereco WHERE idCliente = :idCliente");
   query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-  if (not query.exec()) { return qApp->enqueueError("Erro buscando endereço do cliente: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro buscando endereço do cliente: " + query.lastError().text(), this); }
 
   while (query.next()) {
     ui->comboBoxDestino->addItem(query.value("logradouro").toString() + ", " + query.value("numero").toString() + ", " + query.value("cidade").toString() + ", " + query.value("uf").toString());

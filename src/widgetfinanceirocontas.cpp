@@ -21,13 +21,13 @@ WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent
 WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 
 void WidgetFinanceiroContas::setupTables() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   // TODO: refactor @running_total into running_total :- ifnull(running_total, 0) + ...
   modelVencidos.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " +
                          QString((tipo == Tipo::Receber) ? "view_a_receber_vencidos_base" : "view_a_pagar_vencidos_base") + " v JOIN (SELECT @running_total := 0) r");
 
-  if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
+  if (modelVencidos.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   ui->tableVencidos->setModel(&modelVencidos);
 
@@ -38,7 +38,7 @@ void WidgetFinanceiroContas::setupTables() {
   modelVencer.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString((tipo == Tipo::Receber) ? "view_a_receber_vencer_base" : "view_a_pagar_vencer_base") +
                        " v JOIN (SELECT @running_total := 0) r");
 
-  if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
+  if (modelVencer.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
   ui->tableVencer->setModel(&modelVencer);
 
@@ -92,25 +92,25 @@ void WidgetFinanceiroContas::updateTables() {
 
   model.setQuery(model.query().executedQuery());
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
   modelVencidos.setQuery(modelVencidos.query().executedQuery());
 
-  if (modelVencidos.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
+  if (modelVencidos.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
   modelVencer.setQuery(modelVencer.query().executedQuery());
 
-  if (modelVencer.lastError().isValid()) { return qApp->enqueueError("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
+  if (modelVencer.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 }
 
 void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   if (tipo == Tipo::Receber) {
     auto *contas = new Contas(Contas::Tipo::Receber, this);
@@ -126,7 +126,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetFinanceiroContas::montaFiltro() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   if (tipo == Tipo::Pagar) {
     QStringList filtros;
@@ -245,7 +245,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                    filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
   }
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela: " + model.lastError().text(), this); }
 
   model.setHeaderData("dataEmissao", "Data Emissão");
 
@@ -280,7 +280,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   auto *lancamento = new InserirLancamento((tipo == Tipo::Receber) ? InserirLancamento::Tipo::Receber : InserirLancamento::Tipo::Pagar, this);
   lancamento->setAttribute(Qt::WA_DeleteOnClose);
@@ -298,7 +298,7 @@ void WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged(const double value)
 void WidgetFinanceiroContas::on_dateEditDe_dateChanged(const QDate &date) { ui->dateEditAte->setDate(date); }
 
 void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
-  if (novoTipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (novoTipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;
 
@@ -350,7 +350,7 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   // TODO: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
@@ -368,7 +368,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET desativado = TRUE WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { return qApp->enqueueError("Erro excluindo lançamento: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException("Erro excluindo lançamento: " + query.lastError().text(), this); }
 
     montaFiltro();
 
@@ -379,7 +379,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo creio eu porem em diversas linhas eles tem valores diferentes
 
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   // TODO: bloquear se o pagamento já estiver PENDENTE
 
@@ -393,7 +393,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
   queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-  if (not queryPagamento.exec() or not queryPagamento.first()) { return qApp->enqueueError("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
+  if (not queryPagamento.exec() or not queryPagamento.first()) { return qApp->enqueueException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
   if (queryPagamento.value("dataPagamento").toDate().daysTo(qApp->serverDate()) > 5) { return qApp->enqueueError("No máximo 5 dias para reverter!", this); }
 
@@ -408,7 +408,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { return qApp->enqueueError("Erro revertendo lançamento: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException("Erro revertendo lançamento: " + query.lastError().text(), this); }
 
     updateTables();
 

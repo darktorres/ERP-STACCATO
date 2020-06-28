@@ -56,7 +56,7 @@ int TableView::columnIndex(const QString &column, const bool silent) const {
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
-  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueException("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }
@@ -115,7 +115,7 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
 
-  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
+  if (not baseModel) { return qApp->enqueueException("TableView model não implementado!", this); }
 
   //---------------------------------------
 

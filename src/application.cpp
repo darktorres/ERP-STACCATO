@@ -31,11 +31,12 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   }
 }
 
+// for system errors
 void Application::enqueueException(const QString &error, QWidget *parent) {
-  // TODO: nesse caso pedir para entrar em contato com o desenvolvedor?
+  // TODO: guardar o arquivo/linha que chamou essa funcao
   exceptionQueue << Message{error, parent};
 
-  Log::createLog("Erro: " + error, true);
+  Log::createLog("Exceção", error, true);
 
   if (not updating) { showMessages(); }
 }
@@ -45,10 +46,11 @@ bool Application::enqueueException(const bool boolean, const QString &error, QWi
   return boolean;
 }
 
+// for user errors
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
-  Log::createLog("Erro: " + error, true);
+  Log::createLog("Erro", error, true);
 
   if (not updating) { showMessages(); }
 }
@@ -275,7 +277,7 @@ bool Application::startTransaction(const QString &messageLog, const bool delayMe
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueException(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
-  if (not Log::createLog("Transação: " + messageLog)) { return rollbackTransaction(false); }
+  if (not Log::createLog("Transação", messageLog)) { return rollbackTransaction(false); }
 
   inTransaction = true;
   this->delayMessages = delayMessages;
@@ -347,8 +349,6 @@ void Application::showMessages() {
   for (const auto &exception : std::as_const(exceptionQueue)) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
 
   for (const auto &error : std::as_const(errorQueue)) {
-    //    Log::createLog("Erro: " + error, true);
-
     const QString error1 = "MySQL server has gone away";
     const QString error2 = "Lost connection to MySQL server during query";
 

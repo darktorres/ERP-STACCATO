@@ -374,7 +374,6 @@ bool CadastroCliente::cadastrar() {
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
     if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     // -------------------------------------------------------------------------

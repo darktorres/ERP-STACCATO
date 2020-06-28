@@ -119,7 +119,7 @@ bool RegisterDialog::verifyRequiredField(QLineEdit &line, const bool silent) {
 
   if (isEmpty or isZero or isSymbols or isLessMask or isLessPlaceHolder) {
     if (not silent) {
-      qApp->enqueueError("Você não preencheu um campo obrigatório: " + line.accessibleName(), this);
+      qApp->enqueueError("Um campo obrigatório não foi preenchido: " + line.accessibleName(), this);
       line.setFocus();
     }
 

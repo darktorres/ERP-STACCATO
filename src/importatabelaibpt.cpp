@@ -8,9 +8,7 @@
 #include <QSqlQuery>
 #include <QTextStream>
 
-ImportaTabelaIBPT::ImportaTabelaIBPT(QWidget *parent) : QDialog(parent) {
-  setupTables();
-}
+ImportaTabelaIBPT::ImportaTabelaIBPT(QWidget *parent) : QDialog(parent) { setupTables(); }
 
 void ImportaTabelaIBPT::importar() {
   const QString filePath = QFileDialog::getOpenFileName(this, "Impotar tabela IBPT", QDir::currentPath(), "Excel (*.csv)");

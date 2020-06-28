@@ -193,11 +193,6 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
     if (not modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"))) { return false; }
     if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
     if (not modelContaReceber.setData(row, "idConta", ui->itemBoxConta->getId())) { return false; }
-
-    if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
-
-    if (modelContaReceber.data(row, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
-
     if (not modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + "Antecipação")) { return false; }
   }
 
@@ -267,6 +262,8 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
+  if (not verifyFields(list)) { return; }
+
   if (not qApp->startTransaction("AnteciparRecebimento::on_pushButtonGerar")) { return; }
 
   if (not cadastrar(list)) { return qApp->rollbackTransaction(); }
@@ -274,6 +271,18 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
+}
+
+bool AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
+  for (const auto &index : list) {
+    const int row = index.row();
+
+    if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
+
+    if (modelContaReceber.data(row, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
+  }
+
+  return true;
 }
 
 // TODO: 0implementar antecipacao

@@ -462,10 +462,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   for (int row = list.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) {
-    qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this);
-    return {};
-  }
+  if (not xlsx.saveAs(fileName)) { return {}; }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como: " + fileName, this);

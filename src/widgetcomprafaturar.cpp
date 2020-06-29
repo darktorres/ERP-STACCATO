@@ -88,11 +88,11 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStr
     queryCompra.bindValue(":dataRealFat", dataReal);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status do produto da venda: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando status do produto da venda: " + queryVenda.lastError().text(), this); }
   }
 
   return true;
@@ -185,12 +185,12 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueError("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { return qApp->enqueueException("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":dataPrevFat", dataPrevista);
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueError("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { return qApp->enqueueException("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

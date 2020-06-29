@@ -184,7 +184,7 @@ void InserirLancamento::preencher(const QModelIndex &index) {
       QSqlQuery queryConta;
 
       if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
-        return qApp->enqueueError("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
       }
 
       if (queryConta.first()) {

@@ -127,25 +127,25 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
   for (const auto &index : list) {
     query1.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status do estoque: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status do estoque: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataRealColeta", dataColeta);
     query2.bindValue(":dataPrevReceb", dataPrevReceb);
     query2.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
 
     query3.bindValue(":dataRealColeta", dataColeta);
     query3.bindValue(":dataPrevReceb", dataPrevReceb);
     query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + query3.lastError().text(), this); }
 
     // -------------------------------------------------------------------------
 
     query4.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando veiculo_has_produto: " + query4.lastError().text(), this); }
+    if (not query4.exec()) { return qApp->enqueueException(false, "Erro atualizando veiculo_has_produto: " + query4.lastError().text(), this); }
   }
 
   return true;
@@ -200,18 +200,18 @@ bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
 
     query3.bindValue(":data", dataPrevColeta);
     query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando data no veiculo: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando data no veiculo: " + query3.lastError().text(), this); }
   }
 
   return true;
@@ -256,16 +256,16 @@ bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
 
     query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando data no veiculo: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando data no veiculo: " + query3.lastError().text(), this); }
   }
 
   return true;

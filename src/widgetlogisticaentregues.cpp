@@ -45,7 +45,7 @@ void WidgetLogisticaEntregues::updateTables() {
 
   modelProdutos.setQuery(modelProdutos.query().executedQuery());
 
-  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
+  if (modelProdutos.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela produtos: " + modelProdutos.lastError().text(), this); }
 }
 
 void WidgetLogisticaEntregues::resetTables() { modelIsSet = false; }
@@ -94,7 +94,7 @@ void WidgetLogisticaEntregues::on_tableVendas_clicked(const QModelIndex &index) 
       "FROM (`venda_has_produto2` `vp2` LEFT JOIN `estoque_has_consumo` `ehc` ON ((`vp2`.`idVendaProduto2` = `ehc`.`idVendaProduto2`))) WHERE idVenda = '" +
       modelVendas.data(index.row(), "idVenda").toString() + "' GROUP BY `vp2`.`idVendaProduto2`");
 
-  if (modelProdutos.lastError().isValid()) { return qApp->enqueueError("Erro: " + modelProdutos.lastError().text(), this); }
+  if (modelProdutos.lastError().isValid()) { return qApp->enqueueException("Erro: " + modelProdutos.lastError().text(), this); }
 
   modelProdutos.setHeaderData("status", "Status");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
@@ -168,15 +168,15 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   for (const auto &index : list) {
     query1.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando veiculo_produto: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro atualizando veiculo_produto: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
 
     query3.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido_fornecedor: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido_fornecedor: " + query3.lastError().text(), this); }
   }
 
   return true;

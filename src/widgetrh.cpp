@@ -27,9 +27,9 @@ void WidgetRh::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelRelatorio.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelRelatorio.lastError().text(), this); }
+  if (not modelRelatorio.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelRelatorio.lastError().text(), this); }
 
-  if (not modelTotal.select()) { qApp->enqueueError("Erro atualizando tabela total: " + modelTotal.lastError().text(), this); }
+  if (not modelTotal.select()) { qApp->enqueueException("Erro atualizando tabela total: " + modelTotal.lastError().text(), this); }
 }
 
 void WidgetRh::setConnections() {
@@ -76,7 +76,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
   queryVerifica.prepare("SELECT * FROM comissao WHERE Mês = :mes");
   queryVerifica.bindValue(":mes", mes.toString("yyyy-MM"));
 
-  if (not queryVerifica.exec()) { return qApp->enqueueError("Erro buscando dados da comissão: " + queryVerifica.lastError().text(), this); }
+  if (not queryVerifica.exec()) { return qApp->enqueueException("Erro buscando dados da comissão: " + queryVerifica.lastError().text(), this); }
 
   if (queryVerifica.first()) {
     QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Este mês já está cadastrado. Deseja substituir os dados?", QMessageBox::Yes | QMessageBox::No, this);
@@ -89,7 +89,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
     queryRemove.prepare("DELETE FROM comissao WHERE Mês = :mes");
     queryRemove.bindValue(":mes", mes.toString("yyyy-MM"));
 
-    if (not queryRemove.exec()) { return qApp->enqueueError("Erro removendo dados: " + queryRemove.lastError().text()); }
+    if (not queryRemove.exec()) { return qApp->enqueueException("Erro removendo dados: " + queryRemove.lastError().text()); }
   }
 
   QSqlQuery queryRelatorio;
@@ -97,7 +97,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
   queryRelatorio.bindValue(":mes", mes.toString("yyyy-MM"));
 
   // get data from view_relatorio
-  if (not queryRelatorio.exec()) { return qApp->enqueueError("Erro buscando dados da comissão: " + queryRelatorio.lastError().text(), this); }
+  if (not queryRelatorio.exec()) { return qApp->enqueueException("Erro buscando dados da comissão: " + queryRelatorio.lastError().text(), this); }
 
   if (not queryRelatorio.first()) { return qApp->enqueueInformation("Não há dados para este mês!", this); }
 
@@ -115,7 +115,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
     if (not modelRelatorio.setData(newRow, "%", queryRelatorio.value("%"))) { return; }
   }
 
-  if (not modelRelatorio.submitAll()) { return qApp->enqueueError("Erro salvando dados: " + modelRelatorio.lastError().text(), this); }
+  if (not modelRelatorio.submitAll()) { return qApp->enqueueException("Erro salvando dados: " + modelRelatorio.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
@@ -127,11 +127,11 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
 void WidgetRh::on_dateEdit_dateChanged(const QDate &date) {
   modelRelatorio.setFilter("Mês = '" + date.toString("yyyy-MM") + "'");
 
-  if (not modelRelatorio.select()) { return qApp->enqueueError("Erro filtrando tabela: " + modelRelatorio.lastError().text(), this); }
+  if (not modelRelatorio.select()) { return qApp->enqueueException("Erro filtrando tabela: " + modelRelatorio.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
   modelTotal.setFilter("Mês = '" + date.toString("yyyy-MM") + "'");
 
-  if (not modelTotal.select()) { return qApp->enqueueError("Erro filtrando tabela total: " + modelTotal.lastError().text()); }
+  if (not modelTotal.select()) { return qApp->enqueueException("Erro filtrando tabela total: " + modelTotal.lastError().text()); }
 }

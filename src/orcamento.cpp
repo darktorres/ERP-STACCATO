@@ -398,7 +398,7 @@ void Orcamento::removeItem() {
   [&] {
     if (ui->lineEditOrcamento->text() != "Auto gerado") { save(true); } // save pending rows before submitAll
 
-    if (not modelItem.removeRow(currentRowItem)) { return qApp->enqueueError("Erro removendo linha: " + modelItem.lastError().text(), this); }
+    if (not modelItem.removeRow(currentRowItem)) { return qApp->enqueueException("Erro removendo linha: " + modelItem.lastError().text(), this); }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
       if (not modelItem.submitAll()) { return; }
@@ -422,7 +422,7 @@ void Orcamento::removeItem() {
 bool Orcamento::generateId() {
   const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
 
-  if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
+  if (not siglaLoja) { return qApp->enqueueException(false, "Erro buscando sigla da loja!", this); }
 
   QString id = siglaLoja->toString() + "-" + qApp->serverDate().toString("yy");
 
@@ -433,7 +433,7 @@ bool Orcamento::generateId() {
     query.prepare("SELECT MAX(idOrcamento) AS idOrcamento FROM orcamento WHERE idOrcamento LIKE :id");
     query.bindValue(":id", id + "%");
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando próximo id disponível: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro buscando próximo id disponível: " + query.lastError().text(), this); }
 
     const int last = query.first() ? query.value("idOrcamento").toString().remove(id).leftRef(4).toInt() : 0;
 
@@ -441,14 +441,14 @@ bool Orcamento::generateId() {
     id += ui->checkBoxRepresentacao->isChecked() ? "R" : "";
     id += "O";
 
-    if (id.size() != 12 and id.size() != 13) { return qApp->enqueueError(false, "Tamanho do Id errado: " + id, this); }
+    if (id.size() != 12 and id.size() != 13) { return qApp->enqueueException(false, "Tamanho do Id errado: " + id, this); }
   } else {
     QSqlQuery query;
     query.prepare("SELECT COALESCE(MAX(CAST(RIGHT(idOrcamento, LENGTH(idOrcamento) - LOCATE('Rev', idOrcamento) - 2) AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE LENGTH(idOrcamento) > 16 "
                   "AND idOrcamento LIKE :idOrcamento");
     query.bindValue(":idOrcamento", replica.left(11) + "%");
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando próxima revisão disponível: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando próxima revisão disponível: " + query.lastError().text(), this); }
 
     id = replica.left(replica.indexOf("-REV")) + "-REV" + query.value("revisao").toString();
   }
@@ -473,17 +473,17 @@ bool Orcamento::recalcularTotais() {
 
   if (abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 1) {
     calcPrecoGlobalTotal();
-    return qApp->enqueueError(false, "Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!", this);
+    return qApp->enqueueException(false, "Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!", this);
   }
 
   if (abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 1) {
     calcPrecoGlobalTotal();
-    return qApp->enqueueError(false, "Total dos itens não confere com SubTotalLíquido! Recalculando valores!", this);
+    return qApp->enqueueException(false, "Total dos itens não confere com SubTotalLíquido! Recalculando valores!", this);
   }
 
   if (abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1) {
     calcPrecoGlobalTotal();
-    return qApp->enqueueError(false, "Total dos itens não confere com Total! Recalculando valores!", this);
+    return qApp->enqueueException(false, "Total dos itens não confere com Total! Recalculando valores!", this);
   }
 
   return true;
@@ -531,7 +531,7 @@ bool Orcamento::savingProcedures() {
   if (tipo == Tipo::Cadastrar) {
     const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
 
-    if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!", this); }
+    if (not idLoja) { return qApp->enqueueException(false, "Erro buscando idLoja!", this); }
 
     if (not setData("idLoja", idLoja->toInt())) { return false; }
 
@@ -591,10 +591,10 @@ bool Orcamento::buscarCadastrarConsultor() {
 
   if (not query.exec("SELECT idUsuario FROM usuario WHERE desativado = FALSE AND especialidade > 0 AND especialidade IN (SELECT especialidade FROM fornecedor WHERE razaoSocial IN (" +
                      fornecedores.join(", ") + "))")) {
-    return qApp->enqueueError(false, "Erro buscando consultor: " + query.lastError().text(), this);
+    return qApp->enqueueException(false, "Erro buscando consultor: " + query.lastError().text(), this);
   }
 
-  if (query.size() > 1) { return qApp->enqueueError(false, "Mais de um consultor disponível!", this); }
+  if (query.size() > 1) { return qApp->enqueueException(false, "Mais de um consultor disponível!", this); }
 
   if (query.size() == 1 and query.first() and not setData("idUsuarioConsultor", query.value("idUsuario"))) { return false; }
 
@@ -610,7 +610,7 @@ bool Orcamento::atualizaReplica() {
     query.bindValue(":idReplica", ui->lineEditOrcamento->text());
     query.bindValue(":idOrcamento", ui->lineEditReplicaDe->text());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro salvando replicadoEm: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro salvando replicadoEm: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -857,7 +857,7 @@ void Orcamento::on_itemBoxProduto_idChanged(const QVariant &) {
   query.prepare("SELECT un, precoVenda, estoqueRestante, fornecedor, codComercial, formComercial, quantCaixa, minimo, multiplo, estoque, promocao FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro na busca do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro na busca do produto: " + query.lastError().text(), this); }
 
   const QString un = query.value("un").toString().toUpper();
 
@@ -924,7 +924,7 @@ void Orcamento::on_itemBoxCliente_textChanged(const QString &) {
   queryCliente.prepare("SELECT idProfissionalRel FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError("Erro ao buscar cliente: " + queryCliente.lastError().text(), this); }
+  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueException("Erro ao buscar cliente: " + queryCliente.lastError().text(), this); }
 
   ui->itemBoxProfissional->setId(queryCliente.value("idProfissionalRel"));
   ui->itemBoxEndereco->setEnabled(true);
@@ -972,12 +972,12 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
+    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
 
     if (queryProduto.value("invalido").toBool()) {
       queryEquivalente.bindValue(":codComercial", modelItem.data(row, "codComercial"));
 
-      if (not queryEquivalente.exec()) { return qApp->enqueueError("Erro procurando produto equivalente: " + queryEquivalente.lastError().text(), this); }
+      if (not queryEquivalente.exec()) { return qApp->enqueueException("Erro procurando produto equivalente: " + queryEquivalente.lastError().text(), this); }
 
       if (queryEquivalente.first()) {
         if (not modelItem.setData(row, "idProduto", queryEquivalente.value("idProduto"))) { return; }
@@ -991,7 +991,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
       queryEstoque.bindValue(":idProduto", modelItem.data(row, "idProduto"));
       queryEstoque.bindValue(":quant", modelItem.data(row, "quant"));
 
-      if (not queryEstoque.exec()) { return qApp->enqueueError("Erro verificando estoque: " + queryEstoque.lastError().text(), this); }
+      if (not queryEstoque.exec()) { return qApp->enqueueException("Erro verificando estoque: " + queryEstoque.lastError().text(), this); }
 
       if (not queryEstoque.first()) {
         estoques << modelItem.data(row, "produto").toString();
@@ -1062,7 +1062,7 @@ bool Orcamento::cadastrar() {
 
     primaryId = ui->lineEditOrcamento->text();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     if (not modelItem.submitAll()) { return false; }
 
@@ -1097,7 +1097,7 @@ bool Orcamento::verificaCadastroCliente() {
   queryCliente.prepare("SELECT cpf, cnpj FROM cliente WHERE idCliente = :idCliente");
   queryCliente.bindValue(":idCliente", idCliente);
 
-  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueError(false, "Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text(), this); }
+  if (not queryCliente.exec() or not queryCliente.first()) { return qApp->enqueueException(false, "Erro verificando se cliente possui CPF/CNPJ: " + queryCliente.lastError().text(), this); }
 
   if (queryCliente.value("cpf").toString().isEmpty() and queryCliente.value("cnpj").toString().isEmpty()) { incompleto = true; }
 
@@ -1105,14 +1105,14 @@ bool Orcamento::verificaCadastroCliente() {
   queryCadastro.prepare("SELECT idCliente FROM cliente_has_endereco WHERE idCliente = :idCliente");
   queryCadastro.bindValue(":idCliente", idCliente);
 
-  if (not queryCadastro.exec()) { return qApp->enqueueError(false, "Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text(), this); }
+  if (not queryCadastro.exec()) { return qApp->enqueueException(false, "Erro verificando se cliente possui endereço: " + queryCadastro.lastError().text(), this); }
 
   if (not queryCadastro.first()) { incompleto = true; }
 
   queryCadastro.prepare("SELECT c.incompleto FROM orcamento o LEFT JOIN cliente c ON o.idCliente = c.idCliente WHERE c.idCliente = :idCliente AND c.incompleto = TRUE");
   queryCadastro.bindValue(":idCliente", idCliente);
 
-  if (not queryCadastro.exec()) { return qApp->enqueueError(false, "Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text(), this); }
+  if (not queryCadastro.exec()) { return qApp->enqueueException(false, "Erro verificando se cadastro do cliente está completo: " + queryCadastro.lastError().text(), this); }
 
   if (queryCadastro.first()) { incompleto = true; }
 
@@ -1210,13 +1210,13 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
 bool Orcamento::buscarParametrosFrete() {
   const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
 
-  if (not idLoja) { return qApp->enqueueError(false, "Erro buscando idLoja!", this); }
+  if (not idLoja) { return qApp->enqueueException(false, "Erro buscando idLoja!", this); }
 
   QSqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
   queryFrete.bindValue(":idLoja", idLoja->toInt());
 
-  if (not queryFrete.exec() or not queryFrete.next()) { return qApp->enqueueError(false, "Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
+  if (not queryFrete.exec() or not queryFrete.next()) { return qApp->enqueueException(false, "Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
 
   minimoFrete = queryFrete.value("valorMinimoFrete").toDouble();
   porcFrete = queryFrete.value("porcentagemFrete").toDouble();
@@ -1303,7 +1303,7 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
 
   const double dist = frete->getDistancia();
 
-  if (qFuzzyIsNull(dist)) { return qApp->enqueueError("Não foi possível determinar a distância!", this); }
+  if (qFuzzyIsNull(dist)) { return qApp->enqueueException("Não foi possível determinar a distância!", this); }
 
   int peso = 0;
 
@@ -1313,13 +1313,13 @@ void Orcamento::on_pushButtonCalcularFrete_clicked() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     query.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando peso do produto: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando peso do produto: " + query.lastError().text(), this); }
 
     peso += modelItem.data(row, "caixas").toInt() * query.value("kgcx").toInt();
   }
 
   if (not query.exec("SELECT custoTransporteTon, custoTransporte1, custoTransporte2, custoFuncionario FROM loja WHERE nomeFantasia = 'Geral'") or not query.first()) {
-    return qApp->enqueueError("Erro buscando parâmetros: " + query.lastError().text(), this);
+    return qApp->enqueueException("Erro buscando parâmetros: " + query.lastError().text(), this);
   }
 
   const double custoTon = query.value("custoTransporteTon").toDouble();
@@ -1365,7 +1365,7 @@ bool Orcamento::verificaDisponibilidadeEstoque() {
     const QString quant = modelItem.data(row, "quant").toString();
 
     if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
-      return qApp->enqueueError(false, "Erro verificando a disponibilidade do estoque: " + query.lastError().text(), this);
+      return qApp->enqueueException(false, "Erro verificando a disponibilidade do estoque: " + query.lastError().text(), this);
     }
 
     if (not query.first()) { produtos << modelItem.data(row, "produto").toString(); }

@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
-#include <cmath>
 
 SqlTableModel::SqlTableModel(const int limit, QObject *parent) : QSqlTableModel(parent), limit(limit) {}
 
@@ -15,7 +14,7 @@ SqlTableModel::SqlTableModel() : SqlTableModel(0, nullptr) {}
 
 QVariant SqlTableModel::data(const int row, const int column) const {
   if (row == -1 or column == -1) {
-    qApp->enqueueError("Erro: linha/coluna -1 SqlTableModel");
+    qApp->enqueueException("Erro: linha/coluna -1 SqlTableModel");
     return QVariant();
   }
 
@@ -27,7 +26,7 @@ QVariant SqlTableModel::data(const int row, const int column) const {
 QVariant SqlTableModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
 bool SqlTableModel::setData(const int row, const int column, const QVariant &value) {
-  if (row == -1 or column == -1) { return qApp->enqueueError(false, "Erro: linha/coluna -1 SqlTableModel"); }
+  if (row == -1 or column == -1) { return qApp->enqueueException(false, "Erro: linha/coluna -1 SqlTableModel"); }
 
   QVariant adjustedValue = value;
 
@@ -37,7 +36,7 @@ bool SqlTableModel::setData(const int row, const int column, const QVariant &val
   if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), adjustedValue); }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {
-    return qApp->enqueueError(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
+    return qApp->enqueueException(false, "Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
   }
 
   return true;
@@ -57,7 +56,7 @@ int SqlTableModel::insertRowAtEnd() {
 }
 
 bool SqlTableModel::submitAll() {
-  if (not QSqlTableModel::submitAll()) { return qApp->enqueueError(false, "Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
+  if (not QSqlTableModel::submitAll()) { return qApp->enqueueException(false, "Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 
   return true;
 }
@@ -97,7 +96,7 @@ bool SqlTableModel::select() {
   //  qDebug() << "filter: " << filter();
   //  qDebug() << "stmt: " << selectStatement() << "\n";
 
-  if (not QSqlTableModel::select()) { return qApp->enqueueError(false, "Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
+  if (not QSqlTableModel::select()) { return qApp->enqueueException(false, "Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 
   return true;
 }
@@ -122,7 +121,7 @@ void SqlTableModel::setTable(const QString &tableName) {
 int SqlTableModel::fieldIndex(const QString &fieldName, const bool silent) const {
   const int field = QSqlTableModel::fieldIndex(fieldName);
 
-  if (field == -1 and not silent) { qApp->enqueueError(fieldName + " não encontrado na tabela " + tableName()); }
+  if (field == -1 and not silent) { qApp->enqueueException(fieldName + " não encontrado na tabela " + tableName() + "!"); }
 
   return field;
 }

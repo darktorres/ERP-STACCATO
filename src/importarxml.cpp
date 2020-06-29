@@ -162,7 +162,7 @@ void ImportarXML::setupTables() {
   modelConsumo.setTable("estoque_has_consumo");
 
   modelConsumo.setHeaderData("status", "Status");
-  modelConsumo.setHeaderData("local", "Local");
+  modelConsumo.setHeaderData("bloco", "Bloco");
   modelConsumo.setHeaderData("fornecedor", "Fornecedor");
   modelConsumo.setHeaderData("descricao", "Produto");
   modelConsumo.setHeaderData("quant", "Quant.");

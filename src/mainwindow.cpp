@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
   } else {
-    qApp->enqueueError("A chave 'hostname' não está configurada!", this);
+    qApp->enqueueException("A chave 'hostname' não está configurada!", this);
   }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
-    qApp->enqueueError("Erro lendo permissões: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro lendo permissões: " + query.lastError().text(), this);
   }
 
   // -------------------------------------------------------------------------

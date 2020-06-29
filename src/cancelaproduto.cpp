@@ -27,7 +27,7 @@ void CancelaProduto::setFilter(const QString &ordemCompra) {
   if (tipo == Tipo::CompraConfirmar) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM COMPRA'"); }
   if (tipo == Tipo::CompraFaturamento) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM FATURAMENTO'"); }
 
-  if (not model.select()) { return qApp->enqueueError("Erro carregando tabela: " + model.lastError().text(), this); }
+  if (not model.select()) { return qApp->enqueueException("Erro carregando tabela: " + model.lastError().text(), this); }
 }
 
 void CancelaProduto::setupTables() {
@@ -81,7 +81,7 @@ void CancelaProduto::setupTables() {
 }
 
 void CancelaProduto::on_pushButtonSalvar_clicked() {
-  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueError("Não implementado!", this); }
+  if (tipo != Tipo::CompraConfirmar and tipo != Tipo::CompraFaturamento) { return qApp->enqueueException("Não implementado!", this); }
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
@@ -119,11 +119,11 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
 
     queryCompra.bindValue(":idPedido2", model.data(row, "idPedido2"));
 
-    if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":idVendaProduto2", model.data(row, "idVendaProduto2"));
 
-    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
 
     idVendas << model.data(row, "idVenda").toString();
   }

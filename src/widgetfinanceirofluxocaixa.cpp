@@ -85,7 +85,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   QSqlQuery query;
 
-  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text(), this); }
+  if (not query.exec(modelCaixa.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueException("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo1->setValue(query.value("Acumulado").toDouble()); }
 
@@ -112,7 +112,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   // calcular saldo
 
-  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueError("Erro buscando saldo: " + query.lastError().text(), this); }
+  if (not query.exec(modelCaixa2.query().executedQuery() + " ORDER BY dataRealizado DESC LIMIT 1")) { return qApp->enqueueException("Erro buscando saldo: " + query.lastError().text(), this); }
 
   if (query.first()) { ui->doubleSpinBoxSaldo2->setValue(query.value("Acumulado").toDouble()); }
 
@@ -120,7 +120,7 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   modelFuturo.setQuery("SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_pendente v JOIN (SELECT @running_total := 0) r");
 
-  if (modelFuturo.lastError().isValid()) { return qApp->enqueueError("Erro buscando dados futuros: " + modelFuturo.lastError().text(), this); }
+  if (modelFuturo.lastError().isValid()) { return qApp->enqueueException("Erro buscando dados futuros: " + modelFuturo.lastError().text(), this); }
 
   modelFuturo.setHeaderData("dataPagamento", "Data Pag.");
 

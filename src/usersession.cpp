@@ -22,7 +22,7 @@ bool UserSession::login(const QString &user, const QString &password, LoginDialo
     queryAutorizar.bindValue(":user", user);
     queryAutorizar.bindValue(":password", password);
 
-    if (not queryAutorizar.exec()) { return qApp->enqueueError(false, "Erro no login: " + queryAutorizar.lastError().text()); }
+    if (not queryAutorizar.exec()) { return qApp->enqueueException(false, "Erro no login: " + queryAutorizar.lastError().text()); }
 
     return queryAutorizar.first();
   }
@@ -34,7 +34,7 @@ bool UserSession::login(const QString &user, const QString &password, LoginDialo
     query->bindValue(":user", user);
     query->bindValue(":password", password);
 
-    if (not query->exec()) { return qApp->enqueueError(false, "Erro no login: " + query->lastError().text()); }
+    if (not query->exec()) { return qApp->enqueueException(false, "Erro no login: " + query->lastError().text()); }
 
     return query->first();
   }
@@ -48,7 +48,7 @@ std::optional<QVariant> UserSession::fromLoja(const QString &parameter, const QS
   queryLoja.bindValue(":nome", user);
 
   if (not queryLoja.exec() or not queryLoja.first()) {
-    qApp->enqueueError("Erro na query loja: " + queryLoja.lastError().text());
+    qApp->enqueueException("Erro na query loja: " + queryLoja.lastError().text());
     return {};
   }
 

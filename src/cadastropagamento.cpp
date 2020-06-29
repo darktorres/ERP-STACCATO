@@ -45,22 +45,24 @@ void CadastroPagamento::setupTables() {
   modelPagamentos.setHeaderData("pagamento", "Pagamento");
   modelPagamentos.setHeaderData("parcelas", "Parcelas");
   modelPagamentos.setHeaderData("idConta", "Conta Destino");
-  modelPagamentos.setHeaderData("prazoRecebe", "Prazo");
+  modelPagamentos.setHeaderData("pula1Mes", "Pula 1º Mês");
   modelPagamentos.setHeaderData("ajustaDiaUtil", "Ajusta Dia Útil");
   modelPagamentos.setHeaderData("dMaisUm", "D+1");
   modelPagamentos.setHeaderData("centavoSobressalente", "Centavo 1ª parcela");
+  modelPagamentos.setHeaderData("apenasRepresentacao", "Apenas Representação");
 
   if (not modelPagamentos.select()) { return; }
 
   ui->tablePagamentos->setModel(&modelPagamentos);
 
   ui->tablePagamentos->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
-  ui->tablePagamentos->setItemDelegateForColumn("prazoRecebe", new EditDelegate(this));
+  ui->tablePagamentos->setItemDelegateForColumn("pula1Mes", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("ajustaDiaUtil", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("dMaisUm", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("centavoSobressalente", new CheckBoxDelegate(true, this));
+  ui->tablePagamentos->setItemDelegateForColumn("apenasRepresentacao", new CheckBoxDelegate(true, this));
 
-  ui->tablePagamentos->setPersistentColumns({"idConta", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente"});
+  ui->tablePagamentos->setPersistentColumns({"idConta", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente", "apenasRepresentacao"});
 
   ui->tablePagamentos->hideColumn("idPagamento");
 
@@ -89,10 +91,11 @@ void CadastroPagamento::setupTables() {
   ui->tableAssocia1->hideColumn("idPagamento");
   ui->tableAssocia1->hideColumn("parcelas");
   ui->tableAssocia1->hideColumn("idConta");
-  ui->tableAssocia1->hideColumn("prazoRecebe");
+  ui->tableAssocia1->hideColumn("pula1Mes");
   ui->tableAssocia1->hideColumn("ajustaDiaUtil");
   ui->tableAssocia1->hideColumn("dMaisUm");
   ui->tableAssocia1->hideColumn("centavoSobressalente");
+  ui->tableAssocia1->hideColumn("apenasRepresentacao");
 
   // -------------------------------------------------------------------------
 
@@ -118,20 +121,22 @@ void CadastroPagamento::setupMapper() {
   mapperPagamento.addMapping(ui->lineEditPagamento, modelPagamentos.fieldIndex("pagamento"));
   mapperPagamento.addMapping(ui->spinBoxParcelas, modelPagamentos.fieldIndex("parcelas"));
   mapperPagamento.addMapping(ui->itemBoxContaDestino, modelPagamentos.fieldIndex("idConta"), "id");
-  mapperPagamento.addMapping(ui->spinBoxPrazo, modelPagamentos.fieldIndex("prazoRecebe"));
+  mapperPagamento.addMapping(ui->checkBoxPula1Mes, modelPagamentos.fieldIndex("pula1Mes"));
   mapperPagamento.addMapping(ui->checkBoxDiaUtil, modelPagamentos.fieldIndex("ajustaDiaUtil"));
   mapperPagamento.addMapping(ui->checkBoxDMaisUm, modelPagamentos.fieldIndex("dMaisUm"));
   mapperPagamento.addMapping(ui->checkBoxCentavoSobressalente, modelPagamentos.fieldIndex("centavoSobressalente"));
+  mapperPagamento.addMapping(ui->checkBoxApenasRepresentacao, modelPagamentos.fieldIndex("apenasRepresentacao"));
 }
 
 void CadastroPagamento::limparSelecao() {
   ui->lineEditPagamento->clear();
   ui->spinBoxParcelas->setValue(1);
   ui->itemBoxContaDestino->clear();
-  ui->spinBoxPrazo->setValue(0);
+  ui->checkBoxPula1Mes->setChecked(false);
   ui->checkBoxDiaUtil->setChecked(false);
   ui->checkBoxDMaisUm->setChecked(false);
   ui->checkBoxCentavoSobressalente->setChecked(false);
+  ui->checkBoxApenasRepresentacao->setChecked(false);
 
   //--------------------------------------
 
@@ -171,10 +176,11 @@ bool CadastroPagamento::adicionarPagamento() {
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
   if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "prazoRecebe", ui->spinBoxPrazo->value())) { return false; }
+  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
+  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
 
   if (not modelPagamentos.submitAll()) { return false; }
 
@@ -211,10 +217,11 @@ bool CadastroPagamento::atualizarPagamento() {
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
   if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "prazoRecebe", ui->spinBoxPrazo->value())) { return false; }
+  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
+  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
 
   //--------------------------------------
 

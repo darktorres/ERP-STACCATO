@@ -175,7 +175,13 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
   if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError(false, "Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
 
   QSqlQuery queryPag;
-  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
+
+  if (representacao) {
+    queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
+  } else {
+    queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja AND apenasRepresentacao = FALSE");
+  }
+
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
 
   if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }

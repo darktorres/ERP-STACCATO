@@ -723,7 +723,7 @@ void Venda::montarFluxoCaixa() {
     }
 
     QSqlQuery query2;
-    query2.prepare("SELECT fp.idConta, fp.prazoRecebe, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
+    query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
                    "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
     query2.bindValue(":pagamento", tipoPgt);
     query2.bindValue(":parcela", parcelas);
@@ -731,7 +731,7 @@ void Venda::montarFluxoCaixa() {
     if (not query2.exec() or not query2.first()) { return qApp->enqueueError("Erro buscando taxa: " + query2.lastError().text(), this); }
 
     const int idConta = query2.value("idConta").toInt();
-    const int prazoRecebe = query2.value("prazoRecebe").toInt();
+    const bool pula1Mes = query2.value("pula1Mes").toInt();
     const bool ajustaDiaUtil = query2.value("ajustaDiaUtil").toBool();
     const bool dMaisUm = query2.value("dMaisUm").toBool();
     const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
@@ -763,7 +763,8 @@ void Venda::montarFluxoCaixa() {
 
       QDate dataPgt = ui->widgetPgts->listDataPgt.at(pagamento)->date();
       if (dMaisUm) { dataPgt = dataPgt.addDays(1); }
-      dataPgt = dataPgt.addMonths(parcela + prazoRecebe);
+      if (pula1Mes) { dataPgt = dataPgt.addMonths(1); }
+      dataPgt = dataPgt.addMonths(parcela);
       if (ajustaDiaUtil) { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
 
       if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }

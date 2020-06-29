@@ -267,7 +267,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
 
       QSqlQuery query2;
-      query2.prepare("SELECT fp.idConta, fp.prazoRecebe, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
+      query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
                      "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
       query2.bindValue(":pagamento", tipoPgt);
       query2.bindValue(":parcela", parcelas);

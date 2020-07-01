@@ -342,7 +342,7 @@ bool Application::getUpdating() const { return updating; }
 
 void Application::showMessages() {
   if (delayMessages and (inTransaction or updating)) { return; }
-  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) { return; }
+  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty() and exceptionQueue.isEmpty()) { return; }
 
   showingErrors = true;
 

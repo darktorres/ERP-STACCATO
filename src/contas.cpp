@@ -53,7 +53,7 @@ bool Contas::validarData(const QModelIndex &index) {
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dataPagamento: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
     const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
@@ -87,7 +87,7 @@ void Contas::preencher(const QModelIndex &index) {
       query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
       query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
-      if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando valor: " + query.lastError().text(), this); }
+      if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando valor: " + query.lastError().text(), this); }
 
       const double oldValor = query.value("valor").toDouble();
       const double newValor = modelPendentes.data(row, "valor").toDouble();
@@ -99,13 +99,21 @@ void Contas::preencher(const QModelIndex &index) {
     }
 
     if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
-      const int contaSantander = 3;
-      const int contaItau = 33;
+      const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
+      const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
 
-      const int idConta = (tipo == Tipo::Receber and modelPendentes.data(row, "tipo").toString().contains("BOLETO")) ? contaItau : contaSantander;
+      QSqlQuery queryConta;
 
-      if (modelPendentes.data(row, "idConta").toInt() == 0) {
-        if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+      }
+
+      if (queryConta.first()) {
+        const int idConta = queryConta.value("idConta").toInt();
+
+        if (idContaExistente == 0 and idConta != 0) {
+          if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+        }
       }
 
       if (not modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
@@ -119,8 +127,12 @@ void Contas::preencher(const QModelIndex &index) {
       const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
-        if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) {
-          if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
+        if (queryConta.first()) {
+          const int idConta = queryConta.value("idConta").toInt();
+
+          if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) {
+            if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
+          }
         }
 
         if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"))) { return; }
@@ -320,7 +332,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
   query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
   query.bindValue(":idPagamento", idPagamento);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados: " + query.lastError().text(), this); }
 
   const QString idVenda = query.value("idVenda").toString();
 

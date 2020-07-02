@@ -111,7 +111,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
   queryVenda.bindValue(":dataPrevFat", dataPrevista);
   queryVenda.bindValue(":idCompra", idCompra);
 
-  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
+  if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro salvando status da venda: " + queryVenda.lastError().text(), this); }
 
   //------------------------------------------------
 
@@ -122,7 +122,7 @@ bool WidgetCompraConfirmar::confirmarCompra(const QString &idCompra, const QDate
   queryCompra.bindValue(":dataPrevFat", dataPrevista);
   queryCompra.bindValue(":idCompra", idCompra);
 
-  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
+  if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
 
   return true;
 }

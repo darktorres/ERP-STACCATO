@@ -178,13 +178,21 @@ void InserirLancamento::preencher(const QModelIndex &index) {
     const int row = index.row();
 
     if (index.column() == ui->table->columnIndex("dataRealizado")) {
-      const int contaSantander = 3;
-      const int contaItau = 33;
+      const QString tipoPagamento = modelContaPagamento.data(row, "tipo").toString();
+      const int idContaExistente = modelContaPagamento.data(row, "idConta").toInt();
 
-      const int idConta = (tipo == Tipo::Receber and modelContaPagamento.data(row, "tipo").toString().contains("BOLETO")) ? contaItau : contaSantander;
+      QSqlQuery queryConta;
 
-      if (modelContaPagamento.data(row, "idConta").toInt() == 0) {
-        if (not modelContaPagamento.setData(row, "idConta", idConta)) { return; }
+      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+      }
+
+      if (queryConta.first()) {
+        const int idConta = queryConta.value("idConta").toInt();
+
+        if (idContaExistente == 0 and idConta != 0) {
+          if (not modelContaPagamento.setData(row, "idConta", idConta)) { return; }
+        }
       }
 
       if (not modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }

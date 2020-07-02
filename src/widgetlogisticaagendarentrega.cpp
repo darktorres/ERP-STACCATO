@@ -147,7 +147,7 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
   for (const auto &index : selectedRows) {
     query.bindValue(":idProduto", modelProdutos.data(index.row(), "idProduto"));
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando peso do produto: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando peso do produto: " + query.lastError().text(), this); }
 
     const double kg = query.value("kgcx").toDouble();
     const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
@@ -224,7 +224,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
 
   modelProdutos.setFilter("idVenda = '" + idVenda + "'");
 
-  if (not modelProdutos.select()) { return qApp->enqueueError("Erro buscando produtos: " + modelProdutos.lastError().text()); }
+  if (not modelProdutos.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos.lastError().text()); }
 
   ui->lineEditAviso->setText((modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") ? "Financeiro não liberou!" : "");
 }
@@ -289,7 +289,7 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
   QSqlQuery query;
 
   if (not query.exec("SELECT COALESCE(MAX(idEvento), 0) + 1 FROM veiculo_has_produto") or not query.first()) {
-    return qApp->enqueueError(false, "Erro comunicando com o banco de dados: " + query.lastError().text(), this);
+    return qApp->enqueueException(false, "Erro comunicando com o banco de dados: " + query.lastError().text(), this);
   }
 
   const int idEvento = query.value(0).toInt();
@@ -311,17 +311,17 @@ bool WidgetLogisticaAgendarEntrega::processRows() {
 
     query1.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query1.exec() or not query1.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query1.lastError().text(), this); }
+    if (not query1.exec() or not query1.first()) { return qApp->enqueueException(false, "Erro buscando dados do produto: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataPrevEnt", dataPrevEnt);
     query2.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + query2.lastError().text(), this); }
 
     query3.bindValue(":dataPrevEnt", dataPrevEnt);
     query3.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando produtos venda: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando produtos venda: " + query3.lastError().text(), this); }
   }
 
   return modelTranspAtual.submitAll();
@@ -343,7 +343,7 @@ bool WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const 
   query.prepare("SELECT kgcx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelProdutos.data(row, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando peso do produto: " + query.lastError().text(), this); }
 
   const double quantCaixa = modelProdutos.data(row, "quantCaixa").toDouble();
   const double kg = query.value("kgcx").toDouble();
@@ -409,7 +409,7 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString 
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 
@@ -741,7 +741,7 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
     query1.bindValue(":novoPrazoEntrega", modelVendas.data(row, "data").toDate().daysTo(dataPrev));
     query1.bindValue(":idVenda", modelVendas.data(row, "idVenda"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando novo prazo: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro atualizando novo prazo: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idVenda", modelVendas.data(row, "idVenda"));
     query2.bindValue(":idVendaBase", modelVendas.data(row, "idVenda").toString().left(11));
@@ -751,7 +751,7 @@ bool WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
     query2.bindValue(":observacao", observacao);
     query2.bindValue(":dataFollowup", qApp->serverDate());
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando followup: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando followup: " + query2.lastError().text(), this); }
   }
 
   return true;
@@ -788,7 +788,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
 
-  if (idVenda.isEmpty()) { return qApp->enqueueError("Erro buscando 'Venda'!", this); }
+  if (idVenda.isEmpty()) { return qApp->enqueueException("Erro buscando 'Venda'!", this); }
 
   QStringList lista;
 
@@ -817,7 +817,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo arquivo: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file.errorString(), this); }
 
   XML xml(file.readAll(), file.fileName());
 
@@ -834,7 +834,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   queryNFe.bindValue(":cnpjDest", xml.cnpjDest);
   queryNFe.bindValue(":valor", xml.vNF_Total);
 
-  if (not queryNFe.exec()) { return qApp->enqueueError("Erro importando NFe: " + queryNFe.lastError().text(), this); }
+  if (not queryNFe.exec()) { return qApp->enqueueException("Erro importando NFe: " + queryNFe.lastError().text(), this); }
 
   const QVariant id = queryNFe.lastInsertId();
 
@@ -847,7 +847,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
     queryVenda.bindValue(":idNFeSaida", id);
     queryVenda.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not queryVenda.exec()) { return qApp->enqueueError("Erro salvando NFe nos produtos: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { return qApp->enqueueException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

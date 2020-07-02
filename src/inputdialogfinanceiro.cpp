@@ -267,14 +267,14 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
       const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
 
       QSqlQuery query2;
-      query2.prepare(
-          "SELECT idConta, prazoRecebe, ajustaDiaUtil, dMaisUm, centavoSobressalente, taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento "
-          "WHERE pagamento = :pagamento AND parcela = :parcela");
+      query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
+                     "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
       query2.bindValue(":pagamento", tipoPgt);
       query2.bindValue(":parcela", parcelas);
 
-      if (not query2.exec() or not query2.first()) { return qApp->enqueueError("Erro buscando taxa: " + query2.lastError().text(), this); }
+      if (not query2.exec() or not query2.first()) { return qApp->enqueueException("Erro buscando taxa: " + query2.lastError().text(), this); }
 
+      const int idConta = query2.value("idConta").toInt();
       const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
 
       //-----------------------------------------------------------------
@@ -320,6 +320,7 @@ void InputDialogFinanceiro::montarFluxoCaixa(const bool updateDate) {
         if (not modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt)) { return; }
         if (not modelFluxoCaixa.setData(row, "parcela", parcela + 1)) { return; }
         if (not modelFluxoCaixa.setData(row, "observacao", observacaoPgt)) { return; }
+        if (not modelFluxoCaixa.setData(row, "idConta", idConta)) { return; }
         if (not modelFluxoCaixa.setData(row, "grupo", "PRODUTOS - VENDA")) { return; }
       }
     }
@@ -466,7 +467,7 @@ void InputDialogFinanceiro::updateTableData(const QModelIndex &topLeft) {
 
     const auto match = modelPedidoFornecedor.match("idPedido1", modelPedidoFornecedor2.data(row, "idPedidoFK"), 1, Qt::MatchExactly);
 
-    if (match.isEmpty()) { return qApp->enqueueError("Erro atualizando valores na linha mãe!", this); }
+    if (match.isEmpty()) { return qApp->enqueueException("Erro atualizando valores na linha mãe!", this); }
 
     const int rowMae = match.first().row();
 
@@ -561,7 +562,7 @@ void InputDialogFinanceiro::setTreeView() {
 }
 
 bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
-  if (idCompra.isEmpty()) { return qApp->enqueueError(false, "IdCompra vazio!", this); }
+  if (idCompra.isEmpty()) { return qApp->enqueueException(false, "IdCompra vazio!", this); }
 
   QString filtro = "idCompra IN (" + idCompra + ")";
 
@@ -595,7 +596,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }
 
   representacao = query.value("representacao").toBool();
 

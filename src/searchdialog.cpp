@@ -170,7 +170,7 @@ QString SearchDialog::getText(const QVariant &id) {
   QSqlQuery query;
 
   if (not query.exec(queryText) or not query.first()) {
-    qApp->enqueueError("Erro na query getText: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro na query getText: " + query.lastError().text(), this);
     return QString();
   }
 

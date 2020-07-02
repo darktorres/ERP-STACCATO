@@ -346,13 +346,11 @@ void Application::showMessages() {
 
   showingErrors = true;
 
-  for (const auto &exception : std::as_const(exceptionQueue)) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
-
-  for (const auto &error : std::as_const(errorQueue)) {
+  for (const auto &exception : std::as_const(exceptionQueue)) {
     const QString error1 = "MySQL server has gone away";
     const QString error2 = "Lost connection to MySQL server during query";
 
-    const QString message = error.message;
+    const QString message = exception.message;
 
     if (message.contains(error1) or message.contains(error2)) {
       const bool conectado = dbReconnect(true);
@@ -362,13 +360,14 @@ void Application::showMessages() {
       if (conectado) {
         continue;
       } else {
-        QMessageBox::critical(error.widget, "Erro!", "Conexão com o servidor perdida!");
+        QMessageBox::critical(exception.widget, "Erro!", "Conexão com o servidor perdida!");
       }
     }
 
-    QMessageBox::critical(error.widget, "Erro!", error.message);
+    QMessageBox::critical(exception.widget, "Erro!", exception.message);
   }
 
+  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
   for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
   for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
 

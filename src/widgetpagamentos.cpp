@@ -134,7 +134,7 @@ bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", UserSession::idLoja());
 
-  if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { return qApp->enqueueException(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("ESCOLHA UMA OPÇÃO!");
@@ -172,13 +172,14 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError(false, "Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
+  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueException(false, "Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
 
   QSqlQuery queryPag;
-  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
+  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja AND apenasRepresentacao = :apenasRepresentacao");
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
+  queryPag.bindValue(":apenasRepresentacao", representacao);
 
-  if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { return qApp->enqueueException(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("ESCOLHA UMA OPÇÃO!");
@@ -220,7 +221,7 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listTipoPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
 
   const int parcelas = query.value("parcelas").toInt();
 
@@ -294,7 +295,7 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
 }
 
 void WidgetPagamentos::setTipo(const Tipo &novoTipo) {
-  if (novoTipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (novoTipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;
 
@@ -341,7 +342,7 @@ void WidgetPagamentos::calcularTotal() {
 }
 
 void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFrete) {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   auto *frame = new QFrame(this);
   auto *layout = new QHBoxLayout(frame);

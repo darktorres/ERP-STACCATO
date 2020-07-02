@@ -239,7 +239,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
     QSqlQuery query;
 
     if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+      return qApp->enqueueException("Erro: " + query.lastError().text(), this);
     }
 
     ui->comboBoxVendedores->addItem("");
@@ -268,7 +268,7 @@ void WidgetOrcamento::on_comboBoxLojas_currentIndexChanged() {
 bool WidgetOrcamento::listarLojas() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError(false, "Erro: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueException(false, "Erro: " + query.lastError().text(), this); }
 
   while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 

@@ -45,22 +45,24 @@ void CadastroPagamento::setupTables() {
   modelPagamentos.setHeaderData("pagamento", "Pagamento");
   modelPagamentos.setHeaderData("parcelas", "Parcelas");
   modelPagamentos.setHeaderData("idConta", "Conta Destino");
-  modelPagamentos.setHeaderData("prazoRecebe", "Prazo");
+  modelPagamentos.setHeaderData("pula1Mes", "Pula 1º Mês");
   modelPagamentos.setHeaderData("ajustaDiaUtil", "Ajusta Dia Útil");
   modelPagamentos.setHeaderData("dMaisUm", "D+1");
   modelPagamentos.setHeaderData("centavoSobressalente", "Centavo 1ª parcela");
+  modelPagamentos.setHeaderData("apenasRepresentacao", "Apenas Representação");
 
   if (not modelPagamentos.select()) { return; }
 
   ui->tablePagamentos->setModel(&modelPagamentos);
 
   ui->tablePagamentos->setItemDelegateForColumn("idConta", new ItemBoxDelegate(ItemBoxDelegate::Tipo::Conta, true, this));
-  ui->tablePagamentos->setItemDelegateForColumn("prazoRecebe", new EditDelegate(this));
+  ui->tablePagamentos->setItemDelegateForColumn("pula1Mes", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("ajustaDiaUtil", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("dMaisUm", new CheckBoxDelegate(true, this));
   ui->tablePagamentos->setItemDelegateForColumn("centavoSobressalente", new CheckBoxDelegate(true, this));
+  ui->tablePagamentos->setItemDelegateForColumn("apenasRepresentacao", new CheckBoxDelegate(true, this));
 
-  ui->tablePagamentos->setPersistentColumns({"idConta", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente"});
+  ui->tablePagamentos->setPersistentColumns({"idConta", "ajustaDiaUtil", "dMaisUm", "centavoSobressalente", "apenasRepresentacao"});
 
   ui->tablePagamentos->hideColumn("idPagamento");
 
@@ -89,10 +91,11 @@ void CadastroPagamento::setupTables() {
   ui->tableAssocia1->hideColumn("idPagamento");
   ui->tableAssocia1->hideColumn("parcelas");
   ui->tableAssocia1->hideColumn("idConta");
-  ui->tableAssocia1->hideColumn("prazoRecebe");
+  ui->tableAssocia1->hideColumn("pula1Mes");
   ui->tableAssocia1->hideColumn("ajustaDiaUtil");
   ui->tableAssocia1->hideColumn("dMaisUm");
   ui->tableAssocia1->hideColumn("centavoSobressalente");
+  ui->tableAssocia1->hideColumn("apenasRepresentacao");
 
   // -------------------------------------------------------------------------
 
@@ -118,20 +121,22 @@ void CadastroPagamento::setupMapper() {
   mapperPagamento.addMapping(ui->lineEditPagamento, modelPagamentos.fieldIndex("pagamento"));
   mapperPagamento.addMapping(ui->spinBoxParcelas, modelPagamentos.fieldIndex("parcelas"));
   mapperPagamento.addMapping(ui->itemBoxContaDestino, modelPagamentos.fieldIndex("idConta"), "id");
-  mapperPagamento.addMapping(ui->spinBoxPrazo, modelPagamentos.fieldIndex("prazoRecebe"));
+  mapperPagamento.addMapping(ui->checkBoxPula1Mes, modelPagamentos.fieldIndex("pula1Mes"));
   mapperPagamento.addMapping(ui->checkBoxDiaUtil, modelPagamentos.fieldIndex("ajustaDiaUtil"));
   mapperPagamento.addMapping(ui->checkBoxDMaisUm, modelPagamentos.fieldIndex("dMaisUm"));
   mapperPagamento.addMapping(ui->checkBoxCentavoSobressalente, modelPagamentos.fieldIndex("centavoSobressalente"));
+  mapperPagamento.addMapping(ui->checkBoxApenasRepresentacao, modelPagamentos.fieldIndex("apenasRepresentacao"));
 }
 
 void CadastroPagamento::limparSelecao() {
   ui->lineEditPagamento->clear();
   ui->spinBoxParcelas->setValue(1);
   ui->itemBoxContaDestino->clear();
-  ui->spinBoxPrazo->setValue(0);
+  ui->checkBoxPula1Mes->setChecked(false);
   ui->checkBoxDiaUtil->setChecked(false);
   ui->checkBoxDMaisUm->setChecked(false);
   ui->checkBoxCentavoSobressalente->setChecked(false);
+  ui->checkBoxApenasRepresentacao->setChecked(false);
 
   //--------------------------------------
 
@@ -148,6 +153,8 @@ void CadastroPagamento::limparSelecao() {
 }
 
 void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
+  // TODO: nao deixar cadastrar pagamento com nome já existente pois dá erro depois no montarFluxo()
+
   if (ui->lineEditPagamento->text().isEmpty()) {
     qApp->enqueueError("Digite um nome para o pagamento!", this);
     ui->lineEditPagamento->setFocus();
@@ -169,10 +176,11 @@ bool CadastroPagamento::adicionarPagamento() {
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
   if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "prazoRecebe", ui->spinBoxPrazo->value())) { return false; }
+  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
+  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
 
   if (not modelPagamentos.submitAll()) { return false; }
 
@@ -209,10 +217,11 @@ bool CadastroPagamento::atualizarPagamento() {
   if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
   if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
   if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "prazoRecebe", ui->spinBoxPrazo->value())) { return false; }
+  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
   if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
+  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
 
   //--------------------------------------
 
@@ -222,7 +231,7 @@ bool CadastroPagamento::atualizarPagamento() {
 
   if (novaParcelas < antigoParcelas) { // remove linhas
     for (int i = 0; i < diferenca; ++i) {
-      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { return qApp->enqueueError(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
+      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { return qApp->enqueueException(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
     }
   }
 
@@ -257,7 +266,7 @@ void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
 
   for (const auto &index : list) { modelPagamentos.removeRow(index.row()); }
 
-  if (not modelPagamentos.submitAll()) { return qApp->enqueueError("Erro removendo pagamentos: " + modelPagamentos.lastError().text(), this); }
+  if (not modelPagamentos.submitAll()) { return qApp->enqueueException("Erro removendo pagamentos: " + modelPagamentos.lastError().text(), this); }
 
   if (not modelTaxas.select()) { return; }
 
@@ -281,14 +290,14 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-    if (not query.exec()) { qApp->enqueueError("Erro cadastrando associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { qApp->enqueueException("Erro cadastrando associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
 
-  if (not modelAssocia2.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
 }
 
 void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
@@ -305,14 +314,14 @@ void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 
-    if (not query.exec()) { qApp->enqueueError("Erro removendo associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { qApp->enqueueException("Erro removendo associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
 
-  if (not modelAssocia2.select()) { qApp->enqueueError("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
 }
 
 void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {

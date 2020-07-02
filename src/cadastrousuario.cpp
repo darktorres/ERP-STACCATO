@@ -198,7 +198,7 @@ bool CadastroUsuario::cadastrar() {
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     if (tipo == Tipo::Cadastrar) {
       const int row = modelPermissoes.insertRowAtEnd();
@@ -230,7 +230,7 @@ bool CadastroUsuario::cadastrar() {
 void CadastroUsuario::criarUsuarioMySQL() {
   QFile file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError("Erro lendo mysql.txt: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString()); }
 
   const QString password = file.readAll();
 
@@ -239,12 +239,12 @@ void CadastroUsuario::criarUsuarioMySQL() {
   query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (not query.exec()) { return qApp->enqueueError("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
 
   query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
   query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (not query.exec()) { return qApp->enqueueError("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
 
   if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return; }
 }
@@ -256,7 +256,7 @@ void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 
-  if (not query.exec()) { return qApp->enqueueError("Erro buscando usuário: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro buscando usuário: " + query.lastError().text(), this); }
 
   if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!", this); }
 }

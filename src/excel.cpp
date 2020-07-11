@@ -11,7 +11,7 @@
 Excel::Excel(const QString &id, const Tipo tipo) : tipo(tipo), id(id) {}
 
 void Excel::hideUnusedRows(QXlsx::Document &xlsx) {
-  for (int row = queryProduto.size() + 12; row < 111; ++row) { xlsx.setRowHidden(row, true); }
+  for (int row = queryProduto.size() + 12; row < 398; ++row) { xlsx.setRowHidden(row, true); }
 }
 
 bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &representacao) {
@@ -110,12 +110,12 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
   const double subBru = query.value("subTotalBru").toDouble();
   const double desconto = query.value("descontoPorc").toDouble();
   // TODO: 0no lugar de calcular valores, usar os do BD
-  xlsx.write("N113", subLiq > subBru ? "R$ " + locale.toString(subLiq, 'f', 2) : "R$ " + locale.toString(subBru, 'f', 2) + " (R$ " + locale.toString(subLiq, 'f', 2) + ")"); // soma
-  xlsx.write("N114", locale.toString(desconto, 'f', 2) + "%");                                                                                                               // desconto
-  xlsx.write("N115", "R$ " + locale.toString(subLiq - (desconto / 100. * subLiq), 'f', 2));                                                                                  // total
-  xlsx.write("N116", "R$ " + locale.toString(query.value("frete").toDouble(), 'f', 2));                                                                                      // frete
-  xlsx.write("N117", "R$ " + locale.toString(query.value("total").toDouble(), 'f', 2));                                                                                      // total final
-  xlsx.write("B113", query.value("prazoEntrega").toString() + " dias");
+  xlsx.write("N400", subLiq > subBru ? "R$ " + locale.toString(subLiq, 'f', 2) : "R$ " + locale.toString(subBru, 'f', 2) + " (R$ " + locale.toString(subLiq, 'f', 2) + ")"); // soma
+  xlsx.write("N401", locale.toString(desconto, 'f', 2) + "%");                                                                                                               // desconto
+  xlsx.write("N402", "R$ " + locale.toString(subLiq - (desconto / 100. * subLiq), 'f', 2));                                                                                  // total
+  xlsx.write("N403", "R$ " + locale.toString(query.value("frete").toDouble(), 'f', 2));                                                                                      // frete
+  xlsx.write("N404", "R$ " + locale.toString(query.value("total").toDouble(), 'f', 2));                                                                                      // total final
+  xlsx.write("B400", query.value("prazoEntrega").toString() + " dias");
 
   const QString pgtQuery = "SELECT ANY_VALUE(tipo) AS tipo, COUNT(valor) AS parcelas, ANY_VALUE(valor) AS valor, ANY_VALUE(dataPagamento) AS dataPagamento, ANY_VALUE(observacao) AS observacao FROM "
                            "conta_a_receber_has_pagamento WHERE idVenda = '" +
@@ -136,10 +136,10 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
     const QString pgt = queryPgt.value("tipo").toString() + " - " + queryPgt.value("parcelas").toString() + "x de R$ " + locale.toString(queryPgt.value("valor").toDouble(), 'f', 2) + pagEm +
                         queryPgt.value("dataPagamento").toDate().toString("dd-MM-yyyy") + (observacao.isEmpty() ? "" : " - " + observacao);
 
-    xlsx.write("B" + QString::number(113 + i), pgt);
+    xlsx.write("B" + QString::number(400 + i), pgt);
   }
 
-  xlsx.write("B119", query.value("observacao").toString().replace("\n", " "));
+  xlsx.write("B406", query.value("observacao").toString().replace("\n", " "));
 
   // TODO: 5refator this to start at 12
   int row = 0;

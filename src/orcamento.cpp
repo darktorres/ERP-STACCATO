@@ -628,11 +628,15 @@ void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
   const double step = ui->doubleSpinBoxQuant->singleStep();
+  const double prcUn = ui->lineEditPrecoUn->getValue();
+  const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
   const double caixas = quant / step;
+  const double itemBruto = quant * prcUn;
 
   unsetConnections();
 
-  if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
+  ui->doubleSpinBoxCaixas->setValue(caixas);
+  ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
 
   setConnections();
 }
@@ -806,9 +810,9 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 }
 
 void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
-  const double quant = caixas * ui->spinBoxQuantCx->value();
   const double prcUn = ui->lineEditPrecoUn->getValue();
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
+  const double quant = caixas * ui->spinBoxQuantCx->value();
   const double itemBruto = quant * prcUn;
 
   unsetConnections();

@@ -491,6 +491,7 @@ void Venda::registerMode() {
   ui->pushButtonGerarExcel->hide();
   ui->pushButtonGerarPdf->hide();
   ui->tableFluxoCaixa2->hide();
+  ui->labelRT->hide();
 
   ui->itemBoxConsultor->setReadOnlyItemBox(true);
 
@@ -578,6 +579,19 @@ bool Venda::viewRegister() {
       modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND (comissao = TRUE OR taxa = TRUE)");
 
       if (not modelFluxoCaixa2.select()) { return false; }
+
+      for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(true); }
+
+      ui->frameRT->show();
+      ui->labelRT->show();
+      ui->checkBoxPontuacaoIsento->hide();
+      ui->checkBoxPontuacaoPadrao->hide();
+      ui->checkBoxRT->hide();
+
+      ui->doubleSpinBoxPontuacao->setValue(data("rt").toDouble());
+      ui->doubleSpinBoxPontuacao->setEnabled(true);
+      ui->doubleSpinBoxPontuacao->setReadOnly(true);
+      ui->doubleSpinBoxPontuacao->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
 
     //-----------------------------------------------------------------

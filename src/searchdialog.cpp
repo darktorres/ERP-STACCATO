@@ -254,6 +254,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->setHeaderData("statusEstoque", "Estoque");
   sdProd->setHeaderData("descricao", "Descrição");
   sdProd->setHeaderData("estoqueRestante", "Estoque Disp.");
+  sdProd->setHeaderData("estoqueCaixa", "Estoque Cx.");
   sdProd->setHeaderData("lote", "Lote");
   sdProd->setHeaderData("un", "Un.");
   sdProd->setHeaderData("un2", "Un.2");

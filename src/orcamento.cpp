@@ -813,10 +813,8 @@ void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
 
   unsetConnections();
 
-  [&] {
-    ui->doubleSpinBoxQuant->setValue(quant);
-    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-  }();
+  ui->doubleSpinBoxQuant->setValue(quant);
+  ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
 
   setConnections();
 }

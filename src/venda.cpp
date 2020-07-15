@@ -617,6 +617,36 @@ bool Venda::viewRegister() {
   return ok;
 }
 
+bool Venda::criarComissaoProfissional() {
+  if (ui->checkBoxPontuacaoPadrao->isChecked() and ui->itemBoxProfissional->getId() != 1) {
+    const QDate date = ui->dateTimeEdit->date();
+    const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
+
+    if (not qFuzzyIsNull(valor)) {
+      QSqlQuery query1;
+      query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
+                     "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+      query1.bindValue(":dataEmissao", date);
+      query1.bindValue(":idVenda", ui->lineEditVenda->text());
+      query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
+      query1.bindValue(":idLoja", idLoja);
+      query1.bindValue(":centroCusto", idLoja);
+      query1.bindValue(":valor", valor);
+      query1.bindValue(":tipo", "1. Dinheiro");
+      // 01-15 paga dia 30, 16-30 paga prox dia 15
+      QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
+      QDate quinzena2 = date.addMonths(1);
+      quinzena2.setDate(quinzena2.year(), quinzena2.month(), 15);
+      query1.bindValue(":dataPagamento", date.day() <= 15 ? quinzena1 : quinzena2);
+      query1.bindValue(":grupo", "RT's");
+
+      if (not query1.exec()) { return qApp->enqueueException(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
+    }
+  }
+
+  return true;
+}
+
 bool Venda::verificaDisponibilidadeEstoque() {
   QSqlQuery query;
 
@@ -983,7 +1013,7 @@ bool Venda::atualizarCredito() {
   double creditoRestante = ui->widgetPgts->getCredito();
   bool update = false;
 
-  for (int i = 0; i < ui->widgetPgts->listCheckBoxRep.size(); ++i) {
+  for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
     if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") {
       creditoRestante -= ui->widgetPgts->listValorPgt.at(i)->value();
       update = true;
@@ -1006,7 +1036,7 @@ bool Venda::cadastrar() {
   if (not qApp->startTransaction("Venda::cadastrar")) { return false; }
 
   const bool success = [&] {
-    if (tipo == Tipo::Cadastrar) {
+    if (tipo == Tipo::Cadastrar) { // TODO: como sempre é cadastro, verificar se esse if pode ser removido
       if (not generateId()) { return false; }
 
       currentRow = model.insertRowAtEnd();
@@ -1016,33 +1046,7 @@ bool Venda::cadastrar() {
 
     if (not atualizarCredito()) { return false; }
 
-    // inserir rt em contas_pagar
-
-    if (ui->checkBoxPontuacaoPadrao->isChecked() and ui->itemBoxProfissional->getId() != 1) {
-      const QDate date = ui->dateTimeEdit->date();
-      const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
-
-      if (not qFuzzyIsNull(valor)) {
-        QSqlQuery query1;
-        query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
-                       "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
-        query1.bindValue(":dataEmissao", date);
-        query1.bindValue(":idVenda", ui->lineEditVenda->text());
-        query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
-        query1.bindValue(":idLoja", idLoja);
-        query1.bindValue(":centroCusto", idLoja);
-        query1.bindValue(":valor", valor);
-        query1.bindValue(":tipo", "1. Dinheiro");
-        // 01-15 paga dia 30, 16-30 paga prox dia 15
-        QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
-        QDate quinzena2 = date.addMonths(1);
-        quinzena2.setDate(quinzena2.year(), quinzena2.month(), 15);
-        query1.bindValue(":dataPagamento", date.day() <= 15 ? quinzena1 : quinzena2);
-        query1.bindValue(":grupo", "RT's");
-
-        if (not query1.exec()) { return qApp->enqueueException(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
-      }
-    }
+    if (not criarComissaoProfissional()) { return false; }
 
     // -------------------------------------------------------------------------
 

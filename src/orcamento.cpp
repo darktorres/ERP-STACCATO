@@ -630,7 +630,11 @@ void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
   const double step = ui->doubleSpinBoxQuant->singleStep();
   const double caixas = quant / step;
 
+  unsetConnections();
+
   if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
+
+  setConnections();
 }
 
 void Orcamento::on_pushButtonCadastrarOrcamento_clicked() {

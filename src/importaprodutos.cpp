@@ -72,13 +72,13 @@ bool ImportaProdutos::atualizaProduto() {
 }
 
 bool ImportaProdutos::importar() {
-  progressDialog->show();
-
   QXlsx::Document xlsx(file);
 
   if (not xlsx.selectSheet("BASE")) { return false; }
-
   if (not verificaTabela(xlsx)) { return false; }
+
+  progressDialog->show();
+
   if (not cadastraFornecedores(xlsx)) { return false; }
   if (not verificaSeRepresentacao()) { return false; }
   if (not marcaTodosProdutosDescontinuados()) { return false; }
@@ -125,7 +125,7 @@ bool ImportaProdutos::importar() {
 
   setupTables();
 
-  show();
+  showMaximized();
 
   const QString resultado = "Produtos importados: " + QString::number(itensImported) + "\nProdutos atualizados: " + QString::number(itensUpdated) +
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
@@ -158,7 +158,6 @@ bool ImportaProdutos::readFile() {
 }
 
 bool ImportaProdutos::readValidade() {
-  // TODO: colocar um checkbox para o usuario poder dizer se essa tabela nao tem validade (caso do atelier)
   auto *validadeDlg = new ValidadeDialog(this);
 
   if (not validadeDlg->exec()) { return false; }
@@ -957,28 +956,28 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
 }
 
 bool ImportaProdutos::verificaTabela(QXlsx::Document &xlsx) {
-  if (xlsx.read(1, 1).toString() != "fornecedor") { return false; }
-  if (xlsx.read(1, 2).toString() != "descricao") { return false; }
-  if (xlsx.read(1, 3).toString() != "un") { return false; }
-  if (xlsx.read(1, 4).toString() != "colecao") { return false; }
-  if (xlsx.read(1, 5).toString() != "m2cx") { return false; }
-  if (xlsx.read(1, 6).toString() != "pccx") { return false; }
-  if (xlsx.read(1, 7).toString() != "kgcx") { return false; }
-  if (xlsx.read(1, 8).toString() != "formComercial") { return false; }
-  if (xlsx.read(1, 9).toString() != "codComercial") { return false; }
-  if (xlsx.read(1, 10).toString() != "codBarras") { return false; }
-  if (xlsx.read(1, 11).toString() != "ncm") { return false; }
-  if (xlsx.read(1, 12).toString() != "qtdPallet") { return false; }
-  if (xlsx.read(1, 13).toString() != "custo") { return false; }
-  if (xlsx.read(1, 14).toString() != "precoVenda") { return false; }
-  if (xlsx.read(1, 15).toString() != "ui") { return false; }
-  if (xlsx.read(1, 16).toString() != "un2") { return false; }
-  if (xlsx.read(1, 17).toString() != "minimo") { return false; }
-  if (xlsx.read(1, 18).toString() != "mva") { return false; }
-  if (xlsx.read(1, 19).toString() != "st") { return false; }
-  if (xlsx.read(1, 20).toString() != "sticms") { return false; }
+  if (xlsx.read(1, 1).toString() != "fornecedor") { return qApp->enqueueError(false, "Faltou a coluna 'fornecedor' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 2).toString() != "descricao") { return qApp->enqueueError(false, "Faltou a coluna 'descricao' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 3).toString() != "un") { return qApp->enqueueError(false, "Faltou a coluna 'un' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 4).toString() != "colecao") { return qApp->enqueueError(false, "Faltou a coluna 'colecao' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 5).toString() != "m2cx") { return qApp->enqueueError(false, "Faltou a coluna 'm2cx' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 6).toString() != "pccx") { return qApp->enqueueError(false, "Faltou a coluna 'pccx' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 7).toString() != "kgcx") { return qApp->enqueueError(false, "Faltou a coluna 'kgcx' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 8).toString() != "formComercial") { return qApp->enqueueError(false, "Faltou a coluna 'formComercial' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 9).toString() != "codComercial") { return qApp->enqueueError(false, "Faltou a coluna 'codComercial' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 10).toString() != "codBarras") { return qApp->enqueueError(false, "Faltou a coluna 'codBarras' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 11).toString() != "ncm") { return qApp->enqueueError(false, "Faltou a coluna 'ncm' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 12).toString() != "qtdPallet") { return qApp->enqueueError(false, "Faltou a coluna 'qtdPallet' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 13).toString() != "custo") { return qApp->enqueueError(false, "Faltou a coluna 'custo' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 14).toString() != "precoVenda") { return qApp->enqueueError(false, "Faltou a coluna 'precoVenda' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 15).toString() != "ui") { return qApp->enqueueError(false, "Faltou a coluna 'ui' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 16).toString() != "un2") { return qApp->enqueueError(false, "Faltou a coluna 'un2' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 17).toString() != "minimo") { return qApp->enqueueError(false, "Faltou a coluna 'minimo' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 18).toString() != "mva") { return qApp->enqueueError(false, "Faltou a coluna 'mva' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 19).toString() != "st") { return qApp->enqueueError(false, "Faltou a coluna 'st' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 20).toString() != "sticms") { return qApp->enqueueError(false, "Faltou a coluna 'sticms' no cabeçalho da tabela!"); }
 
-  if (xlsx.read(2, 1).toString().contains("=IF(")) { return qApp->enqueueError(false, "Células estão com fórmula! Trocar por valores no Excel!", this); }
+  if (xlsx.read(2, 1).toString().contains("=IF")) { return qApp->enqueueError(false, "Células estão com fórmula! Trocar por valores no Excel!", this); }
 
   return true;
 }

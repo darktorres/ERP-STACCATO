@@ -242,6 +242,10 @@ void ImportaProdutos::setupModels() {
   modelErro.setHeaderData("markup", "Markup");
 
   modelErro.proxyModel = new ImportaProdutosProxyModel(&modelErro, this);
+
+  //-------------------------------------------------------------//
+
+  modelEstoque.setTable("produto");
 }
 
 void ImportaProdutos::setupTables() {
@@ -393,6 +397,12 @@ bool ImportaProdutos::mostraApenasEstesFornecedores() {
 
   if (not modelProduto.select()) { return false; }
 
+  //-------------------------------------------------------------//
+
+  modelEstoque.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = TRUE AND promocao = FALSE");
+
+  if (not modelEstoque.select()) { return false; }
+
   return true;
 }
 
@@ -458,6 +468,14 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
 
 bool ImportaProdutos::atualizaCamposProduto(const int row) {
   bool changed = false;
+
+  const auto estoqueList = modelEstoque.match("idProdutoRelacionado", modelProduto.data(row, "idProduto"), 1, Qt::MatchExactly);
+
+  for (auto estoqueIndex : estoqueList) {
+    if (produto.precoVenda > modelEstoque.data(estoqueIndex.row(), "precoVenda").toDouble()) {
+      if (not modelEstoque.setData(estoqueIndex.row(), "precoVenda", produto.precoVenda)) { return false; }
+    }
+  }
 
   if (not modelProduto.setData(row, "atualizarTabelaPreco", true)) { return false; }
 
@@ -919,6 +937,8 @@ std::optional<int> ImportaProdutos::buscarCadastrarFornecedor() {
 
 bool ImportaProdutos::salvar() {
   if (not modelProduto.submitAll()) { return false; }
+
+  if (not modelEstoque.submitAll()) { return false; }
 
   QSqlQuery queryPrecos;
 

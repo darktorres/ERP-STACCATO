@@ -74,6 +74,7 @@ private:
   QString validadeString;
   SqlTableModel modelProduto;
   SqlTableModel modelErro;
+  SqlTableModel modelEstoque;
   const Tipo tipo;
   Ui::ImportaProdutos *ui;
   // methods

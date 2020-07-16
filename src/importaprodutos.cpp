@@ -164,7 +164,7 @@ bool ImportaProdutos::readValidade() {
   if (not validadeDlg->exec()) { return false; }
 
   validade = validadeDlg->getValidade();
-  validadeString = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd");
+  if (validade != -1) { validadeString = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd"); }
 
   return true;
 }
@@ -376,7 +376,7 @@ bool ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
 
     QSqlQuery queryFornecedor;
     queryFornecedor.prepare("UPDATE fornecedor SET validadeProdutos = :validade WHERE razaoSocial = :razaoSocial");
-    queryFornecedor.bindValue(":validade", qApp->serverDate().addDays(validade));
+    queryFornecedor.bindValue(":validade", (validade == -1) ? QVariant() : qApp->serverDate().addDays(validade));
     queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
     if (not queryFornecedor.exec()) { return qApp->enqueueException(false, "Erro salvando validade: " + queryFornecedor.lastError().text(), this); }
@@ -649,8 +649,10 @@ bool ImportaProdutos::atualizaCamposProduto(const int row) {
     if (not modelProduto.setData(row, "markupUpd", white)) { return false; }
   }
 
-  if (modelProduto.data(row, "validade") != validadeString) {
-    if (not modelProduto.setData(row, "validade", validadeString)) { return false; }
+  const QDate dataSalva = modelProduto.data(row, "validade").toDate();
+
+  if ((dataSalva.isValid() and dataSalva.toString("yyyy-MM-dd") != validadeString) or (not dataSalva.isValid() and not validadeString.isEmpty())) {
+    if (not modelProduto.setData(row, "validade", (validade == -1) ? QVariant() : validadeString)) { return false; }
     if (not modelProduto.setData(row, "validadeUpd", yellow)) { return false; }
     changed = true;
   } else {
@@ -767,7 +769,7 @@ bool ImportaProdutos::insereEmErro() {
   if (not modelErro.setData(row, "sticms", produto.sticms)) { return false; }
   if (not modelErro.setData(row, "quantCaixa", produto.quantCaixa)) { return false; }
   if (not modelErro.setData(row, "markup", produto.markup)) { return false; }
-  if (not modelErro.setData(row, "validade", validadeString)) { return false; }
+  if (not modelErro.setData(row, "validade", (validade == -1) ? QVariant() : validadeString)) { return false; }
 
   // paint cells
   const int green = static_cast<int>(FieldColors::Green);
@@ -836,7 +838,7 @@ bool ImportaProdutos::insereEmOk() {
   if (not modelProduto.setData(row, "sticms", produto.sticms)) { return false; }
   if (not modelProduto.setData(row, "quantCaixa", produto.quantCaixa)) { return false; }
   if (not modelProduto.setData(row, "markup", produto.markup)) { return false; }
-  if (not modelProduto.setData(row, "validade", validadeString)) { return false; }
+  if (not modelProduto.setData(row, "validade", (validade == -1) ? QVariant() : validadeString)) { return false; }
 
   // paint cells
   const int green = static_cast<int>(FieldColors::Green);
@@ -920,12 +922,16 @@ bool ImportaProdutos::salvar() {
   if (not modelProduto.submitAll()) { return false; }
 
   QSqlQuery queryPrecos;
-  queryPrecos.prepare("INSERT INTO produto_has_preco (idProduto, preco, validadeInicio, validadeFim) SELECT idProduto, precoVenda, :validadeInicio AS validadeInicio, :validadeFim AS validadeFim FROM "
-                      "produto WHERE atualizarTabelaPreco = TRUE");
-  queryPrecos.bindValue(":validadeInicio", qApp->serverDate().toString("yyyy-MM-dd"));
-  queryPrecos.bindValue(":validadeFim", validadeString);
 
-  if (not queryPrecos.exec()) { return qApp->enqueueException(false, "Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text(), this); }
+  if (validade != -1) {
+    queryPrecos.prepare(
+        "INSERT INTO produto_has_preco (idProduto, preco, validadeInicio, validadeFim) SELECT idProduto, precoVenda, :validadeInicio AS validadeInicio, :validadeFim AS validadeFim FROM "
+        "produto WHERE atualizarTabelaPreco = TRUE");
+    queryPrecos.bindValue(":validadeInicio", qApp->serverDate().toString("yyyy-MM-dd"));
+    queryPrecos.bindValue(":validadeFim", validadeString);
+
+    if (not queryPrecos.exec()) { return qApp->enqueueException(false, "Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text(), this); }
+  }
 
   if (not queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE")) { return qApp->enqueueException(false, "Erro comunicando com banco de dados: " + queryPrecos.lastError().text(), this); }
 

@@ -548,8 +548,6 @@ void Venda::updateMode() {
 
   ui->dateTimeEdit->setCalendarPopup(false);
   ui->dateTimeEdit->setButtonSymbols(QDateTimeEdit::NoButtons);
-
-  ui->framePagamentos->adjustSize();
 }
 
 bool Venda::viewRegister() {

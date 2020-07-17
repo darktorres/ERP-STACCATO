@@ -10,7 +10,7 @@ class WidgetFinanceiro final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiro(QWidget *parent = nullptr);
+  explicit WidgetFinanceiro(QWidget *parent);
   ~WidgetFinanceiro();
   auto resetTables() -> void;
   auto updateTables() -> void;

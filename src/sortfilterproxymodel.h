@@ -6,5 +6,5 @@ class SortFilterProxyModel : public QSortFilterProxyModel {
   Q_OBJECT
 
 public:
-  explicit SortFilterProxyModel(QAbstractItemModel *model, QObject *parent = nullptr);
+  explicit SortFilterProxyModel(QAbstractItemModel *model, QObject *parent);
 };

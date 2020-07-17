@@ -11,7 +11,7 @@ class CadastroCliente final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroCliente(QWidget *parent = nullptr);
+  explicit CadastroCliente(QWidget *parent);
   ~CadastroCliente() final;
 
 private:
@@ -43,12 +43,13 @@ private:
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
+  auto verificaVinculo() -> std::optional<bool>;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
-  auto setConnections() -> void;
 };

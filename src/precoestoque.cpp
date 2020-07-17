@@ -106,7 +106,7 @@ void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
     return;
   }
 
-  QStringList strings = text.split(" ", QString::SkipEmptyParts);
+  QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
   for (auto &string : strings) {
     if (string.contains("-")) {

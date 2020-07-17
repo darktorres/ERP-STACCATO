@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>216</width>
-    <height>167</height>
+    <width>222</width>
+    <height>196</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,26 @@
    <locale language="Portuguese" country="Brazil"/>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="5">
-    <widget class="QLineEdit" name="lineEditPass">
-     <property name="echoMode">
-      <enum>QLineEdit::Password</enum>
+   <item row="0" column="4">
+    <widget class="QLabel" name="labelUser">
+     <property name="text">
+      <string>Usuário:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="5">
+    <widget class="QComboBox" name="comboBoxLoja">
+     <item>
+      <property name="text">
+       <string/>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="4" column="4">
+    <widget class="QLabel" name="labelHostname">
+     <property name="text">
+      <string>Loja:</string>
      </property>
     </widget>
    </item>
@@ -30,6 +46,16 @@
       <string>Senha:</string>
      </property>
     </widget>
+   </item>
+   <item row="4" column="5">
+    <widget class="QLineEdit" name="lineEditHostname">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="5">
+    <widget class="QLineEdit" name="lineEditUser"/>
    </item>
    <item row="2" column="4">
     <widget class="QPushButton" name="pushButtonConfig">
@@ -46,32 +72,11 @@
       <iconset resource="../qrs/resources.qrc">
        <normaloff>:/gear.png</normaloff>:/gear.png</iconset>
      </property>
-     <property name="flat">
+     <property name="autoDefault">
       <bool>false</bool>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="4">
-    <widget class="QLabel" name="labelUser">
-     <property name="text">
-      <string>Usuário:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="5">
-    <widget class="QLineEdit" name="lineEditHostname">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="5">
-    <widget class="QLineEdit" name="lineEditUser"/>
-   </item>
-   <item row="3" column="4">
-    <widget class="QLabel" name="labelHostname">
-     <property name="text">
-      <string>Loja:</string>
+     <property name="flat">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -82,13 +87,18 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="5">
-    <widget class="QComboBox" name="comboBoxLoja">
-     <item>
-      <property name="text">
-       <string/>
-      </property>
-     </item>
+   <item row="1" column="5">
+    <widget class="QLineEdit" name="lineEditPass">
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="5">
+    <widget class="QCheckBox" name="checkBoxSalvarSenha">
+     <property name="text">
+      <string>Salvar senha</string>
+     </property>
     </widget>
    </item>
   </layout>

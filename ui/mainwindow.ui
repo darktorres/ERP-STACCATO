@@ -350,7 +350,7 @@ QTabWidget::pane {
      <x>0</x>
      <y>0</y>
      <width>764</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOpcoes">
@@ -382,6 +382,7 @@ QTabWidget::pane {
     </property>
     <addaction name="actionCadastrarProfissional"/>
     <addaction name="actionGerenciar_Lojas"/>
+    <addaction name="actionGerenciar_pagamentos"/>
     <addaction name="actionGerenciar_Transportadoras"/>
     <addaction name="actionCadastrarUsuario"/>
     <addaction name="actionCadastrarFornecedor"/>
@@ -536,6 +537,11 @@ QTabWidget::pane {
   <action name="actionGerenciar_NCMs">
    <property name="text">
     <string>Gerenciar NCMs</string>
+   </property>
+  </action>
+  <action name="actionGerenciar_pagamentos">
+   <property name="text">
+    <string>Gerenciar pagamentos</string>
    </property>
   </action>
  </widget>

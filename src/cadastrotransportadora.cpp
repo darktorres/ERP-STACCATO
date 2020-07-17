@@ -66,7 +66,7 @@ void CadastroTransportadora::setupTables() {
   ui->tableVeiculo->hideColumn("idVeiculo");
   ui->tableVeiculo->hideColumn("idTransportadora");
 
-  ui->tableVeiculo->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableVeiculo->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableVeiculo->setPersistentColumns({"desativado"});
 
@@ -78,7 +78,7 @@ void CadastroTransportadora::setupTables() {
   ui->tableEndereco->hideColumn("idTransportadora");
   ui->tableEndereco->hideColumn("codUF");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 }
@@ -362,7 +362,7 @@ bool CadastroTransportadora::cadastrar() {
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     // -------------------------------------------------------------------------
 

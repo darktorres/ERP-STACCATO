@@ -12,7 +12,7 @@ class WidgetLogisticaCaminhao final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaCaminhao(QWidget *parent = nullptr);
+  explicit WidgetLogisticaCaminhao(QWidget *parent);
   ~WidgetLogisticaCaminhao();
   auto resetTables() -> void;
   auto updateTables() -> void;

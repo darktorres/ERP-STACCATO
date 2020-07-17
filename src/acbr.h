@@ -8,7 +8,8 @@ class ACBr final : public QObject {
   Q_OBJECT
 
 public:
-  explicit ACBr(QObject *parent = nullptr);
+  explicit ACBr(QObject *parent);
+  explicit ACBr();
   ~ACBr() = default;
   auto consultarNFe(const int idNFe) -> std::optional<std::tuple<QString, QString>>;
   auto enviarComando(const QString &comando, const bool local = false) -> std::optional<QString>;

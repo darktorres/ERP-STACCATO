@@ -6,6 +6,16 @@
 #include <QSharedMemory>
 
 int main(int argc, char *argv[]) {
+#ifdef _WIN32
+  if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+  }
+#endif
+
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
   Application app(argc, argv);
 
 #ifdef Q_OS_WIN

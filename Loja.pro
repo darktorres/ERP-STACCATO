@@ -4,9 +4,16 @@
 #
 #-------------------------------------------------
 
+!versionAtLeast(QT_VERSION, 5.14.0) {
+    error("Use Qt 5.14 ou mais novo")
+}
+
+win32-msvc* {
+    error("Não compatível com VisualStudio, use MinGW")
+}
+
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.75
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -17,11 +24,7 @@ QT *= core gui sql network xml charts widgets
 DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
-versionAtLeast(QT_VERSION, 5.12){
-    CONFIG *= c++17
-    } else {
-    CONFIG *= c++1z
-    }
+CONFIG *= c++17
 
 message($$QMAKESPEC)
 
@@ -39,8 +42,8 @@ win32{
 contains(CONFIG, deploy){
     message(deploy)
     DEFINES *= DEPLOY
-    QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
-    QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
+    QMAKE_CXXFLAGS_RELEASE *= -O3
+    QMAKE_LFLAGS_RELEASE *= -O3
 } else{
     QMAKE_CXXFLAGS_DEBUG *= -O0
     QMAKE_CXXFLAGS_RELEASE *= -O0
@@ -48,10 +51,8 @@ contains(CONFIG, deploy){
     QMAKE_LFLAGS_RELEASE *= -O0
 }
 
-#win32-g++{
-#    PRECOMPILED_HEADER = pch.h
-#    CONFIG *= precompile_header
-#}
+    PRECOMPILED_HEADER = pch.h
+    CONFIG *= precompile_header
 
 *-g++{
     QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
@@ -73,8 +74,8 @@ linux-g++{
 
     QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 
-    #QMAKE_CXXFLAGS *= -flto
-    #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
+#    QMAKE_CXXFLAGS *= -flto
+#    QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
@@ -83,8 +84,20 @@ linux-clang{
 
     QMAKE_LFLAGS *= -fuse-ld=lld-9
 
-    #QMAKE_CXXFLAGS *= -flto=thin
-    #QMAKE_LFLAGS *= -flto=thin
+#    QMAKE_CXXFLAGS *= -flto=thin
+#    QMAKE_LFLAGS *= -flto=thin
+}
+
+win32{
+    exists($(QTDIR)/bin/ccache.exe){
+        message("using ccache")
+        QMAKE_CC = ccache $$QMAKE_CC
+        QMAKE_CXX = ccache $$QMAKE_CXX
+        message($$QMAKE_CC)
+        message($$QMAKE_CXX)
+
+        QMAKE_CXXFLAGS += -fpch-preprocess # must also set sloppiness to pch_defines,time_macros in ccache.conf
+    }
 }
 
 linux{
@@ -112,6 +125,7 @@ SOURCES += \
     src/cadastrofornecedor.cpp \
     src/cadastroloja.cpp \
     src/cadastroncm.cpp \
+    src/cadastropagamento.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
     src/cadastrotransportadora.cpp \
@@ -122,6 +136,7 @@ SOURCES += \
     src/charttooltip.cpp \
     src/chartview.cpp \
     src/checkboxdelegate.cpp \
+    src/cnab.cpp \
     src/collapsiblewidget.cpp \
     src/combobox.cpp \
     src/comboboxdelegate.cpp \
@@ -233,6 +248,7 @@ HEADERS  += \
     src/cadastrofornecedor.h \
     src/cadastroloja.h \
     src/cadastroncm.h \
+    src/cadastropagamento.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
     src/cadastrotransportadora.h \
@@ -243,6 +259,7 @@ HEADERS  += \
     src/charttooltip.h \
     src/chartview.h \
     src/checkboxdelegate.h \
+    src/cnab.h \
     src/collapsiblewidget.h \
     src/combobox.h \
     src/comboboxdelegate.h \
@@ -351,12 +368,14 @@ FORMS += \
     ui/cadastrofornecedor.ui \
     ui/cadastroloja.ui \
     ui/cadastroncm.ui \
+    ui/cadastropagamento.ui \
     ui/cadastroproduto.ui \
     ui/cadastroprofissional.ui \
     ui/cadastrotransportadora.ui \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
+    ui/cnab.ui \
     ui/collapsiblewidget.ui \
     ui/comprovantes.ui \
     ui/contas.ui \

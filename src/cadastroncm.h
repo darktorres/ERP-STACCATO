@@ -12,7 +12,7 @@ class CadastroNCM final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroNCM(QWidget *parent = nullptr);
+  explicit CadastroNCM(QWidget *parent);
   ~CadastroNCM();
 
 private:

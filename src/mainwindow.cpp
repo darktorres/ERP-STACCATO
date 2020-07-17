@@ -6,6 +6,7 @@
 #include "cadastrofornecedor.h"
 #include "cadastroloja.h"
 #include "cadastroncm.h"
+#include "cadastropagamento.h"
 #include "cadastroproduto.h"
 #include "cadastroprofissional.h"
 #include "cadastrotransportadora.h"
@@ -39,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionGerenciar_Lojas, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Lojas_triggered);
   connect(ui->actionGerenciar_NCMs, &QAction::triggered, this, &MainWindow::on_actionGerenciar_NCMs_triggered);
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
+  connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
   connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
   connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
@@ -57,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
   } else {
-    qApp->enqueueError("A chave 'hostname' não está configurada!", this);
+    qApp->enqueueException("A chave 'hostname' não está configurada!", this);
   }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
@@ -89,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
-    qApp->enqueueError("Erro lendo permissões: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro lendo permissões: " + query.lastError().text(), this);
   }
 
   // -------------------------------------------------------------------------
@@ -120,7 +122,48 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabConsistencia), true); }
 }
 
+MainWindow::MainWindow() : MainWindow(nullptr) {}
+
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::resetTables() {
+  ui->widgetOrcamento->resetTables();
+  ui->widgetVenda->resetTables();
+  ui->widgetCompra->resetTables();
+  ui->widgetLogistica->resetTables();
+  ui->widgetNfe->resetTables();
+  ui->widgetEstoque->resetTables();
+  ui->widgetFinanceiro->resetTables();
+  ui->widgetRelatorio->resetTables();
+  ui->widgetGraficos->resetTables();
+  ui->widgetConsistencia->resetTables();
+
+  updateTables();
+}
+
+void MainWindow::updateTables() {
+  if (qApp->getUpdating()) { return; }
+  if (not qApp->getIsConnected()) { return; }
+  if (qApp->getShowingErrors()) { return; }
+
+  qApp->setUpdating(true);
+
+  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+
+  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
+  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
+  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
+  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
+  if (currentText == "RH") { ui->widgetRh->updateTables(); }
+  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
+
+  qApp->setUpdating(false);
+}
 
 void MainWindow::reconnectDb() {
   const bool conectado = qApp->dbReconnect();
@@ -134,6 +177,18 @@ void MainWindow::verifyDb(const bool conectado) {
 
   if (conectado) { resetTables(); }
 }
+
+bool MainWindow::event(QEvent *event) {
+  switch (event->type()) {
+  case QEvent::WindowActivate: updateTables(); break;
+
+  default: break;
+  }
+
+  return QMainWindow::event(event);
+}
+
+void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionCriarOrcamento_triggered() {
   auto *orcamento = new Orcamento(this);
@@ -177,62 +232,11 @@ void MainWindow::on_actionGerenciar_Lojas_triggered() {
   cad->show();
 }
 
-void MainWindow::resetTables() {
-  ui->widgetOrcamento->resetTables();
-  ui->widgetVenda->resetTables();
-  ui->widgetCompra->resetTables();
-  ui->widgetLogistica->resetTables();
-  ui->widgetNfe->resetTables();
-  ui->widgetEstoque->resetTables();
-  ui->widgetFinanceiro->resetTables();
-  ui->widgetRelatorio->resetTables();
-  ui->widgetGraficos->resetTables();
-  ui->widgetConsistencia->resetTables();
-
-  updateTables();
-}
-
-void MainWindow::updateTables() {
-  if (qApp->getUpdating()) { return; }
-  if (not qApp->getIsConnected()) { return; }
-  if (qApp->getShowingErrors()) { return; }
-
-  qApp->setUpdating(true);
-
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
-
-  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
-  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
-  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
-  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
-  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
-  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
-  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
-  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
-  if (currentText == "RH") { ui->widgetRh->updateTables(); }
-  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
-
-  qApp->setUpdating(false);
-}
-
 void MainWindow::on_actionCadastrarFornecedor_triggered() {
   auto *cad = new CadastroFornecedor(this);
   cad->setAttribute(Qt::WA_DeleteOnClose);
   cad->show();
 }
-
-bool MainWindow::event(QEvent *event) {
-  switch (event->type()) {
-  case QEvent::WindowActivate: updateTables(); break;
-
-  default: break;
-  }
-
-  return QMainWindow::event(event);
-}
-
-void MainWindow::on_tabWidget_currentChanged(const int) { updateTables(); }
 
 void MainWindow::on_actionSobre_triggered() {
   QMessageBox::about(this, "Sobre ERP Staccato", "Versão " + qApp->applicationVersion() + "\nDesenvolvedor: Rodrigo Torres\nCelular/WhatsApp: (12)98138-3504\nE-mail: torres.dark@gmail.com");
@@ -251,7 +255,7 @@ void MainWindow::on_actionConfiguracoes_triggered() {
 void MainWindow::on_actionCalculadora_triggered() { QDesktopServices::openUrl(QUrl::fromLocalFile(R"(C:\Windows\System32\calc.exe)")); }
 
 void MainWindow::on_actionProdutos_triggered() {
-  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Produto, this);
+  auto *importa = new ImportaProdutos(ImportaProdutos::Tipo::Normal, this);
   importa->setAttribute(Qt::WA_DeleteOnClose);
   importa->importarTabela();
 }
@@ -283,6 +287,12 @@ void MainWindow::on_actionGerenciar_NCMs_triggered() {
   auto *cadastroNCM = new CadastroNCM(this);
   cadastroNCM->setAttribute(Qt::WA_DeleteOnClose);
   cadastroNCM->show();
+}
+
+void MainWindow::on_actionGerenciar_Pagamentos_triggered() {
+  auto *pagamentos = new CadastroPagamento(this);
+  pagamentos->setAttribute(Qt::WA_DeleteOnClose);
+  pagamentos->show();
 }
 
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc

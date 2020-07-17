@@ -12,7 +12,7 @@ class WidgetRelatorio final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetRelatorio(QWidget *parent = nullptr);
+  explicit WidgetRelatorio(QWidget *parent);
   ~WidgetRelatorio();
   auto resetTables() -> void;
   auto updateTables() -> void;

@@ -11,7 +11,7 @@ class CadastroTransportadora final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroTransportadora(QWidget *parent = nullptr);
+  explicit CadastroTransportadora(QWidget *parent);
   ~CadastroTransportadora();
 
 private:

@@ -13,7 +13,7 @@ class WidgetFinanceiroContas final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Receber, Pagar };
-  explicit WidgetFinanceiroContas(QWidget *parent = nullptr);
+  explicit WidgetFinanceiroContas(QWidget *parent);
   ~WidgetFinanceiroContas();
   auto resetTables() -> void;
   auto setTipo(const Tipo &novoTipo) -> void;

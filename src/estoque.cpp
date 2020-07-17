@@ -52,7 +52,7 @@ void Estoque::setupTables() {
 
   ui->tableEstoque->setModel(&modelEstoque);
 
-  ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableEstoque->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
 
   ui->tableEstoque->hideColumn("restante");
   ui->tableEstoque->hideColumn("ajuste");
@@ -103,6 +103,7 @@ void Estoque::setupTables() {
   ui->tableEstoque->hideColumn("vBCCOFINS");
   ui->tableEstoque->hideColumn("pCOFINS");
   ui->tableEstoque->hideColumn("vCOFINS");
+  ui->tableEstoque->hideColumn("valorGare");
 
   //--------------------------------------------------------------------
 
@@ -114,7 +115,7 @@ void Estoque::setupTables() {
 
   modelViewConsumo.setHeaderData("statusProduto", "Status Pedido");
   modelViewConsumo.setHeaderData("status", "Status Consumo");
-  modelViewConsumo.setHeaderData("local", "Local");
+  modelViewConsumo.setHeaderData("bloco", "Bloco");
   modelViewConsumo.setHeaderData("fornecedor", "Fornecedor");
   modelViewConsumo.setHeaderData("descricao", "Produto");
   modelViewConsumo.setHeaderData("quant", "Quant.");
@@ -128,7 +129,7 @@ void Estoque::setupTables() {
 
   ui->tableConsumo->setModel(&modelViewConsumo);
 
-  ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->tableConsumo->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
 
   ui->tableConsumo->showColumn("created");
   ui->tableConsumo->hideColumn("idEstoque");
@@ -144,7 +145,7 @@ void Estoque::buscarRestante() {
 }
 
 bool Estoque::viewRegisterById(const bool showWindow) {
-  if (idEstoque.isEmpty()) { return qApp->enqueueError(false, "Estoque não encontrado!", this); }
+  if (idEstoque.isEmpty()) { return qApp->enqueueException(false, "Estoque não encontrado!", this); }
 
   modelEstoque.setFilter("idEstoque = " + idEstoque);
 
@@ -172,7 +173,7 @@ void Estoque::exibirNota() {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelEstoque.data(0, "idNFe"));
 
-  if (not query.exec()) { return qApp->enqueueError("Erro buscando nfe: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro buscando NFe: " + query.lastError().text(), this); }
 
   if (query.size() == 0) { return qApp->enqueueWarning("Não encontrou NFe associada!", this); }
 
@@ -185,9 +186,9 @@ void Estoque::exibirNota() {
 bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   // TODO: verificar se as divisões de linha batem com a outra função criarConsumo
 
-  if (modelEstoque.filter().isEmpty()) { return qApp->enqueueError(false, "Não setou idEstoque!", this); }
+  if (modelEstoque.filter().isEmpty()) { return qApp->enqueueException(false, "Não setou idEstoque!", this); }
 
-  if (quant > ui->doubleSpinBoxRestante->value()) { return qApp->enqueueError(false, "Quantidade insuficiente!", this); }
+  if (quant > ui->doubleSpinBoxRestante->value()) { return qApp->enqueueException(false, "Quantidade insuficiente!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -207,6 +208,8 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelConsumo.setData(rowConsumo, index, value)) { return false; }
   }
 
@@ -214,7 +217,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double caixas = quant / quantCaixa;
@@ -241,7 +244,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
     queryProduto.bindValue(":lote", modelEstoque.data(rowEstoque, "lote"));
     queryProduto.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not queryProduto.exec()) { return qApp->enqueueError(false, "Erro salvando lote: " + queryProduto.lastError().text(), this); }
+    if (not queryProduto.exec()) { return qApp->enqueueException(false, "Erro salvando lote: " + queryProduto.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
@@ -269,12 +272,12 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando idVenda: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando idVenda: " + query.lastError().text(), this); }
 
   const int row = 0;
   const double quantCompra = modelCompra.data(row, "quant").toDouble();
 
-  if (quant > quantCompra) { return qApp->enqueueError(false, "Erro quant > quantCompra", this); }
+  if (quant > quantCompra) { return qApp->enqueueException(false, "Erro quant > quantCompra", this); }
 
   if (qFuzzyCompare(quant, quantCompra)) {
     if (not modelCompra.setData(row, "idVenda", query.value("idVenda"))) { return false; }
@@ -307,6 +310,8 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
 
       const QVariant value = modelCompra.data(row, column);
 
+      if (value.isNull()) { continue; }
+
       if (not modelCompra.setData(newRow, column, value)) { return false; }
     }
 
@@ -335,14 +340,14 @@ bool Estoque::desfazerConsumo(const int idVendaProduto2) {
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
   queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
+  if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryCompra.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
+  if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
 
   QSqlQuery queryVenda;
   queryVenda.prepare(
@@ -351,7 +356,7 @@ bool Estoque::desfazerConsumo(const int idVendaProduto2) {
       "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
+  if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
 
   return true;
 }

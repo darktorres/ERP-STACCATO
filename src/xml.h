@@ -3,63 +3,65 @@
 #include <QDomElement>
 #include <QStandardItemModel>
 
-struct Produto {
-  // produto
-  QString codProd;
-  QString codBarras;
-  QString descricao;
-  QString ncm;
-  QString nve;
-  QString extipi;
-  QString cest;
-  QString cfop;
-  QString un;
-  double quant = 0;
-  double valorUnid = 0;
-  double valor = 0;
-  QString codBarrasTrib;
-  QString unTrib;
-  double quantTrib = 0;
-  double valorUnidTrib = 0;
-  double frete = 0;
-  double seguro = 0;
-  double desconto = 0;
-  double outros = 0;
-  bool compoeTotal = false;
-  QString numeroPedido;
-  int itemPedido = 0;
-  // icms
-  QString tipoICMS;
-  int orig = 0;
-  int cstICMS = 0;
-  int modBC = 0;
-  double vBC = 0;
-  double pICMS = 0;
-  double vICMS = 0;
-  int modBCST = 0;
-  double pMVAST = 0;
-  double vBCST = 0;
-  double pICMSST = 0;
-  double vICMSST = 0;
-  // ipi
-  int cEnq = 0;
-  int cstIPI = 0;
-  double vBCIPI = 0;
-  double pIPI = 0;
-  double vIPI = 0;
-  // pis
-  int cstPIS = 0;
-  double vBCPIS = 0;
-  double pPIS = 0;
-  double vPIS = 0;
-  // cofins
-  int cstCOFINS = 0;
-  double vBCCOFINS = 0;
-  double pCOFINS = 0;
-  double vCOFINS = 0;
-};
-
 class XML final {
+
+  struct Produto {
+    // produto
+    QString codProd;
+    QString codBarras;
+    QString descricao;
+    QString ncm;
+    QString nve;
+    QString extipi;
+    QString cest;
+    QString cfop;
+    QString un;
+    double quant = 0;
+    double valorUnid = 0;
+    double valor = 0;
+    QString codBarrasTrib;
+    QString unTrib;
+    double quantTrib = 0;
+    double valorUnidTrib = 0;
+    double frete = 0;
+    double seguro = 0;
+    double desconto = 0;
+    double outros = 0;
+    bool compoeTotal = false;
+    QString numeroPedido;
+    int itemPedido = 0;
+    // icms
+    QString tipoICMS;
+    int orig = 0;
+    int cstICMS = 0;
+    int modBC = 0;
+    double vBC = 0;
+    double pICMS = 0;
+    double vICMS = 0;
+    int modBCST = 0;
+    double pMVAST = 0;
+    double vBCST = 0;
+    double pICMSST = 0;
+    double vICMSST = 0;
+    // ipi
+    int cEnq = 0;
+    int cstIPI = 0;
+    double vBCIPI = 0;
+    double pIPI = 0;
+    double vIPI = 0;
+    // pis
+    int cstPIS = 0;
+    double vBCPIS = 0;
+    double pPIS = 0;
+    double vPIS = 0;
+    // cofins
+    int cstCOFINS = 0;
+    double vBCCOFINS = 0;
+    double pCOFINS = 0;
+    double vCOFINS = 0;
+    // gare
+    double valorGare = 0;
+  };
 
 public:
   enum class Tipo { Entrada, Saida };

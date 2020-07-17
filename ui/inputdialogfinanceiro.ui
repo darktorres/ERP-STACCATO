@@ -80,76 +80,6 @@
             </property>
             <layout class="QGridLayout" name="gridLayout_6">
              <item row="0" column="0">
-              <widget class="QFrame" name="frameFrete">
-               <layout class="QGridLayout" name="gridLayout_4">
-                <item row="0" column="2">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxFrete">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="showGroupSeparator" stdset="0">
-                   <bool>true</bool>
-                  </property>
-                  <property name="prefix">
-                   <string>R$ </string>
-                  </property>
-                  <property name="maximum">
-                   <double>999999.989999999990687</double>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLabel" name="labelFrete">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Frete:</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="3" column="1">
-              <spacer name="horizontalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="3" column="0">
               <widget class="QGroupBox" name="groupBoxSt">
                <property name="title">
                 <string>Aplicar ST em todas as linhas selecionadas</string>
@@ -220,29 +150,13 @@
                </layout>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QFrame" name="frameDataSt">
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
+             <item row="0" column="1">
+              <widget class="QGroupBox" name="groupBoxDataSt">
+               <property name="title">
+                <string>Dados da ST</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_5">
                 <item row="0" column="0">
-                 <widget class="QLabel" name="labelFrete_3">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Data ST Loja:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
                  <widget class="QDateEdit" name="dateEditPgtSt">
                   <property name="displayFormat">
                    <string>dd/MM/yy</string>
@@ -252,27 +166,61 @@
                   </property>
                  </widget>
                 </item>
+                <item row="0" column="1">
+                 <widget class="QCheckBox" name="checkBoxParcelarSt">
+                  <property name="text">
+                   <string>Parcelar ST?</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
-             <item row="2" column="1">
-              <spacer name="horizontalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+             <item row="0" column="2">
+              <widget class="QGroupBox" name="groupBoxFrete">
+               <property name="title">
+                <string>Dados do frete</string>
                </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="4" column="0">
-              <widget class="QCheckBox" name="checkBoxParcelarSt">
-               <property name="text">
-                <string>Parcelar ST?</string>
-               </property>
+               <layout class="QGridLayout" name="gridLayout_4">
+                <item row="0" column="2">
+                 <widget class="QDateEdit" name="dateEditFrete">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="displayFormat">
+                   <string>dd/MM/yy</string>
+                  </property>
+                  <property name="calendarPopup">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBoxFrete">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="showGroupSeparator" stdset="0">
+                   <bool>true</bool>
+                  </property>
+                  <property name="prefix">
+                   <string>R$ </string>
+                  </property>
+                  <property name="maximum">
+                   <double>999999.989999999990687</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>

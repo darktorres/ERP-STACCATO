@@ -15,7 +15,7 @@ class WidgetPagamentos final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Compra, Venda };
-  explicit WidgetPagamentos(QWidget *parent = nullptr);
+  explicit WidgetPagamentos(QWidget *parent);
   ~WidgetPagamentos();
   auto getCredito() const -> double;
   auto getTotalPag() -> double;
@@ -30,7 +30,7 @@ public:
   auto verifyFields() -> bool;
 
   // attributes
-  int pagamentos = 0;
+  int pagamentos = 0; // TODO: rename this to count
   QList<QCheckBox *> listCheckBoxRep;
   QList<QComboBox *> listTipoPgt;
   QList<QComboBox *> listTipoData;

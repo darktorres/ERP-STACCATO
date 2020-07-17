@@ -14,7 +14,7 @@ class InputDialogConfirmacao final : public QDialog {
 public:
   enum class Tipo { Recebimento, Entrega, Representacao };
 
-  explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent = nullptr);
+  explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent);
   ~InputDialogConfirmacao() final;
   auto getDate() const -> QDate;
   auto getEntregou() const -> QString;

@@ -33,9 +33,25 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   if (const auto key = UserSession::getSetting("Login/loja")) { ui->comboBoxLoja->setCurrentText(key->toString()); }
 
+  ui->checkBoxSalvarSenha->hide();
   ui->labelHostname->hide();
   ui->lineEditHostname->hide();
   ui->comboBoxLoja->hide();
+
+  if (tipo == Tipo::Login) {
+    if (const auto key = UserSession::getSetting("User/savePasswd")) {
+      const bool salvarSenha = key->toBool();
+
+      ui->checkBoxSalvarSenha->setChecked(salvarSenha);
+
+      if (salvarSenha) {
+        if (const auto key2 = UserSession::getSetting("User/passwd")) {
+          ui->lineEditPass->setText(key2->toString());
+          ui->pushButtonLogin->setFocus();
+        }
+      }
+    }
+  }
 
   if (tipo == Tipo::Autorizacao) {
     ui->pushButtonLogin->setText("Autorizar");
@@ -57,6 +73,7 @@ void LoginDialog::setComboBox() {
 LoginDialog::~LoginDialog() { delete ui; }
 
 void LoginDialog::on_pushButtonConfig_clicked() {
+  ui->checkBoxSalvarSenha->setVisible(not ui->checkBoxSalvarSenha->isVisible());
   ui->labelHostname->setVisible(not ui->labelHostname->isVisible());
   ui->lineEditHostname->setVisible(not ui->lineEditHostname->isVisible());
   ui->comboBoxLoja->setVisible(not ui->comboBoxLoja->isVisible());
@@ -65,18 +82,23 @@ void LoginDialog::on_pushButtonConfig_clicked() {
 
 void LoginDialog::on_pushButtonLogin_clicked() {
   if (tipo == Tipo::Login) {
+    UserSession::setSetting("User/savePasswd", ui->checkBoxSalvarSenha->isChecked());
+
     UserSession::setSetting("Login/hostname", ui->lineEditHostname->text());
     UserSession::setSetting("User/lastuser", ui->lineEditUser->text());
+    UserSession::setSetting("User/passwd", ui->lineEditPass->text());
 
-    if (not qApp->dbConnect()) { return; }
+    if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
     if (not verificaVersao()) { return; }
   }
 
-  if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
-    ui->lineEditPass->setFocus();
-    QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
-    return;
+  if (tipo == Tipo::Autorizacao) {
+    if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
+      ui->lineEditPass->setFocus();
+      QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
+      return;
+    }
   }
 
   accept();
@@ -85,7 +107,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 bool LoginDialog::verificaVersao() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueError(false, "Erro verificando versão atual: " + query.lastError().text()); }
+  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueException(false, "Erro verificando versão atual: " + query.lastError().text()); }
 
   QVersionNumber currentVersion = QVersionNumber::fromString(qApp->applicationVersion());
   QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());

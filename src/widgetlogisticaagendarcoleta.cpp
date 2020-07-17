@@ -266,7 +266,7 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       queryTemp.bindValue(":idEstoque", idEstoque);
 
-      if (not queryTemp.exec() or not queryTemp.first()) { return qApp->enqueueError(false, "Erro buscando codComercial: " + queryTemp.lastError().text(), this); }
+      if (not queryTemp.exec() or not queryTemp.first()) { return qApp->enqueueException(false, "Erro buscando codComercial: " + queryTemp.lastError().text(), this); }
 
       codComercial = queryTemp.value("codComercial").toString();
     } else {
@@ -277,12 +277,12 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
 
     query3.bindValue(":dataPrevColeta", dataPrevColeta);
     query3.bindValue(":idEstoque", idEstoque);
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query3.lastError().text(), this); }
   }
 
   return modelTranspAtual.submitAll();
@@ -293,7 +293,7 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
   if (not modelTranspAtual.select()) { return; }
 
@@ -401,6 +401,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
+      venda->show();
     }
   }
 }

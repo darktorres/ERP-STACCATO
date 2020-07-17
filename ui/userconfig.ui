@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>525</width>
-    <height>553</height>
+    <width>529</width>
+    <height>671</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,104 +20,18 @@
    <string>Configurações do usuário</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="4" column="1">
-    <widget class="QPushButton" name="pushButtonSalvar">
-     <property name="text">
-      <string>Salvar</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0" colspan="3">
-    <widget class="QPushButton" name="pushButtonAlterarDados">
-     <property name="text">
-      <string>Alterar dados do usuário</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="QGroupBox" name="groupBoxEmail">
-     <property name="title">
-      <string>E-mail</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="lineEditEmail"/>
-      </item>
-      <item row="7" column="1">
-       <widget class="QLineEdit" name="lineEditEmailSenha">
-        <property name="echoMode">
-         <enum>QLineEdit::Password</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEditServidorSMTP"/>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="lineEditPortaSMTP"/>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Senha:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Servidor SMTP:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>E-mail:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Porta:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Cópia p/:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="lineEditEmailCopia"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
       <string>Pasta PDF/Excel</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEditOrcamentosFolder"/>
+       <widget class="QLineEdit" name="lineEditOrcamentosFolder">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="2" column="2">
        <widget class="QPushButton" name="pushButtonVendasFolder">
@@ -148,7 +62,11 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEditVendasFolder"/>
+       <widget class="QLineEdit" name="lineEditVendasFolder">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="labelCompras">
@@ -158,7 +76,11 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="lineEditComprasFolder"/>
+       <widget class="QLineEdit" name="lineEditComprasFolder">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="3" column="2">
        <widget class="QPushButton" name="pushButtonComprasFolder">
@@ -175,7 +97,11 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEditEntregasXmlFolder"/>
+       <widget class="QLineEdit" name="lineEditEntregasXmlFolder">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="4" column="2">
        <widget class="QPushButton" name="pushButtonEntregasXmlFolder">
@@ -192,7 +118,11 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QLineEdit" name="lineEditEntregasPdfFolder"/>
+       <widget class="QLineEdit" name="lineEditEntregasPdfFolder">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="5" column="2">
        <widget class="QPushButton" name="pushButtonEntregasPdfFolder">
@@ -203,6 +133,26 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QPushButton" name="pushButtonAlterarDados">
+     <property name="text">
+      <string>Alterar dados do usuário</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item row="0" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBoxAcbr">
@@ -239,7 +189,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEditACBrServidor"/>
+       <widget class="QLineEdit" name="lineEditACBrServidor">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="0" column="2">
        <widget class="QLabel" name="label_15">
@@ -249,18 +203,135 @@
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QLineEdit" name="lineEditACBrPorta"/>
+       <widget class="QLineEdit" name="lineEditACBrPorta">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="3" column="1" colspan="3">
        <widget class="ItemBox" name="itemBoxLoja"/>
       </item>
       <item row="4" column="1" colspan="3">
-       <widget class="QLineEdit" name="lineEditEmailContabilidade"/>
+       <widget class="QLineEdit" name="lineEditEmailContabilidade">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="5" column="1" colspan="3">
-       <widget class="QLineEdit" name="lineEditEmailLogistica"/>
+       <widget class="QLineEdit" name="lineEditEmailLogistica">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QGroupBox" name="groupBoxEmail">
+     <property name="title">
+      <string>E-mail</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="lineEditEmailSenha">
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Cópia p/:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="lineEditPortaSMTP">
+        <property name="placeholderText">
+         <string>465</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>E-mail:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Senha:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Servidor SMTP:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Porta:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEditServidorSMTP">
+        <property name="placeholderText">
+         <string>smtplw.com.br</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="lineEditEmail">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLineEdit" name="lineEditEmailCopia">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QPushButton" name="pushButtonEmailTeste">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Enviar email de teste</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QPushButton" name="pushButtonSalvar">
+     <property name="text">
+      <string>Salvar</string>
+     </property>
     </widget>
    </item>
   </layout>

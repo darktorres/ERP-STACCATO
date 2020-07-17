@@ -12,7 +12,7 @@ class WidgetCompraDevolucao final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraDevolucao(QWidget *parent = nullptr);
+  explicit WidgetCompraDevolucao(QWidget *parent);
   ~WidgetCompraDevolucao();
   auto resetTables() -> void;
   auto updateTables() -> void;

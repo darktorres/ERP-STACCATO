@@ -12,31 +12,35 @@ int UserSession::idUsuario() { return (query->value("idUsuario").toInt()); }
 
 QString UserSession::nome() { return (query->value("nome").toString()); }
 
+QString UserSession::tipoUsuario() { return (query->value("tipo").toString()); }
+
 bool UserSession::login(const QString &user, const QString &password, LoginDialog::Tipo tipo) {
-  if (tipo == LoginDialog::Tipo::Autorizacao) {
+  if (tipo == LoginDialog::Tipo::Autorizacao) { // query separada para não alterar a query usada nas outras funções
     QSqlQuery queryAutorizar;
     queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
                            "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
     queryAutorizar.bindValue(":user", user);
     queryAutorizar.bindValue(":password", password);
 
-    if (not queryAutorizar.exec()) { return qApp->enqueueError(false, "Erro no login: " + queryAutorizar.lastError().text()); }
+    if (not queryAutorizar.exec()) { return qApp->enqueueException(false, "Erro no login: " + queryAutorizar.lastError().text()); }
 
     return queryAutorizar.first();
   }
 
-  initializeQuery(); // TODO: move this to top of function?
+  if (tipo == LoginDialog::Tipo::Login) {
+    if (not query) { query = new QSqlQuery(); }
 
-  query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
-  query->bindValue(":user", user);
-  query->bindValue(":password", password);
+    query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
+    query->bindValue(":user", user);
+    query->bindValue(":password", password);
 
-  if (not query->exec()) { return qApp->enqueueError(false, "Erro no login: " + query->lastError().text()); }
+    if (not query->exec()) { return qApp->enqueueException(false, "Erro no login: " + query->lastError().text()); }
 
-  return query->first();
+    return query->first();
+  }
+
+  return false;
 }
-
-QString UserSession::tipoUsuario() { return (query->value("tipo").toString()); }
 
 std::optional<QVariant> UserSession::fromLoja(const QString &parameter, const QString &user) {
   QSqlQuery queryLoja;
@@ -44,7 +48,7 @@ std::optional<QVariant> UserSession::fromLoja(const QString &parameter, const QS
   queryLoja.bindValue(":nome", user);
 
   if (not queryLoja.exec() or not queryLoja.first()) {
-    qApp->enqueueError("Erro na query loja: " + queryLoja.lastError().text());
+    qApp->enqueueException("Erro na query loja: " + queryLoja.lastError().text());
     return {};
   }
 
@@ -63,7 +67,3 @@ std::optional<QVariant> UserSession::getSetting(const QString &key) {
 }
 
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
-
-void UserSession::initializeQuery() {
-  if (not query) { query = new QSqlQuery(); }
-}

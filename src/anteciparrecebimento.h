@@ -12,7 +12,7 @@ class AnteciparRecebimento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit AnteciparRecebimento(QWidget *parent = nullptr);
+  explicit AnteciparRecebimento(QWidget *parent);
   ~AnteciparRecebimento();
 
 private:
@@ -30,4 +30,5 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
+  auto verifyFields(const QModelIndexList &list) -> bool;
 };

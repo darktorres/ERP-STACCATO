@@ -60,7 +60,7 @@ QDateEdit *WidgetPagamentos::dateEditPgt(QHBoxLayout *layout) {
 }
 
 void WidgetPagamentos::on_doubleSpinBoxPgt_valueChanged(const int index) {
-  if (listTipoPgt.at(index)->currentText() == "Conta Cliente") { calculaCreditoRestante(); }
+  if (listTipoPgt.at(index)->currentText() == "CONTA CLIENTE") { calculaCreditoRestante(); }
 
   calcularTotal();
 }
@@ -69,7 +69,7 @@ void WidgetPagamentos::calculaCreditoRestante() {
   double creditoUsado = 0;
 
   for (int i = 0; i < pagamentos; ++i) {
-    if (listTipoPgt.at(i)->currentText() == "Conta Cliente") { creditoUsado += listValorPgt.at(i)->value(); }
+    if (listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") { creditoUsado += listValorPgt.at(i)->value(); }
   }
 
   creditoRestante = credito - creditoUsado;
@@ -102,8 +102,8 @@ void WidgetPagamentos::comboBoxParc(QHBoxLayout *layout) {
 
 QComboBox *WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
   auto *comboBoxData = new QComboBox(this);
-  comboBoxData->insertItem(0, "Data Mês");
-  comboBoxData->insertItem(1, "Data + 1 Mês");
+  comboBoxData->insertItem(0, "DATA MÊS");
+  comboBoxData->insertItem(1, "DATA + 1 MÊS");
   comboBoxData->insertItem(2, "14");
   comboBoxData->insertItem(3, "20");
   comboBoxData->insertItem(4, "28");
@@ -134,10 +134,10 @@ bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", UserSession::idLoja());
 
-  if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { return qApp->enqueueException(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
 
   const QStringList list([&queryPag]() {
-    QStringList temp("Escolha uma opção!");
+    QStringList temp("ESCOLHA UMA OPÇÃO!");
     while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());
@@ -172,22 +172,23 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError(false, "Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
+  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueException(false, "Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
 
   QSqlQuery queryPag;
-  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
+  queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja AND apenasRepresentacao = :apenasRepresentacao");
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
+  queryPag.bindValue(":apenasRepresentacao", representacao);
 
-  if (not queryPag.exec()) { return qApp->enqueueError(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { return qApp->enqueueException(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
 
   const QStringList list([&queryPag]() {
-    QStringList temp("Escolha uma opção!");
+    QStringList temp("ESCOLHA UMA OPÇÃO!");
     while (queryPag.next()) { temp << queryPag.value("pagamento").toString(); }
     return temp;
   }());
 
   comboBoxPgt->insertItems(0, list);
-  if (credito > 0) { comboBoxPgt->addItem("Conta Cliente"); }
+  if (credito > 0) { comboBoxPgt->addItem("CONTA CLIENTE"); }
   layout->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listTipoPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listTipoPgt << comboBoxPgt;
@@ -196,9 +197,9 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
-  if (text == "Escolha uma opção!") { return; }
+  if (text == "ESCOLHA UMA OPÇÃO!") { return; }
 
-  if (text == "Conta Cliente") {
+  if (text == "CONTA CLIENTE") {
     if (qFuzzyIsNull(ui->doubleSpinBoxCreditoDisponivel->value())) {
       listTipoPgt.at(index)->setCurrentIndex(0);
       return qApp->enqueueError("Não há saldo cliente restante!", this);
@@ -220,14 +221,17 @@ void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const 
   query.prepare("SELECT parcelas FROM forma_pagamento WHERE pagamento = :pagamento");
   query.bindValue(":pagamento", listTipoPgt.at(index)->currentText());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro lendo formas de pagamentos: " + query.lastError().text(), this); }
 
   const int parcelas = query.value("parcelas").toInt();
 
-  listParcela.at(index)->clear();
+  { // NOTE: avoid sending signal before widgets are all set
+    const QSignalBlocker blocker(listParcela.at(index));
 
-  // NOTE: this emits montarFluxoCaixa
-  for (int i = 0; i < parcelas; ++i) { listParcela.at(index)->addItem(QString::number(i + 1) + "x"); }
+    listParcela.at(index)->clear();
+
+    for (int i = 0; i < parcelas; ++i) { listParcela.at(index)->addItem(QString::number(i + 1) + "x"); }
+  }
 
   listParcela.at(index)->setEnabled(true);
 
@@ -268,7 +272,7 @@ void WidgetPagamentos::prepararPagamentosRep() {
   on_pushButtonAdicionarPagamento_clicked();
 
   listCheckBoxRep.at(0)->setChecked(not fretePagoLoja);
-  listObservacao.at(0)->setText("Frete");
+  listObservacao.at(0)->setText("FRETE");
   listObservacao.at(0)->setReadOnly(true);
   listValorPgt.at(0)->setValue(frete);
   listValorPgt.at(0)->setReadOnly(true);
@@ -291,7 +295,7 @@ void WidgetPagamentos::setRepresentacao(const bool isRepresentacao) {
 }
 
 void WidgetPagamentos::setTipo(const Tipo &novoTipo) {
-  if (novoTipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (novoTipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;
 
@@ -338,7 +342,7 @@ void WidgetPagamentos::calcularTotal() {
 }
 
 void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFrete) {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueError("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
   auto *frame = new QFrame(this);
   auto *layout = new QHBoxLayout(frame);
@@ -369,9 +373,9 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
       const QDate currentDate = qApp->serverDate();
       QDate dataPgt;
 
-      if (currentText == "Data + 1 Mês") {
+      if (currentText == "DATA + 1 MÊS") {
         dataPgt = currentDate.addMonths(1);
-      } else if (currentText == "Data Mês") {
+      } else if (currentText == "DATA MÊS") {
         dataPgt = currentDate;
       } else {
         dataPgt = currentDate.addDays(currentText.toInt());
@@ -415,7 +419,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
   on_pushButtonAdicionarPagamento_clicked(false);
 
   listCheckBoxRep.at(0)->setChecked(false);
-  listObservacao.at(0)->setText("Frete");
+  listObservacao.at(0)->setText("FRETE");
   listObservacao.at(0)->setReadOnly(true);
   listValorPgt.at(0)->setValue(frete);
   listValorPgt.at(0)->setReadOnly(true);
@@ -423,7 +427,7 @@ void WidgetPagamentos::on_pushButtonFreteLoja_clicked() {
 
 bool WidgetPagamentos::verifyFields() {
   for (int i = 0; i < pagamentos; ++i) {
-    if (listTipoPgt.at(i)->currentText() == "Escolha uma opção!") {
+    if (listTipoPgt.at(i)->currentText() == "ESCOLHA UMA OPÇÃO!") {
       qApp->enqueueError("Por favor escolha a forma de pagamento " + QString::number(i + 1) + "!", this);
       listTipoPgt.at(i)->setFocus();
       return false;

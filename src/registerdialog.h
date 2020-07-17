@@ -10,7 +10,7 @@ class RegisterDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent = nullptr);
+  explicit RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
   ~RegisterDialog() override = default;
 
   auto marcarDirty() -> void;

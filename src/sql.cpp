@@ -9,11 +9,11 @@
 bool Sql::updateVendaStatus(const QStringList &idVendas) { return updateVendaStatus(idVendas.join(", ")); }
 
 bool Sql::updateVendaStatus(const QString &idVendas) {
-  QStringList list = idVendas.split(", ", QString::SkipEmptyParts);
+  QStringList list = idVendas.split(", ", Qt::SkipEmptyParts);
   list.removeDuplicates();
 
   for (auto const &idVenda : list) {
-    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueError(false, "Erro atualizando status: " + query.lastError().text()); }
+    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueException(false, "Erro atualizando status: " + query.lastError().text()); }
   }
 
   return true;

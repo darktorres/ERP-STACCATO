@@ -15,10 +15,13 @@ class Application : public QApplication {
 
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
+  auto ajustarDiaUtil(const QDate &date) -> QDate;
   auto darkTheme() -> void;
-  auto dbConnect() -> bool;
+  auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
   auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> bool;
+  auto enqueueException(const QString &error, QWidget *parent = nullptr) -> void;
+  auto enqueueException(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
@@ -37,11 +40,10 @@ public:
   auto rollbackTransaction() -> void;
   auto rollbackTransaction(const bool boolean) -> bool;
   auto roundDouble(const double value) -> double;
+  auto roundDouble(const double value, const int decimais) -> double;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
-  auto setInTransaction(const bool value) -> void;
   auto setUpdating(const bool value) -> void;
-  auto showMessages() -> void;
   auto startTransaction(const QString &messageLog, const bool delayMessages = true) -> bool;
   auto updater() -> void;
 
@@ -57,6 +59,7 @@ private:
   // attributes
   QMap<QString, QString> mapLojas;
   QSqlDatabase db; // TODO: doc says not to store database as class member
+  QVector<Message> exceptionQueue;
   QVector<Message> errorQueue;
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;
@@ -70,10 +73,14 @@ private:
   QDateTime serverDateCache;
   QDate systemDate = QDate::currentDate();
   // methods
+  auto genericLogin(const QString &hostname) -> bool;
+  auto loginError() -> void;
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> bool;
-  auto setDatabase() -> bool;
+  auto setConnectOptions() -> void;
+  auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;
   auto storeSelection() -> void;
+  auto userLogin(const QString &user) -> bool;
 };

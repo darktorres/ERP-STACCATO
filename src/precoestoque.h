@@ -12,7 +12,7 @@ class PrecoEstoque final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PrecoEstoque(QWidget *parent = nullptr);
+  explicit PrecoEstoque(QWidget *parent);
   ~PrecoEstoque();
 
 private:

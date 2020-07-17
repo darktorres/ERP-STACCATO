@@ -3,7 +3,9 @@
 #include <QCheckBox>
 #include <QDebug>
 
-CheckBoxDelegate::CheckBoxDelegate(QObject *parent, const bool readOnly) : QStyledItemDelegate(parent), readOnly(readOnly) {}
+CheckBoxDelegate::CheckBoxDelegate(const bool readOnly, QObject *parent) : QStyledItemDelegate(parent), readOnly(readOnly) {}
+
+CheckBoxDelegate::CheckBoxDelegate(QObject *parent) : CheckBoxDelegate(false, parent) {}
 
 QWidget *CheckBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const {
   auto *editor = new QCheckBox(parent);

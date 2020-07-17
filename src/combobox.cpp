@@ -14,5 +14,5 @@ bool ComboBox::setCurrentValue(const QVariant &value) {
     }
   }
 
-  return qApp->enqueueError(false, "Erro procurando " + value.toString() + "!", this);
+  return qApp->enqueueException(false, "Erro procurando " + value.toString() + "!", this);
 }

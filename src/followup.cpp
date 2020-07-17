@@ -59,7 +59,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
-  if (not query.exec()) { return qApp->enqueueError("Erro salvando followup: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro salvando followup: " + query.lastError().text(), this); }
 
   qApp->enqueueInformation("Followup salvo com sucesso!", this);
   close();

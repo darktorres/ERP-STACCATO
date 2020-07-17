@@ -12,7 +12,7 @@ class WidgetLogisticaRecebimento final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaRecebimento(QWidget *parent = nullptr);
+  explicit WidgetLogisticaRecebimento(QWidget *parent);
   ~WidgetLogisticaRecebimento();
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;

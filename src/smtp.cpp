@@ -30,7 +30,7 @@ Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const 
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
   connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived);
+  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived); // TODO: change in 5.15 to errorOcurred
   connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
@@ -64,7 +64,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
     // QFile file("://assinatura conrado.png");
     QFile file(assinatura);
 
-    if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueError("Erro abrindo arquivo: " + file.errorString()); }
+    if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueException("Erro abrindo arquivo: " + file.errorString()); }
 
     const QByteArray bytes = file.readAll();
     message.append("--frontier\n");
@@ -82,7 +82,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
       QFile file(filePath);
 
       if (file.exists()) {
-        if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueError("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
+        if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueException("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
 
         const QByteArray bytes = file.readAll();
         message.append("--frontier\n");
@@ -263,7 +263,7 @@ void Smtp::readyRead() {
     return;
   } else {
     // something broke.
-    qApp->enqueueError(tr("Unexpected reply from SMTP server:\n\n") + response);
+    qApp->enqueueException(tr("Unexpected reply from SMTP server:\n\n") + response);
     state = States::Close;
     emit status(tr("Failed to send message"));
   }

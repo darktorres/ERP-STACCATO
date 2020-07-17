@@ -10,7 +10,7 @@ class UserConfig final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit UserConfig(QWidget *parent = nullptr);
+  explicit UserConfig(QWidget *parent);
   ~UserConfig();
 
 private:
@@ -19,6 +19,7 @@ private:
   // methods
   auto on_pushButtonAlterarDados_clicked() -> void;
   auto on_pushButtonComprasFolder_clicked() -> void;
+  auto on_pushButtonEmailTeste_clicked() -> void;
   auto on_pushButtonEntregasPdfFolder_clicked() -> void;
   auto on_pushButtonEntregasXmlFolder_clicked() -> void;
   auto on_pushButtonOrcamentosFolder_clicked() -> void;

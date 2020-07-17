@@ -55,7 +55,7 @@ void CadastroFornecedor::setupTables() {
   ui->tableEndereco->hideColumn("idFornecedor");
   ui->tableEndereco->hideColumn("codUF");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 }
@@ -189,7 +189,7 @@ bool CadastroFornecedor::cadastrar() {
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     // -------------------------------------------------------------------------
 
@@ -340,14 +340,14 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   query.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
 
   QSqlQuery query2;
   query2.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
   query2.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
   query2.bindValue(":fornecedor", fornecedor);
 
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando validade no fornecedor: " + query2.lastError().text(), this); }
+  if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando validade no fornecedor: " + query2.lastError().text(), this); }
 
   return true;
 }

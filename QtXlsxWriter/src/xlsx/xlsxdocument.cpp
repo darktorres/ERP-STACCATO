@@ -890,7 +890,7 @@ bool Document::save() const {
 bool Document::saveAs(const QString &name) const {
   QFile file(name);
 
-  if (not file.open(QIODevice::WriteOnly)) { return qApp->enqueueError(false, "Erro abrindo arquivo: " + file.errorString()); }
+  if (not file.open(QIODevice::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo: " + file.errorString()); }
 
   return saveAs(&file);
 }

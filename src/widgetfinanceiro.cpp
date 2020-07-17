@@ -41,14 +41,14 @@ void WidgetFinanceiro::resetTables() {
 // 'Conta', cp.observacao, cp.contraParte, cp.grupo, cp.subGrupo
 // from conta_a_pagar_has_pagamento cp
 // left join nfe n on cp.nfe = n.idNFe
-// left join loja_has_conta lhc on cp.contaDestino = lhc.idConta
+// left join loja_has_conta lhc on cp.idConta = lhc.idConta
 // where cp.dataRealizado is not null and cp.valorReal is not null
 // order by cp.dataRealizado;
 
 // select cr.dataEmissao, cr.dataRealizado, cr.valorReal, concat(lhc.banco, ' - ', lhc.agencia, ' - ', lhc.conta) AS
 // 'Conta', cr.observacao, cr.contraParte, cr.grupo, cr.subGrupo
 // from conta_a_receber_has_pagamento cr
-// left join loja_has_conta lhc on cr.contaDestino = lhc.idConta
+// left join loja_has_conta lhc on cr.idConta = lhc.idConta
 // where cr.valorReal is not null
 // order by cr.dataRealizado;
 // TODO: 0poder deixar 'agencia' e 'conta' como nulo nos casos em que nao existem

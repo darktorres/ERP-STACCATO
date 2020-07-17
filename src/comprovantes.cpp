@@ -9,9 +9,9 @@
 #include <QNetworkReply>
 #include <QSqlError>
 
-CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
+Comprovantes::CustomDelegate::CustomDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
-QString CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
+QString Comprovantes::CustomDelegate::displayText(const QVariant &value, const QLocale &) const { return value.toString().split("/").last(); }
 
 // --------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ Comprovantes::~Comprovantes() { delete ui; }
 void Comprovantes::setFilter(const QString &idVenda) {
   model.setQuery("SELECT DISTINCT fotoEntrega FROM veiculo_has_produto WHERE idVenda = '" + idVenda + "'");
 
-  if (model.lastError().isValid()) { return qApp->enqueueError("Erro procurando comprovantes: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { return qApp->enqueueException("Erro procurando comprovantes: " + model.lastError().text(), this); }
 
   model.setHeaderData("fotoEntrega", "Arquivo");
 
@@ -54,18 +54,18 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   auto reply = manager->get(request);
 
   connect(reply, &QNetworkReply::finished, [=] {
-    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueError("Erro ao baixar arquivo: " + reply->errorString()); }
+    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueException("Erro ao baixar arquivo: " + reply->errorString()); }
 
     const QString filename = url.split("/").last();
     const QString path = QDir::currentPath() + "/arquivos/";
 
     QDir dir;
 
-    if (not dir.exists(path)) { dir.mkpath(path); }
+    if (not dir.exists(path) and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta dos comprovantes!"); }
 
     QFile file(path + filename);
 
-    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString()); }
+    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString()); }
 
     file.write(reply->readAll());
 

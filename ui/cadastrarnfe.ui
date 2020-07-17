@@ -1287,7 +1287,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1326,7 +1326,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1423,7 +1423,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1433,7 +1433,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1721,7 +1721,7 @@
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.000000000000000</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -1744,7 +1744,7 @@
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.990000000005239</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -2228,7 +2228,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.990000000005239</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -2277,7 +2277,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.990000000005239</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -2390,7 +2390,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2403,7 +2403,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2442,7 +2442,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2481,7 +2481,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2818,7 +2818,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2846,7 +2846,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2874,7 +2874,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2902,7 +2902,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2930,7 +2930,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2958,7 +2958,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2986,7 +2986,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -3014,7 +3014,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>

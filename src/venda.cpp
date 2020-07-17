@@ -49,21 +49,13 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   setupMapper();
   newRegister();
 
-  ui->labelConsultor->hide();
-  ui->itemBoxConsultor->hide();
-  ui->itemBoxConsultor->setReadOnlyItemBox(true);
-
-  ui->groupBoxFinanceiro->hide();
-  ui->tableFluxoCaixa2->hide();
-
-  ui->pushButtonAdicionarObservacao->hide();
-
-  for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
+  if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO") {
+    ui->dateTimeEdit->setReadOnly(false);
+    ui->dateTimeEdit->setCalendarPopup(true);
+  }
 
   ui->splitter->setStretchFactor(0, 255);
   ui->splitter->setStretchFactor(1, 1);
-
-  show();
 }
 
 Venda::~Venda() { delete ui; }
@@ -128,7 +120,7 @@ void Venda::setTreeView() {
   ui->treeView->hideColumn("created");
   ui->treeView->hideColumn("lastUpdated");
 
-  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(this, 4));
+  ui->treeView->setItemDelegateForColumn("quant", new DoubleDelegate(4, this));
   ui->treeView->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcial", new ReaisDelegate(this));
   ui->treeView->setItemDelegateForColumn("parcialDesc", new ReaisDelegate(this));
@@ -218,7 +210,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa->hideColumn("valorReal");
   ui->tableFluxoCaixa->hideColumn("tipoReal");
   ui->tableFluxoCaixa->hideColumn("parcelaReal");
-  ui->tableFluxoCaixa->hideColumn("contaDestino");
+  ui->tableFluxoCaixa->hideColumn("idConta");
   ui->tableFluxoCaixa->hideColumn("tipoDet");
   ui->tableFluxoCaixa->hideColumn("centroCusto");
   ui->tableFluxoCaixa->hideColumn("grupo");
@@ -229,9 +221,9 @@ void Venda::setupTables() {
 
   ui->tableFluxoCaixa->setItemDelegate(new NoEditDelegate(this));
 
-  ui->tableFluxoCaixa->setItemDelegateForColumn("representacao", new CheckBoxDelegate(this, true));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("representacao", new CheckBoxDelegate(true, this));
   ui->tableFluxoCaixa->setItemDelegateForColumn("observacao", new EditDelegate(this));
-  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(this));
+  ui->tableFluxoCaixa->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 
   ui->tableFluxoCaixa->setPersistentColumns({"representacao"});
 
@@ -261,7 +253,7 @@ void Venda::setupTables() {
   ui->tableFluxoCaixa2->hideColumn("valorReal");
   ui->tableFluxoCaixa2->hideColumn("tipoReal");
   ui->tableFluxoCaixa2->hideColumn("parcelaReal");
-  ui->tableFluxoCaixa2->hideColumn("contaDestino");
+  ui->tableFluxoCaixa2->hideColumn("idConta");
   ui->tableFluxoCaixa2->hideColumn("tipoDet");
   ui->tableFluxoCaixa2->hideColumn("centroCusto");
   ui->tableFluxoCaixa2->hideColumn("grupo");
@@ -289,7 +281,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueError("Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
+  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueException("Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
 
   ui->itemBoxVendedor->setId(queryOrc.value("idUsuario"));
   ui->itemBoxConsultor->setId(queryOrc.value("idUsuarioConsultor"));
@@ -325,7 +317,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
   queryFrete.bindValue(":idLoja", idLoja);
 
-  if (not queryFrete.exec() or not queryFrete.first()) { return qApp->enqueueError("Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
+  if (not queryFrete.exec() or not queryFrete.first()) { return qApp->enqueueException("Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
 
   minimoFrete = queryFrete.value("valorMinimoFrete").toDouble();
   porcFrete = queryFrete.value("porcentagemFrete").toDouble();
@@ -338,7 +330,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryCredito.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryCredito.bindValue(":idCliente", queryOrc.value("idCliente"));
 
-  if (not queryCredito.exec() or not queryCredito.first()) { return qApp->enqueueError("Erro buscando crédito cliente: " + queryCredito.lastError().text(), this); }
+  if (not queryCredito.exec() or not queryCredito.first()) { return qApp->enqueueException("Erro buscando crédito cliente: " + queryCredito.lastError().text(), this); }
 
   ui->widgetPgts->setCredito(queryCredito.value("credito").toDouble());
 
@@ -362,7 +354,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
 
-  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueError("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
 
   const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
 
@@ -379,13 +371,15 @@ bool Venda::verifyFields() {
   // TODO: pintar campos certos de verde
   // TODO: pintar totalPag de vermelho enquanto o total for diferente
 
-  // TODO: copiar do orçamento a verificação de disponibilidade de estoque?
+  if (not financeiro and not verificaDisponibilidadeEstoque()) { return false; }
 
-  if (ui->widgetPgts->isHidden()) { return true; }
+  if (ui->widgetPgts->isVisible()) {
+    if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
 
-  if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
+    if (not ui->widgetPgts->verifyFields()) { return false; }
 
-  if (not ui->widgetPgts->verifyFields()) { return false; }
+    if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
+  }
 
   if (ui->spinBoxPrazoEntrega->value() == 0) {
     qApp->enqueueError("Por favor preencha o prazo de entrega!", this);
@@ -429,6 +423,7 @@ void Venda::clearFields() {}
 
 void Venda::setupMapper() {
   addMapping(ui->checkBoxFreteManual, "freteManual");
+  addMapping(ui->comboBoxFinanceiro, "statusFinanceiro");
   addMapping(ui->dateTimeEdit, "data");
   addMapping(ui->dateTimeEditOrc, "dataOrc");
   addMapping(ui->doubleSpinBoxDescontoGlobal, "descontoPorc");
@@ -452,9 +447,7 @@ void Venda::setupMapper() {
 void Venda::on_pushButtonCadastrarPedido_clicked() { save(); }
 
 bool Venda::savingProcedures() {
-  // TODO: remove novoPrazoEntrega from DB?
-
-  if (not setData("data", qApp->serverDateTime())) { return false; }
+  if (not setData("data", ui->dateTimeEdit->isReadOnly() ? qApp->serverDateTime() : ui->dateTimeEdit->dateTime())) { return false; }
   if (not setData("dataOrc", ui->dateTimeEditOrc->dateTime())) { return false; }
   if (not setData("descontoPorc", ui->doubleSpinBoxDescontoGlobal->value())) { return false; }
   if (not setData("descontoReais", ui->doubleSpinBoxDescontoGlobalReais->value())) { return false; }
@@ -483,40 +476,78 @@ bool Venda::savingProcedures() {
 }
 
 void Venda::registerMode() {
+  ui->checkBoxFreteManual->show();
   ui->framePagamentos->show();
-  ui->pushButtonGerarExcel->hide();
-  ui->pushButtonGerarPdf->hide();
-  ui->pushButtonComprovantes->hide();
-  ui->pushButtonCancelamento->hide();
-  ui->pushButtonDevolucao->hide();
   ui->pushButtonCadastrarPedido->show();
   ui->pushButtonVoltar->show();
+
+  ui->groupBoxFinanceiro->hide();
+  ui->itemBoxConsultor->hide();
+  ui->labelConsultor->hide();
+  ui->pushButtonAdicionarObservacao->hide();
+  ui->pushButtonCancelamento->hide();
+  ui->pushButtonComprovantes->hide();
+  ui->pushButtonDevolucao->hide();
+  ui->pushButtonGerarExcel->hide();
+  ui->pushButtonGerarPdf->hide();
+  ui->tableFluxoCaixa2->hide();
+  ui->labelRT->hide();
+
+  ui->itemBoxConsultor->setReadOnlyItemBox(true);
+
   ui->doubleSpinBoxDescontoGlobal->setReadOnly(false);
-  ui->doubleSpinBoxDescontoGlobal->setFrame(true);
-  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   ui->doubleSpinBoxTotal->setReadOnly(false);
-  ui->doubleSpinBoxTotal->setFrame(true);
+
+  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
   ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::UpDownArrows);
-  ui->checkBoxFreteManual->show();
+
+  for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setHidden(true); }
 }
 
 void Venda::updateMode() {
-  ui->tableFluxoCaixa2->hide();
-  ui->widgetPgts->hide();
+  ui->pushButtonAdicionarObservacao->show();
+  ui->pushButtonCancelamento->show();
+  ui->pushButtonComprovantes->show();
+  ui->pushButtonDevolucao->show();
   ui->pushButtonGerarExcel->show();
   ui->pushButtonGerarPdf->show();
+
+  ui->checkBoxRT->hide();
+  ui->frameRT->hide();
   ui->pushButtonCadastrarPedido->hide();
   ui->pushButtonVoltar->hide();
-  ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
-  ui->doubleSpinBoxDescontoGlobal->setFrame(false);
-  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
-  ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
-  ui->doubleSpinBoxDescontoGlobalReais->setFrame(false);
-  ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
-  ui->doubleSpinBoxTotal->setReadOnly(true);
-  ui->doubleSpinBoxTotal->setFrame(false);
-  ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->tableFluxoCaixa2->hide();
+  ui->tableFluxoCaixa2->hide();
+  ui->widgetPgts->hide();
+  ui->widgetPgts->hide();
+
   ui->checkBoxFreteManual->setDisabled(true);
+
+  ui->checkBoxRT->setChecked(false);
+
+  ui->itemBoxCliente->setReadOnlyItemBox(true);
+  ui->itemBoxEndereco->setReadOnlyItemBox(true);
+  ui->itemBoxEnderecoFat->setReadOnlyItemBox(true);
+  ui->itemBoxProfissional->setReadOnlyItemBox(true);
+  ui->itemBoxVendedor->setReadOnlyItemBox(true);
+
+  ui->dateTimeEdit->setReadOnly(true);
+  ui->doubleSpinBoxDescontoGlobal->setReadOnly(true);
+  ui->doubleSpinBoxDescontoGlobalReais->setReadOnly(true);
+  ui->doubleSpinBoxFrete->setReadOnly(true);
+  ui->doubleSpinBoxTotal->setReadOnly(true);
+  ui->plainTextEdit->setReadOnly(true);
+  ui->spinBoxPrazoEntrega->setReadOnly(true);
+
+  ui->doubleSpinBoxDescontoGlobal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->doubleSpinBoxDescontoGlobalReais->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
+  ui->doubleSpinBoxTotal->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+  ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+  ui->dateTimeEdit->setCalendarPopup(false);
+  ui->dateTimeEdit->setButtonSymbols(QDateTimeEdit::NoButtons);
 }
 
 bool Venda::viewRegister() {
@@ -525,7 +556,7 @@ bool Venda::viewRegister() {
   const auto ok = [&] {
     if (not RegisterDialog::viewRegister()) { return false; }
 
-    ui->doubleSpinBoxDescontoGlobalReais->setMinimum(-9999999);
+    //-----------------------------------------------------------------
 
     modelItem.setFilter("idVenda = '" + model.data(0, "idVenda").toString() + "'");
 
@@ -537,13 +568,6 @@ bool Venda::viewRegister() {
 
     setTreeView();
 
-    calcPrecoGlobalTotal();
-
-    const QString idCliente = ui->itemBoxCliente->getId().toString();
-
-    ui->itemBoxEndereco->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-    ui->itemBoxEnderecoFat->setFilter("idCliente = " + idCliente + " AND desativado = FALSE");
-
     modelFluxoCaixa.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND comissao = FALSE AND taxa = FALSE");
 
     if (not modelFluxoCaixa.select()) { return false; }
@@ -554,33 +578,23 @@ bool Venda::viewRegister() {
 
       if (not modelFluxoCaixa2.select()) { return false; }
 
-      ui->comboBoxFinanceiro->setCurrentText(model.data(0, "statusFinanceiro").toString());
+      for (auto &widget : ui->frameRT->findChildren<QWidget *>()) { widget->setVisible(true); }
+
+      ui->frameRT->show();
+      ui->labelRT->show();
+      ui->checkBoxPontuacaoIsento->hide();
+      ui->checkBoxPontuacaoPadrao->hide();
+      ui->checkBoxRT->hide();
+
+      ui->doubleSpinBoxPontuacao->setValue(data("rt").toDouble());
+      ui->doubleSpinBoxPontuacao->setEnabled(true);
+      ui->doubleSpinBoxPontuacao->setReadOnly(true);
+      ui->doubleSpinBoxPontuacao->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
 
-    ui->tableFluxoCaixa->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    //-----------------------------------------------------------------
 
-    ui->spinBoxPrazoEntrega->setReadOnly(true);
-
-    ui->itemBoxCliente->setReadOnlyItemBox(true);
-    ui->itemBoxEndereco->setReadOnlyItemBox(true);
-    ui->itemBoxEnderecoFat->setReadOnlyItemBox(true);
-    ui->itemBoxProfissional->setReadOnlyItemBox(true);
-    ui->itemBoxVendedor->setReadOnlyItemBox(true);
-
-    ui->dateTimeEdit->setReadOnly(true);
-
-    ui->plainTextEdit->setReadOnly(true);
-    ui->plainTextEdit->setPlainText(data("observacao").toString());
-
-    ui->pushButtonComprovantes->show();
-    ui->pushButtonCancelamento->show();
-    ui->pushButtonDevolucao->show();
-    ui->pushButtonAdicionarObservacao->show();
-
-    ui->doubleSpinBoxFrete->setReadOnly(true);
-    ui->doubleSpinBoxFrete->setButtonSymbols(QDoubleSpinBox::NoButtons);
-
-    if (data("status") == "CANCELADO" or data("status") == "DEVOLUÇÃO") {
+    if (data("status") == "CANCELADO" or data("status") == "DEVOLVIDO") {
       ui->pushButtonCancelamento->hide();
       ui->pushButtonDevolucao->hide();
     }
@@ -591,11 +605,6 @@ bool Venda::viewRegister() {
       ui->pushButtonDevolucao->hide();
       ui->pushButtonCancelamento->hide();
     }
-
-    ui->framePagamentos->adjustSize();
-
-    ui->checkBoxRT->setChecked(false);
-    ui->checkBoxRT->setHidden(true);
 
     if (data("devolucao").toBool()) { ui->pushButtonDevolucao->hide(); }
 
@@ -612,15 +621,68 @@ bool Venda::viewRegister() {
     ui->widgetPgts->setFrete(ui->doubleSpinBoxFrete->value());
     ui->widgetPgts->setTotal(ui->doubleSpinBoxTotal->value());
 
-    ui->tableFluxoCaixa2->hide();
-    ui->widgetPgts->hide();
-
     return true;
   }();
 
   setConnections();
 
   return ok;
+}
+
+bool Venda::criarComissaoProfissional() {
+  if (ui->checkBoxPontuacaoPadrao->isChecked() and ui->itemBoxProfissional->getId() != 1) {
+    const QDate date = ui->dateTimeEdit->date();
+    const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
+
+    if (not qFuzzyIsNull(valor)) {
+      QSqlQuery query1;
+      query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, idVenda, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) "
+                     "VALUES (:dataEmissao, :idVenda, :contraParte, :idLoja, :centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
+      query1.bindValue(":dataEmissao", date);
+      query1.bindValue(":idVenda", ui->lineEditVenda->text());
+      query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
+      query1.bindValue(":idLoja", idLoja);
+      query1.bindValue(":centroCusto", idLoja);
+      query1.bindValue(":valor", valor);
+      query1.bindValue(":tipo", "1. Dinheiro");
+      // 01-15 paga dia 30, 16-30 paga prox dia 15
+      QDate quinzena1 = QDate(date.year(), date.month(), qMin(date.daysInMonth(), 30));
+      QDate quinzena2 = date.addMonths(1);
+      quinzena2.setDate(quinzena2.year(), quinzena2.month(), 15);
+      query1.bindValue(":dataPagamento", date.day() <= 15 ? quinzena1 : quinzena2);
+      query1.bindValue(":grupo", "RT's");
+
+      if (not query1.exec()) { return qApp->enqueueException(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
+    }
+  }
+
+  return true;
+}
+
+bool Venda::verificaDisponibilidadeEstoque() {
+  QSqlQuery query;
+
+  QStringList produtos;
+
+  for (int row = 0; row < modelItem.rowCount(); ++row) {
+    if (modelItem.data(row, "estoque").toInt() != 1) { continue; }
+
+    const QString idProduto = modelItem.data(row, "idProduto").toString();
+    const QString quant = modelItem.data(row, "quant").toString();
+
+    if (not query.exec("SELECT 0 FROM produto WHERE idProduto = " + idProduto + " AND estoqueRestante >= " + quant)) {
+      return qApp->enqueueException(false, "Erro verificando a disponibilidade do estoque: " + query.lastError().text(), this);
+    }
+
+    if (not query.first()) { produtos << modelItem.data(row, "produto").toString(); }
+  }
+
+  if (not produtos.isEmpty()) {
+    return qApp->enqueueError(
+        false, "Os seguintes produtos de estoque não estão mais disponíveis na quantidade selecionada:\n    -" + produtos.join("\n    -") + "\n\nRemova ou diminua a quant. para prosseguir!", this);
+  }
+
+  return true;
 }
 
 void Venda::on_pushButtonVoltar_clicked() {
@@ -633,14 +695,16 @@ void Venda::on_pushButtonVoltar_clicked() {
 }
 
 void Venda::montarFluxoCaixa() {
-  // TODO: 0nao calcular comissao para profissional 'NAO HA'
+  qDebug() << "montarFluxoCaixa: " << QTime::currentTime();
+
   // TODO: verificar se esta funcao nao está rodando mais de uma vez por operacao
-  // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
 
   if (ui->widgetPgts->isHidden()) { return; }
 
   modelFluxoCaixa.revertAll();
   modelFluxoCaixa2.revertAll();
+
+  // TODO: colocar lógica igual da compra para poder escolher as linhas que serão substituidas
 
   if (financeiro) {
     for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
@@ -652,107 +716,179 @@ void Venda::montarFluxoCaixa() {
     }
   }
 
-  for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
-    if (ui->widgetPgts->listTipoPgt.at(i)->currentText() != "Escolha uma opção!") {
-      const int parcelas = ui->widgetPgts->listParcela.at(i)->currentIndex() + 1;
-      const double valor = ui->widgetPgts->listValorPgt.at(i)->value();
-      const int cartao = (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Cartão de crédito") ? 1 : 0;
+  const QString fornecedor = modelItem.data(0, "fornecedor").toString();
+  const double totalVenda = ui->doubleSpinBoxTotal->value();
+  const double frete = ui->doubleSpinBoxFrete->value();
 
-      const double part1 = valor / parcelas;
-      const int part2 = static_cast<int>(part1 * 100); // truncate with 2 decimals
-      const double parcela = static_cast<double>(part2) / 100;
-      const double resto = valor - (parcela * parcelas);
+  QSqlQuery query1;
+  query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
+  query1.bindValue(":razaoSocial", fornecedor);
+
+  if (not query1.exec() or not query1.first()) { return qApp->enqueueException("Erro buscando comissão: " + query1.lastError().text(), this); }
+
+  const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
+
+  for (int pagamento = 0; pagamento < ui->widgetPgts->pagamentos; ++pagamento) {
+    if (ui->widgetPgts->listTipoPgt.at(pagamento)->currentText() == "ESCOLHA UMA OPÇÃO!") { continue; }
+
+    // TODO: lancamento de credito deve ser marcado direto como 'recebido' e statusFinanceiro == liberado
+
+    //-----------------------------------------------------------------
+
+    const QString tipoPgt = ui->widgetPgts->listTipoPgt.at(pagamento)->currentText();
+    const int parcelas = ui->widgetPgts->listParcela.at(pagamento)->currentIndex() + 1;
+
+    //-----------------------------------------------------------------
+
+    if (tipoPgt == "CONTA CLIENTE") {
+      const int row = modelFluxoCaixa.insertRowAtEnd();
 
       const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
 
-      for (int x = 0, y = parcelas - 1; x < parcelas; ++x, --y) {
-        const int row = modelFluxoCaixa.insertRowAtEnd();
+      if (not modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
+      if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", dataEmissao)) { return; }
+      if (not modelFluxoCaixa.setData(row, "valor", ui->widgetPgts->listValorPgt.at(pagamento)->value())) { return; }
+      if (not modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt)) { return; }
+      if (not modelFluxoCaixa.setData(row, "parcela", 1)) { return; }
+      if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listObservacao.at(pagamento)->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "representacao", false)) { return; }
+      const int creditoClientes = 11;
+      if (not modelFluxoCaixa.setData(row, "idConta", creditoClientes)) { return; }
+      if (not modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda")) { return; }
+      if (not modelFluxoCaixa.setData(row, "subGrupo", "")) { return; }
+      if (not modelFluxoCaixa.setData(row, "centroCusto", idLoja)) { return; }
 
-        if (not modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text())) { return; }
-        if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
-        if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
-        if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
-        if (not modelFluxoCaixa.setData(row, "dataPagamento", ui->widgetPgts->listDataPgt.at(i)->date().addMonths(x + cartao))) { return; }
-        if (not modelFluxoCaixa.setData(row, "valor", parcela + (x == 0 ? resto : 0))) { return; }
-        if (not modelFluxoCaixa.setData(row, "tipo", QString::number(i + 1) + ". " + ui->widgetPgts->listTipoPgt.at(i)->currentText())) { return; }
-        if (not modelFluxoCaixa.setData(row, "parcela", parcelas - y)) { return; }
-        if (not modelFluxoCaixa.setData(row, "observacao", ui->widgetPgts->listObservacao.at(i)->text())) { return; }
-        if (not modelFluxoCaixa.setData(row, "representacao", ui->widgetPgts->listCheckBoxRep.at(i)->isChecked())) { return; }
-        if (not modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda")) { return; }
-        if (not modelFluxoCaixa.setData(row, "subGrupo", "")) { return; }
-        if (not modelFluxoCaixa.setData(row, "centroCusto", idLoja)) { return; }
+      continue;
+    }
+
+    QSqlQuery query2;
+    query2.prepare("SELECT fp.idConta, fp.pula1Mes, fp.ajustaDiaUtil, fp.dMaisUm, fp.centavoSobressalente, fpt.taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON "
+                   "fp.idPagamento = fpt.idPagamento WHERE fp.pagamento = :pagamento AND fpt.parcela = :parcela");
+    query2.bindValue(":pagamento", tipoPgt);
+    query2.bindValue(":parcela", parcelas);
+
+    if (not query2.exec() or not query2.first()) { return qApp->enqueueException("Erro buscando taxa: " + query2.lastError().text(), this); }
+
+    const int idConta = query2.value("idConta").toInt();
+    const bool pula1Mes = query2.value("pula1Mes").toInt();
+    const bool ajustaDiaUtil = query2.value("ajustaDiaUtil").toBool();
+    const bool dMaisUm = query2.value("dMaisUm").toBool();
+    const bool centavoSobressalente = query2.value("centavoSobressalente").toBool();
+    const double porcentagemTaxa = query2.value("taxa").toDouble() / 100;
+
+    //-----------------------------------------------------------------
+    // calcular pagamento
+
+    const bool isRepresentacao = ui->widgetPgts->listCheckBoxRep.at(pagamento)->isChecked();
+    const QString observacaoPgt = ui->widgetPgts->listObservacao.at(pagamento)->text();
+
+    const double valor = ui->widgetPgts->listValorPgt.at(pagamento)->value();
+    const double valorParcela = qApp->roundDouble(valor / parcelas, 2);
+    const double restoParcela = qApp->roundDouble(valor - (valorParcela * parcelas), 2);
+
+    const double valorTaxa = qApp->roundDouble(valor * porcentagemTaxa, 2) * -1;
+    const double parcelaTaxa = qApp->roundDouble(valorTaxa / parcelas, 2);
+    const double restoTaxa = qApp->roundDouble(valorTaxa - (parcelaTaxa * parcelas), 2);
+
+    const QDate dataEmissao = correcao ? modelFluxoCaixa.data(0, "dataEmissao").toDate() : qApp->serverDate();
+
+    for (int parcela = 0; parcela < parcelas; ++parcela) {
+      const int row = modelFluxoCaixa.insertRowAtEnd();
+
+      if (not modelFluxoCaixa.setData(row, "contraParte", ui->itemBoxCliente->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "dataEmissao", dataEmissao)) { return; }
+      if (not modelFluxoCaixa.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
+      if (not modelFluxoCaixa.setData(row, "idLoja", idLoja)) { return; }
+
+      QDate dataPgt = ui->widgetPgts->listDataPgt.at(pagamento)->date();
+      if (dMaisUm) { dataPgt = dataPgt.addDays(1); }
+      if (pula1Mes) { dataPgt = dataPgt.addMonths(1); }
+      dataPgt = dataPgt.addMonths(parcela);
+      if (ajustaDiaUtil) { dataPgt = qApp->ajustarDiaUtil(dataPgt); }
+
+      if (not modelFluxoCaixa.setData(row, "dataPagamento", dataPgt)) { return; }
+
+      double val;
+
+      if (centavoSobressalente and parcela == 0) {
+        val = valorParcela + restoParcela;
+      } else if (not centavoSobressalente and parcela == parcelas - 1) {
+        val = valorParcela + restoParcela;
+      } else {
+        val = valorParcela;
       }
 
-      // calculo comissao loja
-      for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
-        if (modelFluxoCaixa.data(z, "representacao").toBool() and modelFluxoCaixa.data(z, "observacao").toString() == "FRETE") { continue; }
-        if (not modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
-        if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
-        if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
+      if (not modelFluxoCaixa.setData(row, "valor", val)) { return; }
+      if (not modelFluxoCaixa.setData(row, "tipo", QString::number(pagamento + 1) + ". " + tipoPgt)) { return; }
+      if (not modelFluxoCaixa.setData(row, "parcela", parcela + 1)) { return; }
+      if (not modelFluxoCaixa.setData(row, "observacao", observacaoPgt)) { return; }
+      if (not modelFluxoCaixa.setData(row, "representacao", isRepresentacao)) { return; }
+      if (not modelFluxoCaixa.setData(row, "idConta", idConta)) { return; }
+      if (not modelFluxoCaixa.setData(row, "grupo", "Produtos - Venda")) { return; }
+      if (not modelFluxoCaixa.setData(row, "subGrupo", "")) { return; }
+      if (not modelFluxoCaixa.setData(row, "centroCusto", idLoja)) { return; }
 
-        const QString fornecedor = modelItem.data(0, "fornecedor").toString();
-        const double totalVenda = ui->doubleSpinBoxTotal->value();
-        const double frete = ui->doubleSpinBoxFrete->value();
+      //-----------------------------------------------------------------
+      // calcular taxa
 
-        QSqlQuery query;
-        query.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
-        query.bindValue(":razaoSocial", fornecedor);
+      const bool calculaTaxa = (not qFuzzyIsNull(porcentagemTaxa) and not isRepresentacao and not tipoPgt.contains("CONTA CLIENTE"));
 
-        if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando comissão: " + query.lastError().text(), this); }
+      if (calculaTaxa) {
+        const int rowTaxa = modelFluxoCaixa2.insertRowAtEnd();
 
-        const double taxaComissao = query.value("comissaoLoja").toDouble() / 100;
-        const double valorComissao = modelFluxoCaixa.data(z, "valor").toDouble();
+        if (not modelFluxoCaixa2.setData(rowTaxa, "contraParte", "Administradora Cartão")) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "dataEmissao", dataEmissao)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "idVenda", ui->lineEditVenda->text())) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "idLoja", idLoja)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "dataPagamento", dataPgt)) { return; }
 
-        const bool isFreteLoja = (ui->widgetPgts->listObservacao.at(0)->text() == "Frete");
+        double val1;
 
-        const double valorAjustado = isFreteLoja ? valorComissao * taxaComissao : taxaComissao * (valorComissao - (valorComissao / totalVenda * frete));
+        if (centavoSobressalente and parcela == 0) {
+          val1 = parcelaTaxa + restoTaxa;
+        } else if (not centavoSobressalente and parcela == parcelas - 1) {
+          val1 = parcelaTaxa + restoTaxa;
+        } else {
+          val1 = parcelaTaxa;
+        }
 
-        const int row = modelFluxoCaixa2.insertRowAtEnd();
-
-        if (not modelFluxoCaixa2.setData(row, "contraParte", modelItem.data(0, "fornecedor"))) { return; }
-        if (not modelFluxoCaixa2.setData(row, "dataEmissao", dataEmissao)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
-        if (not modelFluxoCaixa2.setData(row, "idLoja", idLoja)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "dataPagamento", modelFluxoCaixa.data(z, "dataPagamento").toDate().addMonths(1))) { return; }
-        if (not modelFluxoCaixa2.setData(row, "valor", valorAjustado)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "tipo", QString::number(i + 1) + ". Comissão")) { return; }
-        if (not modelFluxoCaixa2.setData(row, "parcela", modelFluxoCaixa.data(z, "parcela").toString())) { return; }
-        if (not modelFluxoCaixa2.setData(row, "comissao", 1)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "centroCusto", idLoja)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "grupo", "Comissão Representação")) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "valor", val1)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "tipo", QString::number(pagamento + 1) + ". Taxa Cartão")) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "parcela", parcela + 1)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "taxa", true)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "idConta", idConta)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "centroCusto", idLoja)) { return; }
+        if (not modelFluxoCaixa2.setData(rowTaxa, "grupo", "Tarifas Cartão")) { return; }
       }
 
-      // calculo taxas cartao
-      for (int z = 0, total = modelFluxoCaixa.rowCount(); z < total; ++z) {
-        if (not modelFluxoCaixa.data(z, "tipo").toString().contains(QString::number(i + 1))) { continue; }
-        if (modelFluxoCaixa.data(z, "status").toString() == "SUBSTITUIDO") { continue; }
-        if (modelFluxoCaixa.data(z, "representacao").toBool()) { continue; }
-        if (modelFluxoCaixa.data(z, "tipo").toString().contains("CONTA CLIENTE")) { continue; }
+      //-----------------------------------------------------------------
+      // calcular comissao loja
 
-        QSqlQuery query;
-        query.prepare("SELECT taxa FROM forma_pagamento fp LEFT JOIN forma_pagamento_has_taxa fpt ON fp.idPagamento = fpt.idPagamento WHERE pagamento = :pagamento AND parcela = :parcela");
-        query.bindValue(":pagamento", ui->widgetPgts->listTipoPgt.at(i)->currentText());
-        query.bindValue(":parcela", ui->widgetPgts->listParcela.at(i)->currentText().remove("x").toInt());
+      const bool calculaComissao = (not qFuzzyIsNull(taxaComissao) and isRepresentacao and observacaoPgt != "FRETE");
 
-        if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando taxa: " + query.lastError().text(), this); }
+      if (calculaComissao) {
+        const double valorBase = modelFluxoCaixa.data(row, "valor").toDouble();
+        const double valorComissao1 = valorBase * taxaComissao;
+        const double valorComissao2 = taxaComissao * (valorBase - (valorBase / totalVenda * frete));
+        const bool isFreteLoja = (observacaoPgt == "FRETE");
+        const double valorAjustado = isFreteLoja ? valorComissao1 : valorComissao2;
 
-        if (qFuzzyIsNull(query.value("taxa").toDouble())) { continue; }
+        const int rowComissao = modelFluxoCaixa2.insertRowAtEnd();
 
-        const double taxa = query.value("taxa").toDouble() / 100;
-
-        const int row = modelFluxoCaixa2.insertRowAtEnd();
-
-        if (not modelFluxoCaixa2.setData(row, "contraParte", "Administradora Cartão")) { return; }
-        if (not modelFluxoCaixa2.setData(row, "dataEmissao", dataEmissao)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "idVenda", ui->lineEditVenda->text())) { return; }
-        if (not modelFluxoCaixa2.setData(row, "idLoja", idLoja)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "dataPagamento", modelFluxoCaixa.data(z, "dataPagamento"))) { return; }
-        if (not modelFluxoCaixa2.setData(row, "valor", taxa * modelFluxoCaixa.data(z, "valor").toDouble() * -1)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "tipo", QString::number(i + 1) + ". Taxa Cartão")) { return; }
-        if (not modelFluxoCaixa2.setData(row, "parcela", modelFluxoCaixa.data(z, "parcela").toString())) { return; }
-        if (not modelFluxoCaixa2.setData(row, "taxa", 1)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "centroCusto", idLoja)) { return; }
-        if (not modelFluxoCaixa2.setData(row, "grupo", "Tarifas Cartão")) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "contraParte", modelItem.data(0, "fornecedor"))) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "dataEmissao", dataEmissao)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "idVenda", ui->lineEditVenda->text())) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "idLoja", idLoja)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "dataPagamento", dataPgt.addMonths(1))) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "valor", valorAjustado)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pagamento + 1) + ". Comissão")) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "parcela", parcela + 1)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "comissao", true)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "centroCusto", idLoja)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "grupo", "Comissão Representação")) { return; }
       }
     }
   }
@@ -889,8 +1025,8 @@ bool Venda::atualizarCredito() {
   double creditoRestante = ui->widgetPgts->getCredito();
   bool update = false;
 
-  for (int i = 0; i < ui->widgetPgts->listCheckBoxRep.size(); ++i) {
-    if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "Conta Cliente") {
+  for (int i = 0; i < ui->widgetPgts->pagamentos; ++i) {
+    if (ui->widgetPgts->listTipoPgt.at(i)->currentText() == "CONTA CLIENTE") {
       creditoRestante -= ui->widgetPgts->listValorPgt.at(i)->value();
       update = true;
     }
@@ -902,7 +1038,7 @@ bool Venda::atualizarCredito() {
     query.bindValue(":credito", creditoRestante);
     query.bindValue(":idCliente", ui->itemBoxCliente->getId());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro atualizando crédito do cliente: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro atualizando crédito do cliente: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -912,7 +1048,7 @@ bool Venda::cadastrar() {
   if (not qApp->startTransaction("Venda::cadastrar")) { return false; }
 
   const bool success = [&] {
-    if (tipo == Tipo::Cadastrar) {
+    if (tipo == Tipo::Cadastrar) { // TODO: como sempre é cadastro, verificar se esse if pode ser removido
       if (not generateId()) { return false; }
 
       currentRow = model.insertRowAtEnd();
@@ -922,28 +1058,7 @@ bool Venda::cadastrar() {
 
     if (not atualizarCredito()) { return false; }
 
-    // inserir rt em contas_pagar
-
-    if (ui->checkBoxPontuacaoPadrao->isChecked() and ui->itemBoxProfissional->getId() != 1) {
-      const QDate date = ui->dateTimeEdit->date();
-      const double valor = (ui->doubleSpinBoxSubTotalLiq->value() - ui->doubleSpinBoxDescontoGlobalReais->value()) * ui->doubleSpinBoxPontuacao->value() / 100;
-
-      QSqlQuery query1;
-      query1.prepare("INSERT INTO conta_a_pagar_has_pagamento (dataEmissao, contraParte, idLoja, centroCusto, valor, tipo, dataPagamento, grupo) VALUES (:dataEmissao, :contraParte, :idLoja, "
-                     ":centroCusto, :valor, :tipo, :dataPagamento, :grupo)");
-      query1.bindValue(":dataEmissao", date);
-      query1.bindValue(":contraParte", ui->itemBoxProfissional->text());
-      query1.bindValue(":idLoja", idLoja);
-      query1.bindValue(":centroCusto", idLoja);
-      query1.bindValue(":valor", valor);
-      query1.bindValue(":tipo", "1. Dinheiro");
-      // 01-15 paga dia 30, 16-30 paga prox dia 15
-      // TODO: can this '30 > date.daysInMonth() ? date.daysInMonth() : 30' be simplified to just 'daysInMonth'?
-      query1.bindValue(":dataPagamento", date.day() <= 15 ? QDate(date.year(), date.month(), 30 > date.daysInMonth() ? date.daysInMonth() : 30) : QDate(date.year(), date.month() + 1, 15));
-      query1.bindValue(":grupo", "RT's");
-
-      if (not query1.exec()) { return qApp->enqueueError(false, "Erro cadastrando pontuação: " + query1.lastError().text(), this); }
-    }
+    if (not criarComissaoProfissional()) { return false; }
 
     // -------------------------------------------------------------------------
 
@@ -953,7 +1068,7 @@ bool Venda::cadastrar() {
 
     primaryId = ui->lineEditVenda->text();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     // -------------------------------------------------------------------------
 
@@ -985,7 +1100,7 @@ bool Venda::cadastrar() {
     query3.prepare("UPDATE orcamento SET status = 'FECHADO' WHERE idOrcamento = :idOrcamento");
     query3.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro marcando orçamento como 'FECHADO': " + query3.lastError().text(), this); }
 
     if (not criarConsumos()) { return false; }
 
@@ -1020,7 +1135,7 @@ bool Venda::criarConsumos() {
   query.prepare("SELECT p.idEstoque, vp2.idVendaProduto2, vp2.quant FROM venda_has_produto2 vp2 LEFT JOIN produto p ON vp2.idProduto = p.idProduto WHERE vp2.idVenda = :idVenda AND vp2.estoque > 0");
   query.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro buscando produtos estoque: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro buscando produtos estoque: " + query.lastError().text(), this); }
 
   while (query.next()) {
     auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
@@ -1040,16 +1155,16 @@ bool Venda::cancelamento() {
     query1.prepare("UPDATE orcamento SET status = 'ATIVO' WHERE idOrcamento = :idOrcamento");
     query1.bindValue(":idOrcamento", idOrcamento);
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro reativando orçamento: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro reativando orçamento: " + query1.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
 
   QSqlQuery query2;
-  query2.prepare("UPDATE venda SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query2.prepare("UPDATE venda SET status = 'CANCELADO', statusFinanceiro = 'CANCELADO' WHERE idVenda = :idVenda");
   query2.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro marcando venda como cancelada: " + query2.lastError().text(), this); }
+  if (not query2.exec()) { return qApp->enqueueException(false, "Erro marcando venda como cancelada: " + query2.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
@@ -1057,7 +1172,7 @@ bool Venda::cancelamento() {
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
   queryDelete.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not queryDelete.exec()) { return qApp->enqueueError(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
+  if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
@@ -1066,7 +1181,7 @@ bool Venda::cancelamento() {
       "UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, `idVendaProduto2` = NULL WHERE `idVendaProduto2` IN (SELECT `idVendaProduto2` FROM venda_has_produto2 WHERE idVenda = :idVenda)");
   query3.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query3.exec()) { return qApp->enqueueError(false, "Erro removendo vínculo da compra: " + query3.lastError().text(), this); }
+  if (not query3.exec()) { return qApp->enqueueException(false, "Erro removendo vínculo da compra: " + query3.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
@@ -1074,13 +1189,13 @@ bool Venda::cancelamento() {
   query4.prepare("UPDATE venda_has_produto2 SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query4.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query4.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query4.lastError().text(), this); }
+  if (not query4.exec()) { return qApp->enqueueException(false, "Erro marcando produtos da venda como cancelados: " + query4.lastError().text(), this); }
 
   QSqlQuery query5;
   query5.prepare("UPDATE venda_has_produto SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query5.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query5.exec()) { return qApp->enqueueError(false, "Erro marcando produtos da venda como cancelados: " + query5.lastError().text(), this); }
+  if (not query5.exec()) { return qApp->enqueueException(false, "Erro marcando produtos da venda como cancelados: " + query5.lastError().text(), this); }
 
   for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
     if (modelFluxoCaixa.data(row, "tipo").toString().contains("CONTA CLIENTE")) {
@@ -1093,16 +1208,21 @@ bool Venda::cancelamento() {
       query6.bindValue(":valor", credito);
       query6.bindValue(":idCliente", model.data(0, "idCliente"));
 
-      if (not query6.exec()) { return qApp->enqueueError(false, "Erro voltando credito do cliente: " + query6.lastError().text(), this); }
+      if (not query6.exec()) { return qApp->enqueueException(false, "Erro voltando credito do cliente: " + query6.lastError().text(), this); }
     }
   }
 
-  // TODO: 0nao deixar cancelar se tiver ocorrido algum evento de conta
   QSqlQuery query7;
   query7.prepare("UPDATE conta_a_receber_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
   query7.bindValue(":idVenda", ui->lineEditVenda->text());
 
-  if (not query7.exec()) { return qApp->enqueueError(false, "Erro marcando contas como canceladas: " + query7.lastError().text(), this); }
+  if (not query7.exec()) { return qApp->enqueueException(false, "Erro marcando contas como canceladas: " + query7.lastError().text(), this); }
+
+  QSqlQuery query8;
+  query8.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'CANCELADO' WHERE idVenda = :idVenda");
+  query8.bindValue(":idVenda", ui->lineEditVenda->text());
+
+  if (not query8.exec()) { return qApp->enqueueException(false, "Erro marcando RT como cancelado: " + query8.lastError().text(), this); }
 
   return true;
 }
@@ -1144,6 +1264,17 @@ void Venda::on_pushButtonCancelamento_clicked() {
 
   // -------------------------------------------------------------------------
 
+  // TODO: readd this later
+  //  for (int row = 0; row < modelFluxoCaixa.rowCount(); ++row) {
+  //    const QString status = modelFluxoCaixa.data(row, "status").toString();
+
+  //    if (status == "RECEBIDO") {
+  //      return qApp->enqueueError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this);
+  //    }
+  //  }
+
+  // -------------------------------------------------------------------------
+
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja cancelar?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Cancelar venda");
   msgBox.setButtonText(QMessageBox::No, "Voltar");
@@ -1169,7 +1300,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
 bool Venda::generateId() {
   const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
 
-  if (not siglaLoja) { return qApp->enqueueError(false, "Erro buscando sigla da loja!", this); }
+  if (not siglaLoja) { return qApp->enqueueException(false, "Erro buscando sigla da loja!", this); }
 
   QString id = siglaLoja->toString() + "-" + ui->dateTimeEdit->date().toString("yy");
 
@@ -1177,13 +1308,13 @@ bool Venda::generateId() {
   query.prepare("SELECT MAX(idVenda) AS idVenda FROM venda WHERE idVenda LIKE :id");
   query.bindValue(":id", id + "%");
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro na query: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro na query: " + query.lastError().text(), this); }
 
   const int last = query.first() ? query.value("idVenda").toString().remove(id).leftRef(4).toInt() : 0;
 
   id += QString("%1").arg(last + 1, 4, 10, QChar('0'));
 
-  if (id.size() != 11) { return qApp->enqueueError(false, "Ocorreu algum erro ao gerar id: " + id, this); }
+  if (id.size() != 11) { return qApp->enqueueException(false, "Ocorreu algum erro ao gerar id: " + id, this); }
 
   id += representacao ? "R" : "";
 
@@ -1242,11 +1373,13 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
 }
 
 void Venda::on_pushButtonCorrigirFluxo_clicked() {
+  // TODO: usar um delegate para colocar o texto das linhas substituidas como tachado
+
   QSqlQuery queryPag;
   queryPag.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryPag.bindValue(":idCliente", data("idCliente"));
 
-  if (not queryPag.exec() or not queryPag.first()) { return qApp->enqueueError("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec() or not queryPag.first()) { return qApp->enqueueException("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
 
   double credito = queryPag.value("credito").toDouble();
 
@@ -1273,7 +1406,7 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
     query.prepare("SELECT comissao FROM profissional WHERE idProfissional = :idProfissional");
     query.bindValue(":idProfissional", ui->itemBoxProfissional->getId());
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando pontuação: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando pontuação: " + query.lastError().text(), this); }
 
     double comissao = query.value("comissao").toDouble();
 
@@ -1312,7 +1445,7 @@ bool Venda::copiaProdutosOrcamento() {
   queryProdutos.prepare("SELECT * FROM orcamento_has_produto WHERE idOrcamento = :idOrcamento");
   queryProdutos.bindValue(":idOrcamento", ui->lineEditIdOrcamento->text());
 
-  if (not queryProdutos.exec()) { return qApp->enqueueError(false, "Erro buscando produtos: " + queryProdutos.lastError().text(), this); }
+  if (not queryProdutos.exec()) { return qApp->enqueueException(false, "Erro buscando produtos: " + queryProdutos.lastError().text(), this); }
 
   while (queryProdutos.next()) {
     const int rowItem = modelItem.insertRowAtEnd();
@@ -1332,7 +1465,7 @@ bool Venda::copiaProdutosOrcamento() {
 
       if (not queryStatus.exec("SELECT e.status FROM estoque e LEFT JOIN produto p ON e.idEstoque = p.idEstoque WHERE p.idProduto = " + modelItem.data(rowItem, "idProduto").toString()) or
           not queryStatus.first()) {
-        return qApp->enqueueError(false, "Erro buscando status do estoque: " + queryStatus.lastError().text(), this);
+        return qApp->enqueueException(false, "Erro buscando status do estoque: " + queryStatus.lastError().text(), this);
       }
 
       if (not modelItem.setData(rowItem, "status", queryStatus.value("status"))) { return false; }
@@ -1380,14 +1513,9 @@ void Venda::on_pushButtonAdicionarObservacao_clicked() {
   modelTree.updateData();
 }
 
-// TODO: 0hide 'nfe' field from tables that use conta_a_receber
-// TODO: 0nao gerar RT quando o total for zero (e apagar os zerados quando nao houver profissional)
-// TODO: 0se o pedido estiver cancelado ou devolvido bloquear os botoes correspondentes
 // TODO: 0no corrigir fluxo esta mostrando os botoes de 'frete pago a loja' e 'pagamento total a loja' em pedidos que nao sao de representacao
-// TODO: 5verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado' ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
 // TODO: 0quando for 'MATR' nao criar fluxo caixa
-// NOTE: prazoEntrega por produto
-// NOTE: bloquear desconto maximo por classe de funcionario
-// TODO: 2no caso de reposicao colocar formas de pagamento diferenciado ou nao usar pagamento?
+// TODO: verificar se um pedido nao deveria ter seu 'statusFinanceiro' alterado para 'liberado' ao ter todos os pagamentos recebidos ('status' e 'statusFinanceiro' deveriam ser vinculados?)
+// TODO: prazoEntrega por produto
+// TODO: bloquear desconto maximo por classe de funcionario
 // TODO: em vez de ter uma caixinha 'un', concatenar em 'quant', 'minimo' e 'un/cx'
-// TODO: depois de cadastrar venda esconder os elementos graficos da pontuacao

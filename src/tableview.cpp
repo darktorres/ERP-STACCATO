@@ -49,12 +49,14 @@ void TableView::resizeEvent(QResizeEvent *event) {
   QTableView::resizeEvent(event);
 }
 
+int TableView::columnIndex(const QString &column) const { return columnIndex(column, false); }
+
 int TableView::columnIndex(const QString &column, const bool silent) const {
   int columnIndex = -1;
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
-  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueException("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }
@@ -87,7 +89,15 @@ void TableView::redoView() {
   int count = 0;
 
   // subtrair uma linha de altura por vez até achar uma linha
-  while (lastRowIndex == -1) { lastRowIndex = indexAt(QPoint(viewport()->rect().x() + 5, viewport()->rect().height() - 5 - rowHeight(0) * ++count)).row(); }
+  while (lastRowIndex == -1) {
+    int xpos = viewport()->rect().x() + 5;
+    int ypos = viewport()->rect().height() - 5 - rowHeight(0) * count;
+
+    if (ypos < 0) { return; }
+
+    lastRowIndex = indexAt(QPoint(xpos, ypos)).row();
+    ++count;
+  }
 
   for (int row = firstRowIndex; row <= lastRowIndex; ++row) {
     for (const auto &column : persistentColumns) { openPersistentEditor(row, column); }
@@ -95,17 +105,17 @@ void TableView::redoView() {
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
-    QTableView::setModel(temp->proxyModel);
-  } else if (auto temp2 = qobject_cast<SqlTableModel *>(model); temp2 and temp2->proxyModel) {
-    QTableView::setModel(temp2->proxyModel);
+  if (auto queryModel = qobject_cast<SqlQueryModel *>(model); queryModel and queryModel->proxyModel) {
+    QTableView::setModel(queryModel->proxyModel);
+  } else if (auto tableModel = qobject_cast<SqlTableModel *>(model); tableModel and tableModel->proxyModel) {
+    QTableView::setModel(tableModel->proxyModel);
   } else {
     QTableView::setModel(model);
   }
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
 
-  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
+  if (not baseModel) { return qApp->enqueueException("TableView model não implementado!", this); }
 
   //---------------------------------------
 

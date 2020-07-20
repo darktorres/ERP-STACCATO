@@ -128,6 +128,7 @@ SOURCES += \
     src/cadastropagamento.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
+    src/cadastropromocao.cpp \
     src/cadastrotransportadora.cpp \
     src/cadastrousuario.cpp \
     src/calculofrete.cpp \
@@ -251,6 +252,7 @@ HEADERS  += \
     src/cadastropagamento.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
+    src/cadastropromocao.h \
     src/cadastrotransportadora.h \
     src/cadastrousuario.h \
     src/calculofrete.h \
@@ -371,6 +373,7 @@ FORMS += \
     ui/cadastropagamento.ui \
     ui/cadastroproduto.ui \
     ui/cadastroprofissional.ui \
+    ui/cadastropromocao.ui \
     ui/cadastrotransportadora.ui \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \

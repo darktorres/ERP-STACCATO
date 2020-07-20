@@ -15,15 +15,6 @@ public:
   explicit CadastroStaccatoOff(QWidget *parent = nullptr);
   ~CadastroStaccatoOff();
 
-private slots:
-  void on_pushButtonDescadastrar_clicked();
-
-  void on_radioButtonTodos_toggled(bool checked);
-
-  void on_radioButtonStaccatoOFF_toggled(bool checked);
-
-  void on_radioButtonEstoque_toggled(bool checked);
-
 private:
   // attributes
   Ui::CadastroStaccatoOff *ui;
@@ -31,5 +22,9 @@ private:
   // methods
   auto on_itemBoxFornecedor_textChanged(const QString &text) -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
+  auto on_pushButtonDescadastrar_clicked() -> void;
+  auto on_radioButtonEstoque_toggled(bool checked) -> void;
+  auto on_radioButtonStaccatoOFF_toggled(bool checked) -> void;
+  auto on_radioButtonTodos_toggled(bool checked) -> void;
   auto setupTables() -> void;
 };

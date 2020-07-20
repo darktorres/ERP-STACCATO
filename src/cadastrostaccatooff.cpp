@@ -24,6 +24,9 @@ CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(
 
   connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked);
+  connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled);
+  connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled);
+  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled);
 }
 
 CadastroStaccatoOff::~CadastroStaccatoOff() { delete ui; }

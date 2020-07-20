@@ -1,5 +1,5 @@
 #include "cadastrostaccatooff.h"
-#include "ui_cadastropromocao.h"
+#include "ui_cadastroStaccatoOff.h"
 
 #include "application.h"
 #include "searchdialogproxymodel.h"

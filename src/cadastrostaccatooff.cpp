@@ -1,4 +1,4 @@
-#include "cadastropromocao.h"
+#include "cadastrostaccatooff.h"
 #include "ui_cadastropromocao.h"
 
 #include "application.h"
@@ -10,7 +10,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-CadastroPromocao::CadastroPromocao(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroPromocao) {
+CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(new Ui::CadastroStaccatoOff) {
   ui->setupUi(this);
 
   setWindowTitle("Gerenciar promoção");
@@ -22,13 +22,13 @@ CadastroPromocao::CadastroPromocao(QWidget *parent) : QDialog(parent), ui(new Ui
 
   setupTables();
 
-  connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroPromocao::on_itemBoxFornecedor_textChanged);
-  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroPromocao::on_pushButtonCadastrar_clicked);
+  connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged);
+  connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked);
 }
 
-CadastroPromocao::~CadastroPromocao() { delete ui; }
+CadastroStaccatoOff::~CadastroStaccatoOff() { delete ui; }
 
-void CadastroPromocao::setupTables() {
+void CadastroStaccatoOff::setupTables() {
   model.setTable("view_produto");
 
   model.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
@@ -72,13 +72,13 @@ void CadastroPromocao::setupTables() {
   }
 }
 
-void CadastroPromocao::on_itemBoxFornecedor_textChanged(const QString &text) {
+void CadastroStaccatoOff::on_itemBoxFornecedor_textChanged(const QString &text) {
   model.setFilter("fornecedor = '" + text + "' AND estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
 
   if (not model.select()) { return; }
 }
 
-void CadastroPromocao::on_radioButtonTodos_toggled(bool checked) {
+void CadastroStaccatoOff::on_radioButtonTodos_toggled(bool checked) {
   if (not checked) { return; }
 
   const QString fornecedor = ui->itemBoxFornecedor->text().isEmpty() ? "" : " AND fornecedor = '" + ui->itemBoxFornecedor->text() + "'";
@@ -88,7 +88,7 @@ void CadastroPromocao::on_radioButtonTodos_toggled(bool checked) {
   if (not model.select()) { return; }
 }
 
-void CadastroPromocao::on_radioButtonStaccatoOFF_toggled(bool checked) {
+void CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled(bool checked) {
   if (not checked) { return; }
 
   const QString fornecedor = ui->itemBoxFornecedor->text().isEmpty() ? "" : " AND fornecedor = '" + ui->itemBoxFornecedor->text() + "'";
@@ -98,7 +98,7 @@ void CadastroPromocao::on_radioButtonStaccatoOFF_toggled(bool checked) {
   if (not model.select()) { return; }
 }
 
-void CadastroPromocao::on_radioButtonEstoque_toggled(bool checked) {
+void CadastroStaccatoOff::on_radioButtonEstoque_toggled(bool checked) {
   if (not checked) { return; }
 
   const QString fornecedor = ui->itemBoxFornecedor->text().isEmpty() ? "" : " AND fornecedor = '" + ui->itemBoxFornecedor->text() + "'";
@@ -108,7 +108,7 @@ void CadastroPromocao::on_radioButtonEstoque_toggled(bool checked) {
   if (not model.select()) { return; }
 }
 
-void CadastroPromocao::on_pushButtonCadastrar_clicked() {
+void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
   auto list = ui->tableView->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
@@ -145,7 +145,7 @@ void CadastroPromocao::on_pushButtonCadastrar_clicked() {
   qApp->enqueueInformation("Dados salvos com sucesso!", this);
 }
 
-void CadastroPromocao::on_pushButtonDescadastrar_clicked() {
+void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
   auto list = ui->tableView->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }

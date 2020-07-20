@@ -5,15 +5,15 @@
 #include <QDialog>
 
 namespace Ui {
-class CadastroPromocao;
+class CadastroStaccatoOff;
 }
 
-class CadastroPromocao : public QDialog {
+class CadastroStaccatoOff : public QDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroPromocao(QWidget *parent = nullptr);
-  ~CadastroPromocao();
+  explicit CadastroStaccatoOff(QWidget *parent = nullptr);
+  ~CadastroStaccatoOff();
 
 private slots:
   void on_pushButtonDescadastrar_clicked();
@@ -26,7 +26,7 @@ private slots:
 
 private:
   // attributes
-  Ui::CadastroPromocao *ui;
+  Ui::CadastroStaccatoOff *ui;
   SqlTableModel model;
   // methods
   auto on_itemBoxFornecedor_textChanged(const QString &text) -> void;

@@ -9,7 +9,7 @@
 #include "cadastropagamento.h"
 #include "cadastroproduto.h"
 #include "cadastroprofissional.h"
-#include "cadastropromocao.h"
+#include "cadastrostaccatooff.h"
 #include "cadastrotransportadora.h"
 #include "cadastrousuario.h"
 #include "calculofrete.h"
@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
-  connect(ui->actionGerenciar_promocao, &QAction::triggered, this, &MainWindow::on_actionGerenciar_promocao_triggered);
+  connect(ui->actionGerenciar_staccatoOff, &QAction::triggered, this, &MainWindow::on_actionGerenciar_staccatoOff_triggered);
   connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
   connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
   connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered);
@@ -297,8 +297,8 @@ void MainWindow::on_actionGerenciar_Pagamentos_triggered() {
   pagamentos->show();
 }
 
-void MainWindow::on_actionGerenciar_promocao_triggered() {
-  auto *promocao = new CadastroPromocao(this);
+void MainWindow::on_actionGerenciar_staccatoOff_triggered() {
+  auto *promocao = new CadastroStaccatoOff(this);
   promocao->setAttribute(Qt::WA_DeleteOnClose);
   promocao->show();
 }

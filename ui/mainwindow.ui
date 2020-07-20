@@ -389,7 +389,7 @@ QTabWidget::pane {
     <addaction name="actionCadastrarProdutos"/>
     <addaction name="actionGerenciar_preco_estoque"/>
     <addaction name="actionGerenciar_NCMs"/>
-    <addaction name="actionGerenciar_promocao"/>
+    <addaction name="actionGerenciar_staccatoOff"/>
    </widget>
    <widget class="QMenu" name="menuVenda">
     <property name="title">
@@ -545,9 +545,9 @@ QTabWidget::pane {
     <string>Gerenciar pagamentos</string>
    </property>
   </action>
-  <action name="actionGerenciar_promocao">
+  <action name="actionGerenciar_staccatoOff">
    <property name="text">
-    <string>Gerenciar promoção</string>
+    <string>Gerenciar STACCATO OFF</string>
    </property>
   </action>
  </widget>

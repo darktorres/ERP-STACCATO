@@ -208,6 +208,11 @@ bool Application::runSqlJobs() {
       return false;
     }
 
+    if (not query.exec("CALL invalidar_staccatoOff()")) {
+      QMessageBox::critical(nullptr, "Erro!", "Erro executando invalidar_staccatoOff: " + query.lastError().text());
+      return false;
+    }
+
     query.prepare("UPDATE maintenance SET lastInvalidated = :lastInvalidated WHERE id = 1");
     query.bindValue(":lastInvalidated", serverDateTime().toString("yyyy-MM-dd"));
 

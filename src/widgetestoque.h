@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sqlquerymodel.h"
+#include "sqltablemodel.h"
 
 #include <QWidget>
 
@@ -22,6 +23,7 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   SqlQueryModel model;
+  SqlTableModel modelProdutos;
   Ui::WidgetEstoque *ui;
   // methods
   auto escolheFiltro() -> void;
@@ -30,6 +32,9 @@ private:
   auto montaFiltro() -> void;
   auto montaFiltroContabil() -> void;
   auto on_pushButtonRelatorio_clicked() -> void;
+  auto on_radioButtonEstoque_toggled(bool checked) -> void;
+  auto on_radioButtonStaccatoOFF_toggled(bool checked) -> void;
+  auto on_radioButtonTodos_toggled(bool checked) -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setHeaderData() -> void;

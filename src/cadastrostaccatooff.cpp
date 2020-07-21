@@ -24,6 +24,7 @@ CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(
 
   connect(ui->itemBoxFornecedor, &ItemBox::textChanged, this, &CadastroStaccatoOff::on_itemBoxFornecedor_textChanged);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonCadastrar_clicked);
+  connect(ui->pushButtonDescadastrar, &QPushButton::clicked, this, &CadastroStaccatoOff::on_pushButtonDescadastrar_clicked);
   connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonEstoque_toggled);
   connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled);
   connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &CadastroStaccatoOff::on_radioButtonTodos_toggled);
@@ -116,7 +117,7 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  if (ui->doubleSpinBoxDesconto->value() == 0) { return qApp->enqueueError("Selecione um desconto!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxDesconto->value())) { return qApp->enqueueError("Selecione um desconto!", this); }
 
   for (auto index : list) {
     if (model.data(index.row(), "promocao").toInt() == 2) { return qApp->enqueueError("Linha com promoção selecionada!", this); }

@@ -206,6 +206,7 @@ bool CadastroUsuario::cadastrar() {
       if (not modelPermissoes.setData(row, "idUsuario", primaryId)) { return false; }
       if (not modelPermissoes.setData(row, "view_tab_orcamento", true)) { return false; }
       if (not modelPermissoes.setData(row, "view_tab_venda", true)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_estoque", true)) { return false; }
       if (not modelPermissoes.setData(row, "view_tab_relatorio", true)) { return false; }
     }
 

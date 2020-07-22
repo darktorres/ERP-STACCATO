@@ -92,7 +92,8 @@ bool Application::userLogin(const QString &user) {
 
   db.setUserName(user);
 
-  setConnectOptions();
+  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
+  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=3");
 
   if (not db.open()) {
     loginError();
@@ -123,20 +124,32 @@ bool Application::genericLogin(const QString &hostname) {
   db.setDatabaseName("staccato");
   db.setPort(3306);
 
-  setConnectOptions();
+  db.setConnectOptions("MYSQL_OPT_CONNECT_TIMEOUT=1");
 
   if (not db.open()) {
-    loginError();
+    bool connected = false;
 
-    return false;
+    for (const auto &loja : mapLojas) {
+      db.setHostName(loja);
+
+      if (db.open()) {
+        UserSession::setSetting("Login/hostname", mapLojas.key(loja));
+        connected = true;
+        break;
+      }
+    }
+
+    if (not connected) {
+      loginError();
+
+      return false;
+    }
   }
 
   return true;
 }
 
 void Application::loginError() {
-  // TODO: caso o servidor selecionado nao esteja disponivel tente os outros
-  // TODO: try local ip's first
   isConnected = false;
 
   const QString error = db.lastError().text();
@@ -147,11 +160,6 @@ void Application::loginError() {
   if (error.contains("Can't connect to MySQL server on")) { message = "Não foi possível conectar ao servidor!"; }
 
   QMessageBox::critical(nullptr, "Erro!", message);
-}
-
-void Application::setConnectOptions() {
-  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_CONNECT_TIMEOUT=3");
-  //  db.setConnectOptions("CLIENT_COMPRESS=1;MYSQL_OPT_READ_TIMEOUT=10;MYSQL_OPT_WRITE_TIMEOUT=10;MYSQL_OPT_CONNECT_TIMEOUT=3");
 }
 
 bool Application::dbReconnect(const bool silent) {

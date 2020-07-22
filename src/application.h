@@ -77,7 +77,6 @@ private:
   auto loginError() -> void;
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> bool;
-  auto setConnectOptions() -> void;
   auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;

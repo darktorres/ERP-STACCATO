@@ -299,7 +299,6 @@ bool Contas::verifyFields() {
       if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!", this); }
       if (modelPendentes.data(row, "valorReal") == 0) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
       if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "parcelaReal") == 0) { return qApp->enqueueError(false, "'Parcela Real' vazio!", this); }
       if (modelPendentes.data(row, "idConta") == 0) { return qApp->enqueueError(false, "'Conta' vazio!", this); }
       if (modelPendentes.data(row, "centroCusto") == 0) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
       if (modelPendentes.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!", this); }

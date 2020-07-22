@@ -204,8 +204,7 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
-  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
+  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), modelPendentes.fieldIndex("tipo"), (tipo == Tipo::Receber), this));
 
   if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
   if (tipo == Tipo::Pagar) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }

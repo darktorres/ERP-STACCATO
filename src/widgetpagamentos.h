@@ -30,7 +30,7 @@ public:
   auto verifyFields() -> bool;
 
   // attributes
-  int pagamentos = 0; // TODO: rename this to size/count
+  int pagamentos = 0; // TODO: rename this to count
   QList<QCheckBox *> listCheckBoxRep;
   QList<QComboBox *> listTipoPgt;
   QList<QComboBox *> listTipoData;

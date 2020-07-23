@@ -178,7 +178,7 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
   if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) { return false; }
   if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
-  if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) { return false; }
+  if (not setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first())) { return false; }
   if (not setData("icms", ui->lineEditICMS->text())) { return false; }
   if (not setData("idFornecedor", ui->itemBoxFornecedor->getId())) { return false; }
   if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }

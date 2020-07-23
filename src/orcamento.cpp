@@ -444,8 +444,9 @@ bool Orcamento::generateId() {
     if (id.size() != 12 and id.size() != 13) { return qApp->enqueueException(false, "Tamanho do Id errado: " + id, this); }
   } else {
     QSqlQuery query;
-    query.prepare("SELECT COALESCE(MAX(CAST(RIGHT(idOrcamento, LENGTH(idOrcamento) - LOCATE('Rev', idOrcamento) - 2) AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE LENGTH(idOrcamento) > 16 "
-                  "AND idOrcamento LIKE :idOrcamento");
+    query.prepare(
+        "SELECT COALESCE(MAX(CAST(RIGHT(idOrcamento, CHAR_LENGTH(idOrcamento) - LOCATE('Rev', idOrcamento) - 2) AS UNSIGNED)) + 1, 1) AS revisao FROM orcamento WHERE CHAR_LENGTH(idOrcamento) > 16 "
+        "AND idOrcamento LIKE :idOrcamento");
     query.bindValue(":idOrcamento", replica.left(11) + "%");
 
     if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando próxima revisão disponível: " + query.lastError().text(), this); }
@@ -628,14 +629,30 @@ void Orcamento::on_pushButtonRemoverItem_clicked() { removeItem(); }
 
 void Orcamento::on_doubleSpinBoxQuant_valueChanged(const double quant) {
   const double step = ui->doubleSpinBoxQuant->singleStep();
-  const double resto = fmod(quant, step);
-  const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
+  const double prcUn = ui->lineEditPrecoUn->getValue();
+  const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
 
-  if (not qFuzzyCompare(quant, quant2)) { ui->doubleSpinBoxQuant->setValue(quant2); }
+  unsetConnections();
 
-  const double caixas = quant2 / step;
+  if (currentItemIsEstoque) {
+    const double caixas = quant / step;
+    ui->doubleSpinBoxCaixas->setValue(caixas);
 
-  if (not qFuzzyCompare(ui->doubleSpinBoxCaixas->value(), caixas)) { ui->doubleSpinBoxCaixas->setValue(caixas); }
+    const double itemBruto = quant * prcUn;
+    ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
+  } else {
+    const double resto = fmod(quant, step);
+    const double quant2 = not qFuzzyIsNull(resto) ? ceil(quant / step) * step : quant;
+    ui->doubleSpinBoxQuant->setValue(quant2);
+
+    const double caixas2 = quant2 / step;
+    ui->doubleSpinBoxCaixas->setValue(caixas2);
+
+    const double itemBruto2 = quant2 * prcUn;
+    ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
+  }
+
+  setConnections();
 }
 
 void Orcamento::on_pushButtonCadastrarOrcamento_clicked() {
@@ -807,22 +824,29 @@ void Orcamento::on_pushButtonGerarVenda_clicked() {
 }
 
 void Orcamento::on_doubleSpinBoxCaixas_valueChanged(const double caixas) {
-  const double step = ui->doubleSpinBoxCaixas->singleStep();
-  const double resto = fmod(caixas, step);
-  const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
-  const double quant = caixas2 * ui->spinBoxQuantCx->value();
   const double prcUn = ui->lineEditPrecoUn->getValue();
   const double desc = ui->doubleSpinBoxDesconto->value() / 100.;
-  const double itemBruto = quant * prcUn;
-
-  if (not qFuzzyCompare(caixas, caixas2)) { ui->doubleSpinBoxCaixas->setValue(caixas2); }
 
   unsetConnections();
 
-  [&] {
+  if (currentItemIsEstoque) {
+    const double quant = caixas * ui->spinBoxQuantCx->value();
     ui->doubleSpinBoxQuant->setValue(quant);
+
+    const double itemBruto = quant * prcUn;
     ui->doubleSpinBoxTotalItem->setValue(itemBruto * (1. - desc));
-  }();
+  } else {
+    const double step = ui->doubleSpinBoxCaixas->singleStep();
+    const double resto = fmod(caixas, step);
+    const double caixas2 = not qFuzzyIsNull(resto) ? ceil(caixas) : caixas;
+    ui->doubleSpinBoxCaixas->setValue(caixas2);
+
+    const double quant2 = caixas2 * ui->spinBoxQuantCx->value();
+    ui->doubleSpinBoxQuant->setValue(quant2);
+
+    const double itemBruto2 = quant2 * prcUn;
+    ui->doubleSpinBoxTotalItem->setValue(itemBruto2 * (1. - desc));
+  }
 
   setConnections();
 }

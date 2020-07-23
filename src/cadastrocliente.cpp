@@ -252,7 +252,9 @@ bool CadastroCliente::viewRegister() {
 
   if (not existeVinculo) { return false; }
 
-  const bool bloquear = (existeVinculo.value() and UserSession::nome() != "CLAUDIA ZELANTE");
+  const bool administrativo = UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO" or UserSession::tipoUsuario() == "DIRETOR";
+
+  const bool bloquear = (existeVinculo.value() and not administrativo);
 
   ui->lineEditCliente->setReadOnly(bloquear);
   ui->lineEditCPF->setReadOnly(bloquear);

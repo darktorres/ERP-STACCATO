@@ -4,6 +4,7 @@
 #include "application.h"
 #include "doubledelegate.h"
 #include "estoque.h"
+#include "searchdialogproxymodel.h"
 #include "sortfilterproxymodel.h"
 #include "usersession.h"
 #include "xlsxdocument.h"
@@ -22,9 +23,12 @@ void WidgetEstoque::setConnections() {
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetEstoque::escolheFiltro, connectionType);
   connect(ui->pushButtonRelatorio, &QPushButton::clicked, this, &WidgetEstoque::on_pushButtonRelatorio_clicked, connectionType);
+  connect(ui->radioButtonEstoque, &QRadioButton::toggled, this, &WidgetEstoque::on_radioButtonEstoque_toggled, connectionType);
   connect(ui->radioButtonEstoqueContabil, &QRadioButton::clicked, this, &WidgetEstoque::montaFiltroContabil, connectionType);
   connect(ui->radioButtonEstoqueZerado, &QRadioButton::clicked, this, &WidgetEstoque::montaFiltro, connectionType);
   connect(ui->radioButtonMaior, &QRadioButton::clicked, this, &WidgetEstoque::montaFiltro, connectionType);
+  connect(ui->radioButtonStaccatoOFF, &QRadioButton::toggled, this, &WidgetEstoque::on_radioButtonStaccatoOFF_toggled, connectionType);
+  connect(ui->radioButtonTodos, &QRadioButton::toggled, this, &WidgetEstoque::on_radioButtonTodos_toggled, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetEstoque::on_table_activated, connectionType);
 }
 
@@ -36,6 +40,46 @@ void WidgetEstoque::setupTables() {
   ui->table->setModel(&model);
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
+
+  //----------------------------------------------
+
+  modelProdutos.setTable("view_produto");
+
+  modelProdutos.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
+
+  modelProdutos.proxyModel = new SearchDialogProxyModel(&modelProdutos, this);
+
+  if (not modelProdutos.select()) { return; }
+
+  modelProdutos.setHeaderData("fornecedor", "Fornecedor");
+  modelProdutos.setHeaderData("statusEstoque", "Estoque");
+  modelProdutos.setHeaderData("descricao", "Descrição");
+  modelProdutos.setHeaderData("estoqueRestante", "Estoque Disp.");
+  modelProdutos.setHeaderData("estoqueCaixa", "Estoque Cx.");
+  modelProdutos.setHeaderData("lote", "Lote");
+  modelProdutos.setHeaderData("un", "Un.");
+  modelProdutos.setHeaderData("un2", "Un.2");
+  modelProdutos.setHeaderData("colecao", "Coleção");
+  modelProdutos.setHeaderData("tipo", "Tipo");
+  modelProdutos.setHeaderData("minimo", "Mínimo");
+  modelProdutos.setHeaderData("multiplo", "Múltiplo");
+  modelProdutos.setHeaderData("m2cx", "M/Cx.");
+  modelProdutos.setHeaderData("pccx", "Pç./Cx.");
+  modelProdutos.setHeaderData("kgcx", "Kg./Cx.");
+  modelProdutos.setHeaderData("formComercial", "Form. Com.");
+  modelProdutos.setHeaderData("codComercial", "Cód. Com.");
+  modelProdutos.setHeaderData("precoVenda", "R$");
+  modelProdutos.setHeaderData("validade", "Validade");
+  modelProdutos.setHeaderData("ui", "UI");
+
+  ui->tableProdutos->setModel(&modelProdutos);
+
+  ui->tableProdutos->hideColumn("idProduto");
+  ui->tableProdutos->hideColumn("estoque");
+  ui->tableProdutos->hideColumn("promocao");
+  ui->tableProdutos->hideColumn("descontinuado");
+  ui->tableProdutos->hideColumn("desativado");
+  ui->tableProdutos->hideColumn("representacao");
 }
 
 void WidgetEstoque::setHeaderData() {
@@ -169,13 +213,13 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
   modelContabil.setQuery(
       "SELECT e.idEstoque, GROUP_CONCAT(DISTINCT n.cnpjDest SEPARATOR ',') AS cnpjDest, e.status, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + ajuste AS contabil, "
       "e.restante AS disponivel, e.un AS unEst, p.un AS unProd, (e.quant + COALESCE(ehc.contabil, 0) + ajuste) / p.quantCaixa AS Caixas, e.lote, e.local, e.bloco, e.codComercial, "
-      "e.ncm, e.cstICMS, e.pICMS, e.cstIPI, e.cstPIS, e.cstCOFINS, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, p.custo AS custoUnit, p.precoVenda AS precoVendaUnit, p.custo * (e.quant "
-      "+ COALESCE(ehc.contabil, 0) + ajuste) AS custo, p.precoVenda * (e.quant + COALESCE(ehc.contabil, 0) + ajuste) AS precoVenda FROM estoque e LEFT JOIN (SELECT ehc.idEstoque, SUM(ehc.quant) AS "
-      "contabil, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = vp.idVendaProduto2 WHERE "
-      "(vp.dataRealEnt < '" +
+      "e.ncm, e.cstICMS, e.pICMS, e.cstIPI, e.cstPIS, e.cstCOFINS, GROUP_CONCAT(DISTINCT n.numeroNFe SEPARATOR ', ') AS nfe, e.valorUnid AS custoUnit, p.precoVenda AS precoVendaUnit, e.valorUnid * "
+      "(e.quant + COALESCE(ehc.contabil, 0) + ajuste) AS custo, p.precoVenda * (e.quant + COALESCE(ehc.contabil, 0) + ajuste) AS precoVenda FROM estoque e LEFT JOIN (SELECT ehc.idEstoque, "
+      "SUM(ehc.quant) AS contabil, SUM(IF(vp.status != 'DEVOLVIDO ESTOQUE', vp.quant, 0)) AS consumoVenda FROM estoque_has_consumo ehc LEFT JOIN venda_has_produto2 vp ON ehc.idVendaProduto2 = "
+      "vp.idVendaProduto2 WHERE (vp.dataRealEnt < '" +
       data +
       "') AND ehc.status != 'CANCELADO' GROUP BY ehc.idEstoque) ehc ON e.idEstoque = ehc.idEstoque LEFT JOIN estoque_has_compra ehc2 ON e.idEstoque = ehc2.idEstoque LEFT JOIN "
-      "pedido_fornecedor_has_produto2 pf ON pf.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status = 'ESTOQUE' AND "
+      "pedido_fornecedor_has_produto2 pf2 ON pf2.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status = 'ESTOQUE' AND "
       "e.created < '" +
       data + "' GROUP BY e.idEstoque HAVING contabil > 0");
 
@@ -227,6 +271,30 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
   return true;
 }
 
+void WidgetEstoque::on_radioButtonTodos_toggled(bool checked) {
+  if (not checked) { return; }
+
+  modelProdutos.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
+
+  if (not modelProdutos.select()) { return; }
+}
+
+void WidgetEstoque::on_radioButtonStaccatoOFF_toggled(bool checked) {
+  if (not checked) { return; }
+
+  modelProdutos.setFilter("estoque = TRUE AND promocao = 2 AND descontinuado = FALSE AND desativado = FALSE");
+
+  if (not modelProdutos.select()) { return; }
+}
+
+void WidgetEstoque::on_radioButtonEstoque_toggled(bool checked) {
+  if (not checked) { return; }
+
+  modelProdutos.setFilter("estoque = TRUE AND promocao = 0 AND descontinuado = FALSE AND desativado = FALSE");
+
+  if (not modelProdutos.select()) { return; }
+}
+
 // NOTE: gerenciar lugares de estoque (cadastro/permissoes)
 // TODO: 3tem produto com unidade barra que na verdade significa ML
 
@@ -236,3 +304,4 @@ bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &file
 // TODO: terminar de arrumar relatorio estoque
 // TODO: [Conrado] colocar filtro/tela para buscar por pedido e mostrar os estoques em que foi consumido
 // TODO: fix fulltext indexes (put match against inside subquery)
+// TODO: criar um segundo relatorio para os gerentes sem o custo

@@ -202,10 +202,8 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
-  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
+  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), modelPendentes.fieldIndex("tipo"), (tipo == Tipo::Receber), this));
 
   if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
   if (tipo == Tipo::Pagar) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
@@ -297,11 +295,10 @@ bool Contas::verifyFields() {
 
     if ((tipo == Tipo::Pagar and status == "PAGO") or (tipo == Tipo::Receber and status == "RECEBIDO")) {
       if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!", this); }
-      if (modelPendentes.data(row, "valorReal").toString().isEmpty()) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
+      if (modelPendentes.data(row, "valorReal") == 0) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
       if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "parcelaReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Parcela Real' vazio!", this); }
-      if (modelPendentes.data(row, "idConta").toString().isEmpty()) { return qApp->enqueueError(false, "'Conta Dest.' vazio!", this); }
-      if (modelPendentes.data(row, "centroCusto").toString().isEmpty()) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
+      if (modelPendentes.data(row, "idConta") == 0) { return qApp->enqueueError(false, "'Conta' vazio!", this); }
+      if (modelPendentes.data(row, "centroCusto") == 0) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
       if (modelPendentes.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!", this); }
     }
   }

@@ -68,6 +68,7 @@ void PrecoEstoque::setupTables() {
   ui->table->hideColumn("st");
   ui->table->hideColumn("sticms");
   ui->table->hideColumn("mva");
+  ui->table->hideColumn("oldPrecoVenda");
   ui->table->hideColumn("markup");
   ui->table->hideColumn("comissao");
   ui->table->hideColumn("observacoes");

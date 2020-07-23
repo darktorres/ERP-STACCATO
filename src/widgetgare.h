@@ -33,6 +33,7 @@ private:
   auto on_pushButtonRemessaSantander_clicked() -> void;
   auto on_pushButtonRetornoItau_clicked() -> void;
   auto on_pushButtonRetornoSantander_clicked() -> void;
+  auto on_tableSelection_changed() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setupTables() -> void;
 };

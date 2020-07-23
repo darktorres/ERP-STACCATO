@@ -138,6 +138,8 @@ void WidgetGare::setupTables() {
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("referencia");
   ui->table->hideColumn("cnpjOrig");
+
+  connect(ui->table->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WidgetGare::on_tableSelection_changed);
 }
 
 void WidgetGare::on_pushButtonRemessaItau_clicked() {
@@ -264,6 +266,16 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
+}
+
+void WidgetGare::on_tableSelection_changed() {
+  double total = 0;
+
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  for (const auto &index : selection) { total += model.data(index.row(), "valor").toDouble(); }
+
+  ui->doubleSpinBoxTotal->setValue(total);
 }
 
 // TODO: deve salvar gare/gareData em nfe

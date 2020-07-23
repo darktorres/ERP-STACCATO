@@ -202,7 +202,6 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), modelPendentes.fieldIndex("tipo"), (tipo == Tipo::Receber), this));
 

@@ -54,7 +54,7 @@ QTabWidget::pane {
 </string>
       </property>
       <property name="currentIndex">
-       <number>10</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabOrcamentos">
        <attribute name="title">
@@ -206,6 +206,16 @@ QTabWidget::pane {
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabGalpao">
+       <attribute name="title">
+        <string>Galpão</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0">
+         <widget class="Galpao" name="widget" native="true"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabFinanceiro">
        <attribute name="title">
         <string>Financeiro</string>
@@ -307,16 +317,6 @@ QTabWidget::pane {
            <bool>false</bool>
           </property>
          </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabGalpao">
-       <attribute name="title">
-        <string>Galpão</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_8">
-        <item row="0" column="0">
-         <widget class="Galpao" name="widget" native="true"/>
         </item>
        </layout>
       </widget>

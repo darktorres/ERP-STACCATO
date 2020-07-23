@@ -3,10 +3,12 @@
 #include "application.h"
 
 #include <QDebug>
+#include <QGraphicsProxyWidget>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QMimeData>
 #include <QPainter>
+#include <QScrollArea>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QToolTip>
@@ -16,7 +18,7 @@ PalletItem::PalletItem(const QRectF size, QGraphicsItem *parent) : QGraphicsItem
   setAcceptDrops(true);
 }
 
-QRectF PalletItem::boundingRect() const { return flagTooltip ? size.united(childrenBoundingRect()) : size; }
+QRectF PalletItem::boundingRect() const { return selected ? size.united(childrenBoundingRect()) : size; }
 
 void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
   Q_UNUSED(option)
@@ -27,8 +29,8 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     painter->setBrush(QBrush(QColor(Qt::black)));
     painter->drawRect(size);
   } else {
-    //    painter->setPen(QColor(Qt::red));
-    //    painter->drawRect(boundingRect());
+    painter->setPen(QColor(Qt::black));
+    painter->drawRect(size);
   }
 
   setZValue(0);
@@ -36,12 +38,12 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
   font.setPixelSize(8);
   painter->setFont(font);
   painter->setPen(QColor(Qt::red));
-  painter->drawText(size.center().x() / 2, size.center().y(), label);
+  painter->drawText(0, size.center().y(), label);
 
-  if (flagTooltip) {
+  if (selected) {
     setZValue(1);
     painter->setBrush(QBrush(QColor(Qt::black), Qt::SolidPattern));
-    painter->drawRect(boundingRect());
+    painter->drawRect(size);
   }
 }
 
@@ -51,9 +53,9 @@ void PalletItem::setText(const QString &value) {
   int pos = 15;
 
   for (auto line : lines) {
-    auto estoque = new EstoqueItem(line, this);
+    auto estoque = new EstoqueItem(line, line.split(" - ").last().toInt(), this);
     estoque->setVisible(false);
-    estoque->setPos(30, pos);
+    estoque->setPos(mapFromScene(660, pos));
     estoque->setBrush(QBrush(QColor(Qt::red)));
     pos += 15;
   }
@@ -75,37 +77,41 @@ void PalletItem::reorderChildren() {
   int pos = 15;
 
   for (auto estoque : childItems()) {
-    estoque->setPos(30, pos);
+    estoque->setPos(mapFromScene(660, pos));
     pos += 15;
   }
 }
 
-void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-  flagTooltip = true;
+void PalletItem::unselect() {
+  if (not selected) { return; }
 
-  prepareGeometryChange();
-  for (auto estoque : childItems()) { estoque->setVisible(true); }
-
-  QGraphicsItem::hoverEnterEvent(event);
-}
-
-void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
-
-void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
-  flagTooltip = false;
+  selected = false;
 
   prepareGeometryChange();
   for (auto estoque : childItems()) { estoque->setVisible(false); }
-
-  QGraphicsItem::hoverLeaveEvent(event);
 }
 
-void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mousePressEvent(event); }
+void PalletItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverEnterEvent(event); }
+
+void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverMoveEvent(event); }
+
+void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverLeaveEvent(event); }
+
+void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+  if (not selected) { emit unselectOthers(); }
+
+  selected = not selected;
+
+  prepareGeometryChange();
+  for (auto estoque : childItems()) { estoque->setVisible(not estoque->isVisible()); }
+
+  QGraphicsItem::mousePressEvent(event);
+}
 
 void PalletItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseMoveEvent(event); }
 
 void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-  emit save();
+  if (flags().testFlag(QGraphicsItem::ItemIsMovable)) { emit save(); }
 
   QGraphicsItem::mouseReleaseEvent(event);
 }
@@ -123,16 +129,32 @@ void PalletItem::dragMoveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(ev
 void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
   Q_UNUSED(event);
 
+  QStringList text = event->mimeData()->text().split(" - ", QString::SkipEmptyParts);
+
+  if (text.isEmpty()) { return; }
+
+  const QString id = text.at(0);
+  const QString table = (text.at(1) == "ESTOQUE") ? "estoque" : "estoque_has_consumo";
+  const QString idName = (table == "estoque") ? "idEstoque" : "idConsumo";
+
   QSqlQuery query;
 
-  if (not query.exec("UPDATE estoque SET bloco = '" + label + "' WHERE idEstoque = " + event->mimeData()->text().split(" - ").first())) {
+  if (not query.exec("UPDATE " + table + " SET bloco = '" + label + "' WHERE " + idName + " = " + id)) {
     event->ignore();
     return qApp->enqueueError("Erro movendo estoque: " + query.lastError().text());
   }
 
   EstoqueItem *item = dynamic_cast<EstoqueItem *>(event->mimeData()->parent());
   item->setParentItem(this);
+  item->setVisible(false);
   reorderChildren();
 
   event->acceptProposedAction();
+}
+
+void PalletItem::select() {
+  selected = not selected;
+
+  prepareGeometryChange();
+  for (auto estoque : childItems()) { estoque->setVisible(not estoque->isVisible()); }
 }

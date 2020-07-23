@@ -312,6 +312,7 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->hideColumn("idProduto");
   ui->tableErro->hideColumn("idEstoque");
   ui->tableErro->hideColumn("estoqueRestante");
+  ui->tableErro->hideColumn("quantCaixa");
   ui->tableErro->hideColumn("idFornecedor");
   ui->tableErro->hideColumn("desativado");
   ui->tableErro->hideColumn("descontinuado");
@@ -320,7 +321,7 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->hideColumn("atualizarTabelaPreco");
   ui->tableErro->hideColumn("temLote");
   ui->tableErro->hideColumn("tipo");
-  ui->tableErro->hideColumn("oldVendaPreco");
+  ui->tableErro->hideColumn("oldPrecoVenda");
   ui->tableErro->hideColumn("comissao");
   ui->tableErro->hideColumn("observacoes");
   ui->tableErro->hideColumn("origem");

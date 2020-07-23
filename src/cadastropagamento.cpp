@@ -107,6 +107,7 @@ void CadastroPagamento::setupTables() {
 
   ui->tableAssocia2->hideColumn("idLoja");
   ui->tableAssocia2->hideColumn("idPagamento");
+  ui->tableAssocia2->hideColumn("apenasRepresentacao");
 }
 
 void CadastroPagamento::updateTables() {

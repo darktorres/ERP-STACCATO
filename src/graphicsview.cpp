@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 
-GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {}
+GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) { setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform); }
 
 void GraphicsView::mousePressEvent(QMouseEvent *event) { QGraphicsView::mousePressEvent(event); }
 

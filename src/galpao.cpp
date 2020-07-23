@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QDrag>
+#include <QGraphicsProxyWidget>
 #include <QGraphicsRectItem>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -15,6 +16,7 @@ Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) {
 
   scene = new GraphicsScene(this);
   ui->graphicsView->setScene(scene);
+  ui->graphicsView_4->setScene(scene);
 
   setupTables();
 
@@ -23,15 +25,22 @@ Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) {
 
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged);
+  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
+  connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
+  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
 
-  scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao.png")));
+  scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
 
   ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  //  ui->graphicsView->setFixedSize(842, 595);
-  //  ui->graphicsView->setSceneRect(0, 0, 842, 595);
-  //  ui->graphicsView->fitInView(0, 0, 0, 0, Qt::KeepAspectRatio);
+  //  ui->graphicsView_4->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
+  ui->graphicsView->setFixedSize(624, 586);
+  ui->graphicsView->setSceneRect(0, 0, 624, 586);
+  ui->graphicsView->fitInView(0, 0, 0, 0, Qt::KeepAspectRatio);
+
+  ui->graphicsView_4->setSceneRect(650, 0, 842, 10000);
 
   carregarPallets();
 }
@@ -42,7 +51,6 @@ void Galpao::setupTables() {
   modelTranspAgend.setTable("veiculo_has_produto");
 
   modelTranspAgend.setHeaderData("data", "Agendado");
-  modelTranspAgend.setHeaderData("idEstoque", "Estoque");
   modelTranspAgend.setHeaderData("idVenda", "Venda");
   modelTranspAgend.setHeaderData("status", "Status");
   modelTranspAgend.setHeaderData("fornecedor", "Fornecedor");
@@ -57,6 +65,7 @@ void Galpao::setupTables() {
 
   ui->tableTranspAgend->setModel(&modelTranspAgend);
 
+  ui->tableTranspAgend->hideColumn("idEstoque");
   ui->tableTranspAgend->hideColumn("fotoEntrega");
   ui->tableTranspAgend->hideColumn("idVendaProduto1");
   ui->tableTranspAgend->hideColumn("idVendaProduto2");
@@ -68,30 +77,70 @@ void Galpao::setupTables() {
   ui->tableTranspAgend->hideColumn("idLoja");
   ui->tableTranspAgend->hideColumn("idProduto");
   ui->tableTranspAgend->hideColumn("obs");
+
+  connect(ui->tableTranspAgend->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Galpao::on_table_selectionChanged, Qt::ConnectionType(Qt::AutoConnection | Qt::UniqueConnection));
 }
 
 void Galpao::carregarPallets() {
   QSqlQuery query;
 
-  if (not query.exec("select g.*, group_concat(concat(v.idEstoque, ' - ', CAST(v.caixas AS DECIMAL(15,2)), 'cx - ', v.descricao) separator '\n') as descricao from galpao g left join "
-                     "view_estoque_contabil v on g.bloco = v.bloco group by g.bloco order by CAST(g.bloco AS UNSIGNED) desc")) {
+  if (not query.exec("SELECT g.*, v.id, v.tipo, CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, REPLACE(v.descricao, '-', '') AS descricao, v.idVendaProduto2 FROM galpao g LEFT JOIN view_galpao v ON "
+                     "g.bloco = v.bloco ORDER BY CAST(g.bloco AS UNSIGNED) ASC, id ASC")) {
     return qApp->enqueueError("Erro buscando dados do galpão: " + query.lastError().text(), this);
   }
 
+  QHash<QString, QString> blocos;
+
   while (query.next()) {
-    const QStringList posicao = query.value("posicao").toString().split(",");
-    const QStringList tamanho = query.value("tamanho").toString().split(",");
+    // agrupar valores de cada bloco
+
+    const QString posicao = query.value("posicao").toString();
+    const QString tamanho = query.value("tamanho").toString();
+
+    QString item = query.value("id").toString() + " - " + query.value("tipo").toString() + " - " + QString::number(query.value("caixas").toDouble()) + "cx - " + query.value("descricao").toString() +
+                   " - " + query.value("idVendaProduto2").toString();
+
+    QString existente = blocos.value(query.value("bloco").toString());
+
+    if (existente.isEmpty()) {
+      existente += posicao;
+      existente += "\n";
+      existente += tamanho;
+    }
+
+    if (query.value("id") > 0) {
+      if (not existente.isEmpty()) { existente += "\n"; }
+
+      existente += item;
+    }
+
+    blocos.insert(query.value("bloco").toString(), existente);
+  }
+
+  auto iterator = blocos.constBegin();
+
+  while (iterator != blocos.constEnd()) {
+    QStringList strings = iterator.value().split("\n");
+
+    const QStringList posicao = strings.at(0).split(",");
+    const QStringList tamanho = strings.at(1).split(",");
+
+    strings.removeFirst();
+    strings.removeFirst();
 
     auto *pallet = new PalletItem(QRect(0, 0, tamanho.at(0).toInt(), tamanho.at(1).toInt()));
     pallet->setPos(posicao.at(0).toInt(), posicao.at(1).toInt());
-    pallet->setLabel(query.value("bloco").toString());
-    pallet->setText(query.value("descricao").toString());
+    pallet->setLabel(iterator.key());
+    pallet->setText(strings.join("\n"));
     //    pallet->setFlags(QGraphicsItem::ItemIsMovable);
     //    rect->setPen(QPen(QColor(Qt::red)));
 
     connect(pallet, &PalletItem::save, this, &Galpao::salvarPallets);
+    connect(pallet, &PalletItem::unselectOthers, this, &Galpao::unselectOthers);
 
     scene->addItem(pallet);
+
+    ++iterator;
   }
 }
 
@@ -111,18 +160,75 @@ void Galpao::salvarPallets() {
   }
 }
 
-void Galpao::on_dateTimeEdit_dateChanged(const QDate &date) {
-  modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + date.toString("yyyy-MM-dd") + "'");
+void Galpao::on_dateTimeEdit_dateChanged(const QDate &) {
+  if (ui->itemBoxVeiculo->text().isEmpty()) { return; }
 
-  if (not modelTranspAgend.select()) { qApp->enqueueError("Erro: " + modelTranspAgend.lastError().text(), this); }
+  setFilter();
 }
 
-void Galpao::on_itemBoxVeiculo_textChanged(const QString &) {
+void Galpao::on_itemBoxVeiculo_textChanged(const QString &) { setFilter(); }
+
+void Galpao::setFilter() {
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
   if (not modelTranspAgend.select()) { qApp->enqueueError("Erro: " + modelTranspAgend.lastError().text(), this); }
 
-  // TODO: pintar pallets aqui
+  on_table_selectionChanged();
+}
+
+void Galpao::on_table_selectionChanged() {
+  auto items = scene->items();
+
+  for (auto item : items) {
+    if (auto pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlagHighlight(false); }
+  }
+
+  const auto list = ui->tableTranspAgend->selectionModel()->selectedRows();
+
+  for (auto index : list) {
+    const int idVendaProduto2 = modelTranspAgend.data(index.row(), "idVendaProduto2").toInt();
+
+    for (auto item : items) {
+      if (auto pallet = dynamic_cast<PalletItem *>(item)) {
+        auto palletItems = pallet->childItems();
+
+        for (auto palletItem : palletItems) {
+          if (auto estoque = dynamic_cast<EstoqueItem *>(palletItem)) {
+            if (idVendaProduto2 == estoque->idVendaProduto2) { pallet->setFlagHighlight(true); }
+          }
+        }
+      }
+    }
+  }
+
+  scene->update();
+}
+
+void Galpao::unselectOthers() {
+  auto items = scene->items();
+
+  for (auto item : items) {
+    if (auto pallet = dynamic_cast<PalletItem *>(item)) { pallet->unselect(); }
+  }
+}
+
+void Galpao::on_pushButtonCriarPallet_clicked() {
+  //
+}
+
+void Galpao::on_pushButtonRemoverPallet_clicked() {
+  //
+}
+
+void Galpao::on_groupBoxEdicao_toggled(bool checked) {
+  auto items = scene->items();
+
+  for (auto item : items) {
+    if (auto pallet = dynamic_cast<PalletItem *>(item)) {
+      pallet->setFlag(QGraphicsItem::ItemIsMovable, checked);
+      //      rect->setPen(QPen(QColor(Qt::red)));
+    }
+  }
 }
 
 // TODO: adicionar botao para criar pallet

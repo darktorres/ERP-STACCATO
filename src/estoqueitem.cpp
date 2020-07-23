@@ -8,7 +8,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMimeData>
 
-EstoqueItem::EstoqueItem(const QString &text, QGraphicsItem *parent) : QGraphicsSimpleTextItem(text, parent) {}
+EstoqueItem::EstoqueItem(const QString &text, const int idVendaProduto2, QGraphicsItem *parent) : QGraphicsSimpleTextItem(text, parent), idVendaProduto2(idVendaProduto2) {}
 
 void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   startDrag(event->pos());
@@ -18,6 +18,8 @@ void EstoqueItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 
 void EstoqueItem::startDrag(QPointF pos) {
   Q_UNUSED(pos);
+
+  emit startDragSignal();
 
   QPixmap pixmap = QPixmap("://box_medium.png");
 

@@ -21,7 +21,7 @@ QWidget *DateFormatDelegate::createEditor(QWidget *parent, const QStyleOptionVie
     const QString tipo = index.siblingAtColumn(tipoColumn).data().toString();
     const int dias = (tipo.contains("BOLETO") and recebimento) ? 1 : 0;
 
-    editor->setDate(index.siblingAtColumn(vencimentoColumn).data().toDate().addDays(dias));
+    editor->setDate(qApp->ajustarDiaUtil(index.siblingAtColumn(vencimentoColumn).data().toDate().addDays(dias)));
   }
 
   return editor;

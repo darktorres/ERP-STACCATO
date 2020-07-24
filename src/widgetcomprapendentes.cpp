@@ -51,6 +51,7 @@ void WidgetCompraPendentes::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
@@ -183,6 +184,12 @@ void WidgetCompraPendentes::montaFiltro() {
   const bool atelier = ui->checkBoxAtelier->isChecked();
 
   filtros << (atelier ? "fornecedor = 'ATELIER STACCATO'" : "fornecedor <> 'ATELIER STACCATO'");
+
+  //-------------------------------------
+
+  const bool servicos = ui->checkBoxServicos->isChecked();
+
+  filtros << (servicos ? "fornecedor = 'STACCATO SERVIÇOS ESPECIAIS (SSE)'" : "fornecedor <> 'STACCATO SERVIÇOS ESPECIAIS (SSE)'");
 
   //-------------------------------------
 

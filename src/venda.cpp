@@ -572,6 +572,9 @@ bool Venda::viewRegister() {
 
     if (not modelFluxoCaixa.select()) { return false; }
 
+    idLoja = data("idLoja").toInt();
+    representacao = data("representacao").toBool();
+
     if (financeiro) {
       // TODO: 1quando estiver tudo pago bloquear correcao de fluxo
       modelFluxoCaixa2.setFilter("idVenda = '" + ui->lineEditVenda->text() + "' AND status NOT IN ('CANCELADO', 'SUBSTITUIDO') AND (comissao = TRUE OR taxa = TRUE)");
@@ -590,6 +593,20 @@ bool Venda::viewRegister() {
       ui->doubleSpinBoxPontuacao->setEnabled(true);
       ui->doubleSpinBoxPontuacao->setReadOnly(true);
       ui->doubleSpinBoxPontuacao->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+      // -------------------------------------------------------------------------
+
+      if (representacao) {
+        QSqlQuery queryFornecedor;
+        queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
+        queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
+
+        if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException(false, "Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+
+        const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
+
+        if (fretePagoLoja) { ui->widgetPgts->setFretePagoLoja(); }
+      }
     }
 
     //-----------------------------------------------------------------
@@ -612,9 +629,6 @@ bool Venda::viewRegister() {
       ui->labelConsultor->show();
       ui->itemBoxConsultor->show();
     }
-
-    idLoja = data("idLoja").toInt();
-    representacao = data("representacao").toBool();
 
     ui->widgetPgts->setIdOrcamento(ui->lineEditIdOrcamento->text());
     ui->widgetPgts->setRepresentacao(representacao);

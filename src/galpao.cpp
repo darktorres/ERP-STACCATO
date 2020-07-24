@@ -11,41 +11,52 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) {
-  ui->setupUi(this);
-
-  scene = new GraphicsScene(this);
-  ui->graphicsView->setScene(scene);
-  ui->graphicsView_4->setScene(scene);
-
-  setupTables();
-
-  ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
-  ui->dateTimeEdit->setDate(qApp->serverDate());
-
-  connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
-  connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged);
-  connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
-  connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
-  connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
-
-  scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
-
-  ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-  //  ui->graphicsView_4->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-
-  ui->graphicsView->setFixedSize(624, 586);
-  ui->graphicsView->setSceneRect(0, 0, 624, 586);
-  ui->graphicsView->fitInView(0, 0, 0, 0, Qt::KeepAspectRatio);
-
-  ui->graphicsView_4->setSceneRect(650, 0, 842, 10000);
-
-  carregarPallets();
-}
+Galpao::Galpao(QWidget *parent) : QWidget(parent), ui(new Ui::Galpao) { ui->setupUi(this); }
 
 Galpao::~Galpao() { delete ui; }
+
+void Galpao::resetTables() { modelIsSet = false; }
+
+void Galpao::updateTables() {
+  if (not isSet) {
+    scene = new GraphicsScene(this);
+    ui->graphicsView->setScene(scene);
+    ui->graphicsView_4->setScene(scene);
+
+    //      setupTables();
+
+    ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
+    ui->dateTimeEdit->setDate(qApp->serverDate());
+
+    connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
+    connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged);
+    connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
+    connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
+    connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
+
+    scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
+
+    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    //  ui->graphicsView_4->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
+    //    ui->graphicsView->setFixedSize(624, 586);
+    ui->graphicsView->setSceneRect(0, 0, 624, 586);
+    ui->graphicsView->fitInView(0, 0, 0, 0, Qt::KeepAspectRatio);
+
+    ui->graphicsView_4->setSceneRect(650, 0, 842, 10000);
+
+    carregarPallets();
+  }
+
+  if (not modelIsSet) {
+    setupTables();
+    modelIsSet = true;
+  }
+
+  if (not modelTranspAgend.select()) { return; }
+}
 
 void Galpao::setupTables() {
   modelTranspAgend.setTable("veiculo_has_produto");

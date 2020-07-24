@@ -54,6 +54,7 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_logistica", "Ver Logística?");
   modelPermissoes.setHeaderData("view_tab_nfe", "Ver NFe?");
   modelPermissoes.setHeaderData("view_tab_estoque", "Ver Estoque?");
+  modelPermissoes.setHeaderData("view_tab_galpao", "Ver Galpão?");
   modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
   modelPermissoes.setHeaderData("view_tab_rh", "Ver RH?");

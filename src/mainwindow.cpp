@@ -164,6 +164,7 @@ void MainWindow::updateTables() {
   if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
   if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
   if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentText == "Galpão") { ui->widgetGalpao->updateTables(); }
   if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
   if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }

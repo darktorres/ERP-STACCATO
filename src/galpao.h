@@ -15,12 +15,16 @@ class Galpao : public QWidget {
 public:
   explicit Galpao(QWidget *parent = nullptr);
   ~Galpao();
+  auto resetTables() -> void;
+  auto updateTables() -> void;
 
 private:
   // attributes
-  Ui::Galpao *ui;
+  bool isSet = false;
+  bool modelIsSet = false;
   GraphicsScene *scene;
   SqlTableModel modelTranspAgend;
+  Ui::Galpao *ui;
   // methods
   auto carregarPallets() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &) -> void;

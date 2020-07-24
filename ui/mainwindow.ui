@@ -212,7 +212,7 @@ QTabWidget::pane {
        </attribute>
        <layout class="QGridLayout" name="gridLayout_8">
         <item row="0" column="0">
-         <widget class="Galpao" name="widget" native="true"/>
+         <widget class="Galpao" name="widgetGalpao" native="true"/>
         </item>
        </layout>
       </widget>

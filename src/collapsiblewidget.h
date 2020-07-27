@@ -10,7 +10,7 @@ class CollapsibleWidget : public QWidget {
   Q_OBJECT
 
 public:
-  explicit CollapsibleWidget(QWidget *parent);
+  explicit CollapsibleWidget(const QString &data, QWidget *parent = nullptr);
   ~CollapsibleWidget();
   //  auto setHtml(const QString text) -> void;
   //  auto getHtml() -> QString;

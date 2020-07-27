@@ -1151,8 +1151,8 @@ bool Venda::criarConsumos() {
 
   if (not query.exec()) { return qApp->enqueueException(false, "Erro buscando produtos estoque: " + query.lastError().text(), this); }
 
-  while (query2.next()) {
-    auto *estoque = new Estoque(query2.value("idEstoque").toString(), false, this);
+  while (query.next()) {
+    auto *estoque = new Estoque(query.value("idEstoque").toString(), false, this);
 
     if (not estoque->criarConsumo(query.value("idVendaProduto2").toInt(), query.value("quant").toDouble())) { return false; }
   }

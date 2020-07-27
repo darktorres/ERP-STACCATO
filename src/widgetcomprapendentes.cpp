@@ -33,7 +33,7 @@ void WidgetCompraPendentes::setarDadosAvulso() {
   query.prepare("SELECT UPPER(un) AS un, m2cx, pccx FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando produto: " + query.lastError().text(), this); }
 
   // TODO: change this to use quantCaixa?
   const QString un = query.value("un").toString();
@@ -51,6 +51,7 @@ void WidgetCompraPendentes::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->checkBoxAtelier, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
+  connect(ui->checkBoxServicos, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroColeta, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroCompra, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
   connect(ui->checkBoxFiltroEmEntrega, &QCheckBox::toggled, this, &WidgetCompraPendentes::montaFiltro, connectionType);
@@ -186,6 +187,12 @@ void WidgetCompraPendentes::montaFiltro() {
 
   //-------------------------------------
 
+  const bool servicos = ui->checkBoxServicos->isChecked();
+
+  filtros << (servicos ? "fornecedor = 'STACCATO SERVIÇOS ESPECIAIS (SSE)'" : "fornecedor <> 'STACCATO SERVIÇOS ESPECIAIS (SSE)'");
+
+  //-------------------------------------
+
   filtros << "quant > 0";
 
   modelViewVendaProduto.setFilter(filtros.join(" AND "));
@@ -202,7 +209,7 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   const QDate dataPrevista = inputDlg.getNextDate();
 
-  insere(dataPrevista) ? qApp->enqueueInformation("Produto enviado para compras com sucesso!", this) : qApp->enqueueError("Erro ao enviar produto para compras!", this);
+  insere(dataPrevista) ? qApp->enqueueInformation("Produto enviado para compras com sucesso!", this) : qApp->enqueueException("Erro ao enviar produto para compras!", this);
 
   ui->itemBoxProduto->clear();
 }
@@ -217,7 +224,7 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando produto: " + query.lastError().text(), this); }
 
   if (not model.setData(newRow, "fornecedor", query.value("fornecedor"))) { return false; }
   if (not model.setData(newRow, "idProduto", query.value("idProduto"))) { return false; }
@@ -235,7 +242,7 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   if (not model.setData(newRow, "codBarras", query.value("codBarras"))) { return false; }
   if (not model.setData(newRow, "dataPrevCompra", dataPrevista)) { return false; }
 
-  if (not model.submitAll()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
+  if (not model.submitAll()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
 
   return true;
 }

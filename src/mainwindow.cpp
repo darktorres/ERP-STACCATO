@@ -9,6 +9,7 @@
 #include "cadastropagamento.h"
 #include "cadastroproduto.h"
 #include "cadastroprofissional.h"
+#include "cadastrostaccatooff.h"
 #include "cadastrotransportadora.h"
 #include "cadastrousuario.h"
 #include "calculofrete.h"
@@ -42,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionGerenciar_Transportadoras, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Transportadoras_triggered);
   connect(ui->actionGerenciar_pagamentos, &QAction::triggered, this, &MainWindow::on_actionGerenciar_Pagamentos_triggered);
   connect(ui->actionGerenciar_preco_estoque, &QAction::triggered, this, &MainWindow::on_actionGerenciar_preco_estoque_triggered);
+  connect(ui->actionGerenciar_staccatoOff, &QAction::triggered, this, &MainWindow::on_actionGerenciar_staccatoOff_triggered);
   connect(ui->actionImportar_tabela_IBPT, &QAction::triggered, this, &MainWindow::on_actionImportar_tabela_IBPT_triggered);
   connect(ui->actionProdutos, &QAction::triggered, this, &MainWindow::on_actionProdutos_triggered);
   connect(ui->actionPromocao, &QAction::triggered, this, &MainWindow::on_actionPromocao_triggered);
@@ -59,20 +61,26 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
   } else {
-    qApp->enqueueError("A chave 'hostname' não está configurada!", this);
+    qApp->enqueueException("A chave 'hostname' não está configurada!", this);
   }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
+    ui->actionGerenciar_Lojas->setDisabled(true);
+    ui->actionGerenciar_pagamentos->setDisabled(true);
+    ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->actionCadastrarFornecedor->setDisabled(true);
     ui->actionCadastrarProdutos->setDisabled(true);
-    ui->actionGerenciar_Lojas->setDisabled(true);
-    ui->actionGerenciar_Transportadoras->setDisabled(true);
     ui->actionGerenciar_preco_estoque->setDisabled(true);
-    ui->actionProdutos->setDisabled(true);
+    ui->actionGerenciar_NCMs->setDisabled(true);
+    ui->actionGerenciar_staccatoOff->setDisabled(true);
+
     ui->menuImportar_tabela_fornecedor->setDisabled(true);
+    ui->actionImportar_tabela_IBPT->setDisabled(true);
   }
+
+  ui->actionCalcular_frete->setDisabled(true);
 
   // -------------------------------------------------------------------------
 
@@ -87,11 +95,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabLogistica), query.value("view_tab_logistica").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabNFe), query.value("view_tab_nfe").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabEstoque), query.value("view_tab_estoque").toBool());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGalpao), query.value("view_tab_galpao").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabFinanceiro), query.value("view_tab_financeiro").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
-    qApp->enqueueError("Erro lendo permissões: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro lendo permissões: " + query.lastError().text(), this);
   }
 
   // -------------------------------------------------------------------------
@@ -156,6 +165,7 @@ void MainWindow::updateTables() {
   if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
   if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
   if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentText == "Galpão") { ui->widgetGalpao->updateTables(); }
   if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
   if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
   if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
@@ -293,6 +303,12 @@ void MainWindow::on_actionGerenciar_Pagamentos_triggered() {
   auto *pagamentos = new CadastroPagamento(this);
   pagamentos->setAttribute(Qt::WA_DeleteOnClose);
   pagamentos->show();
+}
+
+void MainWindow::on_actionGerenciar_staccatoOff_triggered() {
+  auto *promocao = new CadastroStaccatoOff(this);
+  promocao->setAttribute(Qt::WA_DeleteOnClose);
+  promocao->show();
 }
 
 // TODO: 0montar relatorio dos caminhoes com graficos e total semanal, mensal, custos etc

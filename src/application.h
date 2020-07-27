@@ -20,6 +20,8 @@ public:
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
   auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> bool;
+  auto enqueueException(const QString &error, QWidget *parent = nullptr) -> void;
+  auto enqueueException(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
@@ -57,6 +59,7 @@ private:
   // attributes
   QMap<QString, QString> mapLojas;
   QSqlDatabase db; // TODO: doc says not to store database as class member
+  QVector<Message> exceptionQueue;
   QVector<Message> errorQueue;
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;
@@ -74,7 +77,6 @@ private:
   auto loginError() -> void;
   auto readSettingsFile() -> void;
   auto runSqlJobs() -> bool;
-  auto setConnectOptions() -> void;
   auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;

@@ -52,6 +52,7 @@ private:
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
+  auto verificaVinculo() -> std::optional<bool>;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

@@ -107,7 +107,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 bool LoginDialog::verificaVersao() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueError(false, "Erro verificando versão atual: " + query.lastError().text()); }
+  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueException(false, "Erro verificando versão atual: " + query.lastError().text()); }
 
   QVersionNumber currentVersion = QVersionNumber::fromString(qApp->applicationVersion());
   QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());

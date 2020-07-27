@@ -33,9 +33,9 @@ void ACBr::error() {
   const QString errorString = socket.errorString();
 
   if (errorString == "Connection refused" or errorString == "Connection timed out") {
-    qApp->enqueueError("Erro conectando ao ACBr! Verifique se ele está aberto!");
+    qApp->enqueueException("Erro conectando ao ACBr! Verifique se ele está aberto!");
   } else {
-    qApp->enqueueError("Erro socket: " + socket.errorString());
+    qApp->enqueueException("Erro socket: " + socket.errorString());
   }
 
   progressDialog->cancel();
@@ -76,7 +76,7 @@ bool ACBr::gerarDanfe(const int idNFe) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando chaveAcesso: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando chaveAcesso: " + query.lastError().text()); }
 
   return gerarDanfe(query.value("xml").toByteArray(), true).has_value();
 }
@@ -85,7 +85,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   QFile file("xml.xml");
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueError("Erro abrindo arquivo para escrita: " + file.errorString());
+    qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString());
     return {};
   }
 
@@ -100,7 +100,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   if (not respostaSavePdf) { return {}; }
 
   if (not respostaSavePdf->contains("Arquivo criado em:")) {
-    qApp->enqueueError(respostaSavePdf.value() + " - Verifique se o arquivo não está aberto!");
+    qApp->enqueueException(respostaSavePdf.value() + " - Verifique se o arquivo não está aberto!");
     return {};
   }
 
@@ -119,7 +119,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec() or not query.first()) {
-    qApp->enqueueError("Erro buscando XML: " + query.lastError().text());
+    qApp->enqueueException("Erro buscando XML: " + query.lastError().text());
     return {};
   }
 
@@ -139,12 +139,12 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   if (resposta2->contains("NF-e não consta na base de dados da SEFAZ")) {
     removerNota(idNFe);
-    qApp->enqueueError("NFe não consta na SEFAZ, removendo do sistema...");
+    qApp->enqueueException("NFe não consta na SEFAZ, removendo do sistema...");
     return {};
   }
 
   if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e") and not resposta2->contains("xEvento=Cancelamento registrado")) {
-    qApp->enqueueError(resposta2.value());
+    qApp->enqueueException(resposta2.value());
     return {};
   }
 
@@ -167,19 +167,19 @@ void ACBr::removerNota(const int idNFe) {
     query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
     query2a.bindValue(":idNFeSaida", idNFe);
 
-    if (not query2a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }
+    if (not query2a.exec()) { return qApp->enqueueException(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }
 
     QSqlQuery query3a;
     query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
     query3a.bindValue(":idNFeSaida", idNFe);
 
-    if (not query3a.exec()) { return qApp->enqueueError(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
+    if (not query3a.exec()) { return qApp->enqueueException(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
 
     QSqlQuery queryNota;
     queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
     queryNota.bindValue(":idNFe", idNFe);
 
-    if (not queryNota.exec()) { return qApp->enqueueError(false, "Erro removendo nota: " + queryNota.lastError().text()); }
+    if (not queryNota.exec()) { return qApp->enqueueException(false, "Erro removendo nota: " + queryNota.lastError().text()); }
 
     return true;
   }();
@@ -190,7 +190,7 @@ void ACBr::removerNota(const int idNFe) {
 }
 
 bool ACBr::abrirPdf(const QString &filePath) {
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filePath))) { return qApp->enqueueError(false, "Erro abrindo PDF!"); }
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filePath))) { return qApp->enqueueException(false, "Erro abrindo PDF!"); }
 
   return true;
 }
@@ -252,7 +252,7 @@ bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   if (not respostaEmail) { return false; }
 
   // TODO: perguntar se deseja tentar enviar novamente?
-  if (not respostaEmail->contains("OK: Email enviado com sucesso")) { return qApp->enqueueError(false, respostaEmail.value()); }
+  if (not respostaEmail->contains("OK: Email enviado com sucesso")) { return qApp->enqueueException(false, respostaEmail.value()); }
 
   qApp->enqueueInformation(respostaEmail.value());
 

@@ -21,6 +21,7 @@ private:
   const QString id;
   const Tipo tipo;
   SqlTableModel modelViewFollowup;
+  SqlTableModel modelOrcamento;
   Ui::FollowUp *ui;
   // methods
   auto on_dateFollowup_dateChanged(const QDate &date) -> void;

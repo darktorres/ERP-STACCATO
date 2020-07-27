@@ -39,6 +39,7 @@ private:
   auto cancelamento() -> bool;
   auto clearFields() -> void final;
   auto copiaProdutosOrcamento() -> bool;
+  auto criarComissaoProfissional() -> bool;
   auto criarConsumos() -> bool;
   auto financeiroSalvar() -> bool;
   auto generateId() -> bool;
@@ -72,6 +73,7 @@ private:
   auto successMessage() -> void final;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
+  auto verificaDisponibilidadeEstoque() -> bool;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

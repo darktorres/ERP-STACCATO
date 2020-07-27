@@ -170,7 +170,7 @@ QString SearchDialog::getText(const QVariant &id) {
   QSqlQuery query;
 
   if (not query.exec(queryText) or not query.first()) {
-    qApp->enqueueError("Erro na query getText: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro na query getText: " + query.lastError().text(), this);
     return QString();
   }
 
@@ -254,6 +254,7 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->setHeaderData("statusEstoque", "Estoque");
   sdProd->setHeaderData("descricao", "Descrição");
   sdProd->setHeaderData("estoqueRestante", "Estoque Disp.");
+  sdProd->setHeaderData("estoqueCaixa", "Estoque Cx.");
   sdProd->setHeaderData("lote", "Lote");
   sdProd->setHeaderData("un", "Un.");
   sdProd->setHeaderData("un2", "Un.2");
@@ -285,7 +286,7 @@ SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
       new SearchDialog("Buscar Fornecedor", "fornecedor", "idFornecedor", {"nomeFantasia", "razaoSocial"}, "razaoSocial, nomeFantasia, contatoCPF, cnpj", "desativado = FALSE", parent);
 
   sdFornecedor->hideColumns({"aliquotaSt", "comissao1", "comissao2", "comissaoLoja", "desativado", "email", "idFornecedor", "idNextel", "inscEstadual", "nextel", "representacao", "st", "tel",
-                             "telCel", "telCom", "especialidade"});
+                             "telCel", "telCom", "especialidade", "fretePagoLoja"});
 
   sdFornecedor->setHeaderData("razaoSocial", "Razão Social");
   sdFornecedor->setHeaderData("nomeFantasia", "Nome Fantasia");

@@ -83,15 +83,23 @@ void WidgetVenda::montaFiltro() {
 
   QStringList filtroCheck;
 
-  const auto groupBox = financeiro ? ui->groupBoxStatusFinanceiro : ui->groupBoxStatus;
-
-  for (const auto &child : groupBox->findChildren<QCheckBox *>()) {
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
     if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
   }
 
-  const QString tipoStatus = financeiro ? "statusFinanceiro" : "status";
+  if (not filtroCheck.isEmpty()) { filtros << "status IN (" + filtroCheck.join(", ") + ")"; }
 
-  if (not filtroCheck.isEmpty()) { filtros << tipoStatus + " IN (" + filtroCheck.join(", ") + ")"; }
+  //-------------------------------------
+
+  if (financeiro) {
+    QStringList filtroCheck2;
+
+    for (const auto &child : ui->groupBoxStatusFinanceiro->findChildren<QCheckBox *>()) {
+      if (child->isChecked()) { filtroCheck2 << "'" + child->text().toUpper() + "'"; }
+    }
+
+    if (not filtroCheck2.isEmpty()) { filtros << "statusFinanceiro IN (" + filtroCheck2.join(", ") + ")"; }
+  }
 
   //-------------------------------------
 
@@ -246,7 +254,7 @@ void WidgetVenda::setComboBoxFornecedores() {
 
     QSqlQuery query;
 
-    if (not query.exec("SELECT razaoSocial FROM fornecedor")) { return qApp->enqueueError("Erro buscando fornecedores: " + query.lastError().text(), this); }
+    if (not query.exec("SELECT razaoSocial FROM fornecedor")) { return qApp->enqueueException("Erro buscando fornecedores: " + query.lastError().text(), this); }
 
     ui->comboBoxFornecedores->addItem("");
 
@@ -261,6 +269,8 @@ void WidgetVenda::on_table_activated(const QModelIndex index) {
   vendas->setAttribute(Qt::WA_DeleteOnClose);
   if (financeiro) { vendas->setFinanceiro(); }
   vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
+
+  vendas->show();
 }
 
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
@@ -274,7 +284,7 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
     QSqlQuery query;
 
     if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-      return qApp->enqueueError("Erro: " + query.lastError().text(), this);
+      return qApp->enqueueException("Erro: " + query.lastError().text(), this);
     }
 
     ui->comboBoxVendedores->addItem("");
@@ -302,7 +312,6 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
 void WidgetVenda::setFinanceiro() {
   ui->groupBoxStatusFinanceiro->show();
-  ui->groupBoxStatus->hide();
   financeiro = true;
 }
 
@@ -340,7 +349,7 @@ void WidgetVenda::on_groupBoxStatusFinanceiro_toggled(const bool enabled) {
 bool WidgetVenda::listarLojas() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueError(false, "Erro: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return qApp->enqueueException(false, "Erro: " + query.lastError().text(), this); }
 
   while (query.next()) { ui->comboBoxLojas->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 

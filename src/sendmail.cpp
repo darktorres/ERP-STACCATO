@@ -30,7 +30,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) { qApp->enqueueError("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
+    if (not query.exec()) { qApp->enqueueException("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
 
     QString representante;
 
@@ -70,6 +70,16 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);
   progress->setCancelButton(nullptr);
   progress->reset();
+}
+
+SendMail::SendMail(const SendMail::Tipo tipo, QWidget *parent) : SendMail(tipo, QString(), QString(), parent) {
+  if (tipo == Tipo::Teste) {
+    ui->comboBoxDest->setCurrentText(ui->lineEditEmail->text());
+    ui->lineEditTitulo->setText("Teste");
+    ui->textEdit->setText("Mensagem de teste");
+
+    on_pushButtonEnviar_clicked();
+  }
 }
 
 SendMail::~SendMail() { delete ui; }
@@ -112,4 +122,4 @@ void SendMail::successStatus() {
   QDialog::accept();
 }
 
-void SendMail::failureStatus(const QString &status) { qApp->enqueueError("Ocorreu erro: " + status, this); }
+void SendMail::failureStatus(const QString &status) { qApp->enqueueException("Ocorreu erro: " + status, this); }

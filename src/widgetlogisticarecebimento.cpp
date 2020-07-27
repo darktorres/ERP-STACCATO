@@ -94,7 +94,6 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
                  "idPedido2 IN (SELECT idPedido2 FROM estoque_has_compra WHERE idEstoque = :idEstoque)");
 
-  // salvar status na venda
   QSqlQuery query4;
   query4.prepare("UPDATE venda_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
                  "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
@@ -106,31 +105,35 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     query1.bindValue(":recebidoPor", recebidoPor);
     query1.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro atualizando status do estoque: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro atualizando status do estoque: " + query1.lastError().text(), this); }
+
+    //-----------------------------------------------------------------
 
     query2.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando status da venda: " + query2.lastError().text(), this); }
+
+    //-----------------------------------------------------------------
 
     query3.bindValue(":dataRealReceb", dataReceb);
     query3.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
     query3.bindValue(":codComercial", modelViewRecebimento.data(index.row(), "codComercial"));
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro atualizando status da compra: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + query3.lastError().text(), this); }
+
+    //-----------------------------------------------------------------
 
     query4.bindValue(":dataRealReceb", dataReceb);
     query4.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
-    if (not query4.exec()) { return qApp->enqueueError(false, "Erro atualizando produtos venda: " + query4.lastError().text(), this); }
+    if (not query4.exec()) { return qApp->enqueueException(false, "Erro atualizando produtos venda: " + query4.lastError().text(), this); }
 
-    QDate dataGare = dataReceb.addDays(1);
+    //-----------------------------------------------------------------
 
-    while (dataGare.dayOfWeek() > 5) { dataGare = dataGare.addDays(1); }
-
-    query5.bindValue(":dataRealReceb", dataGare);
+    query5.bindValue(":dataRealReceb", qApp->ajustarDiaUtil(dataReceb.addDays(1)));
     query5.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
-    if (not query5.exec()) { return qApp->enqueueError(false, "Erro atualizando pagamento gare: " + query5.lastError().text(), this); }
+    if (not query5.exec()) { return qApp->enqueueException(false, "Erro atualizando pagamento gare: " + query5.lastError().text(), this); }
   }
 
   return true;
@@ -212,13 +215,13 @@ bool WidgetLogisticaRecebimento::reagendar(const QModelIndexList &list, const QD
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
 
     query2.bindValue(":dataPrevReceb", dataPrevReceb);
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
   }
 
   return true;
@@ -239,6 +242,7 @@ void WidgetLogisticaRecebimento::on_pushButtonVenda_clicked() {
       auto *venda = new Venda(this);
       venda->setAttribute(Qt::WA_DeleteOnClose);
       venda->viewRegisterById(id);
+      venda->show();
     }
   }
 }
@@ -288,17 +292,17 @@ bool WidgetLogisticaRecebimento::cancelar(const QModelIndexList &list) {
 
     query1.bindValue(":idEstoque", idEstoque);
 
-    if (not query1.exec()) { return qApp->enqueueError(false, "Erro salvando status no estoque: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no estoque: " + query1.lastError().text(), this); }
 
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) { return qApp->enqueueError(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
 
     query3.bindValue(":idEstoque", idEstoque);
     query3.bindValue(":codComercial", codComercial);
 
-    if (not query3.exec()) { return qApp->enqueueError(false, "Erro salvando status na venda_produto: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query3.lastError().text(), this); }
   }
 
   return true;

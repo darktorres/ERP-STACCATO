@@ -5,6 +5,7 @@
 #include "followupproxymodel.h"
 #include "usersession.h"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -59,7 +60,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
-  if (not query.exec()) { return qApp->enqueueError("Erro salvando followup: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro salvando followup: " + query.lastError().text(), this); }
 
   qApp->enqueueInformation("Followup salvo com sucesso!", this);
   close();
@@ -78,12 +79,16 @@ bool FollowUp::verifyFields() {
 void FollowUp::setupTables() {
   modelViewFollowup.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
 
-  if (tipo == Tipo::Orcamento) { modelViewFollowup.setHeaderData("idOrcamento", "Orçamento"); }
+  if (tipo == Tipo::Orcamento) {
+    modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
+    modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
+  }
+
   if (tipo == Tipo::Venda) { modelViewFollowup.setHeaderData("idVenda", "Venda"); }
+
   modelViewFollowup.setHeaderData("nome", "Usuário");
   modelViewFollowup.setHeaderData("observacao", "Observação");
   modelViewFollowup.setHeaderData("dataFollowup", "Data");
-  if (tipo == Tipo::Orcamento) { modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data"); }
 
   modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
@@ -96,6 +101,16 @@ void FollowUp::setupTables() {
   ui->table->setModel(&modelViewFollowup);
 
   if (tipo == Tipo::Orcamento) { ui->table->hideColumn("semaforo"); }
+
+  if (tipo == Tipo::Orcamento) {
+    modelOrcamento.setTable("orcamento");
+
+    modelOrcamento.setFilter("idOrcamento = '" + id + "'");
+
+    if (not modelOrcamento.select()) { return; }
+
+    ui->plainTextEditBaixa->setPlainText(modelOrcamento.data(0, "motivoCancelamento").toString() + "\n\n" + modelOrcamento.data(0, "observacaoCancelamento").toString());
+  }
 }
 
 void FollowUp::on_dateFollowup_dateChanged(const QDate &date) {

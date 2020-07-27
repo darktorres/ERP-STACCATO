@@ -56,7 +56,7 @@ int TableView::columnIndex(const QString &column, const bool silent) const {
 
   if (baseModel) { columnIndex = baseModel->record().indexOf(column); }
 
-  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueError("Coluna '" + column + "' não encontrada!"); }
+  if (columnIndex == -1 and not silent and column != "created" and column != "lastUpdated") { qApp->enqueueException("Coluna '" + column + "' não encontrada!"); }
 
   return columnIndex;
 }
@@ -105,17 +105,17 @@ void TableView::redoView() {
 }
 
 void TableView::setModel(QAbstractItemModel *model) {
-  if (auto temp = qobject_cast<SqlQueryModel *>(model); temp and temp->proxyModel) {
-    QTableView::setModel(temp->proxyModel);
-  } else if (auto temp2 = qobject_cast<SqlTableModel *>(model); temp2 and temp2->proxyModel) {
-    QTableView::setModel(temp2->proxyModel);
+  if (auto queryModel = qobject_cast<SqlQueryModel *>(model); queryModel and queryModel->proxyModel) {
+    QTableView::setModel(queryModel->proxyModel);
+  } else if (auto tableModel = qobject_cast<SqlTableModel *>(model); tableModel and tableModel->proxyModel) {
+    QTableView::setModel(tableModel->proxyModel);
   } else {
     QTableView::setModel(model);
   }
 
   baseModel = qobject_cast<QSqlQueryModel *>(model);
 
-  if (not baseModel) { return qApp->enqueueError("TableView model não implementado!", this); }
+  if (not baseModel) { return qApp->enqueueException("TableView model não implementado!", this); }
 
   //---------------------------------------
 

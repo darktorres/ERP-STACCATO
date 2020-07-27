@@ -146,14 +146,14 @@ void InputDialogProduto::setupTables() {
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {
-  if (ids.isEmpty()) { return qApp->enqueueError(false, "Ids vazio!", this); }
+  if (ids.isEmpty()) { return qApp->enqueueException(false, "Ids vazio!", this); }
 
   QString filter;
 
   if (tipo == Tipo::GerarCompra) { filter = "`idPedido1` IN (" + ids.join(", ") + ") AND status = 'PENDENTE'"; }
   if (tipo == Tipo::Faturamento) { filter = "idCompra IN (" + ids.join(", ") + ") AND status = 'EM FATURAMENTO'"; }
 
-  if (filter.isEmpty()) { return qApp->enqueueError(false, "Filtro vazio!", this); }
+  if (filter.isEmpty()) { return qApp->enqueueException(false, "Filtro vazio!", this); }
 
   modelPedidoFornecedor.setFilter(filter);
 
@@ -165,7 +165,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
   query.prepare("SELECT aliquotaSt, st, representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query.bindValue(":razaoSocial", modelPedidoFornecedor.data(0, "fornecedor"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando substituicao tributaria do fornecedor: " + query.lastError().text(), this); }
 
   ui->comboBoxST->setCurrentText(query.value("st").toString());
   ui->doubleSpinBoxAliquota->setValue(query.value("aliquotaSt").toDouble());
@@ -249,7 +249,7 @@ bool InputDialogProduto::cadastrar() {
         queryUpdate.bindValue(":preco", modelPedidoFornecedor.data(row, "preco"));
         queryUpdate.bindValue(":idPedido1", modelPedidoFornecedor.data(row, "idPedido1"));
 
-        if (not queryUpdate.exec()) { return qApp->enqueueError(false, "Erro copiando dados para tabela 2: " + queryUpdate.lastError().text(), this); }
+        if (not queryUpdate.exec()) { return qApp->enqueueException(false, "Erro copiando dados para tabela 2: " + queryUpdate.lastError().text(), this); }
       }
     }
 

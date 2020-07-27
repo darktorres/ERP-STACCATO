@@ -14,7 +14,6 @@ win32-msvc* {
 
 TARGET = Loja
 TEMPLATE = app
-VERSION = 0.8.88
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
@@ -25,11 +24,7 @@ QT *= core gui sql network xml charts widgets
 DEFINES *= QT_DEPRECATED_WARNINGS
 DEFINES *= APP_VERSION=\"\\\"$${VERSION}\\\"\"
 
-versionAtLeast(QT_VERSION, 5.12){
-    CONFIG *= c++17
-    } else {
-    CONFIG *= c++1z
-    }
+CONFIG *= c++17
 
 message($$QMAKESPEC)
 
@@ -47,8 +42,8 @@ win32{
 contains(CONFIG, deploy){
     message(deploy)
     DEFINES *= DEPLOY
-    QMAKE_CXXFLAGS_RELEASE *= -Ofast -flto
-    QMAKE_LFLAGS_RELEASE *= -O3 -fuse-linker-plugin
+    QMAKE_CXXFLAGS_RELEASE *= -O3
+    QMAKE_LFLAGS_RELEASE *= -O3
 } else{
     QMAKE_CXXFLAGS_DEBUG *= -O0
     QMAKE_CXXFLAGS_RELEASE *= -O0
@@ -79,8 +74,8 @@ linux-g++{
 
     QMAKE_CXXFLAGS *= -Wno-deprecated-copy
 
-    #QMAKE_CXXFLAGS *= -flto
-    #QMAKE_LFLAGS *= -flto -fuse-linker-plugin
+#    QMAKE_CXXFLAGS *= -flto
+#    QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
@@ -89,8 +84,8 @@ linux-clang{
 
     QMAKE_LFLAGS *= -fuse-ld=lld-9
 
-    #QMAKE_CXXFLAGS *= -flto=thin
-    #QMAKE_LFLAGS *= -flto=thin
+#    QMAKE_CXXFLAGS *= -flto=thin
+#    QMAKE_LFLAGS *= -flto=thin
 }
 
 win32{
@@ -133,6 +128,7 @@ SOURCES += \
     src/cadastropagamento.cpp \
     src/cadastroproduto.cpp \
     src/cadastroprofissional.cpp \
+    src/cadastrostaccatooff.cpp \
     src/cadastrotransportadora.cpp \
     src/cadastrousuario.cpp \
     src/calculofrete.cpp \
@@ -152,12 +148,16 @@ SOURCES += \
     src/doubledelegate.cpp \
     src/editdelegate.cpp \
     src/estoque.cpp \
+    src/estoqueitem.cpp \
     src/estoqueprazoproxymodel.cpp \
     src/estoqueproxymodel.cpp \
     src/excel.cpp \
     src/financeiroproxymodel.cpp \
     src/followup.cpp \
     src/followupproxymodel.cpp \
+    src/galpao.cpp \
+    src/graphicsscene.cpp \
+    src/graphicsview.cpp \
     src/importaprodutos.cpp \
     src/importaprodutosproxymodel.cpp \
     src/importarxml.cpp \
@@ -182,6 +182,7 @@ SOURCES += \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
     src/pagamentosdia.cpp \
+    src/palletitem.cpp \
     src/pdf.cpp \
     src/porcentagemdelegate.cpp \
     src/precoestoque.cpp \
@@ -256,6 +257,7 @@ HEADERS  += \
     src/cadastropagamento.h \
     src/cadastroproduto.h \
     src/cadastroprofissional.h \
+    src/cadastrostaccatooff.h \
     src/cadastrotransportadora.h \
     src/cadastrousuario.h \
     src/calculofrete.h \
@@ -275,12 +277,16 @@ HEADERS  += \
     src/doubledelegate.h \
     src/editdelegate.h \
     src/estoque.h \
+    src/estoqueitem.h \
     src/estoqueprazoproxymodel.h \
     src/estoqueproxymodel.h \
     src/excel.h \
     src/financeiroproxymodel.h \
     src/followup.h \
     src/followupproxymodel.h \
+    src/galpao.h \
+    src/graphicsscene.h \
+    src/graphicsview.h \
     src/importaprodutos.h \
     src/importaprodutosproxymodel.h \
     src/importarxml.h \
@@ -304,6 +310,7 @@ HEADERS  += \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
     src/pagamentosdia.h \
+    src/palletitem.h \
     src/pdf.h \
     src/porcentagemdelegate.h \
     src/precoestoque.h \
@@ -369,6 +376,7 @@ FORMS += \
     ui/anteciparrecebimento.ui \
     ui/baixaorcamento.ui \
     ui/cadastrarnfe.ui \
+    ui/cadastroStaccatoOff.ui \
     ui/cadastrocliente.ui \
     ui/cadastrofornecedor.ui \
     ui/cadastroloja.ui \
@@ -387,6 +395,7 @@ FORMS += \
     ui/devolucao.ui \
     ui/estoque.ui \
     ui/followup.ui \
+    ui/galpao.ui \
     ui/importaprodutos.ui \
     ui/importarxml.ui \
     ui/inputdialog.ui \

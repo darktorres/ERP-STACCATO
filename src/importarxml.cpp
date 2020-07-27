@@ -162,7 +162,7 @@ void ImportarXML::setupTables() {
   modelConsumo.setTable("estoque_has_consumo");
 
   modelConsumo.setHeaderData("status", "Status");
-  modelConsumo.setHeaderData("local", "Local");
+  modelConsumo.setHeaderData("bloco", "Bloco");
   modelConsumo.setHeaderData("fornecedor", "Fornecedor");
   modelConsumo.setHeaderData("descricao", "Produto");
   modelConsumo.setHeaderData("quant", "Quant.");
@@ -312,8 +312,9 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
       ":estoqueRestante, p.estoqueRestanteUpd, p.quantCaixa, p.quantCaixaUpd, p.un, p.unUpd, p.un2, p.un2Upd, p.colecao, p.colecaoUpd, p.tipo, p.tipoUpd, p.minimo, p.minimoUpd, p.multiplo, "
       "p.multiploUpd, p.m2cx, p.m2cxUpd, p.pccx, p.pccxUpd, p.kgcx, p.kgcxUpd, p.formComercial, p.formComercialUpd, p.codComercial, p.codComercialUpd, p.codBarras, p.codBarrasUpd, p.ncm, p.ncmUpd, "
       "p.ncmEx, p.ncmExUpd, p.cfop, p.cfopUpd, p.icms, p.icmsUpd, p.cst, p.cstUpd, p.qtdPallet, p.qtdPalletUpd, :custo, p.custoUpd, p.ipi, p.ipiUpd, p.st, p.stUpd, p.sticms, p.sticmsUpd, p.mva, "
-      "p.mvaUpd, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, p.ui, p.uiUpd, "
-      "NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = :idProduto");
+      "p.mvaUpd, p.oldPrecoVenda, p.precoVenda, p.precoVendaUpd, p.markup, p.markupUpd, p.comissao, p.comissaoUpd, p.observacoes, p.observacoesUpd, p.origem, p.origemUpd, p.temLote, p.temLoteUpd, "
+      "p.ui, p.uiUpd, NULL, p.validadeUpd, :descontinuado, p.descontinuadoUpd, p.atualizarTabelaPreco, p.representacao, 1, 0, p.idProduto, 0, NULL, NULL FROM produto p WHERE p.idProduto = "
+      ":idProduto");
 
   for (const auto &tuple : tuples) {
     const auto [idProduto, idEstoque, estoqueRestante, valorUnid] = tuple;
@@ -325,7 +326,7 @@ bool ImportarXML::cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples)
     query.bindValue(":descontinuado", qFuzzyIsNull(estoqueRestante) ? true : false);
     query.bindValue(":custo", valorUnid);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando produto_estoque: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro criando produto_estoque: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -352,7 +353,7 @@ bool ImportarXML::salvarDadosVenda() {
 
     const auto list = modelEstoque.multiMatch({{"idEstoque", idEstoque}}, false);
 
-    if (list.isEmpty()) { return qApp->enqueueError(false, "Erro buscando lote!", this); }
+    if (list.isEmpty()) { return qApp->enqueueException(false, "Erro buscando lote!", this); }
 
     const QString lote = modelEstoque.data(list.first(), "lote").toString();
 
@@ -360,7 +361,7 @@ bool ImportarXML::salvarDadosVenda() {
 
     const auto list2 = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-    if (list2.isEmpty()) { return qApp->enqueueError(false, "Erro buscando lote!", this); }
+    if (list2.isEmpty()) { return qApp->enqueueException(false, "Erro buscando lote!", this); }
 
     if (not modelVenda.setData(list2.first(), "lote", lote)) { return false; }
   }
@@ -402,7 +403,7 @@ bool ImportarXML::importar() {
 bool ImportarXML::salvarDadosCompra() {
   const auto list = modelCompra.multiMatch({{"status", "EM FATURAMENTO"}, {"quantUpd", static_cast<int>(FieldColors::Green)}});
 
-  if (list.isEmpty()) { return qApp->enqueueError(false, "Erro buscando produtos da compra!", this); }
+  if (list.isEmpty()) { return qApp->enqueueException(false, "Erro buscando produtos da compra!", this); }
 
   for (const auto &row : list) {
     if (not modelCompra.setData(row, "status", "EM COLETA")) { return false; }
@@ -416,7 +417,7 @@ bool ImportarXML::salvarDadosCompra() {
     QSqlQuery query;
 
     if (not query.exec("CALL update_pedido_fornecedor_status(" + modelCompra.data(row, "idPedidoFK").toString() + ")")) {
-      return qApp->enqueueError(false, "Erro atualizando status compra: " + query.lastError().text(), this);
+      return qApp->enqueueException(false, "Erro atualizando status compra: " + query.lastError().text(), this);
     }
   }
 
@@ -513,7 +514,7 @@ std::optional<double> ImportarXML::buscarCaixas(const int rowEstoque) {
   query.bindValue(":codComercial", modelEstoque.data(rowEstoque, "codComercial"));
 
   if (not query.exec()) {
-    qApp->enqueueError("Erro buscando produto: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando produto: " + query.lastError().text(), this);
     return {};
   }
 
@@ -618,7 +619,7 @@ bool ImportarXML::lerXML() {
 
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueError(false, "Erro lendo arquivo: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException(false, "Erro lendo arquivo: " + file.errorString(), this); }
 
   auto fileContent = file.readAll();
 
@@ -669,7 +670,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
   if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) {
-    qApp->enqueueError("Erro buscando lojas: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando lojas: " + query.lastError().text(), this);
     return false;
   }
 
@@ -780,7 +781,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
   const auto list = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-  if (list.isEmpty()) { return qApp->enqueueError(false, "Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
+  if (list.isEmpty()) { return qApp->enqueueException(false, "Erro procurando produto da venda: " + QString::number(idVendaProduto2), this); }
 
   const int rowVenda = list.first();
 
@@ -788,8 +789,8 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   const double restanteEstoque = qApp->roundDouble(modelEstoque.data(rowEstoque, "restante").toDouble());
   const double quantConsumo = qApp->roundDouble(qMin(quantVenda, restanteEstoque));
 
-  if (qFuzzyIsNull(quantConsumo)) { return qApp->enqueueError(false, "quantConsumo = 0!", this); }
-  if (quantConsumo < quantVenda) { return qApp->enqueueError(false, "quantConsumo < quantVenda", this); }
+  if (qFuzzyIsNull(quantConsumo)) { return qApp->enqueueException(false, "quantConsumo = 0!", this); }
+  if (quantConsumo < quantVenda) { return qApp->enqueueException(false, "quantConsumo < quantVenda", this); }
 
   if (not modelVenda.setData(rowVenda, "status", "EM COLETA")) { return false; }
   if (not modelVenda.setData(rowVenda, "dataRealFat", dataFaturamento)) { return false; }
@@ -811,6 +812,8 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
 
     const QVariant value = modelEstoque.data(rowEstoque, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelConsumo.setData(rowConsumo, index, value)) { return false; }
   }
 
@@ -820,7 +823,7 @@ bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
   queryProduto.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   queryProduto.bindValue(":idProduto", modelCompra.data(rowCompra, "idProduto"));
 
-  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueError(false, "Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
+  if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException(false, "Erro buscando dados do produto: " + queryProduto.lastError().text(), this); }
 
   const double quantCaixa = queryProduto.value("quantCaixa").toDouble();
 
@@ -872,6 +875,8 @@ std::optional<int> ImportarXML::dividirVenda(const int rowVenda, const double qu
 
     const QVariant value = modelVenda.data(rowVenda, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelVenda.setData(newRowVenda, column, value)) { return {}; }
   }
 
@@ -919,6 +924,8 @@ bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
 
     const QVariant value = modelCompra.data(rowCompra, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
 
@@ -938,7 +945,7 @@ bool ImportarXML::dividirCompra(const int rowCompra, const double quantAdicionar
   if (idVendaProduto2 != 0) {
     const auto list = modelVenda.multiMatch({{"idVendaProduto2", idVendaProduto2}}, false);
 
-    if (list.isEmpty()) { return qApp->enqueueError(false, "Erro procurando produto da venda!", this); }
+    if (list.isEmpty()) { return qApp->enqueueException(false, "Erro procurando produto da venda!", this); }
 
     const int rowVenda = list.first();
 
@@ -1062,7 +1069,7 @@ std::optional<ImportarXML::NCM> ImportarXML::buscaNCM(const QString &ncm) {
   QSqlQuery query;
 
   if (not query.exec("SELECT * FROM ncm WHERE ncm = '" + ncm + "'") or not query.first()) {
-    qApp->enqueueError("Erro buscando ncm: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando ncm: " + query.lastError().text(), this);
     return {};
   }
 
@@ -1084,9 +1091,7 @@ bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   if (not modelPagamento.setData(row, "valor", valor)) { return false; }
   if (not modelPagamento.setData(row, "tipo", "Boleto")) { return false; }
   if (not modelPagamento.setData(row, "observacao", "GARE ICMS ST " + xml.nNF)) { return false; }
-  if (not modelPagamento.setData(row, "status", "PENDENTE GARE")) { return false; }
-  const int contaSantander = 3;
-  if (not modelPagamento.setData(row, "idConta", contaSantander)) { return false; }
+  if (not modelPagamento.setData(row, "status", qFuzzyIsNull(valor) ? "PAGO GARE" : "PENDENTE GARE")) { return false; }
   if (not modelPagamento.setData(row, "centroCusto", lojaGeral)) { return false; }
   if (not modelPagamento.setData(row, "grupo", "Impostos - ICMS;ST;ISS")) { return false; }
 

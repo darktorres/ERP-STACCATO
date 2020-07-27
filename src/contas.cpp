@@ -53,7 +53,7 @@ bool Contas::validarData(const QModelIndex &index) {
     query.prepare("SELECT dataPagamento FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", idPagamento);
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dataPagamento: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dataPagamento: " + query.lastError().text(), this); }
 
     const QDate oldDate = query.value("dataPagamento").toDate();
     const QDate newDate = modelPendentes.data(row, "dataPagamento").toDate();
@@ -87,7 +87,7 @@ void Contas::preencher(const QModelIndex &index) {
       query.prepare("SELECT valor FROM " + modelPendentes.tableName() + " WHERE idPagamento = :idPagamento");
       query.bindValue(":idPagamento", modelPendentes.data(row, "idPagamento"));
 
-      if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando valor: " + query.lastError().text(), this); }
+      if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando valor: " + query.lastError().text(), this); }
 
       const double oldValor = query.value("valor").toDouble();
       const double newValor = modelPendentes.data(row, "valor").toDouble();
@@ -99,13 +99,21 @@ void Contas::preencher(const QModelIndex &index) {
     }
 
     if (index.column() == ui->tablePendentes->columnIndex("dataRealizado")) {
-      const int contaSantander = 3;
-      const int contaItau = 33;
+      const QString tipoPagamento = modelPendentes.data(row, "tipo").toString();
+      const int idContaExistente = modelPendentes.data(row, "idConta").toInt();
 
-      const int idConta = (tipo == Tipo::Receber and modelPendentes.data(row, "tipo").toString().contains("BOLETO")) ? contaItau : contaSantander;
+      QSqlQuery queryConta;
 
-      if (modelPendentes.data(row, "idConta").toInt() == 0) {
-        if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+      if (not queryConta.exec("SELECT idConta FROM forma_pagamento WHERE pagamento = '" + tipoPagamento + "'")) {
+        return qApp->enqueueException("Erro buscando conta do pagamento: " + queryConta.lastError().text(), this);
+      }
+
+      if (queryConta.first()) {
+        const int idConta = queryConta.value("idConta").toInt();
+
+        if (idContaExistente == 0 and idConta != 0) {
+          if (not modelPendentes.setData(row, "idConta", idConta)) { return; }
+        }
       }
 
       if (not modelPendentes.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
@@ -119,12 +127,19 @@ void Contas::preencher(const QModelIndex &index) {
       const auto list = modelPendentes.multiMatch({{"tipo", modelPendentes.data(row, "tipo").toString().left(1) + ". TAXA CARTÃO"}, {"parcela", modelPendentes.data(row, "parcela")}});
 
       for (const auto &rowMatch : list) {
+        if (queryConta.first()) {
+          const int idConta = queryConta.value("idConta").toInt();
+
+          if (modelPendentes.data(rowMatch, "idConta").toInt() == 0) {
+            if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
+          }
+        }
+
         if (not modelPendentes.setData(rowMatch, "dataRealizado", modelPendentes.data(row, "dataRealizado"))) { return; }
         if (not modelPendentes.setData(rowMatch, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
         if (not modelPendentes.setData(rowMatch, "valorReal", modelPendentes.data(rowMatch, "valor"))) { return; }
         if (not modelPendentes.setData(rowMatch, "tipoReal", modelPendentes.data(rowMatch, "tipo"))) { return; }
         if (not modelPendentes.setData(rowMatch, "parcelaReal", modelPendentes.data(rowMatch, "parcela"))) { return; }
-        if (not modelPendentes.setData(rowMatch, "idConta", idConta)) { return; }
         if (not modelPendentes.setData(rowMatch, "centroCusto", modelPendentes.data(rowMatch, "idLoja"))) { return; }
       }
     }
@@ -157,6 +172,7 @@ void Contas::setupTables() {
   if (tipo == Tipo::Pagar) { modelPendentes.setTable("conta_a_pagar_has_pagamento"); }
 
   modelPendentes.setHeaderData("dataEmissao", "Data Emissão");
+  modelPendentes.setHeaderData("idVenda", "Venda");
   modelPendentes.setHeaderData("contraParte", "ContraParte");
   modelPendentes.setHeaderData("nfe", "NFe");
   modelPendentes.setHeaderData("valor", "R$");
@@ -186,10 +202,8 @@ void Contas::setupTables() {
   ui->tablePendentes->setItemDelegateForColumn("contraParte", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valor", new ReaisDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("valorReal", new ReaisDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("tipo", new NoEditDelegate(this));
   ui->tablePendentes->setItemDelegateForColumn("parcela", new NoEditDelegate(this));
-  ui->tablePendentes->setItemDelegateForColumn("dataPagamento", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
-  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), this));
+  ui->tablePendentes->setItemDelegateForColumn("dataRealizado", new DateFormatDelegate(modelPendentes.fieldIndex("dataPagamento"), modelPendentes.fieldIndex("tipo"), (tipo == Tipo::Receber), this));
 
   if (tipo == Tipo::Receber) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Receber, this)); }
   if (tipo == Tipo::Pagar) { ui->tablePendentes->setItemDelegateForColumn("status", new ComboBoxDelegate(ComboBoxDelegate::Tipo::Pagar, this)); }
@@ -209,6 +223,7 @@ void Contas::setupTables() {
 
   if (tipo == Tipo::Pagar) {
     ui->tablePendentes->hideColumn("idCompra");
+    ui->tablePendentes->hideColumn("idCnab");
     ui->tablePendentes->hideColumn("idNFe");
   }
 
@@ -224,6 +239,7 @@ void Contas::setupTables() {
   if (tipo == Tipo::Pagar) { modelProcessados.setTable("conta_a_pagar_has_pagamento"); }
 
   modelProcessados.setHeaderData("dataEmissao", "Data Emissão");
+  modelProcessados.setHeaderData("idVenda", "Venda");
   modelProcessados.setHeaderData("contraParte", "ContraParte");
   modelProcessados.setHeaderData("nfe", "NFe");
   modelProcessados.setHeaderData("valor", "R$");
@@ -262,6 +278,7 @@ void Contas::setupTables() {
 
   if (tipo == Tipo::Pagar) {
     ui->tableProcessados->hideColumn("idCompra");
+    ui->tableProcessados->hideColumn("idCnab");
     ui->tableProcessados->hideColumn("idNFe");
   }
 
@@ -278,11 +295,10 @@ bool Contas::verifyFields() {
 
     if ((tipo == Tipo::Pagar and status == "PAGO") or (tipo == Tipo::Receber and status == "RECEBIDO")) {
       if (modelPendentes.data(row, "dataRealizado").toString().isEmpty()) { return qApp->enqueueError(false, "'Data Realizado' vazio!", this); }
-      if (modelPendentes.data(row, "valorReal").toString().isEmpty()) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
+      if (modelPendentes.data(row, "valorReal") == 0) { return qApp->enqueueError(false, "'R$ Real' vazio!", this); }
       if (modelPendentes.data(row, "tipoReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Tipo Real' vazio!", this); }
-      if (modelPendentes.data(row, "parcelaReal").toString().isEmpty()) { return qApp->enqueueError(false, "'Parcela Real' vazio!", this); }
-      if (modelPendentes.data(row, "idConta").toString().isEmpty()) { return qApp->enqueueError(false, "'Conta Dest.' vazio!", this); }
-      if (modelPendentes.data(row, "centroCusto").toString().isEmpty()) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
+      if (modelPendentes.data(row, "idConta") == 0) { return qApp->enqueueError(false, "'Conta' vazio!", this); }
+      if (modelPendentes.data(row, "centroCusto") == 0) { return qApp->enqueueError(false, "'Centro Custo' vazio!", this); }
       if (modelPendentes.data(row, "grupo").toString().isEmpty()) { return qApp->enqueueError(false, "'Grupo' vazio!", this); }
     }
   }
@@ -313,7 +329,7 @@ void Contas::viewContaReceber(const QString &idPagamento, const QString &contrap
   query.prepare("SELECT idVenda FROM conta_a_receber_has_pagamento WHERE idPagamento = :idPagamento");
   query.bindValue(":idPagamento", idPagamento);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando dados: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados: " + query.lastError().text(), this); }
 
   const QString idVenda = query.value("idVenda").toString();
 

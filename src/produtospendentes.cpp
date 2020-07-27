@@ -62,7 +62,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
   query.prepare("SELECT quantCaixa FROM venda_has_produto2 WHERE `idVendaProduto2` = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", modelViewProdutos.data(0, "idVendaProduto2"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError("Erro buscando quantCaixa: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando quantCaixa: " + query.lastError().text(), this); }
 
   const double step = query.value("quantCaixa").toDouble();
 
@@ -77,7 +77,7 @@ void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &
       "('CANCELADO' , 'QUEBRADO') AND p.fornecedor = '" +
       fornecedor + "' AND e.codComercial = '" + codComercial + "' GROUP BY `e`.`idEstoque` HAVING restante > 0");
 
-  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
+  if (modelEstoque.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela estoque: " + modelEstoque.lastError().text(), this); }
 
   modelEstoque.setHeaderData("status", "Status");
   modelEstoque.setHeaderData("idEstoque", "Estoque");
@@ -150,7 +150,7 @@ void ProdutosPendentes::recarregarTabelas() {
 
   modelEstoque.setQuery(modelEstoque.query().executedQuery());
 
-  if (modelEstoque.lastError().isValid()) { return qApp->enqueueError("Erro recarregando modelEstoque: " + modelEstoque.lastError().text(), this); }
+  if (modelEstoque.lastError().isValid()) { return qApp->enqueueException("Erro recarregando modelEstoque: " + modelEstoque.lastError().text(), this); }
 
   ui->tableProdutos->clearSelection();
 
@@ -271,7 +271,7 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
     query.bindValue(":dataPrevCompra", dataPrevista);
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
   }
 
   return true;
@@ -308,7 +308,7 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   if (not model.setData(newRow, "preco", quant * custo)) { return false; }
   if (not model.setData(newRow, "caixas", quant / step)) { return false; }
 
-  if (not model.submitAll()) { return qApp->enqueueError(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
+  if (not model.submitAll()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
 
   return true;
 }
@@ -349,6 +349,8 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
     if (column == modelProdutos.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelProdutos.data(rowProduto, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelProdutos.setData(newRow, column, value)) { return false; }
   }

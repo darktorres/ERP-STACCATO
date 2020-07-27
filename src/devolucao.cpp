@@ -58,7 +58,7 @@ bool Devolucao::determinarIdDevolucao() {
   query.prepare("SELECT MAX(idVenda) AS id FROM venda WHERE idVenda LIKE :idVenda AND MONTH(data) = MONTH(NOW()) HAVING MAX(idVenda) IS NOT NULL");
   query.bindValue(":idVenda", idVenda + "D%");
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se existe devolução: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se existe devolução: " + query.lastError().text(), this); }
 
   if (query.first()) {
     idDevolucao = query.value("id").toString();
@@ -371,7 +371,7 @@ bool Devolucao::criarDevolucao() {
   query2.prepare("SELECT COALESCE(RIGHT(MAX(IDVENDA), 1) + 1, 1) AS number FROM venda WHERE idVenda LIKE :idVenda");
   query2.bindValue(":idVenda", idVenda + "D%");
 
-  if (not query2.exec() or not query2.first()) { return qApp->enqueueError(false, "Erro determinando próximo id: " + query2.lastError().text(), this); }
+  if (not query2.exec() or not query2.first()) { return qApp->enqueueException(false, "Erro determinando próximo id: " + query2.lastError().text(), this); }
 
   idDevolucao = idVenda + "D" + query2.value("number").toString();
 
@@ -385,6 +385,8 @@ bool Devolucao::criarDevolucao() {
     if (column == modelVenda.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelVenda.data(0, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelVenda.setData(newRow, column, value)) { return false; }
   }
@@ -520,6 +522,8 @@ void Devolucao::limparCampos() {
 }
 
 void Devolucao::on_pushButtonDevolverItem_clicked() {
+  // TODO: fazer lançamento negativo da RT do profissional
+
   //  10cx
 
   //  1cx devolvido -> -1cx consumo
@@ -562,7 +566,7 @@ bool Devolucao::atualizarDevolucao() {
   query.prepare("SELECT SUM(parcial) AS parcial, SUM(parcialDesc) AS parcialDesc FROM venda_has_produto2 WHERE idVenda = :idVenda");
   query.bindValue(":idVenda", idDevolucao);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro buscando dados da devolução: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dados da devolução: " + query.lastError().text(), this); }
 
   QSqlQuery query2;
   query2.prepare("UPDATE venda SET subTotalBru = :subTotalBru, subTotalLiq = :subTotalLiq, total = :total WHERE idVenda = :idVenda");
@@ -571,7 +575,7 @@ bool Devolucao::atualizarDevolucao() {
   query2.bindValue(":total", query.value("parcialDesc"));
   query2.bindValue(":idVenda", idDevolucao);
 
-  if (not query2.exec()) { return qApp->enqueueError(false, "Erro atualizando devolução: " + query2.lastError().text(), this); }
+  if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando devolução: " + query2.lastError().text(), this); }
 
   return true;
 }
@@ -592,6 +596,8 @@ bool Devolucao::copiarProdutoParaDevolucao(const int currentRow) {
     if (columnIndex == -1) { continue; }
 
     const QVariant value = modelProdutos2.data(currentRow, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelDevolvidos1.setData(newRow, columnIndex, value)) { return false; }
   }
@@ -635,7 +641,7 @@ bool Devolucao::atualizarIdRelacionado(const int currentRow) {
   QSqlQuery queryBusca;
 
   if (not queryBusca.exec("SELECT idVendaProduto2 FROM venda_has_produto2 WHERE idVendaProdutoFK = " + idVendaProduto1_Devolucao) or not queryBusca.first()) {
-    return qApp->enqueueError(false, "Erro buscando idVendaProduto2: " + queryBusca.lastError().text(), this);
+    return qApp->enqueueException(false, "Erro buscando idVendaProduto2: " + queryBusca.lastError().text(), this);
   }
 
   //------------------------------------
@@ -644,7 +650,7 @@ bool Devolucao::atualizarIdRelacionado(const int currentRow) {
 
   if (not queryRelacionado.exec("UPDATE venda_has_produto2 SET idRelacionado = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString() +
                                 " WHERE idVendaProduto2 = " + queryBusca.value("idVendaProduto2").toString())) {
-    return qApp->enqueueError(false, "Erro marcando linha relacionada: " + queryRelacionado.lastError().text(), this);
+    return qApp->enqueueException(false, "Erro marcando linha relacionada: " + queryRelacionado.lastError().text(), this);
   }
 
   return true;
@@ -653,7 +659,7 @@ bool Devolucao::atualizarIdRelacionado(const int currentRow) {
 bool Devolucao::lerConsumos(const int currentRow) {
   modelConsumos.setFilter("idVendaProduto2 = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString());
 
-  if (not modelConsumos.select()) { return qApp->enqueueError(false, "Erro lendo consumos: " + modelConsumos.lastError().text(), this); }
+  if (not modelConsumos.select()) { return qApp->enqueueException(false, "Erro lendo consumos: " + modelConsumos.lastError().text(), this); }
 
   return true;
 }
@@ -668,6 +674,8 @@ bool Devolucao::dividirVenda(const int currentRow, const int novoIdVendaProduto2
     if (column == modelProdutos2.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelProdutos2.data(currentRow, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelProdutos2.setData(newRow, column, value)) { return false; }
   }
@@ -729,6 +737,8 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
 
     const QVariant value = modelCompra.data(0, column);
 
+    if (value.isNull()) { continue; }
+
     if (not modelCompra.setData(newRow, column, value)) { return false; }
   }
 
@@ -755,6 +765,8 @@ bool Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
     if (column == modelConsumos.fieldIndex("lastUpdated")) { continue; }
 
     const QVariant value = modelConsumos.data(0, column);
+
+    if (value.isNull()) { continue; }
 
     if (not modelConsumos.setData(newRow, column, value)) { return false; }
   }

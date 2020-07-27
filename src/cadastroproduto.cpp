@@ -124,7 +124,7 @@ bool CadastroProduto::verifyFields() {
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se produto já cadastrado!", this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se produto já cadastrado!", this); }
 
     if (query.first()) { return qApp->enqueueError(false, "Código comercial já cadastrado!", this); }
   }
@@ -178,7 +178,7 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
   if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) { return false; }
   if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
-  if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) { return false; }
+  if (not setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first())) { return false; }
   if (not setData("icms", ui->lineEditICMS->text())) { return false; }
   if (not setData("idFornecedor", ui->itemBoxFornecedor->getId())) { return false; }
   if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }
@@ -208,7 +208,7 @@ bool CadastroProduto::savingProcedures() {
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
 
   const bool representacao = query.value("representacao").toBool();
 
@@ -247,7 +247,7 @@ bool CadastroProduto::cadastrar() {
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
     return true;
   }();

@@ -54,7 +54,6 @@ QVariant ItemBox::getId() const { return id; }
 
 void ItemBox::setId(const QVariant &newId) {
   if (newId.isNull()) { return; }
-  if (id == newId) { return; }
 
   id = newId;
 

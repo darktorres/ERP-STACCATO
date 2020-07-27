@@ -6,6 +6,16 @@
 #include <QSharedMemory>
 
 int main(int argc, char *argv[]) {
+#ifdef _WIN32
+  if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+  }
+#endif
+
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
   Application app(argc, argv);
 
 #ifdef Q_OS_WIN
@@ -24,17 +34,24 @@ int main(int argc, char *argv[]) {
   if (dialog.exec() == QDialog::Rejected) { exit(1); }
 
   MainWindow window;
-  //#ifdef Q_OS_WIN
-  //  window.showMaximized();
-  //#else
+#ifdef DEPLOY
+  window.showMaximized();
+#else
   window.show();
-  //#endif
+#endif
 
   return app.exec();
 }
 
-// REFAC: evitar divisoes por zero
-// REFAC: pesquisar selects/submits sem verificacao
-// REFAC: criar um delegate unidade para concatenar a unidade na coluna quant?
-// REFAC: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
-// REFAC: use initializer lists?
+// ----------------- SERVIDOR ----------------------
+
+// TODO: colocar pelo menos as ultimas copias do backup do mysql na nuvem
+
+// -------------------------------------------------
+
+// TODO: replace insert querys with model so values can be correctly rounded (Application::roundDouble)
+// TODO: test changing table header to resizeToContents
+// TODO: evitar divisoes por zero
+// TODO: criar um delegate unidade para concatenar a unidade na coluna quant?
+// TODO: divide views into categories like: view_compra_..., view_logistica_..., view_financeiro_..., etc
+// TODO: use initializer lists?

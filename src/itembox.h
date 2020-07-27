@@ -1,11 +1,10 @@
-#ifndef ITEMBOX_H
-#define ITEMBOX_H
-
-#include <QLineEdit>
-#include <QPushButton>
+#pragma once
 
 #include "registerdialog.h"
 #include "searchdialog.h"
+
+#include <QLineEdit>
+#include <QPushButton>
 
 class ItemBox final : public QLineEdit {
   Q_OBJECT
@@ -44,5 +43,3 @@ private:
   auto search() -> void;
   auto setIcons() -> void;
 };
-
-#endif // ITEMBOX_H

@@ -1,6 +1,6 @@
-#include <QLocale>
-
 #include "lineeditdecimal.h"
+
+#include <QLocale>
 
 LineEditDecimal::LineEditDecimal(QWidget *parent) : QLineEdit(parent) {
   setAlignment(Qt::AlignRight);

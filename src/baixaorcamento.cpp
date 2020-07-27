@@ -1,8 +1,9 @@
-#include <QSqlError>
-
-#include "application.h"
 #include "baixaorcamento.h"
 #include "ui_baixaorcamento.h"
+
+#include "application.h"
+
+#include <QSqlError>
 
 BaixaOrcamento::BaixaOrcamento(const QString &idOrcamento, QWidget *parent) : QDialog(parent), ui(new Ui::BaixaOrcamento) {
   ui->setupUi(this);

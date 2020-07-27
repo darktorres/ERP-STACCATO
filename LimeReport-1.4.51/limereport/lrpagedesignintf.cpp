@@ -135,18 +135,10 @@ void PageDesignIntf::keyPressEvent(QKeyEvent *event) {
     for (QGraphicsItem *item : selectedItems()) {
       if (dynamic_cast<BaseDesignIntf *>(item)) {
         switch (event->key()) {
-        case Qt::Key_Right:
-          dynamic_cast<BaseDesignIntf *>(item)->moveRight();
-          break;
-        case Qt::Key_Left:
-          dynamic_cast<BaseDesignIntf *>(item)->moveLeft();
-          break;
-        case Qt::Key_Up:
-          dynamic_cast<BaseDesignIntf *>(item)->moveUp();
-          break;
-        case Qt::Key_Down:
-          dynamic_cast<BaseDesignIntf *>(item)->moveDown();
-          break;
+        case Qt::Key_Right: dynamic_cast<BaseDesignIntf *>(item)->moveRight(); break;
+        case Qt::Key_Left: dynamic_cast<BaseDesignIntf *>(item)->moveLeft(); break;
+        case Qt::Key_Up: dynamic_cast<BaseDesignIntf *>(item)->moveUp(); break;
+        case Qt::Key_Down: dynamic_cast<BaseDesignIntf *>(item)->moveDown(); break;
         }
       }
     }
@@ -156,18 +148,10 @@ void PageDesignIntf::keyPressEvent(QKeyEvent *event) {
     for (QGraphicsItem *item : selectedItems()) {
       if (dynamic_cast<BaseDesignIntf *>(item)) {
         switch (event->key()) {
-        case Qt::Key_Right:
-          dynamic_cast<BaseDesignIntf *>(item)->sizeRight();
-          break;
-        case Qt::Key_Left:
-          dynamic_cast<BaseDesignIntf *>(item)->sizeLeft();
-          break;
-        case Qt::Key_Up:
-          dynamic_cast<BaseDesignIntf *>(item)->sizeUp();
-          break;
-        case Qt::Key_Down:
-          dynamic_cast<BaseDesignIntf *>(item)->sizeDown();
-          break;
+        case Qt::Key_Right: dynamic_cast<BaseDesignIntf *>(item)->sizeRight(); break;
+        case Qt::Key_Left: dynamic_cast<BaseDesignIntf *>(item)->sizeLeft(); break;
+        case Qt::Key_Up: dynamic_cast<BaseDesignIntf *>(item)->sizeUp(); break;
+        case Qt::Key_Down: dynamic_cast<BaseDesignIntf *>(item)->sizeDown(); break;
         }
       }
     }
@@ -382,8 +366,8 @@ template <typename T> BaseDesignIntf *PageDesignIntf::internalAddBand(T bandType
 }
 
 void PageDesignIntf::bandGeometryChanged(QObject * /*object*/, QRectF newGeometry, QRectF oldGeometry) {
-  Q_UNUSED(newGeometry);
-  Q_UNUSED(oldGeometry);
+  Q_UNUSED(newGeometry)
+  Q_UNUSED(oldGeometry)
   pageItem()->relocateBands();
 }
 
@@ -1378,7 +1362,10 @@ QList<BaseDesignIntf *> PageDesignIntf::reportItemsByName(const QString &name) {
   return result;
 }
 
-void CommandIf::addCommand(Ptr command, bool execute){Q_UNUSED(command) Q_UNUSED(execute)}
+void CommandIf::addCommand(Ptr command, bool execute) {
+  Q_UNUSED(command)
+  Q_UNUSED(execute)
+}
 
 CommandIf::Ptr InsertItemCommand::create(PageDesignIntf *page, const QString &itemType, QPointF pos, QSizeF size) {
   InsertItemCommand *command = new InsertItemCommand();

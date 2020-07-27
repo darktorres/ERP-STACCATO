@@ -1,16 +1,15 @@
-#ifndef CHARTVIEW_H
-#define CHARTVIEW_H
+#pragma once
+
+#include "charttooltip.h"
 
 #include <QGraphicsView>
 #include <QtCharts>
-
-#include "charttooltip.h"
 
 QT_CHARTS_USE_NAMESPACE
 
 class ChartView : public QGraphicsView {
 public:
-  explicit ChartView(QChart *chart, QWidget *parent = nullptr);
+  explicit ChartView(QChart *chart, QWidget *parent);
   auto keepTooltip() -> void;
   auto removeTooltips() -> void;
   auto tooltip(const QPointF point, const bool state) -> void;
@@ -26,5 +25,3 @@ private:
   ChartTooltip *m_tooltip = nullptr;
   QList<ChartTooltip *> m_tooltips;
 };
-
-#endif // CHARTVIEW_H

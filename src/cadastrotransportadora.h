@@ -1,5 +1,4 @@
-#ifndef CADASTROTRANSPORTADORA_H
-#define CADASTROTRANSPORTADORA_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -12,20 +11,21 @@ class CadastroTransportadora final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroTransportadora(QWidget *parent = nullptr);
+  explicit CadastroTransportadora(QWidget *parent);
   ~CadastroTransportadora();
 
 private:
   // attributes
+  QList<QSqlRecord> backupVeiculo;
   int currentRowVeiculo = -1;
   QDataWidgetMapper mapperVeiculo;
   SearchDialog *sdTransportadora;
-  SqlRelationalTableModel modelVeiculo;
+  SqlTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
-  auto cadastrarVeiculo(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
+  auto cadastrarVeiculo(const Tipo tipoVeiculo = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto clearVeiculo() -> void;
@@ -59,5 +59,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROTRANSPORTADORA_H

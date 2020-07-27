@@ -1,17 +1,16 @@
-#ifndef REGISTERDIALOG_H
-#define REGISTERDIALOG_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDataWidgetMapper>
 #include <QDialog>
 #include <QLineEdit>
 
-#include "sqlrelationaltablemodel.h"
-
 class RegisterDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit RegisterDialog(const QString &table, const QString &primaryKey, QWidget *parent);
+  explicit RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent);
   ~RegisterDialog() override = default;
 
   auto marcarDirty() -> void;
@@ -23,27 +22,26 @@ signals:
 
 protected:
   // attributes
-  bool isDirty = false;
   enum class Tipo { Cadastrar, Atualizar } tipo = Tipo::Cadastrar;
+  bool isDirty = false;
   int currentRow = -1;
-  QDataWidgetMapper mapper;
   QString primaryId;
   QString primaryKey;
   QStringList textKeys;
-  SqlRelationalTableModel model;
+  SqlTableModel model;
+  QDataWidgetMapper mapper;
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
   auto closeEvent(QCloseEvent *event) -> void final;
-  auto columnsToUpper(SqlRelationalTableModel &someModel, const int row) -> bool;
   auto confirmationMessage() -> bool;
   auto data(const QString &key) -> QVariant;
-  auto data(const int row, const QString &key) -> QVariant;
   auto getTextKeys() const -> QStringList;
   auto keyPressEvent(QKeyEvent *event) -> void final;
   auto remove() -> void;
+  auto removeBox() -> int;
   auto requiredStyle() -> QString;
   auto setData(const QString &key, const QVariant &value) -> bool;
-  auto setForeignKey(SqlRelationalTableModel &secondaryModel) -> bool;
+  auto setForeignKey(SqlTableModel &secondaryModel) -> bool;
   auto setTextKeys(const QStringList &value) -> void;
   auto validaCNPJ(const QString &text) -> bool;
   auto validaCPF(const QString &text) -> bool;
@@ -58,8 +56,6 @@ protected:
   virtual auto successMessage() -> void = 0;
   virtual auto updateMode() -> void = 0;
   virtual auto verifyFields() -> bool = 0;
-  virtual auto verifyRequiredField(QLineEdit *line, const bool silent = false) -> bool;
+  virtual auto verifyRequiredField(QLineEdit &line, const bool silent = false) -> bool;
   virtual auto viewRegister() -> bool;
 };
-
-#endif // REGISTERDIALOG_H

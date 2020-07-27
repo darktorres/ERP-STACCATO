@@ -1,18 +1,20 @@
-#include <QMessageBox>
-#include <QSqlError>
+#include "widgetfinanceirocompra.h"
+#include "ui_widgetfinanceirocompra.h"
 
+#include "application.h"
+#include "doubledelegate.h"
 #include "inputdialogfinanceiro.h"
 #include "reaisdelegate.h"
-#include "ui_widgetfinanceirocompra.h"
-#include "widgetfinanceirocompra.h"
 
 WidgetFinanceiroCompra::WidgetFinanceiroCompra(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiroCompra) { ui->setupUi(this); }
 
 WidgetFinanceiroCompra::~WidgetFinanceiroCompra() { delete ui; }
 
 void WidgetFinanceiroCompra::setConnections() {
-  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged);
-  connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroCompra::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->table, &TableView::activated, this, &WidgetFinanceiroCompra::on_table_activated, connectionType);
 }
 
 void WidgetFinanceiroCompra::updateTables() {
@@ -27,24 +29,27 @@ void WidgetFinanceiroCompra::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewComprasFinanceiro.select()) { return; }
+  if (not model.select()) { return; }
 }
 
 void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroCompra::setupTables() {
-  modelViewComprasFinanceiro.setTable("view_compras_financeiro");
+  model.setTable("view_compras_financeiro");
 
-  ui->table->setModel(&modelViewComprasFinanceiro);
+  ui->table->setModel(&model);
 
   ui->table->setItemDelegateForColumn("Total", new ReaisDelegate(this));
+
+  ui->table->hideColumn("Compra");
 }
 
 void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
-  InputDialogFinanceiro input(InputDialogFinanceiro::Tipo::Financeiro);
-  input.setFilter(modelViewComprasFinanceiro.data(index.row(), "Compra").toString());
+  InputDialogFinanceiro *input = new InputDialogFinanceiro(InputDialogFinanceiro::Tipo::Financeiro, this);
+  input->setAttribute(Qt::WA_DeleteOnClose);
+  input->setFilter(model.data(index.row(), "Compra").toString());
 
-  if (input.exec() != InputDialogFinanceiro::Accepted) { return; }
+  input->show();
 }
 
 void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
@@ -53,8 +58,5 @@ void WidgetFinanceiroCompra::montaFiltro() {
   const QString text = ui->lineEditBusca->text();
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
-  modelViewComprasFinanceiro.setFilter(filtroBusca);
+  model.setFilter(filtroBusca);
 }
-
-// TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo
-// TODO: 4associar notas com cada produto? e verificar se dá para refazer/ajustar o fluxo de pagamento de acordo com as duplicatas da nota

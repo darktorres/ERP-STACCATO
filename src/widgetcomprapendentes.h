@@ -1,9 +1,8 @@
-#ifndef WIDGETCOMPRAPENDENTES_H
-#define WIDGETCOMPRAPENDENTES_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetCompraPendentes;
@@ -13,7 +12,7 @@ class WidgetCompraPendentes final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompraPendentes(QWidget *parent = nullptr);
+  explicit WidgetCompraPendentes(QWidget *parent);
   ~WidgetCompraPendentes();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -22,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewVendaProduto;
+  SqlTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
   auto insere(const QDate &dataPrevista) -> bool;
@@ -38,5 +37,3 @@ private:
   auto setarDadosAvulso() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETCOMPRAPENDENTES_H

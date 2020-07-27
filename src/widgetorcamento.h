@@ -1,9 +1,8 @@
-#ifndef WIDGETORCAMENTO_H
-#define WIDGETORCAMENTO_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetOrcamento;
@@ -13,7 +12,7 @@ class WidgetOrcamento final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetOrcamento(QWidget *parent = nullptr);
+  explicit WidgetOrcamento(QWidget *parent);
   ~WidgetOrcamento();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -22,11 +21,12 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewOrcamento;
+  SqlTableModel modelViewOrcamento;
   Ui::WidgetOrcamento *ui;
   // methods
+  auto listarLojas() -> bool;
   auto montaFiltro() -> void;
-  auto on_comboBoxLojas_currentIndexChanged(const int) -> void;
+  auto on_comboBoxLojas_currentIndexChanged() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCriarOrc_clicked() -> void;
   auto on_pushButtonFollowup_clicked() -> void;
@@ -36,5 +36,3 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
 };
-
-#endif // WIDGETORCAMENTO_H

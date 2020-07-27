@@ -123,7 +123,7 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QSqlRecord>
-#include <QSqlRelationalTableModel>
+#include <QSqlTableModel>
 #include <QSsl>
 #include <QSslConfiguration>
 #include <QSslError>
@@ -163,9 +163,9 @@
 #include <QtMath>
 #include <QtXml>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <limits>
-#include <math.h>
 #include <memory>
 #include <optional>
 #include <private/qzipreader_p.h>

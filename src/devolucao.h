@@ -1,10 +1,8 @@
-#ifndef DEVOLUCAO_H
-#define DEVOLUCAO_H
+#pragma once
 
-#include <QDataWidgetMapper>
+#include "sqltablemodel.h"
+
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class Devolucao;
@@ -14,38 +12,45 @@ class Devolucao final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit Devolucao(const QString &idVenda, QWidget *parent = nullptr);
+  explicit Devolucao(const QString &idVenda, const bool isRepresentacao, QWidget *parent);
   ~Devolucao();
 
 private:
   // attributes
-  bool createNewId = false; // REFAC: make this a local variable
   const QString idVenda;
-  QDataWidgetMapper mapperItem;
+  const bool isRepresentacao;
   QString idDevolucao;
-  SqlRelationalTableModel modelCliente;
-  SqlRelationalTableModel modelDevolvidos;
-  SqlRelationalTableModel modelPagamentos;
-  SqlRelationalTableModel modelProdutos;
-  SqlRelationalTableModel modelVenda;
+  SqlTableModel modelCliente;
+  SqlTableModel modelDevolvidos1;
+  SqlTableModel modelPagamentos;
+  SqlTableModel modelProdutos2;
+  SqlTableModel modelVenda;
+  SqlTableModel modelCompra;
+  SqlTableModel modelConsumos;
   Ui::Devolucao *ui;
   // methods
+  auto alterarLinhaOriginal(const int currentRow) -> bool;
   auto atualizarDevolucao() -> bool;
-  auto calcPrecoItemTotal() -> void;
+  auto atualizarIdRelacionado(const int currentRow) -> bool;
+  auto dividirConsumo(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto copiarProdutoParaDevolucao(const int currentRow) -> bool;
   auto criarContas() -> bool;
   auto criarDevolucao() -> bool;
-  auto determinarIdDevolucao() -> void;
-  auto devolverItem(const int currentRow) -> bool;
-  auto inserirItens(const int currentRow) -> bool;
+  auto determinarIdDevolucao() -> bool;
+  auto devolverItem(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto dividirCompra(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto dividirVenda(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto inserirItens(const int currentRow, const int novoIdVendaProduto2) -> bool;
+  auto lerConsumos(const int currentRow) -> bool;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
-  auto on_doubleSpinBoxQuant_editingFinished() -> void;
-  auto on_doubleSpinBoxQuant_valueChanged(double) -> void;
-  auto on_doubleSpinBoxTotalItem_valueChanged(double value) -> void;
+  auto on_doubleSpinBoxCredito_valueChanged(const double credito) -> void;
+  auto on_doubleSpinBoxPorcentagem_valueChanged(const double porcentagem) -> void;
+  auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
   auto on_pushButtonDevolverItem_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
   auto salvarCredito() -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };
-
-#endif // DEVOLUCAO_H

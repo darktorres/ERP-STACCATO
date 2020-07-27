@@ -83,5 +83,5 @@ private:
   QString m_package_prefix;
   QString m_document_prefix;
 };
-}
+} // namespace QXlsx
 #endif // XLSXCONTENTTYPES_H

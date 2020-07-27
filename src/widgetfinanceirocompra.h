@@ -1,9 +1,8 @@
-#ifndef WIDGETFINANCEIROCOMPRA_H
-#define WIDGETFINANCEIROCOMPRA_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetFinanceiroCompra;
@@ -13,7 +12,7 @@ class WidgetFinanceiroCompra final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiroCompra(QWidget *parent = nullptr);
+  explicit WidgetFinanceiroCompra(QWidget *parent);
   ~WidgetFinanceiroCompra();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -22,7 +21,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewComprasFinanceiro;
+  SqlTableModel model;
   Ui::WidgetFinanceiroCompra *ui;
   // methods
   auto montaFiltro() -> void;
@@ -31,5 +30,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETFINANCEIROCOMPRA_H

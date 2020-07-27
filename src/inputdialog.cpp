@@ -1,15 +1,16 @@
-#include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
+#include "inputdialog.h"
+#include "ui_inputdialog.h"
 
 #include "application.h"
 #include "doubledelegate.h"
-#include "inputdialog.h"
+#include "editdelegate.h"
 #include "noeditdelegate.h"
 #include "reaisdelegate.h"
-#include "singleeditdelegate.h"
-#include "ui_inputdialog.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
 
 InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::InputDialog) {
   ui->setupUi(this);
@@ -19,8 +20,8 @@ InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), t
 
   setWindowFlags(Qt::Window);
 
-  ui->dateEditEvento->setDate(QDate::currentDate());
-  ui->dateEditProximo->setDate(QDate::currentDate());
+  ui->dateEditEvento->setDate(qApp->serverDate());
+  ui->dateEditProximo->setDate(qApp->serverDate());
 
   if (tipo == Tipo::Carrinho) {
     ui->labelEvento->hide();
@@ -49,7 +50,7 @@ InputDialog::InputDialog(const Tipo &tipo, QWidget *parent) : QDialog(parent), t
     ui->lineEditObservacao->hide();
 
     ui->labelProximoEvento->setText("Data prevista coleta");
-    ui->dateEditProximo->setDate(QDate::currentDate().addDays(8));
+    ui->dateEditProximo->setDate(qApp->serverDate().addDays(8));
   }
 
   if (tipo == Tipo::Coleta) {
@@ -120,4 +121,4 @@ void InputDialog::on_pushButtonSalvar_clicked() {
 }
 
 // TODO: 0colocar titulo, descricao para nao perder o fluxo
-// REFAC: colocar as classes variacoes (Produto/Financeiro) como widget e colocar nesta classe
+// TODO: colocar as classes variacoes (Produto/Financeiro) como widget e colocar nesta classe

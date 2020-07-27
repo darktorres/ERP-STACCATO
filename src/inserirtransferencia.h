@@ -1,9 +1,8 @@
-#ifndef INSERIRTRANSFERENCIA_H
-#define INSERIRTRANSFERENCIA_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InserirTransferencia;
@@ -13,13 +12,13 @@ class InserirTransferencia final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit InserirTransferencia(QWidget *parent = nullptr);
+  explicit InserirTransferencia(QWidget *parent);
   ~InserirTransferencia();
 
 private:
   // attributes
-  SqlRelationalTableModel modelDe;
-  SqlRelationalTableModel modelPara;
+  SqlTableModel modelDe;
+  SqlTableModel modelPara;
   Ui::InserirTransferencia *ui;
   // methods
   auto cadastrar() -> bool;
@@ -28,5 +27,3 @@ private:
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // INSERIRTRANSFERENCIA_H

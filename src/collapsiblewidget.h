@@ -1,5 +1,4 @@
-#ifndef COLLAPSIBLEWIDGET_H
-#define COLLAPSIBLEWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -11,7 +10,7 @@ class CollapsibleWidget : public QWidget {
   Q_OBJECT
 
 public:
-  explicit CollapsibleWidget(const QString &data, QWidget *parent = nullptr);
+  explicit CollapsibleWidget(QWidget *parent);
   ~CollapsibleWidget();
   //  auto setHtml(const QString text) -> void;
   //  auto getHtml() -> QString;
@@ -33,5 +32,3 @@ private:
 protected:
   virtual void resizeEvent(QResizeEvent *event) override;
 };
-
-#endif // COLLAPSIBLEWIDGET_H

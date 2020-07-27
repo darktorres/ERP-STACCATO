@@ -1,14 +1,13 @@
-#ifndef FINANCEIROPROXYMODEL_H
-#define FINANCEIROPROXYMODEL_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QIdentityProxyModel>
-
-#include "sqlrelationaltablemodel.h"
 
 class FinanceiroProxyModel final : public QIdentityProxyModel {
 
 public:
-  FinanceiroProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  explicit FinanceiroProxyModel(SqlTableModel *model, QObject *parent);
   ~FinanceiroProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 
@@ -17,5 +16,3 @@ private:
   const int prazoEntrega;
   const int novoPrazoEntrega;
 };
-
-#endif // FINANCEIROPROXYMODEL_H

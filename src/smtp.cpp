@@ -16,25 +16,32 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
+#include "smtp.h"
+
+#include "application.h"
+
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QResource>
-
-#include "application.h"
-#include "smtp.h"
 
 Smtp::Smtp(const QString &user, const QString &pass, const QString &host, const quint16 port, const int timeout) : timeout(timeout), host(host), pass(pass), user(user), port(port) {
   socket = new QSslSocket(this);
 
   connect(socket, &QIODevice::readyRead, this, &Smtp::readyRead);
   connect(socket, &QAbstractSocket::connected, this, &Smtp::connected);
-  connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Smtp::errorReceived);
+  connect(socket, qOverload<QAbstractSocket::SocketError>(&QAbstractSocket::error), this, &Smtp::errorReceived); // TODO: change in 5.15 to errorOcurred
   connect(socket, &QAbstractSocket::stateChanged, this, &Smtp::stateChanged);
   connect(socket, &QAbstractSocket::disconnected, this, &Smtp::disconnected);
 }
 
-void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) { // FIXME: shadows //TODO: V688 http://www.viva64.com/en/V688 The 'from' function argument possesses the same name as one of the class members, which can result in a confusion.void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) { // FIXME: shadows
+void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString &body, const QStringList &files, const QString &assinatura) {
+  // FIXME: shadows
+
+  // TODO: V688 http://www.viva64.com/en/V688 The 'from' function argument possesses the same name as one of the class members, which
+  // can result in a confusion.void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, const QString &subject, const QString
+  // &body, const QStringList &files, const QString &assinatura) {
+
   message = "To: " + to + "\n";
   message.append("Cc: " + cc + "\n");
   message.append("From: " + from + "\n");
@@ -46,18 +53,18 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
 
   message.append("--frontier\n");
   message.append("Content-Type: text/html\n\n"); // Uncomment this for HTML formating, coment the line below
-  //  message.append("Content-Type: text/plain\n\n");
+  // message.append("Content-Type: text/plain\n\n");
   message.append(body);
   message.append("\n\n");
 
-  // REFAC: 5dont hardcode this
-  // REFAC:__project public code
+  // TODO: 5dont hardcode this
+  // TODO:__project public code
   //
   if (not assinatura.isEmpty()) {
-    //    QFile file("://assinatura conrado.png");
+    // QFile file("://assinatura conrado.png");
     QFile file(assinatura);
 
-    if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueError("Erro abrindo arquivo: " + file.errorString()); }
+    if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueException("Erro abrindo arquivo: " + file.errorString()); }
 
     const QByteArray bytes = file.readAll();
     message.append("--frontier\n");
@@ -69,13 +76,13 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   //
 
   if (not files.isEmpty()) {
-    //    qDebug() << "Files to be sent: " << files.size();
+    // qDebug() << "Files to be sent: " << files.size();
 
     for (const auto &filePath : files) {
       QFile file(filePath);
 
       if (file.exists()) {
-        if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueError("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
+        if (not file.open(QIODevice::ReadOnly)) { return qApp->enqueueException("Erro ao abrir o arquivo do anexo: " + file.errorString()); }
 
         const QByteArray bytes = file.readAll();
         message.append("--frontier\n");
@@ -86,7 +93,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
       }
     }
   } else {
-    //    qDebug() << "No attachments found";
+    // qDebug() << "No attachments found";
   }
 
   message.append("--frontier--\n");
@@ -104,7 +111,7 @@ void Smtp::sendMail(const QString &from, const QString &to, const QString &cc, c
   socket->connectToHostEncrypted(host, port); //"smtp.gmail.com" and 465 for gmail TLS
 
   if (not socket->waitForConnected(timeout)) {
-    //    qDebug() << "timeout: " << socket->errorString();
+    // qDebug() << "timeout: " << socket->errorString();
     emit status("Esgotado tempo de espera do servidor!");
     return;
   }
@@ -117,30 +124,30 @@ Smtp::~Smtp() {
   delete socket;
 }
 void Smtp::stateChanged(QAbstractSocket::SocketState socketState) {
-  Q_UNUSED(socketState);
-  //  qDebug() << "stateChanged " << socketState;
+  Q_UNUSED(socketState)
+  // qDebug() << "stateChanged " << socketState;
 
-  //  if (socketState == QAbstractSocket::UnconnectedState) { emit status("Não conseguiu conectar ao servidor SMTP!"); }
+  // if (socketState == QAbstractSocket::UnconnectedState) { emit status("Não conseguiu conectar ao servidor SMTP!"); }
 }
 
 void Smtp::errorReceived(QAbstractSocket::SocketError socketError) {
   if (socketError == QAbstractSocket::RemoteHostClosedError) { return; }
-  //  qDebug() << "error: " << socketError;
+  // qDebug() << "error: " << socketError;
   if (socketError == QAbstractSocket::HostNotFoundError) { emit status("Não encontrou o servidor SMTP!"); }
 }
 
 void Smtp::disconnected() {
-  //  qDebug() << "disconneted";
+  // qDebug() << "disconneted";
   if (socket->errorString() == "The remote host closed the connection") { return; }
-  //  qDebug() << "error " << socket->errorString();
+  // qDebug() << "error " << socket->errorString();
 }
 
 void Smtp::connected() {
-  //    qDebug() << "Connected ";
+  // qDebug() << "Connected ";
 }
 
 void Smtp::readyRead() {
-  //  qDebug() << "readyRead";
+  // qDebug() << "readyRead";
   // SMTP is line-oriented
 
   QString responseLine;
@@ -152,9 +159,9 @@ void Smtp::readyRead() {
 
   responseLine.truncate(3);
 
-  //  qDebug() << "Server response code:" << responseLine;
-  //  qDebug() << "Server response: " << response;
-  //  qDebug() << "State: " << state;
+  // qDebug() << "Server response code:" << responseLine;
+  // qDebug() << "Server response: " << response;
+  // qDebug() << "State: " << state;
 
   if (state == States::Close) { return; }
 
@@ -183,7 +190,7 @@ void Smtp::readyRead() {
     socket->startClientEncryption();
 
     if (not socket->waitForEncrypted(timeout)) {
-      //      qDebug() << socket->errorString();
+      // qDebug() << socket->errorString();
       state = States::Close;
     }
 
@@ -195,16 +202,16 @@ void Smtp::readyRead() {
     state = States::Auth;
   } else if (state == States::Auth and responseLine == "250") {
     // Trying AUTH
-    //    qDebug() << "Auth";
+    // qDebug() << "Auth";
     // NOTE: try using AUTH XOAUTH2 as described in the developers.google below
     *t << "AUTH LOGIN"
-       //      *t << "AUTH XOAUTH2 + base64("user=" {User} "^Aauth=Bearer " {Access Token} "^A^A")"
+       // *t << "AUTH XOAUTH2 + base64("user=" {User} "^Aauth=Bearer " {Access Token} "^A^A")"
        << "\r\n";
     t->flush();
     state = States::User;
   } else if (state == States::User and responseLine == "334") {
     // Trying User
-    //    qDebug() << "Username";
+    // qDebug() << "Username";
     // GMAIL is using XOAUTH2 protocol, which basically means that password and username has to be sent in base64 coding
     // https://developers.google.com/gmail/xoauth2_protocol
     *t << QByteArray().append(user).toBase64() << "\r\n";
@@ -213,7 +220,7 @@ void Smtp::readyRead() {
     state = States::Pass;
   } else if (state == States::Pass and responseLine == "334") {
     // Trying pass
-    //    qDebug() << "Pass";
+    // qDebug() << "Pass";
     *t << QByteArray().append(pass).toBase64() << "\r\n";
     t->flush();
 
@@ -221,20 +228,18 @@ void Smtp::readyRead() {
   } else if (state == States::Mail and responseLine == "235") {
     // HELO response was okay (well, it has to be)
 
-    // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way ->
-    // <email@gmail.com>
-    //    qDebug() << "MAIL FROM:<" << from << ">";
+    // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way -> <email@gmail.com>
+    // qDebug() << "MAIL FROM:<" << from << ">";
     *t << "MAIL FROM:<" << from << ">\r\n";
     t->flush();
     state = States::Rcpt;
   } else if (state == States::Rcpt and responseLine == "250") {
-    // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way ->
-    // <email@gmail.com>
-    //    qDebug() << "RCPT TO:<" << rcpt.first() << ">\r\n";
+    // Apperantly for Google it is mandatory to have MAIL FROM and RCPT email formated the following way -> <email@gmail.com>
+    // qDebug() << "RCPT TO:<" << rcpt.first() << ">\r\n";
     *t << "RCPT TO:<" << rcpt.first() << ">\r\n"; // r
     rcpt.removeFirst();
     t->flush();
-    //    qDebug() << "size: " << rcpt.size();
+    // qDebug() << "size: " << rcpt.size();
     state = not rcpt.isEmpty() ? States::Rcpt : States::Data;
   } else if (state == States::Data and responseLine == "250") {
 
@@ -258,10 +263,14 @@ void Smtp::readyRead() {
     return;
   } else {
     // something broke.
-    qApp->enqueueError(tr("Unexpected reply from SMTP server:\n\n") + response);
+    qApp->enqueueException(tr("Unexpected reply from SMTP server:\n\n") + response);
     state = States::Close;
     emit status(tr("Failed to send message"));
   }
 
   response = "";
 }
+
+// TODO: for gmail:
+// 1. register access token in google console
+// 2. https://github.com/tranter/qt-oauth-lib

@@ -135,25 +135,8 @@ color: rgb(0, 0, 0);</string>
        <property name="readOnly">
         <bool>true</bool>
        </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="maximum">
-        <double>99999.990000000005239</double>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelRestante_2">
-       <property name="text">
-        <string>Não entregue:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxComprometidoNaoEntregue">
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
        </property>
        <property name="decimals">
         <number>3</number>
@@ -188,6 +171,9 @@ color: rgb(0, 0, 0);</string>
      </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

@@ -1,10 +1,8 @@
-#ifndef WIDGETFINANCEIROFLUXOCAIXA_H
-#define WIDGETFINANCEIROFLUXOCAIXA_H
-
-#include <QWidget>
+#pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetFinanceiroFluxoCaixa;
@@ -14,7 +12,7 @@ class WidgetFinanceiroFluxoCaixa final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent = nullptr);
+  explicit WidgetFinanceiroFluxoCaixa(QWidget *parent);
   ~WidgetFinanceiroFluxoCaixa();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -35,5 +33,3 @@ private:
   auto on_tableCaixa_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETFINANCEIROFLUXOCAIXA_H

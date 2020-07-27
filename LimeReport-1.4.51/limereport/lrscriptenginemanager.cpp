@@ -128,8 +128,7 @@ QVariant ScriptEngineModel::data(const QModelIndex &index, int role) const {
   case Qt::DecorationRole:
     if (!node) return QIcon();
     return node->icon();
-  default:
-    return QVariant();
+  default: return QVariant();
   }
 }
 
@@ -398,15 +397,9 @@ QString ScriptEngineManager::expandUserVariables(QString context, RenderPass pas
           if (pass == dataManager()->variablePass(variable)) {
             varValue = dataManager()->variable(variable);
             switch (expandType) {
-            case EscapeSymbols:
-              context.replace(rx.cap(0), escapeSimbols(varValue.toString()));
-              break;
-            case NoEscapeSymbols:
-              context.replace(rx.cap(0), varValue.toString());
-              break;
-            case ReplaceHTMLSymbols:
-              context.replace(rx.cap(0), replaceHTMLSymbols(varValue.toString()));
-              break;
+            case EscapeSymbols: context.replace(rx.cap(0), escapeSimbols(varValue.toString())); break;
+            case NoEscapeSymbols: context.replace(rx.cap(0), varValue.toString()); break;
+            case ReplaceHTMLSymbols: context.replace(rx.cap(0), replaceHTMLSymbols(varValue.toString())); break;
             }
             pos = 0;
           }
@@ -451,11 +444,8 @@ QString ScriptEngineManager::expandDataFields(QString context, ExpandType expand
             case QVariant::String:
             case QVariant::StringList:
             case QVariant::Date:
-            case QVariant::DateTime:
-              fieldValue = "\"" + fieldValue + "\"";
-              break;
-            default:
-              break;
+            case QVariant::DateTime: fieldValue = "\"" + fieldValue + "\""; break;
+            default: break;
             }
           }
         } else {
@@ -608,8 +598,7 @@ bool ScriptExtractor::parse(int &curPos, const State &state) {
         if (isStartFieldLexem(curPos) || isStartVariableLexem(curPos)) skipField(curPos);
       }
       [[fallthrough]];
-    default:
-      break;
+    default: break;
     }
     curPos++;
   }
@@ -659,8 +648,7 @@ bool ScriptExtractor::isStartLexem(int &curPos, QChar value) {
       } else if (m_context[pos] != ' ')
         return false;
       [[fallthrough]];
-    default:
-      break;
+    default: break;
     }
     pos++;
   }
@@ -753,7 +741,7 @@ QObject *ScriptEngineContext::createElement(const QString &collectionName, const
 
 int ScriptEngineContext::elementsCount(const QString &collectionName) {
 #ifdef HAVE_UI_LOADER
-  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.count(); };
+  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.count(); }
 #else
   Q_UNUSED(collectionName)
 #endif
@@ -762,7 +750,7 @@ int ScriptEngineContext::elementsCount(const QString &collectionName) {
 
 QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index) {
 #ifdef HAVE_UI_LOADER
-  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.at(index).data(); };
+  if (collectionName.compare("dialogs", Qt::CaseInsensitive) == 0) { return m_dialogs.at(index).data(); }
 #else
   Q_UNUSED(collectionName)
   Q_UNUSED(index)
@@ -770,7 +758,7 @@ QObject *ScriptEngineContext::elementAt(const QString &collectionName, int index
   return nullptr;
 }
 
-void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName); }
+void ScriptEngineContext::collectionLoadFinished(const QString &collectionName) { Q_UNUSED(collectionName) }
 
 #ifdef HAVE_UI_LOADER
 QDialog *ScriptEngineContext::createDialog(DialogDescriber *cont) {

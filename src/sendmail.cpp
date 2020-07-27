@@ -1,11 +1,12 @@
-#include <QFileDialog>
-#include <QSqlError>
+#include "sendmail.h"
+#include "ui_sendmail.h"
 
 #include "application.h"
-#include "sendmail.h"
 #include "smtp.h"
-#include "ui_sendmail.h"
 #include "usersession.h"
+
+#include <QFileDialog>
+#include <QSqlError>
 
 SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &fornecedor, QWidget *parent) : QDialog(parent), fornecedor(fornecedor), tipo(tipo), ui(new Ui::SendMail) {
   // TODO: 5colocar arquivo como vetor de strings para multiplos anexos
@@ -29,7 +30,7 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
     query.prepare("SELECT email, contatoNome FROM fornecedor WHERE razaoSocial = :razaoSocial");
     query.bindValue(":razaoSocial", fornecedor);
 
-    if (not query.exec()) { qApp->enqueueError("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
+    if (not query.exec()) { qApp->enqueueException("Erro buscando email do fornecedor: " + query.lastError().text(), this); }
 
     QString representante;
 
@@ -47,8 +48,8 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
       do { ui->comboBoxDest->addItem(query.value("email").toString()); } while (query.next());
     }
 
-    // REFAC: 5dont hardcode this
-    // REFAC:__project public code
+    // TODO: 5dont hardcode this
+    // TODO:__project public code
     ui->textEdit->setHtml(
         R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd"><html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;"><p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:Calibri, sans-serif; font-size:11pt; font-weight:400; font-style:normal;">)" +
         QString(QTime::currentTime().hour() > 12 ? "Boa tarde" : "Bom dia") + " prezado(a) " + (representante.isEmpty() ? "parceiro(a)" : representante) +
@@ -59,16 +60,26 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    if (const auto key = UserSession::getSetting("User/emailCompra"); key) { ui->lineEditEmail->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/emailCopia"); key) { ui->lineEditCopia->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/servidorSMTP"); key) { ui->lineEditServidor->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/portaSMTP"); key) { ui->lineEditPorta->setText(key.value().toString()); }
-    if (const auto key = UserSession::getSetting("User/emailSenha"); key) { ui->lineEditPasswd->setText(key.value().toString()); }
+    if (const auto key = UserSession::getSetting("User/emailCompra")) { ui->lineEditEmail->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/emailCopia")) { ui->lineEditCopia->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/servidorSMTP")) { ui->lineEditServidor->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/portaSMTP")) { ui->lineEditPorta->setText(key->toString()); }
+    if (const auto key = UserSession::getSetting("User/emailSenha")) { ui->lineEditPasswd->setText(key->toString()); }
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);
   progress->setCancelButton(nullptr);
   progress->reset();
+}
+
+SendMail::SendMail(const SendMail::Tipo tipo, QWidget *parent) : SendMail(tipo, QString(), QString(), parent) {
+  if (tipo == Tipo::Teste) {
+    ui->comboBoxDest->setCurrentText(ui->lineEditEmail->text());
+    ui->lineEditTitulo->setText("Teste");
+    ui->textEdit->setText("Mensagem de teste");
+
+    on_pushButtonEnviar_clicked();
+  }
 }
 
 SendMail::~SendMail() { delete ui; }
@@ -102,7 +113,7 @@ void SendMail::on_pushButtonEnviar_clicked() {
 
 void SendMail::mailSent(const QString &status) {
   progress->cancel();
-  status == "Message sent" ? successStatus() : failureStatus(status);
+  (status == "Message sent") ? successStatus() : failureStatus(status);
 }
 
 void SendMail::successStatus() {
@@ -111,4 +122,4 @@ void SendMail::successStatus() {
   QDialog::accept();
 }
 
-void SendMail::failureStatus(const QString &status) { qApp->enqueueError("Ocorreu erro: " + status, this); }
+void SendMail::failureStatus(const QString &status) { qApp->enqueueException("Ocorreu erro: " + status, this); }

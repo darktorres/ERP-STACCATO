@@ -1,5 +1,4 @@
-#ifndef LINEEDITTEL_H
-#define LINEEDITTEL_H
+#pragma once
 
 #include <QLineEdit>
 
@@ -13,5 +12,3 @@ public:
 private:
   auto processTel(const QString &value) -> void;
 };
-
-#endif // LINEEDITTEL_H

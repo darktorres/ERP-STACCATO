@@ -1,14 +1,15 @@
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+#include "cadastroprofissional.h"
+#include "ui_cadastroprofissional.h"
 
 #include "application.h"
-#include "cadastroprofissional.h"
 #include "cepcompleter.h"
 #include "checkboxdelegate.h"
 #include "itembox.h"
-#include "ui_cadastroprofissional.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDialog("profissional", "idProfissional", parent), ui(new Ui::CadastroProfissional) {
   ui->setupUi(this);
@@ -51,10 +52,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") {
-    ui->tabWidget->setTabEnabled(1, false);
-    ui->pushButtonRemover->setDisabled(true);
-  }
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false); }
 }
 
 CadastroProfissional::~CadastroProfissional() { delete ui; }
@@ -68,7 +66,7 @@ void CadastroProfissional::setupTables() {
   ui->tableEndereco->hideColumn("created");
   ui->tableEndereco->hideColumn("lastUpdated");
 
-  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(this, true));
+  ui->tableEndereco->setItemDelegateForColumn("desativado", new CheckBoxDelegate(true, this));
 
   ui->tableEndereco->setPersistentColumns({"desativado"});
 }
@@ -140,6 +138,17 @@ void CadastroProfissional::updateMode() {
   ui->pushButtonRemover->show();
 }
 
+std::optional<bool> CadastroProfissional::verificaVinculo() {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString())) {
+    qApp->enqueueError("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
+    return {};
+  }
+
+  return query.size() > 0;
+}
+
 bool CadastroProfissional::viewRegister() {
   if (not RegisterDialog::viewRegister()) { return false; }
 
@@ -156,36 +165,71 @@ bool CadastroProfissional::viewRegister() {
 
   tipoPFPJ = data("pfpj").toString();
 
-  tipoPFPJ == "PF" ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
+  (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
+
+  const auto existeVinculo = verificaVinculo();
+
+  if (not existeVinculo) { return false; }
+
+  const bool administrativo = UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO" or UserSession::tipoUsuario() == "DIRETOR";
+
+  const bool bloquear = (existeVinculo.value() and not administrativo);
+
+  ui->lineEditProfissional->setReadOnly(bloquear);
+  ui->lineEditCPF->setReadOnly(bloquear);
+  ui->lineEditCNPJ->setReadOnly(bloquear);
+
+  ui->groupBoxPFPJ->setDisabled(bloquear);
+  ui->pushButtonRemover->setDisabled(bloquear);
 
   return true;
 }
 
 bool CadastroProfissional::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  if (not qApp->startTransaction("CadastroProfissional::cadastrar")) { return false; }
 
-  if (not savingProcedures()) { return false; }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+    if (not savingProcedures()) { return false; }
 
-  if (not model.submitAll()) { return false; }
+    if (not model.submitAll()) { return false; }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
-  // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  if (not setForeignKey(modelEnd)) { return false; }
+    if (not setForeignKey(modelEnd)) { return false; }
 
-  return modelEnd.submitAll();
+    return modelEnd.submitAll();
+  }();
+
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
+    backupEndereco.clear();
+
+    model.setFilter(primaryKey + " = '" + primaryId + "'");
+
+    modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelEnd.select());
+
+    for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
+  }
+
+  return success;
 }
 
 bool CadastroProfissional::verifyFields() {
   const auto children = ui->frame->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!", this); }
@@ -196,14 +240,38 @@ bool CadastroProfissional::verifyFields() {
 }
 
 bool CadastroProfissional::savingProcedures() {
+  if (tipoPFPJ == "PF") {
+    if (not setData("cnpj", "")) { return false; }
+  }
+
+  if (tipoPFPJ == "PJ") {
+    if (not setData("cpf", "")) { return false; }
+  }
+
+  if (not ui->lineEditCPF->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("cpf", ui->lineEditCPF->text())) { return false; }
+  }
+
+  if (not ui->lineEditCNPJ->text().remove(".").remove("/").remove("-").isEmpty()) {
+    if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
+  }
+
+  if (not ui->lineEditContatoCPF->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("contatoCPF", ui->lineEditContatoCPF->text())) { return false; }
+  }
+
+  if (not ui->lineEditContatoRG->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("contatoRG", ui->lineEditContatoRG->text())) { return false; }
+  }
+
+  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) {
+    if (not setData("agencia", ui->lineEditAgencia->text())) { return false; }
+  }
+
   if (not setData("nome_razao", ui->lineEditProfissional->text())) { return false; }
   if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
-  if (not setData("cpf", ui->lineEditCPF->text())) { return false; }
   if (not setData("contatoNome", ui->lineEditContatoNome->text())) { return false; }
-  if (not setData("contatoCPF", ui->lineEditContatoCPF->text())) { return false; }
   if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) { return false; }
-  if (not setData("contatoRG", ui->lineEditContatoRG->text())) { return false; }
-  if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
   if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
   if (not setData("tel", ui->lineEditTel_Res->text())) { return false; }
   if (not setData("telCel", ui->lineEditTel_Cel->text())) { return false; }
@@ -215,13 +283,20 @@ bool CadastroProfissional::savingProcedures() {
   if (not setData("idUsuarioRel", ui->itemBoxVendedor->getId())) { return false; }
   if (not setData("idLoja", ui->itemBoxLoja->getId())) { return false; }
   if (not setData("comissao", ui->doubleSpinBoxComissao->value())) { return false; }
+
   // Dados bancários
+
+  if (not ui->lineEditCPFBancario->text().remove(".").remove("-").isEmpty()) {
+    if (not setData("cpfBanco", ui->lineEditCPFBancario->text())) { return false; }
+  }
+
+  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) {
+    if (not setData("cnpjBanco", ui->lineEditCNPJBancario->text())) { return false; }
+  }
+
   if (not setData("banco", ui->lineEditBanco->text())) { return false; }
-  if (not setData("agencia", ui->lineEditAgencia->text())) { return false; }
   if (not setData("cc", ui->lineEditCC->text())) { return false; }
   if (not setData("nomeBanco", ui->lineEditNomeBancario->text())) { return false; }
-  if (not setData("cpfBanco", ui->lineEditCPFBancario->text())) { return false; }
-  if (not setData("cnpjBanco", ui->lineEditCNPJBancario->text())) { return false; }
   if (not setData("poupanca", ui->checkBoxPoupanca->isChecked())) { return false; }
 
   return true;
@@ -280,15 +355,14 @@ void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) {
   ui->lineEditCNPJ->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("/").remove("-")) ? "" : "color: rgb(255, 0, 0)");
 }
 
-bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) { // TODO: V688 http://www.viva64.com/en/V688 The 'tipo' function argument possesses the same name as one of the class members, which can
-                                                                // result in a confusion.bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) {
+bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
     qApp->enqueueError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
 
-  if (tipo == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
+  if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
   if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
   if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
@@ -301,16 +375,20 @@ bool CadastroProfissional::cadastrarEndereco(const Tipo tipo) { // TODO: V688 ht
   if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
   if (not setDataEnd("desativado", false)) { return false; }
 
-  if (not columnsToUpper(modelEnd, currentRowEnd)) { return false; }
+  if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
   isDirty = true;
 
   return true;
 }
 
-void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() { cadastrarEndereco() ? novoEndereco() : qApp->enqueueError("Não foi possível cadastrar este endereço!", this); }
+void CadastroProfissional::on_pushButtonAdicionarEnd_clicked() {
+  if (cadastrarEndereco()) { novoEndereco(); }
+}
 
-void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() { cadastrarEndereco(Tipo::Atualizar) ? novoEndereco() : qApp->enqueueError("Não foi possível atualizar este endereço!", this); }
+void CadastroProfissional::on_pushButtonAtualizarEnd_clicked() {
+  if (cadastrarEndereco(Tipo::Atualizar)) { novoEndereco(); }
+}
 
 void CadastroProfissional::on_lineEditCEP_textChanged(const QString &cep) {
   if (not ui->lineEditCEP->isValid()) { return; }
@@ -351,11 +429,7 @@ void CadastroProfissional::on_checkBoxMostrarInativos_clicked(const bool checked
 void CadastroProfissional::on_pushButtonRemoverEnd_clicked() {
   // TODO: se já estiver desativado apenas retornar
 
-  QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja remover?", QMessageBox::Yes | QMessageBox::No, this);
-  msgBox.setButtonText(QMessageBox::Yes, "Remover");
-  msgBox.setButtonText(QMessageBox::No, "Voltar");
-
-  if (msgBox.exec() == QMessageBox::Yes) {
+  if (removeBox() == QMessageBox::Yes) {
     if (not setDataEnd("desativado", true)) { return; }
 
     if (not modelEnd.submitAll()) { return; }

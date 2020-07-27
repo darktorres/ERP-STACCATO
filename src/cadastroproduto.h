@@ -1,5 +1,4 @@
-#ifndef CADASTROPRODUTO_H
-#define CADASTROPRODUTO_H
+#pragma once
 
 #include "registerdialog.h"
 #include "searchdialog.h"
@@ -12,7 +11,7 @@ class CadastroProduto final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroProduto(QWidget *parent = nullptr);
+  explicit CadastroProduto(QWidget *parent);
   ~CadastroProduto();
 
 private:
@@ -36,5 +35,3 @@ private:
   auto updateMode() -> void final;
   auto verifyFields() -> bool final;
 };
-
-#endif // CADASTROPRODUTO_H

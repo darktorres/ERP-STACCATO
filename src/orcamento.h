@@ -1,5 +1,4 @@
-#ifndef ORCAMENTO_H
-#define ORCAMENTO_H
+#pragma once
 
 #include "registerdialog.h"
 
@@ -11,23 +10,25 @@ class Orcamento final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit Orcamento(QWidget *parent = nullptr);
+  explicit Orcamento(QWidget *parent);
   ~Orcamento();
   auto show() -> void;
 
 private:
   // attributes
+  QList<QSqlRecord> backupItem;
   int currentRowItem = -1;
   bool isReadOnly = false;
-  int currentItemIsEstoque = 0;
-  bool currentItemIsPromocao = false;
+  bool currentItemIsEstoque = false;
+  int currentItemIsPromocao = 0;
+  bool canChangeFrete = false;
   double minimoFrete = 0;
   double porcFrete = 0;
   QDataWidgetMapper mapperItem;
-  SqlRelationalTableModel modelItem;
+  SqlTableModel modelItem;
   Ui::Orcamento *ui;
   // methods
-  auto adicionarItem(const Tipo tipo = Tipo::Cadastrar) -> void;
+  auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
   auto atualizaReplica() -> bool;
   auto atualizarItem() -> void;
   auto buscarCadastrarConsultor() -> bool;
@@ -40,9 +41,10 @@ private:
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
   auto on_checkBoxRepresentacao_toggled(const bool checked) -> void;
+  auto on_dataEmissao_dateChanged(const QDate &date) -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
-  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double desconto) -> void;
-  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double desconto) -> void;
+  auto on_doubleSpinBoxDescontoGlobalReais_valueChanged(const double descontoReais) -> void;
+  auto on_doubleSpinBoxDescontoGlobal_valueChanged(const double descontoPorc) -> void;
   auto on_doubleSpinBoxDesconto_valueChanged(const double desconto) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(const double frete) -> void;
   auto on_doubleSpinBoxQuant_valueChanged(const double quant) -> void;
@@ -60,7 +62,7 @@ private:
   auto on_pushButtonCalcularFrete_clicked() -> void;
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonGerarVenda_clicked() -> void;
-  auto on_pushButtonImprimir_clicked() -> void;
+  auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonRemoverItem_clicked() -> void;
   auto on_pushButtonReplicar_clicked() -> void;
   auto on_tableProdutos_clicked(const QModelIndex &index) -> void;
@@ -75,8 +77,7 @@ private:
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaCadastroCliente() -> bool;
+  auto verificaDisponibilidadeEstoque() -> bool;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // ORCAMENTO_H

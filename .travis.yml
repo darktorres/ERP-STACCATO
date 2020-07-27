@@ -1,26 +1,27 @@
 language: cpp
 compiler: gcc
-sudo: false
-dist: trusty
+dist: focal
 cache: ccache
 
 addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:beineri/opt-qt-5.10.1-trusty'
+    - sourceline: 'ppa:beineri/opt-qt-5.14.2-focal'
     packages:
-    - gcc-7
-    - g++-7
-    - qt510base
-    - qt510charts-no-lgpl
-    - qt510script
-    - qt510tools
+    - gcc-10
+    - g++-10
+    - qt514base
+    - qt514charts-no-lgpl
+    - qt514script
+    - qt514tools
+    - mesa-common-dev
+    - libgl1-mesa-dev
     
 script:
-  - source /opt/qt510/bin/qt510-env.sh
-  - /opt/qt510/bin/qmake Loja.pro
-  - make -j4
+  - source /opt/qt514/bin/qt514-env.sh
+  - /opt/qt514/bin/qmake Loja.pro
+  - make -j2
   
 before_cache:
   - ccache --show-stats

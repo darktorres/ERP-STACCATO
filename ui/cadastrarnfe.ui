@@ -194,7 +194,7 @@
            </widget>
           </item>
           <item row="10" column="0">
-           <widget class="QLabel" name="labelSaida_2">
+           <widget class="QLabel" name="labelDestinoOperacao">
             <property name="text">
              <string>Destino da operação</string>
             </property>
@@ -245,7 +245,7 @@
            </widget>
           </item>
           <item row="10" column="1">
-           <widget class="QLabel" name="labelTipo_2">
+           <widget class="QLabel" name="labelFinalidadeOperacao">
             <property name="text">
              <string>Finalidade da operação</string>
             </property>
@@ -296,7 +296,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="3" column="0">
-           <widget class="QLabel" name="label_28">
+           <widget class="QLabel" name="labelLoja">
             <property name="text">
              <string>Loja:</string>
             </property>
@@ -1061,13 +1061,13 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1041</width>
-                   <height>337</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
                   <item row="0" column="0">
-                   <widget class="QFrame" name="frame_7">
+                   <widget class="QFrame" name="frameICMS">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
@@ -1224,7 +1224,7 @@
                      <item row="1" column="0">
                       <layout class="QGridLayout" name="gridLayout_38">
                        <item row="0" column="0">
-                        <widget class="QFrame" name="frame">
+                        <widget class="QFrame" name="frameICMSNormal">
                          <property name="frameShape">
                           <enum>QFrame::StyledPanel</enum>
                          </property>
@@ -1287,7 +1287,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1326,7 +1326,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1347,7 +1347,7 @@
                         </widget>
                        </item>
                        <item row="0" column="1">
-                        <widget class="QFrame" name="frame_2">
+                        <widget class="QFrame" name="frameST">
                          <property name="frameShape">
                           <enum>QFrame::StyledPanel</enum>
                          </property>
@@ -1356,7 +1356,7 @@
                          </property>
                          <layout class="QGridLayout" name="gridLayout_63">
                           <item row="7" column="0">
-                           <widget class="QLabel" name="label_7">
+                           <widget class="QLabel" name="labelPorcMargemIcmsSt">
                             <property name="sizePolicy">
                              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                               <horstretch>0</horstretch>
@@ -1423,7 +1423,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1433,7 +1433,7 @@
                              <string>R$ </string>
                             </property>
                             <property name="maximum">
-                             <double>99999.990000000005239</double>
+                             <double>99999999.989999994635582</double>
                             </property>
                            </widget>
                           </item>
@@ -1528,13 +1528,13 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>134</width>
-                   <height>98</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
                   <item row="0" column="0">
-                   <widget class="QFrame" name="frame_8">
+                   <widget class="QFrame" name="frameIPI">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
@@ -1678,13 +1678,13 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>192</width>
-                   <height>163</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
                   <item row="0" column="0">
-                   <widget class="QFrame" name="frame_9">
+                   <widget class="QFrame" name="framePIS">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
@@ -1721,7 +1721,7 @@
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.000000000000000</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -1744,7 +1744,7 @@
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.990000000005239</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -1992,13 +1992,13 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>223</width>
-                   <height>163</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
                   <item row="0" column="0">
-                   <widget class="QFrame" name="frame_10">
+                   <widget class="QFrame" name="frameCOFINS">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
@@ -2228,7 +2228,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.990000000005239</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -2277,7 +2277,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                         <string>R$ </string>
                        </property>
                        <property name="maximum">
-                        <double>99999.990000000005239</double>
+                        <double>99999999.989999994635582</double>
                        </property>
                       </widget>
                      </item>
@@ -2305,13 +2305,13 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>498</width>
-                   <height>290</height>
+                   <width>966</width>
+                   <height>312</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">
                   <item row="0" column="0">
-                   <widget class="QFrame" name="frame_3">
+                   <widget class="QFrame" name="frameInterEstadual">
                     <property name="frameShape">
                      <enum>QFrame::StyledPanel</enum>
                     </property>
@@ -2390,7 +2390,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2403,7 +2403,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2442,7 +2442,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2481,7 +2481,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                           <string>R$ </string>
                          </property>
                          <property name="maximum">
-                          <double>99999.990000000005239</double>
+                          <double>99999999.989999994635582</double>
                          </property>
                         </widget>
                        </item>
@@ -2508,6 +2508,32 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
        <string>Totais</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_34">
+       <item row="0" column="2">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="0" column="0">
         <layout class="QGridLayout" name="gridLayout_33">
          <item row="0" column="0">
@@ -2768,62 +2794,6 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
          </item>
          <item row="0" column="2">
           <layout class="QGridLayout" name="gridLayout_32">
-           <item row="0" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseICMS">
-             <property name="wrapping">
-              <bool>false</bool>
-             </property>
-             <property name="frame">
-              <bool>false</bool>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="buttonSymbols">
-              <enum>QAbstractSpinBox::NoButtons</enum>
-             </property>
-             <property name="correctionMode">
-              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-             </property>
-             <property name="showGroupSeparator" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="prefix">
-              <string>R$ </string>
-             </property>
-             <property name="maximum">
-              <double>9999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorICMS">
-             <property name="wrapping">
-              <bool>false</bool>
-             </property>
-             <property name="frame">
-              <bool>false</bool>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="buttonSymbols">
-              <enum>QAbstractSpinBox::NoButtons</enum>
-             </property>
-             <property name="correctionMode">
-              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-             </property>
-             <property name="showGroupSeparator" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="prefix">
-              <string>R$ </string>
-             </property>
-             <property name="maximum">
-              <double>9999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QDoubleSpinBox" name="doubleSpinBoxValorPIS">
              <property name="wrapping">
@@ -2848,63 +2818,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorIPI">
-             <property name="wrapping">
-              <bool>false</bool>
-             </property>
-             <property name="frame">
-              <bool>false</bool>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="buttonSymbols">
-              <enum>QAbstractSpinBox::NoButtons</enum>
-             </property>
-             <property name="correctionMode">
-              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-             </property>
-             <property name="showGroupSeparator" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="prefix">
-              <string>R$ </string>
-             </property>
-             <property name="maximum">
-              <double>9999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorCOFINS">
-             <property name="wrapping">
-              <bool>false</bool>
-             </property>
-             <property name="frame">
-              <bool>false</bool>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="buttonSymbols">
-              <enum>QAbstractSpinBox::NoButtons</enum>
-             </property>
-             <property name="correctionMode">
-              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-             </property>
-             <property name="showGroupSeparator" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="prefix">
-              <string>R$ </string>
-             </property>
-             <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2932,7 +2846,119 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorICMS">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseICMS">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorIPI">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBoxValorCOFINS">
+             <property name="wrapping">
+              <bool>false</bool>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+             </property>
+             <property name="showGroupSeparator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="prefix">
+              <string>R$ </string>
+             </property>
+             <property name="maximum">
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2960,7 +2986,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
              </property>
             </widget>
            </item>
@@ -2988,39 +3014,26 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               <string>R$ </string>
              </property>
              <property name="maximum">
-              <double>9999999.000000000000000</double>
+              <double>99999999.989999994635582</double>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QCheckBox" name="checkBoxFrete">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
           </layout>
          </item>
         </layout>
-       </item>
-       <item row="0" column="1">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0">
-        <spacer name="verticalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
@@ -3102,7 +3115,7 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
        <item row="1" column="0">
         <widget class="QTabWidget" name="tabWidget_3">
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_11">
           <attribute name="title">

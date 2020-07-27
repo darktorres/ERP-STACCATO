@@ -1,9 +1,8 @@
-#ifndef WIDGETNFEENTRADA_H
-#define WIDGETNFEENTRADA_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetNfeEntrada;
@@ -13,7 +12,7 @@ class WidgetNfeEntrada final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetNfeEntrada(QWidget *parent = nullptr);
+  explicit WidgetNfeEntrada(QWidget *parent);
   ~WidgetNfeEntrada();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -22,10 +21,10 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewNFeEntrada;
+  SqlTableModel modelViewNFeEntrada;
   Ui::WidgetNfeEntrada *ui;
   // methods
-  auto cancelar(const int row) -> bool;
+  auto remover(const int row) -> bool;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonRemoverNFe_clicked() -> void;
@@ -33,5 +32,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETNFEENTRADA_H

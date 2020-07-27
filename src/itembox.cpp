@@ -1,7 +1,7 @@
+#include "itembox.h"
+
 #include <QDebug>
 #include <QMouseEvent>
-
-#include "itembox.h"
 
 ItemBox::ItemBox(QWidget *parent) : QLineEdit(parent) {
   setReadOnly(true);
@@ -54,7 +54,6 @@ QVariant ItemBox::getId() const { return id; }
 
 void ItemBox::setId(const QVariant &newId) {
   if (newId.isNull()) { return; }
-  if (id == newId) { return; }
 
   id = newId;
 
@@ -106,7 +105,7 @@ void ItemBox::setIcons() {
     searchButton->hide();
   }
 
-  if (registerDialog) {
+  if (registerDialog and not readOnlyItemBox) {
     x -= size.width();
     plusButton->setGeometry(QRect(QPoint(x, y), size));
     plusButton->show();
@@ -114,9 +113,8 @@ void ItemBox::setIcons() {
     plusButton->hide();
   }
 
-  int left, top, bottom;
-  getTextMargins(&left, &top, nullptr, &bottom);
-  setTextMargins(left, top, rect().right() - x + 4, bottom);
+  const auto margins = textMargins();
+  setTextMargins(margins.left(), margins.top(), rect().right() - x, margins.bottom());
 }
 
 void ItemBox::setRepresentacao(const bool isRepresentacao) { searchDialog->setRepresentacao(isRepresentacao); }
@@ -125,4 +123,5 @@ void ItemBox::setFilter(const QString &filter) { searchDialog->setFilter(filter)
 
 void ItemBox::setFornecedorRep(const QString &fornecedor) { searchDialog->setFornecedorRep(fornecedor); }
 
-// REFAC: replace this with eliding? https://wiki.qt.io/Elided_Label
+// TODO: replace this with eliding? https://wiki.qt.io/Elided_Label
+// TODO: ajustar o tamanho do widget de acordo com o tamanho do texto para o autodimensionar funcionar corretamente na tableView (usar sizeHint?)

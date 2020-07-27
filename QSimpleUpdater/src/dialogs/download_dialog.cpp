@@ -35,13 +35,10 @@ DownloadDialog::DownloadDialog(QWidget *parent) : QWidget(parent), ui(new Ui::Do
 
   // Configure open button
   ui->openButton->setEnabled(false);
-  ui->openButton->setVisible(false);
+  ui->openButton->hide();
 
   // Initialize the network access manager
   m_manager = new QNetworkAccessManager(this);
-
-  // Avoid SSL issues
-  connect(m_manager, &QNetworkAccessManager::sslErrors, this, &DownloadDialog::ignoreSslErrors);
 }
 
 DownloadDialog::~DownloadDialog() { delete ui; }
@@ -57,7 +54,7 @@ void DownloadDialog::beginDownload(const QUrl &url) {
 
   // Begin the download
   m_reply = m_manager->get(QNetworkRequest(url));
-  m_start_time = QDateTime::currentDateTime().toTime_t();
+  m_start_time = QDateTime::currentDateTime();
 
   // Update the progress bar value automatically
   connect(m_reply, &QNetworkReply::downloadProgress, this, &DownloadDialog::updateProgress);
@@ -112,7 +109,7 @@ void DownloadDialog::downloadFinished() {
 
   if (not replyData.isEmpty()) {
     const QStringList list = m_reply->url().toString().split("/");
-    QFile file(QDir::tempPath() + "/" + list.at(list.count() - 1));
+    QFile file(QDir::currentPath() + "/" + list.at(list.count() - 1));
     QMutex _mutex;
 
     if (file.open(QIODevice::WriteOnly)) {
@@ -164,11 +161,11 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
 
     ui->downloadLabel->setText(tr("Baixando atualizações") + " (" + _received_string + " " + tr("de") + " " + _total_string + ")");
 
-    const uint _diff = QDateTime::currentDateTime().toTime_t() - m_start_time;
+    const qint64 _elapsed = m_start_time.secsTo(QDateTime::currentDateTime());
 
-    if (_diff > 0) {
+    if (_elapsed > 0) {
       QString _time_string;
-      double _time_remaining = total / (received / _diff);
+      qint64 _time_remaining = (total - received) / (received / _elapsed);
 
       if (_time_remaining > 7200) {
         _time_remaining /= 3600;
@@ -188,15 +185,6 @@ void DownloadDialog::updateProgress(qint64 received, qint64 total) {
     ui->downloadLabel->setText(tr("Baixando atualizações"));
     ui->timeLabel->setText(tr("Tempo restante") + ": " + tr("desconhecido"));
   }
-}
-
-void DownloadDialog::ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &error) {
-#ifndef Q_OS_IOS
-  reply->ignoreSslErrors(error);
-#else
-  Q_UNUSED(reply);
-  Q_UNUSED(error);
-#endif
 }
 
 double DownloadDialog::roundNumber(const double &input) { return round(input * 100) / 100; }

@@ -1,5 +1,4 @@
-#ifndef COMBOBOX_H
-#define COMBOBOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -15,5 +14,3 @@ public:
 private:
   Q_PROPERTY(QVariant currentValue READ getCurrentValue WRITE setCurrentValue STORED false)
 };
-
-#endif // COMBOBOX_H

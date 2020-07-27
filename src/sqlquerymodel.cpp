@@ -1,28 +1,35 @@
+#include "sqlquerymodel.h"
+
+#include "application.h"
+
 #include <QSqlError>
 #include <QSqlRecord>
 
-#include "application.h"
-#include "sqlquerymodel.h"
-
 SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 
-QVariant SqlQueryModel::data(const int row, const QString &column) const {
-  const int index = QSqlQueryModel::record().indexOf(column);
+SqlQueryModel::SqlQueryModel() : SqlQueryModel(nullptr) {}
 
-  if (index == -1) {
-    qApp->enqueueError("Coluna '" + column + "' não encontrada na tabela!");
+QVariant SqlQueryModel::data(const int row, const int column) const {
+  if (row == -1 or column == -1) {
+    qApp->enqueueException("Erro: linha/coluna -1 SqlQueryModel");
     return QVariant();
   }
 
-  return QSqlQueryModel::data(QSqlQueryModel::index(row, index));
+  if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
+
+  return QSqlQueryModel::data(QSqlQueryModel::index(row, column));
 }
 
+QVariant SqlQueryModel::data(const QModelIndex &index, const QString &column) const { return data(index.row(), column); }
+
+QVariant SqlQueryModel::data(const int row, const QString &column) const { return data(row, QSqlQueryModel::record().indexOf(column)); }
+
 bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) {
-  const int index = QSqlQueryModel::record().indexOf(column);
+  const int field = QSqlQueryModel::record().indexOf(column);
 
-  if (index == -1) { return qApp->enqueueError(false, "Coluna '" + column + "' não encontrada na tabela!"); }
+  if (field == -1) { return qApp->enqueueException(false, "Coluna '" + column + "' não encontrada na tabela!"); }
 
-  return QSqlQueryModel::setHeaderData(index, Qt::Horizontal, value);
+  return QSqlQueryModel::setHeaderData(field, Qt::Horizontal, value);
 }
 
 bool SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
@@ -30,9 +37,7 @@ bool SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
 
   QSqlQueryModel::setQuery(query, db);
 
-  if (lastError().isValid()) { return qApp->enqueueError(false, "Erro lendo dados: " + lastError().text()); }
+  if (lastError().isValid()) { return qApp->enqueueException(false, "Erro lendo dados: " + lastError().text()); }
 
   return true;
 }
-
-QVariant SqlQueryModel::data(const QModelIndex &index, int role) const { return QSqlQueryModel::data(index, role); }

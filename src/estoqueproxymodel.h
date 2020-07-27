@@ -1,19 +1,16 @@
-#ifndef ESTOQUEPROXYMODEL_H
-#define ESTOQUEPROXYMODEL_H
+#pragma once
 
 #include "sortfilterproxymodel.h"
-#include "sqlrelationaltablemodel.h"
+#include "sqltablemodel.h"
 
 class EstoqueProxyModel final : public SortFilterProxyModel {
 
 public:
-  explicit EstoqueProxyModel(SqlRelationalTableModel *model, QObject *parent = nullptr);
+  explicit EstoqueProxyModel(SqlTableModel *model, QObject *parent);
   ~EstoqueProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
 private:
-  const int quantUpdIndex;
+  const int quantUpdColumn = -1;
   enum class Status { Ok = 1, QuantDifere = 2, NaoEncontrado = 3, Consumo = 4, Devolucao = 5 };
 };
-
-#endif // ESTOQUEPROXYMODEL_H

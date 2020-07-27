@@ -1,30 +1,43 @@
+#include "widgetlogisticacalendario.h"
+#include "ui_widgetlogisticacalendario.h"
+
+#include "application.h"
+#include "collapsiblewidget.h"
+
 #include <QCheckBox>
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
 
-#include "application.h"
-#include "collapsiblewidget.h"
-#include "ui_widgetlogisticacalendario.h"
-#include "widgetlogisticacalendario.h"
-
 WidgetLogisticaCalendario::WidgetLogisticaCalendario(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetLogisticaCalendario) { ui->setupUi(this); }
 
 WidgetLogisticaCalendario::~WidgetLogisticaCalendario() { delete ui; }
 
 void WidgetLogisticaCalendario::setConnections() {
-  connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
-  connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
-  connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked);
-  connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged, connectionType);
+  connect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled, connectionType);
+  connect(ui->groupBoxVeiculos, &QGroupBox::toggled, this, &WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled, connectionType);
+  connect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked, connectionType);
+  connect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked, connectionType);
+}
+
+void WidgetLogisticaCalendario::unsetConnections() {
+  disconnect(ui->calendarWidget, &QCalendarWidget::selectionChanged, this, &WidgetLogisticaCalendario::on_calendarWidget_selectionChanged);
+  disconnect(ui->checkBoxMostrarFiltros, &QCheckBox::toggled, this, &WidgetLogisticaCalendario::on_checkBoxMostrarFiltros_toggled);
+  disconnect(ui->groupBoxVeiculos, &QGroupBox::toggled, this, &WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled);
+  disconnect(ui->pushButtonAnterior, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonAnterior_clicked);
+  disconnect(ui->pushButtonProximo, &QPushButton::clicked, this, &WidgetLogisticaCalendario::on_pushButtonProximo_clicked);
 }
 
 void WidgetLogisticaCalendario::listarVeiculos() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora ORDER BY razaoSocial, modelo")) {
-    return qApp->enqueueError("Erro buscando veiculos: " + query.lastError().text(), this);
+  if (not query.exec("SELECT t.razaoSocial, tv.modelo FROM transportadora t LEFT JOIN transportadora_has_veiculo tv ON t.idTransportadora = tv.idTransportadora WHERE t.desativado = FALSE AND "
+                     "tv.desativado = FALSE ORDER BY razaoSocial, modelo")) {
+    return qApp->enqueueException("Erro buscando veiculos: " + query.lastError().text(), this);
   }
 
   while (query.next()) {
@@ -48,8 +61,7 @@ void WidgetLogisticaCalendario::updateTables() {
 
   if (not modelIsSet) { modelIsSet = true; }
 
-  const QDate date = ui->calendarWidget->selectedDate();
-  updateCalendar(date.addDays(date.dayOfWeek() * -1));
+  updateFilter();
 }
 
 void WidgetLogisticaCalendario::resetTables() { modelIsSet = false; }
@@ -61,6 +73,9 @@ void WidgetLogisticaCalendario::updateFilter() {
 
 void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   ui->tableWidget->clearContents();
+
+  ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+  ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
   int veiculos = 0;
   const int start = startDate.day();
@@ -76,10 +91,8 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
 
     QStringList temp = child->text().split(" / ");
 
-    list << temp.at(0) + "\n" + temp.at(1);
-
-    //    list << "Manhã\n" + temp.at(0) + "\n" + temp.at(1);
-    //    list << "Tarde\n" + temp.at(0) + "\n" + temp.at(1);
+    list << "Manhã\n" + temp.at(0).left(15) + "\n" + temp.at(1).left(15);
+    list << "Tarde\n" + temp.at(0).left(15) + "\n" + temp.at(1).left(15);
   }
 
   qDebug() << list;
@@ -106,25 +119,20 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
   for (int row = 0; row < ui->tableWidget->rowCount(); ++row) { ui->tableWidget->setRowHidden(row, true); }
 
   QSqlQuery query;
-  // TODO: estou agrupando por horario mas a tabela separa por manha/tarde, arrumar isso
-  query.prepare("SELECT * FROM view_calendario2 WHERE data BETWEEN :start AND :end");
+  query.prepare("SELECT * FROM view_calendario WHERE DATE(data) BETWEEN :start AND :end");
   query.bindValue(":start", startDate);
   query.bindValue(":end", startDate.addDays(6));
 
-  if (not query.exec()) { return qApp->enqueueError("Erro query: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro query: " + query.lastError().text(), this); }
 
   while (query.next()) {
-    const QString transportadora = query.value("razaoSocial").toString() + "\n" + query.value("modelo").toString();
+    const QString transportadora = query.value("razaoSocial").toString().left(15) + "\n" + query.value("modelo").toString().left(15);
 
     int row = -1;
 
     for (int i = 0; i < list.size(); ++i) {
       if (list.at(i).contains(transportadora)) {
-        //        qDebug() << list.at(i) << " - " << i;
-        //        qDebug() << transportadora;
-        //        ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
-        //        row = query.value("data").toTime().hour() < 12 ? i : i + 1; // manha/tarde
-        row = i;
+        row = (query.value("data").toTime().hour() < 12) ? i : i + 1; // manha/tarde
         break;
       }
     }
@@ -205,8 +213,8 @@ void WidgetLogisticaCalendario::updateCalendar(const QDate &startDate) {
     //    connect(widget, &CollapsibleWidget::toggled, ui->tableWidget, &QTableWidget::resizeRowsToContents);
   }
 
-  ui->tableWidget->resizeColumnsToContents();
-  ui->tableWidget->resizeRowsToContents();
+  ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   const QString range = startDate.toString("dd-MM-yyyy") + " - " + startDate.addDays(6).toString("dd-MM-yyyy");
 
@@ -223,5 +231,24 @@ void WidgetLogisticaCalendario::on_pushButtonProximo_clicked() { ui->calendarWid
 void WidgetLogisticaCalendario::on_pushButtonAnterior_clicked() { ui->calendarWidget->setSelectedDate(ui->calendarWidget->selectedDate().addDays(-7)); }
 
 void WidgetLogisticaCalendario::on_calendarWidget_selectionChanged() { updateFilter(); }
+
+void WidgetLogisticaCalendario::on_groupBoxVeiculos_toggled(const bool enabled) {
+  unsetConnections();
+
+  [&] {
+    const auto children = ui->groupBoxVeiculos->findChildren<QCheckBox *>();
+
+    for (const auto &child : children) {
+      child->blockSignals(true);
+      child->setEnabled(true);
+      child->setChecked(enabled);
+      child->blockSignals(false);
+    }
+  }();
+
+  setConnections();
+
+  updateTables();
+}
 
 // TODO: esconder veiculos que não possuem agendamento na semana

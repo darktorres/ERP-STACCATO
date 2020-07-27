@@ -1,16 +1,18 @@
+#include "cadastrousuario.h"
+#include "ui_cadastrousuario.h"
+
+#include "application.h"
+#include "checkboxdelegate.h"
+#include "searchdialog.h"
+#include "usersession.h"
+
 #include <QCheckBox>
 #include <QDebug>
+#include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
-
-#include "application.h"
-#include "cadastrousuario.h"
-#include "checkboxdelegate.h"
-#include "horizontalproxymodel.h"
-#include "searchdialog.h"
-#include "ui_cadastrousuario.h"
-#include "usersession.h"
+#include <QTransposeProxyModel>
 
 CadastroUsuario::CadastroUsuario(QWidget *parent) : RegisterDialog("usuario", "idUsuario", parent), ui(new Ui::CadastroUsuario) {
   ui->setupUi(this);
@@ -52,20 +54,10 @@ void CadastroUsuario::setupTables() {
   modelPermissoes.setHeaderData("view_tab_logistica", "Ver Logística?");
   modelPermissoes.setHeaderData("view_tab_nfe", "Ver NFe?");
   modelPermissoes.setHeaderData("view_tab_estoque", "Ver Estoque?");
+  modelPermissoes.setHeaderData("view_tab_galpao", "Ver Galpão?");
   modelPermissoes.setHeaderData("view_tab_financeiro", "Ver Financeiro?");
   modelPermissoes.setHeaderData("view_tab_relatorio", "Ver Relatório?");
-
-  auto *proxyModel = new HorizontalProxyModel(&modelPermissoes, this);
-
-  ui->table->setModel(proxyModel);
-
-  ui->table->hideRow(0);                          // idUsuario
-  ui->table->hideRow(proxyModel->rowCount() - 1); // created
-  ui->table->hideRow(proxyModel->rowCount() - 2); // lastUpdated
-
-  ui->table->setItemDelegate(new CheckBoxDelegate(this));
-
-  ui->table->horizontalHeader()->setVisible(false);
+  modelPermissoes.setHeaderData("view_tab_rh", "Ver RH?");
 }
 
 void CadastroUsuario::modificarUsuario() {
@@ -79,11 +71,11 @@ void CadastroUsuario::modificarUsuario() {
   ui->comboBoxTipo->setDisabled(true);
 }
 
-bool CadastroUsuario::verifyFields() {
+bool CadastroUsuario::verifyFields() { // TODO: deve marcar uma loja?
   const auto children = ui->tab->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->lineEditPasswd->text() != ui->lineEditPasswd_2->text()) {
@@ -125,7 +117,7 @@ bool CadastroUsuario::savingProcedures() {
   if (not setData("email", ui->lineEditEmail->text())) { return false; }
   if (not setData("user", ui->lineEditUser->text())) { return false; }
 
-  // NOTE: change this when upgrading for MySQL 8
+  // NOTE: change this when upgrading to MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
     QSqlQuery query;
 
@@ -149,6 +141,21 @@ bool CadastroUsuario::viewRegister() {
 
   if (not modelPermissoes.select()) { return false; }
 
+  // TODO: shouldn't this be in setupTables?
+  auto *transpose = new QTransposeProxyModel(this);
+  transpose->setSourceModel(&modelPermissoes);
+  modelPermissoes.proxyModel = transpose;
+
+  ui->table->setModel(&modelPermissoes);
+
+  ui->table->hideRow(0);                                  // idUsuario
+  ui->table->hideRow(ui->table->model()->rowCount() - 1); // created
+  ui->table->hideRow(ui->table->model()->rowCount() - 2); // lastUpdated
+
+  ui->table->setItemDelegate(new CheckBoxDelegate(this));
+
+  ui->table->horizontalHeader()->hide();
+
   for (int row = 0; row < ui->table->model()->rowCount(); ++row) { ui->table->openPersistentEditor(row, 0); }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { ui->comboBoxEspecialidade->setCurrentIndex(data("especialidade").toString().left(1).toInt()); }
@@ -159,7 +166,7 @@ bool CadastroUsuario::viewRegister() {
 void CadastroUsuario::fillCombobox() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT descricao, idLoja FROM loja")) { return; }
+  if (not query.exec("SELECT descricao, idLoja FROM loja WHERE desativado = FALSE ORDER BY descricao")) { return; }
 
   while (query.next()) { ui->comboBoxLoja->addItem(query.value("descricao").toString(), query.value("idLoja")); }
 
@@ -181,49 +188,67 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
 }
 
 bool CadastroUsuario::cadastrar() {
-  if (tipo == Tipo::Cadastrar) {
-    currentRow = model.rowCount();
-    model.insertRow(currentRow);
+  if (not qApp->startTransaction("CadastroUsuario::cadastrar")) { return false; }
+
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+
+    if (not savingProcedures()) { return false; }
+
+    if (not model.submitAll()) { return false; }
+
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
+
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+
+    if (tipo == Tipo::Cadastrar) {
+      const int row = modelPermissoes.insertRowAtEnd();
+
+      if (not modelPermissoes.setData(row, "idUsuario", primaryId)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_orcamento", true)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_venda", true)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_estoque", true)) { return false; }
+      if (not modelPermissoes.setData(row, "view_tab_relatorio", true)) { return false; }
+    }
+
+    if (not modelPermissoes.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+
+    if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+    void(modelPermissoes.select());
   }
 
-  if (not savingProcedures()) { return false; }
+  return success;
+}
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+void CadastroUsuario::criarUsuarioMySQL() {
+  QFile file("mysql.txt");
 
-  if (not model.submitAll()) { return false; }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString()); }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+  const QString password = file.readAll();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+  // NOTE: those query's below commit transaction so have to be done outside transaction
+  QSqlQuery query;
+  query.prepare("CREATE USER :user@'%' IDENTIFIED BY '" + password + "'");
+  query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-  if (tipo == Tipo::Cadastrar) {
-    QSqlQuery query;
-    query.prepare("CREATE USER :user@'%' IDENTIFIED BY '12345'");
-    query.bindValue(":user", ui->lineEditUser->text().toLower());
+  if (not query.exec()) { return qApp->enqueueException("Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro criando usuário do banco de dados: " + query.lastError().text(), this); }
+  query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
+  query.bindValue(":user", ui->lineEditUser->text().toLower());
 
-    query.prepare("GRANT ALL PRIVILEGES ON *.* TO :user@'%' WITH GRANT OPTION");
-    query.bindValue(":user", ui->lineEditUser->text().toLower());
+  if (not query.exec()) { return qApp->enqueueException("Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro guardando privilégios do usuário do banco de dados: " + query.lastError().text(), this); }
-
-    if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return false; }
-
-    // -------------------------------------------------------------------------
-
-    const int row2 = modelPermissoes.rowCount();
-    modelPermissoes.insertRow(row2);
-
-    if (not modelPermissoes.setData(row2, "idUsuario", primaryId)) { return false; }
-    if (not modelPermissoes.setData(row2, "view_tab_orcamento", true)) { return false; }
-    if (not modelPermissoes.setData(row2, "view_tab_venda", true)) { return false; }
-    if (not modelPermissoes.setData(row2, "view_tab_relatorio", true)) { return false; }
-  }
-
-  if (not modelPermissoes.submitAll()) { return false; }
-
-  return true;
+  if (not QSqlQuery("FLUSH PRIVILEGES").exec()) { return; }
 }
 
 void CadastroUsuario::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Usuário cadastrado com sucesso!", this); }
@@ -233,7 +258,7 @@ void CadastroUsuario::on_lineEditUser_textEdited(const QString &text) {
   query.prepare("SELECT idUsuario FROM usuario WHERE user = :user");
   query.bindValue(":user", text);
 
-  if (not query.exec()) { return qApp->enqueueError("Erro buscando usuário: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro buscando usuário: " + query.lastError().text(), this); }
 
   if (query.first()) { return qApp->enqueueError("Nome de usuário já existe!", this); }
 }
@@ -250,4 +275,7 @@ void CadastroUsuario::on_comboBoxTipo_currentTextChanged(const QString &text) {
 
 // TODO: 1colocar permissoes padroes para cada tipo de usuario
 // TODO: colocar uma coluna 'ultimoAcesso' no BD (para saber quais usuarios nao estao mais ativos e desativar depois de x dias)
-// TODO: mudar nome 'Remover' para 'Bloquear'
+// FIXME: quando o usuario é alterado o usuario do MySql não é, fazendo com que o login não funcione mais
+
+// FIXME: nao está mostrando mensagem de confirmacao apos desativar usuario
+// TODO: mudar botao de 'remover' para 'desativar'

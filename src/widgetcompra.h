@@ -1,5 +1,4 @@
-#ifndef WIDGETCOMPRA_H
-#define WIDGETCOMPRA_H
+#pragma once
 
 #include <QWidget>
 
@@ -11,7 +10,7 @@ class WidgetCompra final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetCompra(QWidget *parent = nullptr);
+  explicit WidgetCompra(QWidget *parent);
   ~WidgetCompra();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -23,5 +22,3 @@ private:
   auto on_tabWidget_currentChanged(const int &) -> void;
   auto setConnections() -> void;
 };
-
-#endif // WIDGETCOMPRA_H

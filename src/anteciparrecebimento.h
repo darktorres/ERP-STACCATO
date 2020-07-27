@@ -1,9 +1,8 @@
-#ifndef ANTECIPARRECEBIMENTO_H
-#define ANTECIPARRECEBIMENTO_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class AnteciparRecebimento;
@@ -13,12 +12,12 @@ class AnteciparRecebimento final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit AnteciparRecebimento(QWidget *parent = nullptr);
+  explicit AnteciparRecebimento(QWidget *parent);
   ~AnteciparRecebimento();
 
 private:
   // attributes
-  SqlRelationalTableModel modelContaReceber;
+  SqlTableModel modelContaReceber;
   Ui::AnteciparRecebimento *ui;
   // methods
   auto cadastrar(const QModelIndexList &list) -> bool;
@@ -31,6 +30,5 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
+  auto verifyFields(const QModelIndexList &list) -> bool;
 };
-
-#endif // ANTECIPARRECEBIMENTO_H

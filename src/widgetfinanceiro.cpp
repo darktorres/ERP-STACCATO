@@ -1,7 +1,7 @@
-#include <QDebug>
-
-#include "ui_widgetfinanceiro.h"
 #include "widgetfinanceiro.h"
+#include "ui_widgetfinanceiro.h"
+
+#include <QDebug>
 
 WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetFinanceiro) {
   ui->setupUi(this);
@@ -10,7 +10,7 @@ WidgetFinanceiro::WidgetFinanceiro(QWidget *parent) : QWidget(parent), ui(new Ui
   ui->widgetReceber->setTipo(WidgetFinanceiroContas::Tipo::Receber);
   ui->widgetVenda->setFinanceiro();
 
-  setConnections();
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables);
 }
 
 WidgetFinanceiro::~WidgetFinanceiro() { delete ui; }
@@ -21,6 +21,7 @@ void WidgetFinanceiro::updateTables() {
   if (currentText == "Fluxo de Caixa") { ui->widgetFluxoCaixa->updateTables(); }
   if (currentText == "Contas a Pagar") { ui->widgetPagar->updateTables(); }
   if (currentText == "Contas a Receber") { ui->widgetReceber->updateTables(); }
+  if (currentText == "GARE") { ui->widgetGare->updateTables(); }
   if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
   if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
 }
@@ -29,11 +30,10 @@ void WidgetFinanceiro::resetTables() {
   ui->widgetFluxoCaixa->resetTables();
   ui->widgetPagar->resetTables();
   ui->widgetReceber->resetTables();
+  ui->widgetGare->resetTables();
   ui->widgetVenda->resetTables();
   ui->widgetCompra->resetTables();
 }
-
-void WidgetFinanceiro::setConnections() { connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetFinanceiro::updateTables); }
 
 // TODO: 0a cada dia colocar em 'maintenance' um job para enviar o relatorio das financas de 3 dias antes
 
@@ -41,14 +41,14 @@ void WidgetFinanceiro::setConnections() { connect(ui->tabWidget, &QTabWidget::cu
 // 'Conta', cp.observacao, cp.contraParte, cp.grupo, cp.subGrupo
 // from conta_a_pagar_has_pagamento cp
 // left join nfe n on cp.nfe = n.idNFe
-// left join loja_has_conta lhc on cp.contaDestino = lhc.idConta
+// left join loja_has_conta lhc on cp.idConta = lhc.idConta
 // where cp.dataRealizado is not null and cp.valorReal is not null
 // order by cp.dataRealizado;
 
 // select cr.dataEmissao, cr.dataRealizado, cr.valorReal, concat(lhc.banco, ' - ', lhc.agencia, ' - ', lhc.conta) AS
 // 'Conta', cr.observacao, cr.contraParte, cr.grupo, cr.subGrupo
 // from conta_a_receber_has_pagamento cr
-// left join loja_has_conta lhc on cr.contaDestino = lhc.idConta
+// left join loja_has_conta lhc on cr.idConta = lhc.idConta
 // where cr.valorReal is not null
 // order by cr.dataRealizado;
 // TODO: 0poder deixar 'agencia' e 'conta' como nulo nos casos em que nao existem

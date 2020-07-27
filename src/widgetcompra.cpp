@@ -17,6 +17,7 @@ void WidgetCompra::resetTables() {
   ui->widgetConfirmar->resetTables();
   ui->widgetFaturar->resetTables();
   ui->widgetOC->resetTables();
+  ui->widgetHistorico->resetTables();
 }
 
 void WidgetCompra::updateTables() {
@@ -28,9 +29,16 @@ void WidgetCompra::updateTables() {
   if (currentText == "Gerar Compra") { ui->widgetGerar->updateTables(); }
   if (currentText == "Confirmar Compra") { ui->widgetConfirmar->updateTables(); }
   if (currentText == "Faturamento") { ui->widgetFaturar->updateTables(); }
-  if (currentText == "Compras") { ui->widgetOC->updateTables(); }
+  if (currentText == "Consumos") { ui->widgetOC->updateTables(); }
+  if (currentText == "Histórico") { ui->widgetHistorico->updateTables(); }
 }
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }
 
-void WidgetCompra::setConnections() { connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetCompra::on_tabWidget_currentChanged); }
+void WidgetCompra::setConnections() {
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(
+      ui->widgetGerar, &WidgetCompraGerar::finished, this, [&] { ui->tabWidget->setCurrentWidget(ui->tabPendentes); }, connectionType);
+  connect(ui->tabWidget, &QTabWidget::currentChanged, this, &WidgetCompra::on_tabWidget_currentChanged, connectionType);
+}

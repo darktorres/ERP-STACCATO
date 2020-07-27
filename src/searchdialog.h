@@ -1,10 +1,8 @@
-#ifndef SEARCHDIALOG_H
-#define SEARCHDIALOG_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDialog>
-
-#include "searchdialogproxymodel.h"
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class SearchDialog;
@@ -29,7 +27,7 @@ public:
   static auto enderecoCliente(QWidget *parent) -> SearchDialog *;
   static auto fornecedor(QWidget *parent) -> SearchDialog *;
   static auto loja(QWidget *parent) -> SearchDialog *;
-  static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, QWidget *parent) -> SearchDialog *;
+  static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) -> SearchDialog *;
   static auto profissional(const bool mostrarNaoHa, QWidget *parent) -> SearchDialog *;
   static auto transportadora(QWidget *parent) -> SearchDialog *;
   static auto usuario(QWidget *parent) -> SearchDialog *;
@@ -48,15 +46,14 @@ private:
   bool silent = false;
   bool isRepresentacao = false;
   bool showAllProdutos = false;
+  bool compraAvulsa = false;
   bool isSet = false;
   QString filter;
   QString fornecedorRep;
-  SearchDialogProxyModel *proxyModel;
-  SqlRelationalTableModel model;
+  SqlTableModel model;
   Ui::SearchDialog *ui;
   // methods
-  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter,
-                        QWidget *parent = nullptr);
+  explicit SearchDialog(const QString &title, const QString &table, const QString &primaryKey, const QStringList &textKeys, const QString &fullTextIndex, const QString &filter, QWidget *parent);
   auto hideColumns(const QStringList &columns) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonSelecionar_clicked() -> void;
@@ -64,9 +61,7 @@ private:
   auto on_radioButtonProdDesc_toggled(const bool) -> void;
   auto on_table_doubleClicked(const QModelIndex &) -> void;
   auto prepare_show() -> bool;
-  auto sendUpdateMessage() -> void;
+  auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table) -> void;
 };
-
-#endif // SEARCHDIALOG_H

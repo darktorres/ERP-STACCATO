@@ -1,12 +1,11 @@
-#ifndef IMPORTARXML_H
-#define IMPORTARXML_H
+#pragma once
 
-#include <QDataWidgetMapper>
-#include <QDate>
-#include <QFileDialog>
-
-#include "sqlrelationaltablemodel.h"
+#include "estoqueproxymodel.h"
+#include "sqltablemodel.h"
 #include "xml.h"
+
+#include <QDate>
+#include <QDialog>
 
 namespace Ui {
 class ImportarXML;
@@ -15,19 +14,34 @@ class ImportarXML;
 class ImportarXML final : public QDialog {
   Q_OBJECT
 
+  struct NCM {
+    double mva4;
+    double mva12;
+    double aliq;
+  };
+
+  struct ProdutoEstoque {
+    int idProduto;
+    int idEstoque;
+    double estoqueRestante;
+    double valorUnid;
+  };
+
 public:
-  explicit ImportarXML(const QStringList &idsCompra, const QDateTime &dataReal, QWidget *parent = nullptr);
+  explicit ImportarXML(const QStringList &idsCompra, const QDate &dataFaturamento, QWidget *parent);
   ~ImportarXML();
 
 private:
   // attributes
-  const QDateTime dataReal;
+  const QDate dataFaturamento;
   const QStringList idsCompra;
-  SqlRelationalTableModel modelCompra;
-  SqlRelationalTableModel modelConsumo;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelEstoque_compra;
-  SqlRelationalTableModel modelNFe;
+  SqlTableModel modelCompra;
+  SqlTableModel modelConsumo;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelVenda;
+  SqlTableModel modelEstoque_compra;
+  SqlTableModel modelNFe;
+  SqlTableModel modelPagamento;
   Ui::ImportarXML *ui;
 
   enum class FieldColors {
@@ -39,33 +53,35 @@ private:
   };
 
   // methods
-  auto associarItens(const int rowCompra, const int rowEstoque, double &estoqueConsumido) -> bool;
-  auto atualizaDados() -> bool;
+  auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
+  auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
+  auto buscaNCM(const QString &ncm) -> std::optional<ImportarXML::NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
-  auto buscarProximoIdEstoque() -> std::optional<int>;
-  auto cadastrarNFe(XML &xml) -> bool;
-  auto cadastrarProdutoEstoque(const QVector<std::tuple<int, int, double>> &tuples) -> bool;
+  auto cadastrarNFe(XML &xml, const double gare) -> bool;
+  auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
+  auto calculaGare(XML &xml) -> std::optional<double>;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
+  auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
+  auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
+  auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
   auto importar() -> bool;
-  auto inserirItemModel(const XML &xml) -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
-  auto mapTuples() -> QVector<std::tuple<int, int, double>>;
-  auto on_checkBoxSemLote_toggled(bool checked) -> void;
+  auto mapTuples() -> QVector<ImportarXML::ProdutoEstoque>;
+  auto on_checkBoxSemLote_toggled(const bool checked) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;
   auto parear() -> bool;
-  auto percorrerXml(XML &xml, const QStandardItem *item) -> bool;
+  auto percorrerXml(XML &xml) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
-  auto produtoCompativel(const int rowCompra, const QString &codComercialEstoque) -> bool;
-  auto reparear(const QModelIndex &index) -> bool;
-  auto salvarLoteNaVenda() -> bool;
+  auto reparear(const QModelIndex &index) -> void;
+  auto salvarDadosCompra() -> bool;
+  auto salvarDadosVenda() -> bool;
+  auto setConnections() -> void;
   auto setupTables() -> void;
-  auto verificaCNPJ(const XML &xml) -> bool;
-  auto verificaExiste(const XML &xml) -> bool;
-  auto verificaValido(const XML &xml) -> bool;
+  auto unsetConnections() -> void;
+  auto updateTableData(const QModelIndex &topLeft) -> void;
+  auto verificaExiste(const QString &chaveAcesso) -> bool;
   auto verifyFields() -> bool;
 };
-
-#endif // IMPORTARXML_H

@@ -1,10 +1,5 @@
-#include <QDate>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QSqlError>
+#include "widgetcompragerar.h"
+#include "ui_widgetcompragerar.h"
 
 #include "application.h"
 #include "excel.h"
@@ -12,10 +7,16 @@
 #include "reaisdelegate.h"
 #include "sendmail.h"
 #include "sql.h"
-#include "ui_widgetcompragerar.h"
 #include "usersession.h"
-#include "widgetcompragerar.h"
 #include "xlsxdocument.h"
+
+#include <QDate>
+#include <QDebug>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSqlError>
 
 WidgetCompraGerar::WidgetCompraGerar(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraGerar) {
   ui->setupUi(this);
@@ -31,7 +32,7 @@ void WidgetCompraGerar::calcularPreco() {
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  for (const auto &item : list) { preco += modelProdutos.data(item.row(), "preco").toDouble(); }
+  for (const auto &index : list) { preco += modelProdutos.data(index.row(), "preco").toDouble(); }
 
   ui->doubleSpinBox->setValue(preco);
 }
@@ -47,7 +48,6 @@ void WidgetCompraGerar::setupTables() {
 
   modelProdutos.setTable("pedido_fornecedor_has_produto");
 
-  modelProdutos.setHeaderData("selecionado", "");
   modelProdutos.setHeaderData("idVenda", "Código");
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("descricao", "Descrição");
@@ -63,7 +63,6 @@ void WidgetCompraGerar::setupTables() {
   modelProdutos.setHeaderData("codComercial", "Cód. Com.");
   modelProdutos.setHeaderData("codBarras", "Cód. Bar.");
   modelProdutos.setHeaderData("dataPrevCompra", "Prev. Compra");
-  modelProdutos.setHeaderData("dataCompra", "Data Compra");
   modelProdutos.setHeaderData("obs", "Obs.");
   modelProdutos.setHeaderData("status", "Status");
 
@@ -72,15 +71,16 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
   ui->tableProdutos->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 
+  ui->tableProdutos->hideColumn("idRelacionado");
   ui->tableProdutos->hideColumn("ordemRepresentacao");
-  ui->tableProdutos->hideColumn("idVendaProduto");
+  ui->tableProdutos->hideColumn("idVendaProduto1");
+  ui->tableProdutos->hideColumn("idVendaProduto2");
   ui->tableProdutos->hideColumn("statusFinanceiro");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("ordemCompra");
   ui->tableProdutos->hideColumn("idCompra");
-  ui->tableProdutos->hideColumn("quantConsumida");
   ui->tableProdutos->hideColumn("quantUpd");
-  ui->tableProdutos->hideColumn("idPedido");
+  ui->tableProdutos->hideColumn("idPedido1");
   ui->tableProdutos->hideColumn("idProduto");
   ui->tableProdutos->hideColumn("dataRealCompra");
   ui->tableProdutos->hideColumn("dataPrevConf");
@@ -100,10 +100,12 @@ void WidgetCompraGerar::setupTables() {
 }
 
 void WidgetCompraGerar::setConnections() {
-  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked);
-  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked);
-  connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked);
-  connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked);
+  const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
+
+  connect(ui->checkBoxMarcarTodos, &QCheckBox::clicked, this, &WidgetCompraGerar::on_checkBoxMarcarTodos_clicked, connectionType);
+  connect(ui->pushButtonCancelarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonCancelarCompra_clicked, connectionType);
+  connect(ui->pushButtonGerarCompra, &QPushButton::clicked, this, &WidgetCompraGerar::on_pushButtonGerarCompra_clicked, connectionType);
+  connect(ui->tableResumo, &TableView::clicked, this, &WidgetCompraGerar::on_tableResumo_clicked, connectionType);
 }
 
 void WidgetCompraGerar::updateTables() {
@@ -128,44 +130,61 @@ void WidgetCompraGerar::updateTables() {
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDateTime &dataCompra, const QDateTime &dataPrevista, const int oc) {
+bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate &dataCompra, const QDate &dataPrevista, const int ordemCompra) {
   QSqlQuery queryId;
 
   if (not queryId.exec("SELECT COALESCE(MAX(idCompra), 0) + 1 AS idCompra FROM pedido_fornecedor_has_produto") or not queryId.first()) {
-    return qApp->enqueueError(false, "Erro buscando idCompra: " + queryId.lastError().text(), this);
+    return qApp->enqueueException(false, "Erro buscando idCompra: " + queryId.lastError().text(), this);
   }
 
   const int idCompra = queryId.value("idCompra").toInt();
 
-  QVector<int> ids;
+  QSqlQuery queryVenda;
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE status = 'INICIADO' AND "
+                     "idVendaProdutoFK = :idVendaProduto1");
+
+  QSqlQuery queryCompra1;
+  queryCompra1.prepare("UPDATE pedido_fornecedor_has_produto set STATUS = 'EM COMPRA', idCompra = :idCompra, ordemCompra = :ordemCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
+                       ":dataPrevConf WHERE status = 'PENDENTE' AND idPedido1 = :idPedido1");
+
+  QSqlQuery queryCompra2;
+  queryCompra2.prepare("UPDATE pedido_fornecedor_has_produto2 set STATUS = 'EM COMPRA', idCompra = :idCompra, ordemCompra = :ordemCompra, dataRealCompra = :dataRealCompra, dataPrevConf = "
+                       ":dataPrevConf WHERE status = 'PENDENTE' AND idPedidoFK = :idPedido1");
 
   for (const auto &index : list) {
-    const auto row = index.row();
-
-    if (not modelProdutos.setData(row, "status", "EM COMPRA")) { return false; }
-    if (not modelProdutos.setData(row, "idCompra", idCompra)) { return false; }
-    if (not modelProdutos.setData(row, "ordemCompra", oc)) { return false; }
-    if (not modelProdutos.setData(row, "dataRealCompra", dataCompra)) { return false; }
-    if (not modelProdutos.setData(row, "dataPrevConf", dataPrevista)) { return false; }
-
     // salvar status na venda
 
-    if (modelProdutos.data(row, "idVendaProduto").toInt() != 0) { ids << modelProdutos.data(row, "idVendaProduto").toInt(); }
-  }
+    const int idVendaProduto1 = modelProdutos.data(index.row(), "idVendaProduto1").toInt();
+    const int idPedido1 = modelProdutos.data(index.row(), "idPedido1").toInt();
 
-  if (not modelProdutos.submitAll()) { return false; }
+    if (idVendaProduto1 != 0) {
+      queryVenda.bindValue(":idCompra", idCompra);
+      queryVenda.bindValue(":dataRealCompra", dataCompra);
+      queryVenda.bindValue(":dataPrevConf", dataPrevista);
+      queryVenda.bindValue(":idVendaProduto1", idVendaProduto1);
 
-  QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto SET status = 'EM COMPRA', idCompra = :idCompra, dataRealCompra = :dataRealCompra, dataPrevConf = :dataPrevConf WHERE idVendaProduto = :idVendaProduto "
-                     "AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
+      if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando status da venda: " + queryVenda.lastError().text(), this); }
+    }
 
-  for (const auto idVendaProduto : ids) {
-    queryVenda.bindValue(":idCompra", idCompra);
-    queryVenda.bindValue(":dataRealCompra", dataCompra);
-    queryVenda.bindValue(":dataPrevConf", dataPrevista);
-    queryVenda.bindValue(":idVendaProduto", idVendaProduto);
+    // ---------------------------------------------------------
 
-    if (not queryVenda.exec()) { return qApp->enqueueError(false, "Erro atualizando status da venda: " + queryVenda.lastError().text(), this); }
+    queryCompra1.bindValue(":idCompra", idCompra);
+    queryCompra1.bindValue(":ordemCompra", ordemCompra);
+    queryCompra1.bindValue(":dataRealCompra", dataCompra);
+    queryCompra1.bindValue(":dataPrevConf", dataPrevista);
+    queryCompra1.bindValue(":idPedido1", idPedido1);
+
+    if (not queryCompra1.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra1.lastError().text(), this); }
+
+    // ---------------------------------------------------------
+
+    queryCompra2.bindValue(":idCompra", idCompra);
+    queryCompra2.bindValue(":ordemCompra", ordemCompra);
+    queryCompra2.bindValue(":dataRealCompra", dataCompra);
+    queryCompra2.bindValue(":dataPrevConf", dataPrevista);
+    queryCompra2.bindValue(":idPedido1", idPedido1);
+
+    if (not queryCompra2.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra2.lastError().text(), this); }
   }
 
   return true;
@@ -213,15 +232,15 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (not qApp->startTransaction()) { return; }
-
   QStringList idVendas;
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
+  if (not qApp->startTransaction("WidgetCompraGerar::on_pushButtonGerarCompra")) { return; }
+
   if (not gerarCompra(list, dataCompra, dataPrevista, oc)) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -231,6 +250,8 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
 
   updateTables();
   qApp->enqueueInformation("Compra gerada com sucesso!", this);
+
+  emit finished();
 }
 
 void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &anexo) {
@@ -246,12 +267,12 @@ void WidgetCompraGerar::enviarEmail(const QString &razaoSocial, const QString &a
   }
 }
 
-std::optional<std::tuple<QDateTime, QDateTime>> WidgetCompraGerar::getDates(const QList<QModelIndex> &list) {
+std::optional<std::tuple<QDate, QDate>> WidgetCompraGerar::getDates(const QList<QModelIndex> &list) {
   QStringList ids;
 
-  for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido").toString(); }
+  for (const auto &index : list) { ids << modelProdutos.data(index.row(), "idPedido1").toString(); }
 
-  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra);
+  InputDialogProduto inputDlg(InputDialogProduto::Tipo::GerarCompra, this);
   if (not inputDlg.setFilter(ids)) { return {}; }
 
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return {}; }
@@ -263,12 +284,12 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
   QSqlQuery queryOC;
 
   if (not queryOC.exec("SELECT COALESCE(MAX(ordemCompra), 0) + 1 AS ordemCompra FROM pedido_fornecedor_has_produto") or not queryOC.first()) {
-    qApp->enqueueError("Erro buscando próximo O.C.!", this);
+    qApp->enqueueException("Erro buscando próximo O.C.!", this);
     return {};
   }
 
   bool ok;
-  int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 99999, 1, &ok);
+  int oc = QInputDialog::getInt(this, "OC", "Qual a OC?", queryOC.value("ordemCompra").toInt(), 0, 999999, 1, &ok);
   if (not ok) { return {}; }
 
   QSqlQuery query2;
@@ -278,7 +299,7 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
     query2.bindValue(":ordemCompra", oc);
 
     if (not query2.exec()) {
-      qApp->enqueueError("Erro buscando O.C.!", this);
+      qApp->enqueueException("Erro buscando O.C.!", this);
       return {};
     }
 
@@ -293,11 +314,9 @@ std::optional<int> WidgetCompraGerar::getOrdemCompra() {
 
       if (choice == QMessageBox::Yes) { break; }
 
-      if (choice != QMessageBox::Yes) { // TODO: V547 http://www.viva64.com/en/V547 Expression 'choice != QMessageBox::Yes' is always true.      if (choice != QMessageBox::Yes) {
-        bool ok2;
-        oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 99999, 1, &ok2);
-        if (not ok2) { return {}; }
-      }
+      bool ok2;
+      oc = QInputDialog::getInt(this, "OC", "Qual a OC?", query2.value("ordemCompra").toInt(), 0, 999999, 1, &ok2);
+      if (not ok2) { return {}; }
     }
   }
 
@@ -313,7 +332,7 @@ std::optional<bool> WidgetCompraGerar::verificaRepresentacao(const QList<QModelI
   query.bindValue(":razaoSocial", fornecedor);
 
   if (not query.exec() or not query.first()) {
-    qApp->enqueueError("Erro buscando dados do fornecedor: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando dados do fornecedor: " + query.lastError().text(), this);
     return {};
   }
 
@@ -349,7 +368,9 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
     Excel excel(idVenda, Excel::Tipo::Venda);
     const QString representacao = "OC " + QString::number(oc) + " " + idVenda + " " + fornecedor;
+
     if (not excel.gerarExcel(oc, true, representacao)) { return {}; }
+
     return excel.getFileName();
   }
 
@@ -359,14 +380,14 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   idVendas.removeDuplicates();
 
-  const QString idVenda = idVendas.join(", ");
+  const QString idVenda = (fornecedor == "QUARTZOBRAS") ? "" : idVendas.join(", ");
 
   const QString arquivoModelo = "modelo compras.xlsx";
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
   if (not modelo.exists()) {
-    qApp->enqueueError("Não encontrou o modelo do Excel!", this);
+    qApp->enqueueException("Não encontrou o modelo do Excel!", this);
     return {};
   }
 
@@ -374,12 +395,12 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   if (not folderKey) { return {}; }
 
-  const QString fileName = folderKey.value().toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
+  const QString fileName = folderKey->toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   QFile file(fileName);
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueError("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this);
+    qApp->enqueueException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this);
     return {};
   }
 
@@ -390,7 +411,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
   if (not queryFornecedor.exec()) {
-    qApp->enqueueError("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text(), this);
+    qApp->enqueueException("Erro buscando contato do fornecedor: " + queryFornecedor.lastError().text(), this);
     return {};
   }
 
@@ -404,7 +425,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
   xlsx.write("E5", idVenda);
   xlsx.write("E6", fornecedor);
   xlsx.write("E7", queryFornecedor.first() ? queryFornecedor.value("contatoNome").toString() : "");
-  xlsx.write("E8", QDateTime::currentDateTime().toString("dddd dd 'de' MMMM 'de' yyyy hh:mm"));
+  xlsx.write("E8", qApp->serverDateTime().toString("dddd dd 'de' MMMM 'de' yyyy hh:mm"));
 
   double total = 0;
   int excelRow = 0;
@@ -441,10 +462,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   for (int row = list.size() + 13; row < 200; ++row) { xlsx.setRowHidden(row, true); }
 
-  if (not xlsx.saveAs(fileName)) {
-    qApp->enqueueError("Ocorreu algum erro ao salvar o arquivo.", this);
-    return {};
-  }
+  if (not xlsx.saveAs(fileName)) { return {}; }
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como: " + fileName, this);
@@ -463,20 +481,35 @@ void WidgetCompraGerar::on_tableResumo_clicked(const QModelIndex &index) {
 }
 
 bool WidgetCompraGerar::cancelar(const QModelIndexList &list) {
-  QSqlQuery query;
-  query.prepare(
-      "UPDATE venda_has_produto SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE idVendaProduto = :idVendaProduto "
-      "AND status = 'INICIADO'");
+  QSqlQuery query1;
+  query1.prepare("UPDATE venda_has_produto2 SET status = CASE WHEN reposicaoEntrega THEN 'REPO. ENTREGA' WHEN reposicaoReceb THEN 'REPO. RECEB.' ELSE 'PENDENTE' END WHERE status = 'INICIADO' AND "
+                 "idVendaProdutoFK = :idVendaProduto1");
+
+  QSqlQuery query2;
+  query2.prepare("UPDATE pedido_fornecedor_has_produto SET status = 'CANCELADO' WHERE idPedido1 = :idPedido1");
+
+  QSqlQuery query3;
+  query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO' WHERE idPedidoFK = :idPedidoFK");
 
   for (const auto &index : list) {
-    if (not modelProdutos.setData(index.row(), "status", "CANCELADO")) { return false; }
+    query1.bindValue(":idVendaProduto1", modelProdutos.data(index.row(), "idVendaProduto1"));
 
-    query.bindValue(":idVendaProduto", modelProdutos.data(index.row(), "idVendaProduto"));
+    if (not query1.exec()) { return qApp->enqueueException(false, "Erro voltando status do produto: " + query1.lastError().text(), this); }
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro voltando status do produto: " + query.lastError().text(), this); }
+    // ---------------------------------------------------------
+
+    query2.bindValue(":idPedido1", modelProdutos.data(index.row(), "idPedido1"));
+
+    if (not query2.exec()) { return qApp->enqueueException(false, "Erro cancelando compra: " + query2.lastError().text(), this); }
+
+    // ---------------------------------------------------------
+
+    query3.bindValue(":idPedidoFK", modelProdutos.data(index.row(), "idPedido1"));
+
+    if (not query3.exec()) { return qApp->enqueueException(false, "Erro cancelando compra: " + query3.lastError().text(), this); }
   }
 
-  return modelProdutos.submitAll();
+  return true;
 }
 
 void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
@@ -494,11 +527,11 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
   for (const auto &index : list) { idVendas << modelProdutos.data(index.row(), "idVenda").toString(); }
 
-  if (not qApp->startTransaction()) { return; }
+  if (not qApp->startTransaction("WidgetCompraGerar::on_pushButtonCancelarCompra")) { return; }
 
   if (not cancelar(list)) { return qApp->rollbackTransaction(); }
 
-  if (not Sql::updateVendaStatus(idVendas)) { return; }
+  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -508,6 +541,7 @@ void WidgetCompraGerar::on_pushButtonCancelarCompra_clicked() {
 
 // TODO: 2vincular compras geradas com loja selecionada em configuracoes
 // TODO: 5colocar tamanho minimo da tabela da esquerda para mostrar todas as colunas
-// TODO: avulso
 // TODO: no caso da quartzobras se for mais de um pedido deixar o campo 'PEDIDO DE VENDA NR.' vazio
 // TODO: no caso da quartzobras ordenar por cod. produto em vez de por pedido
+
+// TODO: ao confirmar email voltar tela para pendentes

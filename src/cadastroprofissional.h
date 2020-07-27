@@ -1,5 +1,4 @@
-#ifndef CADASTROPROFISSIONAL_H
-#define CADASTROPROFISSIONAL_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -12,7 +11,7 @@ class CadastroProfissional final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroProfissional(QWidget *parent = nullptr);
+  explicit CadastroProfissional(QWidget *parent);
   ~CadastroProfissional();
 
 private:
@@ -22,7 +21,7 @@ private:
   Ui::CadastroProfissional *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
@@ -53,8 +52,7 @@ private:
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
+  auto verificaVinculo() -> std::optional<bool>;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROPROFISSIONAL_H

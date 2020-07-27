@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QNetworkReply>
@@ -13,7 +12,8 @@ class MainWindow final : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(QWidget *parent);
+  explicit MainWindow();
   ~MainWindow();
   auto updateTables() -> void;
 
@@ -23,7 +23,6 @@ private:
   QPushButton *pushButtonStatus;
   // methods
   auto event(QEvent *event) -> bool;
-  //  auto gerarEnviarRelatorio() -> void;
   auto on_actionCadastrarCliente_triggered() -> void;
   auto on_actionCadastrarFornecedor_triggered() -> void;
   auto on_actionCadastrarProdutos_triggered() -> void;
@@ -35,16 +34,18 @@ private:
   auto on_actionConfiguracoes_triggered() -> void;
   auto on_actionCriarOrcamento_triggered() -> void;
   auto on_actionEscuro_triggered() -> void;
-  auto on_actionEstoque_triggered() -> void;
   auto on_actionGerenciar_Lojas_triggered() -> void;
+  auto on_actionGerenciar_NCMs_triggered() -> void;
+  auto on_actionGerenciar_Pagamentos_triggered() -> void;
   auto on_actionGerenciar_Transportadoras_triggered() -> void;
   auto on_actionGerenciar_preco_estoque_triggered() -> void;
+  auto on_actionGerenciar_staccatoOff_triggered() -> void;
+  auto on_actionImportar_tabela_IBPT_triggered() -> void;
   auto on_actionProdutos_triggered() -> void;
   auto on_actionPromocao_triggered() -> void;
   auto on_actionSobre_triggered() -> void;
   auto on_tabWidget_currentChanged(const int) -> void;
+  auto reconnectDb() -> void;
   auto resetTables() -> void;
-  auto verifyDb() -> void;
+  auto verifyDb(const bool conectado) -> void;
 };
-
-#endif // MAINWINDOW_H

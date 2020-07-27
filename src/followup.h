@@ -1,9 +1,8 @@
-#ifndef FOLLOWUP_H
-#define FOLLOWUP_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class FollowUp;
@@ -14,14 +13,15 @@ class FollowUp final : public QDialog {
 
 public:
   enum class Tipo { Orcamento, Venda };
-  explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent = nullptr);
+  explicit FollowUp(const QString &id, const Tipo tipo, QWidget *parent);
   ~FollowUp();
 
 private:
   // attributes
   const QString id;
   const Tipo tipo;
-  SqlRelationalTableModel modelViewFollowup;
+  SqlTableModel modelViewFollowup;
+  SqlTableModel modelOrcamento;
   Ui::FollowUp *ui;
   // methods
   auto on_dateFollowup_dateChanged(const QDate &date) -> void;
@@ -30,5 +30,3 @@ private:
   auto setupTables() -> void;
   auto verifyFields() -> bool;
 };
-
-#endif // FOLLOWUP_H

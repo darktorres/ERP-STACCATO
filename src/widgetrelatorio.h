@@ -1,9 +1,8 @@
-#ifndef WIDGETRELATORIO_H
-#define WIDGETRELATORIO_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetRelatorio;
@@ -13,7 +12,7 @@ class WidgetRelatorio final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetRelatorio(QWidget *parent = nullptr);
+  explicit WidgetRelatorio(QWidget *parent);
   ~WidgetRelatorio();
   auto resetTables() -> void;
   auto updateTables() -> void;
@@ -22,10 +21,10 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelOrcamento;
-  SqlRelationalTableModel modelViewRelatorio;
-  SqlRelationalTableModel modelViewRelatorioLoja;
-  SqlRelationalTableModel modelViewRelatorioVendedor;
+  SqlTableModel modelOrcamento;
+  SqlTableModel modelViewRelatorio;
+  SqlTableModel modelViewRelatorioLoja;
+  SqlTableModel modelViewRelatorioVendedor;
   Ui::WidgetRelatorio *ui;
   // methods
   auto calcularTotalGeral() -> void;
@@ -40,5 +39,3 @@ private:
   auto setResumoOrcamento() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETRELATORIO_H

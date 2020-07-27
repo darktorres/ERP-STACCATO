@@ -1,5 +1,4 @@
-#ifndef CADASTRARUSUARIO_H
-#define CADASTRARUSUARIO_H
+#pragma once
 
 #include "registerdialog.h"
 #include "searchdialog.h"
@@ -12,18 +11,19 @@ class CadastroUsuario final : public RegisterDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroUsuario(QWidget *parent = nullptr);
+  explicit CadastroUsuario(QWidget *parent);
   ~CadastroUsuario();
   auto modificarUsuario() -> void;
 
 private:
   // attributes
   SearchDialog *sdUsuario;
-  SqlRelationalTableModel modelPermissoes;
+  SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
   auto cadastrar() -> bool final;
   auto clearFields() -> void final;
+  auto criarUsuarioMySQL() -> void;
   auto fillCombobox() -> void;
   auto on_comboBoxTipo_currentTextChanged(const QString &text) -> void;
   auto on_lineEditUser_textEdited(const QString &text) -> void;
@@ -41,5 +41,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTRARUSUARIO_H

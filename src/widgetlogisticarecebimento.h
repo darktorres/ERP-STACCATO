@@ -1,9 +1,8 @@
-#ifndef WIDGETLOGISTICARECEBIMENTO_H
-#define WIDGETLOGISTICARECEBIMENTO_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaRecebimento;
@@ -13,7 +12,7 @@ class WidgetLogisticaRecebimento final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaRecebimento(QWidget *parent = nullptr);
+  explicit WidgetLogisticaRecebimento(QWidget *parent);
   ~WidgetLogisticaRecebimento();
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
@@ -23,7 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewRecebimento;
+  SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
   auto cancelar(const QModelIndexList &list) -> bool;
@@ -34,10 +33,8 @@ private:
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDateTime &dataReceb, const QString &recebidoPor) -> bool;
+  auto processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) -> bool;
   auto reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICARECEBIMENTO_H

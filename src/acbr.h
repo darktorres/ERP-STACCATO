@@ -1,5 +1,4 @@
-#ifndef ACBR_H
-#define ACBR_H
+#pragma once
 
 #include <QObject>
 #include <QProgressDialog>
@@ -9,7 +8,8 @@ class ACBr final : public QObject {
   Q_OBJECT
 
 public:
-  explicit ACBr(QObject *parent = nullptr);
+  explicit ACBr(QObject *parent);
+  explicit ACBr();
   ~ACBr() = default;
   auto consultarNFe(const int idNFe) -> std::optional<std::tuple<QString, QString>>;
   auto enviarComando(const QString &comando, const bool local = false) -> std::optional<QString>;
@@ -21,6 +21,7 @@ private:
   // attributes
   QTcpSocket socket;
   const QString welcome = "Esperando por comandos.\x03";
+  QString lastHost;
   QString resposta;
   bool pronto = false;
   bool conectado = false;
@@ -36,5 +37,3 @@ private:
   auto setDisconnected() -> void;
   auto write() -> void;
 };
-
-#endif // ACBR_H

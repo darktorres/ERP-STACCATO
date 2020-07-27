@@ -1,9 +1,8 @@
-#ifndef PRECOESTOQUE_H
-#define PRECOESTOQUE_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class PrecoEstoque;
@@ -13,12 +12,12 @@ class PrecoEstoque final : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PrecoEstoque(QWidget *parent = nullptr);
+  explicit PrecoEstoque(QWidget *parent);
   ~PrecoEstoque();
 
 private:
   // attributes
-  SqlRelationalTableModel modelProduto;
+  SqlTableModel modelProduto;
   Ui::PrecoEstoque *ui;
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;
@@ -26,5 +25,3 @@ private:
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;
 };
-
-#endif // PRECOESTOQUE_H

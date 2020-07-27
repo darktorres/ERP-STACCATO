@@ -1,5 +1,4 @@
-#ifndef CADASTROLOJA_H
-#define CADASTROLOJA_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -12,27 +11,22 @@ class CadastroLoja final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroLoja(QWidget *parent = nullptr);
+  explicit CadastroLoja(QWidget *parent);
   ~CadastroLoja();
 
 private:
   // attributes
+  QList<QSqlRecord> backupConta;
+  // TODO: make backup for Pagamentos/Taxas records
   int currentRowConta = -1;
   QDataWidgetMapper mapperConta;
-  QDataWidgetMapper mapperPagamento;
   SearchDialog *sdLoja;
-  SqlRelationalTableModel modelAssocia1;
-  SqlRelationalTableModel modelAssocia2;
-  SqlRelationalTableModel modelConta;
-  SqlRelationalTableModel modelPagamentos;
-  SqlRelationalTableModel modelTaxas;
+  SqlTableModel modelConta;
   Ui::CadastroLoja *ui;
   // methods
-  auto adicionarPagamento() -> bool;
-  auto atualizarPagamento() -> bool;
   auto cadastrar() -> bool final;
-  auto cadastrarConta(const Tipo tipo = Tipo::Cadastrar) -> bool;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarConta(const Tipo tipoConta = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearConta() -> void;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
@@ -43,27 +37,19 @@ private:
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
-  auto on_pushButtonAdicionaAssociacao_clicked() -> void;
   auto on_pushButtonAdicionarConta_clicked() -> void;
   auto on_pushButtonAdicionarEnd_clicked() -> void;
-  auto on_pushButtonAdicionarPagamento_clicked() -> void;
   auto on_pushButtonAtualizarConta_clicked() -> void;
   auto on_pushButtonAtualizarEnd_clicked() -> void;
-  auto on_pushButtonAtualizarPagamento_clicked() -> void;
-  auto on_pushButtonAtualizarTaxas_clicked() -> void;
   auto on_pushButtonAtualizar_clicked() -> void;
   auto on_pushButtonBuscar_clicked() -> void;
   auto on_pushButtonCadastrar_clicked() -> void;
-  auto on_pushButtonLimparSelecao_clicked() -> void;
   auto on_pushButtonNovoCad_clicked() -> void;
-  auto on_pushButtonRemoveAssociacao_clicked() -> void;
   auto on_pushButtonRemoverConta_clicked() -> void;
   auto on_pushButtonRemoverEnd_clicked() -> void;
-  auto on_pushButtonRemoverPagamento_clicked() -> void;
   auto on_pushButtonRemover_clicked() -> void;
   auto on_tableConta_clicked(const QModelIndex &index) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
-  auto on_tablePagamentos_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
   auto setupMapper() -> void final;
@@ -74,5 +60,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROLOJA_H

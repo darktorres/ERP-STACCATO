@@ -1,13 +1,12 @@
-#ifndef COMBOBOXDELEGATE_H
-#define COMBOBOXDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
 class ComboBoxDelegate final : public QStyledItemDelegate {
 
 public:
-  enum class Tipo { Status, StatusReceber, StatusPagar, Conta, Pagamento, Grupo, ST };
-  explicit ComboBoxDelegate(const Tipo tipo, QObject *parent = nullptr);
+  enum class Tipo { Receber, Pagar, Conta, Pagamento, Grupo, ST };
+  explicit ComboBoxDelegate(const Tipo tipo, QObject *parent);
   ~ComboBoxDelegate() = default;
 
 private:
@@ -19,5 +18,3 @@ private:
   auto setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const -> void final;
   auto updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const -> void final;
 };
-
-#endif // COMBOBOXDELEGATE_H

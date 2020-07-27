@@ -1,18 +1,19 @@
+#include "cadastroproduto.h"
+#include "ui_cadastroproduto.h"
+
+#include "application.h"
+#include "cadastrofornecedor.h"
+#include "usersession.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QSqlError>
 
-#include "application.h"
-#include "cadastrofornecedor.h"
-#include "cadastroproduto.h"
-#include "ui_cadastroproduto.h"
-#include "usersession.h"
-
 CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "idProduto", parent), ui(new Ui::CadastroProduto) {
   ui->setupUi(this);
 
-  connect(ui->doubleSpinBoxCusto, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
-  connect(ui->doubleSpinBoxVenda, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
+  connect(ui->doubleSpinBoxCusto, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxCusto_valueChanged);
+  connect(ui->doubleSpinBoxVenda, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &CadastroProduto::on_doubleSpinBoxVenda_valueChanged);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonAtualizar_clicked);
   connect(ui->pushButtonCadastrar, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonCadastrar_clicked);
   connect(ui->pushButtonNovoCad, &QPushButton::clicked, this, &CadastroProduto::on_pushButtonNovoCad_clicked);
@@ -34,13 +35,13 @@ CadastroProduto::CadastroProduto(QWidget *parent) : RegisterDialog("produto", "i
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  sdProduto = SearchDialog::produto(true, true, true, this);
+  sdProduto = SearchDialog::produto(true, true, true, false, this);
   connect(sdProduto, &SearchDialog::itemSelected, this, &CadastroProduto::viewRegisterById);
   connect(ui->pushButtonBuscar, &QAbstractButton::clicked, sdProduto, &SearchDialog::show);
 
   ui->itemBoxFornecedor->setRegisterDialog(new CadastroFornecedor(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->pushButtonRemover->setDisabled(true); }
+  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->pushButtonRemover->setDisabled(true); }
 
   ui->groupBox->hide();
   ui->groupBox_4->hide();
@@ -84,7 +85,7 @@ bool CadastroProduto::verifyFields() {
   const auto children = findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
-    if (not verifyRequiredField(line)) { return false; }
+    if (not verifyRequiredField(*line)) { return false; }
   }
 
   if (ui->comboBoxUn->currentText().isEmpty()) {
@@ -123,7 +124,7 @@ bool CadastroProduto::verifyFields() {
     query.bindValue(":fornecedor", ui->itemBoxFornecedor->text());
     query.bindValue(":codComercial", ui->lineEditCodComer->text());
 
-    if (not query.exec()) { return qApp->enqueueError(false, "Erro verificando se produto já cadastrado!", this); }
+    if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se produto já cadastrado!", this); }
 
     if (query.first()) { return qApp->enqueueError(false, "Código comercial já cadastrado!", this); }
   }
@@ -177,7 +178,7 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
   if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) { return false; }
   if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
-  if (not setData("Fornecedor", ui->itemBoxFornecedor->text())) { return false; }
+  if (not setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first())) { return false; }
   if (not setData("icms", ui->lineEditICMS->text())) { return false; }
   if (not setData("idFornecedor", ui->itemBoxFornecedor->getId())) { return false; }
   if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }
@@ -193,6 +194,13 @@ bool CadastroProduto::savingProcedures() {
   if (not setData("st", ui->doubleSpinBoxST->value())) { return false; }
   if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) { return false; }
   if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) { return false; }
+
+  const QString un = ui->comboBoxUn->currentText();
+  const double m2cx = ui->doubleSpinBoxM2Cx->value();
+  const double pccx = ui->doubleSpinBoxPcCx->value();
+  const double quantCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
+
+  if (not setData("quantCaixa", quantCaixa)) { return false; }
   if (not setData("un", ui->comboBoxUn->currentText())) { return false; }
   if (not setData("validade", ui->dateEditValidade->date())) { return false; }
 
@@ -200,12 +208,12 @@ bool CadastroProduto::savingProcedures() {
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueError(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
 
   const bool representacao = query.value("representacao").toBool();
 
   if (not setData("representacao", representacao)) { return false; }
-  if (not setData("descontinuado", ui->dateEditValidade->date() < QDate::currentDate())) { return false; }
+  if (not setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate())) { return false; }
 
   return true;
 }
@@ -228,26 +236,37 @@ void CadastroProduto::calcularMarkup() {
 }
 
 bool CadastroProduto::cadastrar() {
-  if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
+  if (not qApp->startTransaction("CadastroProduto::cadastrar")) { return false; }
 
-  if (not savingProcedures()) { return false; }
+  const bool success = [&] {
+    if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-  if (not columnsToUpper(model, currentRow)) { return false; }
+    if (not savingProcedures()) { return false; }
 
-  if (not model.submitAll()) { return false; }
+    if (not model.submitAll()) { return false; }
 
-  primaryId = (tipo == Tipo::Atualizar) ? data(currentRow, primaryKey).toString() : model.query().lastInsertId().toString();
+    primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-  if (primaryId.isEmpty()) { return qApp->enqueueError(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
 
-  return true;
+    return true;
+  }();
+
+  if (success) {
+    if (not qApp->endTransaction()) { return false; }
+  } else {
+    qApp->rollbackTransaction();
+    void(model.select());
+  }
+
+  return success;
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos
-// REFAC: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
+// TODO: 5verificar se estou usando corretamente a tabela 'produto_has_preco'
 // me parece que ela só é preenchida na importacao de tabela e nao na modificacao manual de produtos
-// REFAC: 4verificar se posso remover 'un2' de produto
+// TODO: 4verificar se posso remover 'un2' de produto
 // TODO: colocar logica para trabalhar a tabela produto_has_preco para que os produtos nao sejam descontinuados com validade ativa
 // TODO: validar entrada do campo icms para apenas numeros
-// REFAC: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
+// TODO: verificar para que era usado o campo 'un2' e remove-lo caso nao seja mais usado
 // TODO: verificar se vendedor deve mesmo poder alterar cadastro do produto

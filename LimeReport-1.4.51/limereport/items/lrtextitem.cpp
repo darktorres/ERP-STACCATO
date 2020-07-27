@@ -33,7 +33,7 @@
 #include <QScriptEngine>
 #include <QTextLayout>
 #include <QtGui>
-#include <math.h>
+#include <cmath>
 
 #include "lrdatasourcemanager.h"
 #include "lrdesignelementsfactory.h"
@@ -108,8 +108,8 @@ void TextItem::processPopUpAction(QAction *action) {
 }
 
 void TextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *style, QWidget *widget) {
-  Q_UNUSED(widget);
-  Q_UNUSED(style);
+  Q_UNUSED(widget)
+  Q_UNUSED(style)
 
   TextPtr text = textDocument();
 
@@ -347,7 +347,7 @@ QString TextItem::formatNumber(const double value) {
   QString str = QString::number(value);
 
   if (m_format.contains("%")) {
-    str.sprintf(m_format.toStdString().c_str(), value);
+    //    str.asprintf(m_format.toStdString().c_str(), value);
     str = str.replace(",", QLocale::system().groupSeparator());
     str = str.replace(".", QLocale::system().decimalPoint());
   }
@@ -373,19 +373,15 @@ QString TextItem::formatFieldValue() {
       value = (bOk ? QVariant(dbl) : m_varValue);
     }
       [[fallthrough]];
-    default:
-      break;
+    default: break;
     }
   }
 
   switch (value.type()) {
   case QVariant::Date:
-  case QVariant::DateTime:
-    return formatDateTime(value.toDateTime());
-  case QVariant::Double:
-    return formatNumber(value.toDouble());
-  default:
-    return value.toString();
+  case QVariant::DateTime: return formatDateTime(value.toDateTime());
+  case QVariant::Double: return formatNumber(value.toDouble());
+  default: return value.toString();
   }
 }
 
@@ -581,9 +577,7 @@ void TextItem::expandContent(DataSourceManager *dataManager, RenderPass pass) {
     context = expandScripts(context, dataManager);
     context = expandDataFields(context, expandType, dataManager);
     break;
-  case SecondPass:;
-    context = expandUserVariables(context, pass, expandType, dataManager);
-    context = expandScripts(context, dataManager);
+  case SecondPass:; context = expandUserVariables(context, pass, expandType, dataManager); context = expandScripts(context, dataManager);
   }
 
   if (expandType == NoEscapeSymbols && !m_varValue.isNull() && m_valueType != Default) {

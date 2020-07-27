@@ -1,5 +1,4 @@
-#ifndef CADASTROFORNECEDOR_H
-#define CADASTROFORNECEDOR_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -13,7 +12,7 @@ class CadastroFornecedor final : public RegisterAddressDialog {
 
 public:
   enum class Especialidade { Revestimentos = 1, Loucas_Metais = 2, Acessorios = 3, Insumos = 4, Servicos = 5 };
-  explicit CadastroFornecedor(QWidget *parent = nullptr);
+  explicit CadastroFornecedor(QWidget *parent);
   ~CadastroFornecedor() final;
 
 private:
@@ -23,7 +22,7 @@ private:
   // methods
   auto ajustarValidade(const int novaValidade) -> bool;
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
@@ -51,5 +50,3 @@ private:
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };
-
-#endif // CADASTROFORNECEDOR_H

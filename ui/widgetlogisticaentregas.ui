@@ -67,6 +67,16 @@
        </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pushButtonGerarNFe">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Gerar NFe</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="4">
           <widget class="QPushButton" name="pushButtonImprimirDanfe">
            <property name="enabled">
@@ -97,16 +107,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="5">
-          <widget class="QPushButton" name="pushButtonReagendar">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Reagendar</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="6">
           <widget class="QPushButton" name="pushButtonCancelarEntrega">
            <property name="enabled">
@@ -117,13 +117,13 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="pushButtonGerarNFeEntregar">
+         <item row="0" column="5">
+          <widget class="QPushButton" name="pushButtonReagendar">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Gerar NFe</string>
+            <string>Reagendar</string>
            </property>
           </widget>
          </item>

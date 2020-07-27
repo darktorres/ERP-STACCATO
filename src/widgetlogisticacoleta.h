@@ -1,9 +1,8 @@
-#ifndef WIDGETLOGISTICACOLETA_H
-#define WIDGETLOGISTICACOLETA_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaColeta;
@@ -13,7 +12,7 @@ class WidgetLogisticaColeta final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaColeta(QWidget *parent = nullptr);
+  explicit WidgetLogisticaColeta(QWidget *parent);
   ~WidgetLogisticaColeta();
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
@@ -23,7 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  SqlRelationalTableModel modelViewColeta;
+  SqlTableModel modelViewColeta;
   Ui::WidgetLogisticaColeta *ui;
   // methods
   auto cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) -> bool;
@@ -39,5 +38,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICACOLETA_H

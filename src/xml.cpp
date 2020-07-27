@@ -1,172 +1,33 @@
 #include "xml.h"
+
 #include "application.h"
+
+#include <QDebug>
+#include <QSqlError>
+#include <QSqlQuery>
 
 XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(); }
 
-void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
-  QDomElement child = element.firstChildElement();
-
-  for (; not child.isNull(); child = child.nextSiblingElement()) {
-    if (child.firstChild().isText()) {
-      QStandardItem *childItem = new QStandardItem(child.nodeName() + " - " + child.text());
-      elementItem->appendRow(childItem);
-      continue;
-    }
-
-    QDomNamedNodeMap map = child.attributes();
-    QString attributes = child.nodeName();
-
-    if (map.size() > 0) {
-      for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + R"(=")" + map.item(i).nodeValue() + R"(")"; }
-    }
-
-    auto *childItem = new QStandardItem(attributes);
-    elementItem->appendRow(childItem);
-    readChild(child, childItem);
-  }
-}
-
-void XML::lerValores(const QStandardItem *item) {
-  for (int row = 0; row < item->rowCount(); ++row) {
-    for (int col = 0; col < item->columnCount(); ++col) {
-      const QStandardItem *child = item->child(row, col);
-      const QString parentText = child->parent()->text();
-      QString text = child->text();
-
-      if (text.left(6) == "infNFe") { chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44); }
-      if (text.left(3) == "nNF") { nNF = text.remove(0, 6); }
-
-      if (parentText == "emit" and text.left(7) == "xFant -") { xFant = text.remove(0, 8); }
-      if (parentText == "emit" and text.left(7) == "xNome -") { xNome = text.remove(0, 8); }
-      if (parentText == "dest" and text.left(6) == "CNPJ -") { cnpj = text.remove(0, 7); }
-      if (parentText == "transporta" and text.left(7) == "xNome -") { xNomeTransp = text.remove(0, 8); }
-
-      lerDadosProduto(child);
-      lerICMSProduto(child);
-      lerIPIProduto(child);
-      lerPISProduto(child);
-      lerCOFINSProduto(child);
-      lerTotais(child);
-
-      if (child->hasChildren()) { lerValores(child); }
-    }
-  }
-}
-
-void XML::lerDadosProduto(const QStandardItem *child) {
-  QString text = child->text();
-
-  if (child->parent()->text() == "prod") {
-    if (text.left(7) == "cProd -") { codProd = text.remove(0, 8); }
-    if (text.left(6) == "cEAN -") { codBarras = text.remove(0, 7); }
-    if (text.left(7) == "xProd -") { descricao = text.remove(0, 8); }
-    if (text.left(5) == "NCM -") { ncm = text.remove(0, 6); }
-    if (text.left(6) == "CFOP -") { cfop = text.remove(0, 7); }
-    if (text.left(6) == "uCom -") { un = text.remove(0, 7).toUpper(); }
-    if (text.left(6) == "qCom -") { quant = text.remove(0, 7).toDouble(); }
-    if (text.left(8) == "vUnCom -") { valorUnid = text.remove(0, 9).toDouble(); }
-    if (text.left(7) == "vProd -") { valor = text.remove(0, 8).toDouble(); }
-    if (text.left(10) == "cEANTrib -") { codBarrasTrib = text.remove(0, 11); }
-    if (text.left(7) == "uTrib -") { unTrib = text.remove(0, 8); }
-    if (text.left(7) == "qTrib -") { quantTrib = text.remove(0, 8).toDouble(); }
-    if (text.left(9) == "vUnTrib -") { valorTrib = text.remove(0, 10).toDouble(); }
-    if (text.left(7) == "vDesc -") { desconto = text.remove(0, 8).toDouble(); }
-    if (text.left(8) == "indTot -") { compoeTotal = static_cast<bool>(text.remove(0, 9).toInt()); }
-    if (text.left(6) == "xPed -") { numeroPedido = text.remove(0, 7); }
-    if (text.left(10) == "nItemPed -") { itemPedido = text.remove(0, 11).toInt(); }
-
-    // remove 'A'
-    if (xNome == "CECRISA REVEST. CERAMICOS S.A." and codProd.endsWith("A")) { codProd = codProd.left(codProd.size() - 1); }
-  }
-}
-
-void XML::lerICMSProduto(const QStandardItem *child) {
-  QString text = child->text();
-
-  if (text == "ICMS") { tipoICMS = child->child(0, 0)->text(); }
-
-  if (child->parent()->text() == tipoICMS) {
-    if (text.left(6) == "orig -") { orig = text.remove(0, 7).toInt(); }
-    if (text.left(5) == "CST -") { cstICMS = text.remove(0, 6).toInt(); }
-    if (text.left(7) == "modBC -") { modBC = text.remove(0, 8).toInt(); }
-    if (text.left(5) == "vBC -") { vBC = text.remove(0, 6).toDouble(); }
-    if (text.left(7) == "pICMS -") { pICMS = text.remove(0, 8).toDouble(); }
-    if (text.left(7) == "vICMS -") { vICMS = text.remove(0, 8).toDouble(); }
-    if (text.left(9) == "modBCST -") { modBCST = text.remove(0, 10).toInt(); }
-    if (text.left(8) == "pMVAST -") { pMVAST = text.remove(0, 9).toDouble(); }
-    if (text.left(7) == "vBCST -") { vBCST = text.remove(0, 8).toDouble(); }
-    if (text.left(9) == "pICMSST -") { pICMSST = text.remove(0, 10).toDouble(); }
-    if (text.left(9) == "vICMSST -") { vICMSST = text.remove(0, 10).toDouble(); }
-  }
-}
-
-void XML::lerIPIProduto(const QStandardItem *child) {
-  QString text = child->text();
-
-  if (child->parent()->text() == "IPI") {
-    if (text.left(6) == "cEnq -") { cEnq = text.remove(0, 7).toInt(); }
-    if (text.left(5) == "CST -") { cstIPI = text.remove(0, 6).toInt(); }
-  }
-}
-
-void XML::lerPISProduto(const QStandardItem *child) {
-  QString text = child->text();
-
-  if (child->parent()->text() == "PISAliq") {
-    if (text.left(5) == "CST -") { cstPIS = text.remove(0, 6).toInt(); }
-    if (text.left(5) == "vBC -") { vBCPIS = text.remove(0, 6).toDouble(); }
-    if (text.left(6) == "pPIS -") { pPIS = text.remove(0, 7).toDouble(); }
-    if (text.left(6) == "vPIS -") { vPIS = text.remove(0, 7).toDouble(); }
-  }
-}
-
-void XML::lerCOFINSProduto(const QStandardItem *child) {
-  QString text = child->text();
-
-  if (child->parent()->text() == "COFINSAliq") {
-    if (text.left(5) == "CST -") { cstCOFINS = text.remove(0, 6).toInt(); }
-    if (text.left(5) == "vBC -") { vBCCOFINS = text.remove(0, 6).toDouble(); }
-    if (text.left(9) == "pCOFINS -") { pCOFINS = text.remove(0, 10).toDouble(); }
-    if (text.left(9) == "vCOFINS -") { vCOFINS = text.remove(0, 10).toDouble(); }
-  }
-}
-
-void XML::lerTotais(const QStandardItem *child) {
-  QString text = child->text();
-
-  if (child->parent()->text() == "ICMSTot") {
-    if (text.left(5) == "vBC -") { vBC_Total = text.remove(0, 6).toDouble(); }
-    if (text.left(7) == "vICMS -") { vICMS_Total = text.remove(0, 8).toDouble(); }
-    if (text.left(12) == "vICMSDeson -") { vICMSDeson_Total = text.remove(0, 13).toDouble(); }
-    if (text.left(7) == "vBCST -") { vBCST_Total = text.remove(0, 8).toDouble(); }
-    if (text.left(5) == "vST -") { vST_Total = text.remove(0, 6).toDouble(); }
-    if (text.left(7) == "vProd -") { vProd_Total = text.remove(0, 8).toDouble(); }
-    if (text.left(8) == "vFrete -") { vFrete_Total = text.remove(0, 9).toDouble(); }
-    if (text.left(6) == "vSeg -") { vSeg_Total = text.remove(0, 7).toDouble(); }
-    if (text.left(7) == "vDesc -") { vDesc_Total = text.remove(0, 8).toDouble(); }
-    if (text.left(5) == "vII -") { vII_Total = text.remove(0, 6).toDouble(); }
-    if (text.left(6) == "vIPI -") { vPIS_Total = text.remove(0, 7).toDouble(); }
-    if (text.left(6) == "vPIS -") { vPIS_Total = text.remove(0, 7).toDouble(); }
-    if (text.left(9) == "vCOFINS -") { vCOFINS_Total = text.remove(0, 10).toDouble(); }
-    if (text.left(8) == "vOutro -") { vOutro_Total = text.remove(0, 9).toDouble(); }
-    if (text.left(5) == "vNF -") { vNF_Total = text.remove(0, 6).toDouble(); }
-  }
-}
-
 void XML::montarArvore() {
-  if (fileContent.isEmpty()) { return; }
+  if (fileContent.isEmpty()) {
+    error = true;
+    return qApp->enqueueException("XML vazio!");
+  }
 
   QDomDocument document;
-  QString error;
+  QString errorText;
 
-  if (not document.setContent(fileContent, &error)) { return qApp->enqueueError("Erro lendo arquivo: " + error); }
+  if (not document.setContent(fileContent, &errorText)) {
+    error = true;
+    return qApp->enqueueException("Erro lendo arquivo: " + errorText);
+  }
 
   QDomElement root = document.firstChildElement();
   QDomNamedNodeMap map = root.attributes();
   QString attributes = root.nodeName();
 
   if (map.size() > 0) {
-    for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + R"(=")" + map.item(i).nodeValue() + R"(")"; }
+    for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + "=\"" + map.item(i).nodeValue() + "\""; }
   }
 
   auto *rootItem = new QStandardItem(attributes);
@@ -176,4 +37,216 @@ void XML::montarArvore() {
   readChild(root, rootItem);
 
   lerValores(model.item(0, 0));
+
+  if (produtos.isEmpty()) { error = true; }
+}
+
+void XML::readChild(const QDomElement &element, QStandardItem *elementItem) {
+  QDomElement child = element.firstChildElement();
+
+  for (; not child.isNull(); child = child.nextSiblingElement()) {
+    if (child.firstChild().isText()) {
+      elementItem->appendRow(new QStandardItem(child.nodeName() + " - " + child.text()));
+      continue;
+    }
+
+    QDomNamedNodeMap map = child.attributes();
+    QString attributes = child.nodeName();
+
+    if (map.size() > 0) {
+      for (int i = 0; i < map.size(); ++i) { attributes += " " + map.item(i).nodeName() + "=\"" + map.item(i).nodeValue() + "\""; }
+    }
+
+    auto *childItem = new QStandardItem(attributes);
+    elementItem->appendRow(childItem);
+    readChild(child, childItem);
+  }
+}
+
+void XML::limparValores() { produto = {}; }
+
+void XML::lerValores(const QStandardItem *item) {
+  for (int row = 0; row < item->rowCount(); ++row) {
+    for (int col = 0; col < item->columnCount(); ++col) {
+      const QStandardItem *child = item->child(row, col);
+      const QString parentText = child->parent()->text();
+      QString text = child->text();
+
+      if (text.contains("infNFe")) { chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44); }
+      if (text.contains("nNF -")) { nNF = text.remove("nNF - "); }
+      if (text.contains("dhEmi -")) { dataHoraEmissao = text.remove("dhEmi - "); }
+
+      if (parentText == "emit" and text.contains("xFant -")) { xFant = text.remove("xFant - "); }
+      if (parentText == "emit" and text.contains("xNome -")) { xNome = text.remove("xNome - "); }
+      if (parentText == "emit" and text.contains("CNPJ -")) { cnpjOrig = text.remove("CNPJ - "); }
+      if (parentText == "dest" and text.contains("CNPJ -")) { cnpjDest = text.remove("CNPJ - "); }
+      if (parentText == "transporta" and text.contains("xNome -")) { xNomeTransp = text.remove("xNome - "); }
+
+      if (parentText == "prod") { lerDadosProduto(child); }
+      if (parentText == "ICMS" and text.left(4) == "ICMS") { produto.tipoICMS = text; }
+      if (parentText == produto.tipoICMS) { lerICMSProduto(child); }
+      if (parentText == "IPITrib" or parentText == "IPINT") { lerIPIProduto(child); }
+      if (parentText == "PISAliq" or parentText == "PISQtde" or parentText == "PISNT" or parentText == "PISOutr") { lerPISProduto(child); }
+      if (parentText == "COFINSAliq" or parentText == "COFINSQtde" or parentText == "COFINSNT" or parentText == "COFINSOutr") { lerCOFINSProduto(child); }
+
+      if (parentText == "ICMSTot") { lerTotais(child); }
+
+      if (child->hasChildren()) {
+        lerValores(child);
+
+        if (parentText == "COFINS") {
+          produtos << produto;
+          limparValores();
+        }
+      }
+    }
+  }
+}
+
+void XML::lerDadosProduto(const QStandardItem *child) {
+  QString text = child->text();
+
+  if (text.contains("cProd -")) { produto.codProd = text.remove("cProd - "); }
+  if (text.contains("cEAN -")) { produto.codBarras = text.remove("cEAN - "); }
+  if (text.contains("xProd -")) { produto.descricao = text.remove("xProd - "); }
+  if (text.contains("NCM -")) { produto.ncm = text.remove("NCM - "); }
+  if (text.contains("NVE -")) { produto.nve = text.remove("NVE - "); }
+  if (text.contains("EXTIPI -")) { produto.extipi = text.remove("EXTIPI - "); }
+  if (text.contains("CEST -")) { produto.cest = text.remove("CEST - "); }
+  if (text.contains("CFOP -")) { produto.cfop = text.remove("CFOP - "); }
+  if (text.contains("uCom -")) { produto.un = text.remove("uCom - ").toUpper(); }
+  if (text.contains("qCom -")) { produto.quant = text.remove("qCom - ").toDouble(); }
+  if (text.contains("vUnCom -")) { produto.valorUnid = text.remove("vUnCom - ").toDouble(); }
+  if (text.contains("vProd -")) { produto.valor = text.remove("vProd - ").toDouble(); }
+  if (text.contains("cEANTrib -")) { produto.codBarrasTrib = text.remove("cEANTrib - "); }
+  if (text.contains("uTrib -")) { produto.unTrib = text.remove("uTrib - "); }
+  if (text.contains("qTrib -")) { produto.quantTrib = text.remove("qTrib - ").toDouble(); }
+  if (text.contains("vUnTrib -")) { produto.valorUnidTrib = text.remove("vUnTrib - ").toDouble(); }
+  if (text.contains("vFrete -")) { produto.frete = text.remove("vFrete - ").toDouble(); }
+  if (text.contains("vSeg -")) { produto.seguro = text.remove("vSeg - ").toDouble(); }
+  if (text.contains("vDesc -")) { produto.desconto = text.remove("vDesc - ").toDouble(); }
+  if (text.contains("vOutro -")) { produto.outros = text.remove("vOutro - ").toDouble(); }
+  if (text.contains("indTot -")) { produto.compoeTotal = static_cast<bool>(text.remove("indTot - ").toInt()); }
+  if (text.contains("xPed -")) { produto.numeroPedido = text.remove("xPed - "); }
+  if (text.contains("nItemPed -")) { produto.itemPedido = text.remove("nItemPed - ").toInt(); }
+}
+
+void XML::lerICMSProduto(const QStandardItem *child) {
+  QString text = child->text();
+
+  if (text.contains("orig -")) { produto.orig = text.remove("orig - ").toInt(); }
+  if (text.contains("CST -")) { produto.cstICMS = text.remove("CST - ").toInt(); }
+  if (text.contains("modBC -")) { produto.modBC = text.remove("modBC - ").toInt(); }
+  if (text.contains("vBC -")) { produto.vBC = text.remove("vBC - ").toDouble(); }
+  if (text.contains("pICMS -")) { produto.pICMS = text.remove("pICMS - ").toDouble(); }
+  if (text.contains("vICMS -")) { produto.vICMS = text.remove("vICMS - ").toDouble(); }
+  if (text.contains("modBCST -")) { produto.modBCST = text.remove("modBCST - ").toInt(); }
+  if (text.contains("pMVAST -")) { produto.pMVAST = text.remove("pMVAST - ").toDouble(); }
+  if (text.contains("vBCST -")) { produto.vBCST = text.remove("vBCST - ").toDouble(); }
+  if (text.contains("pICMSST -")) { produto.pICMSST = text.remove("pICMSST - ").toDouble(); }
+  if (text.contains("vICMSST -")) { produto.vICMSST = text.remove("vICMSST - ").toDouble(); }
+}
+
+void XML::lerIPIProduto(const QStandardItem *child) {
+  QString text = child->text();
+
+  if (text.contains("cEnq -")) { produto.cEnq = text.remove("cEnq - ").toInt(); }
+
+  if (text.contains("CST -")) { produto.cstIPI = text.remove("CST - ").toInt(); }
+  if (text.contains("vBC -")) { produto.vBCIPI = text.remove("vBC - ").toDouble(); }
+  if (text.contains("pIPI -")) { produto.pIPI = text.remove("pIPI - ").toDouble(); }
+  if (text.contains("vIPI -")) { produto.vIPI = text.remove("vIPI - ").toDouble(); }
+
+  if (text.contains("CST -")) { produto.cstIPI = text.remove("CST - ").toInt(); }
+}
+
+void XML::lerPISProduto(const QStandardItem *child) {
+  QString text = child->text();
+
+  if (text.contains("CST -")) { produto.cstPIS = text.remove("CST - ").toInt(); }
+  if (text.contains("vBC -")) { produto.vBCPIS = text.remove("vBC - ").toDouble(); }
+  if (text.contains("pPIS -")) { produto.pPIS = text.remove("pPIS - ").toDouble(); }
+  if (text.contains("vPIS -")) { produto.vPIS = text.remove("vPIS - ").toDouble(); }
+}
+
+void XML::lerCOFINSProduto(const QStandardItem *child) {
+  QString text = child->text();
+
+  if (text.contains("CST -")) { produto.cstCOFINS = text.remove("CST - ").toInt(); }
+  if (text.contains("vBC -")) { produto.vBCCOFINS = text.remove("vBC - ").toDouble(); }
+  if (text.contains("pCOFINS -")) { produto.pCOFINS = text.remove("pCOFINS - ").toDouble(); }
+  if (text.contains("vCOFINS -")) { produto.vCOFINS = text.remove("vCOFINS - ").toDouble(); }
+}
+
+void XML::lerTotais(const QStandardItem *child) {
+  QString text = child->text();
+
+  if (text.contains("vBC -")) { vBC_Total = text.remove("vBC - ").toDouble(); }
+  if (text.contains("vICMS -")) { vICMS_Total = text.remove("vICMS - ").toDouble(); }
+  if (text.contains("vICMSDeson -")) { vICMSDeson_Total = text.remove("vICMSDeson - ").toDouble(); }
+  if (text.contains("vBCST -")) { vBCST_Total = text.remove("vBCST - ").toDouble(); }
+  if (text.contains("vST -")) { vST_Total = text.remove("vST - ").toDouble(); }
+  if (text.contains("vProd -")) { vProd_Total = text.remove("vProd - ").toDouble(); }
+  if (text.contains("vFrete -")) { vFrete_Total = text.remove("vFrete - ").toDouble(); }
+  if (text.contains("vSeg -")) { vSeg_Total = text.remove("vSeg - ").toDouble(); }
+  if (text.contains("vDesc -")) { vDesc_Total = text.remove("vDesc - ").toDouble(); }
+  if (text.contains("vII -")) { vII_Total = text.remove("vII - ").toDouble(); }
+  if (text.contains("vIPI -")) { vPIS_Total = text.remove("vIPI - ").toDouble(); }
+  if (text.contains("vPIS -")) { vPIS_Total = text.remove("vPIS - ").toDouble(); }
+  if (text.contains("vCOFINS -")) { vCOFINS_Total = text.remove("vCOFINS - ").toDouble(); }
+  if (text.contains("vOutro -")) { vOutro_Total = text.remove("vOutro - ").toDouble(); }
+  if (text.contains("vNF -")) { vNF_Total = text.remove("vNF - ").toDouble(); }
+}
+
+bool XML::validar(const Tipo tipo) {
+  if (not verificaCNPJ(tipo) or verificaExiste() or not verificaValido()) { return false; }
+
+  return true;
+}
+
+bool XML::verificaCNPJ(const Tipo tipo) {
+  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
+
+  return true;
+}
+
+bool XML::verificaExiste() {
+  QSqlQuery query;
+  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", chaveAcesso);
+
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+
+  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
+
+  return false;
+}
+
+bool XML::verificaValido() {
+  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!"); }
+
+  return true;
+}
+
+bool XML::verificaNCMs() {
+  QStringList ncms;
+  bool erro = false;
+
+  for (const auto &produto : produtos) {
+    QSqlQuery query;
+
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text()); }
+
+    if (not query.first()) {
+      ncms << produto.ncm;
+      erro = true;
+    }
+  }
+
+  ncms.removeDuplicates();
+
+  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -")); }
+
+  return true;
 }

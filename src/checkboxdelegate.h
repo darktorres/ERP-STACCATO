@@ -1,17 +1,17 @@
-#ifndef CHECKBOXDELEGATE_H
-#define CHECKBOXDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
 class CheckBoxDelegate final : public QStyledItemDelegate {
 
 public:
-  explicit CheckBoxDelegate(QObject *parent, const bool readOnly = false);
+  explicit CheckBoxDelegate(const bool readOnly, QObject *parent);
+  explicit CheckBoxDelegate(QObject *parent);
   ~CheckBoxDelegate() = default;
 
 private:
   // attributes
-  const bool readOnly;
+  const bool readOnly = false;
   // methods
   auto displayText(const QVariant &, const QLocale &) const -> QString final;
   auto createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const -> QWidget * final;
@@ -20,5 +20,3 @@ private:
   auto updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const -> void final;
   auto commitEditor() -> void;
 };
-
-#endif // CHECKBOXDELEGATE_H

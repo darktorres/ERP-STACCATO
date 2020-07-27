@@ -14,17 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="1">
-    <widget class="QLabel" name="labelNfe">
-     <property name="text">
-      <string>Notas Fiscais</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="labelBuscar">
      <property name="enabled">
       <bool>true</bool>
@@ -37,7 +27,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="2" column="1">
     <widget class="QLineEdit" name="lineEditBusca">
      <property name="enabled">
       <bool>true</bool>
@@ -48,6 +38,16 @@
     </widget>
    </item>
    <item row="1" column="1">
+    <widget class="QPushButton" name="pushButtonRemoverNFe">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Remover NFe</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
     <widget class="TableView" name="table">
      <property name="mouseTracking">
       <bool>true</bool>
@@ -63,22 +63,6 @@
      </property>
      <property name="sortingEnabled">
       <bool>true</bool>
-     </property>
-     <attribute name="horizontalHeaderCascadingSectionResizes">
-      <bool>true</bool>
-     </attribute>
-     <attribute name="horizontalHeaderStretchLastSection">
-      <bool>false</bool>
-     </attribute>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="pushButtonRemoverNFe">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="text">
-      <string>Remover NFe</string>
      </property>
     </widget>
    </item>

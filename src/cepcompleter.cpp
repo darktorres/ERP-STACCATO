@@ -1,8 +1,9 @@
-#include <QSqlError>
-#include <QSqlQuery>
+#include "cepcompleter.h"
 
 #include "application.h"
-#include "cepcompleter.h"
+
+#include <QSqlError>
+#include <QSqlQuery>
 
 bool CepCompleter::buscaCEP(const QString &cep) {
   QSqlQuery query;
@@ -11,7 +12,7 @@ bool CepCompleter::buscaCEP(const QString &cep) {
                 "log_logradouro.bai_nu_sequencial_ini = log_bairro.bai_nu_sequencial AND log_logradouro.cep = :cep");
   query.bindValue(":cep", QString(cep).remove("-"));
 
-  if (not query.exec()) { return qApp->enqueueError(false, "Erro na busca pelo cep: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueException(false, "Erro buscando CEP: " + query.lastError().text()); }
 
   if (not query.first()) { return qApp->enqueueError(false, "CEP não encontrado!"); }
 

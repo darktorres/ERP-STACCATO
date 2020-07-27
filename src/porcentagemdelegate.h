@@ -1,14 +1,14 @@
-#ifndef PORCENTAGEMDELEGATE_H
-#define PORCENTAGEMDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
 class PorcentagemDelegate final : public QStyledItemDelegate {
 
 public:
-  explicit PorcentagemDelegate(QObject *parent = nullptr);
+  explicit PorcentagemDelegate(const bool multiplicar, QObject *parent);
   ~PorcentagemDelegate() = default;
   auto displayText(const QVariant &value, const QLocale &locale) const -> QString;
-};
 
-#endif // PORCENTAGEMDELEGATE_H
+private:
+  const bool multiplicar;
+};

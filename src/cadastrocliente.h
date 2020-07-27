@@ -1,5 +1,4 @@
-#ifndef CADASTROCLIENTE_H
-#define CADASTROCLIENTE_H
+#pragma once
 
 #include "registeraddressdialog.h"
 #include "searchdialog.h"
@@ -12,7 +11,7 @@ class CadastroCliente final : public RegisterAddressDialog {
   Q_OBJECT
 
 public:
-  explicit CadastroCliente(QWidget *parent = nullptr);
+  explicit CadastroCliente(QWidget *parent);
   ~CadastroCliente() final;
 
 private:
@@ -22,7 +21,7 @@ private:
   Ui::CadastroCliente *ui;
   // methods
   auto cadastrar() -> bool final;
-  auto cadastrarEndereco(const Tipo tipo = Tipo::Cadastrar) -> bool;
+  auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
   auto novoEndereco() -> void;
@@ -44,14 +43,13 @@ private:
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
   auto savingProcedures() -> bool final;
+  auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
+  auto verificaVinculo() -> std::optional<bool>;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
-  auto setConnections() -> void;
 };
-
-#endif // CADASTROCLIENTE_H

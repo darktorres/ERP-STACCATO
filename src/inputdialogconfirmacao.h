@@ -1,9 +1,8 @@
-#ifndef INPUTDIALOGCONFIRMACAO_H
-#define INPUTDIALOGCONFIRMACAO_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QDialog>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class InputDialogConfirmacao;
@@ -15,11 +14,11 @@ class InputDialogConfirmacao final : public QDialog {
 public:
   enum class Tipo { Recebimento, Entrega, Representacao };
 
-  explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent = nullptr);
+  explicit InputDialogConfirmacao(const Tipo tipo, QWidget *parent);
   ~InputDialogConfirmacao() final;
-  auto getDateTime() const -> QDateTime;
+  auto getDate() const -> QDate;
   auto getEntregou() const -> QString;
-  auto getNextDateTime() const -> QDateTime;
+  auto getNextDateTime() const -> QDate;
   auto getRecebeu() const -> QString;
   auto setFilterEntrega(const QString &id, const QString &idEvento) -> bool;
   auto setFilterRecebe(const QStringList &ids) -> bool;
@@ -27,24 +26,26 @@ public:
 private:
   // attributes
   const Tipo tipo;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelVeiculo;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelVeiculo;
   Ui::InputDialogConfirmacao *ui;
   // methods
   auto cadastrar() -> bool;
-  auto criarReposicaoCliente(SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) -> bool;
+  auto criarConsumoQuebrado(const int idEstoque, const double caixasDefeito, const double quantCaixa) -> bool;
+  auto criarReposicaoCliente(SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa, const QString obs, const int novoIdVendaProduto2) -> bool;
   auto desfazerConsumo(const int idEstoque, const double caixasDefeito) -> bool;
-  auto gerarCreditoCliente(const SqlRelationalTableModel &modelVendaProduto, const double caixasDefeito, const double unCaixa) -> bool;
+  auto dividirCompra(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) -> bool;
+  auto dividirConsumo(const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2, const QString idVendaProduto2) -> bool;
+  auto dividirEntrega(const int row, const int choice, const double caixasDefeito, const QString obs, const int novoIdVendaProduto2) -> bool;
+  auto dividirRecebimento(const int row, const double caixasDefeito, const double quantCaixa) -> bool;
+  auto dividirVeiculo(const int row, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) -> bool;
+  auto dividirVenda(SqlTableModel &modelVendaProduto, const double caixas, const double caixasDefeito, const double quantCaixa, const int novoIdVendaProduto2) -> bool;
+  auto gerarCreditoCliente(const SqlTableModel &modelVendaProduto, const double caixasDefeito, const double quantCaixa) -> bool;
+  auto getCaixasDefeito(const int row) -> std::optional<double>;
   auto on_dateEditEvento_dateChanged(const QDate &date) -> void;
-  auto on_pushButtonFaltando_clicked() -> void;
-  auto on_pushButtonQuebrado_clicked() -> void;
+  auto on_pushButtonFoto_clicked() -> void;
+  auto on_pushButtonQuebradoEntrega_clicked() -> void;
+  auto on_pushButtonQuebradoReceb_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
-  auto processarQuebra(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;
-  // TODO: rename those to 'dividirXXXX'
-  auto quebrarEntrega(const int row, const int choice, const double caixasDefeito, const double unCaixa) -> bool;
-  auto quebrarLinhaRecebimento(const int row, const int caixas, const double caixasDefeito, const double unCaixa) -> bool;
-  auto quebrarRecebimento(const int row, const double caixasDefeito, const double unCaixa) -> bool;
   auto setupTables() -> void;
 };
-
-#endif // INPUTDIALOGCONFIRMACAO_H

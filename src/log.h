@@ -1,5 +1,4 @@
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
 #include <QString>
 
@@ -7,7 +6,5 @@ class Log final {
 
 public:
   Log() = delete;
-  static auto createLog(const QString &message) -> bool;
+  static auto createLog(const QString &tipo, const QString &message, const bool silent = false) -> bool;
 };
-
-#endif // LOG_H

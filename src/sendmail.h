@@ -1,5 +1,4 @@
-#ifndef SENDMAIL_H
-#define SENDMAIL_H
+#pragma once
 
 #include <QProgressDialog>
 
@@ -11,8 +10,9 @@ class SendMail final : public QDialog {
   Q_OBJECT
 
 public:
-  enum class Tipo { GerarCompra, Vazio };
+  enum class Tipo { GerarCompra, Teste, Vazio };
   explicit SendMail(const Tipo tipo, const QString &arquivo = QString(), const QString &fornecedor = QString(), QWidget *parent = nullptr);
+  explicit SendMail(const Tipo tipo, QWidget *parent = nullptr);
   ~SendMail() final;
 
 private:
@@ -29,5 +29,3 @@ private:
   auto on_pushButtonEnviar_clicked() -> void;
   auto successStatus() -> void;
 };
-
-#endif // SENDMAIL_H

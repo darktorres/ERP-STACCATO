@@ -1,9 +1,15 @@
 #include "reaisdelegate.h"
 
-ReaisDelegate::ReaisDelegate(QObject *parent, const int decimais) : QStyledItemDelegate(parent), decimais(decimais) {}
+ReaisDelegate::ReaisDelegate(const int decimais, const bool readOnly, QObject *parent) : QStyledItemDelegate(parent), decimais(decimais), readOnly(readOnly) {}
+
+ReaisDelegate::ReaisDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 QString ReaisDelegate::displayText(const QVariant &value, const QLocale &locale) const {
   return value.userType() == QVariant::Double ? "R$ " + QLocale(QLocale::Portuguese).toString(value.toDouble(), 'f', decimais) : QStyledItemDelegate::displayText(value, locale);
 }
 
-// TODO: 4add a parameter for enabling/disabling editing (also in others delegate so as to remove NoEditDelegate)
+QWidget *ReaisDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  if (readOnly) { return nullptr; }
+
+  return QStyledItemDelegate::createEditor(parent, option, index);
+}

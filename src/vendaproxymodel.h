@@ -1,14 +1,13 @@
-#ifndef VENDAPROXYMODEL_H
-#define VENDAPROXYMODEL_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QIdentityProxyModel>
-
-#include "sqlrelationaltablemodel.h"
 
 class VendaProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit VendaProxyModel(SqlRelationalTableModel *model, QObject *parent);
+  explicit VendaProxyModel(SqlTableModel *model, QObject *parent);
   ~VendaProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 
@@ -19,5 +18,3 @@ private:
 
   enum class FieldColors { Quente = 1, Morno = 2, Frio = 3 };
 };
-
-#endif // VENDAPROXYMODEL_H

@@ -1,11 +1,13 @@
-#include <QMessageBox>
-#include <QSqlError>
+#include "followup.h"
+#include "ui_followup.h"
 
 #include "application.h"
-#include "followup.h"
 #include "followupproxymodel.h"
-#include "ui_followup.h"
 #include "usersession.h"
+
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlError>
 
 FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialog(parent), id(id), tipo(tipo), ui(new Ui::FollowUp) {
   ui->setupUi(this);
@@ -20,8 +22,8 @@ FollowUp::FollowUp(const QString &id, const Tipo tipo, QWidget *parent) : QDialo
 
   setWindowTitle((tipo == Tipo::Orcamento ? "Orçamento: " : "Pedido: ") + id);
 
-  ui->dateFollowup->setDateTime(QDateTime::currentDateTime());
-  ui->dateProxFollowup->setDateTime(QDateTime::currentDateTime().addDays(1));
+  ui->dateFollowup->setDateTime(qApp->serverDateTime());
+  ui->dateProxFollowup->setDateTime(qApp->serverDateTime().addDays(1));
 
   if (tipo == Tipo::Venda) { ui->frameOrcamento->hide(); }
 }
@@ -58,7 +60,7 @@ void FollowUp::on_pushButtonSalvar_clicked() {
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
-  if (not query.exec()) { return qApp->enqueueError("Erro salvando followup: " + query.lastError().text(), this); }
+  if (not query.exec()) { return qApp->enqueueException("Erro salvando followup: " + query.lastError().text(), this); }
 
   qApp->enqueueInformation("Followup salvo com sucesso!", this);
   close();
@@ -77,20 +79,38 @@ bool FollowUp::verifyFields() {
 void FollowUp::setupTables() {
   modelViewFollowup.setTable("view_followup_" + QString(tipo == Tipo::Orcamento ? "orcamento" : "venda"));
 
-  modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
-  modelViewFollowup.setHeaderData("idVenda", "Venda");
+  if (tipo == Tipo::Orcamento) {
+    modelViewFollowup.setHeaderData("idOrcamento", "Orçamento");
+    modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
+  }
+
+  if (tipo == Tipo::Venda) { modelViewFollowup.setHeaderData("idVenda", "Venda"); }
+
   modelViewFollowup.setHeaderData("nome", "Usuário");
   modelViewFollowup.setHeaderData("observacao", "Observação");
   modelViewFollowup.setHeaderData("dataFollowup", "Data");
-  modelViewFollowup.setHeaderData("dataProxFollowup", "Próx. Data");
 
   modelViewFollowup.setFilter(tipo == Tipo::Orcamento ? "idOrcamento LIKE '" + id.left(12) + "%'" : "idVenda LIKE '" + id.left(11) + "%'");
 
+  modelViewFollowup.setSort("dataFollowup");
+
   if (not modelViewFollowup.select()) { return; }
 
-  ui->table->setModel(new FollowUpProxyModel(&modelViewFollowup, this));
+  modelViewFollowup.proxyModel = new FollowUpProxyModel(&modelViewFollowup, this);
 
-  ui->table->hideColumn("semaforo");
+  ui->table->setModel(&modelViewFollowup);
+
+  if (tipo == Tipo::Orcamento) { ui->table->hideColumn("semaforo"); }
+
+  if (tipo == Tipo::Orcamento) {
+    modelOrcamento.setTable("orcamento");
+
+    modelOrcamento.setFilter("idOrcamento = '" + id + "'");
+
+    if (not modelOrcamento.select()) { return; }
+
+    ui->plainTextEditBaixa->setPlainText(modelOrcamento.data(0, "motivoCancelamento").toString() + "\n\n" + modelOrcamento.data(0, "observacaoCancelamento").toString());
+  }
 }
 
 void FollowUp::on_dateFollowup_dateChanged(const QDate &date) {

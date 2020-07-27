@@ -1,7 +1,7 @@
-#include <QSqlError>
-
-#include "ui_widgetcompraresumo.h"
 #include "widgetcompraresumo.h"
+#include "ui_widgetcompraresumo.h"
+
+#include <QSqlError>
 
 WidgetCompraResumo::WidgetCompraResumo(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetCompraResumo) { ui->setupUi(this); }
 

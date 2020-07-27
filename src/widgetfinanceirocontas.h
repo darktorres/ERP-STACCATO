@@ -1,10 +1,8 @@
-#ifndef WIDGETFINANCEIROCONTAS_H
-#define WIDGETFINANCEIROCONTAS_H
-
-#include <QWidget>
+#pragma once
 
 #include "sqlquerymodel.h"
-#include "sqlrelationaltablemodel.h"
+
+#include <QWidget>
 
 namespace Ui {
 class WidgetFinanceiroContas;
@@ -15,10 +13,10 @@ class WidgetFinanceiroContas final : public QWidget {
 
 public:
   enum class Tipo { Nulo, Receber, Pagar };
-  explicit WidgetFinanceiroContas(QWidget *parent = nullptr);
+  explicit WidgetFinanceiroContas(QWidget *parent);
   ~WidgetFinanceiroContas();
   auto resetTables() -> void;
-  auto setTipo(const Tipo &value) -> void;
+  auto setTipo(const Tipo &novoTipo) -> void;
   auto updateTables() -> void;
 
 private:
@@ -46,5 +44,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETFINANCEIROCONTAS_H

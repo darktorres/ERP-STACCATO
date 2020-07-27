@@ -1,9 +1,8 @@
-#ifndef WIDGETLOGISTICAAGENDARCOLETA_H
-#define WIDGETLOGISTICAAGENDARCOLETA_H
+#pragma once
+
+#include "sqltablemodel.h"
 
 #include <QWidget>
-
-#include "sqlrelationaltablemodel.h"
 
 namespace Ui {
 class WidgetLogisticaAgendarColeta;
@@ -13,7 +12,7 @@ class WidgetLogisticaAgendarColeta final : public QWidget {
   Q_OBJECT
 
 public:
-  explicit WidgetLogisticaAgendarColeta(QWidget *parent = nullptr);
+  explicit WidgetLogisticaAgendarColeta(QWidget *parent);
   ~WidgetLogisticaAgendarColeta();
   auto resetTables() -> void;
   auto tableFornLogistica_clicked(const QString &fornecedor) -> void;
@@ -24,9 +23,9 @@ private:
   bool isSet = false;
   bool modelIsSet = false;
   QString fornecedor;
-  SqlRelationalTableModel modelEstoque;
-  SqlRelationalTableModel modelTranspAtual;
-  SqlRelationalTableModel modelTranspAgend;
+  SqlTableModel modelEstoque;
+  SqlTableModel modelTranspAtual;
+  SqlTableModel modelTranspAgend;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
   auto adicionarProduto(const QModelIndexList &list) -> bool;
@@ -47,5 +46,3 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
 };
-
-#endif // WIDGETLOGISTICAAGENDARCOLETA_H

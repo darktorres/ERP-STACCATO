@@ -235,7 +235,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   if (not modelo.exists()) { return qApp->enqueueException("Não encontrou o modelo do Excel!", this); }
 
-  const QString fileName = dir + "/relatorio_contabil.xlsx";
+  const QString fileName = dir + "/relatorio_contabil_" + data + ".xlsx";
 
   QFile file(fileName);
 

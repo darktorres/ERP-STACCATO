@@ -71,7 +71,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
     if (string.contains("-")) {
       string.prepend("\"").append("\"");
     } else {
-      string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+      string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
       string.prepend("+").append("*");
     }
   }

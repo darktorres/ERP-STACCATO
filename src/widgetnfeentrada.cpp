@@ -69,7 +69,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetNfeEntrada::montaFiltro() {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().remove("'");
 
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
 }

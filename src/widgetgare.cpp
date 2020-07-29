@@ -63,7 +63,7 @@ void WidgetGare::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text();
+  const QString textoBusca = ui->lineEditBusca->text().remove("'");
   const QString filtroBusca = "(numeroNFe LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }

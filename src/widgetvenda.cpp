@@ -103,7 +103,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text();
+  const QString textoBusca = ui->lineEditBusca->text().remove("'");
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
                               "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 

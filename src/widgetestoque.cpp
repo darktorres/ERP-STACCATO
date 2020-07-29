@@ -183,7 +183,7 @@ QString WidgetEstoque::getMatch() const {
     if (string.contains("-")) {
       string.prepend("\"").append("\"");
     } else {
-      string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+      string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
       string.prepend("+").append("*");
     }
   }

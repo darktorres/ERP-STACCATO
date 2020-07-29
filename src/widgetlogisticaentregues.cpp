@@ -64,7 +64,7 @@ void WidgetLogisticaEntregues::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text();
+  const QString textoBusca = ui->lineEditBusca->text().remove("'");
   const QString filtroBusca = "idVenda LIKE '%" + textoBusca + "%'";
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
 

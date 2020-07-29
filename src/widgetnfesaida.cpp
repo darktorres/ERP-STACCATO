@@ -187,9 +187,9 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   updateTables();
   qApp->enqueueInformation(resposta.value(), this);
 
-  if (not gravarArquivo(resposta.value())) { return; }
+  if (not gravarArquivo(resposta.value(), chaveAcesso)) { return; }
 
-  const QString filePath = QDir::currentPath() + "/cancelamento.xml";
+  const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
 
   // -------------------------------------------------------------------------
 
@@ -407,8 +407,8 @@ bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   return true;
 }
 
-bool WidgetNfeSaida::gravarArquivo(const QString &resposta) {
-  QFile arquivo(QDir::currentPath() + "/cancelamento.xml");
+bool WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
+  QFile arquivo(QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml");
 
   if (not arquivo.open(QFile::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo para escrita: " + arquivo.errorString(), this); }
 

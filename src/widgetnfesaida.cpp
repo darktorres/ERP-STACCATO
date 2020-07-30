@@ -196,7 +196,8 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
   ACBr acbrLocal;
-  // TODO: usar ACBR.EnviarEmailInutilizacao?
+  // TODO: enviar o xml atualizado com o cancelamento
+  // TODO: enviar a danfe
   acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath);
 }
 

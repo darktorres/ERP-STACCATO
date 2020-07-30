@@ -1,13 +1,17 @@
 #include "widgetnfeentrada.h"
 #include "ui_widgetnfeentrada.h"
 
+#include "acbr.h"
 #include "application.h"
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "usersession.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -20,6 +24,7 @@ void WidgetNfeEntrada::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
   connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
 }
@@ -44,11 +49,14 @@ void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
 
-  modelViewNFeEntrada.setHeaderData("GARE", "GARE (Estimado)");
+  modelViewNFeEntrada.setHeaderData("created", "Importado em");
 
   ui->table->setModel(&modelViewNFeEntrada);
 
   ui->table->hideColumn("idNFe");
+  ui->table->hideColumn("chaveAcesso");
+
+  ui->table->showColumn("created");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
@@ -80,6 +88,8 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!"); }
 
   const int row = list.first().row();
 
@@ -185,17 +195,63 @@ bool WidgetNfeEntrada::remover(const int row) {
   return true;
 }
 
+void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
+  // TODO: 5zipar arquivos exportados com nome descrevendo mes/notas/etc
+
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
+
+  ACBr acbrLocal;
+
+  for (const auto &index : list) {
+    // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
+    // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
+    // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
+    // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
+
+    if (modelViewNFeEntrada.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
+
+    // pegar XML do MySQL e salvar em arquivo
+
+    const QString chaveAcesso = modelViewNFeEntrada.data(index.row(), "chaveAcesso").toString();
+
+    query.bindValue(":chaveAcesso", chaveAcesso);
+
+    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml: " + query.lastError().text(), this); }
+
+    QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
+
+    if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
+
+    fileXml.write(query.value("xml").toByteArray());
+
+    fileXml.flush();
+    fileXml.close();
+
+    // mandar XML para ACBr gerar PDF
+
+    const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
+
+    if (not pdfOrigem) { return; }
+
+    if (pdfOrigem->isEmpty()) { return qApp->enqueueException("Resposta vazia!", this); }
+
+    // copiar para pasta predefinida
+
+    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
+
+    QFile filePdf(pdfDestino);
+
+    if (filePdf.exists()) { filePdf.remove(); }
+
+    if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueException("Erro copiando pdf!", this); }
+  }
+
+  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
+}
+
 // TODO: 5copiar filtros do widgetnfesaida
-
-// TODO: para gerar GARE da nfe de entrada:
-// dados ncm, valorMercadoria, ipi, desconto e aliqIcms...
-
-// valorIcms = (valorMercadoria - desconto) * aliqIcms
-// mva:
-// 		se aliqIcms = 4% procurar mva4% usando ncm
-// 		se aliqIcms <> 4% procurar mva12% usando ncm
-// IndiceAgregado = (valorMercadoria + Ipi) * MVA
-// baseCalculoIcmsST = valorMercadoria + Ipi + IndiceAgregado
-// icmsInterno = procurar aliqInterna pelo ncm
-// icmsInternoR$ = baseCalculoIcmsST * icmsInterno
-// valorIcmsSt = icmsInternoR$ - valorIcms

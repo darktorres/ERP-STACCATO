@@ -260,21 +260,8 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  const auto folderKeyXml = UserSession::getSetting("User/EntregasXmlFolder");
-
-  if (not folderKeyXml) { return qApp->enqueueError("Não há uma pasta definida para salvar XML. Por favor escolha uma nas configurações do ERP!", this); }
-
-  const auto folderKeyPdf = UserSession::getSetting("User/EntregasPdfFolder");
-
-  if (not folderKeyPdf) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
-
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
-
-  const QString xmlFolder = folderKeyXml->toString();
-  const QString pdfFolder = folderKeyPdf->toString();
-
-  // TODO: create folders if they dont exist (it wont work if they dont)
 
   ACBr acbrLocal;
 
@@ -286,7 +273,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (modelViewNFeSaida.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
 
-    // pegar xml do bd e salvar em arquivo
+    // pegar XML do MySQL e salvar em arquivo
 
     const QString chaveAcesso = modelViewNFeSaida.data(index.row(), "chaveAcesso").toString();
 
@@ -294,9 +281,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml: " + query.lastError().text(), this); }
 
-    QFile fileXml(xmlFolder + "/" + chaveAcesso + ".xml");
-
-    qDebug() << "xml: " + xmlFolder + "/" + chaveAcesso + ".xml";
+    QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
     if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
 
@@ -305,7 +290,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     fileXml.flush();
     fileXml.close();
 
-    // mandar xml para acbr gerar pdf
+    // mandar XML para ACBr gerar PDF
 
     const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
 
@@ -315,7 +300,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // copiar para pasta predefinida
 
-    const QString pdfDestino = pdfFolder + "/" + chaveAcesso + ".pdf";
+    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
 
     QFile filePdf(pdfDestino);
 
@@ -324,7 +309,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
     if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueException("Erro copiando pdf!", this); }
   }
 
-  qApp->enqueueInformation("Arquivos exportados com sucesso para " + pdfFolder + "!", this);
+  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
 }
 
 void WidgetNfeSaida::on_groupBoxStatus_toggled(const bool enabled) {

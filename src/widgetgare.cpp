@@ -122,11 +122,11 @@ void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
 void WidgetGare::setupTables() {
   model.setTable("view_gares");
 
-  model.setHeaderData("numeroNFe", "NFe");
+  model.setHeaderData("status", "Status");
   model.setHeaderData("valor", "R$");
+  model.setHeaderData("numeroNFe", "NFe");
   model.setHeaderData("dataPagamento", "Data Pgt.");
   model.setHeaderData("dataRealizado", "Data Realizado");
-  model.setHeaderData("status", "Status");
   model.setHeaderData("banco", "Banco");
 
   ui->table->setModel(&model);

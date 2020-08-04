@@ -123,7 +123,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const QDate dataFaturamento = inputDlg.getDate();
 
-  const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER";
+  const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER STACCATO";
 
   if (pularNota) {
     if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return; }

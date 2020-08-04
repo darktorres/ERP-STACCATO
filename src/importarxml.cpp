@@ -715,6 +715,7 @@ bool ImportarXML::percorrerXml(XML &xml) {
     if (not modelEstoque.setData(newRow, "idNFe", xml.idNFe)) { return false; }
     if (not modelEstoque.setData(newRow, "fornecedor", xml.xNome)) { return false; }
     if (not modelEstoque.setData(newRow, "local", xml.local)) { return false; }
+    if (xml.local == "CD" and not modelEstoque.setData(newRow, "bloco", "ENTRADA")) { return false; }
     if (not modelEstoque.setData(newRow, "descricao", produto.descricao)) { return false; }
     if (not modelEstoque.setData(newRow, "quant", produto.quant)) { return false; }
     if (not modelEstoque.setData(newRow, "restante", produto.quant)) { return false; }

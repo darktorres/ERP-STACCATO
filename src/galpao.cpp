@@ -20,34 +20,33 @@ void Galpao::resetTables() { modelIsSet = false; }
 void Galpao::updateTables() {
   if (not isSet) {
     scene = new GraphicsScene(this);
-    ui->graphicsView->setScene(scene);
-    ui->graphicsView_4->setScene(scene);
-
-    //      setupTables();
+    ui->graphicsGalpao->setScene(scene);
+    ui->graphicsPallet->setScene(scene);
 
     ui->itemBoxVeiculo->setSearchDialog(SearchDialog::veiculo(this));
     ui->dateTimeEdit->setDate(qApp->serverDate());
 
-    connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
     connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &Galpao::on_dateTimeEdit_dateChanged);
+    connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
+    connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &Galpao::on_itemBoxVeiculo_textChanged);
     connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
     connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
-    connect(ui->groupBoxEdicao, &QGroupBox::toggled, this, &Galpao::on_groupBoxEdicao_toggled);
 
-    scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
+    auto background = new QGraphicsPixmapItem(QPixmap("://galpao2.png"));
+    scene->addItem(background);
 
-    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    //  ui->graphicsView_4->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    ui->graphicsPallet->setSceneRect(650, 0, 842, 10000);
 
-    //    ui->graphicsView->setFixedSize(624, 586);
-    ui->graphicsView->setSceneRect(0, 0, 624, 586);
-    ui->graphicsView->fitInView(0, 0, 0, 0, Qt::KeepAspectRatio);
+    ui->graphicsGalpao->setSceneRect(0, 0, 624, 586);
 
-    ui->graphicsView_4->setSceneRect(650, 0, 842, 10000);
+    ui->graphicsGalpao->fitInView(background, Qt::KeepAspectRatio);
 
     carregarPallets();
+
+    isSet = true;
   }
 
   if (not modelIsSet) {
@@ -139,12 +138,10 @@ void Galpao::carregarPallets() {
     strings.removeFirst();
     strings.removeFirst();
 
-    auto *pallet = new PalletItem(QRect(0, 0, tamanho.at(0).toInt(), tamanho.at(1).toInt()));
-    pallet->setPos(posicao.at(0).toInt(), posicao.at(1).toInt());
+    auto *pallet = new PalletItem(QRect(0, 0, tamanho.at(0).toDouble(), tamanho.at(1).toDouble()));
+    pallet->setPos(posicao.at(0).toDouble(), posicao.at(1).toDouble());
     pallet->setLabel(iterator.key());
     pallet->setText(strings.join("\n"));
-    //    pallet->setFlags(QGraphicsItem::ItemIsMovable);
-    //    rect->setPen(QPen(QColor(Qt::red)));
 
     connect(pallet, &PalletItem::save, this, &Galpao::salvarPallets);
     connect(pallet, &PalletItem::unselectOthers, this, &Galpao::unselectOthers);
@@ -235,11 +232,19 @@ void Galpao::on_groupBoxEdicao_toggled(bool checked) {
   auto items = scene->items();
 
   for (auto item : items) {
-    if (auto pallet = dynamic_cast<PalletItem *>(item)) {
-      pallet->setFlag(QGraphicsItem::ItemIsMovable, checked);
-      //      rect->setPen(QPen(QColor(Qt::red)));
-    }
+    if (auto pallet = dynamic_cast<PalletItem *>(item)) { pallet->setFlag(QGraphicsItem::ItemIsMovable, checked); }
   }
+
+  if (checked) { unselectOthers(); }
+
+  ui->pushButtonCriarPallet->setDisabled(true);
+  ui->pushButtonRemoverPallet->setDisabled(true);
+}
+
+void Galpao::resizeEvent(QResizeEvent *event) {
+  ui->graphicsGalpao->fitInView(0, 0, 624, 586, Qt::KeepAspectRatio);
+
+  QWidget::resizeEvent(event);
 }
 
 // TODO: adicionar botao para criar pallet
@@ -249,3 +254,4 @@ void Galpao::on_groupBoxEdicao_toggled(bool checked) {
 // TODO: guardar idEstoque em veiculo_has_produto
 // TODO: listar os consumos que na venda esteja em 'estoque' e o restante dos estoques (livre)
 // TODO: colocar nas permissoes de usuario uma coluna para 'galpao' para poder limitar quem ve essa aba
+// TODO: quando marcar item entregue mudar bloco do consumo para fora dos pallets (usar um pallet invisivel ou apenas deixar vazio a coluna do bloco)

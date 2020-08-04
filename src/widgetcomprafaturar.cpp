@@ -79,10 +79,10 @@ void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
 bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
   QSqlQuery queryCompra;
-  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
+  queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   QSqlQuery queryVenda;
-  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'EM ENTREGA' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
+  queryVenda.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGUE' WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
   for (const auto &idCompra : idsCompra) {
     queryCompra.bindValue(":dataRealFat", dataReal);

@@ -32,9 +32,6 @@ void Galpao::updateTables() {
     connect(ui->pushButtonCriarPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonCriarPallet_clicked);
     connect(ui->pushButtonRemoverPallet, &QPushButton::clicked, this, &Galpao::on_pushButtonRemoverPallet_clicked);
 
-    auto background = new QGraphicsPixmapItem(QPixmap("://galpao2.png"));
-    scene->addItem(background);
-
     ui->graphicsGalpao->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsGalpao->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -42,9 +39,7 @@ void Galpao::updateTables() {
 
     ui->graphicsGalpao->setSceneRect(0, 0, 624, 586);
 
-    ui->graphicsGalpao->fitInView(background, Qt::KeepAspectRatio);
-
-    carregarPallets();
+    ui->graphicsGalpao->fitInView(0, 0, 624, 586, Qt::KeepAspectRatio);
 
     isSet = true;
   }
@@ -55,6 +50,8 @@ void Galpao::updateTables() {
   }
 
   if (not modelTranspAgend.select()) { return; }
+
+  carregarPallets();
 }
 
 void Galpao::setupTables() {
@@ -92,6 +89,10 @@ void Galpao::setupTables() {
 }
 
 void Galpao::carregarPallets() {
+  scene->clear();
+
+  scene->addItem(new QGraphicsPixmapItem(QPixmap("://galpao2.png")));
+
   QSqlQuery query;
 
   if (not query.exec("SELECT g.*, v.id, v.tipo, CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, REPLACE(v.descricao, '-', '') AS descricao, v.idVendaProduto2 FROM galpao g LEFT JOIN view_galpao v ON "

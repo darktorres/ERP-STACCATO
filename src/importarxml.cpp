@@ -1085,6 +1085,7 @@ bool ImportarXML::criarPagamentoGare(const double valor, const XML &xml) {
   const int lojaGeral = 1;
 
   if (not modelPagamento.setData(row, "dataEmissao", qApp->serverDate())) { return false; }
+  if (not modelPagamento.setData(row, "dataPagamento", qApp->serverDate().addDays(15))) { return false; }
   if (not modelPagamento.setData(row, "idLoja", lojaGeral)) { return false; }
   if (not modelPagamento.setData(row, "contraParte", "GARE")) { return false; }
   if (not modelPagamento.setData(row, "idNFe", xml.idNFe)) { return false; }

@@ -1027,6 +1027,8 @@ std::optional<double> ImportarXML::calculaGare(XML &xml) {
 
   double total = 0;
 
+  if (xml.xNome == "DOCOL METAIS SANITARIOS LTDA") { return 0; }
+
   for (auto &produto : xml.produtos) {
     qDebug() << "tipoICMS: " << produto.tipoICMS;
     if (produto.tipoICMS != "ICMS00") { continue; }

@@ -99,7 +99,8 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
                  "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query5;
-  query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE idNFe IN (SELECT idNFe FROM estoque WHERE idEstoque = :idEstoque)");
+  query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE status = 'PENDENTE GARE' AND idNFe IN (SELECT idNFe FROM estoque WHERE "
+                 "idEstoque = :idEstoque)");
 
   for (const auto &index : list) {
     const bool isCD = (modelViewRecebimento.data(index.row(), "local").toString() == "CD");

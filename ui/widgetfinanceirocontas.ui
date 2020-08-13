@@ -113,8 +113,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>174</width>
-            <height>975</height>
+            <width>208</width>
+            <height>972</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
@@ -127,6 +127,159 @@
               <string>Filtros:</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_12">
+              <item row="5" column="0">
+               <widget class="QRadioButton" name="radioButtonCancelado">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Cancelado</string>
+                </property>
+               </widget>
+              </item>
+              <item row="15" column="0">
+               <widget class="QPushButton" name="pushButtonInserirTransferencia">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Inserir transferência</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QGroupBox" name="groupBoxLojas">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="title">
+                 <string>Loja</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="0" column="0">
+                  <widget class="ItemBox" name="itemBoxLojas">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="13" column="0">
+               <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Antecipar recebimento</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QGroupBox" name="groupBox">
+                <property name="title">
+                 <string>Valor De/Até</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_5">
+                 <item row="0" column="0">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxDe">
+                   <property name="prefix">
+                    <string>R$ </string>
+                   </property>
+                   <property name="maximum">
+                    <double>99999.990000000005239</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxAte">
+                   <property name="prefix">
+                    <string>R$ </string>
+                   </property>
+                   <property name="maximum">
+                    <double>99999.990000000005239</double>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QRadioButton" name="radioButtonPago">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Pago</string>
+                </property>
+               </widget>
+              </item>
+              <item row="16" column="0">
+               <widget class="QPushButton" name="pushButtonExcluirLancamento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Excluir lançamento</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QRadioButton" name="radioButtonRecebido">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Recebido</string>
+                </property>
+               </widget>
+              </item>
+              <item row="11" column="0">
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>290</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="0">
+               <widget class="QRadioButton" name="radioButtonTodos">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Todos</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="14" column="0">
+               <widget class="QPushButton" name="pushButtonInserirLancamento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Inserir lançamento</string>
+                </property>
+               </widget>
+              </item>
               <item row="8" column="0">
                <widget class="QGroupBox" name="groupBoxData">
                 <property name="enabled">
@@ -165,110 +318,13 @@
                 </layout>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QRadioButton" name="radioButtonRecebido">
+              <item row="17" column="0">
+               <widget class="QPushButton" name="pushButtonReverterPagamento">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Recebido</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0">
-               <widget class="QGroupBox" name="groupBoxLojas">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="title">
-                 <string>Loja</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="0" column="0">
-                  <widget class="ItemBox" name="itemBoxLojas">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="9" column="0">
-               <widget class="QGroupBox" name="groupBox">
-                <property name="title">
-                 <string>Valor De/Até</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_5">
-                 <item row="0" column="0">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxDe">
-                   <property name="prefix">
-                    <string>R$ </string>
-                   </property>
-                   <property name="maximum">
-                    <double>99999.990000000005239</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxAte">
-                   <property name="prefix">
-                    <string>R$ </string>
-                   </property>
-                   <property name="maximum">
-                    <double>99999.990000000005239</double>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="14" column="0">
-               <widget class="QPushButton" name="pushButtonInserirTransferencia">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Inserir transferência</string>
-                </property>
-               </widget>
-              </item>
-              <item row="15" column="0">
-               <widget class="QPushButton" name="pushButtonExcluirLancamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Excluir lançamento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="12" column="0">
-               <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Antecipar recebimento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QRadioButton" name="radioButtonCancelado">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Cancelado</string>
+                 <string>Reverter pagamento</string>
                 </property>
                </widget>
               </item>
@@ -282,61 +338,15 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
-               <widget class="QRadioButton" name="radioButtonPago">
+              <item row="12" column="0">
+               <widget class="QPushButton" name="pushButtonImportarFolhaPag">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Pago</string>
+                 <string>Importar folha pag.</string>
                 </property>
                </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonTodos">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Todos</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="13" column="0">
-               <widget class="QPushButton" name="pushButtonInserirLancamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Inserir lançamento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="16" column="0">
-               <widget class="QPushButton" name="pushButtonReverterPagamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Reverter pagamento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="11" column="0">
-               <spacer name="verticalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>290</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
              </layout>
             </widget>

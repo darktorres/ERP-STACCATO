@@ -9,8 +9,10 @@
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "xlsxdocument.h"
 
 #include <QDebug>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -59,6 +61,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->pushButtonAdiantarRecebimento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonAdiantarRecebimento_clicked, connectionType);
   connect(ui->pushButtonExcluirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked, connectionType);
+  connect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked, connectionType);
   connect(ui->pushButtonInserirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked, connectionType);
   connect(ui->pushButtonInserirTransferencia, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked, connectionType);
   connect(ui->pushButtonReverterPagamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked, connectionType);
@@ -309,6 +312,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
   }
 
   if (tipo == Tipo::Receber) {
+    ui->pushButtonImportarFolhaPag->hide();
     ui->radioButtonPago->hide();
     ui->lineEditBusca->setPlaceholderText("Venda/Contraparte");
   }
@@ -376,8 +380,6 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
   }
 }
 
-// TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo creio eu porem em diversas linhas eles tem valores diferentes
-
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
@@ -415,3 +417,63 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     qApp->enqueueInformation("Lançamento revertido com sucesso!", this);
   }
 }
+
+void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
+  const QString file = QFileDialog::getOpenFileName(this, "Importar arquivo do Excel", QDir::currentPath(), "Excel (*.xlsx)");
+
+  if (file.isEmpty()) { return; }
+
+  SqlTableModel modelImportar;
+  modelImportar.setTable("conta_a_pagar_has_pagamento");
+
+  QXlsx::Document xlsx(file);
+
+  if (not xlsx.selectSheet("Planilha1")) { return qApp->enqueueException("Não encontrou 'Planilha1' na tabela!", this); }
+
+  const int rows = xlsx.dimension().rowCount();
+
+  if (not qApp->startTransaction("WidgetFinanceiroContas::pushButtonImportarFolhaPag")) { return; }
+
+  const bool success = [&] {
+    for (int rowExcel = 2; rowExcel <= rows; ++rowExcel) {
+      if (xlsx.read(rowExcel, 1).toString().isEmpty()) { return qApp->enqueueError(false, "Não encontrou cabeçalho na primeira linha do Excel!", this); }
+
+      QSqlQuery queryLoja;
+
+      if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.read(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
+        return qApp->enqueueException(false, "Erro buscando idLoja: " + queryLoja.lastError().text(), this);
+      }
+
+      QSqlQuery queryConta;
+
+      if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.read(rowExcel, 7).toString() + "'") or not queryConta.first()) {
+        return qApp->enqueueException(false, "Erro buscando idConta: " + queryConta.lastError().text(), this);
+      }
+
+      const int rowModel = modelImportar.insertRowAtEnd();
+
+      if (not modelImportar.setData(rowModel, "dataEmissao", xlsx.read(rowExcel, 1))) { return false; }
+      if (not modelImportar.setData(rowModel, "idLoja", queryLoja.value("idLoja"))) { return false; }
+      if (not modelImportar.setData(rowModel, "contraParte", xlsx.read(rowExcel, 3))) { return false; }
+      if (not modelImportar.setData(rowModel, "valor", xlsx.read(rowExcel, 4))) { return false; }
+      if (not modelImportar.setData(rowModel, "tipo", xlsx.read(rowExcel, 5))) { return false; }
+      if (not modelImportar.setData(rowModel, "dataPagamento", xlsx.read(rowExcel, 6))) { return false; }
+      if (not modelImportar.setData(rowModel, "observacao", xlsx.read(rowExcel, 8))) { return false; }
+      if (not modelImportar.setData(rowModel, "idConta", queryConta.value("idConta"))) { return false; }
+      if (not modelImportar.setData(rowModel, "centroCusto", xlsx.read(rowExcel, 9))) { return false; }
+      if (not modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 10))) { return false; }
+    }
+
+    if (not modelImportar.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (not success) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
+
+  qApp->enqueueInformation("Tabela importada com sucesso!", this);
+}
+
+// TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes

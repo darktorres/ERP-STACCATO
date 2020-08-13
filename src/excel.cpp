@@ -37,8 +37,11 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   if (not setQuerys()) { return false; }
 
-  fileName = isRepresentacao ? path + "/" + representacao + ".xlsx"
-                             : path + "/" + id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
+  fileName = (isRepresentacao) ? representacao + ".xlsx"
+                               : id + "-" + queryVendedor.value("nome").toString().split(" ").first() + "-" + queryCliente.value("nome_razao").toString().replace("/", "-") + ".xlsx";
+
+  fileName.remove("\\").remove("/").remove(":").remove("*").remove("?").remove("\"").remove("<").remove(">").remove("|");
+  fileName = path + "/" + fileName;
 
   QFile file(fileName);
 

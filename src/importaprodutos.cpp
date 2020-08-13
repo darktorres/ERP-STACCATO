@@ -94,9 +94,9 @@ bool ImportaProdutos::importar() {
   int current = 0;
   bool canceled = false;
 
-  const int rows = xlsx.dimension().rowCount();
+  const int rowCount = xlsx.dimension().rowCount();
 
-  for (int row = 2; row < rows; ++row) {
+  for (int row = 2; row <= rowCount; ++row) {
     if (progressDialog->wasCanceled()) {
       canceled = true;
       break;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>933</width>
-    <height>427</height>
+    <width>1411</width>
+    <height>595</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -18,7 +18,13 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <widget class="QFrame" name="frame">
+    <widget class="QFrame" name="frameAcessorio">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -159,7 +165,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="GraphicsView" name="graphicsView">
+    <widget class="GraphicsView" name="graphicsGalpao">
      <property name="mouseTracking">
       <bool>true</bool>
      </property>
@@ -169,7 +175,19 @@
     </widget>
    </item>
    <item row="0" column="2">
-    <widget class="GraphicsView" name="graphicsView_4">
+    <widget class="GraphicsView" name="graphicsPallet">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>619</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="mouseTracking">
       <bool>true</bool>
      </property>

@@ -33,6 +33,7 @@ private:
   auto on_pushButtonCriarPallet_clicked() -> void;
   auto on_pushButtonRemoverPallet_clicked() -> void;
   auto on_table_selectionChanged() -> void;
+  auto resizeEvent(QResizeEvent *event) -> void override;
   auto salvarPallets() -> void;
   auto setFilter() -> void;
   auto setupTables() -> void;

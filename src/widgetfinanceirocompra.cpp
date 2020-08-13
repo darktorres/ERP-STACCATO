@@ -55,7 +55,7 @@ void WidgetFinanceiroCompra::on_table_activated(const QModelIndex &index) {
 void WidgetFinanceiroCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetFinanceiroCompra::montaFiltro() {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().remove("'");
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
   model.setFilter(filtroBusca);

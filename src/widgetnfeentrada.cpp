@@ -1,13 +1,17 @@
 #include "widgetnfeentrada.h"
 #include "ui_widgetnfeentrada.h"
 
+#include "acbr.h"
 #include "application.h"
 #include "dateformatdelegate.h"
 #include "doubledelegate.h"
 #include "reaisdelegate.h"
+#include "usersession.h"
 #include "xml_viewer.h"
 
 #include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -20,6 +24,7 @@ void WidgetNfeEntrada::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetNfeEntrada::on_lineEditBusca_textChanged, connectionType);
+  connect(ui->pushButtonExportar, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonExportar_clicked, connectionType);
   connect(ui->pushButtonRemoverNFe, &QPushButton::clicked, this, &WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &WidgetNfeEntrada::on_table_activated, connectionType);
 }
@@ -44,11 +49,14 @@ void WidgetNfeEntrada::resetTables() { modelIsSet = false; }
 void WidgetNfeEntrada::setupTables() {
   modelViewNFeEntrada.setTable("view_nfe_entrada");
 
-  modelViewNFeEntrada.setHeaderData("GARE", "GARE (Estimado)");
+  modelViewNFeEntrada.setHeaderData("created", "Importado em");
 
   ui->table->setModel(&modelViewNFeEntrada);
 
   ui->table->hideColumn("idNFe");
+  ui->table->hideColumn("chaveAcesso");
+
+  ui->table->showColumn("created");
 
   ui->table->setItemDelegate(new DoubleDelegate(this));
   ui->table->setItemDelegateForColumn("GARE", new ReaisDelegate(this));
@@ -69,19 +77,33 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetNfeEntrada::montaFiltro() {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().remove("'");
 
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
 }
 
 void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
-  // TODO: remover GARE da tabela de contas_a_pagar
-
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
+  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!"); }
+
   const int row = list.first().row();
+
+  //--------------------------------------------------------------
+
+  QSqlQuery queryGare;
+  queryGare.prepare("SELECT status FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
+  queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not queryGare.exec()) { return qApp->enqueueError("Erro verificando GARE: " + queryGare.lastError().text(), this); }
+
+  if (queryGare.first()) {
+    const QString status = queryGare.value("status").toString();
+
+    if (status == "GERADO GARE" or status == "PAGO GARE") { return qApp->enqueueError("GARE 'em pagamento/pago'!", this); }
+  }
 
   //--------------------------------------------------------------
 
@@ -113,89 +135,143 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 }
 
 bool WidgetNfeEntrada::remover(const int row) {
-  QSqlQuery query1;
-  query1.prepare(
+  QSqlQuery queryPedidoFornecedor;
+  queryPedidoFornecedor.prepare(
       "UPDATE `pedido_fornecedor_has_produto2` SET status = 'EM FATURAMENTO', quantUpd = 0, dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, "
       "dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque "
       "FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  query1.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryPedidoFornecedor.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query1.exec()) { return qApp->enqueueException(false, "Erro voltando compra para faturamento: " + query1.lastError().text(), this); }
+  if (not queryPedidoFornecedor.exec()) { return qApp->enqueueException(false, "Erro voltando compra para faturamento: " + queryPedidoFornecedor.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query2;
-  query2.prepare(
+  QSqlQuery queryVendaProduto;
+  queryVendaProduto.prepare(
       "UPDATE venda_has_produto2 SET status = 'EM FATURAMENTO', dataPrevCompra = NULL, dataRealCompra = NULL, dataPrevConf = NULL, dataRealConf = NULL, dataPrevFat = NULL, "
       "dataRealFat = NULL, dataPrevColeta = NULL, dataRealColeta = NULL, dataPrevReceb = NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` IN (SELECT "
       "`idVendaProduto2` FROM estoque_has_consumo WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)) AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
-  query2.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  queryVendaProduto.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query2.exec()) { return qApp->enqueueException(false, "Erro voltando venda para faturamento: " + query2.lastError().text(), this); }
+  if (not queryVendaProduto.exec()) { return qApp->enqueueException(false, "Erro voltando venda para faturamento: " + queryVendaProduto.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query03;
-  query03.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
-  query03.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  QSqlQuery queryEstoque;
+  queryEstoque.prepare("SELECT idEstoque FROM estoque WHERE idNFe = :idNFe");
+  queryEstoque.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query03.exec()) { return qApp->enqueueException(false, "Erro buscando consumos: " + query03.lastError().text(), this); }
+  if (not queryEstoque.exec()) { return qApp->enqueueException(false, "Erro buscando consumos: " + queryEstoque.lastError().text(), this); }
 
-  QSqlQuery query3;
-  query3.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque = :idEstoque");
+  QSqlQuery queryDeleteConsumo;
+  queryDeleteConsumo.prepare("DELETE FROM estoque_has_consumo WHERE idEstoque = :idEstoque");
 
-  while (query03.next()) {
-    query3.bindValue(":idEstoque", query03.value("idEstoque"));
+  while (queryEstoque.next()) {
+    queryDeleteConsumo.bindValue(":idEstoque", queryEstoque.value("idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueException(false, "Erro removendo consumos: " + query3.lastError().text(), this); }
+    if (not queryDeleteConsumo.exec()) { return qApp->enqueueException(false, "Erro removendo consumos: " + queryDeleteConsumo.lastError().text(), this); }
   }
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query4;
-  query4.prepare("DELETE FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
-  query4.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  QSqlQuery queryDeleteCompra;
+  queryDeleteCompra.prepare("DELETE FROM estoque_has_compra WHERE idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe)");
+  queryDeleteCompra.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query4.exec()) { return qApp->enqueueException(false, "Erro removendo compras: " + query4.lastError().text(), this); }
-
-  //-----------------------------------------------------------------------------
-
-  QSqlQuery query5;
-  query5.prepare("UPDATE produto SET desativado = TRUE WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
-  query5.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
-
-  if (not query5.exec()) { return qApp->enqueueException(false, "Erro removendo produto estoque: " + query5.lastError().text(), this); }
+  if (not queryDeleteCompra.exec()) { return qApp->enqueueException(false, "Erro removendo compras: " + queryDeleteCompra.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query6;
-  query6.prepare("UPDATE estoque SET status = 'CANCELADO', idNFe = NULL WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
-  query6.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  QSqlQuery queryProduto;
+  queryProduto.prepare("UPDATE produto SET desativado = TRUE WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
+  queryProduto.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query6.exec()) { return qApp->enqueueException(false, "Erro removendo estoque: " + query6.lastError().text(), this); }
+  if (not queryProduto.exec()) { return qApp->enqueueException(false, "Erro removendo produto estoque: " + queryProduto.lastError().text(), this); }
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery query7;
-  query7.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-  query7.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  QSqlQuery queryCancelaEstoque;
+  queryCancelaEstoque.prepare("UPDATE estoque SET status = 'CANCELADO', idNFe = NULL WHERE idEstoque IN (SELECT idEstoque FROM (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe) temp)");
+  queryCancelaEstoque.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query7.exec()) { return qApp->enqueueException(false, "Erro cancelando nota: " + query7.lastError().text(), this); }
+  if (not queryCancelaEstoque.exec()) { return qApp->enqueueException(false, "Erro removendo estoque: " + queryCancelaEstoque.lastError().text(), this); }
+
+  //-----------------------------------------------------------------------------
+
+  QSqlQuery queryGare;
+  queryGare.prepare("DELETE FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
+  queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not queryGare.exec()) { return qApp->enqueueError(false, "Erro removendo pagamento da GARE: " + queryGare.lastError().text(), this); }
+
+  //-----------------------------------------------------------------------------
+
+  QSqlQuery queryDeleteNFe;
+  queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+  queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+  if (not queryDeleteNFe.exec()) { return qApp->enqueueException(false, "Erro cancelando nota: " + queryDeleteNFe.lastError().text(), this); }
 
   return true;
 }
 
+void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
+  // TODO: 5zipar arquivos exportados com nome descrevendo mes/notas/etc
+
+  const auto list = ui->table->selectionModel()->selectedRows();
+
+  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+
+  QSqlQuery query;
+  query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
+
+  ACBr acbrLocal;
+
+  for (const auto &index : list) {
+    // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
+    // quando enviar para o acbr guardar a nota com status 'pendente' para consulta na receita
+    // quando conseguir consultar se a receita retornar que a nota nao existe lá apagar aqui
+    // se ela existir lá verificar se consigo pegar o xml autorizado e atualizar a nota pendente
+
+    if (modelViewNFeEntrada.data(index.row(), "status").toString() != "AUTORIZADO") { continue; }
+
+    // pegar XML do MySQL e salvar em arquivo
+
+    const QString chaveAcesso = modelViewNFeEntrada.data(index.row(), "chaveAcesso").toString();
+
+    query.bindValue(":chaveAcesso", chaveAcesso);
+
+    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml: " + query.lastError().text(), this); }
+
+    QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
+
+    if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
+
+    fileXml.write(query.value("xml").toByteArray());
+
+    fileXml.flush();
+    fileXml.close();
+
+    // mandar XML para ACBr gerar PDF
+
+    const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
+
+    if (not pdfOrigem) { return; }
+
+    if (pdfOrigem->isEmpty()) { return qApp->enqueueException("Resposta vazia!", this); }
+
+    // copiar para pasta predefinida
+
+    const QString pdfDestino = QDir::currentPath() + "/arquivos/" + chaveAcesso + ".pdf";
+
+    QFile filePdf(pdfDestino);
+
+    if (filePdf.exists()) { filePdf.remove(); }
+
+    if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueException("Erro copiando pdf!", this); }
+  }
+
+  qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
+}
+
 // TODO: 5copiar filtros do widgetnfesaida
-
-// TODO: para gerar GARE da nfe de entrada:
-// dados ncm, valorMercadoria, ipi, desconto e aliqIcms...
-
-// valorIcms = (valorMercadoria - desconto) * aliqIcms
-// mva:
-// 		se aliqIcms = 4% procurar mva4% usando ncm
-// 		se aliqIcms <> 4% procurar mva12% usando ncm
-// IndiceAgregado = (valorMercadoria + Ipi) * MVA
-// baseCalculoIcmsST = valorMercadoria + Ipi + IndiceAgregado
-// icmsInterno = procurar aliqInterna pelo ncm
-// icmsInternoR$ = baseCalculoIcmsST * icmsInterno
-// valorIcmsSt = icmsInternoR$ - valorIcms

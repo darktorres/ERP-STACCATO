@@ -132,7 +132,7 @@ bool WidgetCompraConsumos::desfazerConsumo(const int row) {
 void WidgetCompraConsumos::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetCompraConsumos::montaFiltro() {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().remove("'");
 
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
 }

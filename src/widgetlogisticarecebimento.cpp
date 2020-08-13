@@ -85,10 +85,10 @@ void WidgetLogisticaRecebimento::setupTables() {
 
 bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) {
   QSqlQuery query1;
-  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
+  query1.prepare("UPDATE estoque SET status = 'ESTOQUE', bloco = :bloco, recebidoPor = :recebidoPor WHERE status = 'EM RECEBIMENTO' AND idEstoque = :idEstoque");
 
   QSqlQuery query2;
-  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO' WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
+  query2.prepare("UPDATE estoque_has_consumo SET status = 'CONSUMO', bloco = :bloco WHERE idEstoque = :idEstoque AND status = 'PRÉ-CONSUMO'");
 
   QSqlQuery query3;
   query3.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ESTOQUE', dataRealReceb = :dataRealReceb WHERE status = 'EM RECEBIMENTO' AND "
@@ -99,9 +99,13 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
                  "idVendaProduto2 IN (SELECT idVendaProduto2 FROM estoque_has_consumo WHERE idEstoque = :idEstoque)");
 
   QSqlQuery query5;
-  query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE idNFe IN (SELECT idNFe FROM estoque WHERE idEstoque = :idEstoque)");
+  query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE status = 'PENDENTE GARE' AND idNFe IN (SELECT idNFe FROM estoque WHERE "
+                 "idEstoque = :idEstoque)");
 
   for (const auto &index : list) {
+    const bool isCD = (modelViewRecebimento.data(index.row(), "local").toString() == "CD");
+
+    query1.bindValue(":bloco", (isCD) ? "ENTRADA" : "");
     query1.bindValue(":recebidoPor", recebidoPor);
     query1.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
@@ -110,6 +114,7 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     //-----------------------------------------------------------------
 
     query2.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
+    query2.bindValue(":bloco", (isCD) ? "ENTRADA" : "");
 
     if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando status da venda: " + query2.lastError().text(), this); }
 
@@ -174,7 +179,7 @@ void WidgetLogisticaRecebimento::on_checkBoxMarcarTodos_clicked(const bool check
 void WidgetLogisticaRecebimento::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetLogisticaRecebimento::montaFiltro() {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().remove("'");
 
   modelViewRecebimento.setFilter("(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')");
 }

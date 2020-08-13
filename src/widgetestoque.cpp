@@ -183,7 +183,7 @@ QString WidgetEstoque::getMatch() const {
     if (string.contains("-")) {
       string.prepend("\"").append("\"");
     } else {
-      string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
+      string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
       string.prepend("+").append("*");
     }
   }
@@ -235,7 +235,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 
   if (not modelo.exists()) { return qApp->enqueueException("Não encontrou o modelo do Excel!", this); }
 
-  const QString fileName = dir + "/relatorio_contabil.xlsx";
+  const QString fileName = dir + "/relatorio_contabil_" + data + ".xlsx";
 
   QFile file(fileName);
 

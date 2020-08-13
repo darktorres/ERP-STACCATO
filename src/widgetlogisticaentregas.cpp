@@ -511,7 +511,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   if (not modelo.exists()) { return qApp->enqueueException("Não encontrou o modelo do Excel!", this); }
 
-  const QString fileName = path + "/teste_protocolo_entrega.xlsx";
+  const QString fileName = path + "/" + idEvento + "_" + idVenda + ".xlsx";
 
   QFile file(fileName);
 

@@ -13,12 +13,12 @@
 #include <QSqlQuery>
 #include <QToolTip>
 
-PalletItem::PalletItem(const QRectF size, QGraphicsItem *parent) : QGraphicsItem(parent), size(size) {
+PalletItem::PalletItem(const QRectF size, QGraphicsItem *parent) : QGraphicsObject(parent), size(size) {
   setAcceptHoverEvents(true);
   setAcceptDrops(true);
 }
 
-QRectF PalletItem::boundingRect() const { return selected ? size.united(childrenBoundingRect()) : size; }
+QRectF PalletItem::boundingRect() const { return size; }
 
 void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
   Q_UNUSED(option)
@@ -33,18 +33,16 @@ void PalletItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     painter->drawRect(size);
   }
 
-  setZValue(0);
+  if (selected) {
+    painter->setBrush(QBrush(QColor(Qt::black), Qt::SolidPattern));
+    painter->drawRect(size);
+  }
+
   QFont font = painter->font();
   font.setPixelSize(8);
   painter->setFont(font);
   painter->setPen(QColor(Qt::red));
   painter->drawText(0, size.center().y(), label);
-
-  if (selected) {
-    setZValue(1);
-    painter->setBrush(QBrush(QColor(Qt::black), Qt::SolidPattern));
-    painter->drawRect(size);
-  }
 }
 
 void PalletItem::setText(const QString &value) {
@@ -55,7 +53,7 @@ void PalletItem::setText(const QString &value) {
   for (auto line : lines) {
     auto estoque = new EstoqueItem(line, line.split(" - ").last().toInt(), this);
     estoque->setVisible(false);
-    estoque->setPos(mapFromScene(660, pos));
+    estoque->setPos(mapFromScene(680, pos));
     estoque->setBrush(QBrush(QColor(Qt::red)));
     pos += 15;
   }
@@ -77,7 +75,7 @@ void PalletItem::reorderChildren() {
   int pos = 15;
 
   for (auto estoque : childItems()) {
-    estoque->setPos(mapFromScene(660, pos));
+    estoque->setPos(mapFromScene(680, pos));
     pos += 15;
   }
 }
@@ -98,6 +96,8 @@ void PalletItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem
 void PalletItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) { QGraphicsItem::hoverLeaveEvent(event); }
 
 void PalletItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+  if (flags().testFlag(QGraphicsItem::ItemIsMovable)) { return; }
+
   if (not selected) { emit unselectOthers(); }
 
   selected = not selected;
@@ -113,13 +113,20 @@ void PalletItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem
 void PalletItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   if (flags().testFlag(QGraphicsItem::ItemIsMovable)) { emit save(); }
 
+  reorderChildren();
+
   QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void PalletItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseDoubleClickEvent(event); }
 
 void PalletItem::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
-  if (event->mimeData()->hasFormat("text/plain")) { event->acceptProposedAction(); }
+  if (childItems().contains(dynamic_cast<EstoqueItem *>(event->mimeData()->parent()))) {
+    event->ignore();
+    return;
+  }
+
+  if (event->mimeData()->hasFormat("text/plain")) { event->accept(); }
 }
 
 void PalletItem::dragLeaveEvent(QGraphicsSceneDragDropEvent *event) { Q_UNUSED(event); }

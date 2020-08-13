@@ -243,7 +243,7 @@ void WidgetLogisticaAgendarEntrega::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text();
+  const QString textoBusca = ui->lineEditBusca->text().remove("'");
 
   const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR Bairro LIKE '%" + textoBusca + "%' OR Logradouro LIKE '%" + textoBusca + "%' OR Cidade LIKE '%" + textoBusca + "%')";
 

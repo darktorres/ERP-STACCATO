@@ -35,6 +35,7 @@ private:
   auto on_groupBoxData_toggled(const bool enabled) -> void;
   auto on_pushButtonAdiantarRecebimento_clicked() -> void;
   auto on_pushButtonExcluirLancamento_clicked() -> void;
+  auto on_pushButtonImportarFolhaPag_clicked() -> void;
   auto on_pushButtonInserirLancamento_clicked() -> void;
   auto on_pushButtonInserirTransferencia_clicked() -> void;
   auto on_pushButtonReverterPagamento_clicked() -> void;

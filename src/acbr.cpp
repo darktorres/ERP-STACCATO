@@ -4,6 +4,7 @@
 #include "usersession.h"
 
 #include <QDesktopServices>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QSqlError>
@@ -82,7 +83,14 @@ bool ACBr::gerarDanfe(const int idNFe) {
 }
 
 std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
-  QFile file("xml.xml");
+  if (fileContent.indexOf("Id=") == -1) {
+    qApp->enqueueError("Não encontrado a chave de acesso!");
+    return {};
+  }
+
+  const QString chaveAcesso = fileContent.mid(fileContent.indexOf("Id=") + 7, 44);
+
+  QFile file(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
   if (not file.open(QFile::WriteOnly)) {
     qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString());

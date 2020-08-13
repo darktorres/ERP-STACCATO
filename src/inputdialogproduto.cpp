@@ -253,6 +253,14 @@ bool InputDialogProduto::cadastrar() {
       }
     }
 
+    if (tipo == Tipo::Faturamento) {
+      for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
+        if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") {
+          if (not modelPedidoFornecedor.setData(row, "status", "ENTREGUE")) { return false; }
+        }
+      }
+    }
+
     return modelPedidoFornecedor.submitAll();
   }();
 

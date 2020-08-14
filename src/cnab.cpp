@@ -331,31 +331,31 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
 
     // lote Segmento N pag 35
 
-    stream << "341";                                                   // 9(03) codigo do banco
-    writeNumber(stream, 1, 4);                                         // 9(04) lote de servico
-    stream << "3";                                                     // 9(01) registro detalhe de lote
-    writeNumber(stream, ++registro, 5);                                // 9(05) numero sequencial registro no lote
-    stream << "N";                                                     // X(01) codigo segmento reg. detalhe
-    stream << "000";                                                   // 9(03) tipo de movimento
-    stream << "05";                                                    // 9(02) identificacao do tributo
-    stream << "0632";                                                  // 9(04) codigo da receita
-    stream << "2";                                                     // 9(01) tipo de inscricao do contribuinte
-    stream << "09375013000543";                                        // 9(14) cpf ou cnpj do contribuinte
-    stream << "206398781114";                                          // 9(12) inscricao estadual
-    writeNumber(stream, 0, 13);                                        // 9(13) divida ativa/numero etiqueta
-    writeNumber(stream, gare.mesAnoReferencia, 6);                     // 9(06) mes/ano de referencia
-    writeNumber(stream, 0, 13);                                        // 9(13) numero parcela/notificacao
-    writeNumber(stream, gare.valor, 14);                               // 9(12)V9(02) valor da receita
-    writeNumber(stream, 0, 14);                                        // 9(12)V9(02) valor dos juros
-    writeNumber(stream, 0, 14);                                        // 9(12)V9(02) valor da multa
-    writeNumber(stream, gare.valor, 14);                               // 9(12)V9(02) valor do pagamento
-    writeNumber(stream, gare.dataVencimento, 8);                       // 9(08) data de vencimento
-    writeNumber(stream, gare.dataVencimento, 8);                       // 9(08) data de pagamento
-    writeBlanks(stream, 11);                                           // X(11) complemento de registro
-    writeText(stream, "STACCATO REVESTIMENTOS COM E REPRES LTDA", 30); // X(30) nome do contribuinte
-    writeText(stream, gare.cnpjOrig + gare.numeroNF, 20);              // X(20) seu numero: numero docto atribuido pela empresa
-    writeBlanks(stream, 15);                                           // X(15) nosso numero: numero atribuido pelo banco ***apenas retorno, informar com branco ou zero
-    writeBlanks(stream, 10);                                           // X(10) codigo de ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
+    stream << "341";                                                      // 9(03) codigo do banco
+    writeNumber(stream, 1, 4);                                            // 9(04) lote de servico
+    stream << "3";                                                        // 9(01) registro detalhe de lote
+    writeNumber(stream, ++registro, 5);                                   // 9(05) numero sequencial registro no lote
+    stream << "N";                                                        // X(01) codigo segmento reg. detalhe
+    stream << "000";                                                      // 9(03) tipo de movimento
+    stream << "05";                                                       // 9(02) identificacao do tributo
+    stream << "0632";                                                     // 9(04) codigo da receita
+    stream << "2";                                                        // 9(01) tipo de inscricao do contribuinte
+    stream << "09375013000543";                                           // 9(14) cpf ou cnpj do contribuinte
+    stream << "206398781114";                                             // 9(12) inscricao estadual
+    writeNumber(stream, 0, 13);                                           // 9(13) divida ativa/numero etiqueta
+    writeNumber(stream, gare.mesAnoReferencia, 6);                        // 9(06) mes/ano de referencia
+    writeNumber(stream, 0, 13);                                           // 9(13) numero parcela/notificacao
+    writeNumber(stream, gare.valor, 14);                                  // 9(12)V9(02) valor da receita
+    writeNumber(stream, 0, 14);                                           // 9(12)V9(02) valor dos juros
+    writeNumber(stream, 0, 14);                                           // 9(12)V9(02) valor da multa
+    writeNumber(stream, gare.valor, 14);                                  // 9(12)V9(02) valor do pagamento
+    writeNumber(stream, gare.dataVencimento, 8);                          // 9(08) data de vencimento
+    writeNumber(stream, gare.dataVencimento, 8);                          // 9(08) data de pagamento
+    writeBlanks(stream, 11);                                              // X(11) complemento de registro
+    writeText(stream, "STACCATO REVESTIMENTOS COM E REPRES LTDA", 30);    // X(30) nome do contribuinte
+    writeText(stream, gare.cnpjOrig.left(8) + "   " + gare.numeroNF, 20); // X(20) seu numero: numero docto atribuido pela empresa
+    writeBlanks(stream, 15);                                              // X(15) nosso numero: numero atribuido pelo banco ***apenas retorno, informar com branco ou zero
+    writeBlanks(stream, 10);                                              // X(10) codigo de ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
     stream << "\r\n";
 
     // lote Segmento B pag 36

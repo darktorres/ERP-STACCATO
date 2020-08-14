@@ -329,7 +329,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   for (auto &gare : gares) {
     total += gare.valor;
 
-    // lote Segmento N pag 35
+    // lote Segmento N pag 35 e 68
 
     stream << "341";                                                      // 9(03) codigo do banco
     writeNumber(stream, 1, 4);                                            // 9(04) lote de servico

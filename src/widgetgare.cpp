@@ -249,7 +249,7 @@ void WidgetGare::on_pushButtonRetornoItau_clicked() {
 
   if (filePath.isEmpty()) { return; }
 
-  CNAB cnab;
+  CNAB cnab(this);
   cnab.retornoGareItau240(filePath);
 
   updateTables();

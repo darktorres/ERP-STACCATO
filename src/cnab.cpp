@@ -42,7 +42,7 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   QSqlQuery query;
 
   if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'SANTANDER' AND tipo = 'REMESSA'") or not query.first()) {
-    qApp->enqueueException("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando sequencial CNAB: " + query.lastError().text(), parentWidget());
     return {};
   }
 
@@ -228,7 +228,7 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   QFile file("cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueException(file.errorString(), this);
+    qApp->enqueueException(file.errorString(), parentWidget());
     return {};
   }
 
@@ -238,16 +238,16 @@ std::optional<QString> CNAB::remessaGareSantander240(QVector<Gare> gares) {
   QSqlQuery query2;
 
   if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'SANTANDER' AND sequencial = " + query.value("sequencial").toString())) {
-    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parentWidget());
     return {};
   }
 
   if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial) VALUES ('REMESSA', 'SANTANDER', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
-    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parentWidget());
     return {};
   }
 
-  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", this);
+  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", parentWidget());
 
   return query.value("idCnab").toString();
 }
@@ -262,7 +262,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   QSqlQuery query;
 
   if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
-    qApp->enqueueException("Erro buscando sequencial CNAB: " + query.lastError().text(), this);
+    qApp->enqueueException("Erro buscando sequencial CNAB: " + query.lastError().text(), parentWidget());
     return {};
   }
 
@@ -433,7 +433,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   QFile file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueException(file.errorString(), this);
+    qApp->enqueueException(file.errorString(), parentWidget());
     return {};
   }
 
@@ -443,16 +443,16 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   QSqlQuery query2;
 
   if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'ITAU' AND sequencial = " + query.value("sequencial").toString())) {
-    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parentWidget());
     return {};
   }
 
   if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial) VALUES ('REMESSA', 'ITAU', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
-    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parentWidget());
     return {};
   }
 
-  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", this);
+  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", parentWidget());
 
   return query.value("idCnab").toString();
 }
@@ -519,14 +519,14 @@ void CNAB::retornoGareItau240(const QString &filePath) {
         QSqlQuery query1;
 
         if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND cnpjOrig = " + cnpj) or not query1.first()) {
-          qApp->enqueueException("Erro dando baixa na GARE: " + query1.lastError().text(), this);
+          qApp->enqueueException("Erro dando baixa na GARE: " + query1.lastError().text(), parentWidget());
           return qApp->rollbackTransaction();
         }
 
         QSqlQuery query2;
 
         if (not query2.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'PAGO GARE', valorReal = valor, dataRealizado = '" + dataPgt + "' WHERE idNFe = " + query1.value("idNFe").toString())) {
-          qApp->enqueueException("Erro dando baixa na GARE: " + query2.lastError().text(), this);
+          qApp->enqueueException("Erro dando baixa na GARE: " + query2.lastError().text(), parentWidget());
           return qApp->rollbackTransaction();
         }
       }
@@ -555,13 +555,13 @@ void CNAB::retornoGareItau240(const QString &filePath) {
   QSqlQuery query2;
 
   if (not query2.exec("INSERT INTO cnab (tipo, banco, conteudo) VALUES ('RETORNO', 'ITAU', '" + lines.join("") + "')")) {
-    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), this);
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parentWidget());
     qApp->rollbackTransaction();
   }
 
   if (not qApp->endTransaction()) { return; }
 
-  qApp->enqueueInformation(resultado.join("\n"), this);
+  qApp->enqueueInformation(resultado.join("\n"), parentWidget());
 }
 
 QString CNAB::decodeCodeItau(const QString &code) {

@@ -452,6 +452,8 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
 
       const int rowModel = modelImportar.insertRowAtEnd();
 
+      // TODO: marcar os 'santander' direto como pago
+
       if (not modelImportar.setData(rowModel, "dataEmissao", xlsx.read(rowExcel, 1))) { return false; }
       if (not modelImportar.setData(rowModel, "idLoja", queryLoja.value("idLoja"))) { return false; }
       if (not modelImportar.setData(rowModel, "contraParte", xlsx.read(rowExcel, 3))) { return false; }

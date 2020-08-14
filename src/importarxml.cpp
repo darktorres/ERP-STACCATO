@@ -599,7 +599,7 @@ bool ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   if (not modelNFe.setData(row, "cnpjDest", xml.cnpjDest)) { return false; }
   if (not modelNFe.setData(row, "cnpjOrig", xml.cnpjOrig)) { return false; }
   if (not modelNFe.setData(row, "chaveAcesso", xml.chaveAcesso)) { return false; }
-  if (not modelNFe.setData(row, "numeroNFe", xml.nNF)) { return false; }
+  if (not modelNFe.setData(row, "numeroNFe", QString("%1").arg(xml.nNF.toInt(), 9, 10, QChar('0')))) { return false; }
   if (not modelNFe.setData(row, "xml", xml.fileContent)) { return false; }
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }

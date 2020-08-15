@@ -731,8 +731,6 @@ void Venda::montarFluxoCaixa() {
   }
 
   const QString fornecedor = modelItem.data(0, "fornecedor").toString();
-  const double totalVenda = ui->doubleSpinBoxTotal->value();
-  const double frete = ui->doubleSpinBoxFrete->value();
 
   QSqlQuery query1;
   query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
@@ -885,10 +883,7 @@ void Venda::montarFluxoCaixa() {
 
       if (calculaComissao) {
         const double valorBase = modelFluxoCaixa.data(row, "valor").toDouble();
-        const double valorComissao1 = valorBase * taxaComissao;
-        const double valorComissao2 = taxaComissao * (valorBase - (valorBase / totalVenda * frete));
-        const bool isFreteLoja = (observacaoPgt == "FRETE");
-        const double valorAjustado = isFreteLoja ? valorComissao1 : valorComissao2;
+        const double valorComissao = valorBase * taxaComissao;
 
         const int rowComissao = modelFluxoCaixa2.insertRowAtEnd();
 
@@ -897,7 +892,7 @@ void Venda::montarFluxoCaixa() {
         if (not modelFluxoCaixa2.setData(rowComissao, "idVenda", ui->lineEditVenda->text())) { return; }
         if (not modelFluxoCaixa2.setData(rowComissao, "idLoja", idLoja)) { return; }
         if (not modelFluxoCaixa2.setData(rowComissao, "dataPagamento", dataPgt.addMonths(1))) { return; }
-        if (not modelFluxoCaixa2.setData(rowComissao, "valor", valorAjustado)) { return; }
+        if (not modelFluxoCaixa2.setData(rowComissao, "valor", valorComissao)) { return; }
         if (not modelFluxoCaixa2.setData(rowComissao, "tipo", QString::number(pagamento + 1) + ". Comissão")) { return; }
         if (not modelFluxoCaixa2.setData(rowComissao, "parcela", parcela + 1)) { return; }
         if (not modelFluxoCaixa2.setData(rowComissao, "comissao", true)) { return; }

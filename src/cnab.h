@@ -29,10 +29,12 @@ public:
   ~CNAB();
 
 private:
+  // attributes
   Ui::CNAB *ui;
-  void writeBlanks(QTextStream &stream, const int count);
-  void writeText(QTextStream &stream, const QString &text, const int count);
-  void writeNumber(QTextStream &stream, const int number, const int count);
-  void writeZeros(QTextStream &stream, const int count);
-  QString decodeCodeItau(const QString &code);
+  // methods
+  auto decodeCodeItau(const QString &code) -> QString;
+  auto writeBlanks(QTextStream &stream, const int count) -> void;
+  auto writeNumber(QTextStream &stream, const int number, const int count) -> void;
+  auto writeText(QTextStream &stream, const QString &text, const int count) -> void;
+  auto writeZeros(QTextStream &stream, const int count) -> void;
 };

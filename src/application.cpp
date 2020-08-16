@@ -133,7 +133,8 @@ bool Application::genericLogin(const QString &hostname) {
       db.setHostName(loja);
 
       if (db.open()) {
-        UserSession::setSetting("Login/hostname", mapLojas.key(loja));
+        UserSession::setSetting("Login/hostname", loja);
+        UserSession::setSetting("Login/loja", mapLojas.key(loja));
         connected = true;
         break;
       }

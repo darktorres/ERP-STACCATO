@@ -135,6 +135,7 @@ bool Application::genericLogin(const QString &hostname) {
       if (db.open()) {
         UserSession::setSetting("Login/hostname", loja);
         UserSession::setSetting("Login/loja", mapLojas.key(loja));
+        qApp->updater();
         connected = true;
         break;
       }

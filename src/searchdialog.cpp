@@ -22,6 +22,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
   connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
   connect(ui->radioButtonProdDesc, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdDesc_toggled);
+  connect(ui->table, &TableView::clicked, this, &SearchDialog::on_table_clicked);
   connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
 
   setWindowTitle(title);
@@ -35,11 +36,13 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
     ui->labelBusca->hide();
   }
 
+  ui->lineEditEstoque->hide();
+  ui->lineEditEstoque_2->hide();
+  ui->lineEditPromocao->hide();
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
-  ui->lineEditEstoque_2->hide();
-  ui->lineEditEstoque->hide();
-  ui->lineEditPromocao->hide();
+  ui->textBrowser->hide();
+
   ui->lineEditBusca->setFocus();
 }
 
@@ -123,6 +126,10 @@ void SearchDialog::showMaximized() {
   if (not prepare_show()) { return; }
 
   QDialog::showMaximized();
+}
+
+void SearchDialog::on_table_clicked(const QModelIndex &index) {
+  if (model.tableName() == "view_nfe_baixada" and index.isValid()) { ui->textBrowser->setText(model.data(index.row(), "infCpl").toString()); }
 }
 
 void SearchDialog::on_table_doubleClicked(const QModelIndex &) { on_pushButtonSelecionar_clicked(); }
@@ -231,6 +238,21 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->setHeaderData("valorMinimoFrete", "Mínimo Frete");
 
   return sdLoja;
+}
+
+SearchDialog *SearchDialog::nfe(QWidget *parent) {
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "numeroNFe, chaveAcesso, infCpl", "", parent);
+
+  sdNFe->hideColumns({"idNFe", "infCpl"});
+
+  sdNFe->setHeaderData("numeroNFe", "NFe");
+  sdNFe->setHeaderData("status", "Status");
+  sdNFe->setHeaderData("chaveAcesso", "Chave Acesso");
+  sdNFe->setHeaderData("infCpl", "Inf. Comp.");
+
+  sdNFe->ui->textBrowser->show();
+
+  return sdNFe;
 }
 
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {

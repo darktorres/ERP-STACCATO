@@ -27,6 +27,7 @@ public:
   static auto enderecoCliente(QWidget *parent) -> SearchDialog *;
   static auto fornecedor(QWidget *parent) -> SearchDialog *;
   static auto loja(QWidget *parent) -> SearchDialog *;
+  static auto nfe(QWidget *parent) -> SearchDialog *;
   static auto produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) -> SearchDialog *;
   static auto profissional(const bool mostrarNaoHa, QWidget *parent) -> SearchDialog *;
   static auto transportadora(QWidget *parent) -> SearchDialog *;
@@ -59,6 +60,7 @@ private:
   auto on_pushButtonSelecionar_clicked() -> void;
   auto on_radioButtonProdAtivos_toggled(const bool) -> void;
   auto on_radioButtonProdDesc_toggled(const bool) -> void;
+  auto on_table_clicked(const QModelIndex &index) -> void;
   auto on_table_doubleClicked(const QModelIndex &) -> void;
   auto prepare_show() -> bool;
   auto sendUpdateMessage(const QModelIndex &index) -> void;

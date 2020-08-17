@@ -20,10 +20,10 @@ public:
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
   auto dbReconnect(const bool silent = false) -> bool;
   auto endTransaction() -> bool;
-  auto enqueueException(const QString &error, QWidget *parent = nullptr) -> void;
-  auto enqueueException(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
+  auto enqueueException(const QString &error, QWidget *parent = nullptr) -> void;
+  auto enqueueException(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
   auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
   auto getInTransaction() const -> bool;
@@ -43,6 +43,7 @@ public:
   auto roundDouble(const double value, const int decimais) -> double;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
+  auto setSilent(bool value) -> void;
   auto setUpdating(const bool value) -> void;
   auto startTransaction(const QString &messageLog, const bool delayMessages = true) -> bool;
   auto updater() -> void;
@@ -63,6 +64,7 @@ private:
   QVector<Message> errorQueue;
   QVector<Message> informationQueue;
   QVector<Message> warningQueue;
+  bool silent = false;
   bool updaterOpen = false;
   bool delayMessages = false;
   bool inTransaction = false;

@@ -380,9 +380,11 @@ void Application::showMessages() {
     QMessageBox::critical(exception.widget, "Erro!", exception.message);
   }
 
-  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
-  for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
-  for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
+  if (not silent) {
+    for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+    for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
+    for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
+  }
 
   exceptionQueue.clear();
   errorQueue.clear();
@@ -413,6 +415,8 @@ void Application::updater() {
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
 }
+
+void Application::setSilent(bool value) { silent = value; }
 
 bool Application::getInTransaction() const { return inTransaction; }
 

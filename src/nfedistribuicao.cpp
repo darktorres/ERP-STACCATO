@@ -133,30 +133,30 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   //----------------------------------------------------------
 
-  QFile file("LOG_DFe.txt");
+  //  QFile file("LOG_DFe.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return; }
+  //  if (not file.open(QFile::ReadOnly)) { return; }
 
-  const QString resposta = file.readAll();
+  //  const QString resposta = file.readAll();
 
-  file.close();
+  //  file.close();
 
-  qDebug() << "size: " << resposta.length();
+  //  qDebug() << "size: " << resposta.length();
 
-  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
+  //  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
 
   //----------------------------------------------------------
 
-  //  ACBr acbrLocal;
-  //  const auto respostaOptional = acbrLocal.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")", true);
+  ACBr acbrLocal;
+  const auto respostaOptional = acbrLocal.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")", true);
 
   //  qDebug() << "resposta: " << respostaOptional.value_or("erro");
 
-  //  if (not respostaOptional) { return; }
+  if (not respostaOptional) { return; }
 
-  //  const QString resposta = respostaOptional.value();
+  const QString resposta = respostaOptional.value();
 
-  //  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
+  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
 
   //----------------------------------------------------------
 
@@ -170,11 +170,11 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   if (not model.select()) { return; }
 
-  //  if (ui->spinBoxUltNSU->value() < ui->spinBoxMaxNSU->value()) { return on_pushButtonPesquisar_clicked(); }
+  if (ui->spinBoxUltNSU->value() < ui->spinBoxMaxNSU->value()) { return on_pushButtonPesquisar_clicked(); }
 
-  //  if (darCiencia()) { return on_pushButtonPesquisar_clicked(); }
+  if (darCiencia()) { return on_pushButtonPesquisar_clicked(); }
 
-  //  confirmar();
+  confirmar();
 
   QSqlQuery queryMaintenance;
 
@@ -228,10 +228,6 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
     if (evento.contains("[DistribuicaoDFe]")) {
       const int indexMaxNSU = evento.indexOf("\r\nmaxNSU=");
       const int indexUltNSU = evento.indexOf("\r\nultNSU=");
-
-      // TODO: calcular quantidade de eventos retornados (ultNSU - NSUenviado) e verificar se na resposta veio todos
-      // erro de socket resulta em uma resposta cortada
-      // levar em conta que alguns eventos sao duplos, como  ProEve/InfEve e devem ser contados como um unico evento
 
       if (indexMaxNSU == -1 or indexUltNSU == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'maxNSU/ultNSU'!", this); }
 

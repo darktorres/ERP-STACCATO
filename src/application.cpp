@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.8.139");
+  setApplicationVersion("0.8.140");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -234,7 +234,7 @@ bool Application::runSqlJobs() {
 }
 
 void Application::startSqlPing() {
-  auto *timer = new QTimer(this);
+  auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
   timer->start(60000);
 
@@ -242,7 +242,7 @@ void Application::startSqlPing() {
 }
 
 void Application::startUpdaterPing() {
-  auto *timer = new QTimer(this);
+  auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
   timer->start(600000);
 }

@@ -35,20 +35,20 @@ ImportarXML::~ImportarXML() { delete ui; }
 void ImportarXML::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled, connectionType);
   connect(ui->itemBoxNFe, &ItemBox::textChanged, this, &ImportarXML::on_itemBoxNFe_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked, connectionType);
   connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked, connectionType);
-  connect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled, connectionType);
   connect(ui->tableEstoque->model(), &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData, connectionType);
 }
 
 void ImportarXML::unsetConnections() {
+  disconnect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
   disconnect(ui->itemBoxNFe, &ItemBox::textChanged, this, &ImportarXML::on_itemBoxNFe_textChanged);
   disconnect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
   disconnect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
   disconnect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
-  disconnect(ui->checkBoxSemLote, &QCheckBox::toggled, this, &ImportarXML::on_checkBoxSemLote_toggled);
   disconnect(ui->tableEstoque->model(), &QAbstractItemModel::dataChanged, this, &ImportarXML::updateTableData);
 }
 
@@ -796,8 +796,7 @@ bool ImportarXML::perguntarLocal(XML &xml) {
   QSqlQuery query;
 
   if (not query.exec("SELECT descricao FROM loja WHERE descricao NOT IN ('', 'CD') ORDER BY descricao")) {
-    qApp->enqueueException("Erro buscando lojas: " + query.lastError().text(), this);
-    return false;
+    return qApp->enqueueException(false, "Erro buscando lojas: " + query.lastError().text(), this);
   }
 
   QStringList lojas{"CD"};
@@ -898,6 +897,8 @@ bool ImportarXML::percorrerXml(XML &xml) {
 }
 
 bool ImportarXML::criarConsumo(const int rowCompra, const int rowEstoque) {
+  // TODO: caso dê erro criando consumo bloquear botao de importar
+
   const int idEstoque = modelEstoque.data(rowEstoque, "idEstoque").toInt();
   const int idVendaProduto2 = modelCompra.data(rowCompra, "idVendaProduto2").toInt();
 

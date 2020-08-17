@@ -452,6 +452,8 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
 
       const int rowModel = modelImportar.insertRowAtEnd();
 
+      // TODO: marcar os 'santander' direto como pago
+
       if (not modelImportar.setData(rowModel, "dataEmissao", xlsx.read(rowExcel, 1))) { return false; }
       if (not modelImportar.setData(rowModel, "idLoja", queryLoja.value("idLoja"))) { return false; }
       if (not modelImportar.setData(rowModel, "contraParte", xlsx.read(rowExcel, 3))) { return false; }
@@ -460,8 +462,8 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
       if (not modelImportar.setData(rowModel, "dataPagamento", xlsx.read(rowExcel, 6))) { return false; }
       if (not modelImportar.setData(rowModel, "observacao", xlsx.read(rowExcel, 8))) { return false; }
       if (not modelImportar.setData(rowModel, "idConta", queryConta.value("idConta"))) { return false; }
-      if (not modelImportar.setData(rowModel, "centroCusto", xlsx.read(rowExcel, 9))) { return false; }
-      if (not modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 10))) { return false; }
+      if (not modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"))) { return false; }
+      if (not modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9))) { return false; }
     }
 
     if (not modelImportar.submitAll()) { return false; }

@@ -14,6 +14,7 @@ void WidgetNfe::updateTables() {
 
   if (currentText == "Entrada") { ui->widgetEntrada->updateTables(); }
   if (currentText == "Saída") { ui->widgetSaida->updateTables(); }
+  if (currentText == "Distribuição") { ui->widgetDistribuicao->updateTables(); }
 }
 
 void WidgetNfe::resetTables() {

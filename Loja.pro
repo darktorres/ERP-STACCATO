@@ -178,6 +178,7 @@ SOURCES += \
     src/logindialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
+    src/nfedistribuicao.cpp \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
@@ -306,6 +307,7 @@ HEADERS  += \
     src/log.h \
     src/logindialog.h \
     src/mainwindow.h \
+    src/nfedistribuicao.h \
     src/noeditdelegate.h \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
@@ -406,6 +408,7 @@ FORMS += \
     ui/inserirtransferencia.ui \
     ui/logindialog.ui \
     ui/mainwindow.ui \
+    ui/nfedistribuicao.ui \
     ui/orcamento.ui \
     ui/pagamentosdia.ui \
     ui/precoestoque.ui \

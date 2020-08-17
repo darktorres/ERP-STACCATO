@@ -25,6 +25,8 @@ ImportarXML::ImportarXML(const QStringList &idsCompra, const QDate &dataFaturame
 
   setConnections();
 
+  ui->itemBoxNFe->setSearchDialog(SearchDialog::nfe(this));
+
   setWindowFlags(Qt::Window);
 }
 
@@ -33,6 +35,7 @@ ImportarXML::~ImportarXML() { delete ui; }
 void ImportarXML::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->itemBoxNFe, &ItemBox::textChanged, this, &ImportarXML::on_itemBoxNFe_textChanged, connectionType);
   connect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked, connectionType);
   connect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked, connectionType);
   connect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked, connectionType);
@@ -41,6 +44,7 @@ void ImportarXML::setConnections() {
 }
 
 void ImportarXML::unsetConnections() {
+  disconnect(ui->itemBoxNFe, &ItemBox::textChanged, this, &ImportarXML::on_itemBoxNFe_textChanged);
   disconnect(ui->pushButtonCancelar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonCancelar_clicked);
   disconnect(ui->pushButtonImportar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonImportar_clicked);
   disconnect(ui->pushButtonProcurar, &QPushButton::clicked, this, &ImportarXML::on_pushButtonProcurar_clicked);
@@ -377,12 +381,30 @@ bool ImportarXML::salvarDadosVenda() {
   return true;
 }
 
+bool ImportarXML::atualizarNFes() {
+  auto iterator = mapNFes.constBegin();
+
+  while (iterator != mapNFes.constEnd()) {
+    QSqlQuery query;
+
+    if (not query.exec("UPDATE nfe SET gare = " + QString::number(iterator.value()) + ", utilizada = TRUE WHERE chaveAcesso = '" + iterator.key() + "'")) {
+      return qApp->enqueueException(false, "Erro atualizando dados da NFe: " + query.lastError().text(), this);
+    }
+
+    iterator++;
+  }
+
+  return true;
+}
+
 bool ImportarXML::importar() {
   if (not salvarDadosVenda()) { return false; }
 
   if (not salvarDadosCompra()) { return false; }
 
   if (not modelNFe.submitAll()) { return false; }
+
+  if (not atualizarNFes()) { return false; }
 
   // mapear idProduto/idEstoque para cadastrarProdutoEstoque
   const auto tuples = mapTuples();
@@ -492,17 +514,43 @@ bool ImportarXML::limparAssociacoes() {
   return true;
 }
 
+void ImportarXML::on_itemBoxNFe_textChanged(const QString &text) {
+  if (text.isEmpty()) { return; }
+
+  unsetConnections();
+
+  [&] {
+    if (not usarXMLBaixado() or not parear()) {
+      ui->itemBoxNFe->clear();
+      return;
+    }
+
+    const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
+
+    if (list.isEmpty()) {
+      ui->pushButtonProcurar->setDisabled(true);
+      ui->itemBoxNFe->setReadOnly(true);
+    }
+  }();
+
+  setConnections();
+}
+
 void ImportarXML::on_pushButtonProcurar_clicked() {
   unsetConnections();
 
   [&] {
-    if (not lerXML()) { return; }
-
-    if (not parear()) { return; }
+    if (not lerXML() or not parear()) {
+      ui->lineEdit->clear();
+      return;
+    }
 
     const auto list = modelCompra.multiMatch({{"quantUpd", static_cast<int>(FieldColors::Green), false}}, false);
 
-    if (list.isEmpty()) { ui->pushButtonProcurar->setDisabled(true); }
+    if (list.isEmpty()) {
+      ui->pushButtonProcurar->setDisabled(true);
+      ui->itemBoxNFe->setReadOnly(true);
+    }
   }();
 
   setConnections();
@@ -586,7 +634,7 @@ bool ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
 bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
   const auto list = modelNFe.multiMatch({{"chaveAcesso", chaveAcesso}}, false);
 
-  if (not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+  if (not list.isEmpty() or mapNFes.contains(chaveAcesso)) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
 
   return false;
 }
@@ -604,6 +652,52 @@ bool ImportarXML::cadastrarNFe(XML &xml, const double gare) {
   if (not modelNFe.setData(row, "transportadora", xml.xNomeTransp)) { return false; }
   if (not modelNFe.setData(row, "valor", xml.vNF_Total)) { return false; }
   if (not modelNFe.setData(row, "gare", gare)) { return false; }
+  if (not modelNFe.setData(row, "utilizada", 1)) { return false; }
+
+  return true;
+}
+
+bool ImportarXML::usarXMLBaixado() {
+  QSqlQuery query;
+
+  if (not query.exec("SELECT idNFe, xml, status, utilizada FROM nfe WHERE chaveAcesso = '" + ui->itemBoxNFe->text() + "'") or not query.first()) {
+    return qApp->enqueueException(false, "Erro buscando XML: " + query.lastError().text(), this);
+  }
+
+  if (query.value("status") != "AUTORIZADO") { return qApp->enqueueError(false, "NFe não está autorizada!", this); }
+  if (query.value("utilizada").toBool()) { return qApp->enqueueError(false, "NFe já cadastrada!", this); }
+
+  const auto fileContent = query.value("xml").toByteArray();
+
+  // ----------------------------------------------------------------
+
+  XML xml(fileContent);
+
+  if (xml.error) { return false; }
+
+  if (verificaExiste(xml.chaveAcesso)) { return false; } // verifica se já cadastrado dentre as notas utilizadas nessa importacao
+
+  if (not xml.verificaNCMs()) { return false; }
+
+  // ----------------------------------------------------------------
+
+  xml.idNFe = query.value("idNFe").toInt();
+
+  // ----------------------------------------------------------------
+
+  const auto gare = calculaGare(xml);
+
+  if (not gare) { return false; }
+
+  if (not criarPagamentoGare(gare.value(), xml)) { return false; }
+
+  // ----------------------------------------------------------------
+
+  if (not perguntarLocal(xml)) { return false; }
+
+  if (not percorrerXml(xml)) { return false; }
+
+  mapNFes.insert(xml.chaveAcesso, gare.value());
 
   return true;
 }
@@ -632,6 +726,12 @@ bool ImportarXML::lerXML() {
   XML xml(fileContent, file.fileName());
 
   if (xml.error) { return false; }
+
+  const auto verificaBaixado = verificaExisteBaixado(xml.chaveAcesso);
+
+  if (not verificaBaixado) { return false; }
+
+  if (verificaBaixado.value()) { return false; }
 
   if (not xml.validar(XML::Tipo::Entrada)) { return false; }
 
@@ -664,6 +764,32 @@ bool ImportarXML::lerXML() {
   if (not cadastrarNFe(xml, gare.value())) { return false; }
 
   return true;
+}
+
+std::optional<bool> ImportarXML::verificaExisteBaixado(const QString &chaveAcesso) {
+  QSqlQuery query;
+  query.prepare("SELECT utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", chaveAcesso);
+
+  if (not query.exec()) {
+    qApp->enqueueException("Erro verificando se nota já cadastrada: " + query.lastError().text());
+    return {};
+  }
+
+  if (query.first()) {
+    const bool utilizada = query.value("utilizada").toBool();
+
+    if (utilizada) { qApp->enqueueError("Nota já cadastrada!"); }
+
+    if (not utilizada) {
+      ui->itemBoxNFe->setText(chaveAcesso);
+      on_itemBoxNFe_textChanged(chaveAcesso);
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 bool ImportarXML::perguntarLocal(XML &xml) {

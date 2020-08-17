@@ -35,6 +35,7 @@ private:
   // attributes
   const QDate dataFaturamento;
   const QStringList idsCompra;
+  QMap<QString, double> mapNFes;
   SqlTableModel modelCompra;
   SqlTableModel modelConsumo;
   SqlTableModel modelEstoque;
@@ -55,6 +56,7 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
+  auto atualizarNFes() -> bool;
   auto buscaNCM(const QString &ncm) -> std::optional<ImportarXML::NCM>;
   auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
   auto cadastrarNFe(XML &xml, const double gare) -> bool;
@@ -69,6 +71,7 @@ private:
   auto limparAssociacoes() -> bool;
   auto mapTuples() -> QVector<ImportarXML::ProdutoEstoque>;
   auto on_checkBoxSemLote_toggled(const bool checked) -> void;
+  auto on_itemBoxNFe_textChanged(const QString &text) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonImportar_clicked() -> void;
   auto on_pushButtonProcurar_clicked() -> void;
@@ -82,6 +85,8 @@ private:
   auto setupTables() -> void;
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
+  auto usarXMLBaixado() -> bool;
   auto verificaExiste(const QString &chaveAcesso) -> bool;
+  auto verificaExisteBaixado(const QString &chaveAcesso) -> std::optional<bool>;
   auto verifyFields() -> bool;
 };

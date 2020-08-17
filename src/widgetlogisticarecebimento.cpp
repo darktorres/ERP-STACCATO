@@ -81,6 +81,7 @@ void WidgetLogisticaRecebimento::setupTables() {
   ui->table->setModel(&modelViewRecebimento);
 
   ui->table->hideColumn("fornecedor");
+  ui->table->hideColumn("idNFe");
 }
 
 bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) {
@@ -101,6 +102,9 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
   QSqlQuery query5;
   query5.prepare("UPDATE conta_a_pagar_has_pagamento SET status = 'LIBERADO GARE', dataPagamento = :dataRealReceb WHERE status = 'PENDENTE GARE' AND idNFe IN (SELECT idNFe FROM estoque WHERE "
                  "idEstoque = :idEstoque)");
+
+  QSqlQuery query6;
+  query6.prepare("UPDATE nfe SET confirmar = TRUE WHERE idNFe = :idNFe AND nsu IS NOT NULL AND statusDistribuicao = 'CIÊNCIA'");
 
   for (const auto &index : list) {
     const bool isCD = (modelViewRecebimento.data(index.row(), "local").toString() == "CD");
@@ -139,6 +143,12 @@ bool WidgetLogisticaRecebimento::processRows(const QModelIndexList &list, const 
     query5.bindValue(":idEstoque", modelViewRecebimento.data(index.row(), "idEstoque"));
 
     if (not query5.exec()) { return qApp->enqueueException(false, "Erro atualizando pagamento gare: " + query5.lastError().text(), this); }
+
+    //-----------------------------------------------------------------
+
+    query6.bindValue(":idNFe", modelViewRecebimento.data(index.row(), "idNFe"));
+
+    if (not query6.exec()) { return qApp->enqueueException(false, "Erro marcando NFe para confirmar: " + query6.lastError().text(), this); }
   }
 
   return true;

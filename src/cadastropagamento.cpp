@@ -361,3 +361,5 @@ void CadastroPagamento::on_itemBoxLoja_idChanged(const QVariant &id) {
 }
 
 void CadastroPagamento::on_pushButtonLimparSelecao_clicked() { limparSelecao(); }
+
+// TODO: colocar caixa de confirmacao antes de remover qualquer coisa

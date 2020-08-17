@@ -84,7 +84,7 @@ bool ACBr::gerarDanfe(const int idNFe) {
 
 std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
   if (fileContent.indexOf("Id=") == -1) {
-    qApp->enqueueError("Não encontrado a chave de acesso!");
+    qApp->enqueueException("Não encontrado a chave de acesso!");
     return {};
   }
 

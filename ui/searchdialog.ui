@@ -125,6 +125,24 @@ color: rgb(0, 0, 0);</string>
    </item>
    <item row="0" column="0" rowspan="2">
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="2">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QRadioButton" name="radioButtonProdAtivos">
+         <property name="text">
+          <string>Ativos</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioButtonProdDesc">
+         <property name="text">
+          <string>Descontinuados</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="labelBusca">
        <property name="sizePolicy">
@@ -151,24 +169,6 @@ color: rgb(0, 0, 0);</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QRadioButton" name="radioButtonProdAtivos">
-         <property name="text">
-          <string>Ativos</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="radioButtonProdDesc">
-         <property name="text">
-          <string>Descontinuados</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item row="1" column="0" colspan="3">
       <widget class="TableView" name="table">
        <property name="mouseTracking">
@@ -191,6 +191,13 @@ color: rgb(0, 0, 0);</string>
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="3">
+      <widget class="QTextBrowser" name="textBrowser">
+       <property name="placeholderText">
+        <string>Informações complementares da NFe</string>
        </property>
       </widget>
      </item>

@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.8.140");
+  setApplicationVersion("0.8.141");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -133,7 +133,9 @@ bool Application::genericLogin(const QString &hostname) {
       db.setHostName(loja);
 
       if (db.open()) {
-        UserSession::setSetting("Login/hostname", mapLojas.key(loja));
+        UserSession::setSetting("Login/hostname", loja);
+        UserSession::setSetting("Login/loja", mapLojas.key(loja));
+        qApp->updater();
         connected = true;
         break;
       }

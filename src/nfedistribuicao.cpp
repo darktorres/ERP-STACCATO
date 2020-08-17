@@ -1,7 +1,6 @@
 #include "nfedistribuicao.h"
 #include "ui_nfedistribuicao.h"
 
-#include "acbr.h"
 #include "application.h"
 #include "reaisdelegate.h"
 #include "usersession.h"
@@ -147,10 +146,8 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   //----------------------------------------------------------
 
-  ACBr acbrLocal;
+  qDebug() << "pesquisar nsu: " << ui->spinBoxUltNSU->value();
   const auto respostaOptional = acbrLocal.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")", true);
-
-  //  qDebug() << "resposta: " << respostaOptional.value_or("erro");
 
   if (not respostaOptional) { return; }
 
@@ -186,13 +183,12 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 void NFeDistribuicao::confirmar() {
   auto match = model.multiMatch({{"confirmar", true}, {"statusDistribuicao", "CIÊNCIA"}});
 
-  while (match.size() > 0) {
-    // select up to 20 rows
-
+  while (match.size() > 0) { // select up to 20 rows
     const auto selection = match.mid(0, 20);
 
     for (auto row : selection) { ui->table->selectRow(row); }
 
+    qDebug() << "confirmar";
     if (not enviarEvento("210200", "CONFIRMAÇÃO")) { return; }
 
     match = model.multiMatch({{"confirmar", true}, {"statusDistribuicao", "CIÊNCIA"}});
@@ -204,12 +200,12 @@ bool NFeDistribuicao::darCiencia() {
 
   bool pesquisar = false;
 
-  while (match.size() > 0) {
-    // select up to 20 rows
+  while (match.size() > 0) { // select up to 20 rows
     const auto selection = match.mid(0, 20);
 
     for (auto row : selection) { ui->table->selectRow(row); }
 
+    qDebug() << "ciencia";
     if (not enviarEvento("210210", "CIÊNCIA")) { return false; }
 
     match = model.multiMatch({{"statusDistribuicao", "DESCONHECIDO"}});
@@ -471,10 +467,7 @@ bool NFeDistribuicao::enviarEvento(const QString &codigoEvento, const QString &o
 
   //----------------------------------------------------------
 
-  ACBr acbrLocal;
   const auto respostaOptional = acbrLocal.enviarComando(comando, true);
-
-  //  qDebug() << "resposta evento: " << respostaOptional.value_or("erro");
 
   if (not respostaOptional) { return false; }
 

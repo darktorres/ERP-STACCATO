@@ -1,5 +1,6 @@
 #pragma once
 
+#include "acbr.h"
 #include "sqltablemodel.h"
 
 #include <QWidget>
@@ -21,6 +22,7 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  ACBr acbrLocal;
   SqlTableModel model;
   Ui::NFeDistribuicao *ui;
   // methods

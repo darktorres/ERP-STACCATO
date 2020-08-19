@@ -214,6 +214,8 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
   sdCliente->setHeaderData("nextel", "Nextel");
   sdCliente->setHeaderData("email", "E-mail");
 
+  sdCliente->ui->lineEditBusca->setPlaceholderText("Cliente/Fantasia/CPF/CNPJ");
+
   return sdCliente;
 }
 
@@ -237,6 +239,8 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->setHeaderData("porcentagemFrete", "Frete");
   sdLoja->setHeaderData("valorMinimoFrete", "Mínimo Frete");
 
+  sdLoja->ui->lineEditBusca->setPlaceholderText("Descrição/Nome Fantasia/Razão Social");
+
   return sdLoja;
 }
 
@@ -251,6 +255,8 @@ SearchDialog *SearchDialog::nfe(QWidget *parent) {
   sdNFe->setHeaderData("infCpl", "Inf. Comp.");
 
   sdNFe->ui->textBrowser->show();
+
+  sdNFe->ui->lineEditBusca->setPlaceholderText("Número NFe/Chave Acesso/Inf. Comp.");
 
   return sdNFe;
 }
@@ -300,6 +306,8 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->ui->lineEditPromocao->show();
   sdProd->ui->radioButtonProdAtivos->setChecked(true);
 
+  sdProd->ui->lineEditBusca->setPlaceholderText("Fornecedor/Descrição/Coleção/Código Comercial");
+
   return sdProd;
 }
 
@@ -319,6 +327,8 @@ SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
   sdFornecedor->setHeaderData("contatoRG", "RG do Contato");
   sdFornecedor->setHeaderData("validadeProdutos", "Validade Produtos");
 
+  sdFornecedor->ui->lineEditBusca->setPlaceholderText("Razão Social/Nome Fantasia/CNPJ/CPF do Contato");
+
   return sdFornecedor;
 }
 
@@ -334,20 +344,24 @@ SearchDialog *SearchDialog::transportadora(QWidget *parent) {
   sdTransportadora->setHeaderData("antt", "ANTT");
   sdTransportadora->setHeaderData("tel", "Tel.");
 
+  sdTransportadora->ui->lineEditBusca->setPlaceholderText("Razão Social/Nome Fantasia");
+
   return sdTransportadora;
 }
 
 SearchDialog *SearchDialog::veiculo(QWidget *parent) {
-  SearchDialog *sdTransportadora = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", parent);
+  SearchDialog *sdVeiculo = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", parent);
 
-  sdTransportadora->hideColumns({"idVeiculo", "desativado"});
+  sdVeiculo->hideColumns({"idVeiculo", "desativado"});
 
-  sdTransportadora->setHeaderData("razaoSocial", "Transportadora");
-  sdTransportadora->setHeaderData("modelo", "Modelo");
-  sdTransportadora->setHeaderData("capacidade", "Carga");
-  sdTransportadora->setHeaderData("placa", "Placa");
+  sdVeiculo->setHeaderData("razaoSocial", "Transportadora");
+  sdVeiculo->setHeaderData("modelo", "Modelo");
+  sdVeiculo->setHeaderData("capacidade", "Carga");
+  sdVeiculo->setHeaderData("placa", "Placa");
 
-  return sdTransportadora;
+  sdVeiculo->ui->lineEditBusca->setPlaceholderText("Transportadora/Modelo/Placa");
+
+  return sdVeiculo;
 }
 
 SearchDialog *SearchDialog::usuario(QWidget *parent) {
@@ -359,6 +373,8 @@ SearchDialog *SearchDialog::usuario(QWidget *parent) {
   sdUsuario->setHeaderData("tipo", "Função");
   sdUsuario->setHeaderData("nome", "Nome");
   sdUsuario->setHeaderData("email", "E-mail");
+
+  sdUsuario->ui->lineEditBusca->setPlaceholderText("Função/Nome");
 
   return sdUsuario;
 }
@@ -381,6 +397,8 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");
   sdVendedor->setHeaderData("email", "E-mail");
+
+  sdVendedor->ui->lineEditBusca->setPlaceholderText("Função/Nome");
 
   return sdVendedor;
 }
@@ -434,6 +452,8 @@ SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *paren
   sdProfissional->setHeaderData("nextel", "Nextel");
   sdProfissional->setHeaderData("email", "E-mail");
   sdProfissional->setHeaderData("tipoProf", "Profissão");
+
+  sdProfissional->ui->lineEditBusca->setPlaceholderText("Profissional/Profissão");
 
   return sdProfissional;
 }

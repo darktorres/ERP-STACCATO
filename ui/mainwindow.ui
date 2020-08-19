@@ -381,25 +381,25 @@ QTabWidget::pane {
      <addaction name="actionProdutos"/>
      <addaction name="actionPromocao"/>
     </widget>
+    <addaction name="actionConfiguracoes"/>
     <addaction name="menuImportar_tabela_fornecedor"/>
     <addaction name="actionImportar_tabela_IBPT"/>
     <addaction name="menuTema"/>
-    <addaction name="actionConfiguracoes"/>
    </widget>
    <widget class="QMenu" name="menuAdministracao">
     <property name="title">
      <string>Administração</string>
     </property>
-    <addaction name="actionCadastrarProfissional"/>
+    <addaction name="actionCadastrarFornecedor"/>
     <addaction name="actionGerenciar_Lojas"/>
+    <addaction name="actionGerenciar_NCMs"/>
     <addaction name="actionGerenciar_pagamentos"/>
+    <addaction name="actionGerenciar_preco_estoque"/>
+    <addaction name="actionCadastrarProdutos"/>
+    <addaction name="actionCadastrarProfissional"/>
+    <addaction name="actionGerenciar_staccatoOff"/>
     <addaction name="actionGerenciar_Transportadoras"/>
     <addaction name="actionCadastrarUsuario"/>
-    <addaction name="actionCadastrarFornecedor"/>
-    <addaction name="actionCadastrarProdutos"/>
-    <addaction name="actionGerenciar_preco_estoque"/>
-    <addaction name="actionGerenciar_NCMs"/>
-    <addaction name="actionGerenciar_staccatoOff"/>
    </widget>
    <widget class="QMenu" name="menuVenda">
     <property name="title">

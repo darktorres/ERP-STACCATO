@@ -30,6 +30,7 @@ public:
   auto getIsConnected() const -> bool;
   auto getMapLojas() const -> QMap<QString, QString>;
   auto getShowingErrors() const -> bool;
+  auto getSilent() const -> bool;
   auto getUpdating() const -> bool;
   auto getWebDavIp() const -> QString;
   auto lightTheme() -> void;

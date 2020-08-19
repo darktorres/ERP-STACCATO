@@ -17,25 +17,22 @@ NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::
   if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) {
     updateTables();
 
-    const QDateTime today = QDateTime::currentDateTime();
-    const QDateTime tomorrow = QDateTime(QDate::currentDate().addDays(1), QTime(0, 0, 0));
-
-    auto timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [=] {
-      const QDateTime today2 = QDateTime::currentDateTime();
-      const QDateTime tomorrow2 = QDateTime(QDate::currentDate().addDays(1), QTime(0, 0, 0));
-
-      timer->start(today2.msecsTo(tomorrow2));
-
-      qApp->setSilent(true);
-      on_pushButtonPesquisar_clicked();
-      qApp->setSilent(false);
-    });
-    timer->start(today.msecsTo(tomorrow));
+    connect(&timer, &QTimer::timeout, this, &NFeDistribuicao::downloadAutomatico);
+    timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(900)));
   }
 }
 
 NFeDistribuicao::~NFeDistribuicao() { delete ui; }
+
+void NFeDistribuicao::downloadAutomatico() {
+  qApp->setSilent(true);
+  on_pushButtonPesquisar_clicked();
+  qApp->setSilent(false);
+
+  //-----------------------------------------------------------------
+
+  if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) { timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(900))); }
+}
 
 void NFeDistribuicao::resetTables() { modelIsSet = false; }
 
@@ -147,7 +144,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   //----------------------------------------------------------
 
   qDebug() << "pesquisar nsu: " << ui->spinBoxUltNSU->value();
-  const auto respostaOptional = acbrLocal.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")", true);
+  const auto respostaOptional = acbrRemoto.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")");
 
   if (not respostaOptional) { return; }
 
@@ -467,7 +464,7 @@ bool NFeDistribuicao::enviarEvento(const QString &codigoEvento, const QString &o
 
   //----------------------------------------------------------
 
-  const auto respostaOptional = acbrLocal.enviarComando(comando, true);
+  const auto respostaOptional = acbrRemoto.enviarComando(comando);
 
   if (not respostaOptional) { return false; }
 
@@ -561,3 +558,6 @@ QString NFeDistribuicao::encontraTransportadora(const QString &xml) {
 }
 
 // TODO: pintar linhas de amarelo/vermelho a medida que aproximar do prazo para realizar uma operacao final
+// TODO: colocar em cada botao um tooltip com a descricao da operacao
+// TODO: colocar um campo no SQL para cada operacao para os itens poderem ser marcados por qualquer usuario e executado posteriormente no pc com certificado
+// TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario

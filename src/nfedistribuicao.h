@@ -3,6 +3,7 @@
 #include "acbr.h"
 #include "sqltablemodel.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -22,13 +23,15 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
-  ACBr acbrLocal;
+  ACBr acbrRemoto;
+  QTimer timer;
   SqlTableModel model;
   Ui::NFeDistribuicao *ui;
   // methods
   auto buscarNSU() -> void;
   auto confirmar() -> void;
   auto darCiencia() -> bool;
+  auto downloadAutomatico() -> void;
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
   auto enviarEvento(const QString &codigoEvento, const QString &operacao) -> bool;

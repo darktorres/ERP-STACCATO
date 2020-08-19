@@ -418,6 +418,8 @@ void Application::updater() {
   updater->checkForUpdates();
 }
 
+bool Application::getSilent() const { return silent; }
+
 void Application::setSilent(bool value) { silent = value; }
 
 bool Application::getInTransaction() const { return inTransaction; }

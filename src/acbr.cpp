@@ -210,7 +210,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   progressDialog->reset();
 
   if (local) {
-    progressDialog->show();
+    if (not qApp->getSilent()) { progressDialog->show(); }
 
     if (not conectado) { socket.connectToHost("localhost", 3434); }
   }
@@ -224,7 +224,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
       return {};
     }
 
-    progressDialog->show();
+    if (not qApp->getSilent()) { progressDialog->show(); }
 
     if (not conectado) { socket.connectToHost(servidorConfig->toString(), porta->toByteArray().toUShort()); }
   }

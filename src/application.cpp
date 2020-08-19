@@ -379,7 +379,7 @@ void Application::showMessages() {
       }
     }
 
-    QMessageBox::critical(exception.widget, "Erro!", exception.message);
+    if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }
 
   if (not silent) {

@@ -18,7 +18,7 @@ NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::
     updateTables();
 
     connect(&timer, &QTimer::timeout, this, &NFeDistribuicao::downloadAutomatico);
-    timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(900)));
+    timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(tempoTimer)));
   }
 }
 
@@ -31,7 +31,7 @@ void NFeDistribuicao::downloadAutomatico() {
 
   //-----------------------------------------------------------------
 
-  if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) { timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(900))); }
+  if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) { timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(tempoTimer))); }
 }
 
 void NFeDistribuicao::resetTables() { modelIsSet = false; }
@@ -111,7 +111,10 @@ void NFeDistribuicao::setupTables() {
   ui->table->hideColumn("gareData");
   ui->table->hideColumn("infCpl");
   ui->table->hideColumn("utilizada");
+  ui->table->hideColumn("ciencia");
   ui->table->hideColumn("confirmar");
+  ui->table->hideColumn("desconhecer");
+  ui->table->hideColumn("naoRealizar");
 
   ui->table->setItemDelegateForColumn("valor", new ReaisDelegate(2, true, this));
 }
@@ -166,9 +169,10 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   if (ui->spinBoxUltNSU->value() < ui->spinBoxMaxNSU->value()) { return on_pushButtonPesquisar_clicked(); }
 
-  if (darCiencia()) { return on_pushButtonPesquisar_clicked(); }
-
+  darCiencia();
   confirmar();
+  desconhecer();
+  naoRealizar();
 
   QSqlQuery queryMaintenance;
 
@@ -178,39 +182,51 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 }
 
 void NFeDistribuicao::confirmar() {
-  auto match = model.multiMatch({{"confirmar", true}, {"statusDistribuicao", "CIÊNCIA"}});
+  auto match = model.multiMatch({{"confirmar", true}});
 
   while (match.size() > 0) { // select up to 20 rows
     const auto selection = match.mid(0, 20);
 
-    for (auto row : selection) { ui->table->selectRow(row); }
+    if (not enviarEvento("CONFIRMAÇÃO", selection)) { return; }
 
-    qDebug() << "confirmar";
-    if (not enviarEvento("210200", "CONFIRMAÇÃO")) { return; }
-
-    match = model.multiMatch({{"confirmar", true}, {"statusDistribuicao", "CIÊNCIA"}});
+    match = model.multiMatch({{"confirmar", true}});
   }
 }
 
-bool NFeDistribuicao::darCiencia() {
-  auto match = model.multiMatch({{"statusDistribuicao", "DESCONHECIDO"}});
-
-  bool pesquisar = false;
+void NFeDistribuicao::desconhecer() {
+  auto match = model.multiMatch({{"desconhecer", true}});
 
   while (match.size() > 0) { // select up to 20 rows
     const auto selection = match.mid(0, 20);
 
-    for (auto row : selection) { ui->table->selectRow(row); }
+    if (not enviarEvento("DESCONHECIMENTO", selection)) { return; }
 
-    qDebug() << "ciencia";
-    if (not enviarEvento("210210", "CIÊNCIA")) { return false; }
-
-    match = model.multiMatch({{"statusDistribuicao", "DESCONHECIDO"}});
-
-    pesquisar = true;
+    match = model.multiMatch({{"desconhecer", true}});
   }
+}
 
-  return pesquisar;
+void NFeDistribuicao::naoRealizar() {
+  auto match = model.multiMatch({{"naoRealizar", true}});
+
+  while (match.size() > 0) { // select up to 20 rows
+    const auto selection = match.mid(0, 20);
+
+    if (not enviarEvento("NÃO REALIZADA", selection)) { return; }
+
+    match = model.multiMatch({{"naoRealizar", true}});
+  }
+}
+
+void NFeDistribuicao::darCiencia() {
+  auto match = model.multiMatch({{"ciencia", true}});
+
+  while (match.size() > 0) { // select up to 20 rows
+    const auto selection = match.mid(0, 20);
+
+    if (not enviarEvento("CIÊNCIA", selection)) { return; }
+
+    match = model.multiMatch({{"ciencia", true}});
+  }
 }
 
 bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
@@ -308,12 +324,14 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       if (not existe) {
         const QString status = (schema == "procNFe") ? "AUTORIZADO" : "RESUMO";
+        const QString ciencia = (schema == "procNFe") ? "FALSE" : "TRUE";
 
         QSqlQuery queryCadastrar;
 
-        if (not queryCadastrar.exec("INSERT INTO nfe (numeroNFe, tipo, xml, status, emitente, cnpjDest, cnpjOrig, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao) VALUES ('" +
-                                    numeroNFe + "', 'ENTRADA', '" + xml + "', '" + status + "', '" + nomeEmitente + "', '" + cnpjDest + "', '" + cnpjOrig + "', '" + chaveAcesso + "', '" +
-                                    encontraTransportadora(xml) + "', '" + valor + "', '" + encontraInfCpl(xml) + "', '" + nsu + "', 'DESCONHECIDO')")) {
+        if (not queryCadastrar.exec(
+                "INSERT INTO nfe (numeroNFe, tipo, xml, status, emitente, cnpjDest, cnpjOrig, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao, ciencia) VALUES ('" + numeroNFe +
+                "', 'ENTRADA', '" + xml + "', '" + status + "', '" + nomeEmitente + "', '" + cnpjDest + "', '" + cnpjOrig + "', '" + chaveAcesso + "', '" + encontraTransportadora(xml) + "', '" +
+                valor + "', '" + encontraInfCpl(xml) + "', '" + nsu + "', 'DESCONHECIDO', " + ciencia + ")")) {
           return qApp->enqueueException(false, "Erro cadastrando resumo da NFe: " + queryCadastrar.lastError().text(), this);
         }
       }
@@ -359,7 +377,8 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         if (eventoTipo == "Ciencia da Operacao" and statusDistribuicao == "DESCONHECIDO") {
           QSqlQuery queryAtualiza;
 
-          if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA' WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+          if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso +
+                                     "'")) {
             return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
           }
         }
@@ -367,7 +386,8 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         if (eventoTipo == "Confirmacao da Operacao" and (statusDistribuicao == "DESCONHECIDO" or statusDistribuicao == "CIÊNCIA")) {
           QSqlQuery queryAtualiza;
 
-          if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO' WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+          if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                                     chaveAcesso + "'")) {
             return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
           }
         }
@@ -375,7 +395,9 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         if (eventoTipo == "CANCELAMENTO" and statusDistribuicao != "CANCELADA") {
           QSqlQuery queryAtualiza;
 
-          if (not queryAtualiza.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA' WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+          if (not queryAtualiza.exec(
+                  "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                  chaveAcesso + "'")) {
             return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
           }
         }
@@ -391,35 +413,105 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 }
 
 void NFeDistribuicao::on_pushButtonCiencia_clicked() {
-  if (not enviarEvento("210210", "CIÊNCIA")) { return; }
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  for (auto &index : selection) {
+    const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
+
+    if (statusDistribuicao == "CANCELADA") { continue; }
+
+    if (not model.setData(index.row(), "ciencia", true)) { return; }
+  }
+
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+
+  monitorar ? darCiencia() : agendarOperacao();
 }
 
 void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
-  if (not enviarEvento("210200", "CONFIRMAÇÃO")) { return; }
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  for (auto &index : selection) {
+    const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
+
+    if (statusDistribuicao == "CANCELADA") { continue; }
+
+    if (not model.setData(index.row(), "confirmar", true)) { return; }
+  }
+
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+
+  monitorar ? confirmar() : agendarOperacao();
 }
 
 void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
-  if (not enviarEvento("210220", "DESCONHECIMENTO")) { return; }
+  const auto selection = ui->table->selectionModel()->selectedRows();
 
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  for (auto &index : selection) {
+    const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
+
+    if (statusDistribuicao == "CANCELADA") { continue; }
+
+    if (not model.setData(index.row(), "desconhecer", true)) { return; }
+  }
+
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+
+  monitorar ? desconhecer() : agendarOperacao();
 }
 
 void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
-  if (not enviarEvento("210240", "NÃO REALIZADA")) { return; }
-
-  qApp->enqueueInformation("Operação realizada com sucesso!", this);
-}
-
-bool NFeDistribuicao::enviarEvento(const QString &codigoEvento, const QString &operacao) {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError(false, "Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  if (selection.size() > 20) { return qApp->enqueueError(false, "Deve selecionar no máximo 20 linhas!", this); }
+  for (auto &index : selection) {
+    const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
+
+    if (statusDistribuicao == "CANCELADA") { continue; }
+
+    if (not model.setData(index.row(), "naoRealizar", true)) { return; }
+  }
+
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+
+  monitorar ? naoRealizar() : agendarOperacao();
+}
+
+void NFeDistribuicao::agendarOperacao() {
+  if (not qApp->startTransaction("NFeDistribuicao::agendarOperacao")) { return; }
+
+  if (not model.submitAll()) { return qApp->rollbackTransaction(); }
+
+  if (not qApp->endTransaction()) { return; }
+
+  qApp->enqueueInformation("Operação agendada com sucesso!", this);
+}
+
+bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &selection) {
+  QString column;
+
+  if (operacao == "CIÊNCIA") { column = "ciencia"; }
+  if (operacao == "CONFIRMAÇÃO") { column = "confirmar"; }
+  if (operacao == "DESCONHECIMENTO") { column = "desconhecer"; }
+  if (operacao == "NÃO REALIZADA") { column = "naoRealizar"; }
+
+  if (column.isEmpty()) { return false; }
+
+  QString codigoEvento;
+
+  if (operacao == "CIÊNCIA") { codigoEvento = "210210"; }
+  if (operacao == "CONFIRMAÇÃO") { codigoEvento = "210200"; }
+  if (operacao == "DESCONHECIMENTO") { codigoEvento = "210220"; }
+  if (operacao == "NÃO REALIZADA") { codigoEvento = "210240"; }
+
+  if (codigoEvento.isEmpty()) { return false; }
 
   //----------------------------------------------------------
 
@@ -439,14 +531,14 @@ bool NFeDistribuicao::enviarEvento(const QString &codigoEvento, const QString &o
 
   int count = 0;
 
-  for (const auto &index : selection) {
-    const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
+  for (const auto row : selection) {
+    const QString statusDistribuicao = model.data(row, "statusDistribuicao").toString();
 
     if (statusDistribuicao == "CANCELADA") { continue; }
 
     if (operacao == "CIÊNCIA" and statusDistribuicao != "DESCONHECIDO") { continue; }
 
-    const QString chaveAcesso = model.data(index.row(), "chaveAcesso").toString();
+    const QString chaveAcesso = model.data(row, "chaveAcesso").toString();
     const QString numEvento = QString("%1").arg(++count, 3, 10, QChar('0')); // padding with zeros
 
     comando += "[EVENTO" + numEvento + "]\r\n";
@@ -478,47 +570,49 @@ bool NFeDistribuicao::enviarEvento(const QString &codigoEvento, const QString &o
 
   if (not qApp->startTransaction("NFeDistribuicao::on_pushButtonCiencia")) { return false; }
 
-  for (const auto &evento : eventos) {
-    if (evento.contains("XMotivo=Rejeicao: Evento de Ciencia da Operacao para NFe cancelada ou denegada")) {
-      const int indexChave = evento.indexOf("\r\nchNFe=");
+  const bool success = [&] {
+    for (const auto &evento : eventos) {
+      if (evento.contains("XMotivo=Rejeicao:") and evento.contains("para NFe cancelada ou denegada")) {
+        const int indexChave = evento.indexOf("\r\nchNFe=");
 
-      if (indexChave == -1) {
-        qApp->enqueueException("Não encontrou o campo 'chNFe'!", this);
-        return qApp->rollbackTransaction(false);
+        if (indexChave == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'chNFe'!", this); }
+
+        const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
+
+        QSqlQuery query;
+
+        if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                           chaveAcesso + "'")) {
+          return qApp->enqueueException(false, "Erro atualizando status da NFe: " + query.lastError().text(), this);
+        }
       }
 
-      const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
+      if (evento.contains("XMotivo=Evento registrado e vinculado a NF-e") or evento.contains("XMotivo=Rejeicao: Duplicidade de evento")) {
+        const int indexChave = evento.indexOf("\r\nchNFe=");
 
-      QSqlQuery query;
+        if (indexChave == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'chNFe'!", this); }
 
-      if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA' WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-        qApp->enqueueException("Erro atualizando status da NFe: " + query.lastError().text(), this);
-        return qApp->rollbackTransaction(false);
-      }
-    }
+        const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
 
-    if (evento.contains("XMotivo=Evento registrado e vinculado a NF-e") or evento.contains("XMotivo=Rejeicao: Duplicidade de evento")) {
-      const int indexChave = evento.indexOf("\r\nchNFe=");
+        QSqlQuery query;
 
-      if (indexChave == -1) {
-        qApp->enqueueException("Não encontrou o campo 'chNFe'!", this);
-        return qApp->rollbackTransaction(false);
-      }
-
-      const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
-
-      QSqlQuery query;
-
-      if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao + "', dataDistribuicao = NOW() WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-        qApp->enqueueException("Erro atualizando status da NFe: " + query.lastError().text(), this);
-        return qApp->rollbackTransaction(false);
+        if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao +
+                           "', dataDistribuicao = NOW(), ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+          return qApp->enqueueException(false, "Erro atualizando status da NFe: " + query.lastError().text(), this);
+        }
       }
     }
-  }
 
-  if (not model.submitAll()) { return qApp->rollbackTransaction(false); }
+    if (not model.submitAll()) { return false; }
+
+    return true;
+  }();
+
+  if (not success) { return qApp->rollbackTransaction(false); }
 
   if (not qApp->endTransaction()) { return false; }
+
+  qApp->enqueueInformation("Operação realizada com sucesso!", this);
 
   return true;
 }
@@ -558,6 +652,4 @@ QString NFeDistribuicao::encontraTransportadora(const QString &xml) {
 }
 
 // TODO: pintar linhas de amarelo/vermelho a medida que aproximar do prazo para realizar uma operacao final
-// TODO: colocar em cada botao um tooltip com a descricao da operacao
-// TODO: colocar um campo no SQL para cada operacao para os itens poderem ser marcados por qualquer usuario e executado posteriormente no pc com certificado
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario

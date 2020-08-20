@@ -260,7 +260,7 @@ bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   if (not respostaEmail) { return false; }
 
   // TODO: perguntar se deseja tentar enviar novamente?
-  if (not respostaEmail->contains("OK: Email enviado com sucesso")) { return qApp->enqueueException(false, respostaEmail.value()); }
+  if (not respostaEmail->contains("OK: E-mail enviado com sucesso!")) { return qApp->enqueueException(false, respostaEmail.value()); }
 
   qApp->enqueueInformation(respostaEmail.value());
 

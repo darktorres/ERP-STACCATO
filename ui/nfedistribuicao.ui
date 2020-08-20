@@ -89,6 +89,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonCiencia">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Evento registrado pelo destinatário para obter mais informações relativas à existência de NFe em que esteja envolvido, quando ainda não existem elementos suficientes para apresentar uma manifestação conclusiva.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Ciência da Emissão</string>
        </property>
@@ -96,6 +99,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonConfirmacao">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Evento registrado pelo destinatário para confirmar que a operação descrita na NFe ocorreu exatamente como informado nesta NFe.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Confirmação da Operação</string>
        </property>
@@ -103,6 +109,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonDesconhecimento">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Evento registrado pelo destinatário para declarar que a operação descrita da NFe não foi por ele solicitada.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Desconhecimento da operação</string>
        </property>
@@ -110,6 +119,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonNaoRealizada">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Evento registrado pelo destinatário para reconhecer sua participação na operação descrita na NFe, mas declarando que a operação não ocorreu ou não se efetivou como informado nesta NFe.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Operação não realizada</string>
        </property>

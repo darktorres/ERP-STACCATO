@@ -21,6 +21,7 @@ public:
 
 private:
   // attributes
+  const int tempoTimer = 900;
   bool isSet = false;
   bool modelIsSet = false;
   ACBr acbrRemoto;
@@ -28,13 +29,16 @@ private:
   SqlTableModel model;
   Ui::NFeDistribuicao *ui;
   // methods
+  auto agendarOperacao() -> void;
   auto buscarNSU() -> void;
   auto confirmar() -> void;
-  auto darCiencia() -> bool;
+  auto darCiencia() -> void;
+  auto desconhecer() -> void;
   auto downloadAutomatico() -> void;
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
-  auto enviarEvento(const QString &codigoEvento, const QString &operacao) -> bool;
+  auto enviarEvento(const QString &operacao, const QVector<int> &selection) -> bool;
+  auto naoRealizar() -> void;
   auto on_pushButtonCiencia_clicked() -> void;
   auto on_pushButtonConfirmacao_clicked() -> void;
   auto on_pushButtonDesconhecimento_clicked() -> void;

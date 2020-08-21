@@ -170,6 +170,7 @@ bool Application::dbReconnect(const bool silent) {
   isConnected = db.open();
 
   if (not isConnected) {
+    // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
     if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
     return false;
   }

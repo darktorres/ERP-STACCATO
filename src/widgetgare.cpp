@@ -28,7 +28,7 @@ WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare
   connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
 
-  ui->dateEdit->setDate(QDate::currentDate());
+  ui->dateEdit->setDate(qApp->serverDate());
 }
 
 WidgetGare::~WidgetGare() { delete ui; }

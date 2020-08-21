@@ -2,6 +2,7 @@
 #include "ui_nfedistribuicao.h"
 
 #include "application.h"
+#include "nfeproxymodel.h"
 #include "reaisdelegate.h"
 #include "usersession.h"
 #include "xml_viewer.h"
@@ -99,6 +100,8 @@ void NFeDistribuicao::setupTables() {
   model.setHeaderData("nsu", "NSU");
   model.setHeaderData("statusDistribuicao", "Distribuição");
   model.setHeaderData("dataDistribuicao", "Data Evento");
+
+  model.proxyModel = new NFeProxyModel(&model, this);
 
   ui->table->setModel(&model);
 

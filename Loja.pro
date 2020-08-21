@@ -179,6 +179,7 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/nfedistribuicao.cpp \
+    src/nfeproxymodel.cpp \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
@@ -308,6 +309,7 @@ HEADERS  += \
     src/logindialog.h \
     src/mainwindow.h \
     src/nfedistribuicao.h \
+    src/nfeproxymodel.h \
     src/noeditdelegate.h \
     src/orcamento.h \
     src/orcamentoproxymodel.h \

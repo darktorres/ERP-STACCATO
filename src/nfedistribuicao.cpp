@@ -74,12 +74,33 @@ void NFeDistribuicao::buscarNSU() {
 void NFeDistribuicao::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro, connectionType);
+  connect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled, connectionType);
   connect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked, connectionType);
   connect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonConfirmacao_clicked, connectionType);
   connect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonDesconhecimento_clicked, connectionType);
   connect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonNaoRealizada_clicked, connectionType);
   connect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonPesquisar_clicked, connectionType);
   connect(ui->table, &TableView::activated, this, &NFeDistribuicao::on_table_activated, connectionType);
+}
+
+void NFeDistribuicao::unsetConnections() {
+  disconnect(ui->checkBoxCiencia, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxConfirmacao, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxDesconhecido, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxDesconhecimento, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
+  disconnect(ui->checkBoxNaoRealizada, &QCheckBox::toggled, this, &NFeDistribuicao::montaFiltro);
+  disconnect(ui->groupBoxFiltros, &QGroupBox::toggled, this, &NFeDistribuicao::on_groupBoxFiltros_toggled);
+  disconnect(ui->pushButtonCiencia, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonCiencia_clicked);
+  disconnect(ui->pushButtonConfirmacao, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonConfirmacao_clicked);
+  disconnect(ui->pushButtonDesconhecimento, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonDesconhecimento_clicked);
+  disconnect(ui->pushButtonNaoRealizada, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonNaoRealizada_clicked);
+  disconnect(ui->pushButtonPesquisar, &QPushButton::clicked, this, &NFeDistribuicao::on_pushButtonPesquisar_clicked);
+  disconnect(ui->table, &TableView::activated, this, &NFeDistribuicao::on_table_activated);
 }
 
 void NFeDistribuicao::setupTables() {
@@ -654,5 +675,37 @@ QString NFeDistribuicao::encontraTransportadora(const QString &xml) {
   return "";
 }
 
-// TODO: pintar linhas de amarelo/vermelho a medida que aproximar do prazo para realizar uma operacao final
+void NFeDistribuicao::montaFiltro() {
+  QStringList filtros;
+
+  filtros << "nsu IS NOT NULL";
+
+  QStringList filtroCheck;
+
+  for (const auto &child : ui->groupBoxFiltros->findChildren<QCheckBox *>()) {
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
+  }
+
+  if (not filtroCheck.isEmpty()) { filtros << "statusDistribuicao IN (" + filtroCheck.join(", ") + ")"; }
+
+  model.setFilter(filtros.join(" AND "));
+}
+
+void NFeDistribuicao::on_groupBoxFiltros_toggled(const bool enabled) {
+  unsetConnections();
+
+  [&] {
+    const auto children = ui->groupBoxFiltros->findChildren<QCheckBox *>();
+
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  }();
+
+  setConnections();
+
+  montaFiltro();
+}
+
 // TODO: nos casos em que o usuario importar um xml já cadastrado como RESUMO utilizar o xml do usuario

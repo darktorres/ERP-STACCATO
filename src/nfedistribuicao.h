@@ -38,7 +38,9 @@ private:
   auto encontraInfCpl(const QString &xml) -> QString;
   auto encontraTransportadora(const QString &xml) -> QString;
   auto enviarEvento(const QString &operacao, const QVector<int> &selection) -> bool;
+  auto montaFiltro() -> void;
   auto naoRealizar() -> void;
+  auto on_groupBoxFiltros_toggled(const bool enabled) -> void;
   auto on_pushButtonCiencia_clicked() -> void;
   auto on_pushButtonConfirmacao_clicked() -> void;
   auto on_pushButtonDesconhecimento_clicked() -> void;
@@ -48,4 +50,5 @@ private:
   auto pesquisarNFes(const QString &resposta, const QString &idLoja) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };

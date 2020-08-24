@@ -336,7 +336,7 @@ void WidgetLogisticaEntregas::on_pushButtonImprimirDanfe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbrLocal(this); not acbrLocal.gerarDanfe(modelCarga.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaEntregas::on_lineEditBuscar_textChanged(const QString &) { montaFiltro(); }
@@ -420,7 +420,7 @@ void WidgetLogisticaEntregas::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelCarga.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbrRemoto;
+  ACBr acbrRemoto(this);
 
   if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
     const auto [xml, resposta] = *tuple;
@@ -519,7 +519,7 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   file.close();
 
-  QXlsx::Document xlsx(arquivoModelo);
+  QXlsx::Document xlsx(arquivoModelo, this);
 
   xlsx.currentWorksheet()->setFitToPage(true);
   xlsx.currentWorksheet()->setFitToHeight(true);

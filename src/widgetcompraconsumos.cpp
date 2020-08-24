@@ -124,7 +124,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 bool WidgetCompraConsumos::desfazerConsumo(const int row) {
   const int idVendaProduto2 = modelProduto.data(row, "idVendaProduto2").toInt();
 
-  if (not Estoque::desfazerConsumo(idVendaProduto2)) { return false; }
+  if (not Estoque::desfazerConsumo(idVendaProduto2, this)) { return false; }
 
   return true;
 }

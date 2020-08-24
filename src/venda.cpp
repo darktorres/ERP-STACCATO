@@ -354,7 +354,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
 
-  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException("Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text(), this); }
 
   const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
 
@@ -601,7 +601,7 @@ bool Venda::viewRegister() {
         queryFornecedor.prepare("SELECT fretePagoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
         queryFornecedor.bindValue(":razaoSocial", modelItem.data(0, "fornecedor"));
 
-        if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException(false, "Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text()); }
+        if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException(false, "Erro buscando fretePagoLoja: " + queryFornecedor.lastError().text(), this); }
 
         const bool fretePagoLoja = queryFornecedor.value("fretePagoLoja").toBool();
 
@@ -1026,7 +1026,7 @@ void Venda::on_pushButtonGerarPdf_clicked() {
 void Venda::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Venda cadastrada com sucesso!", this); }
 
 void Venda::on_pushButtonGerarExcel_clicked() {
-  Excel excel(ui->lineEditVenda->text(), Excel::Tipo::Venda);
+  Excel excel(ui->lineEditVenda->text(), Excel::Tipo::Venda, this);
   excel.gerarExcel();
 }
 

@@ -392,7 +392,6 @@ FORMS += \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
-    ui/cnab.ui \
     ui/collapsiblewidget.ui \
     ui/comprovantes.ui \
     ui/contas.ui \

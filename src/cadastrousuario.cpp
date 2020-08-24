@@ -232,7 +232,7 @@ bool CadastroUsuario::cadastrar() {
 void CadastroUsuario::criarUsuarioMySQL() {
   QFile file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString(), this); }
 
   const QString password = file.readAll();
 

@@ -87,7 +87,7 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!"); }
+  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
 
   const int row = list.first().row();
 
@@ -225,7 +225,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal;
+  ACBr acbrLocal(this);
 
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)

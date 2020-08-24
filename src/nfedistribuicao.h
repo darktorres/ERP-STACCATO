@@ -14,7 +14,7 @@ class NFeDistribuicao : public QWidget {
   Q_OBJECT
 
 public:
-  explicit NFeDistribuicao(QWidget *parent = nullptr);
+  explicit NFeDistribuicao(QWidget *parent);
   ~NFeDistribuicao();
   auto resetTables() -> void;
   auto updateTables() -> void;

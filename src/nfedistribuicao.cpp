@@ -12,7 +12,7 @@
 #include <QSqlError>
 #include <QTimer>
 
-NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::NFeDistribuicao) {
+NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), acbrRemoto(this), ui(new Ui::NFeDistribuicao) {
   ui->setupUi(this);
 
   if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) {
@@ -56,7 +56,7 @@ void NFeDistribuicao::updateTables() {
 void NFeDistribuicao::buscarNSU() {
   const auto idLoja = UserSession::getSetting("User/lojaACBr");
 
-  if (not idLoja) { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!"); }
+  if (not idLoja) { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
   QSqlQuery queryLoja;
 
@@ -152,7 +152,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   const auto idLoja = UserSession::getSetting("User/lojaACBr");
 
-  if (not idLoja) { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!"); }
+  if (not idLoja) { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
   //----------------------------------------------------------
 
@@ -414,7 +414,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
           if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso +
                                      "'")) {
-            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text(), this);
           }
         }
 
@@ -423,7 +423,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
           if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
                                      chaveAcesso + "'")) {
-            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text(), this);
           }
         }
 
@@ -433,7 +433,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
           if (not queryAtualiza.exec(
                   "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
                   chaveAcesso + "'")) {
-            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
+            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text(), this);
           }
         }
 

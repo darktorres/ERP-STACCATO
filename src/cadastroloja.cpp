@@ -272,7 +272,7 @@ void CadastroLoja::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
 
-  if (CepCompleter cc; cc.buscaCEP(cep)) {
+  if (CepCompleter cc; cc.buscaCEP(cep, this)) {
     ui->lineEditUF->setText(cc.getUf());
     ui->lineEditCidade->setText(cc.getCidade());
     ui->lineEditLogradouro->setText(cc.getEndereco());

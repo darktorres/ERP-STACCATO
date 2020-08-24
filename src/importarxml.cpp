@@ -642,7 +642,7 @@ bool ImportarXML::verificaExiste(const XML &xml) {
   query.prepare("SELECT status, utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueException(true, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueException(true, "Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
 
   if (query.first()) {
     if (query.value("utilizada").toBool()) { return qApp->enqueueError(true, "Nota já utilizada!", this); }
@@ -710,7 +710,7 @@ bool ImportarXML::usarXMLBaixado() {
 
   // ----------------------------------------------------------------
 
-  XML xml(fileContent, XML::Tipo::Entrada);
+  XML xml(fileContent, XML::Tipo::Entrada, this);
 
   if (xml.error) { return false; }
 
@@ -763,7 +763,7 @@ bool ImportarXML::lerXML() {
 
   // ----------------------------------------------------------------
 
-  XML xml(fileContent, XML::Tipo::Entrada);
+  XML xml(fileContent, XML::Tipo::Entrada, this);
 
   if (xml.error) { return false; }
 

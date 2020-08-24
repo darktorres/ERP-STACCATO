@@ -250,7 +250,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 }
 
 bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) {
-  QXlsx::Document xlsx(arquivoModelo);
+  QXlsx::Document xlsx(arquivoModelo, this);
 
   xlsx.selectSheet("Sheet1");
 

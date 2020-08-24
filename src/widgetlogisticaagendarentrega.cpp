@@ -224,7 +224,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &in
 
   modelProdutos.setFilter("idVenda = '" + idVenda + "'");
 
-  if (not modelProdutos.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos.lastError().text()); }
+  if (not modelProdutos.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
 
   ui->lineEditAviso->setText((modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") ? "Financeiro não liberou!" : "");
 }
@@ -819,7 +819,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file.errorString(), this); }
 
-  XML xml(file.readAll(), XML::Tipo::Saida);
+  XML xml(file.readAll(), XML::Tipo::Saida, this);
 
   if (not xml.validar()) { return; }
 
@@ -827,9 +827,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueException("Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+  if (not query.exec()) { return qApp->enqueueException("Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
 
-  if (query.first()) { return qApp->enqueueError("Nota já cadastrada!"); }
+  if (query.first()) { return qApp->enqueueError("Nota já cadastrada!", this); }
 
   QSqlQuery queryNFe;
   queryNFe.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "

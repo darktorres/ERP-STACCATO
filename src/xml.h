@@ -65,7 +65,7 @@ class XML final {
 
 public:
   enum class Tipo { Entrada, Saida, Nulo };
-  explicit XML(const QByteArray &fileContent, const Tipo tipo);
+  explicit XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent);
   explicit XML(const QByteArray &fileContent);
   auto validar() -> bool;
   auto verificaNCMs() -> bool;
@@ -112,6 +112,7 @@ private:
   // attributes
   Produto produto;
   const Tipo tipo;
+  QWidget *parent;
   // methods
   auto lerCOFINSProduto(const QStandardItem *child) -> void;
   auto lerDadosProduto(const QStandardItem *child) -> void;

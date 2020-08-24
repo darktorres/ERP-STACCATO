@@ -631,12 +631,52 @@ bool ImportarXML::associarDiferente(const int rowCompra, const int rowEstoque, d
   return criarConsumo(rowCompra, rowEstoque);
 }
 
-bool ImportarXML::verificaExiste(const QString &chaveAcesso) {
-  const auto list = modelNFe.multiMatch({{"chaveAcesso", chaveAcesso}}, false);
+bool ImportarXML::verificaExiste(const XML &xml) {
+  const auto list = modelNFe.multiMatch({{"chaveAcesso", xml.chaveAcesso}}, false);
 
-  if (not list.isEmpty() or mapNFes.contains(chaveAcesso)) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+  if (not list.isEmpty()) { return qApp->enqueueError(true, "Nota já cadastrada!", this); }
+
+  // ----------------------------------------------------------------
+
+  QSqlQuery query;
+  query.prepare("SELECT status, utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", xml.chaveAcesso);
+
+  if (not query.exec()) { return qApp->enqueueException(true, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+
+  if (query.first()) {
+    if (query.value("utilizada").toBool()) { return qApp->enqueueError(true, "Nota já utilizada!", this); }
+
+    if (query.value("status") == "CANCELADA") { return qApp->enqueueError(true, "Nota cancelada!", this); }
+
+    if (query.value("status") == "RESUMO") {
+      QSqlQuery queryAtualiza;
+      queryAtualiza.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso");
+      queryAtualiza.bindValue(":xml", xml.fileContent);
+      queryAtualiza.bindValue(":transportadora", xml.xNomeTransp);
+      queryAtualiza.bindValue(":infCpl", encontraInfCpl(xml.fileContent));
+      queryAtualiza.bindValue(":chaveAcesso", xml.chaveAcesso);
+
+      if (not queryAtualiza.exec()) { return qApp->enqueueException(true, "Erro cadastrando XML: " + queryAtualiza.lastError().text(), this); }
+    }
+
+    // nota já autorizada ou recém atualizada para autorizada
+    ui->itemBoxNFe->setText(xml.chaveAcesso);
+    on_itemBoxNFe_textChanged(xml.chaveAcesso);
+
+    return true;
+  }
 
   return false;
+}
+
+QString ImportarXML::encontraInfCpl(const QString &xml) {
+  const int indexInfCpl1 = xml.indexOf("<infCpl>");
+  const int indexInfCpl2 = xml.indexOf("</infCpl>");
+
+  if (indexInfCpl1 != -1 and indexInfCpl2 != -1) { return xml.mid(indexInfCpl1, indexInfCpl2 - indexInfCpl1).remove("<infCpl>"); }
+
+  return "";
 }
 
 bool ImportarXML::cadastrarNFe(XML &xml, const double gare) {
@@ -665,17 +705,17 @@ bool ImportarXML::usarXMLBaixado() {
   }
 
   if (query.value("status") != "AUTORIZADO") { return qApp->enqueueError(false, "NFe não está autorizada!", this); }
-  if (query.value("utilizada").toBool()) { return qApp->enqueueError(false, "NFe já cadastrada!", this); }
 
   const auto fileContent = query.value("xml").toByteArray();
 
   // ----------------------------------------------------------------
 
-  XML xml(fileContent);
+  XML xml(fileContent, XML::Tipo::Entrada);
 
   if (xml.error) { return false; }
 
-  if (verificaExiste(xml.chaveAcesso)) { return false; } // verifica se já cadastrado dentre as notas utilizadas nessa importacao
+  // verifica se já cadastrado dentre as notas utilizadas nessa importacao
+  if (mapNFes.contains(xml.chaveAcesso)) { return qApp->enqueueError(false, "Nota já cadastrada!", this); }
 
   if (not xml.verificaNCMs()) { return false; }
 
@@ -723,19 +763,13 @@ bool ImportarXML::lerXML() {
 
   // ----------------------------------------------------------------
 
-  XML xml(fileContent, file.fileName());
+  XML xml(fileContent, XML::Tipo::Entrada);
 
   if (xml.error) { return false; }
 
-  const auto verificaBaixado = verificaExisteBaixado(xml.chaveAcesso);
+  if (not xml.validar()) { return false; }
 
-  if (not verificaBaixado) { return false; }
-
-  if (verificaBaixado.value()) { return false; }
-
-  if (not xml.validar(XML::Tipo::Entrada)) { return false; }
-
-  if (verificaExiste(xml.chaveAcesso)) { return false; }
+  if (verificaExiste(xml)) { return false; }
 
   if (not xml.verificaNCMs()) { return false; }
 
@@ -764,32 +798,6 @@ bool ImportarXML::lerXML() {
   if (not cadastrarNFe(xml, gare.value())) { return false; }
 
   return true;
-}
-
-std::optional<bool> ImportarXML::verificaExisteBaixado(const QString &chaveAcesso) {
-  QSqlQuery query;
-  query.prepare("SELECT utilizada FROM nfe WHERE chaveAcesso = :chaveAcesso");
-  query.bindValue(":chaveAcesso", chaveAcesso);
-
-  if (not query.exec()) {
-    qApp->enqueueException("Erro verificando se nota já cadastrada: " + query.lastError().text());
-    return {};
-  }
-
-  if (query.first()) {
-    const bool utilizada = query.value("utilizada").toBool();
-
-    if (utilizada) { qApp->enqueueError("Nota já cadastrada!"); }
-
-    if (not utilizada) {
-      ui->itemBoxNFe->setText(chaveAcesso);
-      on_itemBoxNFe_textChanged(chaveAcesso);
-    }
-
-    return true;
-  }
-
-  return false;
 }
 
 bool ImportarXML::perguntarLocal(XML &xml) {

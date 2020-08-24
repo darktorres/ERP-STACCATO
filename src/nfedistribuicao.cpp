@@ -332,7 +332,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       if (indexSchema == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'schema'!", this); }
 
-      const QString schema = evento.mid(indexSchema + 9).split("\r\n").first();
+      const QString schemaEvento = evento.mid(indexSchema + 9).split("\r\n").first();
 
       //----------------------------------------------------------
 
@@ -347,28 +347,39 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       //----------------------------------------------------------
 
       if (not existe) {
-        const QString status = (schema == "procNFe") ? "AUTORIZADO" : "RESUMO";
-        const QString ciencia = (schema == "procNFe") ? "FALSE" : "TRUE";
+        const QString status = (schemaEvento == "procNFe") ? "AUTORIZADO" : "RESUMO";
+        const QString ciencia = (schemaEvento == "procNFe") ? "0" : "1";
 
         QSqlQuery queryCadastrar;
+        queryCadastrar.prepare("INSERT INTO nfe (numeroNFe, tipo, xml, status, emitente, cnpjDest, cnpjOrig, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao, ciencia) VALUES "
+                               "(:numeroNFe, 'ENTRADA', :xml, :status, :emitente, :cnpjDest, :cnpjOrig, :chaveAcesso, :transportadora, :valor, :infCpl, :nsu, 'DESCONHECIDO', :ciencia)");
+        queryCadastrar.bindValue(":numeroNFe", numeroNFe);
+        queryCadastrar.bindValue(":xml", xml);
+        queryCadastrar.bindValue(":status", status);
+        queryCadastrar.bindValue(":emitente", nomeEmitente);
+        queryCadastrar.bindValue(":cnpjDest", cnpjDest);
+        queryCadastrar.bindValue(":cnpjOrig", cnpjOrig);
+        queryCadastrar.bindValue(":chaveAcesso", chaveAcesso);
+        queryCadastrar.bindValue(":transportadora", encontraTransportadora(xml));
+        queryCadastrar.bindValue(":valor", valor);
+        queryCadastrar.bindValue(":infCpl", encontraInfCpl(xml));
+        queryCadastrar.bindValue(":nsu", nsu);
+        queryCadastrar.bindValue(":ciencia", ciencia);
 
-        if (not queryCadastrar.exec(
-                "INSERT INTO nfe (numeroNFe, tipo, xml, status, emitente, cnpjDest, cnpjOrig, chaveAcesso, transportadora, valor, infCpl, nsu, statusDistribuicao, ciencia) VALUES ('" + numeroNFe +
-                "', 'ENTRADA', '" + xml + "', '" + status + "', '" + nomeEmitente + "', '" + cnpjDest + "', '" + cnpjOrig + "', '" + chaveAcesso + "', '" + encontraTransportadora(xml) + "', '" +
-                valor + "', '" + encontraInfCpl(xml) + "', '" + nsu + "', 'DESCONHECIDO', " + ciencia + ")")) {
-          return qApp->enqueueException(false, "Erro cadastrando resumo da NFe: " + queryCadastrar.lastError().text(), this);
-        }
+        if (not queryCadastrar.exec()) { return qApp->enqueueException(false, "Erro cadastrando resumo da NFe: " + queryCadastrar.lastError().text(), this); }
       }
 
-      if (existe and schema == "procNFe") {
+      if (existe and schemaEvento == "procNFe") {
         if (queryExiste.value("status").toString() == "AUTORIZADO") { continue; }
 
         QSqlQuery queryAtualizar;
+        queryAtualizar.prepare("UPDATE nfe SET status = 'AUTORIZADO', xml = :xml, transportadora = :transportadora, infCpl = :infCpl WHERE chaveAcesso = :chaveAcesso AND status = 'RESUMO'");
+        queryAtualizar.bindValue(":xml", xml);
+        queryAtualizar.bindValue(":transportadora", encontraTransportadora(xml));
+        queryAtualizar.bindValue(":infCpl", encontraInfCpl(xml));
+        queryAtualizar.bindValue(":chaveAcesso", chaveAcesso);
 
-        if (not queryAtualizar.exec("UPDATE nfe SET status = 'AUTORIZADO', xml = '" + xml + "', transportadora = '" + encontraTransportadora(xml) + "', infCpl = '" + encontraInfCpl(xml) +
-                                    "' WHERE chaveAcesso = '" + chaveAcesso + "' AND status = 'RESUMO'")) {
-          return qApp->enqueueException(false, "Erro atualizando xml: " + queryAtualizar.lastError().text(), this);
-        }
+        if (not queryAtualizar.exec()) { return qApp->enqueueException(false, "Erro atualizando xml: " + queryAtualizar.lastError().text(), this); }
       }
     }
 

@@ -66,6 +66,7 @@ private:
   auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
   auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
   auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
+  auto encontraInfCpl(const QString &xml) -> QString;
   auto importar() -> bool;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
@@ -86,7 +87,6 @@ private:
   auto unsetConnections() -> void;
   auto updateTableData(const QModelIndex &topLeft) -> void;
   auto usarXMLBaixado() -> bool;
-  auto verificaExiste(const QString &chaveAcesso) -> bool;
-  auto verificaExisteBaixado(const QString &chaveAcesso) -> std::optional<bool>;
+  auto verificaExiste(const XML &xml) -> bool;
   auto verifyFields() -> bool;
 };

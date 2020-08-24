@@ -6,7 +6,9 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(); }
+XML::XML(const QByteArray &fileContent, const Tipo tipo) : fileContent(fileContent), tipo(tipo) { montarArvore(); }
+
+XML::XML(const QByteArray &fileContent) : XML(fileContent, XML::Tipo::Nulo) {}
 
 void XML::montarArvore() {
   if (fileContent.isEmpty()) {
@@ -198,29 +200,17 @@ void XML::lerTotais(const QStandardItem *child) {
   if (text.contains("vNF -")) { vNF_Total = text.remove("vNF - ").toDouble(); }
 }
 
-bool XML::validar(const Tipo tipo) {
-  if (not verificaCNPJ(tipo) or verificaExiste() or not verificaValido()) { return false; }
+bool XML::validar() {
+  if (not verificaCNPJ() or not verificaValido()) { return false; }
 
   return true;
 }
 
-bool XML::verificaCNPJ(const Tipo tipo) {
+bool XML::verificaCNPJ() {
   if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
   if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
 
   return true;
-}
-
-bool XML::verificaExiste() {
-  QSqlQuery query;
-  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
-  query.bindValue(":chaveAcesso", chaveAcesso);
-
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
-
-  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
-
-  return false;
 }
 
 bool XML::verificaValido() {

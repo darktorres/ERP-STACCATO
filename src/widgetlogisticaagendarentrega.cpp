@@ -819,9 +819,17 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file.errorString(), this); }
 
-  XML xml(file.readAll(), file.fileName());
+  XML xml(file.readAll(), XML::Tipo::Saida);
 
-  if (not xml.validar(XML::Tipo::Saida)) { return; }
+  if (not xml.validar()) { return; }
+
+  QSqlQuery query;
+  query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
+  query.bindValue(":chaveAcesso", xml.chaveAcesso);
+
+  if (not query.exec()) { return qApp->enqueueException("Erro verificando se nota já cadastrada: " + query.lastError().text()); }
+
+  if (query.first()) { return qApp->enqueueError("Nota já cadastrada!"); }
 
   QSqlQuery queryNFe;
   queryNFe.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "

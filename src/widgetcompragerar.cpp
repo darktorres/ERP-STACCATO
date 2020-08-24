@@ -366,7 +366,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
 
   if (isRepresentacao) {
     const QString idVenda = modelProdutos.data(firstRow, "idVenda").toString();
-    Excel excel(idVenda, Excel::Tipo::Venda);
+    Excel excel(idVenda, Excel::Tipo::Venda, this);
     const QString representacao = "OC " + QString::number(oc) + " " + idVenda + " " + fornecedor;
 
     if (not excel.gerarExcel(oc, true, representacao)) { return {}; }
@@ -415,7 +415,7 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
     return {};
   }
 
-  QXlsx::Document xlsx(arquivoModelo);
+  QXlsx::Document xlsx(arquivoModelo, this);
 
   //  xlsx.currentWorksheet()->setFitToPage(true);
   //  xlsx.currentWorksheet()->setFitToHeight(true);

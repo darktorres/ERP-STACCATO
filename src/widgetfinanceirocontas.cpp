@@ -426,7 +426,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   SqlTableModel modelImportar;
   modelImportar.setTable("conta_a_pagar_has_pagamento");
 
-  QXlsx::Document xlsx(file);
+  QXlsx::Document xlsx(file, this);
 
   if (not xlsx.selectSheet("Planilha1")) { return qApp->enqueueException("Não encontrou 'Planilha1' na tabela!", this); }
 

@@ -996,7 +996,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
+    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException("Erro verificando validade dos produtos: " + queryProduto.lastError().text(), this); }
 
     if (queryProduto.value("invalido").toBool()) {
       queryEquivalente.bindValue(":codComercial", modelItem.data(row, "codComercial"));
@@ -1154,7 +1154,7 @@ bool Orcamento::verificaCadastroCliente() {
 }
 
 void Orcamento::on_pushButtonGerarExcel_clicked() {
-  Excel excel(ui->lineEditOrcamento->text(), Excel::Tipo::Orcamento);
+  Excel excel(ui->lineEditOrcamento->text(), Excel::Tipo::Orcamento, this);
   excel.gerarExcel();
 }
 

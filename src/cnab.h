@@ -1,14 +1,8 @@
 #pragma once
 
-#include <QDialog>
 #include <QTextStream>
 
-namespace Ui {
-class CNAB;
-}
-
-class CNAB : public QDialog {
-  Q_OBJECT
+class CNAB {
 
 public:
   struct Gare {
@@ -20,17 +14,17 @@ public:
     QString cnpjOrig;
   };
 
-  explicit CNAB(QWidget *parent = nullptr);
+  explicit CNAB(QWidget *parent);
   auto remessaGareSantander240(QVector<Gare> gares) -> std::optional<QString>;
   auto remessaGareItau240(QVector<Gare> gares) -> std::optional<QString>;
   auto retornoGareSantander240() -> void;
   auto retornoGareItau240(const QString &filePath) -> void;
   // TODO: adicionar funcoes para boleto e outros pagamentos
-  ~CNAB();
+  ~CNAB() = default;
 
 private:
   // attributes
-  Ui::CNAB *ui;
+  QWidget *parent;
   // methods
   auto decodeCodeItau(const QString &code) -> QString;
   auto writeBlanks(QTextStream &stream, const int count) -> void;

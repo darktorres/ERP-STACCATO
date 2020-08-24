@@ -169,7 +169,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
 
-  ACBr acbrRemoto;
+  ACBr acbrRemoto(this);
 
   const auto resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
@@ -195,7 +195,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  ACBr acbrLocal;
+  ACBr acbrLocal(this);
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
   acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath);
@@ -263,7 +263,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal;
+  ACBr acbrLocal(this);
 
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
@@ -336,7 +336,7 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbrRemoto;
+  ACBr acbrRemoto(this);
 
   if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
     const auto [xml, resposta] = tuple.value();

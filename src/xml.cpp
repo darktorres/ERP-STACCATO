@@ -6,14 +6,14 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-XML::XML(const QByteArray &fileContent, const Tipo tipo) : fileContent(fileContent), tipo(tipo) { montarArvore(); }
+XML::XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent) : fileContent(fileContent), tipo(tipo), parent(parent) { montarArvore(); }
 
-XML::XML(const QByteArray &fileContent) : XML(fileContent, XML::Tipo::Nulo) {}
+XML::XML(const QByteArray &fileContent) : XML(fileContent, XML::Tipo::Nulo, nullptr) {}
 
 void XML::montarArvore() {
   if (fileContent.isEmpty()) {
     error = true;
-    return qApp->enqueueException("XML vazio!");
+    return qApp->enqueueException("XML vazio!", parent);
   }
 
   QDomDocument document;
@@ -21,7 +21,7 @@ void XML::montarArvore() {
 
   if (not document.setContent(fileContent, &errorText)) {
     error = true;
-    return qApp->enqueueException("Erro lendo arquivo: " + errorText);
+    return qApp->enqueueException("Erro lendo arquivo: " + errorText, parent);
   }
 
   QDomElement root = document.firstChildElement();
@@ -207,14 +207,14 @@ bool XML::validar() {
 }
 
 bool XML::verificaCNPJ() {
-  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
+  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!", parent); }
 
   return true;
 }
 
 bool XML::verificaValido() {
-  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!"); }
+  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", parent); }
 
   return true;
 }
@@ -226,7 +226,7 @@ bool XML::verificaNCMs() {
   for (const auto &produto : produtos) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text()); }
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text(), parent); }
 
     if (not query.first()) {
       ncms << produto.ncm;
@@ -236,7 +236,7 @@ bool XML::verificaNCMs() {
 
   ncms.removeDuplicates();
 
-  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -")); }
+  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
 
   return true;
 }

@@ -38,6 +38,9 @@
        <property name="text">
         <string>Procurar...</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
     </layout>
@@ -301,6 +304,21 @@ color: rgb(0, 0, 0);</string>
    <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>pushButtonProcurar</tabstop>
+  <tabstop>itemBoxNFe</tabstop>
+  <tabstop>checkBoxSemLote</tabstop>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>tableConsumo</tabstop>
+  <tabstop>tableCompra</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>pushButtonImportar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

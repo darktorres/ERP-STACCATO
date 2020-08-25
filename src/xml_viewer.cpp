@@ -9,9 +9,6 @@ XML_Viewer::XML_Viewer(const QByteArray &content, QWidget *parent) : QDialog(par
   setWindowFlags(Qt::Window);
 
   ui->treeView->setModel(&xml.model);
-  ui->treeView->setUniformRowHeights(true);
-  ui->treeView->setAnimated(true);
-  ui->treeView->setEditTriggers(QTreeView::NoEditTriggers);
   ui->treeView->expandAll();
 
   connect(ui->pushButtonDanfe, &QPushButton::clicked, this, &XML_Viewer::on_pushButtonDanfe_clicked);

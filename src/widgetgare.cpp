@@ -204,34 +204,12 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
   for (const auto index : selection) {
     CNAB::Gare gare;
 
-    gare.idNFe = model.data(index.row(), "idNFe").toInt();
-
-    QString referencia = model.data(index.row(), "referencia").toString();
-    QString referencia2;
-    referencia2.append(referencia.at(5));
-    referencia2.append(referencia.at(6));
-    referencia2.append(referencia.at(0));
-    referencia2.append(referencia.at(1));
-    referencia2.append(referencia.at(2));
-    referencia2.append(referencia.at(3));
-    gare.mesAnoReferencia = referencia2.toInt();
-
     QDate datePgt = model.data(index.row(), "dataPagamento").toDate();
-
     if (datePgt < qApp->serverDate()) { datePgt = qApp->serverDate(); }
+    gare.dataVencimento = datePgt.toString("ddMMyyyy").toInt();
 
-    QString dataPagamento = datePgt.toString("yyyy-MM-dd");
-    QString dataPagamento2;
-    dataPagamento2.append(dataPagamento.at(8));
-    dataPagamento2.append(dataPagamento.at(9));
-    dataPagamento2.append(dataPagamento.at(5));
-    dataPagamento2.append(dataPagamento.at(6));
-    dataPagamento2.append(dataPagamento.at(0));
-    dataPagamento2.append(dataPagamento.at(1));
-    dataPagamento2.append(dataPagamento.at(2));
-    dataPagamento2.append(dataPagamento.at(3));
-    gare.dataVencimento = dataPagamento2.toInt();
-
+    gare.idNFe = model.data(index.row(), "idNFe").toInt();
+    gare.mesAnoReferencia = model.data(index.row(), "referencia").toDate().toString("MMyyyy").toInt();
     gare.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).toDouble() * 100;
     gare.numeroNF = model.data(index.row(), "numeroNFe").toString();
     gare.cnpjOrig = model.data(index.row(), "cnpjOrig").toString();

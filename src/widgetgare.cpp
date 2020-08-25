@@ -232,7 +232,7 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
     dataPagamento2.append(dataPagamento.at(3));
     gare.dataVencimento = dataPagamento2.toInt();
 
-    gare.valor = model.data(index.row(), "valor").toDouble() * 100;
+    gare.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).toDouble() * 100;
     gare.numeroNF = model.data(index.row(), "numeroNFe").toString();
     gare.cnpjOrig = model.data(index.row(), "cnpjOrig").toString();
 

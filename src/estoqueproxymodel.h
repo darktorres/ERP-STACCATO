@@ -1,12 +1,13 @@
 #pragma once
 
 #include "sortfilterproxymodel.h"
-#include "sqltablemodel.h"
+
+#include <QSqlQueryModel>
 
 class EstoqueProxyModel final : public SortFilterProxyModel {
 
 public:
-  explicit EstoqueProxyModel(SqlTableModel *model, QObject *parent);
+  explicit EstoqueProxyModel(QSqlQueryModel *model, QObject *parent);
   ~EstoqueProxyModel() final = default;
 
 private:

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "sqltablemodel.h"
-
 #include <QIdentityProxyModel>
+#include <QSqlQueryModel>
 
 class FollowUpProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit FollowUpProxyModel(SqlTableModel *model, QObject *parent);
+  explicit FollowUpProxyModel(QSqlQueryModel *model, QObject *parent);
   ~FollowUpProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, int role) const -> QVariant final;
 

@@ -4,9 +4,10 @@
 #include "usersession.h"
 
 #include <QDate>
+#include <QSqlRecord>
 
-NFeProxyModel::NFeProxyModel(SqlTableModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), statusColumn(model->fieldIndex("statusDistribuicao")), dataColumn(model->fieldIndex("dataDistribuicao")) {}
+NFeProxyModel::NFeProxyModel(QSqlQueryModel *model, QObject *parent)
+    : SortFilterProxyModel(model, parent), statusColumn(model->record().indexOf("statusDistribuicao")), dataColumn(model->record().indexOf("dataDistribuicao")) {}
 
 QVariant NFeProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

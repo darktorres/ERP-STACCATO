@@ -3,8 +3,9 @@
 #include "usersession.h"
 
 #include <QBrush>
+#include <QSqlRecord>
 
-EstoqueProxyModel::EstoqueProxyModel(SqlTableModel *model, QObject *parent) : SortFilterProxyModel(model, parent), quantUpdColumn(model->fieldIndex("quantUpd")) {}
+EstoqueProxyModel::EstoqueProxyModel(QSqlQueryModel *model, QObject *parent) : SortFilterProxyModel(model, parent), quantUpdColumn(model->record().indexOf("quantUpd")) {}
 
 QVariant EstoqueProxyModel::data(const QModelIndex &proxyIndex, const int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

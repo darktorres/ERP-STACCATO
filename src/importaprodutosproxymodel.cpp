@@ -3,8 +3,9 @@
 #include "usersession.h"
 
 #include <QBrush>
+#include <QSqlRecord>
 
-ImportaProdutosProxyModel::ImportaProdutosProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->fieldIndex("descontinuado")) {
+ImportaProdutosProxyModel::ImportaProdutosProxyModel(QSqlQueryModel *model, QObject *parent) : QIdentityProxyModel(parent), descontinuadoColumn(model->record().indexOf("descontinuado")) {
   setSourceModel(model);
 }
 

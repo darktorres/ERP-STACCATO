@@ -1,13 +1,12 @@
 #pragma once
 
-#include "sqltablemodel.h"
-
 #include <QIdentityProxyModel>
+#include <QSqlQueryModel>
 
 class VendaProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit VendaProxyModel(SqlTableModel *model, QObject *parent);
+  explicit VendaProxyModel(QSqlQueryModel *model, QObject *parent);
   ~VendaProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

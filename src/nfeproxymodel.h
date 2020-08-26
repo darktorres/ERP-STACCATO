@@ -1,12 +1,13 @@
 #pragma once
 
 #include "sortfilterproxymodel.h"
-#include "sqltablemodel.h"
+
+#include <QSqlQueryModel>
 
 class NFeProxyModel final : public SortFilterProxyModel {
 
 public:
-  explicit NFeProxyModel(SqlTableModel *model, QObject *parent);
+  explicit NFeProxyModel(QSqlQueryModel *model, QObject *parent);
   ~NFeProxyModel() = default;
 
 private:

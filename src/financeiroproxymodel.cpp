@@ -5,9 +5,11 @@
 
 #include <QBrush>
 #include <QDate>
+#include <QSqlRecord>
 
-FinanceiroProxyModel::FinanceiroProxyModel(SqlTableModel *model, QObject *parent)
-    : QIdentityProxyModel(parent), statusFinanceiro(model->fieldIndex("statusFinanceiro")), prazoEntrega(model->fieldIndex("prazoEntrega")), novoPrazoEntrega(model->fieldIndex("novoPrazoEntrega")) {
+FinanceiroProxyModel::FinanceiroProxyModel(QSqlQueryModel *model, QObject *parent)
+    : QIdentityProxyModel(parent), statusFinanceiro(model->record().indexOf("statusFinanceiro")), prazoEntrega(model->record().indexOf("prazoEntrega")),
+      novoPrazoEntrega(model->record().indexOf("novoPrazoEntrega")) {
   setSourceModel(model);
 }
 

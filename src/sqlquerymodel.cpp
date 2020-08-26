@@ -2,6 +2,7 @@
 
 #include "application.h"
 
+#include <QDebug>
 #include <QSqlError>
 #include <QSqlRecord>
 
@@ -22,10 +23,10 @@ QVariant SqlQueryModel::data(const int row, const int column) const {
 
 QVariant SqlQueryModel::data(const QModelIndex &index, const QString &column) const { return data(index.row(), column); }
 
-QVariant SqlQueryModel::data(const int row, const QString &column) const { return data(row, QSqlQueryModel::record().indexOf(column)); }
+QVariant SqlQueryModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
 bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) {
-  const int field = QSqlQueryModel::record().indexOf(column);
+  const int field = fieldIndex(column);
 
   if (field == -1) { return qApp->enqueueException(false, "Coluna '" + column + "' não encontrada na tabela!"); }
 
@@ -35,9 +36,29 @@ bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) 
 bool SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
   // TODO: redo places that use this function
 
+  m_query = query;
+
   QSqlQueryModel::setQuery(query, db);
 
   if (lastError().isValid()) { return qApp->enqueueException(false, "Erro lendo dados: " + lastError().text()); }
 
   return true;
 }
+
+bool SqlQueryModel::setQuery2(const QString &query, const QSqlDatabase &db) {
+  QSqlQueryModel::setQuery(query, db);
+
+  if (lastError().isValid()) { return qApp->enqueueException(false, "Erro lendo dados: " + lastError().text()); }
+
+  return true;
+}
+
+int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const {
+  const int field = record().indexOf(fieldName);
+
+  if (field == -1 and not silent) { qApp->enqueueException(fieldName + " não encontrado na tabela!"); }
+
+  return field;
+}
+
+void SqlQueryModel::sort(int column, Qt::SortOrder order) { setQuery2(m_query + " ORDER BY " + record().fieldName(column) + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }

@@ -22,9 +22,7 @@ WidgetLogisticaAgendarEntrega::WidgetLogisticaAgendarEntrega(QWidget *parent) : 
 WidgetLogisticaAgendarEntrega::~WidgetLogisticaAgendarEntrega() { delete ui; }
 
 void WidgetLogisticaAgendarEntrega::setupTables() {
-  modelVendas.setTable("view_entrega_pendente");
-
-  modelVendas.setSort("prazoEntrega");
+  modelVendas.setQuery(Sql::view_entrega_pendente());
 
   modelVendas.setHeaderData("prazoEntrega", "Prazo Limite");
   modelVendas.setHeaderData("novoPrazoEntrega", "Novo Prazo");
@@ -42,7 +40,7 @@ void WidgetLogisticaAgendarEntrega::setupTables() {
 
   // -----------------------------------------------------------------
 
-  modelProdutos.setTable("view_agendar_entrega");
+  modelProdutos.setQuery(Sql::view_agendar_entrega() + " LIMIT 0");
 
   modelProdutos.setHeaderData("dataPrevEnt", "Prev. Ent.");
   modelProdutos.setHeaderData("status", "Status");
@@ -162,7 +160,22 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
 void WidgetLogisticaAgendarEntrega::setConnections() {
   const auto connectionType = static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection);
 
+  connect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEmCompra, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEmEntrega, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEmFaturamento, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEmRecebimento, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEntregaAgend, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEntregue, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
+  connect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged, connectionType);
+  connect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled, connectionType);
   connect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged, connectionType);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked, connectionType);
@@ -178,6 +191,57 @@ void WidgetLogisticaAgendarEntrega::setConnections() {
   connect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro, connectionType);
   connect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked, connectionType);
   connect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked, connectionType);
+}
+
+void WidgetLogisticaAgendarEntrega::unsetConnections() {
+  disconnect(ui->checkBoxCancelado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxDevolvido, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEmColeta, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEmCompra, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEmEntrega, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEmFaturamento, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEmRecebimento, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEntregaAgend, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEntregue, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxEstoque, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxIniciado, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxPendente, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxRepoEntrega, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->checkBoxRepoReceb, &QCheckBox::toggled, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->dateTimeEdit, &QDateTimeEdit::dateChanged, this, &WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged);
+  disconnect(ui->groupBoxStatus, &QGroupBox::toggled, this, &WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled);
+  disconnect(ui->itemBoxVeiculo, &ItemBox::textChanged, this, &WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged);
+  disconnect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->pushButtonAdicionarParcial, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked);
+  disconnect(ui->pushButtonAdicionarProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked);
+  disconnect(ui->pushButtonAgendarCarga, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked);
+  disconnect(ui->pushButtonGerarNFeFutura, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked);
+  disconnect(ui->pushButtonImportarNFe, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked);
+  disconnect(ui->pushButtonReagendarPedido, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked);
+  disconnect(ui->pushButtonRemoverProduto, &QPushButton::clicked, this, &WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked);
+  disconnect(ui->radioButtonEntregaLimpar, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->radioButtonParcialEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->radioButtonSemEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->radioButtonTotalEstoque, &QRadioButton::clicked, this, &WidgetLogisticaAgendarEntrega::montaFiltro);
+  disconnect(ui->tableVendas, &TableView::clicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_clicked);
+  disconnect(ui->tableVendas, &TableView::doubleClicked, this, &WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked);
+}
+
+void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled) {
+  unsetConnections();
+
+  [&] {
+    const auto children = ui->groupBoxStatus->findChildren<QCheckBox *>();
+
+    for (const auto &child : children) {
+      child->setEnabled(true);
+      child->setChecked(enabled);
+    }
+  }();
+
+  setConnections();
+
+  montaFiltro();
 }
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
@@ -200,11 +264,13 @@ void WidgetLogisticaAgendarEntrega::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelVendas.select()) { return; }
+  // -------------------------------------------------------------------------
+
+  if (not modelVendas.setQuery(modelVendas.query().lastQuery())) { return; }
 
   // -------------------------------------------------------------------------
 
-  if (not modelProdutos.select()) { return; }
+  if (not modelProdutos.setQuery(modelProdutos.query().lastQuery())) { return; }
 
   // -------------------------------------------------------------------------
 
@@ -220,40 +286,61 @@ void WidgetLogisticaAgendarEntrega::resetTables() { modelIsSet = false; }
 void WidgetLogisticaAgendarEntrega::on_tableVendas_clicked(const QModelIndex &index) {
   if (not index.isValid()) { return; }
 
-  const QString idVenda = modelVendas.data(index.row(), "idVenda").toString();
+  selectedIdVenda = modelVendas.data(index.row(), "idVenda").toString();
 
-  modelProdutos.setFilter("idVenda = '" + idVenda + "'");
-
-  if (not modelProdutos.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
+  filtroProdutos();
 
   ui->lineEditAviso->setText((modelVendas.data(index.row(), "statusFinanceiro").toString() != "LIBERADO") ? "Financeiro não liberou!" : "");
 }
 
 void WidgetLogisticaAgendarEntrega::montaFiltro() {
-  QStringList filtros;
-
   QString filtroCheck;
 
-  if (ui->radioButtonEntregaLimpar->isChecked()) { filtroCheck = "(Estoque > 0 OR Outros > 0)"; }
-  if (ui->radioButtonTotalEstoque->isChecked()) { filtroCheck = "Estoque > 0 AND Outros = 0"; }
-  if (ui->radioButtonParcialEstoque->isChecked()) { filtroCheck = "Estoque > 0 AND Outros > 0"; }
-  if (ui->radioButtonSemEstoque->isChecked()) { filtroCheck = "Estoque = 0 AND Outros > 0"; }
-
-  if (not filtroCheck.isEmpty()) { filtros << filtroCheck; }
+  if (ui->radioButtonEntregaLimpar->isChecked()) { filtroCheck = "HAVING (Estoque > 0 OR Outros > 0)"; }
+  if (ui->radioButtonTotalEstoque->isChecked()) { filtroCheck = "HAVING Estoque > 0 AND Outros = 0"; }
+  if (ui->radioButtonParcialEstoque->isChecked()) { filtroCheck = "HAVING Estoque > 0 AND Outros > 0"; }
+  if (ui->radioButtonSemEstoque->isChecked()) { filtroCheck = "HAVING Estoque = 0 AND Outros > 0"; }
 
   //-------------------------------------
 
   const QString textoBusca = ui->lineEditBusca->text().remove("'");
 
-  const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR Bairro LIKE '%" + textoBusca + "%' OR Logradouro LIKE '%" + textoBusca + "%' OR Cidade LIKE '%" + textoBusca + "%')";
-
-  if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
+  const QString filtroBusca = textoBusca.isEmpty() ? ""
+                                                   : " AND (vp2.idVenda LIKE '%" + textoBusca + "%' OR che.bairro LIKE '%" + textoBusca + "%' OR che.logradouro LIKE '%" + textoBusca +
+                                                         "%' OR che.cidade LIKE '%" + textoBusca + "%')";
 
   //-------------------------------------
 
-  modelVendas.setFilter(filtros.join(" AND "));
+  QStringList status;
 
-  modelProdutos.setFilter("0");
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+    if (child->isChecked()) { status << "'" + child->text().toUpper() + "'"; }
+  }
+
+  const QString filtroStatus = status.isEmpty() ? "" : " AND vp2.status IN (" + status.join(", ") + ")";
+
+  //-------------------------------------
+
+  if (not modelVendas.setQuery(Sql::view_entrega_pendente(filtroBusca, filtroCheck, filtroStatus))) { return; }
+
+  //-------------------------------------
+
+  filtroProdutos();
+}
+
+void WidgetLogisticaAgendarEntrega::filtroProdutos() {
+  if (selectedIdVenda.isEmpty()) { return; }
+
+  QStringList filtros;
+  QStringList filtroCheck;
+
+  for (const auto &child : ui->groupBoxStatus->findChildren<QCheckBox *>()) {
+    if (child->isChecked()) { filtroCheck << "'" + child->text().toUpper() + "'"; }
+  }
+
+  if (not filtroCheck.isEmpty()) { filtros << "vp2.status IN (" + filtroCheck.join(", ") + ")"; }
+
+  modelProdutos.setQuery(Sql::view_agendar_entrega(selectedIdVenda, filtros.join(" AND ")));
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {

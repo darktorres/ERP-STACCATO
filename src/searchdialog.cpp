@@ -7,6 +7,7 @@
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
 #include "usersession.h"
+#include "xml.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -41,7 +42,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   ui->lineEditPromocao->hide();
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
-  ui->textBrowser->hide();
+  ui->treeView->hide();
 
   ui->lineEditBusca->setFocus();
 }
@@ -129,7 +130,11 @@ void SearchDialog::showMaximized() {
 }
 
 void SearchDialog::on_table_clicked(const QModelIndex &index) {
-  if (model.tableName() == "view_nfe_baixada" and index.isValid()) { ui->textBrowser->setText(model.data(index.row(), "infCpl").toString()); }
+  if (model.tableName() == "view_nfe_baixada" and index.isValid()) {
+    XML *xml = new XML(model.data(index.row(), "xml").toByteArray(), XML::Tipo::Nulo, this);
+    ui->treeView->setModel(&xml->model);
+    ui->treeView->expandAll();
+  }
 }
 
 void SearchDialog::on_table_doubleClicked(const QModelIndex &) { on_pushButtonSelecionar_clicked(); }
@@ -245,18 +250,25 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "numeroNFe, chaveAcesso, infCpl", "", parent);
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "numeroNFe, xml, chaveAcesso", "", parent);
 
-  sdNFe->hideColumns({"idNFe", "infCpl"});
+  sdNFe->ui->table->setAutoResize(false);
+
+  sdNFe->hideColumns({"idNFe", "infCpl", "xml"});
+  sdNFe->ui->table->showColumn("created");
 
   sdNFe->setHeaderData("numeroNFe", "NFe");
   sdNFe->setHeaderData("status", "Status");
   sdNFe->setHeaderData("chaveAcesso", "Chave Acesso");
   sdNFe->setHeaderData("infCpl", "Inf. Comp.");
+  sdNFe->setHeaderData("emitente", "Emitente");
+  sdNFe->setHeaderData("created", "Data");
 
-  sdNFe->ui->textBrowser->show();
+  sdNFe->ui->treeView->show();
 
-  sdNFe->ui->lineEditBusca->setPlaceholderText("Número NFe/Chave Acesso/Inf. Comp.");
+  sdNFe->ui->lineEditBusca->setPlaceholderText("Número NFe/Chave Acesso/XML");
+
+  sdNFe->resize(1172, 783);
 
   return sdNFe;
 }

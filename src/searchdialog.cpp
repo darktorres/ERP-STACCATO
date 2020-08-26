@@ -64,10 +64,9 @@ void SearchDialog::setupTables(const QString &table) {
 void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
   const QString text = ui->lineEditBusca->text();
 
-  if (text.isEmpty()) {
-    model.setFilter(filter);
-    return;
-  }
+  if (text.isEmpty()) { return model.setFilter(filter); }
+
+  if (model.tableName() == "view_nfe_baixada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
 
   QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
@@ -87,9 +86,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
     const QString representacao = showAllProdutos ? "" : (isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE");
     const QString showEstoque = compraAvulsa ? " AND estoque = FALSE AND promocao <= 1" : "";
 
-    model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
-
-    return;
+    return model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
   }
 
   if (not filter.isEmpty()) { searchFilter.append(" AND (" + filter + ")"); }
@@ -250,7 +247,9 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
 }
 
 SearchDialog *SearchDialog::nfe(QWidget *parent) {
-  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "numeroNFe, xml, chaveAcesso", "", parent);
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "", "", parent);
+
+  sdNFe->ui->lineEditBusca->show();
 
   sdNFe->ui->table->setAutoResize(false);
 
@@ -479,6 +478,3 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepres
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 
 void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
-// TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is
-// fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
-// SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }

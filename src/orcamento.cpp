@@ -8,6 +8,7 @@
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
+#include "log.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
@@ -474,16 +475,52 @@ bool Orcamento::recalcularTotais() {
 
   if (abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 1) {
     calcPrecoGlobalTotal();
+    Log::createLog("Exceção",
+                   "IdOrcamento: " + ui->lineEditOrcamento->text() + "\nsubTotalBruto: " + QString::number(subTotalBruto) + "\nspinBox: " + QString::number(ui->doubleSpinBoxSubTotalBruto->value()),
+                   true);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      Log::createLog("Exceção",
+                     "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                         "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                         "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                         "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                         "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString(),
+                     true);
+    }
     return qApp->enqueueException(false, "Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!", this);
   }
 
   if (abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 1) {
     calcPrecoGlobalTotal();
+    Log::createLog("Exceção",
+                   "IdOrcamento: " + ui->lineEditOrcamento->text() + "\nsubTotalLiq: " + QString::number(subTotalLiq) + "\nspinBox: " + QString::number(ui->doubleSpinBoxSubTotalLiq->value()), true);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      Log::createLog("Exceção",
+                     "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                         "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                         "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                         "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                         "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString(),
+                     true);
+    }
     return qApp->enqueueException(false, "Total dos itens não confere com SubTotalLíquido! Recalculando valores!", this);
   }
 
   if (abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1) {
     calcPrecoGlobalTotal();
+    Log::createLog("Exceção",
+                   "IdOrcamento: " + ui->lineEditOrcamento->text() + "\ntotal: " + QString::number(total) + "\nspinBoxTotal: " + QString::number(ui->doubleSpinBoxTotal->value()) +
+                       "\nspinBoxFrete: " + QString::number(ui->doubleSpinBoxFrete->value()),
+                   true);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      Log::createLog("Exceção",
+                     "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                         "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                         "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                         "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                         "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString(),
+                     true);
+    }
     return qApp->enqueueException(false, "Total dos itens não confere com Total! Recalculando valores!", this);
   }
 

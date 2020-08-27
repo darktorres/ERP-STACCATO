@@ -75,9 +75,11 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
       string.prepend("\"").append("\"");
     } else {
       string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
-      string.prepend("+").append("*");
+      if (not string.isEmpty()) { string.prepend("+").append("*"); }
     }
   }
+
+  strings.removeAll(QString(""));
 
   QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 

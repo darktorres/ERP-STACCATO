@@ -173,22 +173,13 @@ void WidgetEstoque::montaFiltroContabil() {
 }
 
 QString WidgetEstoque::getMatch() const {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = ui->lineEditBusca->text().remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
 
   if (text.isEmpty()) { return QString(); }
 
   QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
-  for (auto &string : strings) {
-    if (string.contains("-")) {
-      string.prepend("\"").append("\"");
-    } else {
-      string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
-      if (not string.isEmpty()) { string.prepend("+").append("*"); }
-    }
-  }
-
-  strings.removeAll(QString(""));
+  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
 
   const QString text2 = strings.join(" ");
 

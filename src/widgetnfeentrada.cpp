@@ -55,6 +55,8 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
+  ui->table->hideColumn("nsu");
+  ui->table->hideColumn("utilizada");
 
   ui->table->showColumn("created");
 
@@ -115,6 +117,10 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   if (not query.exec()) { return qApp->enqueueException("Erro verificando pedidos: " + query.lastError().text(), this); }
 
   if (query.size() > 0) { return qApp->enqueueError("NFe possui itens 'EM ENTREGA/ENTREGUE'!", this); }
+
+  //--------------------------------------------------------------
+
+  if (modelViewNFeEntrada.data(row, "nsu") > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { return qApp->enqueueError("NFe não utilizada!", this); }
 
   //--------------------------------------------------------------
 
@@ -206,11 +212,19 @@ bool WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryDeleteNFe;
-  queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-  queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  if (modelViewNFeEntrada.data(row, "nsu") > 0) {
+    QSqlQuery queryUpdateNFe;
+    queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE, GARE = NULL WHERE idNFe = :idNFe");
+    queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not queryDeleteNFe.exec()) { return qApp->enqueueException(false, "Erro cancelando nota: " + queryDeleteNFe.lastError().text(), this); }
+    if (not queryUpdateNFe.exec()) { return qApp->enqueueException(false, "Erro voltando nota: " + queryUpdateNFe.lastError().text(), this); }
+  } else {
+    QSqlQuery queryDeleteNFe;
+    queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+    queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+    if (not queryDeleteNFe.exec()) { return qApp->enqueueException(false, "Erro cancelando nota: " + queryDeleteNFe.lastError().text(), this); }
+  }
 
   return true;
 }

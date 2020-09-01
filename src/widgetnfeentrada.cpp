@@ -96,15 +96,16 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   //--------------------------------------------------------------
 
   QSqlQuery queryGare;
-  queryGare.prepare("SELECT status FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
+  queryGare.prepare("SELECT status, valor FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
   queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not queryGare.exec()) { return qApp->enqueueError("Erro verificando GARE: " + queryGare.lastError().text(), this); }
 
   if (queryGare.first()) {
     const QString status = queryGare.value("status").toString();
+    const double valor = queryGare.value("valor").toDouble();
 
-    if (status == "GERADO GARE" or status == "PAGO GARE") { return qApp->enqueueError("GARE 'em pagamento/pago'!", this); }
+    if ((status == "GERADO GARE" or status == "PAGO GARE") and valor > 0) { return qApp->enqueueError("GARE 'em pagamento/pago'!", this); }
   }
 
   //--------------------------------------------------------------

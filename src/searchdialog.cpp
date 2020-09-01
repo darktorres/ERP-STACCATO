@@ -62,7 +62,7 @@ void SearchDialog::setupTables(const QString &table) {
 }
 
 void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
-  const QString text = ui->lineEditBusca->text().remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
+  const QString text = ui->lineEditBusca->text().remove("+").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
 
   if (text.isEmpty()) { return model.setFilter(filter); }
 

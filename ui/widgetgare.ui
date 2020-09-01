@@ -32,13 +32,6 @@
    </item>
    <item row="1" column="1">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="4">
-      <widget class="QPushButton" name="pushButtonDarBaixaItau">
-       <property name="text">
-        <string>Dar baixa Itaú</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="3">
       <widget class="QDateEdit" name="dateEdit">
        <property name="sizePolicy">
@@ -49,6 +42,19 @@
        </property>
        <property name="calendarPopup">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Data baixa:</string>
        </property>
       </widget>
      </item>
@@ -65,23 +71,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
-      <widget class="QPushButton" name="pushButtonDarBaixaSantander">
+     <item row="0" column="4">
+      <widget class="QPushButton" name="pushButtonDarBaixaItau">
        <property name="text">
-        <string>Dar baixa Santander</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="label_2">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Data baixa:</string>
+        <string>Dar baixa Itaú</string>
        </property>
       </widget>
      </item>
@@ -122,26 +115,6 @@
        </property>
        <property name="text">
         <string>Importar retorno Itaú</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="pushButtonRemessaSantander">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Gerar remessa Santander</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="pushButtonRetornoSantander">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Impotar retorno Santander</string>
        </property>
       </widget>
      </item>

@@ -15,11 +15,8 @@ WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare
   ui->setupUi(this);
 
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
-  connect(ui->pushButtonDarBaixaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaSantander_clicked);
   connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
-  connect(ui->pushButtonRetornoSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoSantander_clicked);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
-  connect(ui->pushButtonRemessaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaSantander_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
 
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::montaFiltro);
@@ -96,29 +93,6 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
   qApp->enqueueInformation("Baixa salva com sucesso!", this);
 }
 
-void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
-  auto selection = ui->table->selectionModel()->selectedRows();
-
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
-
-  QStringList ids;
-
-  for (auto &index : selection) { ids << model.data(index.row(), "idNFe").toString(); }
-
-  QSqlQuery query;
-
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 3, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
-                     "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
-    return qApp->enqueueException("Erro dando baixa nas gares: " + query.lastError().text(), this);
-  }
-
-  if (not model.select()) { qApp->enqueueException("Erro atualizando a tabela: " + model.lastError().text(), this); }
-
-  updateTables();
-
-  qApp->enqueueInformation("Baixa salva com sucesso!", this);
-}
-
 void WidgetGare::setupTables() {
   model.setTable("view_gares");
 
@@ -170,34 +144,6 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
   updateTables();
 }
 
-void WidgetGare::on_pushButtonRemessaSantander_clicked() {
-  const auto selection = ui->table->selectionModel()->selectedRows();
-
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
-
-  for (const auto index : selection) {
-    if (model.data(index.row(), "status").toString() == "PAGO GARE") { return qApp->enqueueError("GARE já paga!", this); }
-  }
-
-  CNAB cnab(this);
-  auto idCnab = cnab.remessaGareSantander240(montarGare(selection));
-
-  if (not idCnab) { return; }
-
-  QStringList ids;
-
-  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
-
-  QSqlQuery query;
-
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 3, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
-                     " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
-  }
-
-  updateTables();
-}
-
 QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
   QVector<CNAB::Gare> gares;
 
@@ -232,8 +178,6 @@ void WidgetGare::on_pushButtonRetornoItau_clicked() {
 
   updateTables();
 }
-
-void WidgetGare::on_pushButtonRetornoSantander_clicked() {}
 
 void WidgetGare::on_table_activated(const QModelIndex &index) {
   QSqlQuery query;

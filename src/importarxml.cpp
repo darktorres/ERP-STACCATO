@@ -1177,8 +1177,6 @@ std::optional<double> ImportarXML::calculaGare(XML &xml) {
 
     const double icmsIntra = ncm->aliq;
     const double mva = (qFuzzyCompare(produto.pICMS, 4)) ? ncm->mva4 : ncm->mva12;
-    const double icmsInter = produto.pICMS / 100;
-
     const double baseCalculo = produto.valor + produto.vIPI + produto.outros + produto.frete + produto.seguro - produto.desconto;
     const double icmsProprio = produto.vICMS;
     const double baseST = (baseCalculo) * (1 + mva);
@@ -1191,7 +1189,6 @@ std::optional<double> ImportarXML::calculaGare(XML &xml) {
     qDebug() << "baseCalculo: " << baseCalculo;
     qDebug() << "mvaAjustado: " << mva;
     qDebug() << "icmsIntra: " << icmsIntra;
-    qDebug() << "icmsInter: " << icmsInter;
     qDebug() << "icmsProprio: " << icmsProprio;
     qDebug() << "baseST: " << baseST;
     qDebug() << "icmsST: " << icmsST;

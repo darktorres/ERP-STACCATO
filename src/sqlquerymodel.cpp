@@ -61,4 +61,4 @@ int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const
   return field;
 }
 
-void SqlQueryModel::sort(int column, Qt::SortOrder order) { setQuery2(m_query + " ORDER BY " + record().fieldName(column) + (order == Qt::AscendingOrder ? " ASC" : " DESC")); }
+void SqlQueryModel::sort(int column, Qt::SortOrder order) { setQuery2(m_query + " ORDER BY `" + record().fieldName(column) + (order == Qt::AscendingOrder ? "` ASC" : "` DESC")); }

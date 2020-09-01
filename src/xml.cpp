@@ -75,7 +75,7 @@ void XML::lerValores(const QStandardItem *item) {
       QString text = child->text();
 
       if (text.contains("infNFe")) { chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44); }
-      if (text.contains("nNF -")) { nNF = text.remove("nNF - "); }
+      if (text.contains("nNF -")) { nNF = QString("%1").arg(text.remove("nNF - ").toInt(), 9, 10, QChar('0')); }
       if (text.contains("dhEmi -")) { dataHoraEmissao = text.remove("dhEmi - "); }
 
       if (parentText == "emit" and text.contains("xFant -")) { xFant = text.remove("xFant - "); }

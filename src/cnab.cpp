@@ -272,8 +272,8 @@ void CNAB::retornoGareItau240(const QString &filePath) {
     // ocorrencias do segmento N
     if (line.at(13) == 'N') {
 
-      QString cnpj = line.mid(195, 14);
-      QString nfe = line.mid(209, 6).trimmed();
+      QString cnpj = line.mid(195, 8);
+      QString nfe = line.mid(206, 9);
 
       QString dataPgt = line.mid(150, 4) + "-" + line.mid(148, 2) + "-" + line.mid(146, 2); // DDMMAAAA
 
@@ -295,7 +295,7 @@ void CNAB::retornoGareItau240(const QString &filePath) {
       if (segmentoN.contains("PAGAMENTO EFETUADO")) {
         QSqlQuery query1;
 
-        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND cnpjOrig = " + cnpj) or not query1.first()) {
+        if (not query1.exec("SELECT idNFe FROM nfe WHERE numeroNFe = " + nfe + " AND LEFT(cnpjOrig, 8) = " + cnpj) or not query1.first()) {
           qApp->enqueueException("Erro dando baixa na GARE: " + query1.lastError().text(), parent);
           return qApp->rollbackTransaction();
         }

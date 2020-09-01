@@ -20,7 +20,7 @@ private:
   SqlTableModel modelProduto;
   Ui::PrecoEstoque *ui;
   // methods
-  auto on_lineEditBusca_textChanged(const QString &text) -> void;
+  auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;

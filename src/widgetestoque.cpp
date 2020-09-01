@@ -173,7 +173,7 @@ void WidgetEstoque::montaFiltroContabil() {
 }
 
 QString WidgetEstoque::getMatch() const {
-  const QString text = ui->lineEditBusca->text().remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
+  const QString text = ui->lineEditBusca->text().remove("+").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
 
   if (text.isEmpty()) { return QString(); }
 

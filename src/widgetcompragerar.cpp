@@ -75,6 +75,7 @@ void WidgetCompraGerar::setupTables() {
   ui->tableProdutos->hideColumn("ordemRepresentacao");
   ui->tableProdutos->hideColumn("idVendaProduto1");
   ui->tableProdutos->hideColumn("idVendaProduto2");
+  ui->tableProdutos->hideColumn("codFornecedor");
   ui->tableProdutos->hideColumn("statusFinanceiro");
   ui->tableProdutos->hideColumn("selecionado");
   ui->tableProdutos->hideColumn("ordemCompra");

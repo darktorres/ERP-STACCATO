@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1467</width>
+    <width>1530</width>
     <height>596</height>
    </rect>
   </property>
@@ -70,197 +70,213 @@
        <item>
         <widget class="QFrame" name="frameDataPreco">
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="3" column="0">
-           <widget class="QFrame" name="frameAdicionais">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_6">
-             <item row="0" column="0">
-              <widget class="QGroupBox" name="groupBoxSt">
-               <property name="title">
-                <string>Aplicar ST em todas as linhas selecionadas</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="1" column="1">
-                 <widget class="QComboBox" name="comboBoxST">
-                  <item>
-                   <property name="text">
-                    <string>Sem ST</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>ST Fornecedor</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>ST Loja</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QLabel" name="labelAliquota">
-                  <property name="text">
-                   <string>Alíquota:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="3">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquota">
-                  <property name="suffix">
-                   <string> %</string>
-                  </property>
-                  <property name="maximum">
-                   <double>20.000000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="4">
-                 <widget class="QLabel" name="labelSt">
-                  <property name="text">
-                   <string>ST:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="5">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxSt">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="showGroupSeparator" stdset="0">
-                   <bool>true</bool>
-                  </property>
-                  <property name="prefix">
-                   <string>R$ </string>
-                  </property>
-                  <property name="maximum">
-                   <double>999999.989999999990687</double>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QGroupBox" name="groupBoxDataSt">
-               <property name="title">
-                <string>Dados da ST</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_5">
-                <item row="0" column="0">
-                 <widget class="QDateEdit" name="dateEditPgtSt">
-                  <property name="displayFormat">
-                   <string>dd/MM/yy</string>
-                  </property>
-                  <property name="calendarPopup">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QCheckBox" name="checkBoxParcelarSt">
-                  <property name="text">
-                   <string>Parcelar ST?</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QGroupBox" name="groupBoxFrete">
-               <property name="title">
-                <string>Dados do frete</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_4">
-                <item row="0" column="2">
-                 <widget class="QDateEdit" name="dateEditFrete">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="displayFormat">
-                   <string>dd/MM/yy</string>
-                  </property>
-                  <property name="calendarPopup">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBoxFrete">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="showGroupSeparator" stdset="0">
-                   <bool>true</bool>
-                  </property>
-                  <property name="prefix">
-                   <string>R$ </string>
-                  </property>
-                  <property name="maximum">
-                   <double>999999.989999999990687</double>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="TableView" name="table">
-            <property name="minimumSize">
-             <size>
-              <width>600</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="mouseTracking">
-             <bool>true</bool>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::MultiSelection</enum>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
-           <widget class="QCheckBox" name="checkBoxMarcarTodos">
-            <property name="text">
-             <string>Marcar todos</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="TreeView" name="treeView">
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QCheckBox" name="checkBoxMarcarTodos">
+              <property name="text">
+               <string>Marcar todos</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="TableView" name="table">
+              <property name="minimumSize">
+               <size>
+                <width>600</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::MultiSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="TreeView" name="treeView">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameAdicionais">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_6">
+               <item row="0" column="0">
+                <widget class="QGroupBox" name="groupBoxSt">
+                 <property name="title">
+                  <string>Aplicar ST em todas as linhas selecionadas</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout">
+                  <item row="1" column="1">
+                   <widget class="QComboBox" name="comboBoxST">
+                    <item>
+                     <property name="text">
+                      <string>Sem ST</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>ST Fornecedor</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>ST Loja</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QLabel" name="labelAliquota">
+                    <property name="text">
+                     <string>Alíquota:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxAliquota">
+                    <property name="suffix">
+                     <string> %</string>
+                    </property>
+                    <property name="maximum">
+                     <double>20.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="4">
+                   <widget class="QLabel" name="labelSt">
+                    <property name="text">
+                     <string>ST:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="5">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxSt">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="showGroupSeparator" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <property name="prefix">
+                     <string>R$ </string>
+                    </property>
+                    <property name="maximum">
+                     <double>999999.989999999990687</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QGroupBox" name="groupBoxDataSt">
+                 <property name="title">
+                  <string>Dados da ST</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_5">
+                  <item row="0" column="0">
+                   <widget class="QDateEdit" name="dateEditPgtSt">
+                    <property name="displayFormat">
+                     <string>dd/MM/yy</string>
+                    </property>
+                    <property name="calendarPopup">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QCheckBox" name="checkBoxParcelarSt">
+                    <property name="text">
+                     <string>Parcelar ST?</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QGroupBox" name="groupBoxFrete">
+                 <property name="title">
+                  <string>Dados do frete</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_4">
+                  <item row="0" column="2">
+                   <widget class="QDateEdit" name="dateEditFrete">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="displayFormat">
+                     <string>dd/MM/yy</string>
+                    </property>
+                    <property name="calendarPopup">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QDoubleSpinBox" name="doubleSpinBoxFrete">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="showGroupSeparator" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <property name="prefix">
+                     <string>R$ </string>
+                    </property>
+                    <property name="maximum">
+                     <double>999999.989999999990687</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <widget class="QGroupBox" name="groupBoxCodPortinari">
+                 <property name="title">
+                  <string>Código Portinari</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_10">
+                  <item row="0" column="0">
+                   <widget class="QLineEdit" name="lineEditCodFornecedor"/>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

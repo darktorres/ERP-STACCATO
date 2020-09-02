@@ -82,6 +82,7 @@ void InputDialogFinanceiro::setConnections() {
   connect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged, connectionType);
   connect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged, connectionType);
   connect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged, connectionType);
+  connect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged, connectionType);
   connect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked, connectionType);
   connect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked, connectionType);
   connect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData, connectionType);
@@ -98,6 +99,7 @@ void InputDialogFinanceiro::unsetConnections() {
   disconnect(ui->doubleSpinBoxAliquota, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxAliquota_valueChanged);
   disconnect(ui->doubleSpinBoxFrete, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxFrete_valueChanged);
   disconnect(ui->doubleSpinBoxSt, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &InputDialogFinanceiro::on_doubleSpinBoxSt_valueChanged);
+  disconnect(ui->lineEditCodFornecedor, &QLineEdit::textChanged, this, &InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged);
   disconnect(ui->pushButtonCorrigirFluxo, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonCorrigirFluxo_clicked);
   disconnect(ui->pushButtonSalvar, &QPushButton::clicked, this, &InputDialogFinanceiro::on_pushButtonSalvar_clicked);
   disconnect(ui->table->model(), &QAbstractItemModel::dataChanged, this, &InputDialogFinanceiro::updateTableData);
@@ -200,7 +202,6 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
-  ui->table->setItemDelegateForColumn("codFornecedor", new EditDelegate(this));
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
@@ -616,6 +617,8 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
     ui->pushButtonSalvar->hide();
   }
 
+  if (modelPedidoFornecedor2.data(0, "fornecedor") != "PORTINARI") { ui->groupBoxCodPortinari->hide(); }
+
   ui->widgetPgts->setRepresentacao(representacao);
 
   setWindowTitle("OC: " + modelPedidoFornecedor.data(0, "ordemCompra").toString());
@@ -623,6 +626,8 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   // -------------------------------------------------------------------------
 
   calcularTotal();
+
+  adjustSize();
 
   return true;
 }
@@ -657,9 +662,11 @@ bool InputDialogFinanceiro::verifyFields() {
 
   if (selection.isEmpty()) { return qApp->enqueueError(false, "Nenhum item selecionado!", this); }
 
-  for (auto &index : selection) {
-    if (modelPedidoFornecedor2.data(index.row(), "fornecedor") == "PORTINARI" and modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) {
-      return qApp->enqueueError(false, "Não preencheu código do fornecedor!", this);
+  if (tipo == Tipo::ConfirmarCompra) {
+    for (auto &index : selection) {
+      if (modelPedidoFornecedor2.data(index.row(), "fornecedor") == "PORTINARI" and modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) {
+        return qApp->enqueueError(false, "Não preencheu código do fornecedor!", this);
+      }
     }
   }
 
@@ -798,6 +805,14 @@ void InputDialogFinanceiro::on_comboBoxST_currentTextChanged(const QString &text
 }
 
 void InputDialogFinanceiro::on_checkBoxParcelarSt_toggled(bool) { montarFluxoCaixa(); }
+
+void InputDialogFinanceiro::on_lineEditCodFornecedor_textChanged(const QString &text) {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  for (auto &index : selection) {
+    if (not modelPedidoFornecedor2.setData(index.row(), "codFornecedor", text)) { return qApp->enqueueError("Erro guardando código fornecedor: " + modelPedidoFornecedor2.lastError().text(), this); }
+  }
+}
 
 // TODO: [Conrado] copiar de venda as verificacoes/terminar o codigo dos pagamentos
 // TODO: refatorar o frame pagamentos para um widget para nao duplicar codigo

@@ -59,6 +59,7 @@ void WidgetHistoricoCompra::setupTables() {
 
   //------------------------------------------------------
 
+  // TODO: substituir view por query
   modelNFe.setTable("view_ordemcompra_nfe");
 
   modelNFe.setHeaderData("numeroNFe", "NFe");

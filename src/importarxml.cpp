@@ -262,6 +262,7 @@ void ImportarXML::setupTables() {
   ui->tableCompra->hideColumn("idPedidoFK");
   ui->tableCompra->hideColumn("idVendaProduto1");
   ui->tableCompra->hideColumn("idVendaProduto2");
+  ui->tableCompra->hideColumn("codFornecedor");
   ui->tableCompra->hideColumn("idRelacionado");
   ui->tableCompra->hideColumn("ordemRepresentacao");
   ui->tableCompra->hideColumn("selecionado");

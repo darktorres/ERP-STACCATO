@@ -153,6 +153,7 @@ void InputDialogFinanceiro::setupTables() {
   modelPedidoFornecedor2.setHeaderData("st", "ST");
   modelPedidoFornecedor2.setHeaderData("status", "Status");
   modelPedidoFornecedor2.setHeaderData("ordemRepresentacao", "Cód. Rep.");
+  modelPedidoFornecedor2.setHeaderData("codFornecedor", "Cód. Forn.");
   modelPedidoFornecedor2.setHeaderData("idVenda", "Código");
   modelPedidoFornecedor2.setHeaderData("fornecedor", "Fornecedor");
   modelPedidoFornecedor2.setHeaderData("descricao", "Produto");
@@ -199,6 +200,7 @@ void InputDialogFinanceiro::setupTables() {
 
   ui->table->setItemDelegate(new NoEditDelegate(this));
 
+  ui->table->setItemDelegateForColumn("codFornecedor", new EditDelegate(this));
   ui->table->setItemDelegateForColumn("aliquotaSt", new PorcentagemDelegate(false, this));
   ui->table->setItemDelegateForColumn("st", new ComboBoxDelegate(ComboBoxDelegate::Tipo::ST, this));
   ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
@@ -651,7 +653,15 @@ bool InputDialogFinanceiro::verifyFields() {
 
   if (ui->widgetPgts->isHidden()) { return true; }
 
-  if (ui->table->selectionModel()->selectedRows().isEmpty()) { return qApp->enqueueError(false, "Nenhum item selecionado!", this); }
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return qApp->enqueueError(false, "Nenhum item selecionado!", this); }
+
+  for (auto &index : selection) {
+    if (modelPedidoFornecedor2.data(index.row(), "fornecedor") == "PORTINARI" and modelPedidoFornecedor2.data(index.row(), "codFornecedor").toString().isEmpty()) {
+      return qApp->enqueueError(false, "Não preencheu código do fornecedor!", this);
+    }
+  }
 
   if (not representacao) {
     if (not qFuzzyCompare(ui->doubleSpinBoxTotal->value(), ui->widgetPgts->getTotalPag())) { return qApp->enqueueError(false, "Soma dos pagamentos difere do total! Favor verificar!", this); }

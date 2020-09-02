@@ -110,6 +110,7 @@ void WidgetHistoricoCompra::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
+  ui->treeView->hideColumn("codFornecedor");
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("aliquotaSt");

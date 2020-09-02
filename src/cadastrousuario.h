@@ -17,6 +17,7 @@ public:
 
 private:
   // attributes
+  bool limitado = false;
   SearchDialog *sdUsuario;
   SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;

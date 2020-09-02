@@ -105,7 +105,7 @@ void WidgetNfeSaida::on_table_activated(const QModelIndex &index) {
 void WidgetNfeSaida::montaFiltro() {
   QStringList filtros;
 
-  const QString text = ui->lineEditBusca->text().remove("'");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   const QString filtroBusca = "(NFe LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%' OR `CPF/CNPJ` LIKE '%" + text + "%' OR Cliente LIKE '%" + text + "%')";
   if (not text.isEmpty()) { filtros << filtroBusca; }

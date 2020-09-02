@@ -460,6 +460,14 @@ double Application::roundDouble(const double value, const int decimais) {
   return std::round(value * multiploDez) / multiploDez;
 }
 
+QString Application::sanitizeSQL(const QString &string) {
+  QString sanitized = string;
+
+  sanitized.remove("+").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
+
+  return sanitized;
+}
+
 std::optional<int> Application::reservarIdEstoque() {
   if (inTransaction) {
     enqueueException("ALTER TABLE durante transação!");

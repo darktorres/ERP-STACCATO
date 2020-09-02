@@ -155,7 +155,7 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
 void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetHistoricoCompra::montaFiltro() {
-  const QString text = ui->lineEditBusca->text().remove("'");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
   modelViewComprasFinanceiro.setFilter(filtroBusca);

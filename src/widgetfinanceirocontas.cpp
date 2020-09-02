@@ -172,7 +172,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString text = ui->lineEditBusca->text().remove("'");
+    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = text.isEmpty() ? ""
                                          : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR cp_idVenda LIKE '%" + text +
                                                "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%')";
@@ -232,7 +232,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString text = ui->lineEditBusca->text().remove("'");
+    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
     if (not text.isEmpty()) { filtros << busca; }
 

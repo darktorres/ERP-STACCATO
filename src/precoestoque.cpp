@@ -102,7 +102,7 @@ void PrecoEstoque::on_pushButtonSalvar_clicked() {
 void PrecoEstoque::on_pushButtonCancelar_clicked() { close(); }
 
 void PrecoEstoque::on_lineEditBusca_textChanged(const QString &) {
-  const QString text = ui->lineEditBusca->text().remove("+").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   if (text.isEmpty()) { return modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0"); }
 

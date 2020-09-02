@@ -42,6 +42,7 @@ public:
   auto rollbackTransaction(const bool boolean) -> bool;
   auto roundDouble(const double value) -> double;
   auto roundDouble(const double value, const int decimais) -> double;
+  auto sanitizeSQL(const QString &string) -> QString;
   auto serverDate() -> QDate;
   auto serverDateTime() -> QDateTime;
   auto setSilent(bool value) -> void;

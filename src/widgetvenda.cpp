@@ -70,13 +70,14 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString fornecedor = ui->comboBoxFornecedores->currentText();
+  const QString fornecedor = qApp->sanitizeSQL(ui->comboBoxFornecedores->currentText());
   const QString filtroFornecedor = fornecedor.isEmpty() ? "" : "(fornecedores LIKE '%" + fornecedor + "%')";
   if (not filtroFornecedor.isEmpty()) { filtros << filtroFornecedor; }
 
   //-------------------------------------
 
-  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + UserSession::nome() + "'" + " OR Consultor = '" + UserSession::nome() + "')";
+  const QString filtroRadio =
+      ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + qApp->sanitizeSQL(UserSession::nome()) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(UserSession::nome()) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -103,7 +104,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text().remove("'");
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(Código LIKE '%" + textoBusca + "%' OR Vendedor LIKE '%" + textoBusca + "%' OR Cliente LIKE '%" + textoBusca + "%' OR Profissional LIKE '%" + textoBusca +
                               "%' OR `OC Rep` LIKE '%" + textoBusca + "%')";
 

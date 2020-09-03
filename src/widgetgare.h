@@ -26,7 +26,7 @@ private:
   Ui::WidgetGare *ui;
   // methods
   auto montaFiltro() -> void;
-  auto montarGare(const QModelIndexList selection) -> QVector<CNAB::Gare>;
+  auto montarGare(const QModelIndexList &selection) -> QVector<CNAB::Gare>;
   auto on_pushButtonDarBaixaItau_clicked() -> void;
   auto on_pushButtonRemessaItau_clicked() -> void;
   auto on_pushButtonRetornoItau_clicked() -> void;

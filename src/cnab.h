@@ -9,7 +9,7 @@ public:
     int idNFe;
     int mesAnoReferencia;
     int dataVencimento;
-    int valor;
+    ulong valor;
     QString numeroNF;
     QString cnpjOrig;
   };
@@ -26,7 +26,7 @@ private:
   // methods
   auto decodeCodeItau(const QString &code) -> QString;
   auto writeBlanks(QTextStream &stream, const int count) -> void;
-  auto writeNumber(QTextStream &stream, const int number, const int count) -> void;
+  auto writeNumber(QTextStream &stream, const ulong number, const int count) -> void;
   auto writeText(QTextStream &stream, const QString &text, const int count) -> void;
   auto writeZeros(QTextStream &stream, const int count) -> void;
 };

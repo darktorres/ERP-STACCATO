@@ -27,7 +27,7 @@ void CNAB::writeText(QTextStream &stream, const QString &text, const int count) 
   stream << temp;
 }
 
-void CNAB::writeNumber(QTextStream &stream, const int number, const int count) {
+void CNAB::writeNumber(QTextStream &stream, const ulong number, const int count) {
   stream << QString("%1").arg(number, count, 10, QChar('0')); // pad number with count zeros to the left
 }
 
@@ -101,7 +101,7 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   stream << "\r\n";
 
   int registro = 0;
-  int total = 0;
+  ulong total = 0;
 
   for (auto &gare : gares) {
     total += gare.valor;

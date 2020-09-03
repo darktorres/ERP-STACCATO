@@ -144,7 +144,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
   updateTables();
 }
 
-QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
+QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList &selection) {
   QVector<CNAB::Gare> gares;
 
   for (const auto index : selection) {
@@ -156,7 +156,7 @@ QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
 
     gare.idNFe = model.data(index.row(), "idNFe").toInt();
     gare.mesAnoReferencia = model.data(index.row(), "referencia").toDate().toString("MMyyyy").toInt();
-    gare.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).toDouble() * 100;
+    gare.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
     gare.numeroNF = model.data(index.row(), "numeroNFe").toString();
     gare.cnpjOrig = model.data(index.row(), "cnpjOrig").toString();
 
@@ -195,7 +195,7 @@ void WidgetGare::on_tableSelection_changed() {
 
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &index : selection) { total += model.data(index.row(), "valor").toDouble(); }
+  for (const auto &index : selection) { total += QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).toDouble(); }
 
   ui->doubleSpinBoxTotal->setValue(total);
 }

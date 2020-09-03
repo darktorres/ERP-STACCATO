@@ -65,6 +65,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->pushButtonInserirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked, connectionType);
   connect(ui->pushButtonInserirTransferencia, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked, connectionType);
   connect(ui->pushButtonReverterPagamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked, connectionType);
+  connect(ui->radioButtonAgendado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPago, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPendente, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
@@ -185,8 +186,8 @@ void WidgetFinanceiroContas::montaFiltro() {
         "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, cp.idVenda AS `cp_idVenda`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS "
         "`dataPagamento`, `cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
         "GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS `parcela`, `cp`.`observacao` AS `observacao`, GROUP_CONCAT(DISTINCT "
-        "`pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda` FROM `conta_a_pagar_has_pagamento` `cp` "
-        "LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON `cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` "
+        "`pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda`, pf2.codFornecedor FROM `conta_a_pagar_has_pagamento` "
+        "`cp` LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON `cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` "
         "`e` ON `ehc`.`idEstoque` = `e`.`idEstoque` LEFT JOIN `nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` WHERE " +
         filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
   }
@@ -259,6 +260,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     model.setHeaderData("pf2_idVenda", "Venda");
     model.setHeaderData("ordemCompra", "OC");
     model.setHeaderData("numeroNFe", "NFe");
+    model.setHeaderData("codFornecedor", "Cód. Forn.");
   }
 
   model.setHeaderData("contraParte", "ContraParte");

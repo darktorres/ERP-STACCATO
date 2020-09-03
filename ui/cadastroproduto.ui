@@ -617,6 +617,9 @@ color: rgb(0, 0, 0);</string>
                   <string notr="true">background-color: rgb(255, 255, 127);
 color: rgb(0, 0, 0);</string>
                  </property>
+                 <property name="showGroupSeparator" stdset="0">
+                  <bool>true</bool>
+                 </property>
                  <property name="prefix">
                   <string>R$ </string>
                  </property>
@@ -1188,6 +1191,9 @@ color: rgb(0, 0, 0);</string>
                  <property name="styleSheet">
                   <string notr="true">background-color: rgb(255, 255, 127);
 color: rgb(0, 0, 0);</string>
+                 </property>
+                 <property name="showGroupSeparator" stdset="0">
+                  <bool>true</bool>
                  </property>
                  <property name="prefix">
                   <string>R$ </string>

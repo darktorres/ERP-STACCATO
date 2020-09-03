@@ -1022,6 +1022,11 @@ color: rgb(0, 0, 0);</string>
    <header>src/tableview.h</header>
   </customwidget>
   <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
+  <customwidget>
    <class>LineEditCEP</class>
    <extends>QLineEdit</extends>
    <header>src/lineeditcep.h</header>
@@ -1030,11 +1035,6 @@ color: rgb(0, 0, 0);</string>
    <class>LineEditTel</class>
    <extends>QLineEdit</extends>
    <header>src/lineedittel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ItemBox</class>
-   <extends>QLineEdit</extends>
-   <header>src/itembox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

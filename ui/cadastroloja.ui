@@ -695,6 +695,9 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item row="0" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBoxValorMinimoFrete">
+                  <property name="showGroupSeparator" stdset="0">
+                   <bool>true</bool>
+                  </property>
                   <property name="prefix">
                    <string>R$ </string>
                   </property>
@@ -752,6 +755,9 @@ color: rgb(0, 0, 0);</string>
              <layout class="QGridLayout" name="gridLayout_8">
               <item row="0" column="1">
                <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoTransportePorTon">
+                <property name="showGroupSeparator" stdset="0">
+                 <bool>true</bool>
+                </property>
                 <property name="prefix">
                  <string>R$ </string>
                 </property>
@@ -828,6 +834,9 @@ color: rgb(0, 0, 0);</string>
               </item>
               <item row="4" column="1">
                <widget class="QDoubleSpinBox" name="doubleSpinBoxCustoFuncionario">
+                <property name="showGroupSeparator" stdset="0">
+                 <bool>true</bool>
+                </property>
                 <property name="prefix">
                  <string>R$ </string>
                 </property>

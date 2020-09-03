@@ -138,9 +138,9 @@ void WidgetFinanceiroContas::montaFiltro() {
     const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>();
 
     for (const auto &child : children) {
-      if (child->text() == "Todos") { break; }
-
       if (child->isChecked()) {
+        if (child->text() == "Todos") { break; }
+
         status = child->text();
         break;
       }
@@ -198,9 +198,9 @@ void WidgetFinanceiroContas::montaFiltro() {
     const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>();
 
     for (const auto &child : children) {
-      if (child->text() == "Todos") { break; }
-
       if (child->isChecked()) {
+        if (child->text() == "Todos") { break; }
+
         status = child->text();
         break;
       }

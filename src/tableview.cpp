@@ -175,6 +175,7 @@ void TableView::keyPressEvent(QKeyEvent *event) {
     }
 
     QApplication::clipboard()->setText(text);
+    return;
   }
 
   QTableView::keyPressEvent(event);

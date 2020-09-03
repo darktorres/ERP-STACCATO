@@ -45,7 +45,7 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
+  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueError(false, "Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), parent); }
 
   file.close();
 

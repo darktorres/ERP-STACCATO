@@ -14,18 +14,21 @@
 WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
   ui->setupUi(this);
 
+  ui->dateEdit->setDate(qApp->serverDate());
+  ui->dateEditDia->setDate(qApp->serverDate());
+
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
-  connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
+  connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
 
+  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro);
+  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
+  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-
-  ui->dateEdit->setDate(qApp->serverDate());
+  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
 }
 
 WidgetGare::~WidgetGare() { delete ui; }
@@ -57,6 +60,11 @@ void WidgetGare::montaFiltro() {
   if (ui->radioButtonPago->isChecked()) { filtroRadio = "status = 'PAGO GARE'"; }
 
   filtros << filtroRadio;
+
+  //-------------------------------------
+
+  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(dataRealizado, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  if (not filtroDia.isEmpty()) { filtros << filtroDia; }
 
   //-------------------------------------
 

@@ -266,12 +266,12 @@ void WidgetVenda::setComboBoxFornecedores() {
 }
 
 void WidgetVenda::on_table_activated(const QModelIndex index) {
-  auto *vendas = new Venda(this);
-  vendas->setAttribute(Qt::WA_DeleteOnClose);
-  if (financeiro) { vendas->setFinanceiro(); }
-  vendas->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
+  auto *venda = new Venda(this);
+  venda->setAttribute(Qt::WA_DeleteOnClose);
+  if (financeiro) { venda->setFinanceiro(); }
+  venda->viewRegisterById(modelViewVenda.data(index.row(), "Código"));
 
-  vendas->show();
+  venda->show();
 }
 
 void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {

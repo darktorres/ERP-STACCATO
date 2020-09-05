@@ -57,7 +57,11 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
 Orcamento::~Orcamento() { delete ui; }
 
-void Orcamento::show() { RegisterDialog::show(); }
+void Orcamento::show() {
+  RegisterDialog::show();
+  ui->groupBoxInfo->setMaximumHeight(ui->groupBoxInfo->height());
+  ui->groupBoxDados->setMaximumHeight(ui->groupBoxDados->height());
+}
 
 void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   if (isReadOnly) { return; }

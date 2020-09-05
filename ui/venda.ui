@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1497</width>
+    <width>1521</width>
     <height>690</height>
    </rect>
   </property>
@@ -51,7 +51,7 @@
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
-             <widget class="QGroupBox" name="groupBox_9">
+             <widget class="QGroupBox" name="groupBoxInfo">
               <property name="title">
                <string>Info. Pedido</string>
               </property>
@@ -212,7 +212,7 @@
                <enum>QAbstractItemView::MultiSelection</enum>
               </property>
              </widget>
-             <widget class="QGroupBox" name="groupBox">
+             <widget class="QGroupBox" name="groupBoxDados">
               <property name="title">
                <string/>
               </property>
@@ -566,7 +566,7 @@ color: rgb(0, 0, 0);</string>
               </attribute>
              </widget>
              <widget class="WidgetPagamentos" name="widgetPgts" native="true"/>
-             <widget class="QGroupBox" name="groupBox_3">
+             <widget class="QGroupBox" name="groupBoxValores">
               <property name="title">
                <string>Totais</string>
               </property>

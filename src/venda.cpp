@@ -1352,6 +1352,13 @@ void Venda::setFinanceiro() {
   financeiro = true;
 }
 
+void Venda::show() {
+  RegisterDialog::show();
+  ui->groupBoxInfo->setMaximumHeight(ui->groupBoxInfo->height());
+  ui->groupBoxDados->setMaximumHeight(ui->groupBoxDados->height());
+  ui->groupBoxValores->setMaximumHeight(ui->groupBoxValores->height());
+}
+
 bool Venda::financeiroSalvar() {
   if (not atualizarCredito()) { return false; }
 

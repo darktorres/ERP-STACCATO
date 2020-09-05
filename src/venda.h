@@ -15,6 +15,7 @@ public:
   ~Venda();
   auto prepararVenda(const QString &idOrcamento) -> void;
   auto setFinanceiro() -> void;
+  auto show() -> void;
 
 private:
   // attributes

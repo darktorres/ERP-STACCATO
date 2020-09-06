@@ -63,7 +63,6 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa1->getId().toString() + " AND " : "";
 
-  // TODO: see if the outer select can be removed
   modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
                       "WHERE " +
                       filtroConta + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);

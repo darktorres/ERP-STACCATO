@@ -465,7 +465,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
       if (not modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"))) { return false; }
       if (not modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9))) { return false; }
 
-      if (xlsx.read(rowExcel, 7) == "Santander") { // marcar direto como pago
+      if (xlsx.read(rowExcel, 7).toString().toUpper() == "SANTANDER") { // marcar direto como pago
         if (not modelImportar.setData(rowModel, "dataRealizado", xlsx.read(rowExcel, 6))) { return false; }
         if (not modelImportar.setData(rowModel, "status", "PAGO")) { return false; }
         if (not modelImportar.setData(rowModel, "valorReal", xlsx.read(rowExcel, 4))) { return false; }

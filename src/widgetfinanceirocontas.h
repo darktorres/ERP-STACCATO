@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cnab.h"
 #include "sqlquerymodel.h"
 
 #include <QWidget>
@@ -30,6 +31,7 @@ private:
   Ui::WidgetFinanceiroContas *ui;
   // methods
   auto montaFiltro() -> void;
+  auto montarPagamento(const QModelIndexList &selection) -> QVector<CNAB::Pagamento>;
   auto on_dateEditDe_dateChanged(const QDate &date) -> void;
   auto on_doubleSpinBoxDe_valueChanged(const double value) -> void;
   auto on_groupBoxData_toggled(const bool enabled) -> void;
@@ -38,6 +40,7 @@ private:
   auto on_pushButtonImportarFolhaPag_clicked() -> void;
   auto on_pushButtonInserirLancamento_clicked() -> void;
   auto on_pushButtonInserirTransferencia_clicked() -> void;
+  auto on_pushButtonRemessaItau_clicked() -> void;
   auto on_pushButtonReverterPagamento_clicked() -> void;
   auto on_tableVencer_doubleClicked(const QModelIndex &index) -> void;
   auto on_tableVencidos_doubleClicked(const QModelIndex &index) -> void;

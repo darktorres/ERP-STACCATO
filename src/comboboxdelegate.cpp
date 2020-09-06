@@ -18,16 +18,17 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
   if (tipo == Tipo::Receber) {
     list << "PENDENTE"
+         << "CONFERIDO"
          << "RECEBIDO"
-         << "CANCELADO"
-         << "CONFERIDO";
+         << "CANCELADO";
   }
 
   if (tipo == Tipo::Pagar) {
     list << "PENDENTE"
+         << "CONFERIDO"
+         << "AGENDADO"
          << "PAGO"
-         << "CANCELADO"
-         << "CONFERIDO";
+         << "CANCELADO";
   }
 
   if (tipo == Tipo::Pagamento) {
@@ -65,9 +66,9 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
   }
 
   if (tipo == Tipo::ST) {
-    list << "Sem ST"
-         << "ST Fornecedor"
-         << "ST Loja";
+    list << "SEM ST"
+         << "ST FORNECEDOR"
+         << "ST LOJA";
   }
 
   editor->addItems(list);

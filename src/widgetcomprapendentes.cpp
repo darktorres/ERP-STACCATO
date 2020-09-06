@@ -174,7 +174,7 @@ void WidgetCompraPendentes::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text().remove("'");
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(idVenda LIKE '%" + textoBusca + "%' OR fornecedor LIKE '%" + textoBusca + "%' OR produto LIKE '%" + textoBusca + "%' OR `codComercial` LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
@@ -258,7 +258,7 @@ void WidgetCompraPendentes::on_pushButtonExcel_clicked() {
 
   const QString idVenda = modelViewVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  Excel excel(idVenda, Excel::Tipo::Venda);
+  Excel excel(idVenda, Excel::Tipo::Venda, this);
   excel.gerarExcel();
 }
 

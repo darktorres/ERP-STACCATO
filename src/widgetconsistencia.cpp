@@ -7,7 +7,7 @@
 
 WidgetConsistencia::WidgetConsistencia(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetConsistencia) {
   ui->setupUi(this);
-  ui->dateEditMes->setDate(QDate::currentDate());
+  ui->dateEditMes->setDate(qApp->serverDate());
   connect(ui->dateEditMes, &QDateEdit::dateChanged, this, &WidgetConsistencia::setupTables);
 }
 

@@ -3,8 +3,9 @@
 #include "usersession.h"
 
 #include <QBrush>
+#include <QSqlRecord>
 
-FollowUpProxyModel::FollowUpProxyModel(SqlTableModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->fieldIndex("semaforo", true)) { setSourceModel(model); }
+FollowUpProxyModel::FollowUpProxyModel(QSqlQueryModel *model, QObject *parent) : QIdentityProxyModel(parent), semaforoColumn(model->record().indexOf("semaforo")) { setSourceModel(model); }
 
 QVariant FollowUpProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {

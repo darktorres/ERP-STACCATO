@@ -6,10 +6,11 @@
 #include <QBrush>
 #include <QDate>
 #include <QDebug>
+#include <QSqlRecord>
 
-SearchDialogProxyModel::SearchDialogProxyModel(SqlTableModel *model, QObject *parent)
-    : SortFilterProxyModel(model, parent), estoqueColumn(model->fieldIndex("estoque", true)), promocaoColumn(model->fieldIndex("promocao", true)),
-      descontinuadoColumn(model->fieldIndex("descontinuado", true)), validadeColumn(model->fieldIndex("validadeProdutos", true)) {}
+SearchDialogProxyModel::SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent)
+    : SortFilterProxyModel(model, parent), estoqueColumn(model->record().indexOf("estoque")), promocaoColumn(model->record().indexOf("promocao")),
+      descontinuadoColumn(model->record().indexOf("descontinuado")), validadeColumn(model->record().indexOf("validadeProdutos")) {}
 
 SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *parent)
     : SortFilterProxyModel(model, parent), estoqueColumn(model->fieldIndex("estoque")), promocaoColumn(model->fieldIndex("promocao")) {}

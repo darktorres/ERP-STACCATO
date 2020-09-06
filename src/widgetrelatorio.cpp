@@ -257,7 +257,7 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 }
 
 bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fileName) {
-  QXlsx::Document xlsx(arquivoModelo);
+  QXlsx::Document xlsx(arquivoModelo, this);
 
   //  xlsx.currentWorksheet()->setFitToPage(true);
   //  xlsx.currentWorksheet()->setFitToHeight(true);

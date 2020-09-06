@@ -148,8 +148,6 @@ void CadastroPagamento::limparSelecao() {
 
   //--------------------------------------
 
-  ui->tablePagamentos->clearSelection();
-
   modelTaxas.setFilter("0");
 }
 
@@ -332,7 +330,9 @@ void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {
 }
 
 void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
-  if (not index.isValid()) { return limparSelecao(); }
+  limparSelecao();
+
+  if (not index.isValid()) { return; }
 
   const int id = modelPagamentos.data(index.row(), "idPagamento").toInt();
 
@@ -361,3 +361,5 @@ void CadastroPagamento::on_itemBoxLoja_idChanged(const QVariant &id) {
 }
 
 void CadastroPagamento::on_pushButtonLimparSelecao_clicked() { limparSelecao(); }
+
+// TODO: colocar caixa de confirmacao antes de remover qualquer coisa

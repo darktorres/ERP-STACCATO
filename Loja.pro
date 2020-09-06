@@ -178,6 +178,8 @@ SOURCES += \
     src/logindialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
+    src/nfedistribuicao.cpp \
+    src/nfeproxymodel.cpp \
     src/noeditdelegate.cpp \
     src/orcamento.cpp \
     src/orcamentoproxymodel.cpp \
@@ -306,6 +308,8 @@ HEADERS  += \
     src/log.h \
     src/logindialog.h \
     src/mainwindow.h \
+    src/nfedistribuicao.h \
+    src/nfeproxymodel.h \
     src/noeditdelegate.h \
     src/orcamento.h \
     src/orcamentoproxymodel.h \
@@ -388,7 +392,6 @@ FORMS += \
     ui/cadastrousuario.ui \
     ui/calculofrete.ui \
     ui/cancelaproduto.ui \
-    ui/cnab.ui \
     ui/collapsiblewidget.ui \
     ui/comprovantes.ui \
     ui/contas.ui \
@@ -406,6 +409,7 @@ FORMS += \
     ui/inserirtransferencia.ui \
     ui/logindialog.ui \
     ui/mainwindow.ui \
+    ui/nfedistribuicao.ui \
     ui/orcamento.ui \
     ui/pagamentosdia.ui \
     ui/precoestoque.ui \

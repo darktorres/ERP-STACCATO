@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QShortcut>
 
-RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : QDialog(parent), primaryKey(primaryKeyStr) {
+RegisterDialog::RegisterDialog(const QString &table, const QString &primaryKeyStr, QWidget *parent) : QDialog(parent), primaryKey(primaryKeyStr), parent(parent) {
   setWindowModality(Qt::NonModal);
   setWindowFlags(Qt::Window);
 

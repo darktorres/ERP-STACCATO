@@ -30,9 +30,9 @@ public:
 
 private:
   // attributes
-  Ui::Comprovantes *ui;
   SqlQueryModel model;
   const QString idVenda;
+  Ui::Comprovantes *ui;
   // methods
   auto on_pushButtonAbrir_clicked() -> void;
   auto setFilter(const QString &idVenda) -> void;

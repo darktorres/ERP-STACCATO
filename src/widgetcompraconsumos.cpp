@@ -124,7 +124,7 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 bool WidgetCompraConsumos::desfazerConsumo(const int row) {
   const int idVendaProduto2 = modelProduto.data(row, "idVendaProduto2").toInt();
 
-  if (not Estoque::desfazerConsumo(idVendaProduto2)) { return false; }
+  if (not Estoque::desfazerConsumo(idVendaProduto2, this)) { return false; }
 
   return true;
 }
@@ -132,7 +132,7 @@ bool WidgetCompraConsumos::desfazerConsumo(const int row) {
 void WidgetCompraConsumos::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetCompraConsumos::montaFiltro() {
-  const QString text = ui->lineEditBusca->text().remove("'");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   modelPedido.setFilter("Venda LIKE '%" + text + "%' OR OC LIKE '%" + text + "%'");
 }

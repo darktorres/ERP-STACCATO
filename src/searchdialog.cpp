@@ -7,6 +7,7 @@
 #include "reaisdelegate.h"
 #include "searchdialogproxymodel.h"
 #include "usersession.h"
+#include "xml.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -22,6 +23,7 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
   connect(ui->pushButtonSelecionar, &QPushButton::clicked, this, &SearchDialog::on_pushButtonSelecionar_clicked);
   connect(ui->radioButtonProdAtivos, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdAtivos_toggled);
   connect(ui->radioButtonProdDesc, &QRadioButton::clicked, this, &SearchDialog::on_radioButtonProdDesc_toggled);
+  connect(ui->table, &TableView::clicked, this, &SearchDialog::on_table_clicked);
   connect(ui->table, &TableView::doubleClicked, this, &SearchDialog::on_table_doubleClicked);
 
   setWindowTitle(title);
@@ -35,11 +37,13 @@ SearchDialog::SearchDialog(const QString &title, const QString &table, const QSt
     ui->labelBusca->hide();
   }
 
+  ui->lineEditEstoque->hide();
+  ui->lineEditEstoque_2->hide();
+  ui->lineEditPromocao->hide();
   ui->radioButtonProdAtivos->hide();
   ui->radioButtonProdDesc->hide();
-  ui->lineEditEstoque_2->hide();
-  ui->lineEditEstoque->hide();
-  ui->lineEditPromocao->hide();
+  ui->treeView->hide();
+
   ui->lineEditBusca->setFocus();
 }
 
@@ -58,23 +62,15 @@ void SearchDialog::setupTables(const QString &table) {
 }
 
 void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
-  if (text.isEmpty()) {
-    model.setFilter(filter);
-    return;
-  }
+  if (text.isEmpty()) { return model.setFilter(filter); }
+
+  if (model.tableName() == "view_nfe_baixada") { return model.setFilter("numeroNFe LIKE '%" + text + "%' OR xml LIKE '%" + text + "%' OR chaveAcesso LIKE '%" + text + "%'"); }
 
   QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
-  for (auto &string : strings) {
-    if (string.contains("-")) {
-      string.prepend("\"").append("\"");
-    } else {
-      string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
-      string.prepend("+").append("*");
-    }
-  }
+  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
 
   QString searchFilter = "MATCH(" + fullTextIndex + ") AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE)";
 
@@ -83,9 +79,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
     const QString representacao = showAllProdutos ? "" : (isRepresentacao ? " AND representacao = TRUE" : " AND representacao = FALSE");
     const QString showEstoque = compraAvulsa ? " AND estoque = FALSE AND promocao <= 1" : "";
 
-    model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
-
-    return;
+    return model.setFilter(searchFilter + descontinuado + " AND desativado = FALSE" + representacao + showEstoque + fornecedorRep);
   }
 
   if (not filter.isEmpty()) { searchFilter.append(" AND (" + filter + ")"); }
@@ -123,6 +117,14 @@ void SearchDialog::showMaximized() {
   if (not prepare_show()) { return; }
 
   QDialog::showMaximized();
+}
+
+void SearchDialog::on_table_clicked(const QModelIndex &index) {
+  if (model.tableName() == "view_nfe_baixada" and index.isValid()) {
+    XML *xml = new XML(model.data(index.row(), "xml").toByteArray(), XML::Tipo::Nulo, this);
+    ui->treeView->setModel(&xml->model);
+    ui->treeView->expandAll();
+  }
 }
 
 void SearchDialog::on_table_doubleClicked(const QModelIndex &) { on_pushButtonSelecionar_clicked(); }
@@ -207,6 +209,8 @@ SearchDialog *SearchDialog::cliente(QWidget *parent) {
   sdCliente->setHeaderData("nextel", "Nextel");
   sdCliente->setHeaderData("email", "E-mail");
 
+  sdCliente->ui->lineEditBusca->setPlaceholderText("Cliente/Fantasia/CPF/CNPJ");
+
   return sdCliente;
 }
 
@@ -230,7 +234,35 @@ SearchDialog *SearchDialog::loja(QWidget *parent) {
   sdLoja->setHeaderData("porcentagemFrete", "Frete");
   sdLoja->setHeaderData("valorMinimoFrete", "Mínimo Frete");
 
+  sdLoja->ui->lineEditBusca->setPlaceholderText("Descrição/Nome Fantasia/Razão Social");
+
   return sdLoja;
+}
+
+SearchDialog *SearchDialog::nfe(QWidget *parent) {
+  SearchDialog *sdNFe = new SearchDialog("Buscar NFe", "view_nfe_baixada", "idNFe", {"chaveAcesso"}, "", "", parent);
+
+  sdNFe->ui->lineEditBusca->show();
+
+  sdNFe->ui->table->setAutoResize(false);
+
+  sdNFe->hideColumns({"idNFe", "infCpl", "xml"});
+  sdNFe->ui->table->showColumn("created");
+
+  sdNFe->setHeaderData("numeroNFe", "NFe");
+  sdNFe->setHeaderData("status", "Status");
+  sdNFe->setHeaderData("chaveAcesso", "Chave Acesso");
+  sdNFe->setHeaderData("infCpl", "Inf. Comp.");
+  sdNFe->setHeaderData("emitente", "Emitente");
+  sdNFe->setHeaderData("created", "Data");
+
+  sdNFe->ui->treeView->show();
+
+  sdNFe->ui->lineEditBusca->setPlaceholderText("Número NFe/Chave Acesso/XML");
+
+  sdNFe->resize(1172, 783);
+
+  return sdNFe;
 }
 
 SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const bool silent, const bool showAllProdutos, const bool compraAvulsa, QWidget *parent) {
@@ -278,6 +310,8 @@ SearchDialog *SearchDialog::produto(const bool permitirDescontinuados, const boo
   sdProd->ui->lineEditPromocao->show();
   sdProd->ui->radioButtonProdAtivos->setChecked(true);
 
+  sdProd->ui->lineEditBusca->setPlaceholderText("Fornecedor/Descrição/Coleção/Código Comercial");
+
   return sdProd;
 }
 
@@ -297,6 +331,8 @@ SearchDialog *SearchDialog::fornecedor(QWidget *parent) {
   sdFornecedor->setHeaderData("contatoRG", "RG do Contato");
   sdFornecedor->setHeaderData("validadeProdutos", "Validade Produtos");
 
+  sdFornecedor->ui->lineEditBusca->setPlaceholderText("Razão Social/Nome Fantasia/CNPJ/CPF do Contato");
+
   return sdFornecedor;
 }
 
@@ -312,20 +348,24 @@ SearchDialog *SearchDialog::transportadora(QWidget *parent) {
   sdTransportadora->setHeaderData("antt", "ANTT");
   sdTransportadora->setHeaderData("tel", "Tel.");
 
+  sdTransportadora->ui->lineEditBusca->setPlaceholderText("Razão Social/Nome Fantasia");
+
   return sdTransportadora;
 }
 
 SearchDialog *SearchDialog::veiculo(QWidget *parent) {
-  SearchDialog *sdTransportadora = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", parent);
+  SearchDialog *sdVeiculo = new SearchDialog("Buscar Veículo", "view_busca_veiculo", "idVeiculo", {"razaoSocial", "modelo", "placa"}, "modelo, placa", "desativado = FALSE", parent);
 
-  sdTransportadora->hideColumns({"idVeiculo", "desativado"});
+  sdVeiculo->hideColumns({"idVeiculo", "desativado"});
 
-  sdTransportadora->setHeaderData("razaoSocial", "Transportadora");
-  sdTransportadora->setHeaderData("modelo", "Modelo");
-  sdTransportadora->setHeaderData("capacidade", "Carga");
-  sdTransportadora->setHeaderData("placa", "Placa");
+  sdVeiculo->setHeaderData("razaoSocial", "Transportadora");
+  sdVeiculo->setHeaderData("modelo", "Modelo");
+  sdVeiculo->setHeaderData("capacidade", "Carga");
+  sdVeiculo->setHeaderData("placa", "Placa");
 
-  return sdTransportadora;
+  sdVeiculo->ui->lineEditBusca->setPlaceholderText("Transportadora/Modelo/Placa");
+
+  return sdVeiculo;
 }
 
 SearchDialog *SearchDialog::usuario(QWidget *parent) {
@@ -337,6 +377,8 @@ SearchDialog *SearchDialog::usuario(QWidget *parent) {
   sdUsuario->setHeaderData("tipo", "Função");
   sdUsuario->setHeaderData("nome", "Nome");
   sdUsuario->setHeaderData("email", "E-mail");
+
+  sdUsuario->ui->lineEditBusca->setPlaceholderText("Função/Nome");
 
   return sdUsuario;
 }
@@ -359,6 +401,8 @@ SearchDialog *SearchDialog::vendedor(QWidget *parent) {
   sdVendedor->setHeaderData("tipo", "Função");
   sdVendedor->setHeaderData("nome", "Nome");
   sdVendedor->setHeaderData("email", "E-mail");
+
+  sdVendedor->ui->lineEditBusca->setPlaceholderText("Função/Nome");
 
   return sdVendedor;
 }
@@ -413,6 +457,8 @@ SearchDialog *SearchDialog::profissional(const bool mostrarNaoHa, QWidget *paren
   sdProfissional->setHeaderData("email", "E-mail");
   sdProfissional->setHeaderData("tipoProf", "Profissão");
 
+  sdProfissional->ui->lineEditBusca->setPlaceholderText("Profissional/Profissão");
+
   return sdProfissional;
 }
 
@@ -425,6 +471,3 @@ void SearchDialog::setRepresentacao(const bool isRepresentacao) { this->isRepres
 void SearchDialog::on_radioButtonProdAtivos_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
 
 void SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }
-// TODO: V524 http://www.viva64.com/en/V524 It is odd that the body of 'on_radioButtonProdDesc_toggled' function is
-// fully equivalent to the body of 'on_radioButtonProdAtivos_toggled' function.void
-// SearchDialog::on_radioButtonProdDesc_toggled(const bool) { on_lineEditBusca_textChanged(QString()); }

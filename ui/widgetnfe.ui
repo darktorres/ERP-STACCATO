@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>743</width>
-    <height>578</height>
+    <width>874</width>
+    <height>292</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,6 +69,16 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabDistribuicao">
+      <attribute name="title">
+       <string>Distribuição</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="4">
+        <widget class="NFeDistribuicao" name="widgetDistribuicao" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -84,6 +94,12 @@
    <class>WidgetNfeEntrada</class>
    <extends>QWidget</extends>
    <header>src/widgetnfeentrada.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NFeDistribuicao</class>
+   <extends>QWidget</extends>
+   <header>src/nfedistribuicao.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

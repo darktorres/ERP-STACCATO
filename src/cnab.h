@@ -1,38 +1,32 @@
 #pragma once
 
-#include <QDialog>
 #include <QTextStream>
 
-namespace Ui {
-class CNAB;
-}
-
-class CNAB : public QDialog {
-  Q_OBJECT
+class CNAB {
 
 public:
   struct Gare {
     int idNFe;
     int mesAnoReferencia;
     int dataVencimento;
-    int valor;
+    ulong valor;
     QString numeroNF;
     QString cnpjOrig;
   };
 
-  explicit CNAB(QWidget *parent = nullptr);
-  auto remessaGareSantander240(QVector<Gare> gares) -> std::optional<QString>;
+  explicit CNAB(QWidget *parent);
   auto remessaGareItau240(QVector<Gare> gares) -> std::optional<QString>;
-  auto retornoGareSantander240() -> void;
   auto retornoGareItau240(const QString &filePath) -> void;
   // TODO: adicionar funcoes para boleto e outros pagamentos
-  ~CNAB();
+  ~CNAB() = default;
 
 private:
-  Ui::CNAB *ui;
-  void writeBlanks(QTextStream &stream, const int count);
-  void writeText(QTextStream &stream, const QString &text, const int count);
-  void writeNumber(QTextStream &stream, const int number, const int count);
-  void writeZeros(QTextStream &stream, const int count);
-  QString decodeCodeItau(const QString &code);
+  // attributes
+  QWidget *parent;
+  // methods
+  auto decodeCodeItau(const QString &code) -> QString;
+  auto writeBlanks(QTextStream &stream, const int count) -> void;
+  auto writeNumber(QTextStream &stream, const ulong number, const int count) -> void;
+  auto writeText(QTextStream &stream, const QString &text, const int count) -> void;
+  auto writeZeros(QTextStream &stream, const int count) -> void;
 };

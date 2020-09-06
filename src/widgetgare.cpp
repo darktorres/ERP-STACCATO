@@ -14,21 +14,21 @@
 WidgetGare::WidgetGare(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetGare) {
   ui->setupUi(this);
 
+  ui->dateEdit->setDate(qApp->serverDate());
+  ui->dateEditDia->setDate(qApp->serverDate());
+
   connect(ui->pushButtonDarBaixaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaItau_clicked);
-  connect(ui->pushButtonDarBaixaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonDarBaixaSantander_clicked);
-  connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
-  connect(ui->pushButtonRetornoSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoSantander_clicked);
   connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaItau_clicked);
-  connect(ui->pushButtonRemessaSantander, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRemessaSantander_clicked);
+  connect(ui->pushButtonRetornoItau, &QPushButton::clicked, this, &WidgetGare::on_pushButtonRetornoItau_clicked);
   connect(ui->table, &TableView::activated, this, &WidgetGare::on_table_activated);
 
+  connect(ui->dateEditDia, &QDateEdit::dateChanged, this, &WidgetGare::montaFiltro);
+  connect(ui->groupBoxDia, &QGroupBox::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->lineEditBusca, &QLineEdit::textChanged, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonGerado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
+  connect(ui->radioButtonLiberado, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
   connect(ui->radioButtonPago, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
-
-  ui->dateEdit->setDate(QDate::currentDate());
+  connect(ui->radioButtonPendente, &QRadioButton::toggled, this, &WidgetGare::montaFiltro);
 }
 
 WidgetGare::~WidgetGare() { delete ui; }
@@ -63,7 +63,12 @@ void WidgetGare::montaFiltro() {
 
   //-------------------------------------
 
-  const QString textoBusca = ui->lineEditBusca->text().remove("'");
+  const QString filtroDia = ui->groupBoxDia->isChecked() ? "DATE_FORMAT(dataRealizado, '%Y-%m-%d') = '" + ui->dateEditDia->date().toString("yyyy-MM-dd") + "'" : "";
+  if (not filtroDia.isEmpty()) { filtros << filtroDia; }
+
+  //-------------------------------------
+
+  const QString textoBusca = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = "(numeroNFe LIKE '%" + textoBusca + "%')";
 
   if (not textoBusca.isEmpty()) { filtros << filtroBusca; }
@@ -87,29 +92,6 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
                      "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
     return qApp->enqueueException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
-  }
-
-  if (not model.select()) { qApp->enqueueException("Erro atualizando a tabela: " + model.lastError().text(), this); }
-
-  updateTables();
-
-  qApp->enqueueInformation("Baixa salva com sucesso!", this);
-}
-
-void WidgetGare::on_pushButtonDarBaixaSantander_clicked() {
-  auto selection = ui->table->selectionModel()->selectedRows();
-
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
-
-  QStringList ids;
-
-  for (auto &index : selection) { ids << model.data(index.row(), "idNFe").toString(); }
-
-  QSqlQuery query;
-
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 3, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
-                     "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
-    return qApp->enqueueException("Erro dando baixa nas gares: " + query.lastError().text(), this);
   }
 
   if (not model.select()) { qApp->enqueueException("Erro atualizando a tabela: " + model.lastError().text(), this); }
@@ -170,69 +152,19 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
   updateTables();
 }
 
-void WidgetGare::on_pushButtonRemessaSantander_clicked() {
-  const auto selection = ui->table->selectionModel()->selectedRows();
-
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
-
-  for (const auto index : selection) {
-    if (model.data(index.row(), "status").toString() == "PAGO GARE") { return qApp->enqueueError("GARE já paga!", this); }
-  }
-
-  CNAB cnab(this);
-  auto idCnab = cnab.remessaGareSantander240(montarGare(selection));
-
-  if (not idCnab) { return; }
-
-  QStringList ids;
-
-  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
-
-  QSqlQuery query;
-
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 3, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
-                     " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
-  }
-
-  updateTables();
-}
-
-QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList selection) {
+QVector<CNAB::Gare> WidgetGare::montarGare(const QModelIndexList &selection) {
   QVector<CNAB::Gare> gares;
 
   for (const auto index : selection) {
     CNAB::Gare gare;
 
-    gare.idNFe = model.data(index.row(), "idNFe").toInt();
-
-    QString referencia = model.data(index.row(), "referencia").toString();
-    QString referencia2;
-    referencia2.append(referencia.at(5));
-    referencia2.append(referencia.at(6));
-    referencia2.append(referencia.at(0));
-    referencia2.append(referencia.at(1));
-    referencia2.append(referencia.at(2));
-    referencia2.append(referencia.at(3));
-    gare.mesAnoReferencia = referencia2.toInt();
-
     QDate datePgt = model.data(index.row(), "dataPagamento").toDate();
-
     if (datePgt < qApp->serverDate()) { datePgt = qApp->serverDate(); }
+    gare.dataVencimento = datePgt.toString("ddMMyyyy").toInt();
 
-    QString dataPagamento = datePgt.toString("yyyy-MM-dd");
-    QString dataPagamento2;
-    dataPagamento2.append(dataPagamento.at(8));
-    dataPagamento2.append(dataPagamento.at(9));
-    dataPagamento2.append(dataPagamento.at(5));
-    dataPagamento2.append(dataPagamento.at(6));
-    dataPagamento2.append(dataPagamento.at(0));
-    dataPagamento2.append(dataPagamento.at(1));
-    dataPagamento2.append(dataPagamento.at(2));
-    dataPagamento2.append(dataPagamento.at(3));
-    gare.dataVencimento = dataPagamento2.toInt();
-
-    gare.valor = model.data(index.row(), "valor").toDouble() * 100;
+    gare.idNFe = model.data(index.row(), "idNFe").toInt();
+    gare.mesAnoReferencia = model.data(index.row(), "referencia").toDate().toString("MMyyyy").toInt();
+    gare.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
     gare.numeroNF = model.data(index.row(), "numeroNFe").toString();
     gare.cnpjOrig = model.data(index.row(), "cnpjOrig").toString();
 
@@ -249,13 +181,11 @@ void WidgetGare::on_pushButtonRetornoItau_clicked() {
 
   if (filePath.isEmpty()) { return; }
 
-  CNAB cnab;
+  CNAB cnab(this);
   cnab.retornoGareItau240(filePath);
 
   updateTables();
 }
-
-void WidgetGare::on_pushButtonRetornoSantander_clicked() {}
 
 void WidgetGare::on_table_activated(const QModelIndex &index) {
   QSqlQuery query;
@@ -273,7 +203,7 @@ void WidgetGare::on_tableSelection_changed() {
 
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  for (const auto &index : selection) { total += model.data(index.row(), "valor").toDouble(); }
+  for (const auto &index : selection) { total += QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).toDouble(); }
 
   ui->doubleSpinBoxTotal->setValue(total);
 }

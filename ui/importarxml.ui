@@ -16,6 +16,13 @@
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="3">
+      <widget class="ItemBox" name="itemBoxNFe">
+       <property name="placeholderText">
+        <string>Buscar NFe baixada</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -23,21 +30,24 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineEdit"/>
+     </item>
      <item row="0" column="2">
       <widget class="QPushButton" name="pushButtonProcurar">
        <property name="text">
         <string>Procurar...</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit"/>
      </item>
     </layout>
    </item>
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
+     <item row="1" column="1">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>XML</string>
@@ -47,24 +57,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Consumo</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="checkBoxSemLote">
-       <property name="text">
-        <string>Sem lote</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
+     <item row="4" column="0" colspan="2">
       <widget class="TableView" name="tableConsumo">
        <property name="mouseTracking">
         <bool>true</bool>
@@ -83,7 +76,20 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="checkBoxSemLote">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Sem lote</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
       <widget class="TableView" name="tableEstoque">
        <property name="mouseTracking">
         <bool>true</bool>
@@ -99,7 +105,17 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="3" column="0" colspan="2">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Consumo</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>Compra</string>
@@ -109,7 +125,7 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
+     <item row="6" column="0" colspan="2">
       <widget class="TableView" name="tableCompra">
        <property name="mouseTracking">
         <bool>true</bool>
@@ -282,7 +298,27 @@ color: rgb(0, 0, 0);</string>
    <extends>QTableView</extends>
    <header>src/tableview.h</header>
   </customwidget>
+  <customwidget>
+   <class>ItemBox</class>
+   <extends>QLineEdit</extends>
+   <header>src/itembox.h</header>
+  </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>pushButtonProcurar</tabstop>
+  <tabstop>itemBoxNFe</tabstop>
+  <tabstop>checkBoxSemLote</tabstop>
+  <tabstop>tableEstoque</tabstop>
+  <tabstop>tableConsumo</tabstop>
+  <tabstop>tableCompra</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>pushButtonImportar</tabstop>
+  <tabstop>pushButtonCancelar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

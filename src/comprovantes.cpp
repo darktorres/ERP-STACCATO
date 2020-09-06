@@ -15,7 +15,7 @@ QString Comprovantes::CustomDelegate::displayText(const QVariant &value, const Q
 
 // --------------------------------------------------------------------------
 
-Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(parent), ui(new Ui::Comprovantes), idVenda(idVenda) {
+Comprovantes::Comprovantes(const QString &idVenda, QWidget *parent) : QDialog(parent), idVenda(idVenda), ui(new Ui::Comprovantes) {
   ui->setupUi(this);
 
   setWindowFlags(Qt::Window);
@@ -54,18 +54,18 @@ void Comprovantes::on_pushButtonAbrir_clicked() {
   auto reply = manager->get(request);
 
   connect(reply, &QNetworkReply::finished, [=] {
-    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueException("Erro ao baixar arquivo: " + reply->errorString()); }
+    if (reply->error() != QNetworkReply::NoError) { return qApp->enqueueException("Erro ao baixar arquivo: " + reply->errorString(), this); }
 
     const QString filename = url.split("/").last();
     const QString path = QDir::currentPath() + "/arquivos/";
 
     QDir dir;
 
-    if (not dir.exists(path) and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta dos comprovantes!"); }
+    if (not dir.exists(path) and not dir.mkpath(path)) { return qApp->enqueueException("Erro ao criar a pasta dos comprovantes!", this); }
 
     QFile file(path + filename);
 
-    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString()); }
+    if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString(), this); }
 
     file.write(reply->readAll());
 

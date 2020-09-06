@@ -1,13 +1,12 @@
 #pragma once
 
-#include "sqltablemodel.h"
-
 #include <QIdentityProxyModel>
+#include <QSqlQueryModel>
 
 class ImportaProdutosProxyModel final : public QIdentityProxyModel {
 
 public:
-  explicit ImportaProdutosProxyModel(SqlTableModel *model, QObject *parent);
+  explicit ImportaProdutosProxyModel(QSqlQueryModel *model, QObject *parent);
   ~ImportaProdutosProxyModel() final = default;
   auto data(const QModelIndex &proxyIndex, const int role) const -> QVariant final;
 

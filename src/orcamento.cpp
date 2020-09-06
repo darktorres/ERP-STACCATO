@@ -8,6 +8,7 @@
 #include "calculofrete.h"
 #include "doubledelegate.h"
 #include "excel.h"
+#include "log.h"
 #include "pdf.h"
 #include "porcentagemdelegate.h"
 #include "reaisdelegate.h"
@@ -56,7 +57,11 @@ Orcamento::Orcamento(QWidget *parent) : RegisterDialog("orcamento", "idOrcamento
 
 Orcamento::~Orcamento() { delete ui; }
 
-void Orcamento::show() { RegisterDialog::show(); }
+void Orcamento::show() {
+  RegisterDialog::show();
+  ui->groupBoxInfo->setMaximumHeight(ui->groupBoxInfo->height());
+  ui->groupBoxDados->setMaximumHeight(ui->groupBoxDados->height());
+}
 
 void Orcamento::on_tableProdutos_clicked(const QModelIndex &index) {
   if (isReadOnly) { return; }
@@ -473,16 +478,52 @@ bool Orcamento::recalcularTotais() {
   }
 
   if (abs(subTotalBruto - ui->doubleSpinBoxSubTotalBruto->value()) > 1) {
+    Log::createLog("Exceção",
+                   "IdOrcamento: " + ui->lineEditOrcamento->text() + "\nsubTotalBruto: " + QString::number(subTotalBruto) + "\nspinBox: " + QString::number(ui->doubleSpinBoxSubTotalBruto->value()),
+                   true);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      Log::createLog("Exceção",
+                     "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                         "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                         "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                         "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                         "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString(),
+                     true);
+    }
     calcPrecoGlobalTotal();
     return qApp->enqueueException(false, "Subtotal dos itens não confere com SubTotalBruto! Recalculando valores!", this);
   }
 
   if (abs(subTotalLiq - ui->doubleSpinBoxSubTotalLiq->value()) > 1) {
+    Log::createLog("Exceção",
+                   "IdOrcamento: " + ui->lineEditOrcamento->text() + "\nsubTotalLiq: " + QString::number(subTotalLiq) + "\nspinBox: " + QString::number(ui->doubleSpinBoxSubTotalLiq->value()), true);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      Log::createLog("Exceção",
+                     "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                         "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                         "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                         "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                         "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString(),
+                     true);
+    }
     calcPrecoGlobalTotal();
     return qApp->enqueueException(false, "Total dos itens não confere com SubTotalLíquido! Recalculando valores!", this);
   }
 
   if (abs(total - (ui->doubleSpinBoxTotal->value() - ui->doubleSpinBoxFrete->value())) > 1) {
+    Log::createLog("Exceção",
+                   "IdOrcamento: " + ui->lineEditOrcamento->text() + "\ntotal: " + QString::number(total) + "\nspinBoxTotal: " + QString::number(ui->doubleSpinBoxTotal->value()) +
+                       "\nspinBoxFrete: " + QString::number(ui->doubleSpinBoxFrete->value()),
+                   true);
+    for (int row = 0; row < modelItem.rowCount(); ++row) {
+      Log::createLog("Exceção",
+                     "Id: " + modelItem.data(row, "idOrcamentoProduto").toString() + "\nprcUnitario: " + modelItem.data(row, "prcUnitario").toString() +
+                         "\ndescUnitario: " + modelItem.data(row, "descUnitario").toString() + "\nquant: " + modelItem.data(row, "quant").toString() +
+                         "\ncodComercial: " + modelItem.data(row, "codComercial").toString() + "\nparcial: " + modelItem.data(row, "parcial").toString() +
+                         "\ndesconto: " + modelItem.data(row, "desconto").toString() + "\nparcialDesc: " + modelItem.data(row, "parcialDesc").toString() +
+                         "\ndescGlobal: " + modelItem.data(row, "descGlobal").toString() + "\ntotal: " + modelItem.data(row, "total").toString(),
+                     true);
+    }
     calcPrecoGlobalTotal();
     return qApp->enqueueException(false, "Total dos itens não confere com Total! Recalculando valores!", this);
   }
@@ -996,7 +1037,7 @@ void Orcamento::on_pushButtonReplicar_clicked() {
   for (int row = 0; row < modelItem.rowCount(); ++row) {
     queryProduto.bindValue(":idProduto", modelItem.data(row, "idProduto"));
 
-    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException("Erro verificando validade dos produtos: " + queryProduto.lastError().text()); }
+    if (not queryProduto.exec() or not queryProduto.first()) { return qApp->enqueueException("Erro verificando validade dos produtos: " + queryProduto.lastError().text(), this); }
 
     if (queryProduto.value("invalido").toBool()) {
       queryEquivalente.bindValue(":codComercial", modelItem.data(row, "codComercial"));
@@ -1154,7 +1195,7 @@ bool Orcamento::verificaCadastroCliente() {
 }
 
 void Orcamento::on_pushButtonGerarExcel_clicked() {
-  Excel excel(ui->lineEditOrcamento->text(), Excel::Tipo::Orcamento);
+  Excel excel(ui->lineEditOrcamento->text(), Excel::Tipo::Orcamento, this);
   excel.gerarExcel();
 }
 

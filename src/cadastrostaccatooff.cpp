@@ -18,7 +18,7 @@ CadastroStaccatoOff::CadastroStaccatoOff(QWidget *parent) : QDialog(parent), ui(
 
   ui->itemBoxFornecedor->setSearchDialog(SearchDialog::fornecedor(this));
 
-  ui->dateEditValidade->setDate(QDate::currentDate());
+  ui->dateEditValidade->setDate(qApp->serverDate());
 
   setupTables();
 

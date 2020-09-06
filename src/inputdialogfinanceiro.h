@@ -42,6 +42,7 @@ private:
   auto on_doubleSpinBoxAliquota_valueChanged(const double aliquota) -> void;
   auto on_doubleSpinBoxFrete_valueChanged(double) -> void;
   auto on_doubleSpinBoxSt_valueChanged(const double valueSt) -> void;
+  auto on_lineEditCodFornecedor_textChanged(const QString &text) -> void;
   auto on_pushButtonCorrigirFluxo_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setConnections() -> void;

@@ -8,8 +8,7 @@ class ACBr final : public QObject {
   Q_OBJECT
 
 public:
-  explicit ACBr(QObject *parent);
-  explicit ACBr();
+  explicit ACBr(QWidget *parent);
   ~ACBr() = default;
   auto consultarNFe(const int idNFe) -> std::optional<std::tuple<QString, QString>>;
   auto enviarComando(const QString &comando, const bool local = false) -> std::optional<QString>;
@@ -27,7 +26,8 @@ private:
   bool conectado = false;
   bool enviado = false;
   bool recebido = false;
-  QProgressDialog *progressDialog = new QProgressDialog();
+  QProgressDialog *progressDialog;
+  QWidget *parent;
   // methods
   auto abrirPdf(const QString &filePath) -> bool;
   auto error() -> void;

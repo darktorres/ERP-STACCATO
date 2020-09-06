@@ -127,17 +127,37 @@
               <string>Filtros:</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_12">
-              <item row="5" column="0">
-               <widget class="QRadioButton" name="radioButtonCancelado">
+              <item row="1" column="0">
+               <widget class="QRadioButton" name="radioButtonPendente">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Cancelado</string>
+                 <string>Pendente/Conferido</string>
                 </property>
                </widget>
               </item>
               <item row="15" column="0">
+               <widget class="QPushButton" name="pushButtonInserirLancamento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Inserir lançamento</string>
+                </property>
+               </widget>
+              </item>
+              <item row="18" column="0">
+               <widget class="QPushButton" name="pushButtonReverterPagamento">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Reverter pagamento</string>
+                </property>
+               </widget>
+              </item>
+              <item row="16" column="0">
                <widget class="QPushButton" name="pushButtonInserirTransferencia">
                 <property name="enabled">
                  <bool>true</bool>
@@ -145,6 +165,51 @@
                 <property name="text">
                  <string>Inserir transferência</string>
                 </property>
+               </widget>
+              </item>
+              <item row="13" column="0">
+               <widget class="QPushButton" name="pushButtonImportarFolhaPag">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Importar folha pag.</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QGroupBox" name="groupBox">
+                <property name="title">
+                 <string>Valor De/Até</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_5">
+                 <item row="0" column="0">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxDe">
+                   <property name="showGroupSeparator" stdset="0">
+                    <bool>true</bool>
+                   </property>
+                   <property name="prefix">
+                    <string>R$ </string>
+                   </property>
+                   <property name="maximum">
+                    <double>99999.990000000005239</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBoxAte">
+                   <property name="showGroupSeparator" stdset="0">
+                    <bool>true</bool>
+                   </property>
+                   <property name="prefix">
+                    <string>R$ </string>
+                   </property>
+                   <property name="maximum">
+                    <double>99999.990000000005239</double>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
               <item row="7" column="0">
@@ -175,7 +240,7 @@
                 </layout>
                </widget>
               </item>
-              <item row="13" column="0">
+              <item row="14" column="0">
                <widget class="QPushButton" name="pushButtonAdiantarRecebimento">
                 <property name="enabled">
                  <bool>true</bool>
@@ -183,35 +248,6 @@
                 <property name="text">
                  <string>Antecipar recebimento</string>
                 </property>
-               </widget>
-              </item>
-              <item row="9" column="0">
-               <widget class="QGroupBox" name="groupBox">
-                <property name="title">
-                 <string>Valor De/Até</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_5">
-                 <item row="0" column="0">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxDe">
-                   <property name="prefix">
-                    <string>R$ </string>
-                   </property>
-                   <property name="maximum">
-                    <double>99999.990000000005239</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBoxAte">
-                   <property name="prefix">
-                    <string>R$ </string>
-                   </property>
-                   <property name="maximum">
-                    <double>99999.990000000005239</double>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
                </widget>
               </item>
               <item row="4" column="0">
@@ -224,7 +260,7 @@
                 </property>
                </widget>
               </item>
-              <item row="16" column="0">
+              <item row="17" column="0">
                <widget class="QPushButton" name="pushButtonExcluirLancamento">
                 <property name="enabled">
                  <bool>true</bool>
@@ -234,13 +270,16 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QRadioButton" name="radioButtonRecebido">
+              <item row="0" column="0">
+               <widget class="QRadioButton" name="radioButtonTodos">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Recebido</string>
+                 <string>Todos</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -257,26 +296,23 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonTodos">
+              <item row="3" column="0">
+               <widget class="QRadioButton" name="radioButtonRecebido">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Todos</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
+                 <string>Recebido</string>
                 </property>
                </widget>
               </item>
-              <item row="14" column="0">
-               <widget class="QPushButton" name="pushButtonInserirLancamento">
+              <item row="5" column="0">
+               <widget class="QRadioButton" name="radioButtonCancelado">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Inserir lançamento</string>
+                 <string>Cancelado</string>
                 </property>
                </widget>
               </item>
@@ -318,33 +354,20 @@
                 </layout>
                </widget>
               </item>
-              <item row="17" column="0">
-               <widget class="QPushButton" name="pushButtonReverterPagamento">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Reverter pagamento</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QRadioButton" name="radioButtonPendente">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Pendente/Conferido</string>
-                </property>
-               </widget>
-              </item>
               <item row="12" column="0">
-               <widget class="QPushButton" name="pushButtonImportarFolhaPag">
+               <widget class="QPushButton" name="pushButtonRemessaItau">
+                <property name="text">
+                 <string>Gerar remessa ITAÚ</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QRadioButton" name="radioButtonAgendado">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Importar folha pag.</string>
+                 <string>Agendado</string>
                 </property>
                </widget>
               </item>
@@ -367,7 +390,7 @@
           <bool>true</bool>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
+          <enum>QAbstractItemView::MultiSelection</enum>
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>

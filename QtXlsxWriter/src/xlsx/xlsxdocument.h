@@ -52,9 +52,9 @@ class Q_XLSX_EXPORT Document : public QObject {
   Q_DECLARE_PRIVATE(Document)
 
 public:
-  explicit Document(QObject *parent = nullptr);
-  Document(const QString &xlsxName, QObject *parent = nullptr);
-  Document(QIODevice *device, QObject *parent = nullptr);
+  explicit Document(QWidget *parent);
+  Document(const QString &xlsxName, QWidget *parent);
+  Document(QIODevice *device, QWidget *parent);
   ~Document();
 
   bool write(const CellReference &cell, const QVariant &value, const Format &format = Format());
@@ -127,6 +127,7 @@ public:
 private:
   Q_DISABLE_COPY(Document)
   DocumentPrivate *const d_ptr;
+  QWidget *parent;
 };
 
 QT_END_NAMESPACE_XLSX

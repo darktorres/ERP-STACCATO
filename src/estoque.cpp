@@ -330,7 +330,7 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   return true;
 }
 
-bool Estoque::desfazerConsumo(const int idVendaProduto2) {
+bool Estoque::desfazerConsumo(const int idVendaProduto2, QWidget *parent) {
   // there is one implementation in InputDialogConfirmacao
   // TODO: juntar as lógicas
   // TODO: se houver agendamento de estoque remover
@@ -340,14 +340,14 @@ bool Estoque::desfazerConsumo(const int idVendaProduto2) {
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
   queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
+  if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), parent); }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
+  if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), parent); }
 
   QSqlQuery queryVenda;
   queryVenda.prepare(
@@ -356,7 +356,7 @@ bool Estoque::desfazerConsumo(const int idVendaProduto2) {
       "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
+  if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text(), parent); }
 
   return true;
 }

@@ -65,6 +65,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->pushButtonInserirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked, connectionType);
   connect(ui->pushButtonInserirTransferencia, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked, connectionType);
   connect(ui->pushButtonReverterPagamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked, connectionType);
+  connect(ui->radioButtonAgendado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPago, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonPendente, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
@@ -138,9 +139,9 @@ void WidgetFinanceiroContas::montaFiltro() {
     const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>();
 
     for (const auto &child : children) {
-      if (child->text() == "Todos") { break; }
-
       if (child->isChecked()) {
+        if (child->text() == "Todos") { break; }
+
         status = child->text();
         break;
       }
@@ -172,7 +173,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString text = ui->lineEditBusca->text().remove("'");
+    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = text.isEmpty() ? ""
                                          : " WHERE (ordemCompra LIKE '%" + text + "%' OR contraparte LIKE '%" + text + "%' OR numeroNFe LIKE '%" + text + "%' OR cp_idVenda LIKE '%" + text +
                                                "%' OR pf2_idVenda LIKE '%" + text + "%' OR observacao LIKE '%" + text + "%')";
@@ -185,8 +186,8 @@ void WidgetFinanceiroContas::montaFiltro() {
         "SELECT * FROM (SELECT `cp`.`idPagamento` AS `idPagamento`, `cp`.`idLoja` AS `idLoja`, cp.idVenda AS `cp_idVenda`, `cp`.`contraParte` AS `contraparte`, `cp`.`dataPagamento` AS "
         "`dataPagamento`, `cp`.`dataEmissao` AS `dataEmissao`, `cp`.`valor` AS `valor`, `cp`.`status` AS `status`, GROUP_CONCAT(DISTINCT `pf2`.`ordemCompra` SEPARATOR ',') AS `ordemCompra`, "
         "GROUP_CONCAT(DISTINCT `n`.`numeroNFe` SEPARATOR ', ') AS `numeroNFe`, `cp`.`tipo` AS `tipo`, `cp`.`parcela` AS `parcela`, `cp`.`observacao` AS `observacao`, GROUP_CONCAT(DISTINCT "
-        "`pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda` FROM `conta_a_pagar_has_pagamento` `cp` "
-        "LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON `cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` "
+        "`pf2`.`statusFinanceiro` SEPARATOR ',') AS `statusFinanceiro`, GROUP_CONCAT(DISTINCT `pf2`.`idVenda` SEPARATOR ', ') AS `pf2_idVenda`, pf2.codFornecedor FROM `conta_a_pagar_has_pagamento` "
+        "`cp` LEFT JOIN `pedido_fornecedor_has_produto2` `pf2` ON `cp`.`idCompra` = `pf2`.`idCompra` LEFT JOIN `estoque_has_compra` `ehc` ON `ehc`.`idPedido2` = `pf2`.`idPedido2` LEFT JOIN `estoque` "
         "`e` ON `ehc`.`idEstoque` = `e`.`idEstoque` LEFT JOIN `nfe` `n` ON `n`.`idNFe` = `e`.`idNFe` WHERE " +
         filtros.join(" AND ") + " GROUP BY `cp`.`idPagamento`) x" + busca);
   }
@@ -198,9 +199,9 @@ void WidgetFinanceiroContas::montaFiltro() {
     const auto children = ui->groupBoxFiltros->findChildren<QRadioButton *>();
 
     for (const auto &child : children) {
-      if (child->text() == "Todos") { break; }
-
       if (child->isChecked()) {
+        if (child->text() == "Todos") { break; }
+
         status = child->text();
         break;
       }
@@ -232,7 +233,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 
     //-------------------------------------
 
-    const QString text = ui->lineEditBusca->text().remove("'");
+    const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
     const QString busca = "(cr.idVenda LIKE '%" + text + "%' OR cr.contraparte LIKE '%" + text + "%')";
     if (not text.isEmpty()) { filtros << busca; }
 
@@ -259,6 +260,7 @@ void WidgetFinanceiroContas::montaFiltro() {
     model.setHeaderData("pf2_idVenda", "Venda");
     model.setHeaderData("ordemCompra", "OC");
     model.setHeaderData("numeroNFe", "NFe");
+    model.setHeaderData("codFornecedor", "Cód. Forn.");
   }
 
   model.setHeaderData("contraParte", "ContraParte");
@@ -426,7 +428,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   SqlTableModel modelImportar;
   modelImportar.setTable("conta_a_pagar_has_pagamento");
 
-  QXlsx::Document xlsx(file);
+  QXlsx::Document xlsx(file, this);
 
   if (not xlsx.selectSheet("Planilha1")) { return qApp->enqueueException("Não encontrou 'Planilha1' na tabela!", this); }
 
@@ -460,8 +462,15 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
       if (not modelImportar.setData(rowModel, "dataPagamento", xlsx.read(rowExcel, 6))) { return false; }
       if (not modelImportar.setData(rowModel, "observacao", xlsx.read(rowExcel, 8))) { return false; }
       if (not modelImportar.setData(rowModel, "idConta", queryConta.value("idConta"))) { return false; }
-      if (not modelImportar.setData(rowModel, "centroCusto", xlsx.read(rowExcel, 9))) { return false; }
-      if (not modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 10))) { return false; }
+      if (not modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"))) { return false; }
+      if (not modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9))) { return false; }
+
+      if (xlsx.read(rowExcel, 7).toString().toUpper() == "SANTANDER") { // marcar direto como pago
+        if (not modelImportar.setData(rowModel, "dataRealizado", xlsx.read(rowExcel, 6))) { return false; }
+        if (not modelImportar.setData(rowModel, "status", "PAGO")) { return false; }
+        if (not modelImportar.setData(rowModel, "valorReal", xlsx.read(rowExcel, 4))) { return false; }
+        if (not modelImportar.setData(rowModel, "tipoReal", xlsx.read(rowExcel, 5))) { return false; }
+      }
     }
 
     if (not modelImportar.submitAll()) { return false; }

@@ -16,7 +16,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
   setOrganizationName("Staccato");
   setApplicationName("ERP");
   setWindowIcon(QIcon("Staccato.ico"));
-  setApplicationVersion("0.8.139");
+  setApplicationVersion("0.8.154");
   setStyle("Fusion");
 
   readSettingsFile();
@@ -133,7 +133,9 @@ bool Application::genericLogin(const QString &hostname) {
       db.setHostName(loja);
 
       if (db.open()) {
-        UserSession::setSetting("Login/hostname", mapLojas.key(loja));
+        UserSession::setSetting("Login/hostname", loja);
+        UserSession::setSetting("Login/loja", mapLojas.key(loja));
+        qApp->updater();
         connected = true;
         break;
       }
@@ -168,6 +170,7 @@ bool Application::dbReconnect(const bool silent) {
   isConnected = db.open();
 
   if (not isConnected) {
+    // TODO: tentar conectar nos outros servidores (codigo em genericLogin)
     if (not silent) { QMessageBox::critical(nullptr, "Erro!", "Erro conectando no banco de dados: " + db.lastError().text()); }
     return false;
   }
@@ -234,7 +237,7 @@ bool Application::runSqlJobs() {
 }
 
 void Application::startSqlPing() {
-  auto *timer = new QTimer(this);
+  auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [] { QSqlQuery().exec("DO 0"); });
   timer->start(60000);
 
@@ -242,7 +245,7 @@ void Application::startSqlPing() {
 }
 
 void Application::startUpdaterPing() {
-  auto *timer = new QTimer(this);
+  auto timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [&] { updater(); });
   timer->start(600000);
 }
@@ -377,12 +380,14 @@ void Application::showMessages() {
       }
     }
 
-    QMessageBox::critical(exception.widget, "Erro!", exception.message);
+    if (not silent) { QMessageBox::critical(exception.widget, "Erro!", exception.message); }
   }
 
-  for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
-  for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
-  for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
+  if (not silent) {
+    for (const auto &error : std::as_const(errorQueue)) { QMessageBox::critical(error.widget, "Erro!", error.message); }
+    for (const auto &warning : std::as_const(warningQueue)) { QMessageBox::warning(warning.widget, "Aviso!", warning.message); }
+    for (const auto &information : std::as_const(informationQueue)) { QMessageBox::information(information.widget, "Informação!", information.message); }
+  }
 
   exceptionQueue.clear();
   errorQueue.clear();
@@ -413,6 +418,10 @@ void Application::updater() {
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();
 }
+
+bool Application::getSilent() const { return silent; }
+
+void Application::setSilent(bool value) { silent = value; }
 
 bool Application::getInTransaction() const { return inTransaction; }
 
@@ -449,6 +458,14 @@ double Application::roundDouble(const double value, const int decimais) {
   const double multiploDez = std::pow(10, decimais);
 
   return std::round(value * multiploDez) / multiploDez;
+}
+
+QString Application::sanitizeSQL(const QString &string) {
+  QString sanitized = string;
+
+  sanitized.remove("+").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'").remove("\\");
+
+  return sanitized;
 }
 
 std::optional<int> Application::reservarIdEstoque() {

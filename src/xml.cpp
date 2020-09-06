@@ -6,12 +6,14 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-XML::XML(const QByteArray &fileContent, const QString &fileName) : fileContent(fileContent), fileName(fileName) { montarArvore(); }
+XML::XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent) : fileContent(fileContent), tipo(tipo), parent(parent) { montarArvore(); }
+
+XML::XML(const QByteArray &fileContent) : XML(fileContent, XML::Tipo::Nulo, nullptr) {}
 
 void XML::montarArvore() {
   if (fileContent.isEmpty()) {
     error = true;
-    return qApp->enqueueException("XML vazio!");
+    return qApp->enqueueException("XML vazio!", parent);
   }
 
   QDomDocument document;
@@ -19,7 +21,7 @@ void XML::montarArvore() {
 
   if (not document.setContent(fileContent, &errorText)) {
     error = true;
-    return qApp->enqueueException("Erro lendo arquivo: " + errorText);
+    return qApp->enqueueException("Erro lendo arquivo: " + errorText, parent);
   }
 
   QDomElement root = document.firstChildElement();
@@ -73,7 +75,7 @@ void XML::lerValores(const QStandardItem *item) {
       QString text = child->text();
 
       if (text.contains("infNFe")) { chaveAcesso = text.mid(text.indexOf("Id=") + 7, 44); }
-      if (text.contains("nNF -")) { nNF = text.remove("nNF - "); }
+      if (text.contains("nNF -")) { nNF = QString("%1").arg(text.remove("nNF - ").toInt(), 9, 10, QChar('0')); }
       if (text.contains("dhEmi -")) { dataHoraEmissao = text.remove("dhEmi - "); }
 
       if (parentText == "emit" and text.contains("xFant -")) { xFant = text.remove("xFant - "); }
@@ -198,33 +200,21 @@ void XML::lerTotais(const QStandardItem *child) {
   if (text.contains("vNF -")) { vNF_Total = text.remove("vNF - ").toDouble(); }
 }
 
-bool XML::validar(const Tipo tipo) {
-  if (not verificaCNPJ(tipo) or verificaExiste() or not verificaValido()) { return false; }
+bool XML::validar() {
+  if (not verificaCNPJ() or not verificaValido()) { return false; }
 
   return true;
 }
 
-bool XML::verificaCNPJ(const Tipo tipo) {
-  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
-  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!"); }
+bool XML::verificaCNPJ() {
+  if (tipo == Tipo::Entrada and cnpjDest.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!", parent); }
+  if (tipo == Tipo::Saida and cnpjOrig.left(11) != "09375013000") { return qApp->enqueueException(false, "CNPJ da nota não é da Staccato!", parent); }
 
   return true;
-}
-
-bool XML::verificaExiste() {
-  QSqlQuery query;
-  query.prepare("SELECT idNFe FROM nfe WHERE chaveAcesso = :chaveAcesso");
-  query.bindValue(":chaveAcesso", chaveAcesso);
-
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro verificando se nota já cadastrada: " + query.lastError().text()); }
-
-  if (query.first()) { return qApp->enqueueError(true, "Nota já cadastrada!"); }
-
-  return false;
 }
 
 bool XML::verificaValido() {
-  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!"); }
+  if (not fileContent.contains("Autorizado o uso da NF-e")) { return qApp->enqueueError(false, "NFe não está autorizada pela SEFAZ!", parent); }
 
   return true;
 }
@@ -236,7 +226,7 @@ bool XML::verificaNCMs() {
   for (const auto &produto : produtos) {
     QSqlQuery query;
 
-    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text()); }
+    if (not query.exec("SELECT 0 FROM ncm WHERE ncm = '" + produto.ncm + "'")) { return qApp->enqueueException(false, "Erro buscando ncm: " + query.lastError().text(), parent); }
 
     if (not query.first()) {
       ncms << produto.ncm;
@@ -246,7 +236,7 @@ bool XML::verificaNCMs() {
 
   ncms.removeDuplicates();
 
-  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -")); }
+  if (erro) { return qApp->enqueueError(false, "Os seguintes NCMs não foram encontrados na tabela!\nCadastre eles em \"Gerenciar NCMs\"!\n   -" + ncms.join("\n   -"), parent); }
 
   return true;
 }

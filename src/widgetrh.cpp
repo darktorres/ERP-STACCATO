@@ -89,7 +89,7 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
     queryRemove.prepare("DELETE FROM comissao WHERE Mês = :mes");
     queryRemove.bindValue(":mes", mes.toString("yyyy-MM"));
 
-    if (not queryRemove.exec()) { return qApp->enqueueException("Erro removendo dados: " + queryRemove.lastError().text()); }
+    if (not queryRemove.exec()) { return qApp->enqueueException("Erro removendo dados: " + queryRemove.lastError().text(), this); }
   }
 
   QSqlQuery queryRelatorio;
@@ -133,5 +133,5 @@ void WidgetRh::on_dateEdit_dateChanged(const QDate &date) {
 
   modelTotal.setFilter("Mês = '" + date.toString("yyyy-MM") + "'");
 
-  if (not modelTotal.select()) { return qApp->enqueueException("Erro filtrando tabela total: " + modelTotal.lastError().text()); }
+  if (not modelTotal.select()) { return qApp->enqueueException("Erro filtrando tabela total: " + modelTotal.lastError().text(), this); }
 }

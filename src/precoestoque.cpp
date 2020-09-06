@@ -101,22 +101,14 @@ void PrecoEstoque::on_pushButtonSalvar_clicked() {
 
 void PrecoEstoque::on_pushButtonCancelar_clicked() { close(); }
 
-void PrecoEstoque::on_lineEditBusca_textChanged(const QString &text) {
-  if (text.isEmpty()) {
-    modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
-    return;
-  }
+void PrecoEstoque::on_lineEditBusca_textChanged(const QString &) {
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
+
+  if (text.isEmpty()) { return modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0"); }
 
   QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
-  for (auto &string : strings) {
-    if (string.contains("-")) {
-      string.prepend("\"").append("\"");
-    } else {
-      string.replace("+", "").replace("-", "").replace("@", "").replace(">", "").replace("<", "").replace("(", "").replace(")", "").replace("~", "").replace("*", "");
-      string.prepend("+").append("*");
-    }
-  }
+  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
 
   modelProduto.setFilter("MATCH(fornecedor, descricao, codComercial, colecao) AGAINST('" + strings.join(" ") + "' IN BOOLEAN MODE) AND estoque = TRUE AND estoqueRestante > 0");
 }

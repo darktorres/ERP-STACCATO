@@ -48,7 +48,7 @@
      <item>
       <widget class="QPushButton" name="pushButtonSalvar">
        <property name="text">
-        <string>Salvar</string>
+        <string>Confirmar</string>
        </property>
       </widget>
      </item>

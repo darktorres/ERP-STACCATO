@@ -375,7 +375,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbrLocal(this); not acbrLocal.gerarDanfe(modelEstoque.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 void WidgetLogisticaAgendarColeta::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
@@ -423,7 +423,7 @@ void WidgetLogisticaAgendarColeta::montaFiltro() {
 
   //-------------------------------------
 
-  const QString text = ui->lineEditBusca->text().remove("'");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
   // TODO: OC não está aparecendo nessa tabela
   const QString filtroBusca = "(numeroNFe LIKE '%" + text + "%' OR produto LIKE '%" + text + "%' OR idVenda LIKE '%" + text + "%' OR ordemCompra LIKE '%" + text + "%')";
 

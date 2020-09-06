@@ -13,10 +13,10 @@ class Estoque final : public QDialog {
 
 public:
   // TODO: turn showWindow into a enum
-  explicit Estoque(const QString &idEstoque, const bool showWindow = true, QWidget *parent = nullptr);
+  explicit Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent);
   ~Estoque();
   auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> bool;
-  static auto desfazerConsumo(const int idVendaProduto2) -> bool;
+  static auto desfazerConsumo(const int idVendaProduto2, QWidget *parent) -> bool;
 
 private:
   // attributes

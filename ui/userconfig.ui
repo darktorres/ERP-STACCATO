@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>529</width>
-    <height>671</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -38,6 +38,9 @@
         <property name="text">
          <string>Navegar...</string>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="2" column="0">
@@ -58,6 +61,9 @@
        <widget class="QPushButton" name="pushButtonOrcamentosFolder">
         <property name="text">
          <string>Navegar...</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -87,6 +93,9 @@
         <property name="text">
          <string>Navegar...</string>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="4" column="0">
@@ -107,6 +116,9 @@
        <widget class="QPushButton" name="pushButtonEntregasXmlFolder">
         <property name="text">
          <string>Navegar...</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -129,6 +141,9 @@
         <property name="text">
          <string>Navegar...</string>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -138,6 +153,9 @@
     <widget class="QPushButton" name="pushButtonAlterarDados">
      <property name="text">
       <string>Alterar dados do usuário</string>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -160,38 +178,10 @@
       <string>ACBr</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>E-mail Contabilidade:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>E-mail Logística:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Loja:</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_14">
         <property name="text">
          <string>Servidor:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEditACBrServidor">
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -201,16 +191,6 @@
          <string>Porta:</string>
         </property>
        </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="lineEditACBrPorta">
-        <property name="clearButtonEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1" colspan="3">
-       <widget class="ItemBox" name="itemBoxLoja"/>
       </item>
       <item row="4" column="1" colspan="3">
        <widget class="QLineEdit" name="lineEditEmailContabilidade">
@@ -223,6 +203,51 @@
        <widget class="QLineEdit" name="lineEditEmailLogistica">
         <property name="clearButtonEnabled">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditACBrServidor">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="3">
+       <widget class="ItemBox" name="itemBoxLoja"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>E-mail Logística:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="lineEditACBrPorta">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>E-mail Contabilidade:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Loja:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="checkBoxMonitorarNFes">
+        <property name="text">
+         <string>Monitorar NFes</string>
         </property>
        </widget>
       </item>
@@ -322,6 +347,9 @@
         <property name="text">
          <string>Enviar email de teste</string>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -331,6 +359,9 @@
     <widget class="QPushButton" name="pushButtonSalvar">
      <property name="text">
       <string>Salvar</string>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -344,15 +375,28 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>lineEditACBrServidor</tabstop>
+  <tabstop>lineEditACBrPorta</tabstop>
+  <tabstop>itemBoxLoja</tabstop>
+  <tabstop>lineEditEmailContabilidade</tabstop>
+  <tabstop>lineEditEmailLogistica</tabstop>
+  <tabstop>checkBoxMonitorarNFes</tabstop>
   <tabstop>lineEditServidorSMTP</tabstop>
   <tabstop>lineEditPortaSMTP</tabstop>
   <tabstop>lineEditEmail</tabstop>
   <tabstop>lineEditEmailSenha</tabstop>
   <tabstop>lineEditEmailCopia</tabstop>
+  <tabstop>pushButtonEmailTeste</tabstop>
   <tabstop>lineEditOrcamentosFolder</tabstop>
   <tabstop>pushButtonOrcamentosFolder</tabstop>
   <tabstop>lineEditVendasFolder</tabstop>
   <tabstop>pushButtonVendasFolder</tabstop>
+  <tabstop>lineEditComprasFolder</tabstop>
+  <tabstop>pushButtonComprasFolder</tabstop>
+  <tabstop>lineEditEntregasXmlFolder</tabstop>
+  <tabstop>pushButtonEntregasXmlFolder</tabstop>
+  <tabstop>lineEditEntregasPdfFolder</tabstop>
+  <tabstop>pushButtonEntregasPdfFolder</tabstop>
   <tabstop>pushButtonAlterarDados</tabstop>
   <tabstop>pushButtonSalvar</tabstop>
  </tabstops>

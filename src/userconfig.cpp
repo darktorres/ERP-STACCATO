@@ -17,9 +17,9 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
   if (const auto key = UserSession::getSetting("User/servidorACBr")) { ui->lineEditACBrServidor->setText(key->toString()); }
   if (const auto key = UserSession::getSetting("User/portaACBr")) { ui->lineEditACBrPorta->setText(key->toString()); }
   if (const auto key = UserSession::getSetting("User/lojaACBr")) { ui->itemBoxLoja->setId(key->toInt()); }
-
   if (const auto key = UserSession::getSetting("User/emailContabilidade")) { ui->lineEditEmailContabilidade->setText(key->toString()); }
   if (const auto key = UserSession::getSetting("User/emailLogistica")) { ui->lineEditEmailLogistica->setText(key->toString()); }
+  if (const auto key = UserSession::getSetting("User/monitorarNFe")) { ui->checkBoxMonitorarNFes->setChecked(key->toBool()); }
 
   if (const auto key = UserSession::getSetting("User/servidorSMTP")) { ui->lineEditServidorSMTP->setText(key->toString()); }
   if (const auto key = UserSession::getSetting("User/portaSMTP")) { ui->lineEditPortaSMTP->setText(key->toString()); }
@@ -75,6 +75,7 @@ void UserConfig::on_pushButtonSalvar_clicked() {
   UserSession::setSetting("User/lojaACBr", ui->itemBoxLoja->getId());
   UserSession::setSetting("User/emailContabilidade", ui->lineEditEmailContabilidade->text());
   UserSession::setSetting("User/emailLogistica", ui->lineEditEmailLogistica->text());
+  UserSession::setSetting("User/monitorarNFe", ui->checkBoxMonitorarNFes->isChecked());
 
   UserSession::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());
   UserSession::setSetting("User/portaSMTP", ui->lineEditPortaSMTP->text());

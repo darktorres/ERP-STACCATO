@@ -59,6 +59,7 @@ void WidgetHistoricoCompra::setupTables() {
 
   //------------------------------------------------------
 
+  // TODO: substituir view por query
   modelNFe.setTable("view_ordemcompra_nfe");
 
   modelNFe.setHeaderData("numeroNFe", "NFe");
@@ -110,6 +111,7 @@ void WidgetHistoricoCompra::setTreeView() {
 
   ui->treeView->setModel(&modelTree);
 
+  ui->treeView->hideColumn("codFornecedor");
   ui->treeView->hideColumn("idRelacionado");
   ui->treeView->hideColumn("selecionado");
   ui->treeView->hideColumn("aliquotaSt");
@@ -153,7 +155,7 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
 void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetHistoricoCompra::montaFiltro() {
-  const QString text = ui->lineEditBusca->text().remove("'");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
   const QString filtroBusca = text.isEmpty() ? "" : "OC LIKE '%" + text + "%' OR Código LIKE '%" + text + "%'";
 
   modelViewComprasFinanceiro.setFilter(filtroBusca);
@@ -164,7 +166,7 @@ void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  if (ACBr acbrLocal; not acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
+  if (ACBr acbrLocal(this); not acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

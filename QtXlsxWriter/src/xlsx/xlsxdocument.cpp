@@ -345,14 +345,14 @@ bool DocumentPrivate::savePackage(QIODevice *device) const {
  * Creates a new empty xlsx document.
  * The \a parent argument is passed to QObject's constructor.
  */
-Document::Document(QObject *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)) { d_ptr->init(); }
+Document::Document(QWidget *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)), parent(parent) { d_ptr->init(); }
 
 /*!
  * \overload
  * Try to open an existing xlsx document named \a name.
  * The \a parent argument is passed to QObject's constructor.
  */
-Document::Document(const QString &name, QObject *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)) {
+Document::Document(const QString &name, QWidget *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)), parent(parent) {
   d_ptr->packageName = name;
   if (QFile::exists(name)) {
     QFile xlsx(name);
@@ -366,7 +366,7 @@ Document::Document(const QString &name, QObject *parent) : QObject(parent), d_pt
  * Try to open an existing xlsx document from \a device.
  * The \a parent argument is passed to QObject's constructor.
  */
-Document::Document(QIODevice *device, QObject *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)) {
+Document::Document(QIODevice *device, QWidget *parent) : QObject(parent), d_ptr(new DocumentPrivate(this)), parent(parent) {
   if (device and device->isReadable()) d_ptr->loadPackage(device);
   d_ptr->init();
 }
@@ -890,7 +890,7 @@ bool Document::save() const {
 bool Document::saveAs(const QString &name) const {
   QFile file(name);
 
-  if (not file.open(QIODevice::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo: " + file.errorString()); }
+  if (not file.open(QIODevice::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo: " + file.errorString(), parent); }
 
   return saveAs(&file);
 }

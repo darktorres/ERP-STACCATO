@@ -319,7 +319,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   if (not criarChaveAcesso()) { return; }
 
-  ACBr acbrRemoto;
+  ACBr acbrRemoto(this);
 
   auto resposta = acbrRemoto.enviarComando(gerarNota());
 
@@ -369,7 +369,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString assunto = "NFe - " + ui->lineEditNumero->text() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  ACBr acbrLocal;
+  ACBr acbrLocal(this);
 
   // TODO: enviar email separado para cliente
   if (not acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath)) { return; }
@@ -1724,7 +1724,7 @@ void CadastrarNFe::on_comboBoxCfop_currentTextChanged(const QString &text) {
 void CadastrarNFe::on_pushButtonConsultarCadastro_clicked() {
   if (ui->lineEditDestinatarioCPFCNPJ->text().length() == 14) { return qApp->enqueueInformation("SP não faz consulta de CPF!", this); }
 
-  ACBr acbrRemoto;
+  ACBr acbrRemoto(this);
 
   const auto resposta = acbrRemoto.enviarComando("NFE.ConsultaCadastro(" + ui->lineEditDestinatarioUF->text() + ", " + ui->lineEditDestinatarioCPFCNPJ->text() + ")");
 
@@ -1763,7 +1763,7 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   if (not query.first()) { return qApp->enqueueError("A loja selecionada não possui certificado cadastrado no sistema!", this); }
 
-  ACBr acbrRemoto;
+  ACBr acbrRemoto(this);
 
   if (const auto resposta = acbrRemoto.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
       not resposta or not resposta->contains("OK")) {

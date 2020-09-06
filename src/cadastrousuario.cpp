@@ -61,6 +61,8 @@ void CadastroUsuario::setupTables() {
 }
 
 void CadastroUsuario::modificarUsuario() {
+  limitado = true;
+
   ui->pushButtonBuscar->hide();
   ui->pushButtonNovoCad->hide();
   ui->pushButtonRemover->hide();
@@ -98,13 +100,19 @@ void CadastroUsuario::setupMapper() {
 }
 
 void CadastroUsuario::registerMode() {
+  if (limitado) { return; }
+
   ui->pushButtonCadastrar->show();
+
   ui->pushButtonAtualizar->hide();
   ui->pushButtonRemover->hide();
 }
 
 void CadastroUsuario::updateMode() {
+  if (limitado) { return; }
+
   ui->pushButtonCadastrar->hide();
+
   ui->pushButtonAtualizar->show();
   ui->pushButtonRemover->show();
 }
@@ -232,7 +240,7 @@ bool CadastroUsuario::cadastrar() {
 void CadastroUsuario::criarUsuarioMySQL() {
   QFile file("mysql.txt");
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString()); }
+  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo mysql.txt: " + file.errorString(), this); }
 
   const QString password = file.readAll();
 

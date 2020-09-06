@@ -1061,8 +1061,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>1041</width>
+                   <height>337</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_81">
@@ -1283,6 +1283,9 @@
                           </item>
                           <item row="8" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvbc">
+                            <property name="showGroupSeparator" stdset="0">
+                             <bool>true</bool>
+                            </property>
                             <property name="prefix">
                              <string>R$ </string>
                             </property>
@@ -1322,6 +1325,9 @@
                           </item>
                           <item row="10" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvicms">
+                            <property name="showGroupSeparator" stdset="0">
+                             <bool>true</bool>
+                            </property>
                             <property name="prefix">
                              <string>R$ </string>
                             </property>
@@ -1419,6 +1425,9 @@
                           </item>
                           <item row="11" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvicmsst">
+                            <property name="showGroupSeparator" stdset="0">
+                             <bool>true</bool>
+                            </property>
                             <property name="prefix">
                              <string>R$ </string>
                             </property>
@@ -1429,6 +1438,9 @@
                           </item>
                           <item row="9" column="1">
                            <widget class="QDoubleSpinBox" name="doubleSpinBoxICMSvbcst">
+                            <property name="showGroupSeparator" stdset="0">
+                             <bool>true</bool>
+                            </property>
                             <property name="prefix">
                              <string>R$ </string>
                             </property>
@@ -1528,8 +1540,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_83">
@@ -1678,8 +1690,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_84">
@@ -1717,6 +1729,9 @@
                      </item>
                      <item row="1" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxPISvbc">
+                       <property name="showGroupSeparator" stdset="0">
+                        <bool>true</bool>
+                       </property>
                        <property name="prefix">
                         <string>R$ </string>
                        </property>
@@ -1740,6 +1755,9 @@
                      </item>
                      <item row="3" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxPISvpis">
+                       <property name="showGroupSeparator" stdset="0">
+                        <bool>true</bool>
+                       </property>
                        <property name="prefix">
                         <string>R$ </string>
                        </property>
@@ -1992,8 +2010,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_85">
@@ -2224,6 +2242,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                      </item>
                      <item row="1" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSvbc">
+                       <property name="showGroupSeparator" stdset="0">
+                        <bool>true</bool>
+                       </property>
                        <property name="prefix">
                         <string>R$ </string>
                        </property>
@@ -2273,6 +2294,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                      </item>
                      <item row="3" column="1">
                       <widget class="QDoubleSpinBox" name="doubleSpinBoxCOFINSvcofins">
+                       <property name="showGroupSeparator" stdset="0">
+                        <bool>true</bool>
+                       </property>
                        <property name="prefix">
                         <string>R$ </string>
                        </property>
@@ -2305,8 +2329,8 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>966</width>
-                   <height>312</height>
+                   <width>965</width>
+                   <height>339</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_86">
@@ -2386,6 +2410,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                          <property name="readOnly">
                           <bool>false</bool>
                          </property>
+                         <property name="showGroupSeparator" stdset="0">
+                          <bool>true</bool>
+                         </property>
                          <property name="prefix">
                           <string>R$ </string>
                          </property>
@@ -2398,6 +2425,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                         <widget class="QDoubleSpinBox" name="doubleSpinBoxPartilhaRemetente">
                          <property name="readOnly">
                           <bool>false</bool>
+                         </property>
+                         <property name="showGroupSeparator" stdset="0">
+                          <bool>true</bool>
                          </property>
                          <property name="prefix">
                           <string>R$ </string>
@@ -2438,6 +2468,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                          <property name="readOnly">
                           <bool>false</bool>
                          </property>
+                         <property name="showGroupSeparator" stdset="0">
+                          <bool>true</bool>
+                         </property>
                          <property name="prefix">
                           <string>R$ </string>
                          </property>
@@ -2476,6 +2509,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
                         <widget class="QDoubleSpinBox" name="doubleSpinBoxBaseCalculoDestinatario">
                          <property name="readOnly">
                           <bool>false</bool>
+                         </property>
+                         <property name="showGroupSeparator" stdset="0">
+                          <bool>true</bool>
                          </property>
                          <property name="prefix">
                           <string>R$ </string>
@@ -3222,6 +3258,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               </item>
               <item row="0" column="1">
                <widget class="QDoubleSpinBox" name="doubleSpinBoxTransportadorBaseCalculo">
+                <property name="showGroupSeparator" stdset="0">
+                 <bool>true</bool>
+                </property>
                 <property name="prefix">
                  <string>R$ </string>
                 </property>
@@ -3256,6 +3295,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               </item>
               <item row="2" column="1">
                <widget class="QDoubleSpinBox" name="doubleSpinBoxTransportadorValorServico">
+                <property name="showGroupSeparator" stdset="0">
+                 <bool>true</bool>
+                </property>
                 <property name="prefix">
                  <string>R$ </string>
                 </property>
@@ -3293,6 +3335,9 @@ Operação com Direito a Crédito - Vinculada a Receitas Tributadas e Não-Tribu
               </item>
               <item row="5" column="1">
                <widget class="QDoubleSpinBox" name="doubleSpinBoxTransportadorIcmsRetido">
+                <property name="showGroupSeparator" stdset="0">
+                 <bool>true</bool>
+                </property>
                 <property name="prefix">
                  <string>R$ </string>
                 </property>

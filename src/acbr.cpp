@@ -12,7 +12,7 @@
 #include <QThread>
 #include <QUrl>
 
-ACBr::ACBr(QObject *parent) : QObject(parent) {
+ACBr::ACBr(QWidget *parent) : QObject(parent), progressDialog(new QProgressDialog(parent)), parent(parent) {
   connect(&socket, qOverload<QTcpSocket::SocketError>(&QAbstractSocket::error), this, &ACBr::error); // TODO: change in 5.15 to errorOcurred
   connect(&socket, &QTcpSocket::connected, this, &ACBr::setConnected);
   connect(&socket, &QTcpSocket::disconnected, this, &ACBr::setDisconnected);
@@ -28,15 +28,13 @@ ACBr::ACBr(QObject *parent) : QObject(parent) {
   progressDialog->setMinimum(0);
 }
 
-ACBr::ACBr() : ACBr(nullptr) {}
-
 void ACBr::error() {
   const QString errorString = socket.errorString();
 
   if (errorString == "Connection refused" or errorString == "Connection timed out") {
-    qApp->enqueueException("Erro conectando ao ACBr! Verifique se ele está aberto!");
+    qApp->enqueueException("Erro conectando ao ACBr! Verifique se ele está aberto!", parent);
   } else {
-    qApp->enqueueException("Erro socket: " + socket.errorString());
+    qApp->enqueueException("Erro socket: " + socket.errorString(), parent);
   }
 
   progressDialog->cancel();
@@ -71,20 +69,20 @@ void ACBr::readSocket() {
 }
 
 bool ACBr::gerarDanfe(const int idNFe) {
-  if (idNFe == 0) { return qApp->enqueueError(false, "Produto não possui nota!"); }
+  if (idNFe == 0) { return qApp->enqueueError(false, "Produto não possui nota!", parent); }
 
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando chaveAcesso: " + query.lastError().text()); }
+  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando chaveAcesso: " + query.lastError().text(), parent); }
 
   return gerarDanfe(query.value("xml").toByteArray(), true).has_value();
 }
 
 std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const bool openFile) {
   if (fileContent.indexOf("Id=") == -1) {
-    qApp->enqueueError("Não encontrado a chave de acesso!");
+    qApp->enqueueException("Não encontrado a chave de acesso!", parent);
     return {};
   }
 
@@ -93,7 +91,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   QFile file(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
   if (not file.open(QFile::WriteOnly)) {
-    qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString());
+    qApp->enqueueException("Erro abrindo arquivo para escrita: " + file.errorString(), parent);
     return {};
   }
 
@@ -108,7 +106,7 @@ std::optional<QString> ACBr::gerarDanfe(const QByteArray &fileContent, const boo
   if (not respostaSavePdf) { return {}; }
 
   if (not respostaSavePdf->contains("Arquivo criado em:")) {
-    qApp->enqueueException(respostaSavePdf.value() + " - Verifique se o arquivo não está aberto!");
+    qApp->enqueueException(respostaSavePdf.value() + " - Verifique se o arquivo não está aberto!", parent);
     return {};
   }
 
@@ -127,7 +125,7 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
   query.bindValue(":idNFe", idNFe);
 
   if (not query.exec() or not query.first()) {
-    qApp->enqueueException("Erro buscando XML: " + query.lastError().text());
+    qApp->enqueueException("Erro buscando XML: " + query.lastError().text(), parent);
     return {};
   }
 
@@ -147,12 +145,12 @@ std::optional<std::tuple<QString, QString>> ACBr::consultarNFe(const int idNFe) 
 
   if (resposta2->contains("NF-e não consta na base de dados da SEFAZ")) {
     removerNota(idNFe);
-    qApp->enqueueException("NFe não consta na SEFAZ, removendo do sistema...");
+    qApp->enqueueException("NFe não consta na SEFAZ, removendo do sistema...", parent);
     return {};
   }
 
   if (not resposta2->contains("XMotivo=Autorizado o uso da NF-e") and not resposta2->contains("xEvento=Cancelamento registrado")) {
-    qApp->enqueueException(resposta2.value());
+    qApp->enqueueException(resposta2.value(), parent);
     return {};
   }
 
@@ -175,19 +173,19 @@ void ACBr::removerNota(const int idNFe) {
     query2a.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
     query2a.bindValue(":idNFeSaida", idNFe);
 
-    if (not query2a.exec()) { return qApp->enqueueException(false, "Erro removendo nfe da venda: " + query2a.lastError().text()); }
+    if (not query2a.exec()) { return qApp->enqueueException(false, "Erro removendo nfe da venda: " + query2a.lastError().text(), parent); }
 
     QSqlQuery query3a;
     query3a.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE idNFeSaida = :idNFeSaida");
     query3a.bindValue(":idNFeSaida", idNFe);
 
-    if (not query3a.exec()) { return qApp->enqueueException(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text()); }
+    if (not query3a.exec()) { return qApp->enqueueException(false, "Erro removendo nfe do veiculo: " + query3a.lastError().text(), parent); }
 
     QSqlQuery queryNota;
     queryNota.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
     queryNota.bindValue(":idNFe", idNFe);
 
-    if (not queryNota.exec()) { return qApp->enqueueException(false, "Erro removendo nota: " + queryNota.lastError().text()); }
+    if (not queryNota.exec()) { return qApp->enqueueException(false, "Erro removendo nota: " + queryNota.lastError().text(), parent); }
 
     return true;
   }();
@@ -198,7 +196,7 @@ void ACBr::removerNota(const int idNFe) {
 }
 
 bool ACBr::abrirPdf(const QString &filePath) {
-  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filePath))) { return qApp->enqueueException(false, "Erro abrindo PDF!"); }
+  if (not QDesktopServices::openUrl(QUrl::fromLocalFile(filePath))) { return qApp->enqueueException(false, "Erro abrindo PDF!", parent); }
 
   return true;
 }
@@ -210,7 +208,7 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   progressDialog->reset();
 
   if (local) {
-    progressDialog->show();
+    if (not qApp->getSilent()) { progressDialog->show(); }
 
     if (not conectado) { socket.connectToHost("localhost", 3434); }
   }
@@ -220,11 +218,11 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
     const auto porta = UserSession::getSetting("User/portaACBr");
 
     if (not servidorConfig or not porta) {
-      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!");
+      qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!", parent);
       return {};
     }
 
-    progressDialog->show();
+    if (not qApp->getSilent()) { progressDialog->show(); }
 
     if (not conectado) { socket.connectToHost(servidorConfig->toString(), porta->toByteArray().toUShort()); }
   }
@@ -260,9 +258,9 @@ bool ACBr::enviarEmail(const QString &emailDestino, const QString &emailCopia, c
   if (not respostaEmail) { return false; }
 
   // TODO: perguntar se deseja tentar enviar novamente?
-  if (not respostaEmail->contains("OK: Email enviado com sucesso")) { return qApp->enqueueException(false, respostaEmail.value()); }
+  if (not respostaEmail->contains("OK: E-mail enviado com sucesso!")) { return qApp->enqueueException(false, respostaEmail.value(), parent); }
 
-  qApp->enqueueInformation(respostaEmail.value());
+  qApp->enqueueInformation(respostaEmail.value(), parent);
 
   return true;
 }

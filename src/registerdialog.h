@@ -30,6 +30,7 @@ protected:
   QStringList textKeys;
   SqlTableModel model;
   QDataWidgetMapper mapper;
+  QWidget *parent;
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
   auto closeEvent(QCloseEvent *event) -> void final;

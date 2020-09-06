@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sqlquerymodel.h"
 #include "sqltablemodel.h"
 
 #include <QWidget>
@@ -21,10 +22,11 @@ private:
   // attributes
   bool isSet = false;
   bool modelIsSet = false;
+  QString selectedIdVenda;
   SqlTableModel modelTranspAtual;
   SqlTableModel modelTranspAgend;
-  SqlTableModel modelVendas;
-  SqlTableModel modelProdutos;
+  SqlQueryModel modelVendas;
+  SqlQueryModel modelProdutos;
   Ui::WidgetLogisticaAgendarEntrega *ui;
   // methods
   auto adicionaProdutoNoModel(const int row, const double caixas) -> bool;
@@ -35,8 +37,10 @@ private:
   auto dividirCompra(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> bool;
   auto dividirConsumo(const int row, const double proporcao, const double proporcaoNovo, const int idVendaProduto2) -> bool;
   auto dividirVenda(const int row, const double caixasAgendar, const double caixasTotal, const int novoIdVendaProduto2) -> bool;
+  auto filtroProdutos() -> void;
   auto montaFiltro() -> void;
   auto on_dateTimeEdit_dateChanged(const QDate &date) -> void;
+  auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_itemBoxVeiculo_textChanged(const QString &) -> void;
   auto on_pushButtonAdicionarParcial_clicked() -> void;
   auto on_pushButtonAdicionarProduto_clicked() -> void;
@@ -51,4 +55,5 @@ private:
   auto reagendar(const QModelIndexList &list, const QDate &dataPrev, const QString &observacao) -> bool;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto unsetConnections() -> void;
 };

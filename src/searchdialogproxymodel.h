@@ -4,10 +4,12 @@
 #include "sqltablemodel.h"
 #include "sqltreemodel.h"
 
+#include <QSqlQueryModel>
+
 class SearchDialogProxyModel final : public SortFilterProxyModel {
 
 public:
-  explicit SearchDialogProxyModel(SqlTableModel *model, QObject *parent);
+  explicit SearchDialogProxyModel(QSqlQueryModel *model, QObject *parent);
   explicit SearchDialogProxyModel(SqlTreeModel *model, QObject *parent);
   ~SearchDialogProxyModel() final = default;
   // TODO: copy the helper 'data' function with 'row, column'

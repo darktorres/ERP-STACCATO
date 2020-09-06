@@ -55,6 +55,8 @@ void WidgetNfeEntrada::setupTables() {
 
   ui->table->hideColumn("idNFe");
   ui->table->hideColumn("chaveAcesso");
+  ui->table->hideColumn("nsu");
+  ui->table->hideColumn("utilizada");
 
   ui->table->showColumn("created");
 
@@ -77,7 +79,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
 void WidgetNfeEntrada::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }
 
 void WidgetNfeEntrada::montaFiltro() {
-  const QString text = ui->lineEditBusca->text().remove("'");
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   modelViewNFeEntrada.setFilter("NFe LIKE '%" + text + "%' OR OC LIKE '%" + text + "%' OR Venda LIKE '%" + text + "%'");
 }
@@ -87,22 +89,23 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
 
-  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!"); }
+  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
 
   const int row = list.first().row();
 
   //--------------------------------------------------------------
 
   QSqlQuery queryGare;
-  queryGare.prepare("SELECT status FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
+  queryGare.prepare("SELECT status, valor FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
   queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
   if (not queryGare.exec()) { return qApp->enqueueError("Erro verificando GARE: " + queryGare.lastError().text(), this); }
 
   if (queryGare.first()) {
     const QString status = queryGare.value("status").toString();
+    const double valor = queryGare.value("valor").toDouble();
 
-    if (status == "GERADO GARE" or status == "PAGO GARE") { return qApp->enqueueError("GARE 'em pagamento/pago'!", this); }
+    if ((status == "GERADO GARE" or status == "PAGO GARE") and valor > 0) { return qApp->enqueueError("GARE 'em pagamento/pago'!", this); }
   }
 
   //--------------------------------------------------------------
@@ -115,6 +118,10 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   if (not query.exec()) { return qApp->enqueueException("Erro verificando pedidos: " + query.lastError().text(), this); }
 
   if (query.size() > 0) { return qApp->enqueueError("NFe possui itens 'EM ENTREGA/ENTREGUE'!", this); }
+
+  //--------------------------------------------------------------
+
+  if (modelViewNFeEntrada.data(row, "nsu") > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { return qApp->enqueueError("NFe não utilizada!", this); }
 
   //--------------------------------------------------------------
 
@@ -206,11 +213,19 @@ bool WidgetNfeEntrada::remover(const int row) {
 
   //-----------------------------------------------------------------------------
 
-  QSqlQuery queryDeleteNFe;
-  queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
-  queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+  if (modelViewNFeEntrada.data(row, "nsu") > 0) {
+    QSqlQuery queryUpdateNFe;
+    queryUpdateNFe.prepare("UPDATE nfe SET utilizada = FALSE, GARE = NULL WHERE idNFe = :idNFe");
+    queryUpdateNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not queryDeleteNFe.exec()) { return qApp->enqueueException(false, "Erro cancelando nota: " + queryDeleteNFe.lastError().text(), this); }
+    if (not queryUpdateNFe.exec()) { return qApp->enqueueException(false, "Erro voltando nota: " + queryUpdateNFe.lastError().text(), this); }
+  } else {
+    QSqlQuery queryDeleteNFe;
+    queryDeleteNFe.prepare("DELETE FROM nfe WHERE idNFe = :idNFe");
+    queryDeleteNFe.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
+
+    if (not queryDeleteNFe.exec()) { return qApp->enqueueException(false, "Erro cancelando nota: " + queryDeleteNFe.lastError().text(), this); }
+  }
 
   return true;
 }
@@ -225,7 +240,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal;
+  ACBr acbrLocal(this);
 
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)

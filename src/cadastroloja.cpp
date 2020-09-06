@@ -95,9 +95,6 @@ void CadastroLoja::clearFields() {
 }
 
 bool CadastroLoja::verifyFields() {
-  // Loja Geral
-  if (data("idLoja").toInt() == 1) { return true; }
-
   const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
 
   for (const auto &line : children) {
@@ -272,7 +269,7 @@ void CadastroLoja::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
 
-  if (CepCompleter cc; cc.buscaCEP(cep)) {
+  if (CepCompleter cc; cc.buscaCEP(cep, this)) {
     ui->lineEditUF->setText(cc.getUf());
     ui->lineEditCidade->setText(cc.getCidade());
     ui->lineEditLogradouro->setText(cc.getEndereco());

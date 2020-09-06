@@ -173,20 +173,13 @@ void WidgetEstoque::montaFiltroContabil() {
 }
 
 QString WidgetEstoque::getMatch() const {
-  const QString text = ui->lineEditBusca->text();
+  const QString text = qApp->sanitizeSQL(ui->lineEditBusca->text());
 
   if (text.isEmpty()) { return QString(); }
 
   QStringList strings = text.split(" ", Qt::SkipEmptyParts);
 
-  for (auto &string : strings) {
-    if (string.contains("-")) {
-      string.prepend("\"").append("\"");
-    } else {
-      string.remove("+").remove("-").remove("@").remove(">").remove("<").remove("(").remove(")").remove("~").remove("*").remove("'");
-      string.prepend("+").append("*");
-    }
-  }
+  for (auto &string : strings) { string.contains("-") ? string.prepend("\"").append("\"") : string.prepend("+").append("*"); }
 
   const QString text2 = strings.join(" ");
 
@@ -250,7 +243,7 @@ void WidgetEstoque::on_pushButtonRelatorio_clicked() {
 }
 
 bool WidgetEstoque::gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) {
-  QXlsx::Document xlsx(arquivoModelo);
+  QXlsx::Document xlsx(arquivoModelo, this);
 
   xlsx.selectSheet("Sheet1");
 

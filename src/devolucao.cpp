@@ -411,30 +411,16 @@ bool Devolucao::criarDevolucao() {
 bool Devolucao::inserirItens(const int currentRow, const int novoIdVendaProduto2) {
   if (not copiarProdutoParaDevolucao(currentRow)) { return false; }
 
-  if (not lerConsumos(currentRow)) { return false; }
-
-  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
-  const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
-
-  if (modelConsumos.rowCount() > 0) { // consumo referente a quant. devolvida
-    if (not modelConsumos.setData(0, "quant", quantDevolvida * -1)) { return false; }
-    if (not modelConsumos.setData(0, "caixas", (quantDevolvida / stepQuant))) { return false; }
-  }
-
   //------------------------------------
 
-  const double quant = modelProdutos2.data(currentRow, "quant").toDouble();
-  const double restante = quant - quantDevolvida;
+  const double quantTotal = modelProdutos2.data(currentRow, "quant").toDouble();
+  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
+  const double restante = quantTotal - quantDevolvida;
 
   if (restante > 0) {
     if (not dividirVenda(currentRow, novoIdVendaProduto2)) { return false; }
     if (not dividirCompra(currentRow, novoIdVendaProduto2)) { return false; }
-
-    //------------------------------------
-
-    if (modelConsumos.rowCount() > 0) {
-      if (not dividirConsumo(currentRow, novoIdVendaProduto2)) { return false; }
-    }
+    if (not dividirConsumo(currentRow, novoIdVendaProduto2)) { return false; }
   }
 
   //------------------------------------
@@ -656,14 +642,6 @@ bool Devolucao::atualizarIdRelacionado(const int currentRow) {
   return true;
 }
 
-bool Devolucao::lerConsumos(const int currentRow) {
-  modelConsumos.setFilter("idVendaProduto2 = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString());
-
-  if (not modelConsumos.select()) { return qApp->enqueueException(false, "Erro lendo consumos: " + modelConsumos.lastError().text(), this); }
-
-  return true;
-}
-
 bool Devolucao::dividirVenda(const int currentRow, const int novoIdVendaProduto2) {
   // NOTE: *quebralinha venda_produto2
   const int newRow = modelProdutos2.insertRowAtEnd();
@@ -732,6 +710,7 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
 
   for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
     if (column == modelCompra.fieldIndex("idPedido2")) { continue; }
+    if (column == modelCompra.fieldIndex("idVendaProduto2")) { continue; }
     if (column == modelCompra.fieldIndex("created")) { continue; }
     if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
@@ -757,10 +736,52 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
 }
 
 bool Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProduto2) {
+  modelConsumos.setFilter("idVendaProduto2 = " + modelProdutos2.data(currentRow, "idVendaProduto2").toString());
+
+  if (not modelConsumos.select()) { return false; }
+
+  if (modelConsumos.rowCount() == 0) { return true; }
+
+  //--------------------------------------------------------------------
+
+  const double quantTotal = modelProdutos2.data(currentRow, "quant").toDouble();
+  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
+  const double caixasDevolvida = ui->doubleSpinBoxCaixas->value();
+
+  const double valorConsumo = modelConsumos.data(0, "valor").toDouble();
+  const double desconto = modelConsumos.data(0, "desconto").toDouble();
+  const double vBC = modelConsumos.data(0, "vBC").toDouble();
+  const double vICMS = modelConsumos.data(0, "vICMS").toDouble();
+  const double vBCST = modelConsumos.data(0, "vBCST").toDouble();
+  const double vICMSST = modelConsumos.data(0, "vICMSST").toDouble();
+  const double vBCPIS = modelConsumos.data(0, "vBCPIS").toDouble();
+  const double vPIS = modelConsumos.data(0, "vPIS").toDouble();
+  const double vBCCOFINS = modelConsumos.data(0, "vBCCOFINS").toDouble();
+  const double vCOFINS = modelConsumos.data(0, "vCOFINS").toDouble();
+
+  const double proporcao = quantDevolvida / quantTotal;
+
+  if (not modelConsumos.setData(0, "quant", quantDevolvida * -1)) { return false; }
+  if (not modelConsumos.setData(0, "caixas", caixasDevolvida)) { return false; }
+  if (not modelConsumos.setData(0, "valor", valorConsumo * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "desconto", desconto * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vBC", vBC * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vICMS", vICMS * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vBCST", vBCST * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vICMSST", vICMSST * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vBCPIS", vBCPIS * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vPIS", vPIS * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vBCCOFINS", vBCCOFINS * proporcao)) { return false; }
+  if (not modelConsumos.setData(0, "vCOFINS", vCOFINS * proporcao)) { return false; }
+
+  //--------------------------------------------------------------------
+
+  // NOTE: *quebralinha estoque_consumo
   const int newRow = modelConsumos.insertRowAtEnd();
 
   for (int column = 0; column < modelConsumos.columnCount(); ++column) {
     if (column == modelConsumos.fieldIndex("idConsumo")) { continue; }
+    if (column == modelConsumos.fieldIndex("idVendaProduto2")) { continue; }
     if (column == modelConsumos.fieldIndex("created")) { continue; }
     if (column == modelConsumos.fieldIndex("lastUpdated")) { continue; }
 
@@ -773,14 +794,24 @@ bool Devolucao::dividirConsumo(const int currentRow, const int novoIdVendaProdut
 
   //--------------------------------------------------------------------
 
-  const double quant = modelProdutos2.data(currentRow, "quant").toDouble();
-  const double quantDevolvida = ui->doubleSpinBoxQuant->value();
-  const double restante = quant - quantDevolvida;
   const double stepQuant = ui->doubleSpinBoxQuant->singleStep();
+  const double restante = quantTotal - quantDevolvida;
+
+  const double proporcaoNovo = restante / quantTotal;
 
   if (not modelConsumos.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
   if (not modelConsumos.setData(newRow, "quant", restante * -1)) { return false; }
   if (not modelConsumos.setData(newRow, "caixas", (restante / stepQuant))) { return false; }
+  if (not modelConsumos.setData(newRow, "valor", valorConsumo * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "desconto", desconto * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vBC", vBC * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vICMS", vICMS * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vBCST", vBCST * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vICMSST", vICMSST * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vBCPIS", vBCPIS * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vPIS", vPIS * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
+  if (not modelConsumos.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
 
   return true;
 }

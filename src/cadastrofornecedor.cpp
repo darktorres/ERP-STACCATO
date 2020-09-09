@@ -33,6 +33,7 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   connect(ui->checkBoxMostrarInativos, &QCheckBox::clicked, this, &CadastroFornecedor::on_checkBoxMostrarInativos_clicked);
   connect(ui->lineEditCEP, &LineEditCEP::textChanged, this, &CadastroFornecedor::on_lineEditCEP_textChanged);
   connect(ui->lineEditCNPJ, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJ_textEdited);
+  connect(ui->lineEditCNPJBancario, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditCNPJBancario_textEdited);
   connect(ui->lineEditContatoCPF, &QLineEdit::textEdited, this, &CadastroFornecedor::on_lineEditContatoCPF_textEdited);
   connect(ui->pushButtonAdicionarEnd, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAdicionarEnd_clicked);
   connect(ui->pushButtonAtualizar, &QPushButton::clicked, this, &CadastroFornecedor::on_pushButtonAtualizar_clicked);
@@ -61,12 +62,19 @@ void CadastroFornecedor::setupTables() {
 }
 
 void CadastroFornecedor::setupUi() {
+  // dados
   ui->lineEditContatoCPF->setInputMask("999.999.999-99;_");
   ui->lineEditContatoRG->setInputMask("99.999.999-9;_");
   ui->lineEditIdNextel->setInputMask("99*9999999*99999;_");
   ui->lineEditCNPJ->setInputMask("99.999.999/9999-99;_");
-  ui->lineEditCEP->setInputMask("99999-999;_");
   ui->lineEditUF->setInputMask(">AA;_");
+
+  // endereco
+  ui->lineEditCEP->setInputMask("99999-999;_");
+
+  // bancario
+  ui->lineEditAgencia->setInputMask("9999-9;_");
+  ui->lineEditCNPJBancario->setInputMask("99.999.999/9999-99;_");
 }
 
 void CadastroFornecedor::clearEndereco() {
@@ -119,6 +127,23 @@ bool CadastroFornecedor::savingProcedures() {
   if (not setData("comissao2", ui->doubleSpinBoxComissaoEspecial->value())) { return false; }
   if (not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
 
+  // Dados bancários
+
+  if (not setData("nomeBanco", ui->lineEditNomeBancario->text())) { return false; }
+
+  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) {
+    if (not setData("cnpjBanco", ui->lineEditCNPJBancario->text())) { return false; }
+  }
+
+  if (not setData("banco", ui->lineEditBanco->text())) { return false; }
+
+  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) {
+    if (not setData("agencia", ui->lineEditAgencia->text())) { return false; }
+  }
+
+  if (not setData("cc", ui->lineEditCC->text())) { return false; }
+  if (not setData("poupanca", ui->checkBoxPoupanca->isChecked())) { return false; }
+
   return true;
 }
 
@@ -151,6 +176,13 @@ void CadastroFornecedor::setupMapper() {
   addMapping(ui->doubleSpinBoxAliquotaSt, "aliquotaSt");
   addMapping(ui->doubleSpinBoxComissao, "comissao1");
   addMapping(ui->doubleSpinBoxComissaoEspecial, "comissao2");
+
+  addMapping(ui->lineEditNomeBancario, "nomeBanco");
+  addMapping(ui->lineEditCNPJBancario, "cnpjBanco");
+  addMapping(ui->lineEditBanco, "banco");
+  addMapping(ui->lineEditAgencia, "agencia");
+  addMapping(ui->lineEditCC, "cc");
+  addMapping(ui->checkBoxPoupanca, "poupanca");
 
   mapperEnd.addMapping(ui->comboBoxTipoEnd, modelEnd.fieldIndex("descricao"));
   mapperEnd.addMapping(ui->lineEditCEP, modelEnd.fieldIndex("CEP"));
@@ -374,6 +406,10 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (checked ? "" : " AND desativado = FALSE"));
 
   if (not modelEnd.select()) { return; }
+}
+
+void CadastroFornecedor::on_lineEditCNPJBancario_textEdited(const QString &text) {
+  ui->lineEditCNPJBancario->setStyleSheet(validaCNPJ(QString(text).remove(".").remove("-").remove("/")) ? "color: rgb(0, 190, 0)" : "color: rgb(255, 0, 0)");
 }
 
 // TODO: 5poder alterar na tela 'comissao'

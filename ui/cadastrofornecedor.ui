@@ -101,7 +101,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabCadastro">
       <attribute name="title">
        <string>Novo cadastro</string>
       </attribute>
@@ -898,6 +898,109 @@ color: rgb(0, 0, 0);</string>
              </spacer>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabBancario">
+      <attribute name="title">
+       <string>Dados bancários</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_12">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Dados bancários:</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="4" column="0">
+             <widget class="QLabel" name="labelAgencia">
+              <property name="text">
+               <string>Agência:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="labelCC">
+              <property name="text">
+               <string>C/C:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditNomeBancario"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelBanco_4">
+              <property name="text">
+               <string>CNPJ:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditAgencia"/>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLineEdit" name="lineEditCC"/>
+            </item>
+            <item row="5" column="2">
+             <widget class="QCheckBox" name="checkBoxPoupanca">
+              <property name="text">
+               <string>Poupança</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditCNPJBancario"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="labelBanco">
+              <property name="text">
+               <string>Banco:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelBanco_2">
+              <property name="text">
+               <string>Nome:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEditBanco"/>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>

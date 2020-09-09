@@ -28,13 +28,10 @@ private:
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
   auto on_lineEditCNPJBancario_textEdited(const QString &text) -> void;
-  auto on_lineEditCNPJ_editingFinished() -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
   auto on_lineEditCPFBancario_textEdited(const QString &text) -> void;
-  auto on_lineEditCPF_editingFinished() -> void;
   auto on_lineEditCPF_textEdited(const QString &text) -> void;
   auto on_lineEditContatoCPF_textEdited(const QString &text) -> void;
-  auto on_lineEditProfissional_editingFinished() -> void;
   auto on_pushButtonAdicionarEnd_clicked() -> void;
   auto on_pushButtonAtualizarEnd_clicked() -> void;
   auto on_pushButtonAtualizar_clicked() -> void;

@@ -2,6 +2,7 @@
 #include "ui_cancelaproduto.h"
 
 #include "application.h"
+#include "reaisdelegate.h"
 #include "sql.h"
 
 #include <QSqlError>
@@ -79,6 +80,9 @@ void CancelaProduto::setupTables() {
   ui->table->hideColumn("dataRealEnt");
   ui->table->hideColumn("aliquotaSt");
   ui->table->hideColumn("st");
+
+  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 }
 
 void CancelaProduto::on_pushButtonSalvar_clicked() {

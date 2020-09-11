@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1383</width>
+    <width>1515</width>
     <height>774</height>
    </rect>
   </property>
@@ -62,6 +62,12 @@
                   <layout class="QVBoxLayout" name="verticalLayout_6">
                    <item>
                     <widget class="QLabel" name="labelOrcamento">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="text">
                       <string>Venda:</string>
                      </property>
@@ -95,6 +101,12 @@
                    </item>
                    <item>
                     <widget class="QLabel" name="labelCliente">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="text">
                       <string>Cliente:</string>
                      </property>
@@ -137,6 +149,12 @@
                   <layout class="QVBoxLayout" name="verticalLayout_7">
                    <item>
                     <widget class="QLabel" name="labelDateTime">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="text">
                       <string>Data venda:</string>
                      </property>

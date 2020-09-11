@@ -131,6 +131,12 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
     if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
 
     idVendas << model.data(row, "idVenda").toString();
+
+    QSqlQuery query;
+
+    if (not query.exec("CALL update_pedido_fornecedor_status(" + model.data(row, "idPedidoFK").toString() + ")")) {
+      return qApp->enqueueException(false, "Erro atualizando status compra: " + query.lastError().text(), this);
+    }
   }
 
   if (not Sql::updateVendaStatus(idVendas)) { return false; }

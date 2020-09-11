@@ -697,8 +697,11 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   const double prcUnitario = modelCompra.data(0, "prcUnitario").toDouble();
   const double quantRestante = quantOriginal - quantDevolvida;
   const QString status = modelCompra.data(0, "status").toString();
+  const QString idVenda = modelCompra.data(0, "idVenda").toString();
 
-  if (not modelCompra.setData(0, "status", "DEVOLVIDO")) { return false; }
+  if (not modelCompra.setData(0, "idVenda", QVariant(QVariant::Int))) { return false; }
+  if (not modelCompra.setData(0, "idVendaProduto2", QVariant(QVariant::Int))) { return false; }
+  if (not modelCompra.setData(0, "obs", idVenda + " DEVOLVEU")) { return false; }
   if (not modelCompra.setData(0, "quant", quantDevolvida)) { return false; }
   if (not modelCompra.setData(0, "caixas", quantDevolvida / stepQuant)) { return false; }
   if (not modelCompra.setData(0, "preco", prcUnitario * quantDevolvida)) { return false; }
@@ -711,6 +714,7 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
   for (int column = 0, columnCount = modelCompra.columnCount(); column < columnCount; ++column) {
     if (column == modelCompra.fieldIndex("idPedido2")) { continue; }
     if (column == modelCompra.fieldIndex("idVendaProduto2")) { continue; }
+    if (column == modelCompra.fieldIndex("obs")) { continue; }
     if (column == modelCompra.fieldIndex("created")) { continue; }
     if (column == modelCompra.fieldIndex("lastUpdated")) { continue; }
 
@@ -723,9 +727,10 @@ bool Devolucao::dividirCompra(const int currentRow, const int novoIdVendaProduto
 
   //--------------------------------------------------------------------
 
-  if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
-  if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
   if (not modelCompra.setData(newRow, "status", status)) { return false; }
+  if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
+  if (not modelCompra.setData(newRow, "idVenda", idVenda)) { return false; }
+  if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
   if (not modelCompra.setData(newRow, "quant", quantRestante)) { return false; }
   if (not modelCompra.setData(newRow, "caixas", quantRestante / stepQuant)) { return false; }
   if (not modelCompra.setData(newRow, "preco", prcUnitario * quantRestante)) { return false; }

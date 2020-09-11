@@ -144,6 +144,9 @@ void InputDialogProduto::setupTables() {
   }
 
   if (tipo == Tipo::Faturamento) { ui->table->setItemDelegateForColumn("ordemRepresentacao", new EditDelegate(this)); }
+
+  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 }
 
 bool InputDialogProduto::setFilter(const QStringList &ids) {

@@ -59,6 +59,10 @@ Orcamento::~Orcamento() { delete ui; }
 
 void Orcamento::show() {
   RegisterDialog::show();
+
+  ui->groupBoxInfo->adjustSize();
+  ui->groupBoxDados->adjustSize();
+
   ui->groupBoxInfo->setMaximumHeight(ui->groupBoxInfo->height());
   ui->groupBoxDados->setMaximumHeight(ui->groupBoxDados->height());
 }

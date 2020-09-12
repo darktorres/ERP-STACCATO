@@ -52,7 +52,17 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
 
   if (not modelIsSet) { modelIsSet = true; }
 
+  ui->tableCaixa->setDisabled(true);
+  ui->tableCaixa2->setDisabled(true);
+  ui->tableFuturo->setDisabled(true);
+
+  repaint();
+
   montaFiltro();
+
+  ui->tableCaixa->setEnabled(true);
+  ui->tableCaixa2->setEnabled(true);
+  ui->tableFuturo->setEnabled(true);
 }
 
 void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }
@@ -63,7 +73,6 @@ void WidgetFinanceiroFluxoCaixa::montaFiltro() {
 
   const QString filtroConta = (ui->groupBoxCaixa1->isChecked() and ui->itemBoxCaixa1->getId().isValid()) ? "idConta = " + ui->itemBoxCaixa1->getId().toString() + " AND " : "";
 
-  // TODO: see if the outer select can be removed
   modelCaixa.setQuery("SELECT * FROM (SELECT v.*, @running_total := @running_total + COALESCE(v.`R$`, 0) AS Acumulado FROM view_fluxo_resumo_realizado v JOIN (SELECT @running_total := 0) r "
                       "WHERE " +
                       filtroConta + "`dataRealizado` IS NOT NULL ORDER BY dataRealizado, idConta) x WHERE " + filtroData);

@@ -9,6 +9,7 @@
 #include "inserirtransferencia.h"
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
+#include "sql.h"
 #include "xlsxdocument.h"
 
 #include <QDebug>
@@ -25,9 +26,8 @@ WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 void WidgetFinanceiroContas::setupTables() {
   if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
 
-  // TODO: refactor @running_total into running_total :- ifnull(running_total, 0) + ...
-  modelVencidos.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " +
-                         QString((tipo == Tipo::Receber) ? "view_a_receber_vencidos_base" : "view_a_pagar_vencidos_base") + " v JOIN (SELECT @running_total := 0) r");
+  if (tipo == Tipo::Receber) { modelVencidos.setQuery(Sql::view_a_receber_vencidos()); }
+  if (tipo == Tipo::Pagar) { modelVencidos.setQuery(Sql::view_a_pagar_vencidos()); }
 
   if (modelVencidos.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
@@ -37,8 +37,8 @@ void WidgetFinanceiroContas::setupTables() {
 
   // -------------------------------------------------------------------------
 
-  modelVencer.setQuery("SELECT v.*, @running_total := @running_total + v.Total AS Acumulado FROM " + QString((tipo == Tipo::Receber) ? "view_a_receber_vencer_base" : "view_a_pagar_vencer_base") +
-                       " v JOIN (SELECT @running_total := 0) r");
+  if (tipo == Tipo::Receber) { modelVencer.setQuery(Sql::view_a_receber_vencer()); }
+  if (tipo == Tipo::Pagar) { modelVencer.setQuery(Sql::view_a_pagar_vencer()); }
 
   if (modelVencer.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
@@ -64,6 +64,7 @@ void WidgetFinanceiroContas::setConnections() {
   connect(ui->pushButtonImportarFolhaPag, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked, connectionType);
   connect(ui->pushButtonInserirLancamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked, connectionType);
   connect(ui->pushButtonInserirTransferencia, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked, connectionType);
+  connect(ui->pushButtonRemessaItau, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked, connectionType);
   connect(ui->pushButtonReverterPagamento, &QPushButton::clicked, this, &WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked, connectionType);
   connect(ui->radioButtonAgendado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
   connect(ui->radioButtonCancelado, &QRadioButton::clicked, this, &WidgetFinanceiroContas::montaFiltro, connectionType);
@@ -316,6 +317,7 @@ void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
   if (tipo == Tipo::Receber) {
     ui->pushButtonImportarFolhaPag->hide();
     ui->radioButtonPago->hide();
+    ui->radioButtonAgendado->hide();
     ui->lineEditBusca->setPlaceholderText("Venda/Contraparte");
   }
 }
@@ -483,6 +485,56 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   if (not qApp->endTransaction()) { return; }
 
   qApp->enqueueInformation("Tabela importada com sucesso!", this);
+}
+
+void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
+  const auto selection = ui->table->selectionModel()->selectedRows();
+
+  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+
+  for (const auto index : selection) {
+    if (model.data(index.row(), "status").toString() == "PAGO") { return qApp->enqueueError("Linha selecionada já paga!", this); }
+    if (model.data(index.row(), "ContraParte").toString() != "PORTINARI") { return qApp->enqueueError("Linha selecionada não é da PORTINARI!", this); }
+    if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { return qApp->enqueueError("Pagamento selecionado não é transferência ITAÚ!", this); }
+    // TODO: se linha já estiver como agendado confirmar com usuario antes de gerar outro arquivo
+  }
+
+  CNAB cnab(this);
+  auto idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
+
+  if (not idCnab) { return; }
+
+  QStringList ids;
+
+  for (const auto &index : selection) { ids << model.data(index.row(), "idPagamento").toString(); }
+
+  QSqlQuery query;
+
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'AGENDADO', idCnab = " + idCnab.value() + " WHERE idPagamento IN (" + ids.join(",") + ")")) {
+    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
+  }
+
+  updateTables();
+}
+
+QVector<CNAB::Pagamento> WidgetFinanceiroContas::montarPagamento(const QModelIndexList &selection) {
+  QVector<CNAB::Pagamento> pagamentos;
+
+  for (const auto index : selection) {
+    CNAB::Pagamento pagamento;
+
+    pagamento.codBanco = 341;
+    pagamento.valor = QString::number(model.data(index.row(), "valor").toDouble(), 'f', 2).remove('.').toULong();
+    pagamento.data = QDate::currentDate().toString("ddMMyyyy");
+    pagamento.cnpjDest = "10633753000198";
+    pagamento.agenciaConta = "00628 000000042175 2";
+    pagamento.nome = "CECRISA REV CERAMICOS S";
+    pagamento.codFornecedor = model.data(index.row(), "codFornecedor").toString() + " " + model.data(index.row(), "pf2_idVenda").toString();
+
+    pagamentos << pagamento;
+  }
+
+  return pagamentos;
 }
 
 // TODO: [Verificar com Midi] contareceber.status e venda.statusFinanceiro deveriam ser o mesmo porem em diversas linhas eles tem valores diferentes

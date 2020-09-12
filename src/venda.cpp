@@ -1354,6 +1354,11 @@ void Venda::setFinanceiro() {
 
 void Venda::show() {
   RegisterDialog::show();
+
+  ui->groupBoxInfo->adjustSize();
+  ui->groupBoxDados->adjustSize();
+  ui->groupBoxValores->adjustSize();
+
   ui->groupBoxInfo->setMaximumHeight(ui->groupBoxInfo->height());
   ui->groupBoxDados->setMaximumHeight(ui->groupBoxDados->height());
   ui->groupBoxValores->setMaximumHeight(ui->groupBoxValores->height());

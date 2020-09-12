@@ -2,6 +2,7 @@
 #include "ui_cancelaproduto.h"
 
 #include "application.h"
+#include "reaisdelegate.h"
 #include "sql.h"
 
 #include <QSqlError>
@@ -79,6 +80,9 @@ void CancelaProduto::setupTables() {
   ui->table->hideColumn("dataRealEnt");
   ui->table->hideColumn("aliquotaSt");
   ui->table->hideColumn("st");
+
+  ui->table->setItemDelegateForColumn("prcUnitario", new ReaisDelegate(this));
+  ui->table->setItemDelegateForColumn("preco", new ReaisDelegate(this));
 }
 
 void CancelaProduto::on_pushButtonSalvar_clicked() {
@@ -127,6 +131,12 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
     if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
 
     idVendas << model.data(row, "idVenda").toString();
+
+    QSqlQuery query;
+
+    if (not query.exec("CALL update_pedido_fornecedor_status(" + model.data(row, "idPedidoFK").toString() + ")")) {
+      return qApp->enqueueException(false, "Erro atualizando status compra: " + query.lastError().text(), this);
+    }
   }
 
   if (not Sql::updateVendaStatus(idVendas)) { return false; }

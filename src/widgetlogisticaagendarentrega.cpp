@@ -677,14 +677,11 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
   // -------------------------------------------------------------------------
   // NOTE: *quebralinha estoque_has_consumo
 
-  const int newRow = modelConsumoTemp.insertRowAtEnd();
-
-  // alterar quant, caixas, valor
-
   const double quantConsumo = modelConsumoTemp.data(0, "quant").toDouble();
   const double caixasConsumo = modelConsumoTemp.data(0, "caixas").toDouble();
   const double valorConsumo = modelConsumoTemp.data(0, "valor").toDouble();
 
+  // dados da NFe
   const double desconto = modelConsumoTemp.data(0, "desconto").toDouble();
   const double vBC = modelConsumoTemp.data(0, "vBC").toDouble();
   const double vICMS = modelConsumoTemp.data(0, "vICMS").toDouble();
@@ -710,6 +707,7 @@ bool WidgetLogisticaAgendarEntrega::dividirConsumo(const int row, const double p
 
   // -------------------------------------------------------------------------
   // alterar linha nova
+  const int newRow = modelConsumoTemp.insertRowAtEnd();
 
   for (int column = 0, columnCount = modelConsumoTemp.columnCount(); column < columnCount; ++column) {
     if (column == modelConsumoTemp.fieldIndex("idConsumo")) { continue; }

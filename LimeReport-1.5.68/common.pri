@@ -15,6 +15,8 @@ message(TOP_BUILD_DIR: $$TOP_BUILD_DIR)
 }
 #CONFIG *= easy_profiler
 
+CONFIG += no_zint
+
 !contains(CONFIG, no_zint){
     CONFIG *= zint
 }

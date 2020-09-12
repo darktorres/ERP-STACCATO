@@ -17,7 +17,7 @@ TEMPLATE = app
 
 include(QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include(QSimpleUpdater/qsimpleupdater.pri)
-include(LimeReport-1.5.56/limereport/limereport.pri)
+include(LimeReport-1.5.68/limereport/limereport.pri)
 
 QT *= core gui sql network xml charts widgets
 

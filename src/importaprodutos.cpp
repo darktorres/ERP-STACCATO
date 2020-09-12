@@ -365,6 +365,8 @@ bool ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
     m_fornecedores << xlsx.read(row, 1).toString();
   }
 
+  if (not m_fornecedores.filter("=IF").isEmpty()) { return qApp->enqueueError(false, "Células estão com fórmula! Trocar por valores no Excel!", this); }
+
   progressDialog->setMaximum(count);
 
   QStringList ids;
@@ -999,8 +1001,6 @@ bool ImportaProdutos::verificaTabela(QXlsx::Document &xlsx) {
   if (xlsx.read(1, 18).toString() != "mva") { return qApp->enqueueError(false, "Faltou a coluna 'mva' no cabeçalho da tabela!", this); }
   if (xlsx.read(1, 19).toString() != "st") { return qApp->enqueueError(false, "Faltou a coluna 'st' no cabeçalho da tabela!", this); }
   if (xlsx.read(1, 20).toString() != "sticms") { return qApp->enqueueError(false, "Faltou a coluna 'sticms' no cabeçalho da tabela!", this); }
-
-  if (xlsx.read(2, 1).toString().contains("=IF")) { return qApp->enqueueError(false, "Células estão com fórmula! Trocar por valores no Excel!", this); }
 
   return true;
 }

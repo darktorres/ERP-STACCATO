@@ -315,9 +315,9 @@ void Contas::on_pushButtonSalvar_clicked() {
 }
 
 void Contas::viewContaPagar(const QString &dataPagamento) {
-  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO') AND desativado = FALSE");
+  modelPendentes.setFilter("dataPagamento = '" + dataPagamento + "' AND status IN ('PENDENTE', 'CONFERIDO', 'AGENDADO') AND desativado = FALSE");
 
-  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CANCELADO', 'CONFERIDO', 'SUBSTITUIDO') AND desativado = FALSE");
+  modelProcessados.setFilter("dataPagamento = '" + dataPagamento + "' AND status NOT IN ('PENDENTE', 'CONFERIDO', 'AGENDADO', 'CANCELADO', 'SUBSTITUIDO') AND desativado = FALSE");
 
   if (not modelPendentes.select()) { return; }
 

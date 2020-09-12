@@ -41,7 +41,6 @@ private:
   auto dividirCompra(const int currentRow, const int novoIdVendaProduto2) -> bool;
   auto dividirVenda(const int currentRow, const int novoIdVendaProduto2) -> bool;
   auto inserirItens(const int currentRow, const int novoIdVendaProduto2) -> bool;
-  auto lerConsumos(const int currentRow) -> bool;
   auto limparCampos() -> void;
   auto on_doubleSpinBoxCaixas_valueChanged(const double caixas) -> void;
   auto on_doubleSpinBoxCredito_valueChanged(const double credito) -> void;

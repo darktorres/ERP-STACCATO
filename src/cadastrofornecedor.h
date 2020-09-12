@@ -28,6 +28,7 @@ private:
   auto novoEndereco() -> void;
   auto on_checkBoxMostrarInativos_clicked(const bool checked) -> void;
   auto on_lineEditCEP_textChanged(const QString &cep) -> void;
+  auto on_lineEditCNPJBancario_textEdited(const QString &text) -> void;
   auto on_lineEditCNPJ_textEdited(const QString &text) -> void;
   auto on_lineEditContatoCPF_textEdited(const QString &text) -> void;
   auto on_pushButtonAdicionarEnd_clicked() -> void;

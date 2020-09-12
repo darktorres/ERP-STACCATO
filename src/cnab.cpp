@@ -234,6 +234,173 @@ std::optional<QString> CNAB::remessaGareItau240(QVector<Gare> gares) {
   return query.value("idCnab").toString();
 }
 
+std::optional<QString> CNAB::remessaPagamentoItau240(QVector<CNAB::Pagamento> pagamentos) {
+  QString arquivo;
+
+  QTextStream stream(&arquivo);
+
+  QSqlQuery query;
+
+  if (not query.exec("SELECT idCnab, MAX(sequencial) AS sequencial FROM cnab WHERE banco = 'ITAU' AND tipo = 'REMESSA'") or not query.first()) {
+    qApp->enqueueException("Erro buscando sequencial CNAB: " + query.lastError().text(), parent);
+    return {};
+  }
+
+  // header arquivo pag 11
+
+  stream << "341";                                                   // 9(03) código do banco na compensacao
+  stream << "0000";                                                  // 9(04) lote de servico
+  stream << "0";                                                     // 9(01) registro header de arquivo
+  writeBlanks(stream, 6);                                            // X(06) complemento de registro brancos
+  stream << "080";                                                   // 9(03) numero da versao do layout do arquivo
+  stream << "2";                                                     // 9(01) tipo de inscricao da empresa 1 = CPF/2 = CNPJ
+  stream << "09375013000110";                                        // 9(14) cnpj empresa debitada - NOTA 1
+  writeBlanks(stream, 20);                                           // X(20) complemento de registro brancos
+  stream << "04807";                                                 // 9(05) numero agencia debitada - NOTA 1
+  writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos
+  stream << "000000045749";                                          // 9(12) numero de c/c debitada - NOTA 1
+  writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos
+  stream << "6";                                                     // 9(01) DAC da agencia/conta debitada - NOTA 1
+  writeText(stream, "STACCATO REVESTIMENTOS COM E REPRES LTDA", 30); // X(30) nome da empresa
+  writeText(stream, "BANCO ITAU SA", 30);                            // X(30) nome do banco
+  writeBlanks(stream, 10);                                           // X(10) complemento de registro brancos
+  stream << "1";                                                     // 9(01) codigo remessa/retorno 1 = remessa/2 = retorno
+  stream << qApp->serverDate().toString("ddMMyyyy");                 // 9(08) data de geracao do arquivo DDMMAAAA
+  stream << qApp->serverDateTime().toString("HHmmss");               // 9(06) hora de geracao do arquivo HHMMSS
+  writeZeros(stream, 9);                                             // 9(09) complemento de registro zeros
+  stream << "00000";                                                 // 9(05) densidade de gravacao do arquivo - NOTA 2
+  writeBlanks(stream, 69);                                           // X(69) complemento de registro brancos
+  stream << "\r\n";
+
+  // header lote pag 12
+
+  stream << "341";                                                   // 9(03) codigo do banco
+  writeNumber(stream, 1, 4);                                         // 9(04) lote identificacao de pagtos - NOTA 3
+  stream << "1";                                                     // 9(01) registro header de lote
+  stream << "C";                                                     // X(01) tipo da operacao C = credito
+  stream << "20";                                                    // 9(02) tipo de pagto - NOTA 4
+  stream << "01";                                                    // 9(02) forma de pagto - NOTA 5
+  stream << "040";                                                   // 9(03) numero da versao do layout do lote
+  writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos
+  stream << "2";                                                     // 9(01) tipo inscricao empresa debitada 1 = CPF/2 = CNPJ
+  stream << "09375013000110";                                        // 9(14) cnpj empresa ou cpf debitado - NOTA 1
+  writeBlanks(stream, 4);                                            // X(04) identificacao do lancamento no extrato do favorecido
+  writeBlanks(stream, 16);                                           // X(16) brancos
+  stream << "04807";                                                 // 9(05) numero agencia debitada - NOTA 1
+  writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos
+  stream << "000000045749";                                          // 9(12) numero de c/c debitada - NOTA 1
+  writeBlanks(stream, 1);                                            // X(01) complemento de registro brancos
+  stream << "6";                                                     // 9(01) DAC da agencia/conta debitada - NOTA 1
+  writeText(stream, "STACCATO REVESTIMENTOS COM E REPRES LTDA", 30); // X(30) nome da empresa debitada
+  writeBlanks(stream, 30);                                           // X(30) finalidade dos pagtos do lote - NOTA 6
+  writeBlanks(stream, 10);                                           // X(10) complemento historico c/c debitada - NOTA 7
+  writeText(stream, "ALAMEDA ARAGUAIA", 30);                         // X(30) nome da rua, av, pça, etc
+  writeNumber(stream, 661, 5);                                       // 9(05) numero do local
+  writeText(stream, "", 15);                                         // X(15) casa, apto, sala, etc
+  writeText(stream, "BARUERI", 20);                                  // X(20) nome da cidade
+  stream << "06455000";                                              // 9(08) cep
+  stream << "SP";                                                    // X(02) sigla do estado
+  writeBlanks(stream, 8);                                            // X(08) complemento de registro brancos
+  writeBlanks(stream, 10);                                           // X(10) codigo ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
+  stream << "\r\n";
+
+  int registro = 0;
+  ulong total = 0;
+
+  for (auto &pagamento : pagamentos) {
+    total += pagamento.valor;
+
+    // segmento A pag 14
+
+    stream << "341";                                // 9(03) código banco na compensacao
+    writeNumber(stream, 1, 4);                      // 9(04) lote de servico
+    stream << "3";                                  // 9(01) registro detalhe de lote
+    writeNumber(stream, ++registro, 5);             // 9(05) numero sequencial registro no lote
+    stream << "A";                                  // X(01) codigo segmento reg. detalhe
+    writeNumber(stream, 0, 3);                      // 9(03) tipo de movimento
+    writeZeros(stream, 3);                          // 9(03) codigo da camara centralizadora
+    writeNumber(stream, pagamento.codBanco, 3);     // 9(03) codigo do banco favorecido
+    writeText(stream, pagamento.agenciaConta, 20);  // X(20) agencia conta favorecido
+    writeText(stream, pagamento.nome, 30);          // X(30) nome do favorecido
+    writeText(stream, pagamento.codFornecedor, 20); // X(20) numero docto atribuido pela empresa
+    writeText(stream, pagamento.data, 8);           // 9(08) data prevista para pagto DDMMAAAA
+    writeText(stream, "REA", 3);                    // X(03) tipo da moeda
+    writeZeros(stream, 8);                          // X(08) identificacao da instituicao para o SPB
+    writeZeros(stream, 7);                          // 9(07) complemento de registro
+    writeNumber(stream, pagamento.valor, 15);       // 9(13)V9(02) valor previsto do pagto
+    writeBlanks(stream, 15);                        // X(15) numero docto atribuido pelo banco ***apenas retorno
+    writeBlanks(stream, 5);                         // X(05) complemento de registro
+    writeZeros(stream, 8);                          // 9(08) data real efetivacao do pagto DDMMAAAA ***apenas retorno
+    writeZeros(stream, 15);                         // 9(13)V9(02) valor real efetivacao do pagto ***apenas retorno
+    writeText(stream, pagamento.codFornecedor, 20); // X(20) informacao complementar p/ hist. c/c
+    writeZeros(stream, 6);                          // 9(06) numero do doc/ted/op/cheque no retorno ***apenas retorno
+    writeText(stream, pagamento.cnpjDest, 14);      // 9(14) numero de inscricao do favorecido (cpf/cnpj)
+    writeBlanks(stream, 2);                         // X(02) finalidade do doc e status do funcionario na empresa
+    writeBlanks(stream, 5);                         // X(05) finalidade do ted
+    writeBlanks(stream, 5);                         // X(05) complemento de registro
+    writeNumber(stream, 0, 1);                      // X(01) aviso ao favorecido
+    writeBlanks(stream, 10);                        // X(10) codigo ocorrencias no retorno
+    stream << "\r\n";
+  }
+
+  // trailer do lote pag 22
+
+  stream << "341";                      // 9(03) codigo banco na compensacao
+  writeNumber(stream, 1, 4);            // 9(04) lote de servico
+  stream << "5";                        // 9(01) registro trailer de lote
+  writeBlanks(stream, 9);               // X(09) complemento de registro brancos
+  writeNumber(stream, 2 + registro, 6); // 9(06) quantidade registros do lote
+  writeNumber(stream, total, 18);       // 9(16)V9(02) soma valor dos pagtos do lote
+  writeZeros(stream, 18);               // 9(18) complemento de registro zeros
+  writeBlanks(stream, 171);             // X(171) complemento de registro brancos
+  writeBlanks(stream, 10);              // X(10) codigos ocorrencias p/ retorno ***apenas retorno, informar com branco ou zero
+  stream << "\r\n";
+
+  // trailer do arquivo pag 40
+
+  stream << "341";                      // 9(03) codigo banco na compensacao
+  stream << "9999";                     // 9(04) lote de servico
+  stream << "9";                        // 9(01) registro trailer de arquivo
+  writeBlanks(stream, 9);               // X(09) complemento de registro brancos
+  writeNumber(stream, 1, 6);            // 9(06) quantidade lotes do arquivo - NOTA 17
+  writeNumber(stream, 4 + registro, 6); // 9(06) quantidade registros do arquivo - NOTA 17
+  writeBlanks(stream, 211);             // X(211) complemento de registro brancos
+  stream << "\r\n";
+
+  QDir dir(QDir::currentPath() + "/cnab/itau/");
+
+  if (not dir.exists() and not dir.mkpath(QDir::currentPath() + "/cnab/itau/")) {
+    qApp->enqueueException("Erro ao criar a pasta CNAB Itau!", parent);
+    return {};
+  }
+
+  QFile file(QDir::currentPath() + "/cnab/itau/cnab" + query.value("sequencial").toString() + ".rem");
+
+  if (not file.open(QFile::WriteOnly)) {
+    qApp->enqueueException(file.errorString(), parent);
+    return {};
+  }
+
+  file.write(arquivo.toUtf8());
+  file.close();
+
+  QSqlQuery query2;
+
+  if (not query2.exec("UPDATE cnab SET conteudo = '" + arquivo.toUtf8() + "' WHERE banco = 'ITAU' AND sequencial = " + query.value("sequencial").toString())) {
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parent);
+    return {};
+  }
+
+  if (not query2.exec("INSERT INTO cnab (tipo, banco, sequencial) VALUES ('REMESSA', 'ITAU', " + QString::number(query.value("sequencial").toInt() + 1) + ")")) {
+    qApp->enqueueException("Erro guardando CNAB: " + query2.lastError().text(), parent);
+    return {};
+  }
+
+  qApp->enqueueInformation("Arquivo gerado com sucesso: cnab" + query.value("sequencial").toString() + ".rem", parent);
+
+  return query.value("idCnab").toString();
+}
+
 void CNAB::retornoGareItau240(const QString &filePath) {
   QFile file(filePath);
 

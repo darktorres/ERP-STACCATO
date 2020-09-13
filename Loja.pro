@@ -55,8 +55,8 @@ contains(CONFIG, deploy){
     CONFIG *= precompile_header
 
 *-g++{
-    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic -Wfloat-equal -Wnarrowing
-    QMAKE_CXXFLAGS *= -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
+    QMAKE_CXXFLAGS *= -Wall -Wextra -Wpedantic
+#    QMAKE_CXXFLAGS *= -Wfloat-equal -Wnarrowing -Wnull-dereference -Wold-style-cast -Wdouble-promotion -Wformat=2 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wshadow=local
 }
 
 *-clang{

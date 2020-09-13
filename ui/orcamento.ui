@@ -884,6 +884,12 @@ color: rgb(0, 0, 0);</string>
           <layout class="QGridLayout" name="gridLayout_11">
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_9">
+             <item row="6" column="1">
+              <widget class="QLineEdit" name="lineEditReplicadoEm"/>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLineEdit" name="lineEditReplicaDe"/>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="labelPrazoEntrega">
                <property name="sizePolicy">
@@ -894,6 +900,19 @@ color: rgb(0, 0, 0);</string>
                </property>
                <property name="text">
                 <string>Prazo de entrega:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="labelEndereco_9">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Observação:</string>
                </property>
               </widget>
              </item>
@@ -913,8 +932,8 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="labelEndereco_9">
+             <item row="6" column="0">
+              <widget class="QLabel" name="labelReplicadoEm">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -922,27 +941,24 @@ color: rgb(0, 0, 0);</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Observação:</string>
+                <string>Replicado em:</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QPlainTextEdit" name="plainTextEditObs">
+             <item row="5" column="0">
+              <widget class="QLabel" name="labelReplicaDe">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>120</height>
-                </size>
+               <property name="text">
+                <string>Replica de:</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="labelBaixa">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
@@ -955,7 +971,7 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="4" column="0" colspan="2">
               <widget class="QPlainTextEdit" name="plainTextEditBaixa">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -971,37 +987,21 @@ color: rgb(0, 0, 0);</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="labelReplicaDe">
+             <item row="2" column="0" colspan="2">
+              <widget class="QPlainTextEdit" name="plainTextEditObs">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string>Replica de:</string>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>120</height>
+                </size>
                </property>
               </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QLineEdit" name="lineEditReplicaDe"/>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="labelReplicadoEm">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Replicado em:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QLineEdit" name="lineEditReplicadoEm"/>
              </item>
             </layout>
            </item>

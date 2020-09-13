@@ -1165,10 +1165,11 @@ void PageDesignIntf::activateItemToJoin(QRectF itemRect, QList<ItemProjections>&
 
 void PageDesignIntf::selectAllChildren(BaseDesignIntf *item)
 {
-    if (item)
+    if (item) {
         foreach(BaseDesignIntf* child, item->childBaseItems()){
             child->setSelected(true);
         }
+    }
 }
 
 void PageDesignIntf::rectMoved(QRectF itemRect, BaseDesignIntf* container){
@@ -1723,7 +1724,7 @@ HorizontalLayout* PageDesignIntf::internalAddHLayout()
 
         QList<QGraphicsItem *> si = selectedItems();
         QList<QGraphicsItem *>::iterator it = si.begin();
-        qSort(si.begin(), si.end(), hLayoutLessThen);
+        std::sort(si.begin(), si.end(), hLayoutLessThen);
         it = si.begin();
 
         if (si.count() > 1) {
@@ -1767,7 +1768,7 @@ VerticalLayout* PageDesignIntf::internalAddVLayout()
 
         QList<QGraphicsItem *> si = selectedItems();
         QList<QGraphicsItem *>::iterator it = si.begin();
-        qSort(si.begin(), si.end(), vLayoutLessThen);
+        std::sort(si.begin(), si.end(), vLayoutLessThen);
         it = si.begin();
 
         if (si.count() > 1) {

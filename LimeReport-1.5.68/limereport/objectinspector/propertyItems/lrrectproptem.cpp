@@ -171,6 +171,8 @@ qreal LimeReport::RectUnitValuePropItem::valueInUnits(qreal value) const
     case LimeReport::BaseDesignIntf::Inches:
         return value / (item->unitFactor() * 10);
     }
+
+    return 0;
 }
 
 qreal LimeReport::RectUnitValuePropItem::valueInReportUnits(qreal value) const
@@ -182,6 +184,8 @@ qreal LimeReport::RectUnitValuePropItem::valueInReportUnits(qreal value) const
     case LimeReport::BaseDesignIntf::Inches:
         return value * (item->unitFactor() * 10);
     }
+
+    return 0;
 }
 
 QString LimeReport::RectUnitValuePropItem::unitShortName() const
@@ -193,6 +197,8 @@ QString LimeReport::RectUnitValuePropItem::unitShortName() const
     case LimeReport::BaseDesignIntf::Inches:
         return QObject::tr("''");
     }
+
+    return QString();
 }
 
 QString LimeReport::RectUnitValuePropItem::displayValue() const
@@ -202,26 +208,26 @@ QString LimeReport::RectUnitValuePropItem::displayValue() const
 
 void LimeReport::RectUnitPropItem::itemPosChanged(QObject* /*object*/, QPointF newPos, QPointF oldPos)
 {
-    if (newPos.x() != oldPos.x()){
+  if(not qFuzzyCompare(newPos.x(), oldPos.x())){
         setValue("x", newPos.x());
     }
-    if (newPos.y() != oldPos.y()){
+    if(not qFuzzyCompare(newPos.y(), oldPos.y())){
         setValue("y", newPos.y());
     }
 }
 
 void LimeReport::RectUnitPropItem::itemGeometryChanged(QObject * /*object*/, QRectF newGeometry, QRectF oldGeometry)
 {
-    if (newGeometry.x() != oldGeometry.x()){
+  if(not qFuzzyCompare(newGeometry.x(), oldGeometry.x())){
         setValue("x", newGeometry.x());
     }
-    if (newGeometry.y() != oldGeometry.y()){
+    if(not qFuzzyCompare(newGeometry.y(), oldGeometry.y())){
         setValue("y", newGeometry.y());
     }
-    if (newGeometry.width() != oldGeometry.width()){
+    if(not qFuzzyCompare(newGeometry.width(), oldGeometry.width())){
         setValue("width", newGeometry.width());
     }
-    if (newGeometry.height() != oldGeometry.height()){
+    if(not qFuzzyCompare(newGeometry.height(), oldGeometry.height())){
         setValue("height", newGeometry.height());
     }
 }
@@ -258,6 +264,8 @@ QRectF LimeReport::RectUnitPropItem::rectInUnits(QRectF rect) const
                       rect.width() / (item->unitFactor() * 10),
                       rect.height() / (item->unitFactor() * 10));
     }
+
+    return QRectF();
 }
 
 QString LimeReport::RectUnitPropItem::unitShortName() const
@@ -269,4 +277,6 @@ QString LimeReport::RectUnitPropItem::unitShortName() const
     case LimeReport::BaseDesignIntf::Inches:
         return QObject::tr("''");
     }
+
+    return QString();
 }

@@ -124,6 +124,7 @@ void ScriptHighlighter::highlightBlock(const QString& text)
                     break;
                 case Comment2:
                     setCurrentBlockState(Comment2);
+                    [[fallthrough]];
                 case Separator:
                     switch(oldState){
                         case MayBeComment2End:
@@ -140,6 +141,7 @@ void ScriptHighlighter::highlightBlock(const QString& text)
                         case MayBeNumber:
                             setFormat(i-(buffer.length()-1), buffer.length()-1, m_formats[NumberFormat]);
                             buffer.clear();
+                            [[fallthrough]];
                         case String:
                         case String2:
                             setFormat(i-(buffer.length()-1), buffer.length(), m_formats[StringFormat]);
@@ -185,7 +187,7 @@ ScriptHighlighter::ScriptHighlighter(QTextDocument* parent):
     QSyntaxHighlighter(parent)
 {
 
-    if ( isColorDark(QPalette().background().color())){
+    if ( isColorDark(QPalette().window().color())){
         m_formats[NumberFormat].setForeground(Qt::darkBlue);
         m_formats[StringFormat].setForeground(Qt::darkGreen);
         m_formats[KeywordFormat].setForeground(Qt::darkYellow);

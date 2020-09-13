@@ -348,7 +348,7 @@ void ChartItem::paintChartTitle(QPainter *painter, QRectF titleRect)
     painter->save();
     QFont tmpFont = painter->font();
     QFontMetrics fm(tmpFont);
-    while ((fm.height()>titleRect.height() || fm.width(m_title)>titleRect.width())
+    while ((fm.height()>titleRect.height() || fm.horizontalAdvance(m_title)>titleRect.width())
            && tmpFont.pixelSize()>1) {
         tmpFont.setPixelSize(tmpFont.pixelSize()-1);
         fm = QFontMetrics(tmpFont);
@@ -570,14 +570,14 @@ QSizeF AbstractSeriesChart::calcChartLegendSize(const QFont &font)
     if (!m_chartItem->series().isEmpty()){
         foreach(SeriesItem* series, m_chartItem->series()){
             cw += fm.height();
-            if (maxWidth<fm.width(series->name()))
-                maxWidth = fm.width(series->name())+10;
+            if (maxWidth<fm.horizontalAdvance(series->name()))
+                maxWidth = fm.horizontalAdvance(series->name())+10;
         }
     } else {
         foreach(QString label, m_designLabels){
             cw += fm.height();
-            if (maxWidth<fm.width(label))
-                maxWidth = fm.width(label)+10;
+            if (maxWidth<fm.horizontalAdvance(label))
+                maxWidth = fm.horizontalAdvance(label)+10;
         }
     }
     cw += fm.height();
@@ -591,7 +591,7 @@ bool AbstractSeriesChart::verticalLabels(QPainter* painter, QRectF labelsRect)
     qreal hStep = (labelsRect.width() / valuesCount());
     QFontMetrics fm = painter->fontMetrics();
     foreach(QString label, m_chartItem->labels()){
-        if (fm.width(label) > hStep){
+        if (fm.horizontalAdvance(label) > hStep){
             return  true;
         }
     }
@@ -656,7 +656,7 @@ void AbstractSeriesChart::paintHorizontalGrid(QPainter *painter, QRectF gridRect
     delta = genNextValue(delta);
 
     painter->setRenderHint(QPainter::Antialiasing,false);
-    qreal hStep = (gridRect.width() - painter->fontMetrics().width(QString::number(maxValue()))) / 4;
+    qreal hStep = (gridRect.width() - painter->fontMetrics().horizontalAdvance(QString::number(maxValue()))) / 4;
 
     painter->setFont(adaptValuesFont(hStep-4, painter->font()));
 
@@ -708,7 +708,7 @@ qreal AbstractSeriesChart::valuesHMargin(QPainter *painter)
 {
     int delta = int(maxValue()-minValue());
     delta = genNextValue(delta);
-    return painter->fontMetrics().width(QString::number(delta))+4;
+    return painter->fontMetrics().horizontalAdvance(QString::number(delta))+4;
 }
 
 qreal AbstractSeriesChart::valuesVMargin(QPainter *painter)
@@ -723,11 +723,11 @@ QFont AbstractSeriesChart::adaptLabelsFont(QRectF rect, QFont font)
 
     foreach(QString label, m_chartItem->labels()){
         foreach (QString currentWord, label.split(QRegExp("\\W+"))){
-            if (fm.width(maxWord) < fm.width(currentWord)) maxWord = currentWord;
+            if (fm.horizontalAdvance(maxWord) < fm.horizontalAdvance(currentWord)) maxWord = currentWord;
         }
     }
 
-    qreal curWidth = fm.width(maxWord);
+    qreal curWidth = fm.horizontalAdvance(maxWord);
     QFont tmpFont = font;
     while (curWidth>rect.width() && tmpFont.pixelSize() > 1){
         tmpFont.setPixelSize(tmpFont.pixelSize() - 1);
@@ -803,8 +803,8 @@ QRectF AbstractBarChart::verticalLabelsRect(QPainter *painter, QRectF labelsRect
     qreal maxWidth = 0;
 
     foreach (QString label, m_chartItem->labels()) {
-        if (painter->fontMetrics().width(label)>maxWidth)
-            maxWidth = painter->fontMetrics().width(label);
+        if (painter->fontMetrics().horizontalAdvance(label)>maxWidth)
+            maxWidth = painter->fontMetrics().horizontalAdvance(label);
     }
 
     if (maxWidth + hPadding(m_chartItem->rect()) * 2 < labelsRect.width())
@@ -818,8 +818,8 @@ QRectF AbstractBarChart::horizontalLabelsRect(QPainter *painter, QRectF labelsRe
     qreal maxWidth = 0;
 
     foreach (QString label, m_chartItem->labels()) {
-        if (painter->fontMetrics().width(label)>maxWidth)
-            maxWidth = painter->fontMetrics().width(label);
+        if (painter->fontMetrics().horizontalAdvance(label)>maxWidth)
+            maxWidth = painter->fontMetrics().horizontalAdvance(label);
     }
 
     if ((maxWidth + vPadding(m_chartItem->rect()) < labelsRect.height()) || !verticalLabels(painter, labelsRect))

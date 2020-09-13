@@ -186,7 +186,7 @@ private:
     QStandardItemModel m_model;
     QString m_separator;
     IDataSource::Ptr m_dataSource;
-    DataSourceManager* m_dataManager;
+//    DataSourceManager* m_dataManager;
     bool m_firstRowIsHeader;
 };
 

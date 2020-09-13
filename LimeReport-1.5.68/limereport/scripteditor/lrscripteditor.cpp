@@ -20,7 +20,7 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
     setFocusProxy(ui->textEdit);
     m_completer = new ReportStructureCompleater(this);
     ui->textEdit->setCompleter(m_completer);
-    ui->textEdit->setTabStopWidth(ui->textEdit->fontMetrics().width("0")*m_tabIndention);
+    ui->textEdit->setTabStopDistance(ui->textEdit->fontMetrics().horizontalAdvance("0")*m_tabIndention);
     connect(ui->splitter, SIGNAL(splitterMoved(int,int)), this, SIGNAL(splitterMoved(int,int)));
     connect(ui->textEdit, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
 }
@@ -86,7 +86,7 @@ void ScriptEditor::setPageBand(BandDesignIntf* band)
 void ScriptEditor::setTabIndention(int charCount)
 {
     if (m_tabIndention != charCount){
-        ui->textEdit->setTabStopWidth(ui->textEdit->fontMetrics().width("W")*charCount);
+        ui->textEdit->setTabStopDistance(ui->textEdit->fontMetrics().horizontalAdvance("W")*charCount);
         m_tabIndention = charCount;
     }
 }

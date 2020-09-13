@@ -928,9 +928,10 @@ void CSVHolder::setFirsRowIsHeader(bool firstRowIsHeader)
 CSVHolder::CSVHolder(const CSVDesc &desc, DataSourceManager *dataManager)
     : m_csvText(desc.csvText()),
       m_separator(desc.separator()),
-      m_dataManager(dataManager),
+//      m_dataManager(dataManager),
       m_firstRowIsHeader(desc.firstRowIsHeader())
 {
+    Q_UNUSED(dataManager)
     m_dataSource = IDataSource::Ptr(new ModelToDataSource(&m_model, false));
     updateModel();
 }

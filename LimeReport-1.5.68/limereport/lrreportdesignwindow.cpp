@@ -832,10 +832,10 @@ void ReportDesignWindow::restoreSetting()
     if (v.isValid()){
         restoreGeometry(v.toByteArray());
     } else {
-        QDesktopWidget *desktop = QApplication::desktop();
+        QScreen *screen = QGuiApplication::screens().first();
 
-        int screenWidth = desktop->screenGeometry().width();
-        int screenHeight = desktop->screenGeometry().height();
+        int screenWidth = screen->availableGeometry().width();
+        int screenHeight = screen->availableGeometry().height();
 
         int x = screenWidth * 0.1;
         int y = screenHeight * 0.1;
@@ -904,6 +904,7 @@ bool ReportDesignWindow::checkNeedToSave()
             break;
         case QMessageBox::Yes:
             if (!m_reportDesignWidget->save()) break;
+            [[fallthrough]];
         default:
             return true;
         }
@@ -1320,8 +1321,10 @@ void ReportDesignWindow::slotBandDeleted(PageDesignIntf *, BandDesignIntf *band)
             break;
         case BandDesignIntf::ReportFooter:
             m_newReportFooter->setEnabled(true);
+            [[fallthrough]];
         case BandDesignIntf::TearOffBand:
             m_newTearOffBand->setEnabled(true);
+            [[fallthrough]];
         default:
             break;
         }
@@ -1351,8 +1354,10 @@ void ReportDesignWindow::updateAvaibleBands(){
             break;
         case BandDesignIntf::ReportFooter:
             m_newReportFooter->setEnabled(false);
+            [[fallthrough]];
         case BandDesignIntf::TearOffBand:
             m_newTearOffBand->setEnabled(false);
+            [[fallthrough]];
         default:
             break;
         }

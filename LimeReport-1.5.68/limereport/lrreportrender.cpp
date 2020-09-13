@@ -1418,7 +1418,7 @@ void ReportRender::checkLostHeadersOnPrevPage()
 
     if (lostHeaders.size() > 0){
         m_lostHeadersMoved = true;
-        qSort(lostHeaders.begin(), lostHeaders.end(), bandLessThen);
+        std::sort(lostHeaders.begin(), lostHeaders.end(), bandLessThen);
         foreach(BandDesignIntf* header, lostHeaders){
             registerBand(header);
         }
@@ -1455,7 +1455,7 @@ void ReportRender::checkLostHeadersInPrevColumn()
 
     if (lostHeaders.size() > 0){
         m_lostHeadersMoved = true;
-        qSort(lostHeaders.begin(), lostHeaders.end(), bandLessThen);
+        std::sort(lostHeaders.begin(), lostHeaders.end(), bandLessThen);
         foreach(BandDesignIntf* header, lostHeaders){
             registerBand(header);
         }

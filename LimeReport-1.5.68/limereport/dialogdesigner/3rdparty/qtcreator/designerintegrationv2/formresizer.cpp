@@ -183,7 +183,6 @@ void FormResizer::mainContainerChanged()
     const QSize maxWidgetSize = QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
     if (const QWidget *mc = mainContainer()) {
         // Set Maximum size which is not handled via a hint (as opposed to minimum size)
-        const QSize maxWidgetSize = QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
         const QSize formMaxSize = mc->maximumSize();
         QSize newMaxSize = maxWidgetSize;
         if (formMaxSize != maxWidgetSize)

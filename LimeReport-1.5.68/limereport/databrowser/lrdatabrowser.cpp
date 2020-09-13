@@ -413,7 +413,7 @@ void DataBrowser::initConnections()
             connections.append(connectionName);
         }
     }
-    qSort(connections);
+    std::sort(connections.begin(), connections.end());
     foreach (QString connectionName, connections) {
         QTreeWidgetItem *item=new QTreeWidgetItem(
             ui->dataTree,

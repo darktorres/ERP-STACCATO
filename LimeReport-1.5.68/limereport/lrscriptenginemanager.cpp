@@ -989,6 +989,7 @@ bool ScriptExtractor::parse(int &curPos, const State& state, ScriptNode* scriptN
                 if (m_context[curPos]=='{')
                    extractBracket(curPos, scriptNode);
             }
+            [[fallthrough]];
         case None:
             if (m_context[curPos]=='$'){
                 int startPos = curPos;
@@ -997,6 +998,7 @@ bool ScriptExtractor::parse(int &curPos, const State& state, ScriptNode* scriptN
                 if (isStartFieldLexem(curPos) || isStartVariableLexem(curPos))
                     skipField(curPos);
             }
+            [[fallthrough]];
         default:
             break;
         }

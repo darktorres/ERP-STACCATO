@@ -86,7 +86,7 @@ QWidget *SVGItem::defaultEditor()
     ImageItemEditor* editor = new ImageItemEditor(this);
     editor->setAttribute(Qt::WA_DeleteOnClose);
     return editor;
-};
+}
 
 BaseDesignIntf* SVGItem::createSameTypeItem(QObject *owner, QGraphicsItem *parent){
     return new SVGItem(owner, parent);
@@ -194,5 +194,5 @@ QString SVGItem::field() const
 void SVGItem::setField(const QString &field)
 {
     m_field = field;
-};
+}
 } // namespace LimeReport

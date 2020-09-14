@@ -92,7 +92,7 @@ void WidgetCompraPendentes::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewVendaProduto.select()) { return; }
+  modelViewVendaProduto.select();
 }
 
 void WidgetCompraPendentes::resetTables() { modelIsSet = false; }
@@ -226,23 +226,23 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
 
   if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando produto: " + query.lastError().text(), this); }
 
-  if (not model.setData(newRow, "fornecedor", query.value("fornecedor"))) { return false; }
-  if (not model.setData(newRow, "idProduto", query.value("idProduto"))) { return false; }
-  if (not model.setData(newRow, "descricao", query.value("descricao"))) { return false; }
-  if (not model.setData(newRow, "colecao", query.value("colecao"))) { return false; }
-  if (not model.setData(newRow, "quant", ui->doubleSpinBoxQuantAvulso->value())) { return false; }
-  if (not model.setData(newRow, "un", query.value("un"))) { return false; }
-  if (not model.setData(newRow, "un2", query.value("un2"))) { return false; }
-  if (not model.setData(newRow, "caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value())) { return false; }
-  if (not model.setData(newRow, "prcUnitario", query.value("custo").toDouble())) { return false; }
-  if (not model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value())) { return false; }
-  if (not model.setData(newRow, "kgcx", query.value("kgcx"))) { return false; }
-  if (not model.setData(newRow, "formComercial", query.value("formComercial"))) { return false; }
-  if (not model.setData(newRow, "codComercial", query.value("codComercial"))) { return false; }
-  if (not model.setData(newRow, "codBarras", query.value("codBarras"))) { return false; }
-  if (not model.setData(newRow, "dataPrevCompra", dataPrevista)) { return false; }
+  model.setData(newRow, "fornecedor", query.value("fornecedor"));
+  model.setData(newRow, "idProduto", query.value("idProduto"));
+  model.setData(newRow, "descricao", query.value("descricao"));
+  model.setData(newRow, "colecao", query.value("colecao"));
+  model.setData(newRow, "quant", ui->doubleSpinBoxQuantAvulso->value());
+  model.setData(newRow, "un", query.value("un"));
+  model.setData(newRow, "un2", query.value("un2"));
+  model.setData(newRow, "caixas", ui->doubleSpinBoxQuantAvulsoCaixas->value());
+  model.setData(newRow, "prcUnitario", query.value("custo").toDouble());
+  model.setData(newRow, "preco", query.value("custo").toDouble() * ui->doubleSpinBoxQuantAvulso->value());
+  model.setData(newRow, "kgcx", query.value("kgcx"));
+  model.setData(newRow, "formComercial", query.value("formComercial"));
+  model.setData(newRow, "codComercial", query.value("codComercial"));
+  model.setData(newRow, "codBarras", query.value("codBarras"));
+  model.setData(newRow, "dataPrevCompra", dataPrevista);
 
-  if (not model.submitAll()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
+  model.submitAll();
 
   return true;
 }

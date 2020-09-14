@@ -27,9 +27,9 @@ void WidgetRh::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelRelatorio.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelRelatorio.lastError().text(), this); }
+  modelRelatorio.select();
 
-  if (not modelTotal.select()) { qApp->enqueueException("Erro atualizando tabela total: " + modelTotal.lastError().text(), this); }
+  modelTotal.select();
 }
 
 void WidgetRh::setConnections() {
@@ -105,17 +105,17 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
   for (int i = 0; i < queryRelatorio.size(); ++i, queryRelatorio.next()) {
     int newRow = modelRelatorio.insertRowAtEnd();
 
-    if (not modelRelatorio.setData(newRow, "Loja", queryRelatorio.value("Loja"))) { return; }
-    if (not modelRelatorio.setData(newRow, "Vendedor", queryRelatorio.value("Vendedor"))) { return; }
-    if (not modelRelatorio.setData(newRow, "idUsuario", queryRelatorio.value("idUsuario"))) { return; }
-    if (not modelRelatorio.setData(newRow, "idVenda", queryRelatorio.value("idVenda"))) { return; }
-    if (not modelRelatorio.setData(newRow, "Mês", queryRelatorio.value("Mês"))) { return; }
-    if (not modelRelatorio.setData(newRow, "Faturamento", queryRelatorio.value("Faturamento"))) { return; }
-    if (not modelRelatorio.setData(newRow, "Comissão", queryRelatorio.value("Comissão"))) { return; }
-    if (not modelRelatorio.setData(newRow, "%", queryRelatorio.value("%"))) { return; }
+    modelRelatorio.setData(newRow, "Loja", queryRelatorio.value("Loja"));
+    modelRelatorio.setData(newRow, "Vendedor", queryRelatorio.value("Vendedor"));
+    modelRelatorio.setData(newRow, "idUsuario", queryRelatorio.value("idUsuario"));
+    modelRelatorio.setData(newRow, "idVenda", queryRelatorio.value("idVenda"));
+    modelRelatorio.setData(newRow, "Mês", queryRelatorio.value("Mês"));
+    modelRelatorio.setData(newRow, "Faturamento", queryRelatorio.value("Faturamento"));
+    modelRelatorio.setData(newRow, "Comissão", queryRelatorio.value("Comissão"));
+    modelRelatorio.setData(newRow, "%", queryRelatorio.value("%"));
   }
 
-  if (not modelRelatorio.submitAll()) { return qApp->enqueueException("Erro salvando dados: " + modelRelatorio.lastError().text(), this); }
+  modelRelatorio.submitAll();
 
   // -------------------------------------------------------------------------
 
@@ -127,11 +127,11 @@ void WidgetRh::on_pushButtonSalvarMes_clicked() {
 void WidgetRh::on_dateEdit_dateChanged(const QDate &date) {
   modelRelatorio.setFilter("Mês = '" + date.toString("yyyy-MM") + "'");
 
-  if (not modelRelatorio.select()) { return qApp->enqueueException("Erro filtrando tabela: " + modelRelatorio.lastError().text(), this); }
+  modelRelatorio.select();
 
   // -------------------------------------------------------------------------
 
   modelTotal.setFilter("Mês = '" + date.toString("yyyy-MM") + "'");
 
-  if (not modelTotal.select()) { return qApp->enqueueException("Erro filtrando tabela total: " + modelTotal.lastError().text(), this); }
+  modelTotal.select();
 }

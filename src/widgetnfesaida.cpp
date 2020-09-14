@@ -69,7 +69,7 @@ void WidgetNfeSaida::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewNFeSaida.select()) { return; }
+  modelViewNFeSaida.select();
 }
 
 void WidgetNfeSaida::resetTables() { modelIsSet = false; }
@@ -219,7 +219,7 @@ void WidgetNfeSaida::on_pushButtonRelatorio_clicked() {
 
   view.setFilter("DATE_FORMAT(`Criado em`, '%Y-%m') = '" + ui->dateEdit->date().toString("yyyy-MM") + "' AND (status = 'AUTORIZADO')");
 
-  if (not view.select()) { return; }
+  view.select();
 
   dataManager->addModel("view", &view, true);
 

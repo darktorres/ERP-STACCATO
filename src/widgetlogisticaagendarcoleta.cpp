@@ -173,9 +173,9 @@ void WidgetLogisticaAgendarColeta::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelEstoque.select()) { return; }
+  modelEstoque.select();
 
-  if (not modelTranspAgend.select()) { return; }
+  modelTranspAgend.select();
 }
 
 void WidgetLogisticaAgendarColeta::tableFornLogistica_clicked(const QString &fornecedor) {
@@ -259,8 +259,8 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
 
       const int idEvento = query.value(0).toInt();
 
-      if (not modelTranspAtual.setData(index.row(), "data", dataPrevColeta)) { return false; }
-      if (not modelTranspAtual.setData(index.row(), "idEvento", idEvento)) { return false; }
+      modelTranspAtual.setData(index.row(), "data", dataPrevColeta);
+      modelTranspAtual.setData(index.row(), "idEvento", idEvento);
 
       idEstoque = modelTranspAtual.data(index.row(), "idEstoque").toInt();
 
@@ -285,7 +285,9 @@ bool WidgetLogisticaAgendarColeta::processRows(const QModelIndexList &list, cons
     if (not query3.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query3.lastError().text(), this); }
   }
 
-  return modelTranspAtual.submitAll();
+  modelTranspAtual.submitAll();
+
+  return true;
 }
 
 void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &) {
@@ -295,11 +297,11 @@ void WidgetLogisticaAgendarColeta::on_itemBoxVeiculo_textChanged(const QString &
 
   if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
-  if (not modelTranspAtual.select()) { return; }
+  modelTranspAtual.select();
 
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
-  if (not modelTranspAgend.select()) { return; }
+  modelTranspAgend.select();
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 }
@@ -312,19 +314,19 @@ bool WidgetLogisticaAgendarColeta::adicionarProduto(const QModelIndexList &list)
 
     const int row = modelTranspAtual.insertRowAtEnd();
 
-    if (not modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(index.row(), "fornecedor"))) { return false; }
-    if (not modelTranspAtual.setData(row, "quantCaixa", modelEstoque.data(index.row(), "quantCaixa"))) { return false; }
-    if (not modelTranspAtual.setData(row, "formComercial", modelEstoque.data(index.row(), "formComercial"))) { return false; }
-    if (not modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getId())) { return false; }
-    if (not modelTranspAtual.setData(row, "idEstoque", modelEstoque.data(index.row(), "idEstoque"))) { return false; }
-    if (not modelTranspAtual.setData(row, "idProduto", modelEstoque.data(index.row(), "idProduto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "produto", modelEstoque.data(index.row(), "produto"))) { return false; }
-    if (not modelTranspAtual.setData(row, "codComercial", modelEstoque.data(index.row(), "codComercial"))) { return false; }
-    if (not modelTranspAtual.setData(row, "un", modelEstoque.data(index.row(), "un"))) { return false; }
-    if (not modelTranspAtual.setData(row, "caixas", modelEstoque.data(index.row(), "caixas"))) { return false; }
-    if (not modelTranspAtual.setData(row, "kg", peso)) { return false; }
-    if (not modelTranspAtual.setData(row, "quant", modelEstoque.data(index.row(), "quant"))) { return false; }
-    if (not modelTranspAtual.setData(row, "status", "EM COLETA")) { return false; }
+    modelTranspAtual.setData(row, "fornecedor", modelEstoque.data(index.row(), "fornecedor"));
+    modelTranspAtual.setData(row, "quantCaixa", modelEstoque.data(index.row(), "quantCaixa"));
+    modelTranspAtual.setData(row, "formComercial", modelEstoque.data(index.row(), "formComercial"));
+    modelTranspAtual.setData(row, "idVeiculo", ui->itemBoxVeiculo->getId());
+    modelTranspAtual.setData(row, "idEstoque", modelEstoque.data(index.row(), "idEstoque"));
+    modelTranspAtual.setData(row, "idProduto", modelEstoque.data(index.row(), "idProduto"));
+    modelTranspAtual.setData(row, "produto", modelEstoque.data(index.row(), "produto"));
+    modelTranspAtual.setData(row, "codComercial", modelEstoque.data(index.row(), "codComercial"));
+    modelTranspAtual.setData(row, "un", modelEstoque.data(index.row(), "un"));
+    modelTranspAtual.setData(row, "caixas", modelEstoque.data(index.row(), "caixas"));
+    modelTranspAtual.setData(row, "kg", peso);
+    modelTranspAtual.setData(row, "quant", modelEstoque.data(index.row(), "quant"));
+    modelTranspAtual.setData(row, "status", "EM COLETA");
   }
 
   return true;
@@ -345,7 +347,9 @@ void WidgetLogisticaAgendarColeta::on_pushButtonAdicionarProduto_clicked() {
     if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelEstoque.data(index.row(), "produto").toString() + "' já inserido!", this); }
   }
 
-  if (not adicionarProduto(list) and not modelTranspAtual.select()) { return; }
+  adicionarProduto(list);
+
+  modelTranspAtual.select();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonRemoverProduto_clicked() {
@@ -367,7 +371,7 @@ void WidgetLogisticaAgendarColeta::on_pushButtonCancelarCarga_clicked() {
   ui->pushButtonAgendarColeta->show();
   ui->pushButtonCancelarCarga->hide();
 
-  if (not modelTranspAtual.select()) { return; }
+  modelTranspAtual.select();
 }
 
 void WidgetLogisticaAgendarColeta::on_pushButtonDanfe_clicked() {

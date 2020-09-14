@@ -40,7 +40,7 @@ void WidgetLogisticaColeta::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewColeta.select()) { return; }
+  modelViewColeta.select();
 }
 
 void WidgetLogisticaColeta::tableFornLogistica_clicked(const QString &fornecedor) {

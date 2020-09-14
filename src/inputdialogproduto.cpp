@@ -161,7 +161,7 @@ bool InputDialogProduto::setFilter(const QStringList &ids) {
 
   modelPedidoFornecedor.setFilter(filter);
 
-  if (not modelPedidoFornecedor.select()) { return false; }
+  modelPedidoFornecedor.select();
 
   calcularTotal();
 
@@ -196,12 +196,12 @@ void InputDialogProduto::updateTableData(const QModelIndex &topLeft) {
 
     if (header == "Quant." or header == "$ Unit.") {
       const double preco = modelPedidoFornecedor.data(row, "quant").toDouble() * modelPedidoFornecedor.data(row, "prcUnitario").toDouble();
-      if (not modelPedidoFornecedor.setData(row, "preco", preco)) { return; }
+      modelPedidoFornecedor.setData(row, "preco", preco);
     }
 
     if (header == "Total") {
       const double preco = modelPedidoFornecedor.data(row, "preco").toDouble() / modelPedidoFornecedor.data(row, "quant").toDouble();
-      if (not modelPedidoFornecedor.setData(row, "prcUnitario", preco)) { return; }
+      modelPedidoFornecedor.setData(row, "prcUnitario", preco);
     }
   }();
 
@@ -259,13 +259,13 @@ bool InputDialogProduto::cadastrar() {
 
     if (tipo == Tipo::Faturamento) {
       for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-        if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") {
-          if (not modelPedidoFornecedor.setData(row, "status", "ENTREGUE")) { return false; }
-        }
+        if (modelPedidoFornecedor.data(row, "fornecedor").toString() == "ATELIER STACCATO") { modelPedidoFornecedor.setData(row, "status", "ENTREGUE"); }
       }
     }
 
-    return modelPedidoFornecedor.submitAll();
+    modelPedidoFornecedor.submitAll();
+
+    return true;
   }();
 
   if (success) {
@@ -293,9 +293,7 @@ void InputDialogProduto::on_doubleSpinBoxAliquota_valueChanged(double aliquota) 
 
     ui->doubleSpinBoxST->setValue(valueSt);
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
-    }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
 
     ui->doubleSpinBoxTotal->setValue(total + valueSt);
   }();
@@ -315,9 +313,7 @@ void InputDialogProduto::on_doubleSpinBoxST_valueChanged(double valueSt) {
 
     ui->doubleSpinBoxAliquota->setValue(aliquota);
 
-    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-      if (not modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota)) { return; }
-    }
+    for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "aliquotaSt", aliquota); }
 
     ui->doubleSpinBoxTotal->setValue(total + valueSt);
   }();
@@ -344,13 +340,9 @@ void InputDialogProduto::on_comboBoxST_currentTextChanged(const QString &text) {
     ui->doubleSpinBoxAliquota->setValue(4.68);
   }
 
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "st", text)) { return; }
-  }
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "st", text); }
 }
 
 void InputDialogProduto::on_lineEditCodRep_textEdited(const QString &text) {
-  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) {
-    if (not modelPedidoFornecedor.setData(row, "ordemRepresentacao", text)) { return; }
-  }
+  for (int row = 0; row < modelPedidoFornecedor.rowCount(); ++row) { modelPedidoFornecedor.setData(row, "ordemRepresentacao", text); }
 }

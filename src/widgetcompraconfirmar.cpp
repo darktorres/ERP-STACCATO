@@ -64,9 +64,9 @@ void WidgetCompraConfirmar::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelResumo.select()) { return; }
+  modelResumo.select();
 
-  if (not modelViewCompras.select()) { return; }
+  modelViewCompras.select();
 }
 
 void WidgetCompraConfirmar::resetTables() { modelIsSet = false; }

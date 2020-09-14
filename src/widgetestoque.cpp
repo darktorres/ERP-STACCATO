@@ -49,7 +49,7 @@ void WidgetEstoque::setupTables() {
 
   modelProdutos.proxyModel = new SearchDialogProxyModel(&modelProdutos, this);
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 
   modelProdutos.setHeaderData("fornecedor", "Fornecedor");
   modelProdutos.setHeaderData("statusEstoque", "Estoque");
@@ -269,7 +269,7 @@ void WidgetEstoque::on_radioButtonTodos_toggled(bool checked) {
 
   modelProdutos.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 }
 
 void WidgetEstoque::on_radioButtonStaccatoOFF_toggled(bool checked) {
@@ -277,7 +277,7 @@ void WidgetEstoque::on_radioButtonStaccatoOFF_toggled(bool checked) {
 
   modelProdutos.setFilter("estoque = TRUE AND promocao = 2 AND descontinuado = FALSE AND desativado = FALSE");
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 }
 
 void WidgetEstoque::on_radioButtonEstoque_toggled(bool checked) {
@@ -285,7 +285,7 @@ void WidgetEstoque::on_radioButtonEstoque_toggled(bool checked) {
 
   modelProdutos.setFilter("estoque = TRUE AND promocao = 0 AND descontinuado = FALSE AND desativado = FALSE");
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 }
 
 // NOTE: gerenciar lugares de estoque (cadastro/permissoes)

@@ -119,7 +119,7 @@ void WidgetOrcamento::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewOrcamento.select()) { return; }
+  modelViewOrcamento.select();
 }
 
 void WidgetOrcamento::resetTables() { modelIsSet = false; }

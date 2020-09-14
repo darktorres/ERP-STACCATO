@@ -33,20 +33,20 @@ protected:
   QWidget *parent;
   // methods
   auto addMapping(QWidget *widget, const QString &key, const QByteArray &propertyName = QByteArray()) -> void;
-  auto closeEvent(QCloseEvent *event) -> void final;
   auto confirmationMessage() -> bool;
   auto data(const QString &key) -> QVariant;
   auto getTextKeys() const -> QStringList;
-  auto keyPressEvent(QKeyEvent *event) -> void final;
   auto remove() -> void;
   auto removeBox() -> int;
   auto requiredStyle() -> QString;
-  auto setData(const QString &key, const QVariant &value) -> bool;
+  auto setData(const QString &key, const QVariant &value) -> void;
   auto setForeignKey(SqlTableModel &secondaryModel) -> bool;
   auto setTextKeys(const QStringList &value) -> void;
   auto validaCNPJ(const QString &text) -> bool;
   auto validaCPF(const QString &text) -> bool;
   auto verifyFields(const QList<QLineEdit *> &list) -> bool;
+  auto closeEvent(QCloseEvent *event) -> void final;
+  auto keyPressEvent(QKeyEvent *event) -> void final;
   virtual auto cadastrar() -> bool = 0;
   virtual auto clearFields() -> void = 0;
   virtual auto newRegister() -> bool;

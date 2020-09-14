@@ -33,7 +33,7 @@ void WidgetLogisticaRepresentacao::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewLogisticaRepresentacao.select()) { return; }
+  modelViewLogisticaRepresentacao.select();
 }
 
 void WidgetLogisticaRepresentacao::tableFornLogistica_clicked(const QString &fornecedor) {

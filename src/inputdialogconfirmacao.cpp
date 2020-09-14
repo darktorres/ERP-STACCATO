@@ -89,13 +89,9 @@ QString InputDialogConfirmacao::getRecebeu() const { return ui->lineEditRecebeu-
 QString InputDialogConfirmacao::getEntregou() const { return ui->lineEditEntregou->text(); }
 
 bool InputDialogConfirmacao::cadastrar() {
-  if (tipo == Tipo::Recebimento) {
-    if (not modelEstoque.submitAll()) { return false; }
-  }
+  if (tipo == Tipo::Recebimento) { modelEstoque.submitAll(); }
 
-  if (tipo == Tipo::Entrega) {
-    if (not modelVeiculo.submitAll()) { return false; }
-  }
+  if (tipo == Tipo::Entrega) { modelVeiculo.submitAll(); }
 
   return true;
 }
@@ -241,7 +237,7 @@ bool InputDialogConfirmacao::setFilterEntrega(const QString &id, const QString &
 
   modelVeiculo.setFilter(filter);
 
-  if (not modelVeiculo.select()) { return false; }
+  modelVeiculo.select();
 
   ui->dateEditEvento->setDateTime(modelVeiculo.data(0, "data").toDateTime());
 
@@ -257,7 +253,7 @@ bool InputDialogConfirmacao::setFilterRecebe(const QStringList &ids) { // recebi
 
   modelEstoque.setFilter(filter);
 
-  if (not modelEstoque.select()) { return false; }
+  modelEstoque.select();
 
   setWindowTitle("Estoque: " + ids.join(", "));
 
@@ -419,7 +415,9 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   modelVendaProduto.setFilter("idVendaProduto2 = " + modelVeiculo.data(row, "idVendaProduto2").toString());
 
-  if (not modelVendaProduto.select() or modelVendaProduto.rowCount() == 0) { return false; }
+  modelVendaProduto.select();
+
+  if (modelVendaProduto.rowCount() == 0) { return false; }
 
   // -------------------------------------------------------------------------
 
@@ -429,7 +427,7 @@ bool InputDialogConfirmacao::dividirEntrega(const int row, const int choice, con
 
   choice == (QMessageBox::Yes) ? criarReposicaoCliente(modelVendaProduto, caixasDefeito, quantCaixa, obs, novoIdVendaProduto2) : gerarCreditoCliente(modelVendaProduto, caixasDefeito, quantCaixa);
 
-  if (not modelVendaProduto.submitAll()) { return false; }
+  modelVendaProduto.submitAll();
 
   // -------------------------------------------------------------------------
 
@@ -468,13 +466,13 @@ bool InputDialogConfirmacao::gerarCreditoCliente(const SqlTableModel &modelVenda
 
   modelCliente.setFilter("idCliente = " + query.value("idCliente").toString());
 
-  if (not modelCliente.select()) { return false; }
+  modelCliente.select();
 
   const double creditoAntigo = modelCliente.data(0, "credito").toDouble();
 
-  if (not modelCliente.setData(0, "credito", credito + creditoAntigo)) { return false; }
+  modelCliente.setData(0, "credito", credito + creditoAntigo);
 
-  if (not modelCliente.submitAll()) { return false; }
+  modelCliente.submitAll();
 
   return true;
 }
@@ -507,23 +505,25 @@ bool InputDialogConfirmacao::criarReposicaoCliente(SqlTableModel &modelVendaProd
 
     if (value.isNull()) { continue; }
 
-    if (not modelVendaProduto.setData(newRow, col, value)) { return false; }
+    modelVendaProduto.setData(newRow, col, value);
   }
 
-  if (not modelVendaProduto.setData(newRow, "idRelacionado", novoIdVendaProduto2)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "quant", caixasDefeito * quantCaixa)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "caixas", caixasDefeito)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "prcUnitario", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "descUnitario", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "parcial", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "desconto", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "parcialDesc", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "descGlobal", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "total", 0)) { return false; }
-  if (not modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA")) { return false; }
-  if (not modelVendaProduto.setData(newRow, "reposicaoEntrega", true)) { return false; }
+  modelVendaProduto.setData(newRow, "idRelacionado", novoIdVendaProduto2);
+  modelVendaProduto.setData(newRow, "quant", caixasDefeito * quantCaixa);
+  modelVendaProduto.setData(newRow, "caixas", caixasDefeito);
+  modelVendaProduto.setData(newRow, "prcUnitario", 0);
+  modelVendaProduto.setData(newRow, "descUnitario", 0);
+  modelVendaProduto.setData(newRow, "parcial", 0);
+  modelVendaProduto.setData(newRow, "desconto", 0);
+  modelVendaProduto.setData(newRow, "parcialDesc", 0);
+  modelVendaProduto.setData(newRow, "descGlobal", 0);
+  modelVendaProduto.setData(newRow, "total", 0);
+  modelVendaProduto.setData(newRow, "status", "REPO. ENTREGA");
+  modelVendaProduto.setData(newRow, "reposicaoEntrega", true);
 
-  return modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
+  modelVendaProduto.setData(newRow, "obs", "(REPO. ENTREGA) " + obs);
+
+  return true;
 }
 
 bool InputDialogConfirmacao::desfazerConsumo(const int idEstoque, const double caixasDefeito) {
@@ -611,9 +611,7 @@ void InputDialogConfirmacao::on_pushButtonFoto_clicked() {
     ui->lineEditFoto->setText(url);
     ui->lineEditFoto->setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(0, 0, 0);");
 
-    for (int row = 0; row < modelVeiculo.rowCount(); ++row) {
-      if (not modelVeiculo.setData(row, "fotoEntrega", url)) { return; }
-    }
+    for (int row = 0; row < modelVeiculo.rowCount(); ++row) { modelVeiculo.setData(row, "fotoEntrega", url); }
   });
 }
 
@@ -644,16 +642,16 @@ bool InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
 
-  if (not modelVendaProduto.setData(0, "caixas", caixasRestante)) { return false; }
-  if (not modelVendaProduto.setData(0, "quant", quantRestante)) { return false; }
+  modelVendaProduto.setData(0, "caixas", caixasRestante);
+  modelVendaProduto.setData(0, "quant", quantRestante);
 
   const double prcUnitario = modelVendaProduto.data(0, "prcUnitario").toDouble();
   const double descUnitario = modelVendaProduto.data(0, "descUnitario").toDouble();
   const double descGlobal = modelVendaProduto.data(0, "descGlobal").toDouble() / 100;
 
-  if (not modelVendaProduto.setData(0, "parcial", quantRestante * prcUnitario)) { return false; }
-  if (not modelVendaProduto.setData(0, "parcialDesc", quantRestante * descUnitario)) { return false; }
-  if (not modelVendaProduto.setData(0, "total", quantRestante * descUnitario * (1 - descGlobal))) { return false; }
+  modelVendaProduto.setData(0, "parcial", quantRestante * prcUnitario);
+  modelVendaProduto.setData(0, "parcialDesc", quantRestante * descUnitario);
+  modelVendaProduto.setData(0, "total", quantRestante * descUnitario * (1 - descGlobal));
 
   // -------------------------------------------------------------------------
 
@@ -683,20 +681,20 @@ bool InputDialogConfirmacao::dividirVenda(SqlTableModel &modelVendaProduto, cons
 
     if (value.isNull()) { continue; }
 
-    if (not modelVendaProduto.setData(rowQuebrado2, col, value)) { return false; }
+    modelVendaProduto.setData(rowQuebrado2, col, value);
   }
 
   const double quantDefeito = caixasDefeito * quantCaixa;
 
-  if (not modelVendaProduto.setData(rowQuebrado2, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"))) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO")) { return false; }
+  modelVendaProduto.setData(rowQuebrado2, "idVendaProduto2", novoIdVendaProduto2);
+  modelVendaProduto.setData(rowQuebrado2, "idRelacionado", modelVendaProduto.data(0, "idVendaProduto2"));
+  modelVendaProduto.setData(rowQuebrado2, "caixas", caixasDefeito);
+  modelVendaProduto.setData(rowQuebrado2, "quant", quantDefeito);
+  modelVendaProduto.setData(rowQuebrado2, "status", "QUEBRADO");
 
-  if (not modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario)) { return false; }
-  if (not modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal))) { return false; }
+  modelVendaProduto.setData(rowQuebrado2, "parcial", quantDefeito * prcUnitario);
+  modelVendaProduto.setData(rowQuebrado2, "parcialDesc", quantDefeito * descUnitario);
+  modelVendaProduto.setData(rowQuebrado2, "total", quantDefeito * descUnitario * (1 - descGlobal));
 
   return true;
 }
@@ -705,8 +703,8 @@ bool InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
   // diminuir quantidade da linha selecionada
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not modelVeiculo.setData(row, "caixas", caixas - caixasDefeito)) { return false; }
-  if (not modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * quantCaixa)) { return false; }
+  modelVeiculo.setData(row, "caixas", caixas - caixasDefeito);
+  modelVeiculo.setData(row, "quant", (caixas - caixasDefeito) * quantCaixa);
 
   // copiar linha com quantDefeito
 
@@ -721,16 +719,16 @@ bool InputDialogConfirmacao::dividirVeiculo(const int row, const double caixas, 
 
     if (value.isNull()) { continue; }
 
-    if (not modelVeiculo.setData(rowQuebrado, col, value)) { return false; }
+    modelVeiculo.setData(rowQuebrado, col, value);
   }
 
   // recalcular kg? (posso usar proporcao para nao precisar puxar kgcx)
-  if (not modelVeiculo.setData(rowQuebrado, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito)) { return false; }
-  if (not modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * quantCaixa)) { return false; }
-  if (not modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO")) { return false; }
+  modelVeiculo.setData(rowQuebrado, "idVendaProduto2", novoIdVendaProduto2);
+  modelVeiculo.setData(rowQuebrado, "caixas", caixasDefeito);
+  modelVeiculo.setData(rowQuebrado, "quant", caixasDefeito * quantCaixa);
+  modelVeiculo.setData(rowQuebrado, "status", "QUEBRADO");
 
-  if (not modelVeiculo.submitAll()) { return false; }
+  modelVeiculo.submitAll();
 
   return true;
 }
@@ -741,7 +739,7 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
   modelConsumo.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
-  if (not modelConsumo.select()) { return false; }
+  modelConsumo.select();
 
   if (modelConsumo.rowCount() == 0) { return true; }
 
@@ -764,18 +762,18 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
   const double proporcao = caixasRestante / caixas;
 
-  if (not modelConsumo.setData(0, "quant", quantRestante * -1)) { return false; }
-  if (not modelConsumo.setData(0, "caixas", caixasRestante)) { return false; }
-  if (not modelConsumo.setData(0, "valor", valorConsumo * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "desconto", desconto * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBC", vBC * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vICMS", vICMS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBCST", vBCST * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vICMSST", vICMSST * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBCPIS", vBCPIS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vPIS", vPIS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vBCCOFINS", vBCCOFINS * proporcao)) { return false; }
-  if (not modelConsumo.setData(0, "vCOFINS", vCOFINS * proporcao)) { return false; }
+  modelConsumo.setData(0, "quant", quantRestante * -1);
+  modelConsumo.setData(0, "caixas", caixasRestante);
+  modelConsumo.setData(0, "valor", valorConsumo * proporcao);
+  modelConsumo.setData(0, "desconto", desconto * proporcao);
+  modelConsumo.setData(0, "vBC", vBC * proporcao);
+  modelConsumo.setData(0, "vICMS", vICMS * proporcao);
+  modelConsumo.setData(0, "vBCST", vBCST * proporcao);
+  modelConsumo.setData(0, "vICMSST", vICMSST * proporcao);
+  modelConsumo.setData(0, "vBCPIS", vBCPIS * proporcao);
+  modelConsumo.setData(0, "vPIS", vPIS * proporcao);
+  modelConsumo.setData(0, "vBCCOFINS", vBCCOFINS * proporcao);
+  modelConsumo.setData(0, "vCOFINS", vCOFINS * proporcao);
 
   // -------------------------------------------------------------------------
 
@@ -792,31 +790,31 @@ bool InputDialogConfirmacao::dividirConsumo(const double caixas, const double ca
 
     if (value.isNull()) { continue; }
 
-    if (not modelConsumo.setData(newRow, column, value)) { return false; }
+    modelConsumo.setData(newRow, column, value);
   }
 
   // -------------------------------------------------------------------------
 
   const double proporcaoNovo = caixasDefeito / caixas;
 
-  if (not modelConsumo.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelConsumo.setData(newRow, "status", "QUEBRADO")) { return false; }
-  if (not modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa * -1)) { return false; }
-  if (not modelConsumo.setData(newRow, "caixas", caixasDefeito)) { return false; }
-  if (not modelConsumo.setData(newRow, "valor", valorConsumo * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "desconto", desconto * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBC", vBC * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vICMS", vICMS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBCST", vBCST * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vICMSST", vICMSST * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBCPIS", vBCPIS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vPIS", vPIS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo)) { return false; }
-  if (not modelConsumo.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo)) { return false; }
+  modelConsumo.setData(newRow, "idVendaProduto2", novoIdVendaProduto2);
+  modelConsumo.setData(newRow, "status", "QUEBRADO");
+  modelConsumo.setData(newRow, "quant", caixasDefeito * quantCaixa * -1);
+  modelConsumo.setData(newRow, "caixas", caixasDefeito);
+  modelConsumo.setData(newRow, "valor", valorConsumo * proporcaoNovo);
+  modelConsumo.setData(newRow, "desconto", desconto * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBC", vBC * proporcaoNovo);
+  modelConsumo.setData(newRow, "vICMS", vICMS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBCST", vBCST * proporcaoNovo);
+  modelConsumo.setData(newRow, "vICMSST", vICMSST * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBCPIS", vBCPIS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vPIS", vPIS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vBCCOFINS", vBCCOFINS * proporcaoNovo);
+  modelConsumo.setData(newRow, "vCOFINS", vCOFINS * proporcaoNovo);
 
   // -------------------------------------------------------------------------
 
-  if (not modelConsumo.submitAll()) { return false; }
+  modelConsumo.submitAll();
 
   return true;
 }
@@ -827,7 +825,7 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
 
   modelCompra.setFilter("idVendaProduto2 = " + idVendaProduto2);
 
-  if (not modelCompra.select()) { return false; }
+  modelCompra.select();
 
   if (modelCompra.rowCount() == 0) { return true; }
 
@@ -837,9 +835,9 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
   const double caixasRestante = caixas - caixasDefeito;
   const double quantRestante = caixasRestante * quantCaixa;
 
-  if (not modelCompra.setData(0, "quant", quantRestante)) { return false; }
-  if (not modelCompra.setData(0, "caixas", caixasRestante)) { return false; }
-  if (not modelCompra.setData(0, "preco", quantRestante * prcUnitario)) { return false; }
+  modelCompra.setData(0, "quant", quantRestante);
+  modelCompra.setData(0, "caixas", caixasRestante);
+  modelCompra.setData(0, "preco", quantRestante * prcUnitario);
 
   // -------------------------------------------------------------------------
 
@@ -855,20 +853,20 @@ bool InputDialogConfirmacao::dividirCompra(const double caixas, const double cai
 
     if (value.isNull()) { continue; }
 
-    if (not modelCompra.setData(newRow, column, value)) { return false; }
+    modelCompra.setData(newRow, column, value);
   }
 
   // -------------------------------------------------------------------------
 
-  if (not modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"))) { return false; }
-  if (not modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2)) { return false; }
-  if (not modelCompra.setData(newRow, "quant", caixasDefeito * quantCaixa)) { return false; }
-  if (not modelCompra.setData(newRow, "caixas", caixasDefeito)) { return false; }
-  if (not modelCompra.setData(newRow, "preco", caixasDefeito * quantCaixa * prcUnitario)) { return false; }
+  modelCompra.setData(newRow, "idRelacionado", modelCompra.data(0, "idPedido2"));
+  modelCompra.setData(newRow, "idVendaProduto2", novoIdVendaProduto2);
+  modelCompra.setData(newRow, "quant", caixasDefeito * quantCaixa);
+  modelCompra.setData(newRow, "caixas", caixasDefeito);
+  modelCompra.setData(newRow, "preco", caixasDefeito * quantCaixa * prcUnitario);
 
   // -------------------------------------------------------------------------
 
-  if (not modelCompra.submitAll()) { return false; }
+  modelCompra.submitAll();
 
   return true;
 }

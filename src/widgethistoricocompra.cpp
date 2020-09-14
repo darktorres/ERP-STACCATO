@@ -35,7 +35,7 @@ void WidgetHistoricoCompra::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewComprasFinanceiro.select()) { return; }
+  modelViewComprasFinanceiro.select();
 }
 
 void WidgetHistoricoCompra::resetTables() { modelIsSet = false; }
@@ -139,17 +139,17 @@ void WidgetHistoricoCompra::on_tablePedidos_clicked(const QModelIndex &index) {
 
   modelProdutos.setFilter("ordemCompra = " + ordemCompra);
 
-  if (not modelProdutos.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos.lastError().text(), this); }
+  modelProdutos.select();
 
   modelProdutos2.setFilter("ordemCompra = " + ordemCompra);
 
-  if (not modelProdutos2.select()) { return qApp->enqueueException("Erro buscando produtos: " + modelProdutos2.lastError().text(), this); }
+  modelProdutos2.select();
 
   setTreeView();
 
   modelNFe.setFilter("ordemCompra = " + ordemCompra);
 
-  if (not modelNFe.select()) { return qApp->enqueueException("Erro buscando NFe: " + modelNFe.lastError().text(), this); }
+  modelNFe.select();
 }
 
 void WidgetHistoricoCompra::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }

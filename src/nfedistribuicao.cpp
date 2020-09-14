@@ -50,7 +50,7 @@ void NFeDistribuicao::updateTables() {
 
   buscarNSU();
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void NFeDistribuicao::buscarNSU() {
@@ -189,7 +189,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   //----------------------------------------------------------
 
-  if (not model.select()) { return; }
+  model.select();
 
   if (ui->spinBoxUltNSU->value() < ui->spinBoxMaxNSU->value()) { return on_pushButtonPesquisar_clicked(); }
 
@@ -457,7 +457,7 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
 
     if (statusDistribuicao == "CANCELADA") { continue; }
 
-    if (not model.setData(index.row(), "ciencia", true)) { return; }
+    model.setData(index.row(), "ciencia", true);
   }
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
@@ -475,7 +475,7 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
 
     if (statusDistribuicao == "CANCELADA") { continue; }
 
-    if (not model.setData(index.row(), "confirmar", true)) { return; }
+    model.setData(index.row(), "confirmar", true);
   }
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
@@ -493,7 +493,7 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
 
     if (statusDistribuicao == "CANCELADA") { continue; }
 
-    if (not model.setData(index.row(), "desconhecer", true)) { return; }
+    model.setData(index.row(), "desconhecer", true);
   }
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
@@ -511,7 +511,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
 
     if (statusDistribuicao == "CANCELADA") { continue; }
 
-    if (not model.setData(index.row(), "naoRealizar", true)) { return; }
+    model.setData(index.row(), "naoRealizar", true);
   }
 
   const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
@@ -522,7 +522,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
 void NFeDistribuicao::agendarOperacao() {
   if (not qApp->startTransaction("NFeDistribuicao::agendarOperacao")) { return; }
 
-  if (not model.submitAll()) { return qApp->rollbackTransaction(); }
+  model.submitAll();
 
   if (not qApp->endTransaction()) { return; }
 
@@ -638,7 +638,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
       }
     }
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     return true;
   }();

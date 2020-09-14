@@ -68,11 +68,11 @@ void WidgetCompraFaturar::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelResumo.select()) { return; }
+  modelResumo.select();
 
   //--------------------------------------
 
-  if (not modelViewFaturamento.select()) { return; }
+  modelViewFaturamento.select();
 }
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }

@@ -21,7 +21,7 @@ void BaixaOrcamento::setupTables(const QString &idOrcamento) {
 
   modelOrcamento.setFilter("idOrcamento = '" + idOrcamento + "'");
 
-  if (not modelOrcamento.select()) { return; }
+  modelOrcamento.select();
 }
 
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
@@ -38,11 +38,11 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
 
   if (motivo.isEmpty()) { return qApp->enqueueError("Deve escolher um motivo!", this); }
 
-  if (not modelOrcamento.setData(0, "status", "PERDIDO")) { return; }
-  if (not modelOrcamento.setData(0, "motivoCancelamento", motivo)) { return; }
-  if (not modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText())) { return; }
+  modelOrcamento.setData(0, "status", "PERDIDO");
+  modelOrcamento.setData(0, "motivoCancelamento", motivo);
+  modelOrcamento.setData(0, "observacaoCancelamento", ui->plainTextEditObservacao->toPlainText());
 
-  if (not modelOrcamento.submitAll()) { return; }
+  modelOrcamento.submitAll();
 
   qApp->enqueueInformation("Baixa salva!", this);
 

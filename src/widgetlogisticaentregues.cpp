@@ -39,7 +39,7 @@ void WidgetLogisticaEntregues::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelVendas.select()) { return; }
+  modelVendas.select();
 
   // -----------------------------------------------------------------
 

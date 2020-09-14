@@ -94,7 +94,7 @@ void FollowUp::setupTables() {
 
   modelViewFollowup.setSort("dataFollowup");
 
-  if (not modelViewFollowup.select()) { return; }
+  modelViewFollowup.select();
 
   modelViewFollowup.proxyModel = new FollowUpProxyModel(&modelViewFollowup, this);
 
@@ -107,7 +107,7 @@ void FollowUp::setupTables() {
 
     modelOrcamento.setFilter("idOrcamento = '" + id + "'");
 
-    if (not modelOrcamento.select()) { return; }
+    modelOrcamento.select();
 
     ui->plainTextEditBaixa->setPlainText(modelOrcamento.data(0, "motivoCancelamento").toString() + "\n\n" + modelOrcamento.data(0, "observacaoCancelamento").toString());
   }

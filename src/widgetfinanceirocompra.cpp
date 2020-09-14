@@ -29,7 +29,7 @@ void WidgetFinanceiroCompra::updateTables() {
     modelIsSet = true;
   }
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void WidgetFinanceiroCompra::resetTables() { modelIsSet = false; }

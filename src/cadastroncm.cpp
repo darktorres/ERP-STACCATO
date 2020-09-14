@@ -35,7 +35,7 @@ void CadastroNCM::setupTables() {
 
   model.setFilter("");
 
-  if (not model.select()) { return; }
+  model.select();
 
   ui->table->setModel(&model);
 
@@ -52,7 +52,7 @@ void CadastroNCM::on_pushButtonSalvar_clicked() {
     // TODO: se houver algum dado em CEST verificar se o tamanho é 7
   }
 
-  if (not model.submitAll()) { return; }
+  model.submitAll();
 
   qApp->enqueueInformation("Dados atualizados!", this);
   close();
@@ -74,7 +74,7 @@ void CadastroNCM::on_pushButtonRemover_clicked() {
 
   for (const auto &index : selection) { model.removeRow(index.row()); }
 
-  if (not model.submitAll()) { return; }
+  model.submitAll();
 }
 
 // TODO: avisar após digitar NCM se ele já estiver cadastrado (o banco de dados não vai permitir cadastrar duplicado mas a mensagem de

@@ -16,7 +16,7 @@ PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : tipo(tipo), id(i
 
   modelItem.setFilter(tipo == Tipo::Orcamento ? "idOrcamento = '" + id + "'" : "idVenda = '" + id + "'");
 
-  if (not modelItem.select()) { return; }
+  modelItem.select();
 }
 
 void PDF::gerarPdf() {

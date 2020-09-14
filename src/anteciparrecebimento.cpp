@@ -123,7 +123,7 @@ void AnteciparRecebimento::setupTables() {
 
   modelContaReceber.setFilter("status IN ('PENDENTE', 'CONFERIDO') AND representacao = FALSE ORDER BY dataPagamento");
 
-  if (not modelContaReceber.select()) { return; }
+  modelContaReceber.select();
 
   ui->table->setModel(&modelContaReceber);
 
@@ -186,17 +186,17 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   for (const auto &index : list) {
     const int row = index.row();
 
-    if (not modelContaReceber.setData(row, "status", "RECEBIDO")) { return false; }
-    if (not modelContaReceber.setData(row, "dataRealizado", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaReceber.setData(row, "valorReal", modelContaReceber.data(row, "valor"))) { return false; }
-    if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"))) { return false; }
-    if (not modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"))) { return false; }
-    if (not modelContaReceber.setData(row, "idConta", ui->itemBoxConta->getId())) { return false; }
-    if (not modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + "Antecipação")) { return false; }
+    modelContaReceber.setData(row, "status", "RECEBIDO");
+    modelContaReceber.setData(row, "dataRealizado", ui->dateEditEvento->date());
+    modelContaReceber.setData(row, "valorReal", modelContaReceber.data(row, "valor"));
+    modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"));
+    modelContaReceber.setData(row, "parcelaReal", modelContaReceber.data(row, "parcela"));
+    modelContaReceber.setData(row, "tipoReal", modelContaReceber.data(row, "tipo"));
+    modelContaReceber.setData(row, "idConta", ui->itemBoxConta->getId());
+    modelContaReceber.setData(row, "observacao", modelContaReceber.data(row, "observacao").toString() + "Antecipação");
   }
 
-  if (not modelContaReceber.submitAll()) { return false; }
+  modelContaReceber.submitAll();
 
   //----------------------------------
 
@@ -212,21 +212,21 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
     const int rowPagar1 = modelContaPagar.insertRowAtEnd();
 
-    if (not modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "idLoja", 1)) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "contraParte", query.value("banco"))) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "tipo", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "dataPagamento", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "observacao", "Juros da antecipação de recebíveis")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "status", "PAGO")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "dataRealizado", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "valorReal", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "tipoReal", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "idConta", ui->itemBoxConta->getId())) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "centroCusto", "1")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "grupo", "Despesas Financeiras")) { return false; }
-    if (not modelContaPagar.setData(rowPagar1, "subGrupo", "Juros")) { return false; }
+    modelContaPagar.setData(rowPagar1, "dataEmissao", ui->dateEditEvento->date());
+    modelContaPagar.setData(rowPagar1, "idLoja", 1);
+    modelContaPagar.setData(rowPagar1, "contraParte", query.value("banco"));
+    modelContaPagar.setData(rowPagar1, "valor", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
+    modelContaPagar.setData(rowPagar1, "tipo", "DÉBITO EM CONTA");
+    modelContaPagar.setData(rowPagar1, "dataPagamento", ui->dateEditEvento->date());
+    modelContaPagar.setData(rowPagar1, "observacao", "Juros da antecipação de recebíveis");
+    modelContaPagar.setData(rowPagar1, "status", "PAGO");
+    modelContaPagar.setData(rowPagar1, "dataRealizado", ui->dateEditEvento->date());
+    modelContaPagar.setData(rowPagar1, "valorReal", ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value());
+    modelContaPagar.setData(rowPagar1, "tipoReal", "DÉBITO EM CONTA");
+    modelContaPagar.setData(rowPagar1, "idConta", ui->itemBoxConta->getId());
+    modelContaPagar.setData(rowPagar1, "centroCusto", "1");
+    modelContaPagar.setData(rowPagar1, "grupo", "Despesas Financeiras");
+    modelContaPagar.setData(rowPagar1, "subGrupo", "Juros");
   }
 
   //
@@ -234,24 +234,26 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   if (not qFuzzyIsNull(ui->doubleSpinBoxIOF->value())) {
     const int rowPagar2 = modelContaPagar.insertRowAtEnd();
 
-    if (not modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "idLoja", 1)) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "contraParte", query.value("banco"))) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "valor", ui->doubleSpinBoxIOF->value())) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "tipo", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "dataPagamento", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "observacao", "IOF da antecipação de recebíveis")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "status", "PAGO")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "dataRealizado", ui->dateEditEvento->date())) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "valorReal", ui->doubleSpinBoxIOF->value())) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "tipoReal", "DÉBITO EM CONTA")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "idConta", ui->itemBoxConta->getId())) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "centroCusto", "1")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "grupo", "Despesas Financeiras")) { return false; }
-    if (not modelContaPagar.setData(rowPagar2, "subGrupo", "IOF")) { return false; }
+    modelContaPagar.setData(rowPagar2, "dataEmissao", ui->dateEditEvento->date());
+    modelContaPagar.setData(rowPagar2, "idLoja", 1);
+    modelContaPagar.setData(rowPagar2, "contraParte", query.value("banco"));
+    modelContaPagar.setData(rowPagar2, "valor", ui->doubleSpinBoxIOF->value());
+    modelContaPagar.setData(rowPagar2, "tipo", "DÉBITO EM CONTA");
+    modelContaPagar.setData(rowPagar2, "dataPagamento", ui->dateEditEvento->date());
+    modelContaPagar.setData(rowPagar2, "observacao", "IOF da antecipação de recebíveis");
+    modelContaPagar.setData(rowPagar2, "status", "PAGO");
+    modelContaPagar.setData(rowPagar2, "dataRealizado", ui->dateEditEvento->date());
+    modelContaPagar.setData(rowPagar2, "valorReal", ui->doubleSpinBoxIOF->value());
+    modelContaPagar.setData(rowPagar2, "tipoReal", "DÉBITO EM CONTA");
+    modelContaPagar.setData(rowPagar2, "idConta", ui->itemBoxConta->getId());
+    modelContaPagar.setData(rowPagar2, "centroCusto", "1");
+    modelContaPagar.setData(rowPagar2, "grupo", "Despesas Financeiras");
+    modelContaPagar.setData(rowPagar2, "subGrupo", "IOF");
   }
 
-  return modelContaPagar.submitAll();
+  modelContaPagar.submitAll();
+
+  return true;
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {

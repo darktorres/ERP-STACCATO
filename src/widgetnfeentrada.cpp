@@ -41,7 +41,7 @@ void WidgetNfeEntrada::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewNFeEntrada.select()) { return; }
+  modelViewNFeEntrada.select();
 }
 
 void WidgetNfeEntrada::resetTables() { modelIsSet = false; }

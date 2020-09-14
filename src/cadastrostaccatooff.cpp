@@ -37,7 +37,7 @@ void CadastroStaccatoOff::setupTables() {
 
   model.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
 
-  if (not model.select()) { return; }
+  model.select();
 
   model.setHeaderData("fornecedor", "Fornecedor");
   model.setHeaderData("statusEstoque", "Estoque");
@@ -79,7 +79,7 @@ void CadastroStaccatoOff::setupTables() {
 void CadastroStaccatoOff::on_itemBoxFornecedor_textChanged(const QString &text) {
   model.setFilter("fornecedor = '" + text + "' AND estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE");
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void CadastroStaccatoOff::on_radioButtonTodos_toggled(bool checked) {
@@ -89,7 +89,7 @@ void CadastroStaccatoOff::on_radioButtonTodos_toggled(bool checked) {
 
   model.setFilter("estoque = TRUE AND descontinuado = FALSE AND desativado = FALSE" + fornecedor);
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled(bool checked) {
@@ -99,7 +99,7 @@ void CadastroStaccatoOff::on_radioButtonStaccatoOFF_toggled(bool checked) {
 
   model.setFilter("estoque = TRUE AND promocao = 2 AND descontinuado = FALSE AND desativado = FALSE" + fornecedor);
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void CadastroStaccatoOff::on_radioButtonEstoque_toggled(bool checked) {
@@ -109,7 +109,7 @@ void CadastroStaccatoOff::on_radioButtonEstoque_toggled(bool checked) {
 
   model.setFilter("estoque = TRUE AND promocao = 0 AND descontinuado = FALSE AND desativado = FALSE" + fornecedor);
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
@@ -145,7 +145,7 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
     }
   }
 
-  if (not model.select()) { return; }
+  model.select();
   qApp->enqueueInformation("Dados salvos com sucesso!", this);
 }
 
@@ -180,6 +180,6 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
     }
   }
 
-  if (not model.select()) { return; }
+  model.select();
   qApp->enqueueInformation("Dados salvos com sucesso!", this);
 }

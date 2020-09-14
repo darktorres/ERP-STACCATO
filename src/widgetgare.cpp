@@ -44,7 +44,7 @@ void WidgetGare::updateTables() {
     modelIsSet = true;
   }
 
-  if (not model.select()) { return; }
+  model.select();
 }
 
 void WidgetGare::montaFiltro() {
@@ -94,7 +94,7 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
     return qApp->enqueueException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
   }
 
-  if (not model.select()) { qApp->enqueueException("Erro atualizando a tabela: " + model.lastError().text(), this); }
+  model.select();
 
   updateTables();
 

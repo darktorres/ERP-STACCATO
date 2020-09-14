@@ -32,7 +32,7 @@ bool RegisterDialog::viewRegisterById(const QVariant &id) {
 
   model.setFilter(primaryKey + " = '" + primaryId + "'");
 
-  if (not model.select()) { return false; }
+  model.select();
 
   if (model.rowCount() == 0) {
     close();
@@ -67,14 +67,12 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
 }
 
 bool RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
-  for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) {
-    if (not secondaryModel.setData(row, primaryKey, primaryId)) { return false; }
-  }
+  for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) { secondaryModel.setData(row, primaryKey, primaryId); }
 
   return true;
 }
 
-bool RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
+void RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
 
 QVariant RegisterDialog::data(const QString &key) { return model.data(currentRow, key); }
 
@@ -193,9 +191,9 @@ int RegisterDialog::removeBox() {
 
 void RegisterDialog::remove() {
   if (removeBox() == QMessageBox::Yes) {
-    if (not setData("desativado", true)) { return; }
+    setData("desativado", true);
 
-    if (not model.submitAll()) { return; }
+    model.submitAll();
 
     isDirty = false;
 

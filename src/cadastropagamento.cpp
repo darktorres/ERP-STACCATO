@@ -51,7 +51,7 @@ void CadastroPagamento::setupTables() {
   modelPagamentos.setHeaderData("centavoSobressalente", "Centavo 1ª parcela");
   modelPagamentos.setHeaderData("apenasRepresentacao", "Apenas Representação");
 
-  if (not modelPagamentos.select()) { return; }
+  modelPagamentos.select();
 
   ui->tablePagamentos->setModel(&modelPagamentos);
 
@@ -111,9 +111,9 @@ void CadastroPagamento::setupTables() {
 }
 
 void CadastroPagamento::updateTables() {
-  if (not modelAssocia1.select()) { return; }
+  modelAssocia1.select();
 
-  if (not modelAssocia2.select()) { return; }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::setupMapper() {
@@ -172,32 +172,34 @@ void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
 bool CadastroPagamento::adicionarPagamento() {
   const int row = modelPagamentos.insertRowAtEnd();
 
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
-  if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
+  modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text());
+  modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value());
+  modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId());
+  modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked());
+  modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked());
+  modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked());
+  modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked());
+  modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked());
 
-  if (not modelPagamentos.submitAll()) { return false; }
+  modelPagamentos.submitAll();
 
   const int id = modelPagamentos.query().lastInsertId().toInt();
 
   for (int i = 0; i < ui->spinBoxParcelas->value(); ++i) {
     const int rowTaxas = modelTaxas.insertRowAtEnd();
 
-    if (not modelTaxas.setData(rowTaxas, "idPagamento", id)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "parcela", i + 1)) { return false; }
-    if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
+    modelTaxas.setData(rowTaxas, "idPagamento", id);
+    modelTaxas.setData(rowTaxas, "parcela", i + 1);
+    modelTaxas.setData(rowTaxas, "taxa", 0);
   }
 
-  if (not modelTaxas.submitAll()) { return false; }
+  modelTaxas.submitAll();
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  return modelTaxas.select();
+  modelTaxas.select();
+
+  return true;
 }
 
 void CadastroPagamento::on_pushButtonAtualizarPagamento_clicked() {
@@ -213,14 +215,14 @@ void CadastroPagamento::on_pushButtonAtualizarPagamento_clicked() {
 bool CadastroPagamento::atualizarPagamento() {
   const int row = mapperPagamento.currentIndex();
 
-  if (not modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text())) { return false; }
-  if (not modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value())) { return false; }
-  if (not modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId())) { return false; }
-  if (not modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked())) { return false; }
-  if (not modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked())) { return false; }
+  modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text());
+  modelPagamentos.setData(row, "parcelas", ui->spinBoxParcelas->value());
+  modelPagamentos.setData(row, "idConta", ui->itemBoxContaDestino->getId());
+  modelPagamentos.setData(row, "pula1Mes", ui->checkBoxPula1Mes->isChecked());
+  modelPagamentos.setData(row, "ajustaDiaUtil", ui->checkBoxDiaUtil->isChecked());
+  modelPagamentos.setData(row, "dMaisUm", ui->checkBoxDMaisUm->isChecked());
+  modelPagamentos.setData(row, "centavoSobressalente", ui->checkBoxCentavoSobressalente->isChecked());
+  modelPagamentos.setData(row, "apenasRepresentacao", ui->checkBoxApenasRepresentacao->isChecked());
 
   //--------------------------------------
 
@@ -238,17 +240,17 @@ bool CadastroPagamento::atualizarPagamento() {
     for (int i = 0; i < diferenca; ++i) {
       const int rowTaxas = modelTaxas.insertRowAtEnd();
 
-      if (not modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(row, "idPagamento"))) { return false; }
-      if (not modelTaxas.setData(rowTaxas, "parcela", modelTaxas.rowCount())) { return false; }
-      if (not modelTaxas.setData(rowTaxas, "taxa", 0)) { return false; }
+      modelTaxas.setData(rowTaxas, "idPagamento", modelPagamentos.data(row, "idPagamento"));
+      modelTaxas.setData(rowTaxas, "parcela", modelTaxas.rowCount());
+      modelTaxas.setData(rowTaxas, "taxa", 0);
     }
   }
 
   //--------------------------------------
 
-  if (not modelPagamentos.submitAll()) { return false; }
+  modelPagamentos.submitAll();
 
-  if (not modelTaxas.submitAll()) { return false; }
+  modelTaxas.submitAll();
 
   // submitAll resets currentIndex to -1, set it again
   mapperPagamento.setCurrentIndex(row);
@@ -265,9 +267,9 @@ void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
 
   for (const auto &index : list) { modelPagamentos.removeRow(index.row()); }
 
-  if (not modelPagamentos.submitAll()) { return qApp->enqueueException("Erro removendo pagamentos: " + modelPagamentos.lastError().text(), this); }
+  modelPagamentos.submitAll();
 
-  if (not modelTaxas.select()) { return; }
+  modelTaxas.select();
 
   //--------------------------------------
 
@@ -294,9 +296,9 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  modelAssocia1.select();
 
-  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
@@ -318,13 +320,13 @@ void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
 
   // -------------------------------------------------------------------------
 
-  if (not modelAssocia1.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia1.lastError().text(), this); }
+  modelAssocia1.select();
 
-  if (not modelAssocia2.select()) { qApp->enqueueException("Erro atualizando tabela: " + modelAssocia2.lastError().text(), this); }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::on_pushButtonAtualizarTaxas_clicked() {
-  if (not modelTaxas.submitAll()) { return; }
+  modelTaxas.submitAll();
 
   qApp->enqueueInformation("Taxas atualizadas!", this);
 }
@@ -338,7 +340,7 @@ void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
 
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
-  if (not modelTaxas.select()) { return; }
+  modelTaxas.select();
 
   mapperPagamento.setCurrentModelIndex(index);
 
@@ -351,13 +353,13 @@ void CadastroPagamento::on_tablePagamentos_clicked(const QModelIndex &index) {
 void CadastroPagamento::on_itemBoxLoja_idChanged(const QVariant &id) {
   modelAssocia1.setFilter("idPagamento NOT IN (SELECT idPagamento FROM view_pagamento_loja WHERE idLoja = " + id.toString() + ")");
 
-  if (not modelAssocia1.select()) { return; }
+  modelAssocia1.select();
 
   // -------------------------------------------------------------------------
 
   modelAssocia2.setFilter("idLoja = " + id.toString());
 
-  if (not modelAssocia2.select()) { return; }
+  modelAssocia2.select();
 }
 
 void CadastroPagamento::on_pushButtonLimparSelecao_clicked() { limparSelecao(); }

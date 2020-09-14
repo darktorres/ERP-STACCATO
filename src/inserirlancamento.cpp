@@ -96,8 +96,8 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
   [&] {
     const int newRow = modelContaPagamento.insertRowAtEnd();
 
-    if (not modelContaPagamento.setData(newRow, "status", "PENDENTE")) { return; }
-    if (not modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate())) { return; }
+    modelContaPagamento.setData(newRow, "status", "PENDENTE");
+    modelContaPagamento.setData(newRow, "dataEmissao", qApp->serverDate());
   }();
 
   setConnections();
@@ -106,7 +106,7 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
 void InserirLancamento::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not modelContaPagamento.submitAll()) { return; }
+  modelContaPagamento.submitAll();
 
   qApp->enqueueInformation("Lançamento salvo com sucesso!", this);
   close();
@@ -167,7 +167,7 @@ void InserirLancamento::on_pushButtonDuplicarLancamento_clicked() {
 
     if (value.isNull()) { continue; }
 
-    if (not modelContaPagamento.setData(newRow, col, value)) { return; }
+    modelContaPagamento.setData(newRow, col, value);
   }
 }
 
@@ -190,16 +190,14 @@ void InserirLancamento::preencher(const QModelIndex &index) {
       if (queryConta.first()) {
         const int idConta = queryConta.value("idConta").toInt();
 
-        if (idContaExistente == 0 and idConta != 0) {
-          if (not modelContaPagamento.setData(row, "idConta", idConta)) { return; }
-        }
+        if (idContaExistente == 0 and idConta != 0) { modelContaPagamento.setData(row, "idConta", idConta); }
       }
 
-      if (not modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO")) { return; }
-      if (not modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"))) { return; }
-      if (not modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"))) { return; }
-      if (not modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"))) { return; }
-      if (not modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"))) { return; }
+      modelContaPagamento.setData(row, "status", (tipo == Tipo::Receber) ? "RECEBIDO" : "PAGO");
+      modelContaPagamento.setData(row, "valorReal", modelContaPagamento.data(row, "valor"));
+      modelContaPagamento.setData(row, "tipoReal", modelContaPagamento.data(row, "tipo"));
+      modelContaPagamento.setData(row, "parcelaReal", modelContaPagamento.data(row, "parcela"));
+      modelContaPagamento.setData(row, "centroCusto", modelContaPagamento.data(row, "idLoja"));
     }
   }();
 

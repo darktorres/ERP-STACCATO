@@ -244,7 +244,7 @@ void WidgetVenda::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewVenda.select()) { return; }
+  modelViewVenda.select();
 }
 
 void WidgetVenda::setComboBoxFornecedores() {

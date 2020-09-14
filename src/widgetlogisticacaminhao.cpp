@@ -50,9 +50,9 @@ void WidgetLogisticaCaminhao::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelCaminhao.select()) { return; }
+  modelCaminhao.select();
 
-  if (not modelCarga.select()) { return; }
+  modelCarga.select();
 }
 
 void WidgetLogisticaCaminhao::resetTables() { modelIsSet = false; }

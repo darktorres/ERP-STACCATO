@@ -22,7 +22,7 @@ QVariant SqlTableModel::data(const int row, const int column) const {
 
 QVariant SqlTableModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
-bool SqlTableModel::setData(const int row, const int column, const QVariant &value) {
+void SqlTableModel::setData(const int row, const int column, const QVariant &value) {
   if (row == -1 or column == -1) { throw RuntimeError("Erro: linha/coluna -1 SqlTableModel"); }
 
   QVariant adjustedValue = value;
@@ -30,16 +30,17 @@ bool SqlTableModel::setData(const int row, const int column, const QVariant &val
   if (adjustedValue.type() == QVariant::Double) { adjustedValue.setValue(qApp->roundDouble(adjustedValue.toDouble())); }
   if (adjustedValue.type() == QVariant::String) { adjustedValue.setValue(adjustedValue.toString().toUpper()); }
 
-  if (proxyModel) { return proxyModel->setData(proxyModel->index(row, column), adjustedValue); }
+  if (proxyModel) {
+    proxyModel->setData(proxyModel->index(row, column), adjustedValue);
+    return;
+  }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {
     throw RuntimeError("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
   }
-
-  return true;
 }
 
-bool SqlTableModel::setData(const int row, const QString &column, const QVariant &value) { return setData(row, fieldIndex(column), value); }
+void SqlTableModel::setData(const int row, const QString &column, const QVariant &value) { setData(row, fieldIndex(column), value); }
 
 bool SqlTableModel::setHeaderData(const QString &column, const QVariant &value) { return QSqlTableModel::setHeaderData(fieldIndex(column), Qt::Horizontal, value); }
 
@@ -52,9 +53,7 @@ int SqlTableModel::insertRowAtEnd() {
   return row;
 }
 
-bool SqlTableModel::submitAll() {
-
-  return true;
+void SqlTableModel::submitAll() {
   if (not QSqlTableModel::submitAll()) { throw RuntimeError("Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 }
 

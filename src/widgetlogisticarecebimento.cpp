@@ -41,7 +41,7 @@ void WidgetLogisticaRecebimento::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelViewRecebimento.select()) { return; }
+  modelViewRecebimento.select();
 }
 
 void WidgetLogisticaRecebimento::resetTables() { modelIsSet = false; }

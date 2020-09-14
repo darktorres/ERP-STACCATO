@@ -23,7 +23,7 @@ void WidgetCompraResumo::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelResumo.select()) { return; }
+  modelResumo.select();
 }
 
 void WidgetCompraResumo::resetTables() { modelIsSet = false; }

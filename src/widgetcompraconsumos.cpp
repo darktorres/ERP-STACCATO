@@ -28,9 +28,9 @@ void WidgetCompraConsumos::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelPedido.select()) { return; }
+  modelPedido.select();
 
-  if (not modelProduto.select()) { return; }
+  modelProduto.select();
 }
 
 void WidgetCompraConsumos::resetTables() { modelIsSet = false; }

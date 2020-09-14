@@ -26,7 +26,7 @@ void RegisterAddressDialog::setupTables(const QString &table) {
   mapperEnd.setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 }
 
-bool RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) { return modelEnd.setData(currentRowEnd, key, value); }
+void RegisterAddressDialog::setDataEnd(const QString &key, const QVariant &value) { modelEnd.setData(currentRowEnd, key, value); }
 
 bool RegisterAddressDialog::newRegister() {
   if (not RegisterDialog::newRegister()) { return false; }

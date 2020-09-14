@@ -101,12 +101,12 @@ bool CadastroTransportadora::verifyFields() {
 }
 
 bool CadastroTransportadora::savingProcedures() {
-  if (not setData("cnpj", ui->lineEditCNPJ->text())) { return false; }
-  if (not setData("razaoSocial", ui->lineEditRazaoSocial->text())) { return false; }
-  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
-  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
-  if (not setData("tel", ui->lineEditTel->text())) { return false; }
-  if (not setData("antt", ui->lineEditANTT->text())) { return false; }
+  setData("cnpj", ui->lineEditCNPJ->text());
+  setData("razaoSocial", ui->lineEditRazaoSocial->text());
+  setData("nomeFantasia", ui->lineEditNomeFantasia->text());
+  setData("inscEstadual", ui->lineEditInscEstadual->text());
+  setData("tel", ui->lineEditTel->text());
+  setData("antt", ui->lineEditANTT->text());
 
   return true;
 }
@@ -182,9 +182,9 @@ void CadastroTransportadora::on_pushButtonAtualizarEnd_clicked() {
 
 void CadastroTransportadora::on_pushButtonRemoverEnd_clicked() {
   if (removeBox() == QMessageBox::Yes) {
-    if (not setDataEnd("desativado", true)) { return; }
+    setDataEnd("desativado", true);
 
-    if (not modelEnd.submitAll()) { return; }
+    modelEnd.submitAll();
 
     novoEndereco();
   }
@@ -205,16 +205,16 @@ bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
-  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
-  if (not setDataEnd("CEP", ui->lineEditCEP->text())) { return false; }
-  if (not setDataEnd("logradouro", ui->lineEditLogradouro->text())) { return false; }
-  if (not setDataEnd("numero", ui->lineEditNro->text())) { return false; }
-  if (not setDataEnd("complemento", ui->lineEditComp->text())) { return false; }
-  if (not setDataEnd("bairro", ui->lineEditBairro->text())) { return false; }
-  if (not setDataEnd("cidade", ui->lineEditCidade->text())) { return false; }
-  if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
-  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
-  if (not setDataEnd("desativado", false)) { return false; }
+  setDataEnd("descricao", ui->comboBoxTipoEnd->currentText());
+  setDataEnd("CEP", ui->lineEditCEP->text());
+  setDataEnd("logradouro", ui->lineEditLogradouro->text());
+  setDataEnd("numero", ui->lineEditNro->text());
+  setDataEnd("complemento", ui->lineEditComp->text());
+  setDataEnd("bairro", ui->lineEditBairro->text());
+  setDataEnd("cidade", ui->lineEditCidade->text());
+  setDataEnd("uf", ui->lineEditUF->text());
+  setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()));
+  setDataEnd("desativado", false);
 
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
@@ -284,14 +284,14 @@ bool CadastroTransportadora::viewRegister() {
   const bool inativos = ui->checkBoxMostrarInativos->isChecked();
   modelEnd.setFilter("idTransportadora = " + data("idTransportadora").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) { return false; }
+  modelEnd.select();
 
   //---------------------------------------------------
 
   const bool inativosVeiculo = ui->checkBoxMostrarInativosVeiculo->isChecked();
   modelVeiculo.setFilter("idTransportadora = " + data("idTransportadora").toString() + (inativosVeiculo ? "" : " AND desativado = FALSE"));
 
-  if (not modelVeiculo.select()) { return false; }
+  modelVeiculo.select();
 
   return true;
 }
@@ -301,14 +301,12 @@ void CadastroTransportadora::successMessage() { qApp->enqueueInformation((tipo =
 bool CadastroTransportadora::cadastrarVeiculo(const Tipo tipoVeiculo) {
   if (tipoVeiculo == Tipo::Cadastrar) { currentRowVeiculo = modelVeiculo.insertRowAtEnd(); }
 
-  if (not modelVeiculo.setData(currentRowVeiculo, "modelo", ui->lineEditModelo->text())) { return false; }
-  if (not modelVeiculo.setData(currentRowVeiculo, "capacidade", ui->lineEditCarga->text().toInt())) { return false; }
+  modelVeiculo.setData(currentRowVeiculo, "modelo", ui->lineEditModelo->text());
+  modelVeiculo.setData(currentRowVeiculo, "capacidade", ui->lineEditCarga->text().toInt());
 
-  if (ui->lineEditPlaca->text() != "-") {
-    if (not modelVeiculo.setData(currentRowVeiculo, "placa", ui->lineEditPlaca->text())) { return false; }
-  }
+  if (ui->lineEditPlaca->text() != "-") { modelVeiculo.setData(currentRowVeiculo, "placa", ui->lineEditPlaca->text()); }
 
-  if (not modelVeiculo.setData(currentRowVeiculo, "ufPlaca", ui->lineEditUfPlaca->text())) { return false; }
+  modelVeiculo.setData(currentRowVeiculo, "ufPlaca", ui->lineEditUfPlaca->text());
 
   if (tipoVeiculo == Tipo::Cadastrar) { backupVeiculo.append(modelVeiculo.record(currentRowVeiculo)); }
 
@@ -342,9 +340,9 @@ void CadastroTransportadora::clearVeiculo() {
 
 void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
   if (removeBox() == QMessageBox::Yes) {
-    if (not modelVeiculo.setData(currentRowVeiculo, "desativado", true)) { return; }
+    modelVeiculo.setData(currentRowVeiculo, "desativado", true);
 
-    if (not modelVeiculo.submitAll()) { return; }
+    modelVeiculo.submitAll();
 
     novoVeiculo();
   }
@@ -358,7 +356,7 @@ bool CadastroTransportadora::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
@@ -368,13 +366,15 @@ bool CadastroTransportadora::cadastrar() {
 
     if (not setForeignKey(modelEnd)) { return false; }
 
-    if (not modelEnd.submitAll()) { return false; }
+    modelEnd.submitAll();
 
     // -------------------------------------------------------------------------
 
     if (not setForeignKey(modelVeiculo)) { return false; }
 
-    return modelVeiculo.submitAll();
+    modelVeiculo.submitAll();
+
+    return true;
   }();
 
   if (success) {
@@ -390,9 +390,9 @@ bool CadastroTransportadora::cadastrar() {
     modelVeiculo.setFilter(primaryKey + " = '" + primaryId + "'");
   } else {
     qApp->rollbackTransaction();
-    void(model.select());
-    void(modelEnd.select());
-    void(modelVeiculo.select());
+    model.select();
+    modelEnd.select();
+    modelVeiculo.select();
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
     for (auto &record : backupVeiculo) { modelVeiculo.insertRecord(-1, record); }

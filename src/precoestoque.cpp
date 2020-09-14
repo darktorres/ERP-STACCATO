@@ -41,7 +41,7 @@ void PrecoEstoque::setupTables() {
 
   modelProduto.setFilter("estoque = TRUE AND estoqueRestante > 0");
 
-  if (not modelProduto.select()) { return; }
+  modelProduto.select();
 
   modelProduto.proxyModel = new SortFilterProxyModel(&modelProduto, this);
 
@@ -93,7 +93,7 @@ void PrecoEstoque::setupTables() {
 }
 
 void PrecoEstoque::on_pushButtonSalvar_clicked() {
-  if (not modelProduto.submitAll()) { return; }
+  modelProduto.submitAll();
 
   qApp->enqueueInformation("Dados atualizados!", this);
   close();

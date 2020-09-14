@@ -28,7 +28,7 @@ void CancelaProduto::setFilter(const QString &ordemCompra) {
   if (tipo == Tipo::CompraConfirmar) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM COMPRA'"); }
   if (tipo == Tipo::CompraFaturamento) { model.setFilter("ordemCompra = " + ordemCompra + " AND status = 'EM FATURAMENTO'"); }
 
-  if (not model.select()) { return qApp->enqueueException("Erro carregando tabela: " + model.lastError().text(), this); }
+  model.select();
 }
 
 void CancelaProduto::setupTables() {

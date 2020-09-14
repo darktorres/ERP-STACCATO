@@ -108,41 +108,37 @@ bool CadastroFornecedor::verifyFields() {
 }
 
 bool CadastroFornecedor::savingProcedures() {
-  if (not setData("razaoSocial", ui->lineEditFornecedor->text())) { return false; }
-  if (not setData("nomeFantasia", ui->lineEditNomeFantasia->text())) { return false; }
-  if (not setData("contatoNome", ui->lineEditContatoNome->text())) { return false; }
-  if (not setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"))) { return false; }
-  if (not setData("contatoApelido", ui->lineEditContatoApelido->text())) { return false; }
-  if (not setData("contatoRG", ui->lineEditContatoRG->text().remove(".").remove("-"))) { return false; }
-  if (not setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"))) { return false; }
-  if (not setData("inscEstadual", ui->lineEditInscEstadual->text())) { return false; }
-  if (not setData("tel", ui->lineEditTel_Res->text())) { return false; }
-  if (not setData("telCel", ui->lineEditTel_Cel->text())) { return false; }
-  if (not setData("telCom", ui->lineEditTel_Com->text())) { return false; }
-  if (not setData("nextel", ui->lineEditNextel->text())) { return false; }
-  if (not setData("email", ui->lineEditEmail->text())) { return false; }
-  if (not setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value())) { return false; }
-  if (not setData("st", ui->comboBoxSt->currentText())) { return false; }
-  if (not setData("comissao1", ui->doubleSpinBoxComissao->value())) { return false; }
-  if (not setData("comissao2", ui->doubleSpinBoxComissaoEspecial->value())) { return false; }
-  if (not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
+  setData("razaoSocial", ui->lineEditFornecedor->text());
+  setData("nomeFantasia", ui->lineEditNomeFantasia->text());
+  setData("contatoNome", ui->lineEditContatoNome->text());
+  setData("contatoCPF", ui->lineEditContatoCPF->text().remove(".").remove("-"));
+  setData("contatoApelido", ui->lineEditContatoApelido->text());
+  setData("contatoRG", ui->lineEditContatoRG->text().remove(".").remove("-"));
+  setData("cnpj", ui->lineEditCNPJ->text().remove(".").remove("/").remove("-"));
+  setData("inscEstadual", ui->lineEditInscEstadual->text());
+  setData("tel", ui->lineEditTel_Res->text());
+  setData("telCel", ui->lineEditTel_Cel->text());
+  setData("telCom", ui->lineEditTel_Com->text());
+  setData("nextel", ui->lineEditNextel->text());
+  setData("email", ui->lineEditEmail->text());
+  setData("aliquotaSt", ui->doubleSpinBoxAliquotaSt->value());
+  setData("st", ui->comboBoxSt->currentText());
+  setData("comissao1", ui->doubleSpinBoxComissao->value());
+  setData("comissao2", ui->doubleSpinBoxComissaoEspecial->value());
+  setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt());
 
   // Dados bancários
 
-  if (not setData("nomeBanco", ui->lineEditNomeBancario->text())) { return false; }
+  setData("nomeBanco", ui->lineEditNomeBancario->text());
 
-  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) {
-    if (not setData("cnpjBanco", ui->lineEditCNPJBancario->text())) { return false; }
-  }
+  if (not ui->lineEditCNPJBancario->text().remove(".").remove("/").remove("-").isEmpty()) { setData("cnpjBanco", ui->lineEditCNPJBancario->text()); }
 
-  if (not setData("banco", ui->lineEditBanco->text())) { return false; }
+  setData("banco", ui->lineEditBanco->text());
 
-  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) {
-    if (not setData("agencia", ui->lineEditAgencia->text())) { return false; }
-  }
+  if (not ui->lineEditAgencia->text().remove("-").isEmpty()) { setData("agencia", ui->lineEditAgencia->text()); }
 
-  if (not setData("cc", ui->lineEditCC->text())) { return false; }
-  if (not setData("poupanca", ui->checkBoxPoupanca->isChecked())) { return false; }
+  setData("cc", ui->lineEditCC->text());
+  setData("poupanca", ui->checkBoxPoupanca->isChecked());
 
   return true;
 }
@@ -217,7 +213,7 @@ bool CadastroFornecedor::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
@@ -227,7 +223,7 @@ bool CadastroFornecedor::cadastrar() {
 
     if (not setForeignKey(modelEnd)) { return false; }
 
-    if (not modelEnd.submitAll()) { return false; }
+    modelEnd.submitAll();
 
     return true;
   }();
@@ -242,8 +238,8 @@ bool CadastroFornecedor::cadastrar() {
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
   } else {
     qApp->rollbackTransaction();
-    void(model.select());
-    void(modelEnd.select());
+    model.select();
+    modelEnd.select();
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
   }
@@ -287,16 +283,16 @@ bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
 
   if (tipoEndereco == Tipo::Cadastrar) { currentRowEnd = modelEnd.insertRowAtEnd(); }
 
-  if (not setDataEnd("descricao", ui->comboBoxTipoEnd->currentText())) { return false; }
-  if (not setDataEnd("cep", ui->lineEditCEP->text())) { return false; }
-  if (not setDataEnd("logradouro", ui->lineEditEndereco->text())) { return false; }
-  if (not setDataEnd("numero", ui->lineEditNro->text())) { return false; }
-  if (not setDataEnd("complemento", ui->lineEditComp->text())) { return false; }
-  if (not setDataEnd("bairro", ui->lineEditBairro->text())) { return false; }
-  if (not setDataEnd("cidade", ui->lineEditCidade->text())) { return false; }
-  if (not setDataEnd("uf", ui->lineEditUF->text())) { return false; }
-  if (not setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()))) { return false; }
-  if (not setDataEnd("desativado", false)) { return false; }
+  setDataEnd("descricao", ui->comboBoxTipoEnd->currentText());
+  setDataEnd("cep", ui->lineEditCEP->text());
+  setDataEnd("logradouro", ui->lineEditEndereco->text());
+  setDataEnd("numero", ui->lineEditNro->text());
+  setDataEnd("complemento", ui->lineEditComp->text());
+  setDataEnd("bairro", ui->lineEditBairro->text());
+  setDataEnd("cidade", ui->lineEditCidade->text());
+  setDataEnd("uf", ui->lineEditUF->text());
+  setDataEnd("codUF", getCodigoUF(ui->lineEditUF->text()));
+  setDataEnd("desativado", false);
 
   if (tipoEndereco == Tipo::Cadastrar) { backupEndereco.append(modelEnd.record(currentRowEnd)); }
 
@@ -341,7 +337,7 @@ bool CadastroFornecedor::viewRegister() {
   const bool inativos = ui->checkBoxMostrarInativos->isChecked();
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (inativos ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) { return false; }
+  modelEnd.select();
 
   //---------------------------------------------------
 
@@ -354,9 +350,9 @@ bool CadastroFornecedor::viewRegister() {
 
 void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
   if (removeBox() == QMessageBox::Yes) {
-    if (not setDataEnd("desativado", true)) { return; }
+    setDataEnd("desativado", true);
 
-    if (not modelEnd.submitAll()) { return; }
+    modelEnd.submitAll();
 
     novoEndereco();
   }
@@ -405,7 +401,7 @@ void CadastroFornecedor::on_checkBoxMostrarInativos_clicked(const bool checked) 
 
   modelEnd.setFilter("idFornecedor = " + data("idFornecedor").toString() + (checked ? "" : " AND desativado = FALSE"));
 
-  if (not modelEnd.select()) { return; }
+  modelEnd.select();
 }
 
 void CadastroFornecedor::on_lineEditCNPJBancario_textEdited(const QString &text) {

@@ -118,12 +118,12 @@ void CadastroUsuario::updateMode() {
 }
 
 bool CadastroUsuario::savingProcedures() {
-  if (not setData("nome", ui->lineEditNome->text())) { return false; }
-  if (not setData("idLoja", ui->comboBoxLoja->getCurrentValue())) { return false; }
-  if (not setData("tipo", ui->comboBoxTipo->currentText())) { return false; }
-  if (not setData("user", ui->lineEditUser->text())) { return false; }
-  if (not setData("email", ui->lineEditEmail->text())) { return false; }
-  if (not setData("user", ui->lineEditUser->text())) { return false; }
+  setData("nome", ui->lineEditNome->text());
+  setData("idLoja", ui->comboBoxLoja->getCurrentValue());
+  setData("tipo", ui->comboBoxTipo->currentText());
+  setData("user", ui->lineEditUser->text());
+  setData("email", ui->lineEditEmail->text());
+  setData("user", ui->lineEditUser->text());
 
   // NOTE: change this when upgrading to MySQL 8
   if (ui->lineEditPasswd->text() != "********") {
@@ -131,10 +131,10 @@ bool CadastroUsuario::savingProcedures() {
 
     if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { return false; }
 
-    if (not setData("passwd", query.value(0))) { return false; }
+    setData("passwd", query.value(0));
   }
 
-  if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL" and not setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt())) { return false; }
+  if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }
 
   return true;
 }
@@ -147,7 +147,7 @@ bool CadastroUsuario::viewRegister() {
 
   modelPermissoes.setFilter("idUsuario = " + data("idUsuario").toString());
 
-  if (not modelPermissoes.select()) { return false; }
+  modelPermissoes.select();
 
   // TODO: shouldn't this be in setupTables?
   auto *transpose = new QTransposeProxyModel(this);
@@ -203,7 +203,7 @@ bool CadastroUsuario::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
@@ -212,14 +212,14 @@ bool CadastroUsuario::cadastrar() {
     if (tipo == Tipo::Cadastrar) {
       const int row = modelPermissoes.insertRowAtEnd();
 
-      if (not modelPermissoes.setData(row, "idUsuario", primaryId)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_orcamento", true)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_venda", true)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_estoque", true)) { return false; }
-      if (not modelPermissoes.setData(row, "view_tab_relatorio", true)) { return false; }
+      modelPermissoes.setData(row, "idUsuario", primaryId);
+      modelPermissoes.setData(row, "view_tab_orcamento", true);
+      modelPermissoes.setData(row, "view_tab_venda", true);
+      modelPermissoes.setData(row, "view_tab_estoque", true);
+      modelPermissoes.setData(row, "view_tab_relatorio", true);
     }
 
-    if (not modelPermissoes.submitAll()) { return false; }
+    modelPermissoes.submitAll();
 
     return true;
   }();
@@ -230,8 +230,8 @@ bool CadastroUsuario::cadastrar() {
     if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
   } else {
     qApp->rollbackTransaction();
-    void(model.select());
-    void(modelPermissoes.select());
+    model.select();
+    modelPermissoes.select();
   }
 
   return success;

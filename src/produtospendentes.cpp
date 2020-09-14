@@ -49,11 +49,11 @@ void ProdutosPendentes::recalcularQuantidade() {
 void ProdutosPendentes::viewProduto(const QString &codComercial, const QString &idVenda) {
   modelProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 
   modelViewProdutos.setFilter("codComercial = '" + codComercial + "' AND idVenda = '" + idVenda + "' AND status IN ('PENDENTE', 'REPO. ENTREGA', 'REPO. RECEB.')");
 
-  if (not modelViewProdutos.select()) { return; }
+  modelViewProdutos.select();
 
   ui->doubleSpinBoxQuantTotal->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
   ui->doubleSpinBoxComprar->setSuffix(" " + modelViewProdutos.data(0, "un").toString());
@@ -141,12 +141,14 @@ bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPr
     if (not enviarExcedenteParaCompra(row, dataPrevista)) { return false; }
   }
 
-  return modelProdutos.submitAll();
+  modelProdutos.submitAll();
+
+  return true;
 }
 
 void ProdutosPendentes::recarregarTabelas() {
-  if (not modelProdutos.select()) { return; }
-  if (not modelViewProdutos.select()) { return; }
+  modelProdutos.select();
+  modelViewProdutos.select();
 
   modelEstoque.setQuery(modelEstoque.query().executedQuery());
 
@@ -195,9 +197,9 @@ bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoq
     if (not dividirVenda(quantConsumir, quantVenda, rowProduto)) { return false; }
   }
 
-  if (not modelProdutos.setData(rowProduto, "status", modelEstoque.data(rowEstoque, "status"))) { return false; }
+  modelProdutos.setData(rowProduto, "status", modelEstoque.data(rowEstoque, "status"));
 
-  if (not modelProdutos.submitAll()) { return false; }
+  modelProdutos.submitAll();
 
   return true;
 }
@@ -283,32 +285,32 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
 
   const int newRow = model.insertRowAtEnd();
 
-  if (not model.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"))) { return false; }
-  if (not model.setData(newRow, "idVendaProduto1", modelViewProdutos.data(row, "idVendaProdutoFK"))) { return false; }
-  if (not model.setData(newRow, "idVendaProduto2", modelViewProdutos.data(row, "idVendaProduto2"))) { return false; }
-  if (not model.setData(newRow, "fornecedor", modelViewProdutos.data(row, "fornecedor"))) { return false; }
-  if (not model.setData(newRow, "idProduto", modelViewProdutos.data(row, "idProduto"))) { return false; }
-  if (not model.setData(newRow, "descricao", modelViewProdutos.data(row, "produto"))) { return false; }
-  if (not model.setData(newRow, "obs", modelViewProdutos.data(row, "obs"))) { return false; }
-  if (not model.setData(newRow, "colecao", modelViewProdutos.data(row, "colecao"))) { return false; }
-  if (not model.setData(newRow, "un", modelViewProdutos.data(row, "un"))) { return false; }
-  if (not model.setData(newRow, "un2", modelViewProdutos.data(row, "un2"))) { return false; }
-  if (not model.setData(newRow, "prcUnitario", modelViewProdutos.data(row, "custo"))) { return false; }
-  if (not model.setData(newRow, "kgcx", modelViewProdutos.data(row, "kgcx"))) { return false; }
-  if (not model.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"))) { return false; }
-  if (not model.setData(newRow, "codComercial", modelViewProdutos.data(row, "codComercial"))) { return false; }
-  if (not model.setData(newRow, "codBarras", modelViewProdutos.data(row, "codBarras"))) { return false; }
-  if (not model.setData(newRow, "dataPrevCompra", dataPrevista)) { return false; }
+  model.setData(newRow, "idVenda", modelViewProdutos.data(row, "idVenda"));
+  model.setData(newRow, "idVendaProduto1", modelViewProdutos.data(row, "idVendaProdutoFK"));
+  model.setData(newRow, "idVendaProduto2", modelViewProdutos.data(row, "idVendaProduto2"));
+  model.setData(newRow, "fornecedor", modelViewProdutos.data(row, "fornecedor"));
+  model.setData(newRow, "idProduto", modelViewProdutos.data(row, "idProduto"));
+  model.setData(newRow, "descricao", modelViewProdutos.data(row, "produto"));
+  model.setData(newRow, "obs", modelViewProdutos.data(row, "obs"));
+  model.setData(newRow, "colecao", modelViewProdutos.data(row, "colecao"));
+  model.setData(newRow, "un", modelViewProdutos.data(row, "un"));
+  model.setData(newRow, "un2", modelViewProdutos.data(row, "un2"));
+  model.setData(newRow, "prcUnitario", modelViewProdutos.data(row, "custo"));
+  model.setData(newRow, "kgcx", modelViewProdutos.data(row, "kgcx"));
+  model.setData(newRow, "formComercial", modelViewProdutos.data(row, "formComercial"));
+  model.setData(newRow, "codComercial", modelViewProdutos.data(row, "codComercial"));
+  model.setData(newRow, "codBarras", modelViewProdutos.data(row, "codBarras"));
+  model.setData(newRow, "dataPrevCompra", dataPrevista);
 
   const double quant = (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) ? ui->doubleSpinBoxComprar->value() : modelViewProdutos.data(row, "quant").toDouble();
   const double custo = modelViewProdutos.data(row, "custo").toDouble();
   const double step = ui->doubleSpinBoxQuantTotal->singleStep();
 
-  if (not model.setData(newRow, "quant", quant)) { return false; }
-  if (not model.setData(newRow, "preco", quant * custo)) { return false; }
-  if (not model.setData(newRow, "caixas", quant / step)) { return false; }
+  model.setData(newRow, "quant", quant);
+  model.setData(newRow, "preco", quant * custo);
+  model.setData(newRow, "caixas", quant / step);
 
-  if (not model.submitAll()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + model.lastError().text(), this); }
+  model.submitAll();
 
   return true;
 }
@@ -318,7 +320,7 @@ bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
     if (not dividirVenda(ui->doubleSpinBoxComprar->value(), modelProdutos.data(rowProduto, "quant").toDouble(), rowProduto)) { return false; }
   }
 
-  if (not modelProdutos.setData(rowProduto, "status", "INICIADO")) { return false; }
+  modelProdutos.setData(rowProduto, "status", "INICIADO");
 
   return true;
 }
@@ -332,11 +334,11 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
   const double parcialDesc = modelProdutos.data(rowProduto, "parcialDesc").toDouble();
   const double total = modelProdutos.data(rowProduto, "total").toDouble();
 
-  if (not modelProdutos.setData(rowProduto, "quant", quantSeparar)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa))) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcial", parcial * proporcao)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc * proporcao)) { return false; }
-  if (not modelProdutos.setData(rowProduto, "total", total * proporcao)) { return false; }
+  modelProdutos.setData(rowProduto, "quant", quantSeparar);
+  modelProdutos.setData(rowProduto, "caixas", (quantSeparar / quantCaixa));
+  modelProdutos.setData(rowProduto, "parcial", parcial * proporcao);
+  modelProdutos.setData(rowProduto, "parcialDesc", parcialDesc * proporcao);
+  modelProdutos.setData(rowProduto, "total", total * proporcao);
 
   // -------------------------------------------------------------------------
 
@@ -352,7 +354,7 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
 
     if (value.isNull()) { continue; }
 
-    if (not modelProdutos.setData(newRow, column, value)) { return false; }
+    modelProdutos.setData(newRow, column, value);
   }
 
   // -------------------------------------------------------------------------
@@ -360,12 +362,12 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
   // alterar quant, precos, etc da linha nova
   const double proporcaoNovo = (quantVenda - quantSeparar) / quantVenda;
 
-  if (not modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"))) { return false; }
-  if (not modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar))) { return false; }
-  if (not modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / quantCaixa)) { return false; }
-  if (not modelProdutos.setData(newRow, "parcial", parcial * proporcaoNovo)) { return false; }
-  if (not modelProdutos.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo)) { return false; }
-  if (not modelProdutos.setData(newRow, "total", total * proporcaoNovo)) { return false; }
+  modelProdutos.setData(newRow, "idRelacionado", modelProdutos.data(rowProduto, "idVendaProduto2"));
+  modelProdutos.setData(newRow, "quant", (quantVenda - quantSeparar));
+  modelProdutos.setData(newRow, "caixas", (quantVenda - quantSeparar) / quantCaixa);
+  modelProdutos.setData(newRow, "parcial", parcial * proporcaoNovo);
+  modelProdutos.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo);
+  modelProdutos.setData(newRow, "total", total * proporcaoNovo);
 
   return true;
 }

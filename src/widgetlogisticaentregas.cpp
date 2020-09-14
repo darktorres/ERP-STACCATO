@@ -56,17 +56,17 @@ void WidgetLogisticaEntregas::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelCalendario.select()) { return; }
+  modelCalendario.select();
 
   // -----------------------------------------------------------------
 
-  if (not modelCarga.select()) { return; }
+  modelCarga.select();
 
   // -----------------------------------------------------------------
 
   if (modelCarga.rowCount() == 0) { modelProdutos.setFilter("0"); }
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 }
 
 void WidgetLogisticaEntregas::resetTables() { modelIsSet = false; }

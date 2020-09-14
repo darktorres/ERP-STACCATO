@@ -169,40 +169,40 @@ void CadastroProduto::successMessage() { qApp->enqueueInformation((tipo == Tipo:
 bool CadastroProduto::savingProcedures() {
   // TODO: verificar aonde estou salvando 'estoque'/'promocao' e não deixar marcar os 2
 
-  if (not setData("codBarras", ui->lineEditCodBarras->text())) { return false; }
-  if (not setData("codComercial", ui->lineEditCodComer->text())) { return false; }
-  if (not setData("colecao", ui->lineEditColecao->text())) { return false; }
-  if (not setData("comissao", ui->doubleSpinBoxComissao->value())) { return false; }
-  if (not setData("cst", ui->comboBoxCST->currentText())) { return false; }
-  if (not setData("custo", ui->doubleSpinBoxCusto->value())) { return false; }
-  if (not setData("descricao", ui->lineEditDescricao->text())) { return false; }
-  if (not setData("estoqueRestante", ui->doubleSpinBoxEstoque->value())) { return false; }
-  if (not setData("formComercial", ui->lineEditFormComer->text())) { return false; }
-  if (not setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first())) { return false; }
-  if (not setData("icms", ui->lineEditICMS->text())) { return false; }
-  if (not setData("idFornecedor", ui->itemBoxFornecedor->getId())) { return false; }
-  if (not setData("ipi", ui->doubleSpinBoxIPI->value())) { return false; }
-  if (not setData("kgcx", ui->doubleSpinBoxKgCx->value())) { return false; }
-  if (not setData("m2cx", ui->doubleSpinBoxM2Cx->value())) { return false; }
-  if (not setData("markup", ui->doubleSpinBoxMarkup->value())) { return false; }
-  if (not setData("ncm", ui->lineEditNCM->text())) { return false; }
-  if (not setData("observacoes", ui->textEditObserv->toPlainText())) { return false; }
-  if (not setData("origem", ui->comboBoxOrigem->currentData())) { return false; }
-  if (not setData("pccx", ui->doubleSpinBoxPcCx->value())) { return false; }
-  if (not setData("precoVenda", ui->doubleSpinBoxVenda->value())) { return false; }
-  if (not setData("qtdPallet", ui->doubleSpinBoxQtePallet->value())) { return false; }
-  if (not setData("st", ui->doubleSpinBoxST->value())) { return false; }
-  if (not setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO")) { return false; }
-  if (not setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text())) { return false; }
+  setData("codBarras", ui->lineEditCodBarras->text());
+  setData("codComercial", ui->lineEditCodComer->text());
+  setData("colecao", ui->lineEditColecao->text());
+  setData("comissao", ui->doubleSpinBoxComissao->value());
+  setData("cst", ui->comboBoxCST->currentText());
+  setData("custo", ui->doubleSpinBoxCusto->value());
+  setData("descricao", ui->lineEditDescricao->text());
+  setData("estoqueRestante", ui->doubleSpinBoxEstoque->value());
+  setData("formComercial", ui->lineEditFormComer->text());
+  setData("Fornecedor", ui->itemBoxFornecedor->text().split(" - ").first());
+  setData("icms", ui->lineEditICMS->text());
+  setData("idFornecedor", ui->itemBoxFornecedor->getId());
+  setData("ipi", ui->doubleSpinBoxIPI->value());
+  setData("kgcx", ui->doubleSpinBoxKgCx->value());
+  setData("m2cx", ui->doubleSpinBoxM2Cx->value());
+  setData("markup", ui->doubleSpinBoxMarkup->value());
+  setData("ncm", ui->lineEditNCM->text());
+  setData("observacoes", ui->textEditObserv->toPlainText());
+  setData("origem", ui->comboBoxOrigem->currentData());
+  setData("pccx", ui->doubleSpinBoxPcCx->value());
+  setData("precoVenda", ui->doubleSpinBoxVenda->value());
+  setData("qtdPallet", ui->doubleSpinBoxQtePallet->value());
+  setData("st", ui->doubleSpinBoxST->value());
+  setData("temLote", ui->radioButtonLote->isChecked() ? "SIM" : "NÃO");
+  setData("ui", ui->lineEditUI->text().isEmpty() ? "0" : ui->lineEditUI->text());
 
   const QString un = ui->comboBoxUn->currentText();
   const double m2cx = ui->doubleSpinBoxM2Cx->value();
   const double pccx = ui->doubleSpinBoxPcCx->value();
   const double quantCaixa = (un == "M2" or un == "M²" or un == "ML") ? m2cx : pccx;
 
-  if (not setData("quantCaixa", quantCaixa)) { return false; }
-  if (not setData("un", ui->comboBoxUn->currentText())) { return false; }
-  if (not setData("validade", ui->dateEditValidade->date())) { return false; }
+  setData("quantCaixa", quantCaixa);
+  setData("un", ui->comboBoxUn->currentText());
+  setData("validade", ui->dateEditValidade->date());
 
   QSqlQuery query;
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
@@ -212,8 +212,8 @@ bool CadastroProduto::savingProcedures() {
 
   const bool representacao = query.value("representacao").toBool();
 
-  if (not setData("representacao", representacao)) { return false; }
-  if (not setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate())) { return false; }
+  setData("representacao", representacao);
+  setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate());
 
   return true;
 }
@@ -243,7 +243,7 @@ bool CadastroProduto::cadastrar() {
 
     if (not savingProcedures()) { return false; }
 
-    if (not model.submitAll()) { return false; }
+    model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
@@ -256,7 +256,7 @@ bool CadastroProduto::cadastrar() {
     if (not qApp->endTransaction()) { return false; }
   } else {
     qApp->rollbackTransaction();
-    void(model.select());
+    model.select();
   }
 
   return success;

@@ -93,7 +93,7 @@ bool SearchDialog::prepare_show() {
   model.setFilter(filter);
 
   if (not isSet) {
-    if (not model.select()) { return false; }
+    model.select();
     isSet = true;
   }
 

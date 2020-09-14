@@ -53,7 +53,7 @@ void WidgetLogistica::updateTables() {
   if (currentText == "Agendar Coleta" or currentText == "Coleta" or currentText == "Recebimento" or currentText == "Representação") {
     ui->frameForn->show();
 
-    if (not modelViewLogistica.select()) { return; }
+    modelViewLogistica.select();
   }
 
   //--------------------------------------------------------

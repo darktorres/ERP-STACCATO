@@ -57,19 +57,19 @@ void ImportaTabelaIBPT::importar() {
 
     const int row = model.insertRowAtEnd();
 
-    if (not model.setData(row, "codigo", line.takeFirst())) { return; }
+    model.setData(row, "codigo", line.takeFirst());
     const QString excecao = line.takeFirst();
-    if (not model.setData(row, "excecao", excecao.isEmpty() ? 0 : excecao.toInt())) { return; }
-    if (not model.setData(row, "tipo", line.takeFirst())) { return; }
-    if (not model.setData(row, "descricao", line.takeFirst())) { return; }
-    if (not model.setData(row, "nacionalfederal", line.takeFirst())) { return; }
-    if (not model.setData(row, "importadosfederal", line.takeFirst())) { return; }
-    if (not model.setData(row, "estadual", line.takeFirst())) { return; }
-    if (not model.setData(row, "municipal", line.takeFirst())) { return; }
-    if (not model.setData(row, "vigenciainicio", QDate::fromString(line.takeFirst(), "dd/MM/yyyy"))) { return; }
-    if (not model.setData(row, "vigenciafim", QDate::fromString(line.takeFirst(), "dd/MM/yyyy"))) { return; }
-    if (not model.setData(row, "chave", line.takeFirst())) { return; }
-    if (not model.setData(row, "versao", line.takeFirst())) { return; }
+    model.setData(row, "excecao", excecao.isEmpty() ? 0 : excecao.toInt());
+    model.setData(row, "tipo", line.takeFirst());
+    model.setData(row, "descricao", line.takeFirst());
+    model.setData(row, "nacionalfederal", line.takeFirst());
+    model.setData(row, "importadosfederal", line.takeFirst());
+    model.setData(row, "estadual", line.takeFirst());
+    model.setData(row, "municipal", line.takeFirst());
+    model.setData(row, "vigenciainicio", QDate::fromString(line.takeFirst(), "dd/MM/yyyy"));
+    model.setData(row, "vigenciafim", QDate::fromString(line.takeFirst(), "dd/MM/yyyy"));
+    model.setData(row, "chave", line.takeFirst());
+    model.setData(row, "versao", line.takeFirst());
 
     const auto remains = file.bytesAvailable();
     progressDialog.setValue(size - remains);
@@ -77,10 +77,7 @@ void ImportaTabelaIBPT::importar() {
 
   if (not qApp->startTransaction("ImportaTabelaIBPT::importar")) { return; }
 
-  if (not model.submitAll()) {
-    qApp->rollbackTransaction();
-    return qApp->enqueueException("Erro salvando dados: " + model.lastError().text(), this);
-  }
+  model.submitAll();
 
   if (not qApp->endTransaction()) { return; }
 

@@ -49,7 +49,7 @@ void Galpao::updateTables() {
     modelIsSet = true;
   }
 
-  if (not modelTranspAgend.select()) { return; }
+  modelTranspAgend.select();
 
   carregarPallets();
 }
@@ -180,7 +180,7 @@ void Galpao::on_itemBoxVeiculo_textChanged(const QString &) { setFilter(); }
 void Galpao::setFilter() {
   modelTranspAgend.setFilter("idVeiculo = " + ui->itemBoxVeiculo->getId().toString() + " AND status != 'FINALIZADO' AND DATE(data) = '" + ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "'");
 
-  if (not modelTranspAgend.select()) { qApp->enqueueError("Erro: " + modelTranspAgend.lastError().text(), this); }
+  modelTranspAgend.select();
 
   on_table_selectionChanged();
 }

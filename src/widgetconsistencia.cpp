@@ -21,21 +21,21 @@ void WidgetConsistencia::updateTables() {
     modelIsSet = true;
   }
 
-  if (not model1.select()) { qApp->enqueueException("Erro1: " + model1.lastError().text(), this); }
+  model1.select();
 
-  if (not model2.select()) { qApp->enqueueException("Erro2: " + model2.lastError().text(), this); }
+  model2.select();
 
-  if (not model3.select()) { qApp->enqueueException("Erro3: " + model3.lastError().text(), this); }
+  model3.select();
 
-  if (not model4.select()) { qApp->enqueueException("Erro4: " + model4.lastError().text(), this); }
+  model4.select();
 
-  if (not model5.select()) { qApp->enqueueException("Erro5: " + model5.lastError().text(), this); }
+  model5.select();
 
-  if (not model6.select()) { qApp->enqueueException("Erro6: " + model6.lastError().text(), this); }
+  model6.select();
 
-  if (not model7.select()) { qApp->enqueueException("Erro7: " + model7.lastError().text(), this); }
+  model7.select();
 
-  if (not model8.select()) { qApp->enqueueException("Erro8: " + model8.lastError().text(), this); }
+  model8.select();
 }
 
 void WidgetConsistencia::setupTables() {
@@ -49,7 +49,7 @@ void WidgetConsistencia::setupTables() {
 
   model1.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model1.select()) { qApp->enqueueException("Erro1: " + model1.lastError().text(), this); }
+  model1.select();
 
   ui->tableView->setModel(&model1);
 
@@ -59,7 +59,7 @@ void WidgetConsistencia::setupTables() {
 
   model2.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model2.select()) { qApp->enqueueException("Erro2: " + model2.lastError().text(), this); }
+  model2.select();
 
   ui->tableView_2->setModel(&model2);
 
@@ -69,7 +69,7 @@ void WidgetConsistencia::setupTables() {
 
   model3.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model3.select()) { qApp->enqueueException("Erro3: " + model3.lastError().text(), this); }
+  model3.select();
 
   ui->tableView_3->setModel(&model3);
 
@@ -79,7 +79,7 @@ void WidgetConsistencia::setupTables() {
 
   model4.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model4.select()) { qApp->enqueueException("Erro4: " + model4.lastError().text(), this); }
+  model4.select();
 
   ui->tableView_4->setModel(&model4);
 
@@ -89,7 +89,7 @@ void WidgetConsistencia::setupTables() {
 
   model5.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model5.select()) { qApp->enqueueException("Erro5: " + model5.lastError().text(), this); }
+  model5.select();
 
   ui->tableView_5->setModel(&model5);
 
@@ -99,7 +99,7 @@ void WidgetConsistencia::setupTables() {
 
   model6.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model6.select()) { qApp->enqueueException("Erro6: " + model6.lastError().text(), this); }
+  model6.select();
 
   ui->tableView_6->setModel(&model6);
 
@@ -109,7 +109,7 @@ void WidgetConsistencia::setupTables() {
 
   model7.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model7.select()) { qApp->enqueueException("Erro7: " + model7.lastError().text(), this); }
+  model7.select();
 
   ui->tableView_7->setModel(&model7);
 
@@ -119,7 +119,7 @@ void WidgetConsistencia::setupTables() {
 
   model8.setFilter("DATE(created) BETWEEN '" + dateBegin + "' AND '" + dateEnd + "'");
 
-  if (not model8.select()) { qApp->enqueueException("Erro8: " + model8.lastError().text(), this); }
+  model8.select();
 
   ui->tableView_8->setModel(&model8);
 }

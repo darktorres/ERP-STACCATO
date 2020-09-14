@@ -16,7 +16,7 @@ protected:
   QDataWidgetMapper mapperEnd;
   SqlTableModel modelEnd;
   // methods
-  auto setDataEnd(const QString &key, const QVariant &value) -> bool;
+  auto setDataEnd(const QString &key, const QVariant &value) -> void;
   auto getCodigoUF(const QString &uf) const -> int;
   virtual auto newRegister() -> bool override;
 

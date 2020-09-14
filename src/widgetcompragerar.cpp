@@ -122,11 +122,11 @@ void WidgetCompraGerar::updateTables() {
 
   const auto selection = ui->tableResumo->selectionModel()->selectedRows();
 
-  if (not modelResumo.select()) { return; }
+  modelResumo.select();
 
   if (not selection.isEmpty()) { ui->tableResumo->selectRow(selection.first().row()); }
 
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 }
 
 void WidgetCompraGerar::resetTables() { modelIsSet = false; }
@@ -223,7 +223,7 @@ void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
   // email --------------------------------
 
   // reload data after getDates
-  if (not modelProdutos.select()) { return; }
+  modelProdutos.select();
 
   const QString razaoSocial = modelProdutos.data(list.first().row(), "fornecedor").toString();
 

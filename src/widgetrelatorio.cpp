@@ -46,7 +46,7 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
 
   qDebug() << "filter2: " << modelViewRelatorioVendedor.filter();
 
-  if (not modelViewRelatorioVendedor.select()) { return; }
+  modelViewRelatorioVendedor.select();
 }
 
 void WidgetRelatorio::setFilterTotaisLoja() {
@@ -62,7 +62,7 @@ void WidgetRelatorio::setFilterTotaisLoja() {
 
   modelViewRelatorioLoja.setFilter(filter);
 
-  if (not modelViewRelatorioLoja.select()) { return; }
+  modelViewRelatorioLoja.select();
 }
 
 void WidgetRelatorio::setupTables() {
@@ -154,7 +154,7 @@ void WidgetRelatorio::setFilterRelatorio() {
 
   qDebug() << "filter1: " << modelViewRelatorio.filter();
 
-  if (not modelViewRelatorio.select()) { return; }
+  modelViewRelatorio.select();
 }
 
 void WidgetRelatorio::dateEditMes_dateChanged(const QDate &) { updateTables(); }
@@ -215,7 +215,7 @@ void WidgetRelatorio::setResumoOrcamento() {
   //    if (const auto descricaoLoja = UserSession::fromLoja("descricao")) { modelOrcamento.setFilter("Loja = '" + descricaoLoja->toString() + "' ORDER BY Loja, Vendedor"); }
   //  }
 
-  //  if (not modelOrcamento.select()) { return; }
+  //  modelOrcamento.select();
 
   //  ui->tableResumoOrcamento->setModel(&modelOrcamento);
 
@@ -225,8 +225,8 @@ void WidgetRelatorio::setResumoOrcamento() {
   //  ui->tableResumoOrcamento->setItemDelegateForColumn("Fechados Mes", new ReaisDelegate(this));
   //  ui->tableResumoOrcamento->setItemDelegateForColumn("Perdidos Mes", new ReaisDelegate(this));
   //  ui->tableResumoOrcamento->setItemDelegateForColumn("Validos Mes", new ReaisDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(this));
-  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Gerados", new PorcentagemDelegate(false, this));
+  //  ui->tableResumoOrcamento->setItemDelegateForColumn("% Fechados / Carteira", new PorcentagemDelegate(false, this));
 }
 
 void WidgetRelatorio::resetTables() { modelIsSet = false; }

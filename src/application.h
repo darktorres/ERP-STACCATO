@@ -15,6 +15,9 @@ class Application : public QApplication {
 
 public:
   Application(int &argc, char **argv, int = ApplicationFlags);
+
+  virtual auto notify(QObject *receiver, QEvent *event) -> bool override;
+
   auto ajustarDiaUtil(const QDate &date) -> QDate;
   auto darkTheme() -> void;
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;

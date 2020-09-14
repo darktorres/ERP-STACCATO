@@ -315,7 +315,7 @@ bool Application::endTransaction() {
 }
 
 void Application::rollbackTransaction() {
-  if (not inTransaction) { return enqueueException("Não está em transação!"); }
+  //  if (not inTransaction) { return enqueueException("Não está em transação!"); }
 
   if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueException("Erro rollback: " + query.lastError().text()); }
 
@@ -568,4 +568,17 @@ QDate Application::ajustarDiaUtil(const QDate &date) {
   while (newDate.dayOfWeek() > 5) { newDate = newDate.addDays(1); }
 
   return newDate;
+}
+
+bool Application::notify(QObject *receiver, QEvent *event) {
+  bool done = true;
+
+  try {
+    done = QApplication::notify(receiver, event);
+  } catch (const std::exception &ex) {
+    qApp->rollbackTransaction();
+    qApp->enqueueException(ex.what());
+  }
+
+  return done;
 }

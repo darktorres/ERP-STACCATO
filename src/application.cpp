@@ -12,6 +12,8 @@
 #include <QSqlError>
 #include <QTimer>
 
+RuntimeError::RuntimeError(const QString &message) : std::runtime_error(message.toStdString()) {}
+
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
   setApplicationName("ERP");

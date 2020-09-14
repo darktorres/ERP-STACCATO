@@ -10,6 +10,11 @@
 #endif
 #define qApp (static_cast<Application *>(QCoreApplication::instance()))
 
+class RuntimeError : public std::runtime_error {
+public:
+  explicit RuntimeError(const QString &message);
+};
+
 class Application : public QApplication {
   Q_OBJECT
 

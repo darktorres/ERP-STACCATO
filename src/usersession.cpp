@@ -2,6 +2,8 @@
 
 #include "application.h"
 
+#include <QSqlError>
+
 QVariant UserSession::getSetting(const QString &key) { return settings->value(key); }
 
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }

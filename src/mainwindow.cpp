@@ -157,20 +157,20 @@ void MainWindow::updateTables() {
 
   qApp->setUpdating(true);
 
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+  const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
-  if (currentText == "Vendas") { ui->widgetVenda->updateTables(); }
-  if (currentText == "Compras") { ui->widgetCompra->updateTables(); }
-  if (currentText == "Logística") { ui->widgetLogistica->updateTables(); }
-  if (currentText == "NFe") { ui->widgetNfe->updateTables(); }
-  if (currentText == "Estoque") { ui->widgetEstoque->updateTables(); }
-  if (currentText == "Galpão") { ui->widgetGalpao->updateTables(); }
-  if (currentText == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
-  if (currentText == "Relatórios") { ui->widgetRelatorio->updateTables(); }
-  if (currentText == "Gráfico") { ui->widgetGraficos->updateTables(); }
-  if (currentText == "RH") { ui->widgetRh->updateTables(); }
-  if (currentText == "Consistência") { ui->widgetConsistencia->updateTables(); }
+  if (currentTab == "Orçamentos") { ui->widgetOrcamento->updateTables(); }
+  if (currentTab == "Vendas") { ui->widgetVenda->updateTables(); }
+  if (currentTab == "Compras") { ui->widgetCompra->updateTables(); }
+  if (currentTab == "Logística") { ui->widgetLogistica->updateTables(); }
+  if (currentTab == "NFe") { ui->widgetNfe->updateTables(); }
+  if (currentTab == "Estoque") { ui->widgetEstoque->updateTables(); }
+  if (currentTab == "Galpão") { ui->widgetGalpao->updateTables(); }
+  if (currentTab == "Financeiro") { ui->widgetFinanceiro->updateTables(); }
+  if (currentTab == "Relatórios") { ui->widgetRelatorio->updateTables(); }
+  if (currentTab == "Gráfico") { ui->widgetGraficos->updateTables(); }
+  if (currentTab == "RH") { ui->widgetRh->updateTables(); }
+  if (currentTab == "Consistência") { ui->widgetConsistencia->updateTables(); }
 
   qApp->setUpdating(false);
 }

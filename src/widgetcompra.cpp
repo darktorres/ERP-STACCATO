@@ -21,16 +21,16 @@ void WidgetCompra::resetTables() {
 }
 
 void WidgetCompra::updateTables() {
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+  const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Devoluções") { ui->widgetDevolucao->updateTables(); }
-  if (currentText == "Resumo") { ui->widgetResumo->updateTables(); }
-  if (currentText == "Pendentes") { ui->widgetPendentes->updateTables(); }
-  if (currentText == "Gerar Compra") { ui->widgetGerar->updateTables(); }
-  if (currentText == "Confirmar Compra") { ui->widgetConfirmar->updateTables(); }
-  if (currentText == "Faturamento") { ui->widgetFaturar->updateTables(); }
-  if (currentText == "Consumos") { ui->widgetOC->updateTables(); }
-  if (currentText == "Histórico") { ui->widgetHistorico->updateTables(); }
+  if (currentTab == "Devoluções") { ui->widgetDevolucao->updateTables(); }
+  if (currentTab == "Resumo") { ui->widgetResumo->updateTables(); }
+  if (currentTab == "Pendentes") { ui->widgetPendentes->updateTables(); }
+  if (currentTab == "Gerar Compra") { ui->widgetGerar->updateTables(); }
+  if (currentTab == "Confirmar Compra") { ui->widgetConfirmar->updateTables(); }
+  if (currentTab == "Faturamento") { ui->widgetFaturar->updateTables(); }
+  if (currentTab == "Consumos") { ui->widgetOC->updateTables(); }
+  if (currentTab == "Histórico") { ui->widgetHistorico->updateTables(); }
 }
 
 void WidgetCompra::on_tabWidget_currentChanged(const int &) { updateTables(); }

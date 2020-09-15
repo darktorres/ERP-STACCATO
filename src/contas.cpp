@@ -149,9 +149,7 @@ void Contas::preencher(const QModelIndex &index) {
       for (const auto &rowMatch : list) { modelPendentes.setData(rowMatch, "idConta", modelPendentes.data(row, "idConta")); }
     }
 
-    if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) {
-      if (not modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto"))) { return; }
-    }
+    if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) { modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto")); }
 
     if (index.column() != ui->tablePendentes->columnIndex("dataRealizado")) {
       if (index.data().toString() == "PENDENTE") { return; }

@@ -1297,11 +1297,11 @@ void Venda::on_pushButtonCancelamento_clicked() {
 }
 
 bool Venda::generateId() {
-  const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
+  const QString siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
 
-  if (not siglaLoja) { return qApp->enqueueException(false, "Erro buscando sigla da loja!", this); }
+  if (siglaLoja.isEmpty()) { return qApp->enqueueException(false, "Erro buscando sigla da loja!", this); }
 
-  QString id = siglaLoja->toString() + "-" + ui->dateTimeEdit->date().toString("yy");
+  QString id = siglaLoja + "-" + ui->dateTimeEdit->date().toString("yy");
 
   QSqlQuery query;
   query.prepare("SELECT MAX(idVenda) AS idVenda FROM venda WHERE idVenda LIKE :id");

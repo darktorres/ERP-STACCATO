@@ -253,7 +253,7 @@ bool Orcamento::viewRegister() {
     }
 
     if (ui->lineEditOrcamento->text() != "Auto gerado") {
-      const QString idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).value_or("-1").toString();
+      const QString idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toString();
       ui->itemBoxVendedor->setFilter("idLoja = " + idLoja);
     }
 
@@ -429,11 +429,11 @@ void Orcamento::removeItem() {
 }
 
 bool Orcamento::generateId() {
-  const auto siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text());
+  const QString siglaLoja = UserSession::fromLoja("sigla", ui->itemBoxVendedor->text()).toString();
 
-  if (not siglaLoja) { return qApp->enqueueException(false, "Erro buscando sigla da loja!", this); }
+  if (siglaLoja.isEmpty()) { return qApp->enqueueException(false, "Erro buscando sigla da loja!", this); }
 
-  QString id = siglaLoja->toString() + "-" + qApp->serverDate().toString("yy");
+  QString id = siglaLoja + "-" + qApp->serverDate().toString("yy");
 
   const QString replica = ui->lineEditReplicaDe->text();
 
@@ -575,11 +575,11 @@ bool Orcamento::verifyFields() {
 
 bool Orcamento::savingProcedures() {
   if (tipo == Tipo::Cadastrar) {
-    const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+    const int idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
 
-    if (not idLoja) { return qApp->enqueueException(false, "Erro buscando idLoja!", this); }
+    if (idLoja == 0) { return qApp->enqueueException(false, "Erro buscando idLoja!", this); }
 
-    setData("idLoja", idLoja->toInt());
+    setData("idLoja", idLoja);
 
     setData("idOrcamento", ui->lineEditOrcamento->text());
     setData("idOrcamentoBase", ui->lineEditOrcamento->text().left(11));
@@ -1277,13 +1277,13 @@ void Orcamento::on_itemBoxVendedor_textChanged(const QString &) {
 }
 
 bool Orcamento::buscarParametrosFrete() {
-  const auto idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text());
+  const int idLoja = UserSession::fromLoja("usuario.idLoja", ui->itemBoxVendedor->text()).toInt();
 
-  if (not idLoja) { return qApp->enqueueException(false, "Erro buscando idLoja!", this); }
+  if (idLoja == 0) { return qApp->enqueueException(false, "Erro buscando idLoja!", this); }
 
   QSqlQuery queryFrete;
   queryFrete.prepare("SELECT valorMinimoFrete, porcentagemFrete FROM loja WHERE idLoja = :idLoja");
-  queryFrete.bindValue(":idLoja", idLoja->toInt());
+  queryFrete.bindValue(":idLoja", idLoja);
 
   if (not queryFrete.exec() or not queryFrete.next()) { return qApp->enqueueException(false, "Erro buscando parâmetros do frete: " + queryFrete.lastError().text(), this); }
 

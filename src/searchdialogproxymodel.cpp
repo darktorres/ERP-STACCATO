@@ -18,10 +18,10 @@ SearchDialogProxyModel::SearchDialogProxyModel(SqlTreeModel *model, QObject *par
 QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) const {
   if (role == Qt::BackgroundRole or role == Qt::ForegroundRole) {
     if (not proxyIndex.model()->hasChildren(proxyIndex) and proxyIndex.parent().isValid()) {
-      const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+      const QString tema = UserSession::getSetting("User/tema").toString();
 
-      if (role == Qt::BackgroundRole) { return (tema == "claro") ? QBrush(Qt::gray) : QBrush(Qt::darkGray); }
-      if (role == Qt::ForegroundRole) { return (tema == "claro") ? QBrush(Qt::black) : QBrush(Qt::white); }
+      if (role == Qt::BackgroundRole) { return (tema == "escuro") ? QBrush(Qt::darkGray) : QBrush(Qt::gray); }
+      if (role == Qt::ForegroundRole) { return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black); }
     }
 
     if (descontinuadoColumn != -1) {
@@ -64,9 +64,9 @@ QVariant SearchDialogProxyModel::data(const QModelIndex &proxyIndex, int role) c
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+      const QString tema = UserSession::getSetting("User/tema").toString();
 
-      return (tema == "claro") ? QBrush(Qt::black) : QBrush(Qt::white);
+      return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }
   }
 

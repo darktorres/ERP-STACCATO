@@ -14,24 +14,24 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (const auto key = UserSession::getSetting("User/servidorACBr")) { ui->lineEditACBrServidor->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/portaACBr")) { ui->lineEditACBrPorta->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/lojaACBr")) { ui->itemBoxLoja->setId(key->toInt()); }
-  if (const auto key = UserSession::getSetting("User/emailContabilidade")) { ui->lineEditEmailContabilidade->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailLogistica")) { ui->lineEditEmailLogistica->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/monitorarNFe")) { ui->checkBoxMonitorarNFes->setChecked(key->toBool()); }
+  ui->lineEditACBrServidor->setText(UserSession::getSetting("User/servidorACBr").toString());
+  ui->lineEditACBrPorta->setText(UserSession::getSetting("User/portaACBr").toString());
+  ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
+  ui->lineEditEmailContabilidade->setText(UserSession::getSetting("User/emailContabilidade").toString());
+  ui->lineEditEmailLogistica->setText(UserSession::getSetting("User/emailLogistica").toString());
+  ui->checkBoxMonitorarNFes->setChecked(UserSession::getSetting("User/monitorarNFe").toBool());
 
-  if (const auto key = UserSession::getSetting("User/servidorSMTP")) { ui->lineEditServidorSMTP->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/portaSMTP")) { ui->lineEditPortaSMTP->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailCompra")) { ui->lineEditEmail->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailSenha")) { ui->lineEditEmailSenha->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/emailCopia")) { ui->lineEditEmailCopia->setText(key->toString()); }
+  ui->lineEditServidorSMTP->setText(UserSession::getSetting("User/servidorSMTP").toString());
+  ui->lineEditPortaSMTP->setText(UserSession::getSetting("User/portaSMTP").toString());
+  ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
+  ui->lineEditEmailSenha->setText(UserSession::getSetting("User/emailSenha").toString());
+  ui->lineEditEmailCopia->setText(UserSession::getSetting("User/emailCopia").toString());
 
-  if (const auto key = UserSession::getSetting("User/OrcamentosFolder")) { ui->lineEditOrcamentosFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/VendasFolder")) { ui->lineEditVendasFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/ComprasFolder")) { ui->lineEditComprasFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/EntregasXmlFolder")) { ui->lineEditEntregasXmlFolder->setText(key->toString()); }
-  if (const auto key = UserSession::getSetting("User/EntregasPdfFolder")) { ui->lineEditEntregasPdfFolder->setText(key->toString()); }
+  ui->lineEditOrcamentosFolder->setText(UserSession::getSetting("User/OrcamentosFolder").toString());
+  ui->lineEditVendasFolder->setText(UserSession::getSetting("User/VendasFolder").toString());
+  ui->lineEditComprasFolder->setText(UserSession::getSetting("User/ComprasFolder").toString());
+  ui->lineEditEntregasXmlFolder->setText(UserSession::getSetting("User/EntregasXmlFolder").toString());
+  ui->lineEditEntregasPdfFolder->setText(UserSession::getSetting("User/EntregasPdfFolder").toString());
 
   if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();

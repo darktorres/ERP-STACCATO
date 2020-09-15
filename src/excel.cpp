@@ -19,11 +19,11 @@ bool Excel::gerarExcel(const int oc, const bool isRepresentacao, const QString &
 
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  const auto folderKey = UserSession::getSetting(folder);
+  const QString folderKey = UserSession::getSetting(folder).toString();
 
-  if (not folderKey) { return qApp->enqueueError(false, "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
+  if (folderKey.isEmpty()) { return qApp->enqueueError(false, "Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
 
-  const QString path = folderKey->toString();
+  const QString path = folderKey;
 
   QDir dir(path);
 

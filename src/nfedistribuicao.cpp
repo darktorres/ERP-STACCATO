@@ -15,7 +15,7 @@
 NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), acbrRemoto(this), ui(new Ui::NFeDistribuicao) {
   ui->setupUi(this);
 
-  if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) {
+  if (UserSession::getSetting("User/monitorarNFe").toBool()) {
     updateTables();
 
     connect(&timer, &QTimer::timeout, this, &NFeDistribuicao::downloadAutomatico);
@@ -32,7 +32,7 @@ void NFeDistribuicao::downloadAutomatico() {
 
   //-----------------------------------------------------------------
 
-  if (UserSession::getSetting("User/monitorarNFe").value_or(false).toBool()) { timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(tempoTimer))); }
+  if (UserSession::getSetting("User/monitorarNFe").toBool()) { timer.start(QDateTime::currentDateTime().msecsTo(QDateTime::currentDateTime().addSecs(tempoTimer))); }
 }
 
 void NFeDistribuicao::resetTables() { modelIsSet = false; }
@@ -54,13 +54,13 @@ void NFeDistribuicao::updateTables() {
 }
 
 void NFeDistribuicao::buscarNSU() {
-  const auto idLoja = UserSession::getSetting("User/lojaACBr");
+  const QString idLoja = UserSession::getSetting("User/lojaACBr").toString();
 
-  if (not idLoja) { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
+  if (idLoja == "0") { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
   QSqlQuery queryLoja;
 
-  if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja->toString()) or not queryLoja.first()) {
+  if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja) or not queryLoja.first()) {
     return qApp->enqueueException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this);
   }
 
@@ -150,9 +150,9 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   // 4. fazer evento de ciencia para cada nota
   // 5. repetir passo 1 para pegar os xmls das notas
 
-  const auto idLoja = UserSession::getSetting("User/lojaACBr");
+  const QString idLoja = UserSession::getSetting("User/lojaACBr").toString();
 
-  if (not idLoja) { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
+  if (idLoja == "0") { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
   //----------------------------------------------------------
 
@@ -183,7 +183,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   if (not qApp->startTransaction("NFeDistribuicao::on_pushButtonPesquisar")) { return; }
 
-  if (not pesquisarNFes(resposta, idLoja->toString())) { return qApp->rollbackTransaction(); }
+  if (not pesquisarNFes(resposta, idLoja)) { return qApp->rollbackTransaction(); }
 
   if (not qApp->endTransaction()) { return; }
 
@@ -460,7 +460,7 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
     model.setData(index.row(), "ciencia", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? darCiencia() : agendarOperacao();
 }
@@ -478,7 +478,7 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
     model.setData(index.row(), "confirmar", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? confirmar() : agendarOperacao();
 }
@@ -496,7 +496,7 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
     model.setData(index.row(), "desconhecer", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? desconhecer() : agendarOperacao();
 }
@@ -514,7 +514,7 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
     model.setData(index.row(), "naoRealizar", true);
   }
 
-  const auto monitorar = UserSession::getSetting("User/monitorarNFe").value_or(false).toBool();
+  const auto monitorar = UserSession::getSetting("User/monitorarNFe").toBool();
 
   monitorar ? naoRealizar() : agendarOperacao();
 }

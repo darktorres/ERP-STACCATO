@@ -190,9 +190,9 @@ void WidgetLogisticaEntregas::on_pushButtonGerarNFe_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
 
-  const auto lojaACBr = UserSession::getSetting("User/lojaACBr");
+  const int lojaACBr = UserSession::getSetting("User/lojaACBr").toInt();
 
-  if (not lojaACBr) { return qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
+  if (lojaACBr == 0) { return qApp->enqueueError("Escolha a loja a ser utilizada em \"Opções->Configurações->ACBr->Loja\"!", this); }
 
   const QString idVenda = modelCarga.data(list.first().row(), "idVenda").toString();
 
@@ -495,11 +495,11 @@ void WidgetLogisticaEntregas::on_pushButtonProtocoloEntrega_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const auto folderKey = UserSession::getSetting("User/EntregasPdfFolder");
+  const QString folderKey = UserSession::getSetting("User/EntregasPdfFolder").toString();
 
-  if (not folderKey) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
+  if (folderKey.isEmpty()) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF. Por favor escolha uma nas configurações do ERP!", this); }
 
-  const QString path = folderKey->toString();
+  const QString path = folderKey;
 
   QDir dir(path);
 

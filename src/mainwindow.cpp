@@ -56,13 +56,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
   connect(shortcut, &QShortcut::activated, this, &QWidget::close);
 
-  if (const auto hostname = UserSession::getSetting("Login/hostname")) {
-    const QString hostnameText = qApp->getMapLojas().key(hostname->toString());
+  const QString hostname = UserSession::getSetting("Login/hostname").toString();
 
-    setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname->toString() : hostnameText));
-  } else {
-    qApp->enqueueException("A chave 'hostname' não está configurada!", this);
-  }
+  if (hostname.isEmpty()) { throw RuntimeError("A chave 'hostname não está configurada!'"); }
+
+  const QString hostnameText = qApp->getMapLojas().key(hostname);
+
+  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
   if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
 
@@ -107,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   pushButtonStatus = new QPushButton(this);
   pushButtonStatus->setIcon(QIcon(":/reconnect.png"));
-  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname")->toString());
+  pushButtonStatus->setText("Conectado: " + UserSession::getSetting("Login/hostname").toString());
   pushButtonStatus->setStyleSheet("color: rgb(0, 190, 0);");
 
   ui->statusBar->addWidget(pushButtonStatus);
@@ -182,7 +182,7 @@ void MainWindow::reconnectDb() {
 }
 
 void MainWindow::verifyDb(const bool conectado) {
-  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname")->toString() : "Desconectado");
+  pushButtonStatus->setText(conectado ? "Conectado: " + UserSession::getSetting("Login/hostname").toString() : "Desconectado");
   pushButtonStatus->setStyleSheet(conectado ? "color: rgb(0, 190, 0);" : "color: rgb(255, 0, 0);");
 
   if (conectado) { resetTables(); }

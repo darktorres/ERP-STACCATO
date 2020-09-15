@@ -35,9 +35,9 @@ void WidgetRelatorio::setFilterTotaisVendedor() {
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario()); }
 
   if (tipoUsuario == "GERENTE LOJA") {
-    const auto descricaoLoja = UserSession::fromLoja("descricao");
+    const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
+    if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor";
@@ -53,9 +53,9 @@ void WidgetRelatorio::setFilterTotaisLoja() {
   QString filter = "Mês = '" + ui->dateEditMes->date().toString("yyyy-MM") + "'";
 
   if (UserSession::tipoUsuario() == "GERENTE LOJA") {
-    const auto descricaoLoja = UserSession::fromLoja("descricao");
+    const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
+    if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
   }
 
   filter += " ORDER BY Loja";
@@ -143,9 +143,9 @@ void WidgetRelatorio::setFilterRelatorio() {
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { filter += " AND idUsuario = " + QString::number(UserSession::idUsuario()); }
 
   if (tipoUsuario == "GERENTE LOJA") {
-    const auto descricaoLoja = UserSession::fromLoja("descricao");
+    const QString descricaoLoja = UserSession::fromLoja("descricao").toString();
 
-    if (descricaoLoja) { filter += " AND Loja = '" + descricaoLoja->toString() + "'"; }
+    if (not descricaoLoja.isEmpty()) { filter += " AND Loja = '" + descricaoLoja + "'"; }
   }
 
   filter += " ORDER BY Loja, Vendedor, idVenda";

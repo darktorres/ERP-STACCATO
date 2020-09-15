@@ -2,44 +2,40 @@
 
 #include "application.h"
 
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
+QVariant UserSession::getSetting(const QString &key) { return settings->value(key); }
 
-int UserSession::idLoja() { return (query->value("idLoja").toInt()); }
+void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
-int UserSession::idUsuario() { return (query->value("idUsuario").toInt()); }
+bool UserSession::login(const QString &user, const QString &password) {
+  if (not query) { query = new QSqlQuery(); }
 
-QString UserSession::nome() { return (query->value("nome").toString()); }
+  query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
+  query->bindValue(":user", user);
+  query->bindValue(":password", password);
 
-QString UserSession::tipoUsuario() { return (query->value("tipo").toString()); }
+  if (not query->exec()) { throw RuntimeError("Erro no login: " + query->lastError().text()); }
 
-bool UserSession::login(const QString &user, const QString &password, LoginDialog::Tipo tipo) {
-  if (tipo == LoginDialog::Tipo::Autorizacao) { // query separada para não alterar a query usada nas outras funções
-    QSqlQuery queryAutorizar;
-    queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
-                           "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
-    queryAutorizar.bindValue(":user", user);
-    queryAutorizar.bindValue(":password", password);
+  return query->first();
+}
 
-    if (not queryAutorizar.exec()) { throw RuntimeError("Erro no login: " + queryAutorizar.lastError().text()); }
+int UserSession::idLoja() { return query->value("idLoja").toInt(); }
 
-    return queryAutorizar.first();
-  }
+int UserSession::idUsuario() { return query->value("idUsuario").toInt(); }
 
-  if (tipo == LoginDialog::Tipo::Login) {
-    if (not query) { query = new QSqlQuery(); }
+QString UserSession::nome() { return query->value("nome").toString(); }
 
-    query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
-    query->bindValue(":user", user);
-    query->bindValue(":password", password);
+QString UserSession::tipoUsuario() { return query->value("tipo").toString(); }
 
-    if (not query->exec()) { throw RuntimeError("Erro no login: " + query->lastError().text()); }
+bool UserSession::autorizacao(const QString &user, const QString &password) {
+  QSqlQuery queryAutorizar;
+  queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
+                         "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
+  queryAutorizar.bindValue(":user", user);
+  queryAutorizar.bindValue(":password", password);
 
-    return query->first();
-  }
+  if (not queryAutorizar.exec()) { throw RuntimeError("Erro no login: " + queryAutorizar.lastError().text()); }
 
-  return false;
+  return queryAutorizar.first();
 }
 
 QVariant UserSession::fromLoja(const QString &parameter, const QString &user) {
@@ -51,7 +47,3 @@ QVariant UserSession::fromLoja(const QString &parameter, const QString &user) {
 
   return queryLoja.value(0);
 }
-
-QVariant UserSession::getSetting(const QString &key) { return settings->value(key); }
-
-void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }

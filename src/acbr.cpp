@@ -214,17 +214,17 @@ std::optional<QString> ACBr::enviarComando(const QString &comando, const bool lo
   }
 
   if (not local) {
-    const auto servidorConfig = UserSession::getSetting("User/servidorACBr");
-    const auto porta = UserSession::getSetting("User/portaACBr");
+    const QString servidorConfig = UserSession::getSetting("User/servidorACBr").toString();
+    const QString porta = UserSession::getSetting("User/portaACBr").toString();
 
-    if (not servidorConfig or not porta) {
+    if (servidorConfig.isEmpty() or porta.isEmpty()) {
       qApp->enqueueError("Preencher IP e porta do ACBr nas configurações!", parent);
       return {};
     }
 
     if (not qApp->getSilent()) { progressDialog->show(); }
 
-    if (not conectado) { socket.connectToHost(servidorConfig->toString(), porta->toByteArray().toUShort()); }
+    if (not conectado) { socket.connectToHost(servidorConfig, porta.toUShort()); }
   }
 
   while (not pronto) {

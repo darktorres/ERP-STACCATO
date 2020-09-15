@@ -192,9 +192,9 @@ bool WidgetCompraGerar::gerarCompra(const QList<QModelIndex> &list, const QDate 
 }
 
 void WidgetCompraGerar::on_pushButtonGerarCompra_clicked() {
-  const auto folderKey = UserSession::getSetting("User/ComprasFolder");
+  const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
 
-  if (not folderKey) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
+  if (folderKey.isEmpty()) { return qApp->enqueueError("Por favor selecione uma pasta para salvar os arquivos nas configurações do usuário!", this); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
@@ -392,11 +392,11 @@ std::optional<QString> WidgetCompraGerar::gerarExcel(const QList<QModelIndex> &l
     return {};
   }
 
-  const auto folderKey = UserSession::getSetting("User/ComprasFolder");
+  const QString folderKey = UserSession::getSetting("User/ComprasFolder").toString();
 
-  if (not folderKey) { return {}; }
+  if (folderKey.isEmpty()) { return {}; }
 
-  const QString fileName = folderKey->toString() + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
+  const QString fileName = folderKey + "/" + QString::number(oc) + " " + idVenda + " " + fornecedor + ".xlsx";
 
   QFile file(fileName);
 

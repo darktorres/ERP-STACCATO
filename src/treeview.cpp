@@ -123,9 +123,9 @@ void TreeView::mousePressEvent(QMouseEvent *event) {
 void TreeView::drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const {
   QTreeView::drawRow(painter, options, index);
 
-  const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+  const QString tema = UserSession::getSetting("User/tema").toString();
 
-  const QColor color = (tema == "claro") ? QColor(200, 200, 200) : QColor(44, 44, 44);
+  const QColor color = (tema == "escuro") ? QColor(44, 44, 44) : QColor(200, 200, 200);
   painter->setPen(color);
   int top = options.rect.top();
 

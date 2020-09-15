@@ -22,9 +22,9 @@ PDF::PDF(const QString &id, const Tipo tipo, QWidget *parent) : tipo(tipo), id(i
 void PDF::gerarPdf() {
   const QString folder = tipo == Tipo::Orcamento ? "User/OrcamentosFolder" : "User/VendasFolder";
 
-  const auto folderKey = UserSession::getSetting(folder);
+  const QString folderKey = UserSession::getSetting(folder).toString();
 
-  if (not folderKey) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
+  if (folderKey.isEmpty()) { return qApp->enqueueError("Não há uma pasta definida para salvar PDF/Excel. Por favor escolha uma nas configurações do ERP!", parent); }
 
   if (not setQuerys()) { return; }
 
@@ -120,7 +120,7 @@ void PDF::gerarPdf() {
     }
   }
 
-  const QString path = folderKey->toString();
+  const QString path = folderKey;
 
   QDir dir(path);
 

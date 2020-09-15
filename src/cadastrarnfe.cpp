@@ -18,7 +18,7 @@ CadastrarNFe::CadastrarNFe(const QString &idVenda, const QStringList &items, con
   setWindowFlags(Qt::Window);
 
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
-  ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr").value_or(""));
+  ui->itemBoxLoja->setId(UserSession::getSetting("User/lojaACBr"));
 
   setupTables();
 
@@ -299,13 +299,13 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   // TODO: verificar isso antes de abrir CadastrarNFe
   // se os emails nao estiverem configurados avisar antes de gerar a nota
-  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
 
-  if (not emailContabilidade) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  if (emailContabilidade.isEmpty()) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
 
-  if (not emailLogistica) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  if (emailLogistica.isEmpty()) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   //
 
@@ -372,7 +372,7 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
   ACBr acbrLocal(this);
 
   // TODO: enviar email separado para cliente
-  if (not acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath)) { return; }
+  if (not acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath)) { return; }
 
   if (not acbrLocal.gerarDanfe(xml.toLatin1())) { return; }
 
@@ -604,16 +604,13 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
   //------------------------
 
-  const auto porcentagemPIS = UserSession::fromLoja("porcentagemPIS");
+  const double porcentagemPIS = UserSession::fromLoja("porcentagemPIS").toDouble();
 
-  if (not porcentagemPIS) { return qApp->enqueueException("Erro buscando % PIS!", this); }
+  if (qFuzzyIsNull(porcentagemPIS)) { return qApp->enqueueException("Erro buscando % PIS!", this); }
 
-  const auto porcentagemCOFINS = UserSession::fromLoja("porcentagemCOFINS");
+  const double porcentagemCOFINS = UserSession::fromLoja("porcentagemCOFINS").toDouble();
 
-  if (not porcentagemCOFINS) { return qApp->enqueueException("Erro buscando % COFINS!", this); }
-
-  const double porcentagemPIS2 = porcentagemPIS->toDouble();
-  const double porcentagemCOFINS2 = porcentagemCOFINS->toDouble();
+  if (qFuzzyIsNull(porcentagemCOFINS)) { return qApp->enqueueException("Erro buscando % COFINS!", this); }
 
   //
 
@@ -640,12 +637,12 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
       modelViewProdutoEstoque.setData(row, "cstPIS", "01");
       modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS2);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS2 / 100);
+      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
+      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
       modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
       modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS2);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS2 / 100);
+      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
 
     QSqlQuery queryTransp;
@@ -710,12 +707,12 @@ void CadastrarNFe::prepararNFe(const QStringList &items) {
 
       modelViewProdutoEstoque.setData(row, "cstPIS", "01");
       modelViewProdutoEstoque.setData(row, "vBCPIS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS2);
-      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS2 / 100);
+      modelViewProdutoEstoque.setData(row, "pPIS", porcentagemPIS);
+      modelViewProdutoEstoque.setData(row, "vPIS", (total + freteProduto) * porcentagemPIS / 100);
       modelViewProdutoEstoque.setData(row, "cstCOFINS", "01");
       modelViewProdutoEstoque.setData(row, "vBCCOFINS", total + freteProduto);
-      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS2);
-      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS2 / 100);
+      modelViewProdutoEstoque.setData(row, "pCOFINS", porcentagemCOFINS);
+      modelViewProdutoEstoque.setData(row, "vCOFINS", (total + freteProduto) * porcentagemCOFINS / 100);
     }
 
     ui->comboBoxNatureza->setCurrentText("VENDA COM PROMESSA DE ENTREGA FUTURA");

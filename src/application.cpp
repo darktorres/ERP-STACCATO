@@ -25,7 +25,7 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
 
   storeSelection();
 
-  if (UserSession::getSetting("User/tema").value_or("claro").toString() == "escuro") { darkTheme(); }
+  if (UserSession::getSetting("User/tema").toString() == "escuro") { darkTheme(); }
 
   if (not QSqlDatabase::drivers().contains("QMYSQL")) {
     QMessageBox::critical(nullptr, "Erro!", "Este aplicativo requer o driver QMYSQL!");
@@ -339,7 +339,7 @@ bool Application::getIsConnected() const { return isConnected; }
 QMap<QString, QString> Application::getMapLojas() const { return mapLojas; }
 
 void Application::storeSelection() {
-  if (not UserSession::getSetting("Login/hostname")) {
+  if (UserSession::getSetting("Login/hostname").toString().isEmpty()) {
     const QStringList items = mapLojas.keys();
 
     const QString loja = QInputDialog::getItem(nullptr, "Escolha a loja", "Qual a sua loja?", items, 0, false);
@@ -402,20 +402,17 @@ void Application::showMessages() {
 void Application::updater() {
   if (updaterOpen) { return; }
 
-  const auto hostname = UserSession::getSetting("Login/hostname");
+  const QString hostname = UserSession::getSetting("Login/hostname").toString();
 
-  if (not hostname) { return; }
+  if (hostname.isEmpty()) { return; }
 
   updaterOpen = true;
-
-  // TODO: add timeout in Qt 5.15 to avoid waiting for non available hosts
-  // (quickly changing hosts dont work as updater is still waiting for the first one to respond)
 
   auto *updater = new QSimpleUpdater(this);
   connect(updater, &QSimpleUpdater::done, [&] { updaterOpen = false; });
   updater->setApplicationVersion(applicationVersion());
-  updater->setReferenceUrl("http://" + hostname->toString() + "/versao.txt");
-  updater->setDownloadUrl("http://" + hostname->toString() + "/Instalador.exe");
+  updater->setReferenceUrl("http://" + hostname + "/versao.txt");
+  updater->setDownloadUrl("http://" + hostname + "/Instalador.exe");
   updater->setSilent(true);
   updater->setShowNewestVersionMessage(true);
   updater->checkForUpdates();

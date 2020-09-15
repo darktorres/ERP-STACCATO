@@ -147,7 +147,7 @@ void WidgetOrcamento::montaFiltro() {
   if (const auto tipoUsuario = UserSession::tipoUsuario(); not ui->comboBoxLojas->currentText().isEmpty()) {
     filtroLoja = "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
   } else if (tipoUsuario == "GERENTE LOJA") {
-    filtroLoja = "(Código LIKE '%" + UserSession::fromLoja("sigla").value_or("ERRO").toString() + "%')";
+    filtroLoja = "(Código LIKE '%" + UserSession::fromLoja("sigla").toString() + "%')";
   } else {
     filtroLoja = "";
   }

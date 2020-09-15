@@ -27,9 +27,9 @@ QVariant NFeProxyModel::data(const QModelIndex &proxyIndex, const int role) cons
     }
 
     if (role == Qt::ForegroundRole) {
-      const QString tema = UserSession::getSetting("User/tema").value_or("claro").toString();
+      const QString tema = UserSession::getSetting("User/tema").toString();
 
-      return (tema == "claro") ? QBrush(Qt::black) : QBrush(Qt::white);
+      return (tema == "escuro") ? QBrush(Qt::white) : QBrush(Qt::black);
     }
   }
 

@@ -60,11 +60,11 @@ SendMail::SendMail(const Tipo tipo, const QString &arquivo, const QString &forne
   }
 
   if (tipo != Tipo::Vazio) {
-    if (const auto key = UserSession::getSetting("User/emailCompra")) { ui->lineEditEmail->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/emailCopia")) { ui->lineEditCopia->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/servidorSMTP")) { ui->lineEditServidor->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/portaSMTP")) { ui->lineEditPorta->setText(key->toString()); }
-    if (const auto key = UserSession::getSetting("User/emailSenha")) { ui->lineEditPasswd->setText(key->toString()); }
+    ui->lineEditEmail->setText(UserSession::getSetting("User/emailCompra").toString());
+    ui->lineEditCopia->setText(UserSession::getSetting("User/emailCopia").toString());
+    ui->lineEditServidor->setText(UserSession::getSetting("User/servidorSMTP").toString());
+    ui->lineEditPorta->setText(UserSession::getSetting("User/portaSMTP").toString());
+    ui->lineEditPasswd->setText(UserSession::getSetting("User/emailSenha").toString());
   }
 
   progress = new QProgressDialog("Enviando...", "Cancelar", 0, 0, this);

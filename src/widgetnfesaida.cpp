@@ -141,13 +141,13 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   // -------------------------------------------------------------------------
 
-  const auto emailContabilidade = UserSession::getSetting("User/emailContabilidade");
+  const QString emailContabilidade = UserSession::getSetting("User/emailContabilidade").toString();
 
-  if (not emailContabilidade) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  if (emailContabilidade.isEmpty()) { return qApp->enqueueError(R"("Email Contabilidade" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
-  const auto emailLogistica = UserSession::getSetting("User/emailLogistica");
+  const QString emailLogistica = UserSession::getSetting("User/emailLogistica").toString();
 
-  if (not emailLogistica) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
+  if (emailLogistica.isEmpty()) { return qApp->enqueueError(R"("Email Logistica" não está configurado! Ajuste no menu "Opções->Configurações")", this); }
 
   // -------------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
   ACBr acbrLocal(this);
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
-  acbrLocal.enviarEmail(emailContabilidade->toString(), emailLogistica->toString(), assunto, filePath);
+  acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
 }
 
 // TODO: 1verificar se ao cancelar nota ela é removida do venda_produto/veiculo_produto

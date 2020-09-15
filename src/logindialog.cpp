@@ -24,14 +24,14 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
 
   ui->lineEditUser->setFocus();
 
-  if (const auto key = UserSession::getSetting("User/lastuser")) {
-    ui->lineEditUser->setText(key->toString());
+  if (not UserSession::getSetting("User/lastuser").toString().isEmpty()) {
+    ui->lineEditUser->setText(UserSession::getSetting("User/lastuser").toString());
     ui->lineEditPass->setFocus();
   }
 
-  if (const auto key = UserSession::getSetting("Login/hostname")) { ui->lineEditHostname->setText(key->toString()); }
+  if (not UserSession::getSetting("Login/hostname").toString().isEmpty()) { ui->lineEditHostname->setText(UserSession::getSetting("Login/hostname").toString()); }
 
-  if (const auto key = UserSession::getSetting("Login/loja")) { ui->comboBoxLoja->setCurrentText(key->toString()); }
+  if (not UserSession::getSetting("Login/loja").toString().isEmpty()) { ui->comboBoxLoja->setCurrentText(UserSession::getSetting("Login/loja").toString()); }
 
   ui->checkBoxSalvarSenha->hide();
   ui->labelHostname->hide();
@@ -39,17 +39,14 @@ LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), ti
   ui->comboBoxLoja->hide();
 
   if (tipo == Tipo::Login) {
-    if (const auto key = UserSession::getSetting("User/savePasswd")) {
-      const bool salvarSenha = key->toBool();
+    const bool salvarSenha = UserSession::getSetting("User/savePasswd").toBool();
 
-      ui->checkBoxSalvarSenha->setChecked(salvarSenha);
+    ui->checkBoxSalvarSenha->setChecked(salvarSenha);
 
-      if (salvarSenha) {
-        if (const auto key2 = UserSession::getSetting("User/passwd")) {
-          ui->lineEditPass->setText(key2->toString());
-          ui->pushButtonLogin->setFocus();
-        }
-      }
+    if (salvarSenha) {
+      const QString passwd = UserSession::getSetting("User/passwd").toString();
+      ui->lineEditPass->setText(passwd);
+      ui->pushButtonLogin->setFocus();
     }
   }
 

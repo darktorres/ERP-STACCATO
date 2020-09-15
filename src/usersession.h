@@ -9,8 +9,8 @@ class UserSession final {
 
 public:
   UserSession() = delete;
-  static auto fromLoja(const QString &parameter, const QString &user = nome()) -> std::optional<QVariant>;
-  static auto getSetting(const QString &key) -> std::optional<QVariant>;
+  static auto fromLoja(const QString &parameter, const QString &user = nome()) -> QVariant;
+  static auto getSetting(const QString &key) -> QVariant;
   static auto idLoja() -> int;
   static auto idUsuario() -> int;
   static auto login(const QString &user, const QString &password, LoginDialog::Tipo tipo = LoginDialog::Tipo::Login) -> bool;

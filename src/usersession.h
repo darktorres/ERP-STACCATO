@@ -13,7 +13,8 @@ public:
   static auto getSetting(const QString &key) -> QVariant;
   static auto idLoja() -> int;
   static auto idUsuario() -> int;
-  static auto login(const QString &user, const QString &password, LoginDialog::Tipo tipo = LoginDialog::Tipo::Login) -> bool;
+  static auto login(const QString &user, const QString &password) -> bool;
+  static auto autorizacao(const QString &user, const QString &password) -> bool;
   static auto nome() -> QString;
   static auto setSetting(const QString &key, const QVariant &value) -> void;
   static auto tipoUsuario() -> QString;

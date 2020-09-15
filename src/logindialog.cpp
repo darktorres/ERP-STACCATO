@@ -4,11 +4,6 @@
 #include "application.h"
 #include "usersession.h"
 
-#include <QDebug>
-#include <QMessageBox>
-#include <QSqlError>
-#include <QVersionNumber>
-
 LoginDialog::LoginDialog(const Tipo tipo, QWidget *parent) : QDialog(parent), tipo(tipo), ui(new Ui::LoginDialog) {
   ui->setupUi(this);
 
@@ -91,7 +86,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   }
 
   if (tipo == Tipo::Autorizacao) {
-    if (not UserSession::login(ui->lineEditUser->text(), ui->lineEditPass->text(), tipo)) {
+    if (not UserSession::autorizacao(ui->lineEditUser->text(), ui->lineEditPass->text())) {
       ui->lineEditPass->setFocus();
       QMessageBox::critical(nullptr, "Erro!", "Login inválido!");
       return;

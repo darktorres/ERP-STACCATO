@@ -13,8 +13,8 @@ addons:
     - g++-10
     - qt514base
     - qt514charts-no-lgpl
-    - qt514script
     - qt514tools
+    - qt514svg
     - mesa-common-dev
     - libgl1-mesa-dev
     

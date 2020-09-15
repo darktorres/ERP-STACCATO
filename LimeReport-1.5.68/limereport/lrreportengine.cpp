@@ -343,8 +343,11 @@ void ReportEnginePrivate::printPages(ReportPages pages, QMap<QString, QPrinter*>
 
     PrintProcessor* defaultProcessor = 0;
     int currentPrinter = 0;
-    if (printProcessors.contains("default")) defaultProcessor =  printProcessors["default"].data();
-    else defaultProcessor = printProcessors.values().at(0).data();
+    if (printProcessors.contains("default")) {
+      defaultProcessor = printProcessors["default"].data();
+    } else {
+      defaultProcessor = printProcessors.values().at(0).data();
+    }
 
     emit printingStarted(pages.size());
 

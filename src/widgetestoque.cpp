@@ -124,9 +124,9 @@ void WidgetEstoque::updateTables() {
     modelIsSet = true;
   }
 
-  const QString currentText = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+  const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
-  if (currentText == "Estoques") {
+  if (currentTab == "Estoques") {
     ui->tableEstoque->setDisabled(true);
 
     repaint();
@@ -138,7 +138,7 @@ void WidgetEstoque::updateTables() {
     ui->tableEstoque->setEnabled(true);
   }
 
-  if (currentText == "Produtos") {
+  if (currentTab == "Produtos") {
     ui->tableProdutos->setDisabled(true);
 
     repaint();

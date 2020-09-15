@@ -10,11 +10,11 @@ WidgetNfe::WidgetNfe(QWidget *parent) : QWidget(parent), ui(new Ui::WidgetNfe) {
 WidgetNfe::~WidgetNfe() { delete ui; }
 
 void WidgetNfe::updateTables() {
-  const QString currentText = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());
+  const QString currentTab = ui->tabWidgetNfe->tabText(ui->tabWidgetNfe->currentIndex());
 
-  if (currentText == "Entrada") { ui->widgetEntrada->updateTables(); }
-  if (currentText == "Saída") { ui->widgetSaida->updateTables(); }
-  if (currentText == "Distribuição") { ui->widgetDistribuicao->updateTables(); }
+  if (currentTab == "Entrada") { ui->widgetEntrada->updateTables(); }
+  if (currentTab == "Saída") { ui->widgetSaida->updateTables(); }
+  if (currentTab == "Distribuição") { ui->widgetDistribuicao->updateTables(); }
 }
 
 void WidgetNfe::resetTables() {

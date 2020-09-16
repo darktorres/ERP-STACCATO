@@ -29,16 +29,21 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
-  LoginDialog dialog;
+  try {
+    LoginDialog dialog;
 
-  if (dialog.exec() == QDialog::Rejected) { exit(1); }
+    if (dialog.exec() == QDialog::Rejected) { exit(1); }
 
-  MainWindow window;
+    MainWindow *window = new MainWindow;
 #ifdef DEPLOY
-  window.showMaximized();
+    window->showMaximized();
 #else
-  window.show();
+    window->show();
 #endif
+  } catch (std::exception &e) {
+    qApp->enqueueException(e.what());
+    exit(1);
+  }
 
   return app.exec();
 }

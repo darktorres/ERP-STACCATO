@@ -574,9 +574,9 @@ bool Application::notify(QObject *receiver, QEvent *event) {
 
   try {
     done = QApplication::notify(receiver, event);
-  } catch (const std::exception &ex) {
+  } catch (const std::exception &e) {
     qApp->rollbackTransaction();
-    qApp->enqueueException(ex.what());
+    qApp->enqueueException(e.what());
   }
 
   return done;

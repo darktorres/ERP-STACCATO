@@ -67,25 +67,16 @@ contains(CONFIG, deploy){
 }
 
 linux-g++{
-    QMAKE_CC = gcc-10
-    QMAKE_CXX = g++-10
-
     QMAKE_LFLAGS *= -fuse-ld=gold
 
     QMAKE_CXXFLAGS *= -Wno-deprecated-copy
-
-#    QMAKE_CXXFLAGS *= -flto
-#    QMAKE_LFLAGS *= -flto -fuse-linker-plugin
 }
 
 linux-clang{
-    QMAKE_CC = clang-9
-    QMAKE_CXX = clang++-9
+    QMAKE_CC = clang-10
+    QMAKE_CXX = clang++-10
 
-    QMAKE_LFLAGS *= -fuse-ld=lld-9
-
-#    QMAKE_CXXFLAGS *= -flto=thin
-#    QMAKE_LFLAGS *= -flto=thin
+    QMAKE_LFLAGS *= -fuse-ld=lld-10
 }
 
 win32{

@@ -38,7 +38,7 @@ void Application::enqueueException(const QString &error, QWidget *parent) {
   // TODO: guardar o arquivo/linha que chamou essa funcao
   exceptionQueue << Message{error, parent};
 
-  Log::createLog("Exceção", error, true);
+  Log::createLog("Exceção", error);
 
   if (not updating) { showMessages(); }
 }
@@ -52,7 +52,7 @@ bool Application::enqueueException(const bool boolean, const QString &error, QWi
 void Application::enqueueError(const QString &error, QWidget *parent) {
   errorQueue << Message{error, parent};
 
-  Log::createLog("Erro", error, true);
+  Log::createLog("Erro", error);
 
   if (not updating) { showMessages(); }
 }
@@ -295,7 +295,7 @@ bool Application::startTransaction(const QString &messageLog, const bool delayMe
 
   if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueException(false, "Erro iniciando transaction: " + query.lastError().text()); }
 
-  if (not Log::createLog("Transação", messageLog)) { return rollbackTransaction(false); }
+  Log::createLog("Transação", messageLog);
 
   inTransaction = true;
   this->delayMessages = delayMessages;

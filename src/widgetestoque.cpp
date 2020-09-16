@@ -127,25 +127,13 @@ void WidgetEstoque::updateTables() {
   const QString currentTab = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
 
   if (currentTab == "Estoques") {
-    ui->tableEstoque->setDisabled(true);
-
-    repaint();
-
     model.setQuery(model.query().executedQuery());
 
     if (model.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
-
-    ui->tableEstoque->setEnabled(true);
   }
 
   if (currentTab == "Produtos") {
-    ui->tableProdutos->setDisabled(true);
-
-    repaint();
-
     if (not modelProdutos.select()) { return; }
-
-    ui->tableProdutos->setEnabled(true);
   }
 }
 
@@ -163,10 +151,6 @@ void WidgetEstoque::escolheFiltro() { ui->radioButtonEstoqueContabil->isChecked(
 void WidgetEstoque::montaFiltro() {
   const QString having = (ui->radioButtonMaior->isChecked()) ? "restante > 0" : "restante <= 0";
 
-  ui->tableEstoque->setDisabled(true);
-
-  repaint();
-
   model.setQuery(
       "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.restante AS restante, e.un AS unEst, e.restante / p.quantCaixa AS Caixas, e.lote, e.local, e.bloco, "
       "e.codComercial, ANY_VALUE(n.numeroNFe) AS nfe, ANY_VALUE(pf.dataPrevColeta) AS dataPrevColeta, ANY_VALUE(pf.dataRealColeta) AS dataRealColeta, ANY_VALUE(pf.dataPrevReceb) AS dataPrevReceb, "
@@ -177,16 +161,10 @@ void WidgetEstoque::montaFiltro() {
   if (model.lastError().isValid()) { qApp->enqueueException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   setHeaderData();
-
-  ui->tableEstoque->setEnabled(true);
 }
 
 void WidgetEstoque::montaFiltroContabil() {
   // TODO: trocar o NOW() por uma data escolhida pelo usuario
-
-  ui->tableEstoque->setDisabled(true);
-
-  repaint();
 
   model.setQuery(
       "SELECT n.cnpjDest AS cnpjDest, e.status, e.idEstoque, p.fornecedor, e.descricao, e.quant + COALESCE(ehc.contabil, 0) + COALESCE(e.ajuste, 0) AS contabil, e.restante AS restante, e.un AS "
@@ -200,8 +178,6 @@ void WidgetEstoque::montaFiltroContabil() {
   if (model.lastError().isValid()) { qApp->enqueueException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   setHeaderData();
-
-  ui->tableEstoque->setEnabled(true);
 }
 
 QString WidgetEstoque::getMatch() const {

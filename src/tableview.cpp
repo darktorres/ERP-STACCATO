@@ -119,6 +119,14 @@ void TableView::setModel(QAbstractItemModel *model) {
 
   //---------------------------------------
 
+  // TODO: reativar
+  //  connect(baseModel, &QSqlQueryModel::modelAboutToBeReset, this, [=] {
+  //    setDisabled(true);
+  //    repaint();
+  //  });
+
+  //  connect(baseModel, &QSqlQueryModel::modelReset, this, [=] { setEnabled(true); });
+
   connect(baseModel, &QSqlQueryModel::modelReset, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::dataChanged, this, &TableView::redoView);
   connect(baseModel, &QSqlQueryModel::rowsRemoved, this, &TableView::redoView);

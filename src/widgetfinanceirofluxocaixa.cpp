@@ -52,17 +52,7 @@ void WidgetFinanceiroFluxoCaixa::updateTables() {
 
   if (not modelIsSet) { modelIsSet = true; }
 
-  ui->tableCaixa->setDisabled(true);
-  ui->tableCaixa2->setDisabled(true);
-  ui->tableFuturo->setDisabled(true);
-
-  repaint();
-
   montaFiltro();
-
-  ui->tableCaixa->setEnabled(true);
-  ui->tableCaixa2->setEnabled(true);
-  ui->tableFuturo->setEnabled(true);
 }
 
 void WidgetFinanceiroFluxoCaixa::resetTables() { modelIsSet = false; }

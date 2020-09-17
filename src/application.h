@@ -10,6 +10,11 @@
 #endif
 #define qApp (static_cast<Application *>(QCoreApplication::instance()))
 
+class RuntimeException : public std::runtime_error {
+public:
+  explicit RuntimeException(const QString &message);
+};
+
 class RuntimeError : public std::runtime_error {
 public:
   explicit RuntimeError(const QString &message);
@@ -37,7 +42,7 @@ public:
   auto getInTransaction() const -> bool;
   auto getIsConnected() const -> bool;
   auto getMapLojas() const -> QMap<QString, QString>;
-  auto getShowingErrors() const -> bool;
+  auto getShowingMessages() const -> bool;
   auto getSilent() const -> bool;
   auto getUpdating() const -> bool;
   auto getWebDavIp() const -> QString;
@@ -55,7 +60,7 @@ public:
   auto serverDateTime() -> QDateTime;
   auto setSilent(bool value) -> void;
   auto setUpdating(const bool value) -> void;
-  auto startTransaction(const QString &messageLog, const bool delayMessages = true) -> bool;
+  auto startTransaction(const QString &messageLog) -> bool;
   auto updater() -> void;
 
 signals:
@@ -76,10 +81,9 @@ private:
   QVector<Message> warningQueue;
   bool silent = false;
   bool updaterOpen = false;
-  bool delayMessages = false;
   bool inTransaction = false;
   bool isConnected = false;
-  bool showingErrors = false;
+  bool showingMessages = false;
   bool updating = false;
   const QPalette defaultPalette = palette();
   QDateTime serverDateCache;

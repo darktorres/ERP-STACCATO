@@ -15,7 +15,7 @@ bool UserSession::login(const QString &user, const QString &password) {
   query->bindValue(":user", user);
   query->bindValue(":password", password);
 
-  if (not query->exec()) { throw RuntimeError("Erro no login: " + query->lastError().text()); }
+  if (not query->exec()) { throw RuntimeException("Erro no login: " + query->lastError().text()); }
 
   return query->first();
 }
@@ -35,7 +35,7 @@ bool UserSession::autorizacao(const QString &user, const QString &password) {
   queryAutorizar.bindValue(":user", user);
   queryAutorizar.bindValue(":password", password);
 
-  if (not queryAutorizar.exec()) { throw RuntimeError("Erro no login: " + queryAutorizar.lastError().text()); }
+  if (not queryAutorizar.exec()) { throw RuntimeException("Erro no login: " + queryAutorizar.lastError().text()); }
 
   return queryAutorizar.first();
 }
@@ -45,7 +45,7 @@ QVariant UserSession::fromLoja(const QString &parameter, const QString &user) {
   queryLoja.prepare("SELECT " + parameter + " FROM loja LEFT JOIN usuario ON loja.idLoja = usuario.idLoja WHERE usuario.nome = :nome");
   queryLoja.bindValue(":nome", user);
 
-  if (not queryLoja.exec() or not queryLoja.first()) { throw RuntimeError("Erro na query loja: " + queryLoja.lastError().text()); }
+  if (not queryLoja.exec() or not queryLoja.first()) { throw RuntimeException("Erro na query loja: " + queryLoja.lastError().text()); }
 
   return queryLoja.value(0);
 }

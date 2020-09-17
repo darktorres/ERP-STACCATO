@@ -13,7 +13,7 @@ SqlTableModel::SqlTableModel(const int limit) : SqlTableModel(limit, nullptr) {}
 SqlTableModel::SqlTableModel() : SqlTableModel(0, nullptr) {}
 
 QVariant SqlTableModel::data(const int row, const int column) const {
-  if (row == -1 or column == -1) { throw RuntimeError("Erro: linha/coluna -1 SqlTableModel"); }
+  if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlTableModel"); }
 
   if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
 
@@ -23,7 +23,7 @@ QVariant SqlTableModel::data(const int row, const int column) const {
 QVariant SqlTableModel::data(const int row, const QString &column) const { return data(row, fieldIndex(column)); }
 
 void SqlTableModel::setData(const int row, const int column, const QVariant &value) {
-  if (row == -1 or column == -1) { throw RuntimeError("Erro: linha/coluna -1 SqlTableModel"); }
+  if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlTableModel"); }
 
   QVariant adjustedValue = value;
 
@@ -36,7 +36,7 @@ void SqlTableModel::setData(const int row, const int column, const QVariant &val
   }
 
   if (not QSqlTableModel::setData(QSqlTableModel::index(row, column), adjustedValue)) {
-    throw RuntimeError("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
+    throw RuntimeException("Erro inserindo " + QSqlTableModel::record().fieldName(column) + " na tabela: " + QSqlTableModel::lastError().text());
   }
 }
 
@@ -54,7 +54,7 @@ int SqlTableModel::insertRowAtEnd() {
 }
 
 void SqlTableModel::submitAll() {
-  if (not QSqlTableModel::submitAll()) { throw RuntimeError("Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
+  if (not QSqlTableModel::submitAll()) { throw RuntimeException("Erro salvando tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 }
 
 QString SqlTableModel::selectStatement() const { return QSqlTableModel::selectStatement() + (limit > 0 ? " LIMIT " + QString::number(limit) : ""); }
@@ -92,7 +92,7 @@ bool SqlTableModel::select() {
   //  qDebug() << "filter: " << filter();
   //  qDebug() << "stmt: " << selectStatement() << "\n";
 
-  if (not QSqlTableModel::select()) { throw RuntimeError("Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
+  if (not QSqlTableModel::select()) { throw RuntimeException("Erro lendo tabela '" + QSqlTableModel::tableName() + "': " + QSqlTableModel::lastError().text()); }
 
   return true;
 }
@@ -117,7 +117,7 @@ void SqlTableModel::setTable(const QString &tableName) {
 int SqlTableModel::fieldIndex(const QString &fieldName, const bool silent) const {
   const int field = QSqlTableModel::fieldIndex(fieldName);
 
-  if (field == -1 and not silent) { throw RuntimeError(fieldName + " não encontrado na tabela " + tableName() + "!"); }
+  if (field == -1 and not silent) { throw RuntimeException(fieldName + " não encontrado na tabela " + tableName() + "!"); }
 
   return field;
 }

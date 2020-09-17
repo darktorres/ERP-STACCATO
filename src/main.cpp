@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     window->show();
 #endif
   } catch (std::exception &e) {
-    qApp->enqueueException(e.what());
+    app.rollbackTransaction();
     exit(1);
   }
 

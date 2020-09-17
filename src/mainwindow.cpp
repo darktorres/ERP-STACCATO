@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   const QString hostname = UserSession::getSetting("Login/hostname").toString();
 
-  if (hostname.isEmpty()) { throw RuntimeError("A chave 'hostname não está configurada!'"); }
+  if (hostname.isEmpty()) { throw RuntimeException("A chave 'hostname não está configurada!'"); }
 
   const QString hostnameText = qApp->getMapLojas().key(hostname);
 
@@ -153,7 +153,7 @@ void MainWindow::resetTables() {
 void MainWindow::updateTables() {
   if (qApp->getUpdating()) { return; }
   if (not qApp->getIsConnected()) { return; }
-  if (qApp->getShowingErrors()) { return; }
+  if (qApp->getShowingMessages()) { return; }
 
   qApp->setUpdating(true);
 

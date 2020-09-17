@@ -12,7 +12,9 @@
 #include <QSqlError>
 #include <QTimer>
 
-RuntimeError::RuntimeError(const QString &message) : std::runtime_error(message.toStdString()) {}
+RuntimeException::RuntimeException(const QString &message) : std::runtime_error(message.toStdString()) { qApp->enqueueException(message); }
+
+RuntimeError::RuntimeError(const QString &message) : std::runtime_error(message.toStdString()) { qApp->enqueueError(message); }
 
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
   setOrganizationName("Staccato");
@@ -40,7 +42,7 @@ void Application::enqueueException(const QString &error, QWidget *parent) {
 
   Log::createLog("Exceção", error);
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 bool Application::enqueueException(const bool boolean, const QString &error, QWidget *parent) {
@@ -54,7 +56,7 @@ void Application::enqueueError(const QString &error, QWidget *parent) {
 
   Log::createLog("Erro", error);
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 bool Application::enqueueError(const bool boolean, const QString &error, QWidget *parent) {
@@ -65,13 +67,13 @@ bool Application::enqueueError(const bool boolean, const QString &error, QWidget
 void Application::enqueueInformation(const QString &information, QWidget *parent) {
   informationQueue << Message{information, parent};
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 void Application::enqueueWarning(const QString &warning, QWidget *parent) {
   warningQueue << Message{warning, parent};
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 QString Application::getWebDavIp() const { return mapLojas.value("Acesso Externo - Alphaville"); }
@@ -137,7 +139,7 @@ bool Application::genericLogin(const QString &hostname) {
       if (db.open()) {
         UserSession::setSetting("Login/hostname", loja);
         UserSession::setSetting("Login/loja", mapLojas.key(loja));
-        qApp->updater();
+        updater();
         connected = true;
         break;
       }
@@ -287,29 +289,24 @@ void Application::lightTheme() {
   UserSession::setSetting("User/tema", "claro");
 }
 
-bool Application::startTransaction(const QString &messageLog, const bool delayMessages) {
-  if (inTransaction) {
-    // TODO: this message wont show due to inTransaction flag (look for other places that need to use a messagebox directly)
-    return qApp->enqueueException(false, "Transação já em execução!");
-  }
+bool Application::startTransaction(const QString &messageLog) {
+  if (inTransaction) { throw RuntimeException("Transação já em execução!"); }
 
-  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return enqueueException(false, "Erro iniciando transaction: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return false; }
 
   Log::createLog("Transação", messageLog);
 
   inTransaction = true;
-  this->delayMessages = delayMessages;
 
   return true;
 }
 
 bool Application::endTransaction() {
-  if (not inTransaction) { return enqueueException(false, "Não está em transação"); }
+  if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
-  if (QSqlQuery query; not query.exec("COMMIT")) { return enqueueException(false, "Erro no commit: " + query.lastError().text()); }
+  if (QSqlQuery query; not query.exec("COMMIT")) { return false; }
 
   inTransaction = false;
-  delayMessages = false;
 
   showMessages();
 
@@ -317,12 +314,10 @@ bool Application::endTransaction() {
 }
 
 void Application::rollbackTransaction() {
-  //  if (not inTransaction) { return enqueueException("Não está em transação!"); }
-
-  if (QSqlQuery query; not query.exec("ROLLBACK")) { return enqueueException("Erro rollback: " + query.lastError().text()); }
-
-  inTransaction = false;
-  delayMessages = false;
+  if (inTransaction) {
+    if (QSqlQuery query; not query.exec("ROLLBACK")) { return; }
+    inTransaction = false;
+  }
 
   showMessages();
 }
@@ -332,7 +327,7 @@ bool Application::rollbackTransaction(const bool boolean) {
   return boolean;
 }
 
-bool Application::getShowingErrors() const { return showingErrors; }
+bool Application::getShowingMessages() const { return showingMessages; }
 
 bool Application::getIsConnected() const { return isConnected; }
 
@@ -353,16 +348,17 @@ void Application::storeSelection() {
 void Application::setUpdating(const bool value) {
   updating = value;
 
-  if (not updating) { showMessages(); }
+  showMessages();
 }
 
 bool Application::getUpdating() const { return updating; }
 
 void Application::showMessages() {
-  if (delayMessages and (inTransaction or updating)) { return; }
-  if (errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty() and exceptionQueue.isEmpty()) { return; }
+  if (inTransaction) { return; }
+  if (updating) { return; }
+  if (exceptionQueue.isEmpty() and errorQueue.isEmpty() and warningQueue.isEmpty() and informationQueue.isEmpty()) { return; }
 
-  showingErrors = true;
+  showingMessages = true;
 
   for (const auto &exception : std::as_const(exceptionQueue)) {
     const QString error1 = "MySQL server has gone away";
@@ -396,7 +392,7 @@ void Application::showMessages() {
   warningQueue.clear();
   informationQueue.clear();
 
-  showingErrors = false;
+  showingMessages = false;
 }
 
 void Application::updater() {
@@ -574,10 +570,7 @@ bool Application::notify(QObject *receiver, QEvent *event) {
 
   try {
     done = QApplication::notify(receiver, event);
-  } catch (const std::exception &e) {
-    qApp->rollbackTransaction();
-    qApp->enqueueException(e.what());
-  }
+  } catch (const std::exception &e) { rollbackTransaction(); }
 
   return done;
 }

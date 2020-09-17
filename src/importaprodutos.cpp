@@ -31,31 +31,29 @@ ImportaProdutos::ImportaProdutos(const Tipo tipo, QWidget *parent) : QDialog(par
 ImportaProdutos::~ImportaProdutos() { delete ui; }
 
 void ImportaProdutos::importarTabela() {
-  if (not readFile()) { return; }
-  if (not readValidade()) { return; }
+  try {
+    if (not readFile() or not readValidade()) {
+      close();
+      return;
+    }
 
-  if (not qApp->startTransaction("ImportaProdutos::importaTabela", false)) { return; }
+    qApp->startTransaction("ImportaProdutos::importaTabela");
 
-  if (not importar()) {
-    db.close();
-    qApp->rollbackTransaction();
-    close();
-  }
+    importar();
+  } catch (std::exception &e) { close(); }
 }
 
-bool ImportaProdutos::verificaSeRepresentacao() {
+void ImportaProdutos::verificaSeRepresentacao() {
   QSqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT representacao FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-  if (not queryFornecedor.exec() or not queryFornecedor.first()) { return qApp->enqueueException(false, "Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text(), this); }
+  if (not queryFornecedor.exec() or not queryFornecedor.first()) { throw RuntimeException("Erro lendo tabela fornecedor: " + queryFornecedor.lastError().text()); }
 
   ui->checkBoxRepresentacao->setChecked(queryFornecedor.value("representacao").toBool());
-
-  return true;
 }
 
-bool ImportaProdutos::atualizaProduto() {
+void ImportaProdutos::atualizaProduto() {
   const int row = hashModel.value(produto.fornecedor + produto.codComercial + produto.ui + QString::number(static_cast<int>(tipo)));
 
   if (vectorProdutosImportados.contains(row)) {
@@ -65,24 +63,22 @@ bool ImportaProdutos::atualizaProduto() {
 
   vectorProdutosImportados << row;
 
-  if (not atualizaCamposProduto(row)) { return false; }
-  if (not marcaProdutoNaoDescontinuado(row)) { return false; }
-
-  return true;
+  atualizaCamposProduto(row);
+  marcaProdutoNaoDescontinuado(row);
 }
 
-bool ImportaProdutos::importar() {
+void ImportaProdutos::importar() {
   QXlsx::Document xlsx(file, this);
 
-  if (not xlsx.selectSheet("BASE")) { return false; }
-  if (not verificaTabela(xlsx)) { return false; }
+  xlsx.selectSheet("BASE");
+  verificaTabela(xlsx);
 
   progressDialog->show();
 
-  if (not cadastraFornecedores(xlsx)) { return false; }
-  if (not verificaSeRepresentacao()) { return false; }
-  if (not marcaTodosProdutosDescontinuados()) { return false; }
-  if (not mostraApenasEstesFornecedores()) { return false; }
+  cadastraFornecedores(xlsx);
+  verificaSeRepresentacao();
+  marcaTodosProdutosDescontinuados();
+  mostraApenasEstesFornecedores();
 
   itensExpired = modelProduto.rowCount();
 
@@ -114,14 +110,12 @@ bool ImportaProdutos::importar() {
     }
 
     const bool existeNoModel = hashModel.contains(produto.fornecedor + produto.codComercial + produto.ui + QString::number(static_cast<int>(tipo)));
-    const bool success = existeNoModel ? atualizaProduto() : insereEmOk();
-
-    if (not success) { return false; }
+    existeNoModel ? atualizaProduto() : insereEmOk();
   }
 
   progressDialog->cancel();
 
-  if (canceled) { return false; }
+  if (canceled) { throw std::exception(); }
 
   setupTables();
 
@@ -131,8 +125,6 @@ bool ImportaProdutos::importar() {
                             "\nNão modificados: " + QString::number(itensNotChanged) + "\nDescontinuados: " + QString::number(itensExpired) + "\nCom erro: " + QString::number(itensError);
 
   QMessageBox::information(this, "Aviso!", resultado);
-
-  return true;
 }
 
 void ImportaProdutos::setProgressDialog() {
@@ -160,9 +152,10 @@ bool ImportaProdutos::readFile() {
 bool ImportaProdutos::readValidade() {
   auto *validadeDlg = new ValidadeDialog(this);
 
-  if (not validadeDlg->exec()) { return false; }
+  if (validadeDlg->exec() == QDialog::Rejected) { return false; }
 
   validade = validadeDlg->getValidade();
+
   if (validade != -1) { validadeString = qApp->serverDate().addDays(validade).toString("yyyy-MM-dd"); }
 
   return true;
@@ -349,7 +342,7 @@ void ImportaProdutos::setupTables() {
   ui->tableErro->setItemDelegateForColumn("mva", porcDelegate);
 }
 
-bool ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
+void ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
   const int rows = xlsx.dimension().rowCount();
 
   QStringList m_fornecedores;
@@ -365,7 +358,7 @@ bool ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
     m_fornecedores << xlsx.read(row, 1).toString();
   }
 
-  if (not m_fornecedores.filter("=IF").isEmpty()) { return qApp->enqueueError(false, "Células estão com fórmula! Trocar por valores no Excel!", this); }
+  if (not m_fornecedores.filter("=IF").isEmpty()) { throw RuntimeError("Células estão com fórmula! Trocar por valores no Excel!"); }
 
   progressDialog->setMaximum(count);
 
@@ -374,30 +367,26 @@ bool ImportaProdutos::cadastraFornecedores(QXlsx::Document &xlsx) {
   for (auto const &m_fornecedor : m_fornecedores) {
     fornecedor = m_fornecedor;
 
-    const auto idFornecedor = buscarCadastrarFornecedor();
+    const int idFornecedor = buscarCadastrarFornecedor();
 
-    if (not idFornecedor) { return false; }
+    ids << QString::number(idFornecedor);
 
-    ids << QString::number(idFornecedor.value());
-
-    fornecedores.insert(fornecedor, idFornecedor.value());
+    fornecedores.insert(fornecedor, idFornecedor);
 
     QSqlQuery queryFornecedor;
     queryFornecedor.prepare("UPDATE fornecedor SET validadeProdutos = :validade WHERE razaoSocial = :razaoSocial");
     queryFornecedor.bindValue(":validade", (validade == -1) ? QVariant() : qApp->serverDate().addDays(validade));
     queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-    if (not queryFornecedor.exec()) { return qApp->enqueueException(false, "Erro salvando validade: " + queryFornecedor.lastError().text(), this); }
+    if (not queryFornecedor.exec()) { throw RuntimeException("Erro salvando validade: " + queryFornecedor.lastError().text()); }
   }
 
   idsFornecedor = ids.join(",");
 
-  if (fornecedores.isEmpty()) { return qApp->enqueueException(false, "Erro ao cadastrar fornecedores!", this); }
-
-  return true;
+  if (fornecedores.isEmpty()) { throw RuntimeException("Erro ao cadastrar fornecedores!"); }
 }
 
-bool ImportaProdutos::mostraApenasEstesFornecedores() {
+void ImportaProdutos::mostraApenasEstesFornecedores() {
   modelProduto.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)));
 
   modelProduto.select();
@@ -407,24 +396,14 @@ bool ImportaProdutos::mostraApenasEstesFornecedores() {
   modelEstoque.setFilter("idFornecedor IN (" + idsFornecedor + ") AND estoque = TRUE AND promocao = FALSE");
 
   modelEstoque.select();
-
-  return true;
 }
 
-bool ImportaProdutos::marcaTodosProdutosDescontinuados() {
+void ImportaProdutos::marcaTodosProdutosDescontinuados() {
   QSqlQuery query;
 
   if (not query.exec("UPDATE produto SET descontinuado = TRUE WHERE idFornecedor IN (" + idsFornecedor + ") AND estoque = FALSE AND promocao = " + QString::number(static_cast<int>(tipo)))) {
-    return qApp->enqueueException(false, "Erro marcando produtos descontinuados: " + query.lastError().text(), this);
+    throw RuntimeException("Erro marcando produtos descontinuados: " + query.lastError().text());
   }
-
-  return true;
-}
-
-void ImportaProdutos::contaProdutos() {
-  QSqlQuery queryProdSize("SELECT COUNT(*) FROM [BASE$]", db);
-  if (not queryProdSize.first()) { return; }
-  progressDialog->setMaximum(queryProdSize.value(0).toInt());
 }
 
 void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
@@ -471,7 +450,7 @@ void ImportaProdutos::leituraProduto(QXlsx::Document &xlsx, const int row) {
   produto.quantCaixa = quantCaixa;
 }
 
-bool ImportaProdutos::atualizaCamposProduto(const int row) {
+void ImportaProdutos::atualizaCamposProduto(const int row) {
   bool changed = false;
 
   const auto estoqueList = modelEstoque.match("idProdutoRelacionado", modelProduto.data(row, "idProduto"), 1, Qt::MatchExactly);
@@ -680,19 +659,15 @@ bool ImportaProdutos::atualizaCamposProduto(const int row) {
   }
 
   changed ? itensUpdated++ : itensNotChanged++;
-
-  return true;
 }
 
-bool ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
+void ImportaProdutos::marcaProdutoNaoDescontinuado(const int row) {
   modelProduto.setData(row, "descontinuado", false);
 
   itensExpired--;
-
-  return true;
 }
 
-bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
+void ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
   const QString ncm = produto.ncm;
   const QString codBarras = produto.codBarras;
   const QString fornecedor = produto.fornecedor;
@@ -727,8 +702,6 @@ bool ImportaProdutos::pintarCamposForaDoPadrao(const int row) {
   if (precoVenda <= 0.) { modelErro.setData(row, "precoVendaUpd", red); }
 
   if (precoVenda < custo) { modelErro.setData(row, "precoVendaUpd", red); }
-
-  return true;
 }
 
 bool ImportaProdutos::camposForaDoPadrao() {
@@ -742,7 +715,7 @@ bool ImportaProdutos::camposForaDoPadrao() {
   return false;
 }
 
-bool ImportaProdutos::insereEmErro() {
+void ImportaProdutos::insereEmErro() {
   const int row = modelErro.insertRowAtEnd();
 
   modelErro.setData(row, "atualizarTabelaPreco", true);
@@ -803,14 +776,12 @@ bool ImportaProdutos::insereEmErro() {
 
   // -------------------------------------------------
 
-  if (not pintarCamposForaDoPadrao(row)) { return false; }
+  pintarCamposForaDoPadrao(row);
 
   itensError++;
-
-  return true;
 }
 
-bool ImportaProdutos::insereEmOk() {
+void ImportaProdutos::insereEmOk() {
   const int row = modelProduto.insertRowAtEnd();
 
   modelProduto.setData(row, "atualizarTabelaPreco", true);
@@ -876,7 +847,7 @@ bool ImportaProdutos::insereEmOk() {
     query.bindValue(":idFornecedor", produto.idFornecedor);
     query.bindValue(":codComercial", modelProduto.data(row, "codComercial"));
 
-    if (not query.exec()) { return qApp->enqueueException(false, "Erro buscando produto relacionado: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro buscando produto relacionado: " + query.lastError().text()); }
 
     if (query.first()) { modelProduto.setData(row, "idProdutoRelacionado", query.value("idProduto")); }
   }
@@ -886,33 +857,22 @@ bool ImportaProdutos::insereEmOk() {
   vectorProdutosImportados << row;
 
   itensImported++;
-
-  return true;
 }
 
-std::optional<int> ImportaProdutos::buscarCadastrarFornecedor() {
+int ImportaProdutos::buscarCadastrarFornecedor() {
   QSqlQuery queryFornecedor;
   queryFornecedor.prepare("SELECT idFornecedor FROM fornecedor WHERE razaoSocial = :razaoSocial");
   queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-  if (not queryFornecedor.exec()) {
-    qApp->enqueueException("Erro buscando fornecedor: " + queryFornecedor.lastError().text(), this);
-    return {};
-  }
+  if (not queryFornecedor.exec()) { throw RuntimeException("Erro buscando fornecedor: " + queryFornecedor.lastError().text()); }
 
   if (not queryFornecedor.first()) {
     queryFornecedor.prepare("INSERT INTO fornecedor (razaoSocial) VALUES (:razaoSocial)");
     queryFornecedor.bindValue(":razaoSocial", fornecedor);
 
-    if (not queryFornecedor.exec()) {
-      qApp->enqueueException("Erro cadastrando fornecedor: " + queryFornecedor.lastError().text(), this);
-      return {};
-    }
+    if (not queryFornecedor.exec()) { throw RuntimeException("Erro cadastrando fornecedor: " + queryFornecedor.lastError().text()); }
 
-    if (queryFornecedor.lastInsertId().isNull()) {
-      qApp->enqueueException("Erro lastInsertId", this);
-      return {};
-    }
+    if (queryFornecedor.lastInsertId().isNull()) { throw RuntimeException("Erro lastInsertId"); }
 
     return queryFornecedor.lastInsertId().toInt();
   }
@@ -920,7 +880,7 @@ std::optional<int> ImportaProdutos::buscarCadastrarFornecedor() {
   return queryFornecedor.value("idFornecedor").toInt();
 }
 
-bool ImportaProdutos::salvar() {
+void ImportaProdutos::salvar() {
   modelProduto.submitAll();
 
   modelEstoque.submitAll();
@@ -934,12 +894,10 @@ bool ImportaProdutos::salvar() {
     queryPrecos.bindValue(":validadeInicio", qApp->serverDate().toString("yyyy-MM-dd"));
     queryPrecos.bindValue(":validadeFim", validadeString);
 
-    if (not queryPrecos.exec()) { return qApp->enqueueException(false, "Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text(), this); }
+    if (not queryPrecos.exec()) { throw RuntimeException("Erro inserindo dados em produto_has_preco: " + queryPrecos.lastError().text()); }
   }
 
-  if (not queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE")) { return qApp->enqueueException(false, "Erro comunicando com banco de dados: " + queryPrecos.lastError().text(), this); }
-
-  return true;
+  if (not queryPrecos.exec("UPDATE produto SET atualizarTabelaPreco = FALSE")) { throw RuntimeException("Erro comunicando com banco de dados: " + queryPrecos.lastError().text()); }
 }
 
 void ImportaProdutos::on_pushButtonSalvar_clicked() {
@@ -951,7 +909,9 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
     if (msgBox.exec() == QMessageBox::No) { return; }
   }
 
-  if (not salvar()) { return; }
+  try {
+    salvar();
+  } catch (std::exception &e) { close(); }
 
   qApp->endTransaction();
 
@@ -960,29 +920,27 @@ void ImportaProdutos::on_pushButtonSalvar_clicked() {
   close();
 }
 
-bool ImportaProdutos::verificaTabela(QXlsx::Document &xlsx) {
-  if (xlsx.read(1, 1).toString() != "fornecedor") { return qApp->enqueueError(false, "Faltou a coluna 'fornecedor' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 2).toString() != "descricao") { return qApp->enqueueError(false, "Faltou a coluna 'descricao' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 3).toString() != "un") { return qApp->enqueueError(false, "Faltou a coluna 'un' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 4).toString() != "colecao") { return qApp->enqueueError(false, "Faltou a coluna 'colecao' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 5).toString() != "m2cx") { return qApp->enqueueError(false, "Faltou a coluna 'm2cx' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 6).toString() != "pccx") { return qApp->enqueueError(false, "Faltou a coluna 'pccx' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 7).toString() != "kgcx") { return qApp->enqueueError(false, "Faltou a coluna 'kgcx' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 8).toString() != "formComercial") { return qApp->enqueueError(false, "Faltou a coluna 'formComercial' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 9).toString() != "codComercial") { return qApp->enqueueError(false, "Faltou a coluna 'codComercial' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 10).toString() != "codBarras") { return qApp->enqueueError(false, "Faltou a coluna 'codBarras' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 11).toString() != "ncm") { return qApp->enqueueError(false, "Faltou a coluna 'ncm' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 12).toString() != "qtdPallet") { return qApp->enqueueError(false, "Faltou a coluna 'qtdPallet' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 13).toString() != "custo") { return qApp->enqueueError(false, "Faltou a coluna 'custo' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 14).toString() != "precoVenda") { return qApp->enqueueError(false, "Faltou a coluna 'precoVenda' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 15).toString() != "ui") { return qApp->enqueueError(false, "Faltou a coluna 'ui' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 16).toString() != "un2") { return qApp->enqueueError(false, "Faltou a coluna 'un2' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 17).toString() != "minimo") { return qApp->enqueueError(false, "Faltou a coluna 'minimo' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 18).toString() != "mva") { return qApp->enqueueError(false, "Faltou a coluna 'mva' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 19).toString() != "st") { return qApp->enqueueError(false, "Faltou a coluna 'st' no cabeçalho da tabela!", this); }
-  if (xlsx.read(1, 20).toString() != "sticms") { return qApp->enqueueError(false, "Faltou a coluna 'sticms' no cabeçalho da tabela!", this); }
-
-  return true;
+void ImportaProdutos::verificaTabela(QXlsx::Document &xlsx) {
+  if (xlsx.read(1, 1).toString() != "fornecedor") { throw RuntimeError("Faltou a coluna 'fornecedor' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 2).toString() != "descricao") { throw RuntimeError("Faltou a coluna 'descricao' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 3).toString() != "un") { throw RuntimeError("Faltou a coluna 'un' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 4).toString() != "colecao") { throw RuntimeError("Faltou a coluna 'colecao' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 5).toString() != "m2cx") { throw RuntimeError("Faltou a coluna 'm2cx' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 6).toString() != "pccx") { throw RuntimeError("Faltou a coluna 'pccx' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 7).toString() != "kgcx") { throw RuntimeError("Faltou a coluna 'kgcx' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 8).toString() != "formComercial") { throw RuntimeError("Faltou a coluna 'formComercial' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 9).toString() != "codComercial") { throw RuntimeError("Faltou a coluna 'codComercial' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 10).toString() != "codBarras") { throw RuntimeError("Faltou a coluna 'codBarras' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 11).toString() != "ncm") { throw RuntimeError("Faltou a coluna 'ncm' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 12).toString() != "qtdPallet") { throw RuntimeError("Faltou a coluna 'qtdPallet' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 13).toString() != "custo") { throw RuntimeError("Faltou a coluna 'custo' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 14).toString() != "precoVenda") { throw RuntimeError("Faltou a coluna 'precoVenda' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 15).toString() != "ui") { throw RuntimeError("Faltou a coluna 'ui' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 16).toString() != "un2") { throw RuntimeError("Faltou a coluna 'un2' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 17).toString() != "minimo") { throw RuntimeError("Faltou a coluna 'minimo' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 18).toString() != "mva") { throw RuntimeError("Faltou a coluna 'mva' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 19).toString() != "st") { throw RuntimeError("Faltou a coluna 'st' no cabeçalho da tabela!"); }
+  if (xlsx.read(1, 20).toString() != "sticms") { throw RuntimeError("Faltou a coluna 'sticms' no cabeçalho da tabela!"); }
 }
 
 void ImportaProdutos::closeEvent(QCloseEvent *event) {
@@ -996,7 +954,7 @@ void ImportaProdutos::on_checkBoxRepresentacao_toggled(const bool checked) {
 
   QSqlQuery query;
   if (not query.exec("UPDATE fornecedor SET representacao = " + QString(checked ? "TRUE" : "FALSE") + " WHERE idFornecedor IN (" + idsFornecedor + ")")) {
-    return qApp->enqueueException("Erro guardando 'Representacao' em Fornecedor: " + query.lastError().text(), this);
+    throw RuntimeException("Erro guardando 'Representacao' em Fornecedor: " + query.lastError().text());
   }
 }
 

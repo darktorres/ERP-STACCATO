@@ -801,6 +801,12 @@ color: rgb(0, 0, 0);</string>
                <layout class="QVBoxLayout" name="verticalLayout_3">
                 <item>
                  <widget class="QPushButton" name="pushButtonAtualizarItem">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Atualizar item atual&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -814,6 +820,12 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonAdicionarItem">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adicionar item atual&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -827,6 +839,12 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonRemoverItem">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remover item selecionado&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -840,6 +858,12 @@ color: rgb(0, 0, 0);</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonLimparSelecao">
+                  <property name="minimumSize">
+                   <size>
+                    <width>110</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remover item selecionado&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>

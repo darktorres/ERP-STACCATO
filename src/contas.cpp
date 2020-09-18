@@ -156,6 +156,8 @@ void Contas::preencher(const QModelIndex &index) {
     }
 
     if (index.column() == ui->tablePendentes->columnIndex("centroCusto")) {
+      if (index.data() == 0) { return; } // for dealing with ItemBox editor emiting signal when mouseOver
+
       if (not modelPendentes.setData(row, "idLoja", modelPendentes.data(row, "centroCusto"))) { return; }
     }
 

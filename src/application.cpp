@@ -289,28 +289,24 @@ void Application::lightTheme() {
   UserSession::setSetting("User/tema", "claro");
 }
 
-bool Application::startTransaction(const QString &messageLog) {
+void Application::startTransaction(const QString &messageLog) {
   if (inTransaction) { throw RuntimeException("Transação já em execução!"); }
 
-  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return false; }
+  if (QSqlQuery query; not query.exec("START TRANSACTION")) { return; }
 
   Log::createLog("Transação", messageLog);
 
   inTransaction = true;
-
-  return true;
 }
 
-bool Application::endTransaction() {
+void Application::endTransaction() {
   if (not inTransaction) { throw RuntimeException("Não está em transação"); }
 
-  if (QSqlQuery query; not query.exec("COMMIT")) { return false; }
+  if (QSqlQuery query; not query.exec("COMMIT")) { return; }
 
   inTransaction = false;
 
   showMessages();
-
-  return true;
 }
 
 void Application::rollbackTransaction() {
@@ -320,11 +316,6 @@ void Application::rollbackTransaction() {
   }
 
   showMessages();
-}
-
-bool Application::rollbackTransaction(const bool boolean) {
-  rollbackTransaction();
-  return boolean;
 }
 
 bool Application::getShowingMessages() const { return showingMessages; }
@@ -463,94 +454,66 @@ QString Application::sanitizeSQL(const QString &string) {
   return sanitized;
 }
 
-std::optional<int> Application::reservarIdEstoque() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdEstoque() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'estoque'") or not query.first()) {
-    enqueueException("Erro reservar id estoque: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id estoque: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id estoque: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE estoque auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id estoque: " + query.lastError().text()); }
 
   return id;
 }
 
-std::optional<int> Application::reservarIdVendaProduto2() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdVendaProduto2() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'venda_has_produto2'") or not query.first()) {
-    enqueueException("Erro reservar id venda: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id venda: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id venda: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE venda_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id venda: " + query.lastError().text()); }
 
   return id;
 }
 
-std::optional<int> Application::reservarIdNFe() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdNFe() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'nfe'") or not query.first()) {
-    enqueueException("Erro reservar id nfe: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id nfe: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id nfe: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE nfe auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id nfe: " + query.lastError().text()); }
 
   return id;
 }
 
-std::optional<int> Application::reservarIdPedido2() {
-  if (inTransaction) {
-    enqueueException("ALTER TABLE durante transação!");
-    return {};
-  }
+int Application::reservarIdPedido2() {
+  if (inTransaction) { throw RuntimeException("ALTER TABLE durante transação!"); }
 
   QSqlQuery query;
 
   if (not query.exec("SELECT auto_increment FROM information_schema.tables WHERE table_schema = 'staccato' AND table_name = 'pedido_fornecedor_has_produto2'") or not query.first()) {
-    enqueueException("Erro reservar id compra: " + query.lastError().text());
-    return {};
+    throw RuntimeException("Erro reservar id compra: " + query.lastError().text());
   }
 
   const int id = query.value("auto_increment").toInt();
 
-  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) {
-    enqueueException("Erro reservar id compra: " + query.lastError().text());
-    return {};
-  }
+  if (not query.exec("ALTER TABLE pedido_fornecedor_has_produto2 auto_increment = " + QString::number(id + 1))) { throw RuntimeException("Erro reservar id compra: " + query.lastError().text()); }
 
   return id;
 }

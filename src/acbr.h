@@ -8,13 +8,13 @@ class ACBr final : public QObject {
   Q_OBJECT
 
 public:
-  explicit ACBr(QWidget *parent);
+  explicit ACBr();
   ~ACBr() = default;
-  auto consultarNFe(const int idNFe) -> std::optional<std::tuple<QString, QString>>;
-  auto enviarComando(const QString &comando, const bool local = false) -> std::optional<QString>;
-  auto enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &filePath) -> bool;
-  auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> std::optional<QString>;
-  auto gerarDanfe(const int idNFe) -> bool;
+  auto consultarNFe(const int idNFe) -> std::tuple<QString, QString>;
+  auto enviarComando(const QString &comando, const bool local = false) -> QString;
+  auto enviarEmail(const QString &emailDestino, const QString &emailCopia, const QString &assunto, const QString &filePath) -> void;
+  auto gerarDanfe(const QByteArray &fileContent, const bool openFile = true) -> QString;
+  auto gerarDanfe(const int idNFe) -> void;
 
 private:
   // attributes
@@ -27,9 +27,8 @@ private:
   bool enviado = false;
   bool recebido = false;
   QProgressDialog *progressDialog;
-  QWidget *parent;
   // methods
-  auto abrirPdf(const QString &filePath) -> bool;
+  auto abrirPdf(const QString &filePath) -> void;
   auto error() -> void;
   auto readSocket() -> void;
   auto removerNota(const int idNFe) -> void;

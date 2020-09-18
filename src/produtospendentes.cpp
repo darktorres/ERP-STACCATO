@@ -132,18 +132,16 @@ void ProdutosPendentes::setupTables() {
   ui->tableProdutos->hideColumn("idCompra");
 }
 
-bool ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
+void ProdutosPendentes::comprar(const QModelIndexList &list, const QDate &dataPrevista) {
   for (const auto &index : list) {
     const int row = index.row();
 
-    if (not atualizarVenda(row)) { return false; }
-    if (not enviarProdutoParaCompra(row, dataPrevista)) { return false; }
-    if (not enviarExcedenteParaCompra(row, dataPrevista)) { return false; }
+    atualizarVenda(row);
+    enviarProdutoParaCompra(row, dataPrevista);
+    enviarExcedenteParaCompra(row, dataPrevista);
   }
 
   modelProdutos.submitAll();
-
-  return true;
 }
 
 void ProdutosPendentes::recarregarTabelas() {
@@ -174,34 +172,30 @@ void ProdutosPendentes::on_pushButtonComprar_clicked() {
   InputDialog inputDlg(InputDialog::Tipo::Carrinho, this);
   if (inputDlg.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction("ProdutosPendentes::on_pushButtonComprar")) { return; }
+  qApp->startTransaction("ProdutosPendentes::on_pushButtonComprar");
 
-  if (not comprar(list, inputDlg.getNextDate())) { return qApp->rollbackTransaction(); }
+  comprar(list, inputDlg.getNextDate());
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Produto enviado para carrinho!", this);
 
   recarregarTabelas();
 }
 
-bool ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
+void ProdutosPendentes::consumirEstoque(const int rowProduto, const int rowEstoque, const double quantConsumir, const double quantVenda) {
   // TODO: 1pensar em alguma forma de poder consumir compra que nao foi faturada ainda
 
   auto *estoque = new Estoque(modelEstoque.data(rowEstoque, "idEstoque").toString(), false, this);
-  if (not estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt(), quantConsumir)) { return false; }
+  estoque->criarConsumo(modelViewProdutos.data(rowProduto, "idVendaProduto2").toInt(), quantConsumir);
 
-  if (quantConsumir < quantVenda) {
-    if (not dividirVenda(quantConsumir, quantVenda, rowProduto)) { return false; }
-  }
+  if (quantConsumir < quantVenda) { dividirVenda(quantConsumir, quantVenda, rowProduto); }
 
   modelProdutos.setData(rowProduto, "status", modelEstoque.data(rowEstoque, "status"));
 
   modelProdutos.submitAll();
-
-  return true;
 }
 
 void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
@@ -234,13 +228,13 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
 
   //--------------------------------------------------------------------
 
-  if (not qApp->startTransaction("ProdutosPendentes::on_pushButtonConsumirEstoque")) { return; }
+  qApp->startTransaction("ProdutosPendentes::on_pushButtonConsumirEstoque");
 
-  if (not consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda)) { return qApp->rollbackTransaction(); }
+  consumirEstoque(rowProduto, rowEstoque, quantConsumir, quantVenda);
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   //--------------------------------------------------------------------
 
@@ -249,7 +243,7 @@ void ProdutosPendentes::on_pushButtonConsumirEstoque_clicked() {
   recarregarTabelas();
 }
 
-bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) {
+void ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &dataPrevista) {
   const double excedente = ui->doubleSpinBoxComprar->value() - ui->doubleSpinBoxQuantTotal->value();
 
   if (excedente > 0.) { // TODO: replace query with model so values can be correctly rounded (Application::roundDouble)
@@ -273,13 +267,11 @@ bool ProdutosPendentes::enviarExcedenteParaCompra(const int row, const QDate &da
     query.bindValue(":codBarras", modelViewProdutos.data(row, "codBarras"));
     query.bindValue(":dataPrevCompra", dataPrevista);
 
-    if (not query.exec()) { return qApp->enqueueException(false, "Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro inserindo dados em pedido_fornecedor_has_produto: " + query.lastError().text()); }
   }
-
-  return true;
 }
 
-bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
+void ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &dataPrevista) {
   SqlTableModel model;
   model.setTable("pedido_fornecedor_has_produto");
 
@@ -311,21 +303,15 @@ bool ProdutosPendentes::enviarProdutoParaCompra(const int row, const QDate &data
   model.setData(newRow, "caixas", quant / step);
 
   model.submitAll();
-
-  return true;
 }
 
-bool ProdutosPendentes::atualizarVenda(const int rowProduto) {
-  if (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) {
-    if (not dividirVenda(ui->doubleSpinBoxComprar->value(), modelProdutos.data(rowProduto, "quant").toDouble(), rowProduto)) { return false; }
-  }
+void ProdutosPendentes::atualizarVenda(const int rowProduto) {
+  if (ui->doubleSpinBoxComprar->value() < ui->doubleSpinBoxQuantTotal->value()) { dividirVenda(ui->doubleSpinBoxComprar->value(), modelProdutos.data(rowProduto, "quant").toDouble(), rowProduto); }
 
   modelProdutos.setData(rowProduto, "status", "INICIADO");
-
-  return true;
 }
 
-bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
+void ProdutosPendentes::dividirVenda(const double quantSeparar, const double quantVenda, const int rowProduto) {
   // NOTE: *quebralinha venda_has_produto2
 
   const double quantCaixa = modelProdutos.data(rowProduto, "quantCaixa").toDouble();
@@ -368,8 +354,6 @@ bool ProdutosPendentes::dividirVenda(const double quantSeparar, const double qua
   modelProdutos.setData(newRow, "parcial", parcial * proporcaoNovo);
   modelProdutos.setData(newRow, "parcialDesc", parcialDesc * proporcaoNovo);
   modelProdutos.setData(newRow, "total", total * proporcaoNovo);
-
-  return true;
 }
 
 // NOTE: se o estoque for consumido gerar comissao 2% senao gerar comissao padrao

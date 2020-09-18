@@ -169,25 +169,23 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString chaveAcesso = modelViewNFeSaida.data(row, "chaveAcesso").toString();
 
-  ACBr acbrRemoto(this);
+  ACBr acbrRemoto;
 
-  const auto resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
-
-  if (not resposta) { return; }
+  const QString resposta = acbrRemoto.enviarComando("NFE.CancelarNFe(" + chaveAcesso + ", " + justificativa + ")");
 
   // TODO: verificar outras possiveis respostas (tinha algo como 'cancelamento registrado fora do prazo')
-  if (not resposta->contains("xEvento=Cancelamento registrado")) { return qApp->enqueueException("Resposta: " + resposta.value(), this); }
+  if (not resposta.contains("xEvento=Cancelamento registrado")) { throw RuntimeException("Resposta: " + resposta); }
 
-  if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe")) { return; }
+  qApp->startTransaction("WidgetNfeSaida::on_pushButtonCancelarNFe");
 
-  if (not cancelarNFe(chaveAcesso, row)) { return qApp->rollbackTransaction(); }
+  cancelarNFe(chaveAcesso, row);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
-  qApp->enqueueInformation(resposta.value(), this);
+  qApp->enqueueInformation(resposta, this);
 
-  if (not gravarArquivo(resposta.value(), chaveAcesso)) { return; }
+  gravarArquivo(resposta, chaveAcesso);
 
   const QString filePath = QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml";
 
@@ -195,7 +193,7 @@ void WidgetNfeSaida::on_pushButtonCancelarNFe_clicked() {
 
   const QString assunto = "Cancelamento NFe - " + modelViewNFeSaida.data(row, "NFe").toString() + " - STACCATO REVESTIMENTOS COMERCIO E REPRESENTACAO LTDA";
 
-  ACBr acbrLocal(this);
+  ACBr acbrLocal;
   // TODO: enviar o xml atualizado com o cancelamento
   // TODO: enviar a danfe
   acbrLocal.enviarEmail(emailContabilidade, emailLogistica, assunto, filePath);
@@ -263,7 +261,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");
 
-  ACBr acbrLocal(this);
+  ACBr acbrLocal;
 
   for (const auto &index : list) {
     // TODO: se a conexao com o acbr falhar ou der algum erro pausar o loop e perguntar para o usuario se ele deseja tentar novamente (do ponto que parou)
@@ -279,11 +277,11 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     query.bindValue(":chaveAcesso", chaveAcesso);
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml: " + query.lastError().text()); }
 
     QFile fileXml(QDir::currentPath() + "/arquivos/" + chaveAcesso + ".xml");
 
-    if (not fileXml.open(QFile::WriteOnly)) { return qApp->enqueueException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString(), this); }
+    if (not fileXml.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita xml: " + fileXml.errorString()); }
 
     fileXml.write(query.value("xml").toByteArray());
 
@@ -292,11 +290,9 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     // mandar XML para ACBr gerar PDF
 
-    const auto pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
+    const QString pdfOrigem = acbrLocal.gerarDanfe(query.value("xml").toByteArray(), false);
 
-    if (not pdfOrigem) { return; }
-
-    if (pdfOrigem->isEmpty()) { return qApp->enqueueException("Resposta vazia!", this); }
+    if (pdfOrigem.isEmpty()) { throw RuntimeException("Resposta vazia!"); }
 
     // copiar para pasta predefinida
 
@@ -306,7 +302,7 @@ void WidgetNfeSaida::on_pushButtonExportar_clicked() {
 
     if (filePdf.exists()) { filePdf.remove(); }
 
-    if (not QFile::copy(*pdfOrigem, pdfDestino)) { return qApp->enqueueException("Erro copiando pdf!", this); }
+    if (not QFile::copy(pdfOrigem, pdfDestino)) { throw RuntimeException("Erro copiando pdf!"); }
   }
 
   qApp->enqueueInformation("Arquivos exportados com sucesso para " + QDir::currentPath() + "/arquivos/" + "!", this);
@@ -336,29 +332,28 @@ void WidgetNfeSaida::on_pushButtonConsultarNFe_clicked() {
 
   const int idNFe = modelViewNFeSaida.data(selection.first().row(), "idNFe").toInt();
 
-  ACBr acbrRemoto(this);
+  ACBr acbrRemoto;
 
-  if (auto tuple = acbrRemoto.consultarNFe(idNFe)) {
-    const auto [xml, resposta] = tuple.value();
+  const auto [xml, resposta] = acbrRemoto.consultarNFe(idNFe);
 
-    if (not qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe")) { return; }
+  qApp->startTransaction("WidgetNfeSaida::on_pushButtonConsultarNFe");
 
-    if (not atualizarNFe(resposta, idNFe, xml)) { return qApp->rollbackTransaction(); }
+  atualizarNFe(resposta, idNFe, xml);
 
-    if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
-    updateTables();
-    qApp->enqueueInformation(resposta, this);
-  }
+  updateTables();
+
+  qApp->enqueueInformation(resposta, this);
 }
 
-bool WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
+void WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) {
   QString status;
 
   if (resposta.contains("XMotivo=Autorizado o uso da NF-e")) { status = "AUTORIZADO"; }
   if (resposta.contains("xEvento=Cancelamento registrado")) { status = "CAMCELADO"; }
 
-  if (status.isEmpty()) { return false; }
+  if (status.isEmpty()) { throw RuntimeException("Erro status vazio"); }
 
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = :status, xml = :xml WHERE idNFe = :idNFe");
@@ -366,45 +361,39 @@ bool WidgetNfeSaida::atualizarNFe(const QString &resposta, const int idNFe, cons
   query.bindValue(":xml", xml);
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro atualizando xml da nota: " + query.lastError().text(), this); }
-
-  return true;
+  if (not query.exec()) { throw RuntimeException("Erro atualizando xml da nota: " + query.lastError().text()); }
 }
 
-bool WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
+void WidgetNfeSaida::cancelarNFe(const QString &chaveAcesso, const int row) {
   QSqlQuery query;
   query.prepare("UPDATE nfe SET status = 'CANCELADO' WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro marcando nota como cancelada: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro marcando nota como cancelada: " + query.lastError().text()); }
 
   const int idNFe = modelViewNFeSaida.data(row, "idNFe").toInt();
 
   query.prepare("UPDATE venda_has_produto2 SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro removendo NFe da venda_produto: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro removendo NFe da venda_produto: " + query.lastError().text()); }
 
   query.prepare("UPDATE veiculo_has_produto SET status = 'ENTREGA AGEND.', idNFeSaida = NULL WHERE status = 'EM ENTREGA' AND idNFeSaida = :idNFe");
   query.bindValue(":idNFe", idNFe);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro removendo NFe do veiculo_produto: " + query.lastError().text(), this); }
-
-  return true;
+  if (not query.exec()) { throw RuntimeException("Erro removendo NFe do veiculo_produto: " + query.lastError().text()); }
 }
 
-bool WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
+void WidgetNfeSaida::gravarArquivo(const QString &resposta, const QString &chaveAcesso) {
   QFile arquivo(QDir::currentPath() + "/arquivos/cancelamento_" + chaveAcesso + ".xml");
 
-  if (not arquivo.open(QFile::WriteOnly)) { return qApp->enqueueException(false, "Erro abrindo arquivo para escrita: " + arquivo.errorString(), this); }
+  if (not arquivo.open(QFile::WriteOnly)) { throw RuntimeException("Erro abrindo arquivo para escrita: " + arquivo.errorString()); }
 
   QTextStream stream(&arquivo);
 
   stream << resposta;
 
   arquivo.close();
-
-  return true;
 }
 
 // TODO: 2tela para importar notas de amostra (aba separada)

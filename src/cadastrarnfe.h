@@ -41,15 +41,15 @@ private:
   Ui::CadastrarNFe *ui;
   // methods
   auto alterarCertificado(const QString &text) -> void;
-  auto buscarAliquotas() -> bool;
-  auto cadastrar(const int &idNFe) -> bool;
+  auto buscarAliquotas() -> void;
+  auto cadastrar(const int &idNFe) -> void;
   auto calculaCofins() -> void;
-  auto calculaDigitoVerificador(QString &chave) -> bool;
+  auto calculaDigitoVerificador(QString &chave) -> void;
   auto calculaIcms() -> void;
   auto calculaPis() -> void;
   auto calculaSt() -> void;
   auto clearStr(const QString &str) const -> QString;
-  auto criarChaveAcesso() -> bool;
+  auto criarChaveAcesso() -> void;
   auto gerarNota() -> QString;
   auto listarCfop() -> bool;
   auto on_checkBoxFrete_toggled(bool checked) -> void;
@@ -84,7 +84,7 @@ private:
   auto on_pushButtonEnviarNFE_clicked() -> void;
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
-  auto preCadastrarNota() -> std::optional<int>;
+  auto preCadastrarNota() -> int;
   auto preencherNumeroNFe() -> bool;
   auto prepararNFe(const QStringList &items) -> void;
   auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> bool;

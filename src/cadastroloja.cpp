@@ -104,7 +104,7 @@ bool CadastroLoja::verifyFields() {
   return true;
 }
 
-bool CadastroLoja::savingProcedures() {
+void CadastroLoja::savingProcedures() {
   setData("descricao", ui->lineEditDescricao->text());
   setData("razaoSocial", ui->lineEditRazaoSocial->text());
   setData("sigla", ui->lineEditSIGLA->text());
@@ -119,8 +119,6 @@ bool CadastroLoja::savingProcedures() {
   setData("custoTransporte1", ui->doubleSpinBoxCustoTransporte2Ton->value());
   setData("custoTransporte2", ui->doubleSpinBoxCustoTransporteAcima2Ton->value());
   setData("custoFuncionario", ui->doubleSpinBoxCustoFuncionario->value());
-
-  return true;
 }
 
 void CadastroLoja::registerMode() {
@@ -317,39 +315,33 @@ bool CadastroLoja::viewRegister() {
 
 void CadastroLoja::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Loja cadastrada com sucesso!", this); }
 
-bool CadastroLoja::cadastrar() {
-  if (not qApp->startTransaction("CadastroLoja::cadastrar")) { return false; }
+void CadastroLoja::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroLoja::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelEnd)) { return false; }
+    setForeignKey(modelEnd);
 
     modelEnd.submitAll();
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelConta)) { return false; }
+    setForeignKey(modelConta);
 
     modelConta.submitAll();
 
-    // -------------------------------------------------------------------------
-
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     backupEndereco.clear();
     backupConta.clear();
@@ -357,7 +349,7 @@ bool CadastroLoja::cadastrar() {
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
-  } else {
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
     modelEnd.select();
@@ -366,8 +358,6 @@ bool CadastroLoja::cadastrar() {
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
     for (auto &record : backupConta) { modelConta.insertRecord(-1, record); }
   }
-
-  return success;
 }
 
 void CadastroLoja::on_tableConta_clicked(const QModelIndex &index) {

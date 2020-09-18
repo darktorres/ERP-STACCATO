@@ -28,7 +28,7 @@ private:
   SqlTableModel modelTranspAgend;
   Ui::WidgetLogisticaAgendarColeta *ui;
   // methods
-  auto adicionarProduto(const QModelIndexList &list) -> bool;
+  auto adicionarProduto(const QModelIndexList &list) -> void;
   auto calcularPeso() -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxEstoque_toggled() -> void;
@@ -42,7 +42,7 @@ private:
   auto on_pushButtonMontarCarga_clicked() -> void;
   auto on_pushButtonRemoverProduto_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga = false) -> bool;
+  auto processRows(const QModelIndexList &list, const QDate &dataPrevColeta, const bool montarCarga = false) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

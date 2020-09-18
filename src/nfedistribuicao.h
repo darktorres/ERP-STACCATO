@@ -47,7 +47,7 @@ private:
   auto on_pushButtonNaoRealizada_clicked() -> void;
   auto on_pushButtonPesquisar_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto pesquisarNFes(const QString &resposta, const QString &idLoja) -> bool;
+  auto pesquisarNFes(const QString &resposta, const QString &idLoja) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

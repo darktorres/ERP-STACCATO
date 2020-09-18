@@ -111,19 +111,20 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  if (not qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor")) { return; }
+  qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor");
 
-  if (not retornarFornecedor(list)) { return qApp->rollbackTransaction(); }
+  retornarFornecedor(list);
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
+
   qApp->enqueueInformation("Retornado para fornecedor!", this);
 }
 
-bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
+void WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   // TODO: ao fazer a linha copia da devolucao limpar todas as datas e preencher 'dataRealEnt' com a data em que foi feita o retorno para o estoque
 
   // TODO: ao retornar para estoque criar linha livre no pf2 para consumos posteriores (ou agrupar com linha livre existente)
@@ -147,7 +148,7 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
 
     modelConsumo.select();
 
-    if (modelConsumo.rowCount() == 0) { return qApp->enqueueError(false, "Não encontrou consumo!", this); }
+    if (modelConsumo.rowCount() == 0) { throw RuntimeException("Não encontrou consumo!"); }
 
     const int newRow = modelConsumo.insertRowAtEnd();
 
@@ -174,18 +175,14 @@ bool WidgetCompraDevolucao::retornarEstoque(const QModelIndexList &list) {
   }
 
   modelVendaProduto.submitAll();
-
-  return true;
 }
 
-bool WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
+void WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
   // se for devolucao fornecedor na logica nova nao havera linha de consumo, a quant. simplesmente mantem o consumo negativo na linha original de DEVOLVIDO
 
   for (const auto &index : list) { modelVendaProduto.setData(index.row(), "status", "DEVOLVIDO FORN."); }
 
   modelVendaProduto.submitAll();
-
-  return true;
 }
 
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
@@ -195,13 +192,13 @@ void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
-  if (not qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonRetornarEstoque")) { return; }
+  qApp->startTransaction("WidgetCompraDevolucao::on_pushButtonRetornarEstoque");
 
-  if (not retornarEstoque(list)) { return qApp->rollbackTransaction(); }
+  retornarEstoque(list);
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   modelVendaProduto.select();
 

@@ -166,7 +166,7 @@ void CadastroProduto::setupMapper() {
 
 void CadastroProduto::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Produto cadastrado com sucesso!", this); }
 
-bool CadastroProduto::savingProcedures() {
+void CadastroProduto::savingProcedures() {
   // TODO: verificar aonde estou salvando 'estoque'/'promocao' e não deixar marcar os 2
 
   setData("codBarras", ui->lineEditCodBarras->text());
@@ -208,14 +208,12 @@ bool CadastroProduto::savingProcedures() {
   query.prepare("SELECT representacao FROM fornecedor WHERE idFornecedor = :idFornecedor");
   query.bindValue(":idFornecedor", ui->itemBoxFornecedor->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro verificando se fornecedor é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro verificando se fornecedor é representacao: " + query.lastError().text()); }
 
   const bool representacao = query.value("representacao").toBool();
 
   setData("representacao", representacao);
   setData("descontinuado", ui->dateEditValidade->date() < qApp->serverDate());
-
-  return true;
 }
 
 void CadastroProduto::on_pushButtonCadastrar_clicked() { save(); }
@@ -235,31 +233,25 @@ void CadastroProduto::calcularMarkup() {
   ui->doubleSpinBoxMarkup->setValue(markup);
 }
 
-bool CadastroProduto::cadastrar() {
-  if (not qApp->startTransaction("CadastroProduto::cadastrar")) { return false; }
+void CadastroProduto::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroProduto::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
-  } else {
+    qApp->endTransaction();
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
   }
-
-  return success;
 }
 
 // TODO: 3poder alterar nesta tela a quantidade minima/multiplo dos produtos

@@ -100,15 +100,13 @@ bool CadastroTransportadora::verifyFields() {
   return true;
 }
 
-bool CadastroTransportadora::savingProcedures() {
+void CadastroTransportadora::savingProcedures() {
   setData("cnpj", ui->lineEditCNPJ->text());
   setData("razaoSocial", ui->lineEditRazaoSocial->text());
   setData("nomeFantasia", ui->lineEditNomeFantasia->text());
   setData("inscEstadual", ui->lineEditInscEstadual->text());
   setData("tel", ui->lineEditTel->text());
   setData("antt", ui->lineEditANTT->text());
-
-  return true;
 }
 
 void CadastroTransportadora::setupMapper() {
@@ -348,37 +346,33 @@ void CadastroTransportadora::on_pushButtonRemoverVeiculo_clicked() {
   }
 }
 
-bool CadastroTransportadora::cadastrar() {
-  if (not qApp->startTransaction("CadastroTransportadora::cadastrar")) { return false; }
+void CadastroTransportadora::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroTransportadora::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelEnd)) { return false; }
+    setForeignKey(modelEnd);
 
     modelEnd.submitAll();
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelVeiculo)) { return false; }
+    setForeignKey(modelVeiculo);
 
     modelVeiculo.submitAll();
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     backupEndereco.clear();
     backupVeiculo.clear();
@@ -388,7 +382,7 @@ bool CadastroTransportadora::cadastrar() {
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelVeiculo.setFilter(primaryKey + " = '" + primaryId + "'");
-  } else {
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
     modelEnd.select();
@@ -397,8 +391,6 @@ bool CadastroTransportadora::cadastrar() {
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
     for (auto &record : backupVeiculo) { modelVeiculo.insertRecord(-1, record); }
   }
-
-  return success;
 }
 
 void CadastroTransportadora::on_checkBoxMostrarInativosVeiculo_toggled(bool checked) {

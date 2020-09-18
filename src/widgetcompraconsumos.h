@@ -25,7 +25,7 @@ private:
   SqlTableModel modelProduto;
   Ui::WidgetCompraConsumos *ui;
   // methods
-  auto desfazerConsumo(const int row) -> bool;
+  auto desfazerConsumo(const int row) -> void;
   auto montaFiltro() -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
   auto on_pushButtonDesfazerConsumo_clicked() -> void;

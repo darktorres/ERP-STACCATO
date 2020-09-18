@@ -86,7 +86,7 @@ void LoginDialog::on_pushButtonLogin_clicked() {
 
     if (not qApp->dbConnect(ui->lineEditHostname->text(), ui->lineEditUser->text().toLower(), ui->lineEditPass->text())) { return; }
 
-    if (not verificaVersao()) { return; }
+    verificaVersao();
   }
 
   if (tipo == Tipo::Autorizacao) {
@@ -100,19 +100,17 @@ void LoginDialog::on_pushButtonLogin_clicked() {
   accept();
 }
 
-bool LoginDialog::verificaVersao() {
+void LoginDialog::verificaVersao() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { return qApp->enqueueException(false, "Erro verificando versão atual: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT versaoAtual FROM versao_erp") or not query.first()) { throw RuntimeException("Erro verificando versão atual: " + query.lastError().text()); }
 
   QVersionNumber currentVersion = QVersionNumber::fromString(qApp->applicationVersion());
   QVersionNumber serverVersion = QVersionNumber::fromString(query.value("versaoAtual").toString());
 
   if (currentVersion < serverVersion) {
-    return qApp->enqueueError(false, "Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString(), this);
+    throw RuntimeError("Versão do ERP não é a mais recente!\nSua versão: " + qApp->applicationVersion() + "\nVersão atual: " + query.value("versaoAtual").toString());
   }
-
-  return true;
 }
 
 void LoginDialog::on_comboBoxLoja_currentTextChanged(const QString &loja) {

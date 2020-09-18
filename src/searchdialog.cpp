@@ -89,7 +89,7 @@ void SearchDialog::on_lineEditBusca_textChanged(const QString &) {
 
 void SearchDialog::sendUpdateMessage(const QModelIndex &index) { emit itemSelected(model.data(index.row(), primaryKey)); }
 
-bool SearchDialog::prepare_show() {
+void SearchDialog::prepare_show() {
   model.setFilter(filter);
 
   if (not isSet) {
@@ -103,18 +103,16 @@ bool SearchDialog::prepare_show() {
   ui->lineEditEstoque_2->setText("STACCATO OFF");
   ui->lineEditEstoque->setText("Estoque");
   ui->lineEditPromocao->setText("Promoção");
-
-  return true;
 }
 
 void SearchDialog::show() {
-  if (not prepare_show()) { return; }
+  prepare_show();
 
   QDialog::show();
 }
 
 void SearchDialog::showMaximized() {
-  if (not prepare_show()) { return; }
+  prepare_show();
 
   QDialog::showMaximized();
 }

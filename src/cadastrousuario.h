@@ -22,7 +22,7 @@ private:
   SqlTableModel modelPermissoes;
   Ui::CadastroUsuario *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto clearFields() -> void final;
   auto criarUsuarioMySQL() -> void;
   auto fillCombobox() -> void;
@@ -34,7 +34,7 @@ private:
   auto on_pushButtonNovoCad_clicked() -> void;
   auto on_pushButtonRemover_clicked() -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto successMessage() -> void final;

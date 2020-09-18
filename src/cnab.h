@@ -25,8 +25,8 @@ public:
   };
 
   explicit CNAB(QWidget *parent);
-  auto remessaGareItau240(QVector<Gare> gares) -> std::optional<QString>;
-  auto remessaPagamentoItau240(QVector<Pagamento> pagamentos) -> std::optional<QString>;
+  auto remessaGareItau240(QVector<Gare> gares) -> QString;
+  auto remessaPagamentoItau240(QVector<Pagamento> pagamentos) -> QString;
   auto retornoGareItau240(const QString &filePath) -> void;
   // TODO: adicionar funcoes para boleto e outros pagamentos
   ~CNAB() = default;

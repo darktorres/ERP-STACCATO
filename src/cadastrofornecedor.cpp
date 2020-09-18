@@ -107,7 +107,7 @@ bool CadastroFornecedor::verifyFields() {
   return true;
 }
 
-bool CadastroFornecedor::savingProcedures() {
+void CadastroFornecedor::savingProcedures() {
   setData("razaoSocial", ui->lineEditFornecedor->text());
   setData("nomeFantasia", ui->lineEditNomeFantasia->text());
   setData("contatoNome", ui->lineEditContatoNome->text());
@@ -139,8 +139,6 @@ bool CadastroFornecedor::savingProcedures() {
 
   setData("cc", ui->lineEditCC->text());
   setData("poupanca", ui->checkBoxPoupanca->isChecked());
-
-  return true;
 }
 
 void CadastroFornecedor::clearFields() {
@@ -205,46 +203,40 @@ void CadastroFornecedor::updateMode() {
   ui->pushButtonRemover->show();
 }
 
-bool CadastroFornecedor::cadastrar() {
-  if (not qApp->startTransaction("CadastroFornecedor::cadastrar")) { return false; }
+void CadastroFornecedor::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroFornecedor::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelEnd)) { return false; }
+    setForeignKey(modelEnd);
 
     modelEnd.submitAll();
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     backupEndereco.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
-  } else {
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
     modelEnd.select();
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
   }
-
-  return success;
 }
 
 void CadastroFornecedor::on_pushButtonCadastrar_clicked() { save(); }
@@ -360,7 +352,7 @@ void CadastroFornecedor::on_pushButtonRemoverEnd_clicked() {
 
 void CadastroFornecedor::successMessage() { qApp->enqueueInformation((tipo == Tipo::Atualizar) ? "Cadastro atualizado!" : "Fornecedor cadastrado com sucesso!", this); }
 
-bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
+void CadastroFornecedor::ajustarValidade(const int novaValidade) {
   const QString fornecedor = data("razaoSocial").toString();
 
   QSqlQuery query;
@@ -368,16 +360,14 @@ bool CadastroFornecedor::ajustarValidade(const int novaValidade) {
   query.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
   query.bindValue(":fornecedor", fornecedor);
 
-  if (not query.exec()) { return qApp->enqueueException(false, "Erro atualizando validade nos produtos: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro atualizando validade nos produtos: " + query.lastError().text()); }
 
   QSqlQuery query2;
   query2.prepare("UPDATE fornecedor SET validadeProdutos = :novaValidade WHERE razaoSocial = :fornecedor");
   query2.bindValue(":novaValidade", qApp->serverDate().addDays(novaValidade));
   query2.bindValue(":fornecedor", fornecedor);
 
-  if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando validade no fornecedor: " + query2.lastError().text(), this); }
-
-  return true;
+  if (not query2.exec()) { throw RuntimeException("Erro atualizando validade no fornecedor: " + query2.lastError().text()); }
 }
 
 void CadastroFornecedor::on_pushButtonValidade_clicked() {
@@ -387,11 +377,11 @@ void CadastroFornecedor::on_pushButtonValidade_clicked() {
 
   if (not ok) { return; }
 
-  if (not qApp->startTransaction("CadastroFornecedor::on_pushButtonValidade")) { return; }
+  qApp->startTransaction("CadastroFornecedor::on_pushButtonValidade");
 
-  if (not ajustarValidade(novaValidade)) { return qApp->rollbackTransaction(); }
+  ajustarValidade(novaValidade);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Validade alterada com sucesso!", this);
 }

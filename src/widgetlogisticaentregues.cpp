@@ -141,19 +141,19 @@ void WidgetLogisticaEntregues::on_pushButtonCancelar_clicked() {
 
   // desfazer passos da confirmacao de entrega (volta para tela de confirmar entrega)
 
-  if (not qApp->startTransaction("WidgetLogisticaEntregues::on_pushButtonCancelar")) { return; }
+  qApp->startTransaction("WidgetLogisticaEntregues::on_pushButtonCancelar");
 
-  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
+  cancelar(list);
 
-  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVendas);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
   qApp->enqueueInformation("Entrega cancelada!", this);
 }
 
-bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
+void WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   QSqlQuery query1;
   query1.prepare("UPDATE veiculo_has_produto SET status = 'CANCELADO' WHERE `idVendaProduto2` = :idVendaProduto2");
 
@@ -168,18 +168,16 @@ bool WidgetLogisticaEntregues::cancelar(const QModelIndexList &list) {
   for (const auto &index : list) {
     query1.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not query1.exec()) { return qApp->enqueueException(false, "Erro atualizando veiculo_produto: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { throw RuntimeException("Erro atualizando veiculo_produto: " + query1.lastError().text()); }
 
     query2.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not query2.exec()) { return qApp->enqueueException(false, "Erro atualizando venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { throw RuntimeException("Erro atualizando venda_produto: " + query2.lastError().text()); }
 
     query3.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido_fornecedor: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { throw RuntimeException("Erro atualizando pedido_fornecedor: " + query3.lastError().text()); }
   }
-
-  return true;
 }
 
 // TODO: 0mostrar quem entregou/recebeu nos produtos

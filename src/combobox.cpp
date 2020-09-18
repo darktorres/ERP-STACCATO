@@ -6,13 +6,13 @@ ComboBox::ComboBox(QWidget *parent) : QComboBox(parent) {}
 
 QVariant ComboBox::getCurrentValue() const { return currentData(); }
 
-bool ComboBox::setCurrentValue(const QVariant &value) {
+void ComboBox::setCurrentValue(const QVariant &value) {
   for (int index = 0, size = count(); index < size; ++index) {
     if (value == itemData(index)) {
       setCurrentIndex(index);
-      return true;
+      return;
     }
   }
 
-  return qApp->enqueueException(false, "Erro procurando " + value.toString() + "!", this);
+  throw RuntimeException("Erro procurando " + value.toString() + "!");
 }

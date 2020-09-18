@@ -32,7 +32,7 @@ public:
   auto darkTheme() -> void;
   auto dbConnect(const QString &hostname, const QString &user, const QString &userPassword) -> bool;
   auto dbReconnect(const bool silent = false) -> bool;
-  auto endTransaction() -> bool;
+  auto endTransaction() -> void;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
   auto enqueueException(const QString &error, QWidget *parent = nullptr) -> void;
@@ -47,12 +47,11 @@ public:
   auto getUpdating() const -> bool;
   auto getWebDavIp() const -> QString;
   auto lightTheme() -> void;
-  auto reservarIdEstoque() -> std::optional<int>;
-  auto reservarIdNFe() -> std::optional<int>;
-  auto reservarIdPedido2() -> std::optional<int>;
-  auto reservarIdVendaProduto2() -> std::optional<int>;
+  auto reservarIdEstoque() -> int;
+  auto reservarIdNFe() -> int;
+  auto reservarIdPedido2() -> int;
+  auto reservarIdVendaProduto2() -> int;
   auto rollbackTransaction() -> void;
-  auto rollbackTransaction(const bool boolean) -> bool;
   auto roundDouble(const double value) -> double;
   auto roundDouble(const double value, const int decimais) -> double;
   auto sanitizeSQL(const QString &string) -> QString;
@@ -60,7 +59,7 @@ public:
   auto serverDateTime() -> QDateTime;
   auto setSilent(bool value) -> void;
   auto setUpdating(const bool value) -> void;
-  auto startTransaction(const QString &messageLog) -> bool;
+  auto startTransaction(const QString &messageLog) -> void;
   auto updater() -> void;
 
 signals:

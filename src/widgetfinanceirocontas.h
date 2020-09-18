@@ -2,6 +2,7 @@
 
 #include "cnab.h"
 #include "sqlquerymodel.h"
+#include "xlsxdocument.h"
 
 #include <QWidget>
 
@@ -47,4 +48,5 @@ private:
   auto on_table_activated(const QModelIndex &index) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
+  auto verificaCabecalho(QXlsx::Document &document) -> void;
 };

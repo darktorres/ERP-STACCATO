@@ -209,12 +209,14 @@ void WidgetCompraPendentes::on_pushButtonComprarAvulso_clicked() {
 
   const QDate dataPrevista = inputDlg.getNextDate();
 
-  insere(dataPrevista) ? qApp->enqueueInformation("Produto enviado para compras com sucesso!", this) : qApp->enqueueException("Erro ao enviar produto para compras!", this);
+  insere(dataPrevista);
+
+  qApp->enqueueInformation("Produto enviado para compras com sucesso!", this);
 
   ui->itemBoxProduto->clear();
 }
 
-bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
+void WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   SqlTableModel model;
   model.setTable("pedido_fornecedor_has_produto");
 
@@ -224,7 +226,7 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   query.prepare("SELECT fornecedor, idProduto, descricao, colecao, un, un2, custo, kgcx, formComercial, codComercial, codBarras FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", ui->itemBoxProduto->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando produto: " + query.lastError().text()); }
 
   model.setData(newRow, "fornecedor", query.value("fornecedor"));
   model.setData(newRow, "idProduto", query.value("idProduto"));
@@ -243,8 +245,6 @@ bool WidgetCompraPendentes::insere(const QDate &dataPrevista) {
   model.setData(newRow, "dataPrevCompra", dataPrevista);
 
   model.submitAll();
-
-  return true;
 }
 
 void WidgetCompraPendentes::on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) { ui->doubleSpinBoxQuantAvulso->setValue(value * ui->doubleSpinBoxQuantAvulso->singleStep()); }

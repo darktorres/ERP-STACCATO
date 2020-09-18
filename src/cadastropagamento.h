@@ -25,8 +25,8 @@ private:
   SqlTableModel modelTaxas;
   Ui::CadastroPagamento *ui;
   // methods
-  auto adicionarPagamento() -> bool;
-  auto atualizarPagamento() -> bool;
+  auto adicionarPagamento() -> void;
+  auto atualizarPagamento() -> void;
   auto limparSelecao() -> void;
   auto on_itemBoxLoja_idChanged(const QVariant &id) -> void;
   auto on_pushButtonAdicionaAssociacao_clicked() -> void;

@@ -96,19 +96,19 @@ void WidgetLogisticaColeta::on_pushButtonMarcarColetado_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonMarcarColetado")) { return; }
+  qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonMarcarColetado");
 
-  if (not cadastrar(list, input.getDate(), input.getNextDate())) { return qApp->rollbackTransaction(); }
+  cadastrar(list, input.getDate(), input.getNextDate());
 
-  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVendas);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
   qApp->enqueueInformation("Confirmado coleta!", this);
 }
 
-bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) {
+void WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &dataColeta, const QDate &dataPrevReceb) {
   QSqlQuery query1;
   query1.prepare("UPDATE estoque SET status = 'EM RECEBIMENTO' WHERE status = 'EM COLETA' AND idEstoque = :idEstoque");
 
@@ -127,28 +127,26 @@ bool WidgetLogisticaColeta::cadastrar(const QModelIndexList &list, const QDate &
   for (const auto &index : list) {
     query1.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status do estoque: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { throw RuntimeException("Erro salvando status do estoque: " + query1.lastError().text()); }
 
     query2.bindValue(":dataRealColeta", dataColeta);
     query2.bindValue(":dataPrevReceb", dataPrevReceb);
     query2.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query2.lastError().text()); }
 
     query3.bindValue(":dataRealColeta", dataColeta);
     query3.bindValue(":dataPrevReceb", dataPrevReceb);
     query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { throw RuntimeException("Erro atualizando status da compra: " + query3.lastError().text()); }
 
     // -------------------------------------------------------------------------
 
     query4.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query4.exec()) { return qApp->enqueueException(false, "Erro atualizando veiculo_has_produto: " + query4.lastError().text(), this); }
+    if (not query4.exec()) { throw RuntimeException("Erro atualizando veiculo_has_produto: " + query4.lastError().text()); }
   }
-
-  return true;
 }
 
 void WidgetLogisticaColeta::on_checkBoxMarcarTodos_clicked(const bool checked) { checked ? ui->table->selectAll() : ui->table->clearSelection(); }
@@ -170,17 +168,17 @@ void WidgetLogisticaColeta::on_pushButtonReagendar_clicked() {
 
   if (input.exec() != InputDialog::Accepted) { return; }
 
-  if (not qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonReagendar")) { return; }
+  qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonReagendar");
 
-  if (not reagendar(list, input.getNextDate())) { return qApp->rollbackTransaction(); }
+  reagendar(list, input.getNextDate());
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
   qApp->enqueueInformation("Reagendado com sucesso!", this);
 }
 
-bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) {
+void WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &dataPrevColeta) {
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = :dataPrevColeta WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) "
                  "AND status = 'EM COLETA'");
@@ -200,21 +198,19 @@ bool WidgetLogisticaColeta::reagendar(const QModelIndexList &list, const QDate &
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
 
-    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":dataPrevColeta", dataPrevColeta);
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query2.lastError().text()); }
 
     query3.bindValue(":data", dataPrevColeta);
     query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando data no veiculo: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { throw RuntimeException("Erro atualizando data no veiculo: " + query3.lastError().text()); }
   }
-
-  return true;
 }
 
 void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
@@ -237,7 +233,7 @@ void WidgetLogisticaColeta::on_pushButtonVenda_clicked() {
   }
 }
 
-bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
+void WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
   QSqlQuery query1;
   query1.prepare(
       "UPDATE pedido_fornecedor_has_produto2 SET dataPrevColeta = NULL WHERE `idPedido2` IN (SELECT `idPedido2` FROM estoque_has_compra WHERE idEstoque = :idEstoque) AND status = 'EM COLETA'");
@@ -256,19 +252,17 @@ bool WidgetLogisticaColeta::cancelar(const QModelIndexList &list) {
     query1.bindValue(":idEstoque", idEstoque);
     query1.bindValue(":codComercial", codComercial);
 
-    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":idEstoque", idEstoque);
     query2.bindValue(":codComercial", codComercial);
 
-    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query2.lastError().text()); }
 
     query3.bindValue(":idEstoque", modelViewColeta.data(index.row(), "idEstoque"));
 
-    if (not query3.exec()) { return qApp->enqueueException(false, "Erro atualizando data no veiculo: " + query3.lastError().text(), this); }
+    if (not query3.exec()) { throw RuntimeException("Erro atualizando data no veiculo: " + query3.lastError().text()); }
   }
-
-  return true;
 }
 
 void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
@@ -282,12 +276,13 @@ void WidgetLogisticaColeta::on_pushButtonCancelar_clicked() {
 
   if (msgBox.exec() == QMessageBox::No) { return; }
 
-  if (not qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonCancelar")) { return; }
+  qApp->startTransaction("WidgetLogisticaColeta::on_pushButtonCancelar");
 
-  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
+  cancelar(list);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
+
   qApp->enqueueInformation("Cancelado com sucesso!", this);
 }

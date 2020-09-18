@@ -34,16 +34,16 @@ private:
   SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods
-  auto atualizarCredito() -> bool;
-  auto cadastrar() -> bool final;
+  auto atualizarCredito() -> void;
+  auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
-  auto cancelamento() -> bool;
+  auto cancelamento() -> void;
   auto clearFields() -> void final;
-  auto copiaProdutosOrcamento() -> bool;
-  auto criarComissaoProfissional() -> bool;
-  auto criarConsumos() -> bool;
-  auto financeiroSalvar() -> bool;
-  auto generateId() -> bool;
+  auto copiaProdutosOrcamento() -> void;
+  auto criarComissaoProfissional() -> void;
+  auto criarConsumos() -> void;
+  auto financeiroSalvar() -> void;
+  auto generateId() -> void;
   auto montarFluxoCaixa() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
   auto on_checkBoxPontuacaoIsento_toggled(bool checked) -> void;
@@ -66,7 +66,7 @@ private:
   auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setTreeView() -> void;
   auto setupMapper() -> void final;
@@ -74,7 +74,7 @@ private:
   auto successMessage() -> void final;
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
-  auto verificaDisponibilidadeEstoque() -> bool;
+  auto verificaDisponibilidadeEstoque() -> void;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

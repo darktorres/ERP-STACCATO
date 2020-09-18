@@ -160,16 +160,16 @@ void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
     return;
   }
 
-  if (not qApp->startTransaction("CadastroLoja::on_pushButtonAdicionarPagamento")) { return; }
+  qApp->startTransaction("CadastroLoja::on_pushButtonAdicionarPagamento");
 
-  if (not adicionarPagamento()) { return qApp->rollbackTransaction(); }
+  adicionarPagamento();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
 }
 
-bool CadastroPagamento::adicionarPagamento() {
+void CadastroPagamento::adicionarPagamento() {
   const int row = modelPagamentos.insertRowAtEnd();
 
   modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text());
@@ -198,21 +198,19 @@ bool CadastroPagamento::adicionarPagamento() {
   modelTaxas.setFilter("idPagamento = " + QString::number(id));
 
   modelTaxas.select();
-
-  return true;
 }
 
 void CadastroPagamento::on_pushButtonAtualizarPagamento_clicked() {
-  if (not qApp->startTransaction("CadastroLoja::on_pushButtonAtualizarPagamento")) { return; }
+  qApp->startTransaction("CadastroLoja::on_pushButtonAtualizarPagamento");
 
-  if (not atualizarPagamento()) { return qApp->rollbackTransaction(); }
+  atualizarPagamento();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
 }
 
-bool CadastroPagamento::atualizarPagamento() {
+void CadastroPagamento::atualizarPagamento() {
   const int row = mapperPagamento.currentIndex();
 
   modelPagamentos.setData(row, "pagamento", ui->lineEditPagamento->text());
@@ -232,7 +230,7 @@ bool CadastroPagamento::atualizarPagamento() {
 
   if (novaParcelas < antigoParcelas) { // remove linhas
     for (int i = 0; i < diferenca; ++i) {
-      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { return qApp->enqueueException(false, "Erro removendo linha: " + modelTaxas.lastError().text(), this); }
+      if (not modelTaxas.removeRow(modelTaxas.rowCount() - 1 - i)) { throw RuntimeException("Erro removendo linha: " + modelTaxas.lastError().text()); }
     }
   }
 
@@ -254,8 +252,6 @@ bool CadastroPagamento::atualizarPagamento() {
 
   // submitAll resets currentIndex to -1, set it again
   mapperPagamento.setCurrentIndex(row);
-
-  return true;
 }
 
 void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {

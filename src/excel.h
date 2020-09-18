@@ -9,7 +9,7 @@ class Excel final {
 public:
   enum class Tipo { Orcamento, Venda };
   Excel(const QString &id, const Tipo tipo, QWidget *parent);
-  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> bool;
+  auto gerarExcel(const int oc = 0, const bool isRepresentacao = false, const QString &representacao = QString()) -> void;
   auto getFileName() const -> QString;
 
 private:
@@ -29,5 +29,5 @@ private:
   QWidget *parent;
   // methods
   auto hideUnusedRows(QXlsx::Document &xlsx) -> void;
-  auto setQuerys() -> bool;
+  auto setQuerys() -> void;
 };

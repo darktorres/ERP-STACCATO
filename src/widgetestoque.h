@@ -27,7 +27,7 @@ private:
   Ui::WidgetEstoque *ui;
   // methods
   auto escolheFiltro() -> void;
-  auto gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) -> bool;
+  auto gerarExcel(const QString &arquivoModelo, const QString &fileName, const SqlQueryModel &modelContabil) -> void;
   auto getMatch() const -> QString;
   auto montaFiltro() -> void;
   auto montaFiltroContabil() -> void;

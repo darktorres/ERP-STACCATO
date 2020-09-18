@@ -6,17 +6,15 @@
 #include <QSqlQuery>
 #include <QStringList>
 
-bool Sql::updateVendaStatus(const QStringList &idVendas) { return updateVendaStatus(idVendas.join(", ")); }
+void Sql::updateVendaStatus(const QStringList &idVendas) { updateVendaStatus(idVendas.join(", ")); }
 
-bool Sql::updateVendaStatus(const QString &idVendas) {
+void Sql::updateVendaStatus(const QString &idVendas) {
   QStringList list = idVendas.split(", ", Qt::SkipEmptyParts);
   list.removeDuplicates();
 
   for (auto const &idVenda : list) {
-    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { return qApp->enqueueException(false, "Erro atualizando status: " + query.lastError().text()); }
+    if (QSqlQuery query; not query.exec("CALL update_venda_status('" + idVenda + "')")) { throw RuntimeException("Erro atualizando status: " + query.lastError().text()); }
   }
-
-  return true;
 }
 
 // clang-format off

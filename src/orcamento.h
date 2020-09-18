@@ -29,14 +29,14 @@ private:
   Ui::Orcamento *ui;
   // methods
   auto adicionarItem(const Tipo tipoItem = Tipo::Cadastrar) -> void;
-  auto atualizaReplica() -> bool;
+  auto atualizaReplica() -> void;
   auto atualizarItem() -> void;
-  auto buscarCadastrarConsultor() -> bool;
-  auto buscarParametrosFrete() -> bool;
-  auto cadastrar() -> bool final;
+  auto buscarCadastrarConsultor() -> void;
+  auto buscarParametrosFrete() -> void;
+  auto cadastrar() -> void final;
   auto calcPrecoGlobalTotal() -> void;
   auto clearFields() -> void final;
-  auto generateId() -> bool;
+  auto generateId() -> void;
   auto newRegister() -> bool final;
   auto novoItem() -> void;
   auto on_checkBoxFreteManual_clicked(const bool checked) -> void;
@@ -69,7 +69,7 @@ private:
   auto recalcularTotais() -> bool;
   auto registerMode() -> void final;
   auto removeItem() -> void;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;

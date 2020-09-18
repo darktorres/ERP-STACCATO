@@ -12,7 +12,7 @@
 #include <QSqlError>
 #include <QTimer>
 
-NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), acbrRemoto(this), ui(new Ui::NFeDistribuicao) {
+NFeDistribuicao::NFeDistribuicao(QWidget *parent) : QWidget(parent), ui(new Ui::NFeDistribuicao) {
   ui->setupUi(this);
 
   if (UserSession::getSetting("User/monitorarNFe").toBool()) {
@@ -171,21 +171,17 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
   //----------------------------------------------------------
 
   qDebug() << "pesquisar nsu: " << ui->spinBoxUltNSU->value();
-  const auto respostaOptional = acbrRemoto.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")");
-
-  if (not respostaOptional) { return; }
-
-  const QString resposta = respostaOptional.value();
+  const QString resposta = acbrRemoto.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")");
 
   if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
 
   //----------------------------------------------------------
 
-  if (not qApp->startTransaction("NFeDistribuicao::on_pushButtonPesquisar")) { return; }
+  qApp->startTransaction("NFeDistribuicao::on_pushButtonPesquisar");
 
-  if (not pesquisarNFes(resposta, idLoja)) { return qApp->rollbackTransaction(); }
+  pesquisarNFes(resposta, idLoja);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   //----------------------------------------------------------
 
@@ -253,7 +249,7 @@ void NFeDistribuicao::darCiencia() {
   }
 }
 
-bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
+void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLoja) {
   const QStringList eventos = resposta.split("\r\n\r\n", Qt::SkipEmptyParts);
   const QString cnpjDest = ui->lineEditCNPJ->text();
 
@@ -262,7 +258,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       const int indexMaxNSU = evento.indexOf("\r\nmaxNSU=");
       const int indexUltNSU = evento.indexOf("\r\nultNSU=");
 
-      if (indexMaxNSU == -1 or indexUltNSU == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'maxNSU/ultNSU'!", this); }
+      if (indexMaxNSU == -1 or indexUltNSU == -1) { throw RuntimeException("Não encontrou o campo 'maxNSU/ultNSU'!"); }
 
       const QString maxNSU = evento.mid(indexMaxNSU + 9).split("\r\n").first();
       const QString ultNSU = evento.mid(indexUltNSU + 9).split("\r\n").first();
@@ -273,14 +269,14 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       QSqlQuery queryLoja2;
 
       if (not queryLoja2.exec("UPDATE loja SET ultimoNSU = " + ultNSU + ", maximoNSU = " + maxNSU + " WHERE idLoja = " + idLoja)) {
-        return qApp->enqueueException(false, "Erro guardando NSU: " + queryLoja2.lastError().text(), this);
+        throw RuntimeException("Erro guardando NSU: " + queryLoja2.lastError().text());
       }
     }
 
     if (evento.contains("[ResNFe")) {
       const int indexChave = evento.indexOf("\r\nchNFe=");
 
-      if (indexChave == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'chNFe'!", this); }
+      if (indexChave == -1) { throw RuntimeException("Não encontrou o campo 'chNFe'!"); }
 
       const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
       const QString numeroNFe = chaveAcesso.mid(25, 9);
@@ -289,7 +285,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       const int indexCnpj = evento.indexOf("\r\nCNPJCPF=");
 
-      if (indexCnpj == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'CNPJCPF'!", this); }
+      if (indexCnpj == -1) { throw RuntimeException("Não encontrou o campo 'CNPJCPF'!"); }
 
       const QString cnpjOrig = evento.mid(indexCnpj + 10).split("\r\n").first();
 
@@ -297,7 +293,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       const int indexNome = evento.indexOf("\r\nxNome=");
 
-      if (indexNome == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'xNome'!", this); }
+      if (indexNome == -1) { throw RuntimeException("Não encontrou o campo 'xNome'!"); }
 
       const QString nomeEmitente = evento.mid(indexNome + 8).split("\r\n").first();
 
@@ -305,7 +301,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       const int indexValor = evento.indexOf("\r\nvNF=");
 
-      if (indexValor == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'vNF'!", this); }
+      if (indexValor == -1) { throw RuntimeException("Não encontrou o campo 'vNF'!"); }
 
       const QString valor = evento.mid(indexValor + 6).split("\r\n").first().replace(",", ".");
 
@@ -313,7 +309,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       const int indexNsu = evento.indexOf("\r\nNSU=");
 
-      if (indexNsu == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'NSU'!", this); }
+      if (indexNsu == -1) { throw RuntimeException("Não encontrou o campo 'NSU'!"); }
 
       const QString nsu = evento.mid(indexNsu + 6).split("\r\n").first();
 
@@ -322,7 +318,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       const int indexXML = evento.indexOf("\r\nXML=");
       const int indexArquivo = evento.indexOf("\r\narquivo=");
 
-      if (indexXML == -1 or indexArquivo == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'XML'!", this); }
+      if (indexXML == -1 or indexArquivo == -1) { throw RuntimeException("Não encontrou o campo 'XML'!"); }
 
       const QString xml = evento.mid(indexXML + 6, indexArquivo - indexXML - 6);
 
@@ -330,7 +326,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       const int indexSchema = evento.indexOf("\r\nschema=");
 
-      if (indexSchema == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'schema'!", this); }
+      if (indexSchema == -1) { throw RuntimeException("Não encontrou o campo 'schema'!"); }
 
       const QString schemaEvento = evento.mid(indexSchema + 9).split("\r\n").first();
 
@@ -339,7 +335,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       QSqlQuery queryExiste;
 
       if (not queryExiste.exec("SELECT status FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-        return qApp->enqueueException(false, "Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text(), this);
+        throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text());
       }
 
       const bool existe = queryExiste.first();
@@ -366,7 +362,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         queryCadastrar.bindValue(":nsu", nsu);
         queryCadastrar.bindValue(":ciencia", ciencia);
 
-        if (not queryCadastrar.exec()) { return qApp->enqueueException(false, "Erro cadastrando resumo da NFe: " + queryCadastrar.lastError().text(), this); }
+        if (not queryCadastrar.exec()) { throw RuntimeException("Erro cadastrando resumo da NFe: " + queryCadastrar.lastError().text()); }
       }
 
       if (existe and schemaEvento == "procNFe") {
@@ -379,14 +375,14 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
         queryAtualizar.bindValue(":infCpl", encontraInfCpl(xml));
         queryAtualizar.bindValue(":chaveAcesso", chaveAcesso);
 
-        if (not queryAtualizar.exec()) { return qApp->enqueueException(false, "Erro atualizando xml: " + queryAtualizar.lastError().text(), this); }
+        if (not queryAtualizar.exec()) { throw RuntimeException("Erro atualizando xml: " + queryAtualizar.lastError().text()); }
       }
     }
 
     if (evento.contains("[InfEve")) {
       const int indexTipo = evento.indexOf("\r\nxEvento=");
 
-      if (indexTipo == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'xEvento'!", this); }
+      if (indexTipo == -1) { throw RuntimeException("Não encontrou o campo 'xEvento'!"); }
 
       const QString eventoTipo = evento.mid(indexTipo + 10).split("\r\n").first();
 
@@ -394,7 +390,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
       const int indexChave = evento.indexOf("\r\nchNFe=");
 
-      if (indexChave == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'chNFe'!", this); }
+      if (indexChave == -1) { throw RuntimeException("Não encontrou o campo 'chNFe'!"); }
 
       const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
 
@@ -403,7 +399,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       QSqlQuery queryExiste;
 
       if (not queryExiste.exec("SELECT statusDistribuicao FROM nfe WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-        return qApp->enqueueException(false, "Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text(), this);
+        throw RuntimeException("Erro verificando se NFe já cadastrada: " + queryExiste.lastError().text());
       }
 
       if (queryExiste.first()) {
@@ -414,7 +410,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
           if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CIÊNCIA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso +
                                      "'")) {
-            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text(), this);
+            throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
           }
         }
 
@@ -423,7 +419,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 
           if (not queryAtualiza.exec("UPDATE nfe SET statusDistribuicao = 'CONFIRMAÇÃO', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
                                      chaveAcesso + "'")) {
-            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text(), this);
+            throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
           }
         }
 
@@ -433,7 +429,7 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
           if (not queryAtualiza.exec(
                   "UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
                   chaveAcesso + "'")) {
-            return qApp->enqueueException(false, "Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text(), this);
+            throw RuntimeException("Erro atualizando statusDistribuicao: " + queryAtualiza.lastError().text());
           }
         }
 
@@ -443,8 +439,6 @@ bool NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
       }
     }
   }
-
-  return true;
 }
 
 void NFeDistribuicao::on_pushButtonCiencia_clicked() {
@@ -520,11 +514,11 @@ void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
 }
 
 void NFeDistribuicao::agendarOperacao() {
-  if (not qApp->startTransaction("NFeDistribuicao::agendarOperacao")) { return; }
+  qApp->startTransaction("NFeDistribuicao::agendarOperacao");
 
   model.submitAll();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Operação agendada com sucesso!", this);
 }
@@ -591,11 +585,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
   //----------------------------------------------------------
 
-  const auto respostaOptional = acbrRemoto.enviarComando(comando);
-
-  if (not respostaOptional) { return false; }
-
-  const QString resposta = respostaOptional.value();
+  const QString resposta = acbrRemoto.enviarComando(comando);
 
   if (resposta.contains("ERRO: ")) { return qApp->enqueueException(false, resposta, this); }
 
@@ -603,49 +593,43 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
   const QStringList eventos = resposta.split("\r\n\r\n", Qt::SkipEmptyParts);
 
-  if (not qApp->startTransaction("NFeDistribuicao::on_pushButtonCiencia")) { return false; }
+  qApp->startTransaction("NFeDistribuicao::on_pushButtonCiencia");
 
-  const bool success = [&] {
-    for (const auto &evento : eventos) {
-      if (evento.contains("XMotivo=Rejeicao:") and evento.contains("para NFe cancelada ou denegada")) {
-        const int indexChave = evento.indexOf("\r\nchNFe=");
+  for (const auto &evento : eventos) {
+    if (evento.contains("XMotivo=Rejeicao:") and evento.contains("para NFe cancelada ou denegada")) {
+      const int indexChave = evento.indexOf("\r\nchNFe=");
 
-        if (indexChave == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'chNFe'!", this); }
+      if (indexChave == -1) { throw RuntimeException("Não encontrou o campo 'chNFe'!"); }
 
-        const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
+      const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
 
-        QSqlQuery query;
+      QSqlQuery query;
 
-        if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
-                           chaveAcesso + "'")) {
-          return qApp->enqueueException(false, "Erro atualizando status da NFe: " + query.lastError().text(), this);
-        }
-      }
-
-      if (evento.contains("XMotivo=Evento registrado e vinculado a NF-e") or evento.contains("XMotivo=Rejeicao: Duplicidade de evento")) {
-        const int indexChave = evento.indexOf("\r\nchNFe=");
-
-        if (indexChave == -1) { return qApp->enqueueException(false, "Não encontrou o campo 'chNFe'!", this); }
-
-        const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
-
-        QSqlQuery query;
-
-        if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao +
-                           "', dataDistribuicao = NOW(), ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso + "'")) {
-          return qApp->enqueueException(false, "Erro atualizando status da NFe: " + query.lastError().text(), this);
-        }
+      if (not query.exec("UPDATE nfe SET status = 'CANCELADA', statusDistribuicao = 'CANCELADA', ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" +
+                         chaveAcesso + "'")) {
+        throw RuntimeException("Erro atualizando status da NFe: " + query.lastError().text());
       }
     }
 
-    model.submitAll();
+    if (evento.contains("XMotivo=Evento registrado e vinculado a NF-e") or evento.contains("XMotivo=Rejeicao: Duplicidade de evento")) {
+      const int indexChave = evento.indexOf("\r\nchNFe=");
 
-    return true;
-  }();
+      if (indexChave == -1) { throw RuntimeException("Não encontrou o campo 'chNFe'!"); }
 
-  if (not success) { return qApp->rollbackTransaction(false); }
+      const QString chaveAcesso = evento.mid(indexChave + 8).split("\r\n").first();
 
-  if (not qApp->endTransaction()) { return false; }
+      QSqlQuery query;
+
+      if (not query.exec("UPDATE nfe SET statusDistribuicao = '" + operacao +
+                         "', dataDistribuicao = NOW(), ciencia = FALSE, confirmar = FALSE, desconhecer = FALSE, naoRealizar = FALSE WHERE chaveAcesso = '" + chaveAcesso + "'")) {
+        throw RuntimeException("Erro atualizando status da NFe: " + query.lastError().text());
+      }
+    }
+  }
+
+  model.submitAll();
+
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 

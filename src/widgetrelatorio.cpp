@@ -240,23 +240,23 @@ void WidgetRelatorio::on_pushButtonExcel_clicked() {
 
   QFile modelo(QDir::currentPath() + "/" + arquivoModelo);
 
-  if (not modelo.exists()) { return qApp->enqueueException("Não encontrou o modelo do Excel!", this); }
+  if (not modelo.exists()) { throw RuntimeException("Não encontrou o modelo do Excel!"); }
 
   const QString fileName = dir + "/relatorio-" + ui->dateEditMes->date().toString("MM-yyyy") + ".xlsx";
 
   QFile file(fileName);
 
-  if (not file.open(QFile::WriteOnly)) { return qApp->enqueueException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString(), this); }
+  if (not file.open(QFile::WriteOnly)) { throw RuntimeException("Não foi possível abrir o arquivo '" + fileName + "' para escrita: " + file.errorString()); }
 
   file.close();
 
-  if (not gerarExcel(arquivoModelo, fileName)) { return; }
+  gerarExcel(arquivoModelo, fileName);
 
   QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
   qApp->enqueueInformation("Arquivo salvo como " + fileName, this);
 }
 
-bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fileName) {
+void WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fileName) {
   QXlsx::Document xlsx(arquivoModelo, this);
 
   //  xlsx.currentWorksheet()->setFitToPage(true);
@@ -301,9 +301,7 @@ bool WidgetRelatorio::gerarExcel(const QString &arquivoModelo, const QString &fi
     column = 'A';
   }
 
-  if (not xlsx.saveAs(fileName)) { return qApp->enqueueException(false, "Ocorreu algum erro ao salvar o arquivo!", this); }
-
-  return true;
+  if (not xlsx.saveAs(fileName)) { throw RuntimeException("Ocorreu algum erro ao salvar o arquivo!"); }
 }
 
 // TODO: vendedor especial recebe 0,5% nas vendas como consultor

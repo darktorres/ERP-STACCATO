@@ -164,9 +164,10 @@ void WidgetHistoricoCompra::montaFiltro() {
 void WidgetHistoricoCompra::on_pushButtonDanfe_clicked() {
   const auto list = ui->tableNFe->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!"); }
 
-  if (ACBr acbrLocal(this); not acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt())) { return; }
+  ACBr acbrLocal;
+  acbrLocal.gerarDanfe(modelNFe.data(list.first().row(), "idNFe").toInt());
 }
 
 // TODO: 1quando recalcula fluxo deve ter um campo para digitar/calcular ST pois o antigo é substituido e não é criado um novo

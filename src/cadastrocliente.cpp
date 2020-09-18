@@ -107,7 +107,7 @@ bool CadastroCliente::verifyFields() {
   return true;
 }
 
-bool CadastroCliente::savingProcedures() {
+void CadastroCliente::savingProcedures() {
   const QDate aniversario = ui->dateEdit->date();
   if (aniversario.toString("yyyy-MM-dd") != "1900-01-01") { setData("dataNasc", aniversario); }
 
@@ -139,8 +139,6 @@ bool CadastroCliente::savingProcedures() {
   const bool incompleto = (modelEnd.rowCount() == 0 or ui->lineEditTel_Res->text().isEmpty() or ui->lineEditEmail->text().isEmpty());
 
   setData("incompleto", incompleto);
-
-  return true;
 }
 
 void CadastroCliente::clearFields() {
@@ -203,13 +201,10 @@ void CadastroCliente::updateMode() {
   ui->pushButtonRemover->show();
 }
 
-std::optional<bool> CadastroCliente::verificaVinculo() {
+bool CadastroCliente::verificaVinculo() {
   QSqlQuery query;
 
-  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString())) {
-    qApp->enqueueException("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
-    return {};
-  }
+  if (not query.exec("SELECT 0 FROM venda WHERE idCliente = " + data("idCliente").toString())) { throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text()); }
 
   return query.size() > 0;
 }
@@ -236,13 +231,11 @@ bool CadastroCliente::viewRegister() {
 
   if (data("dataNasc").isNull()) { ui->dateEdit->setDate(QDate(1900, 1, 1)); }
 
-  const auto existeVinculo = verificaVinculo();
-
-  if (not existeVinculo) { return false; }
+  const bool existeVinculo = verificaVinculo();
 
   const bool administrativo = UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO" or UserSession::tipoUsuario() == "DIRETOR";
 
-  const bool bloquear = (existeVinculo.value() and not administrativo);
+  const bool bloquear = (existeVinculo and not administrativo);
 
   ui->lineEditCliente->setReadOnly(bloquear);
   ui->lineEditCPF->setReadOnly(bloquear);
@@ -352,46 +345,40 @@ bool CadastroCliente::cadastrarEndereco(const Tipo tipoEndereco) {
   return true;
 }
 
-bool CadastroCliente::cadastrar() {
-  if (not qApp->startTransaction("CadastroCliente::cadastrar")) { return false; }
+void CadastroCliente::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroCliente::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelEnd)) { return false; }
+    setForeignKey(modelEnd);
 
     modelEnd.submitAll();
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     backupEndereco.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
-  } else {
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
     modelEnd.select();
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
   }
-
-  return success;
 }
 
 void CadastroCliente::on_pushButtonAdicionarEnd_clicked() {

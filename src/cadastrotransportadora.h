@@ -23,7 +23,7 @@ private:
   SqlTableModel modelVeiculo;
   Ui::CadastroTransportadora *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto cadastrarVeiculo(const Tipo tipoVeiculo = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
@@ -50,7 +50,7 @@ private:
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto on_tableVeiculo_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;

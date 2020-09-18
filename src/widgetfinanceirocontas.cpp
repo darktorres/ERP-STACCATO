@@ -10,7 +10,6 @@
 #include "reaisdelegate.h"
 #include "sortfilterproxymodel.h"
 #include "sql.h"
-#include "xlsxdocument.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -422,6 +421,18 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
   }
 }
 
+void WidgetFinanceiroContas::verificaCabecalho(QXlsx::Document &xlsx) {
+  if (xlsx.read(1, 1).toString() != "Data Emissão") { throw RuntimeError("Cabeçalho errado na coluna 1!"); }
+  if (xlsx.read(1, 2).toString() != "Centro de Custo") { throw RuntimeError("Cabeçalho errado na coluna 2!"); }
+  if (xlsx.read(1, 3).toString() != "Contraparte") { throw RuntimeError("Cabeçalho errado na coluna 3!"); }
+  if (xlsx.read(1, 4).toString() != "") { throw RuntimeError("Cabeçalho errado na coluna 4!"); }
+  if (xlsx.read(1, 5).toString() != "Tipo") { throw RuntimeError("Cabeçalho errado na coluna 5!"); }
+  if (xlsx.read(1, 6).toString() != "Vencimento") { throw RuntimeError("Cabeçalho errado na coluna 6!"); }
+  if (xlsx.read(1, 7).toString() != "Banco") { throw RuntimeError("Cabeçalho errado na coluna 7!"); }
+  if (xlsx.read(1, 8).toString() != "Obs") { throw RuntimeError("Cabeçalho errado na coluna 8!"); }
+  if (xlsx.read(1, 9).toString() != "Grupo") { throw RuntimeError("Cabeçalho errado na coluna 9!"); }
+}
+
 void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
   const QString file = QFileDialog::getOpenFileName(this, "Importar arquivo do Excel", QDir::currentPath(), "Excel (*.xlsx)");
 
@@ -434,55 +445,49 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
 
   if (not xlsx.selectSheet("Planilha1")) { return qApp->enqueueException("Não encontrou 'Planilha1' na tabela!", this); }
 
+  verificaCabecalho(xlsx);
+
   const int rows = xlsx.dimension().rowCount();
 
-  if (not qApp->startTransaction("WidgetFinanceiroContas::pushButtonImportarFolhaPag")) { return; }
+  qApp->startTransaction("WidgetFinanceiroContas::pushButtonImportarFolhaPag");
 
-  const bool success = [&] {
-    for (int rowExcel = 2; rowExcel <= rows; ++rowExcel) {
-      if (xlsx.read(rowExcel, 1).toString().isEmpty()) { return qApp->enqueueError(false, "Não encontrou cabeçalho na primeira linha do Excel!", this); }
+  for (int rowExcel = 2; rowExcel <= rows; ++rowExcel) {
+    QSqlQuery queryLoja;
 
-      QSqlQuery queryLoja;
-
-      if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.read(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
-        return qApp->enqueueException(false, "Erro buscando idLoja: " + queryLoja.lastError().text(), this);
-      }
-
-      QSqlQuery queryConta;
-
-      if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.read(rowExcel, 7).toString() + "'") or not queryConta.first()) {
-        return qApp->enqueueException(false, "Erro buscando idConta: " + queryConta.lastError().text(), this);
-      }
-
-      const int rowModel = modelImportar.insertRowAtEnd();
-
-      modelImportar.setData(rowModel, "dataEmissao", xlsx.read(rowExcel, 1));
-      modelImportar.setData(rowModel, "idLoja", queryLoja.value("idLoja"));
-      modelImportar.setData(rowModel, "contraParte", xlsx.read(rowExcel, 3));
-      modelImportar.setData(rowModel, "valor", xlsx.read(rowExcel, 4));
-      modelImportar.setData(rowModel, "tipo", xlsx.read(rowExcel, 5));
-      modelImportar.setData(rowModel, "dataPagamento", xlsx.read(rowExcel, 6));
-      modelImportar.setData(rowModel, "observacao", xlsx.read(rowExcel, 8));
-      modelImportar.setData(rowModel, "idConta", queryConta.value("idConta"));
-      modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"));
-      modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9));
-
-      if (xlsx.read(rowExcel, 7).toString().toUpper() == "SANTANDER") { // marcar direto como pago
-        modelImportar.setData(rowModel, "dataRealizado", xlsx.read(rowExcel, 6));
-        modelImportar.setData(rowModel, "status", "PAGO");
-        modelImportar.setData(rowModel, "valorReal", xlsx.read(rowExcel, 4));
-        modelImportar.setData(rowModel, "tipoReal", xlsx.read(rowExcel, 5));
-      }
+    if (not queryLoja.exec("SELECT idLoja FROM loja WHERE nomeFantasia = '" + xlsx.read(rowExcel, 2).toString() + "'") or not queryLoja.first()) {
+      throw RuntimeException("Erro buscando idLoja: " + queryLoja.lastError().text());
     }
 
-    modelImportar.submitAll();
+    QSqlQuery queryConta;
 
-    return true;
-  }();
+    if (not queryConta.exec("SELECT idConta FROM loja_has_conta WHERE banco = '" + xlsx.read(rowExcel, 7).toString() + "'") or not queryConta.first()) {
+      throw RuntimeException("Erro buscando idConta: " + queryConta.lastError().text());
+    }
 
-  if (not success) { return qApp->rollbackTransaction(); }
+    const int rowModel = modelImportar.insertRowAtEnd();
 
-  if (not qApp->endTransaction()) { return; }
+    modelImportar.setData(rowModel, "dataEmissao", xlsx.read(rowExcel, 1));
+    modelImportar.setData(rowModel, "idLoja", queryLoja.value("idLoja"));
+    modelImportar.setData(rowModel, "contraParte", xlsx.read(rowExcel, 3));
+    modelImportar.setData(rowModel, "valor", xlsx.read(rowExcel, 4));
+    modelImportar.setData(rowModel, "tipo", xlsx.read(rowExcel, 5));
+    modelImportar.setData(rowModel, "dataPagamento", xlsx.read(rowExcel, 6));
+    modelImportar.setData(rowModel, "observacao", xlsx.read(rowExcel, 8));
+    modelImportar.setData(rowModel, "idConta", queryConta.value("idConta"));
+    modelImportar.setData(rowModel, "centroCusto", queryLoja.value("idLoja"));
+    modelImportar.setData(rowModel, "grupo", xlsx.read(rowExcel, 9));
+
+    if (xlsx.read(rowExcel, 7).toString().toUpper() == "SANTANDER") { // marcar direto como pago
+      modelImportar.setData(rowModel, "dataRealizado", xlsx.read(rowExcel, 6));
+      modelImportar.setData(rowModel, "status", "PAGO");
+      modelImportar.setData(rowModel, "valorReal", xlsx.read(rowExcel, 4));
+      modelImportar.setData(rowModel, "tipoReal", xlsx.read(rowExcel, 5));
+    }
+  }
+
+  modelImportar.submitAll();
+
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Tabela importada com sucesso!", this);
 }
@@ -500,9 +505,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   }
 
   CNAB cnab(this);
-  auto idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
-
-  if (not idCnab) { return; }
+  QString idCnab = cnab.remessaPagamentoItau240(montarPagamento(selection));
 
   QStringList ids;
 
@@ -510,7 +513,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'AGENDADO', idCnab = " + idCnab.value() + " WHERE idPagamento IN (" + ids.join(",") + ")")) {
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'AGENDADO', idCnab = " + idCnab + " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
   }
 

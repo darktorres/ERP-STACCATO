@@ -26,8 +26,8 @@ private:
   SqlTableModel modelProdutos;
   Ui::WidgetLogisticaEntregas *ui;
   // methods
-  auto cancelarEntrega(const QModelIndexList &list) -> bool;
-  auto confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) -> bool;
+  auto cancelarEntrega(const QModelIndexList &list) -> void;
+  auto confirmarEntrega(const QDate &dataRealEnt, const QString &entregou, const QString &recebeu) -> void;
   auto montaFiltro() -> void;
   auto on_lineEditBuscar_textChanged(const QString &) -> void;
   auto on_pushButtonCancelarEntrega_clicked() -> void;
@@ -39,8 +39,8 @@ private:
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_tableCalendario_clicked(const QModelIndex &index) -> void;
   auto on_tableCarga_clicked(const QModelIndex &index) -> void;
-  auto processarConsultaNFe(const int idNFe, const QString &xml) -> bool;
-  auto reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) -> bool;
+  auto processarConsultaNFe(const int idNFe, const QString &xml) -> void;
+  auto reagendar(const QModelIndexList &list, const QDate &dataPrevEnt) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

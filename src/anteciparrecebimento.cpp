@@ -182,7 +182,7 @@ void AnteciparRecebimento::on_doubleSpinBoxValorPresente_valueChanged(double) {
   ui->doubleSpinBoxLiqIOF->setValue(ui->doubleSpinBoxValorPresente->value() - ui->doubleSpinBoxIOF->value());
 }
 
-bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
+void AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   for (const auto &index : list) {
     const int row = index.row();
 
@@ -207,7 +207,7 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   query.prepare("SELECT banco FROM loja_has_conta WHERE idConta = :idConta");
   query.bindValue(":idConta", ui->itemBoxConta->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando 'banco': " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando 'banco': " + query.lastError().text()); }
 
   if (not qFuzzyIsNull(ui->doubleSpinBoxValorLiquido->value() - ui->doubleSpinBoxValorPresente->value())) {
     const int rowPagar1 = modelContaPagar.insertRowAtEnd();
@@ -252,8 +252,6 @@ bool AnteciparRecebimento::cadastrar(const QModelIndexList &list) {
   }
 
   modelContaPagar.submitAll();
-
-  return true;
 }
 
 void AnteciparRecebimento::on_pushButtonGerar_clicked() {
@@ -266,11 +264,11 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 
   if (not verifyFields(list)) { return; }
 
-  if (not qApp->startTransaction("AnteciparRecebimento::on_pushButtonGerar")) { return; }
+  qApp->startTransaction("AnteciparRecebimento::on_pushButtonGerar");
 
-  if (not cadastrar(list)) { return qApp->rollbackTransaction(); }
+  cadastrar(list);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }

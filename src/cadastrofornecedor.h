@@ -20,8 +20,8 @@ private:
   SearchDialog *sdFornecedor;
   Ui::CadastroFornecedor *ui;
   // methods
-  auto ajustarValidade(const int novaValidade) -> bool;
-  auto cadastrar() -> bool final;
+  auto ajustarValidade(const int novaValidade) -> void;
+  auto cadastrar() -> void final;
   auto cadastrarEndereco(const CadastroFornecedor::Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
@@ -42,7 +42,7 @@ private:
   auto on_pushButtonValidade_clicked() -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;

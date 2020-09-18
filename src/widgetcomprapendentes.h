@@ -24,7 +24,7 @@ private:
   SqlTableModel modelViewVendaProduto;
   Ui::WidgetCompraPendentes *ui;
   // methods
-  auto insere(const QDate &dataPrevista) -> bool;
+  auto insere(const QDate &dataPrevista) -> void;
   auto setConnections() -> void;
   auto montaFiltro() -> void;
   auto on_doubleSpinBoxQuantAvulsoCaixas_valueChanged(const double value) -> void;

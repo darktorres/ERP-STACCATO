@@ -20,7 +20,7 @@ private:
   SearchDialog *sdCliente;
   Ui::CadastroCliente *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearEndereco() -> void;
   auto clearFields() -> void final;
@@ -42,14 +42,14 @@ private:
   auto on_radioButtonPF_toggled(const bool checked) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verificaVinculo() -> std::optional<bool>;
+  auto verificaVinculo() -> bool;
   auto verifyFields() -> bool final;
   auto viewRegister() -> bool final;
 };

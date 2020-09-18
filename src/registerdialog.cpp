@@ -66,10 +66,8 @@ bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   return true;
 }
 
-bool RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
+void RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {
   for (int row = 0, rowCount = secondaryModel.rowCount(); row < rowCount; ++row) { secondaryModel.setData(row, primaryKey, primaryId); }
-
-  return true;
 }
 
 void RegisterDialog::setData(const QString &key, const QVariant &value) { return model.setData(currentRow, key, value); }
@@ -162,7 +160,7 @@ bool RegisterDialog::newRegister() {
 bool RegisterDialog::save(const bool silent) {
   if (not verifyFields()) { return false; }
 
-  if (not cadastrar()) { return false; }
+  cadastrar();
 
   isDirty = false;
 

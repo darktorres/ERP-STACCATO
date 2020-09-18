@@ -106,13 +106,13 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   const QString idVenda = modelProduto.data(row, "idVenda").toString();
 
-  if (not qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo")) { return; }
+  qApp->startTransaction("WidgetCompraConsumos::on_pushButtonDesfazerConsumo");
 
-  if (not desfazerConsumo(row)) { return qApp->rollbackTransaction(); }
+  desfazerConsumo(row);
 
-  if (not Sql::updateVendaStatus(idVenda)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVenda);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   //------------------------------------
 
@@ -121,12 +121,10 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool WidgetCompraConsumos::desfazerConsumo(const int row) {
+void WidgetCompraConsumos::desfazerConsumo(const int row) {
   const int idVendaProduto2 = modelProduto.data(row, "idVendaProduto2").toInt();
 
-  if (not Estoque::desfazerConsumo(idVendaProduto2, this)) { return false; }
-
-  return true;
+  Estoque::desfazerConsumo(idVendaProduto2);
 }
 
 void WidgetCompraConsumos::on_lineEditBusca_textChanged(const QString &) { montaFiltro(); }

@@ -19,7 +19,7 @@ public:
   ~InputDialogFinanceiro();
   auto getDate() const -> QDate;
   auto getNextDate() const -> QDate;
-  auto setFilter(const QString &idCompra) -> bool;
+  auto setFilter(const QString &idCompra) -> void;
 
 private:
   // attributes
@@ -31,7 +31,7 @@ private:
   SqlTreeModel modelTree;
   Ui::InputDialogFinanceiro *ui;
   // methods
-  auto cadastrar() -> bool;
+  auto cadastrar() -> void;
   auto calcularTotal() -> void;
   auto montarFluxoCaixa(const bool updateDate = true) -> void;
   auto on_checkBoxMarcarTodos_toggled(const bool checked) -> void;

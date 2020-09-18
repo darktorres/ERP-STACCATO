@@ -59,8 +59,8 @@ private:
   auto checkBoxRep(QFrame *frame, QHBoxLayout *layout) -> void;
   auto comboBoxData(QHBoxLayout *layout) -> QComboBox *;
   auto comboBoxParc(QHBoxLayout *layout) -> void;
-  auto comboBoxPgtCompra(QHBoxLayout *layout) -> bool;
-  auto comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) -> bool;
+  auto comboBoxPgtCompra(QHBoxLayout *layout) -> void;
+  auto comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) -> void;
   auto dateEditPgt(QHBoxLayout *layout) -> QDateEdit *;
   auto doubleSpinBoxPgt(QHBoxLayout *layout) -> void;
   auto labelPagamento(QHBoxLayout *layout) -> void;

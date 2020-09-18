@@ -142,12 +142,11 @@ void CadastroProfissional::updateMode() {
   ui->pushButtonRemover->show();
 }
 
-std::optional<bool> CadastroProfissional::verificaVinculo() {
+bool CadastroProfissional::verificaVinculo() {
   QSqlQuery query;
 
   if (not query.exec("SELECT 0 FROM venda WHERE idProfissional = " + data("idProfissional").toString())) {
-    qApp->enqueueError("Erro verificando se existe pedidos vinculados: " + query.lastError().text(), this);
-    return {};
+    throw RuntimeException("Erro verificando se existe pedidos vinculados: " + query.lastError().text());
   }
 
   return query.size() > 0;
@@ -169,13 +168,11 @@ bool CadastroProfissional::viewRegister() {
 
   (tipoPFPJ == "PF") ? ui->radioButtonPF->setChecked(true) : ui->radioButtonPJ->setChecked(true);
 
-  const auto existeVinculo = verificaVinculo();
-
-  if (not existeVinculo) { return false; }
+  const bool existeVinculo = verificaVinculo();
 
   const bool administrativo = UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO" or UserSession::tipoUsuario() == "DIRETOR";
 
-  const bool bloquear = (existeVinculo.value() and not administrativo);
+  const bool bloquear = (existeVinculo and not administrativo);
 
   ui->lineEditProfissional->setReadOnly(bloquear);
   ui->lineEditCPF->setReadOnly(bloquear);
@@ -187,46 +184,40 @@ bool CadastroProfissional::viewRegister() {
   return true;
 }
 
-bool CadastroProfissional::cadastrar() {
-  if (not qApp->startTransaction("CadastroProfissional::cadastrar")) { return false; }
+void CadastroProfissional::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroProfissional::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     // -------------------------------------------------------------------------
 
-    if (not setForeignKey(modelEnd)) { return false; }
+    setForeignKey(modelEnd);
 
     modelEnd.submitAll();
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     backupEndereco.clear();
 
     model.setFilter(primaryKey + " = '" + primaryId + "'");
 
     modelEnd.setFilter(primaryKey + " = '" + primaryId + "'");
-  } else {
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
     modelEnd.select();
 
     for (auto &record : backupEndereco) { modelEnd.insertRecord(-1, record); }
   }
-
-  return success;
 }
 
 bool CadastroProfissional::verifyFields() {
@@ -243,7 +234,7 @@ bool CadastroProfissional::verifyFields() {
   return true;
 }
 
-bool CadastroProfissional::savingProcedures() {
+void CadastroProfissional::savingProcedures() {
   if (tipoPFPJ == "PF") { setData("cnpj", ""); }
   if (tipoPFPJ == "PJ") { setData("cpf", ""); }
   if (not ui->lineEditCPF->text().remove(".").remove("-").isEmpty()) { setData("cpf", ui->lineEditCPF->text()); }
@@ -280,8 +271,6 @@ bool CadastroProfissional::savingProcedures() {
 
   setData("cc", ui->lineEditCC->text());
   setData("poupanca", ui->checkBoxPoupanca->isChecked());
-
-  return true;
 }
 
 void CadastroProfissional::on_pushButtonCadastrar_clicked() { save(); }

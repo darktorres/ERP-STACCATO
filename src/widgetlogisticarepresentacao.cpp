@@ -86,19 +86,19 @@ void WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue_clicked() {
 
   if (input.exec() != InputDialogConfirmacao::Accepted) { return; }
 
-  if (not qApp->startTransaction("WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue")) { return; }
+  qApp->startTransaction("WidgetLogisticaRepresentacao::on_pushButtonMarcarEntregue");
 
-  if (not processRows(list, input.getDate(), input.getRecebeu())) { return qApp->rollbackTransaction(); }
+  processRows(list, input.getDate(), input.getRecebeu());
 
-  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
+  Sql::updateVendaStatus(idVendas);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   updateTables();
   qApp->enqueueInformation("Entrega confirmada!", this);
 }
 
-bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) {
+void WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) {
   QSqlQuery query1;
   query1.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'ENTREGUE', dataRealEnt = :dataRealEnt WHERE status = 'EM ENTREGA' AND idVendaProduto2 = :idVendaProduto2");
 
@@ -109,16 +109,14 @@ bool WidgetLogisticaRepresentacao::processRows(const QModelIndexList &list, cons
     query1.bindValue(":dataRealEnt", dataEntrega);
     query1.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
 
-    if (not query1.exec()) { return qApp->enqueueException(false, "Erro salvando status no pedido_fornecedor: " + query1.lastError().text(), this); }
+    if (not query1.exec()) { throw RuntimeException("Erro salvando status no pedido_fornecedor: " + query1.lastError().text()); }
 
     query2.bindValue(":dataRealEnt", dataEntrega);
     query2.bindValue(":idVendaProduto2", modelViewLogisticaRepresentacao.data(index.row(), "idVendaProduto2"));
     query2.bindValue(":recebeu", recebeu);
 
-    if (not query2.exec()) { return qApp->enqueueException(false, "Erro salvando status na venda_produto: " + query2.lastError().text(), this); }
+    if (not query2.exec()) { throw RuntimeException("Erro salvando status na venda_produto: " + query2.lastError().text()); }
   }
-
-  return true;
 }
 
 void WidgetLogisticaRepresentacao::on_lineEditBusca_textChanged(const QString &text) { modelViewLogisticaRepresentacao.setFilter("(idVenda LIKE '%" + text + "%' OR cliente LIKE '%" + text + "%')"); }

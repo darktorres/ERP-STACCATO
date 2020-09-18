@@ -15,8 +15,8 @@ public:
   // TODO: turn showWindow into a enum
   explicit Estoque(const QString &idEstoque, const bool showWindow, QWidget *parent);
   ~Estoque();
-  auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> bool;
-  static auto desfazerConsumo(const int idVendaProduto2, QWidget *parent) -> bool;
+  auto criarConsumo(const int idVendaProduto2, const double quant = 0) -> void;
+  static auto desfazerConsumo(const int idVendaProduto2) -> void;
 
 private:
   // attributes
@@ -37,7 +37,7 @@ private:
 
   // methods
   auto buscarRestante() -> void;
-  auto dividirCompra(const int idVendaProduto2, const double quant) -> bool;
+  auto dividirCompra(const int idVendaProduto2, const double quant) -> void;
   auto exibirNota() -> void;
   auto on_pushButtonExibirNfe_clicked() -> void;
   auto setupTables() -> void;

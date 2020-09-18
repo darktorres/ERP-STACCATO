@@ -134,9 +134,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
   }
 
   CNAB cnab(this);
-  auto idCnab = cnab.remessaGareItau240(montarGare(selection));
-
-  if (not idCnab) { return; }
+  QString idCnab = cnab.remessaGareItau240(montarGare(selection));
 
   QStringList ids;
 
@@ -144,7 +142,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   QSqlQuery query;
 
-  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 33, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab.value() +
+  if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 33, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
     return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
   }

@@ -29,5 +29,5 @@ private:
   SqlTableModel modelItem;
   QWidget *parent;
   // methods
-  auto setQuerys() -> bool;
+  auto setQuerys() -> void;
 };

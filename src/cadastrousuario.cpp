@@ -117,7 +117,7 @@ void CadastroUsuario::updateMode() {
   ui->pushButtonRemover->show();
 }
 
-bool CadastroUsuario::savingProcedures() {
+void CadastroUsuario::savingProcedures() {
   setData("nome", ui->lineEditNome->text());
   setData("idLoja", ui->comboBoxLoja->getCurrentValue());
   setData("tipo", ui->comboBoxTipo->currentText());
@@ -129,14 +129,12 @@ bool CadastroUsuario::savingProcedures() {
   if (ui->lineEditPasswd->text() != "********") {
     QSqlQuery query;
 
-    if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { return false; }
+    if (not query.exec("SELECT PASSWORD('" + ui->lineEditPasswd->text() + "')") or not query.first()) { throw RuntimeException("Erro gerando senha: " + query.lastError().text()); }
 
     setData("passwd", query.value(0));
   }
 
   if (ui->comboBoxTipo->currentText() == "VENDEDOR ESPECIAL") { setData("especialidade", ui->comboBoxEspecialidade->currentText().left(1).toInt()); }
-
-  return true;
 }
 
 bool CadastroUsuario::viewRegister() {
@@ -195,19 +193,19 @@ void CadastroUsuario::on_pushButtonBuscar_clicked() {
   sdUsuario->show();
 }
 
-bool CadastroUsuario::cadastrar() {
-  if (not qApp->startTransaction("CadastroUsuario::cadastrar")) { return false; }
+void CadastroUsuario::cadastrar() {
+  try {
+    qApp->startTransaction("CadastroUsuario::cadastrar");
 
-  const bool success = [&] {
     if (tipo == Tipo::Cadastrar) { currentRow = model.insertRowAtEnd(); }
 
-    if (not savingProcedures()) { return false; }
+    savingProcedures();
 
     model.submitAll();
 
     primaryId = (tipo == Tipo::Atualizar) ? data(primaryKey).toString() : model.query().lastInsertId().toString();
 
-    if (primaryId.isEmpty()) { return qApp->enqueueException(false, "Id vazio!", this); }
+    if (primaryId.isEmpty()) { throw RuntimeException("Id vazio!"); }
 
     if (tipo == Tipo::Cadastrar) {
       const int row = modelPermissoes.insertRowAtEnd();
@@ -221,20 +219,14 @@ bool CadastroUsuario::cadastrar() {
 
     modelPermissoes.submitAll();
 
-    return true;
-  }();
-
-  if (success) {
-    if (not qApp->endTransaction()) { return false; }
+    qApp->endTransaction();
 
     if (tipo == Tipo::Cadastrar) { criarUsuarioMySQL(); }
-  } else {
+  } catch (std::exception &e) {
     qApp->rollbackTransaction();
     model.select();
     modelPermissoes.select();
   }
-
-  return success;
 }
 
 void CadastroUsuario::criarUsuarioMySQL() {

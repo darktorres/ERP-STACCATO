@@ -26,17 +26,18 @@ InserirTransferencia::~InserirTransferencia() { delete ui; }
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
   if (not verifyFields()) { return; }
 
-  if (not qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar")) { return; }
+  qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar");
 
-  if (not cadastrar()) { return qApp->rollbackTransaction(); }
+  cadastrar();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Transferência registrada com sucesso!", this);
+
   close();
 }
 
-bool InserirTransferencia::cadastrar() {
+void InserirTransferencia::cadastrar() {
   // lancamento 'de'
 
   const int rowDe = modelDe.insertRowAtEnd();
@@ -80,8 +81,6 @@ bool InserirTransferencia::cadastrar() {
   modelDe.submitAll();
 
   modelPara.submitAll();
-
-  return true;
 }
 
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }

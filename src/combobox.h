@@ -9,7 +9,7 @@ public:
   explicit ComboBox(QWidget *parent);
   ~ComboBox() = default;
   auto getCurrentValue() const -> QVariant;
-  auto setCurrentValue(const QVariant &value) -> bool;
+  auto setCurrentValue(const QVariant &value) -> void;
 
 private:
   Q_PROPERTY(QVariant currentValue READ getCurrentValue WRITE setCurrentValue STORED false)

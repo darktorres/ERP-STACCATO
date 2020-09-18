@@ -56,18 +56,18 @@ private:
   // methods
   auto associarDiferente(const int rowCompra, const int rowEstoque, double &estoquePareado, bool &repareado) -> bool;
   auto associarIgual(const int rowCompra, const int rowEstoque) -> bool;
-  auto atualizarNFes() -> bool;
-  auto buscaNCM(const QString &ncm) -> std::optional<ImportarXML::NCM>;
-  auto buscarCaixas(const int rowEstoque) -> std::optional<double>;
+  auto atualizarNFes() -> void;
+  auto buscaNCM(const QString &ncm) -> ImportarXML::NCM;
+  auto buscarCaixas(const int rowEstoque) -> double;
   auto cadastrarNFe(XML &xml, const double gare) -> bool;
-  auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> bool;
-  auto calculaGare(XML &xml) -> std::optional<double>;
+  auto cadastrarProdutoEstoque(const QVector<ProdutoEstoque> &tuples) -> void;
+  auto calculaGare(XML &xml) -> double;
   auto criarConsumo(const int rowCompra, const int rowEstoque) -> bool;
   auto criarPagamentoGare(const double valor, const XML &xml) -> bool;
-  auto dividirCompra(const int rowCompra, const double quantAdicionar) -> bool;
-  auto dividirVenda(const int rowVenda, const double quantAdicionar) -> std::optional<int>;
+  auto dividirCompra(const int rowCompra, const double quantAdicionar) -> void;
+  auto dividirVenda(const int rowVenda, const double quantAdicionar) -> int;
   auto encontraInfCpl(const QString &xml) -> QString;
-  auto importar() -> bool;
+  auto importar() -> void;
   auto lerXML() -> bool;
   auto limparAssociacoes() -> bool;
   auto mapTuples() -> QVector<ImportarXML::ProdutoEstoque>;
@@ -80,8 +80,8 @@ private:
   auto percorrerXml(XML &xml) -> bool;
   auto perguntarLocal(XML &xml) -> bool;
   auto reparear(const QModelIndex &index) -> void;
-  auto salvarDadosCompra() -> bool;
-  auto salvarDadosVenda() -> bool;
+  auto salvarDadosCompra() -> void;
+  auto salvarDadosVenda() -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;

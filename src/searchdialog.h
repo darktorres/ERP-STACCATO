@@ -62,7 +62,7 @@ private:
   auto on_radioButtonProdDesc_toggled(const bool) -> void;
   auto on_table_clicked(const QModelIndex &index) -> void;
   auto on_table_doubleClicked(const QModelIndex &) -> void;
-  auto prepare_show() -> bool;
+  auto prepare_show() -> void;
   auto sendUpdateMessage(const QModelIndex &index) -> void;
   auto setHeaderData(const QString &column, const QString &newHeader) -> void;
   auto setupTables(const QString &table) -> void;

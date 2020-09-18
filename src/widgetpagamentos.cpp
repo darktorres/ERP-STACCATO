@@ -126,7 +126,7 @@ QComboBox *WidgetPagamentos::comboBoxData(QHBoxLayout *layout) {
   return comboBoxData;
 }
 
-bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
+void WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   auto *comboBoxPgt = new QComboBox(this);
   comboBoxPgt->setMinimumWidth(140);
 
@@ -134,7 +134,7 @@ bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja");
   queryPag.bindValue(":idLoja", UserSession::idLoja());
 
-  if (not queryPag.exec()) { return qApp->enqueueException(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("ESCOLHA UMA OPÇÃO!");
@@ -146,8 +146,6 @@ bool WidgetPagamentos::comboBoxPgtCompra(QHBoxLayout *layout) {
   layout->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listTipoPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listTipoPgt << comboBoxPgt;
-
-  return true;
 }
 
 void WidgetPagamentos::checkBoxRep(QFrame *frame, QHBoxLayout *layout) {
@@ -161,25 +159,25 @@ void WidgetPagamentos::checkBoxRep(QFrame *frame, QHBoxLayout *layout) {
   listCheckBoxRep << checkboxRep;
 }
 
-bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
+void WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
   auto *comboBoxPgt = new QComboBox(frame);
   comboBoxPgt->setMinimumWidth(140);
 
-  if (idOrcamento.isEmpty()) { return qApp->enqueueError(false, "Orçamento vazio!", this); }
+  if (idOrcamento.isEmpty()) { throw RuntimeError("Orçamento vazio!"); }
 
   QSqlQuery queryOrc;
   queryOrc.prepare("SELECT idUsuario, idOrcamento, idLoja, idUsuarioConsultor, idCliente, idEnderecoEntrega, idEnderecoFaturamento, idProfissional, data, subTotalBru, subTotalLiq, frete, "
                    "freteManual, descontoPorc, descontoReais, total, status, observacao, prazoEntrega, representacao FROM orcamento WHERE idOrcamento = :idOrcamento");
   queryOrc.bindValue(":idOrcamento", idOrcamento);
 
-  if (not queryOrc.exec() or not queryOrc.first()) { return qApp->enqueueException(false, "Erro buscando orçamento: " + queryOrc.lastError().text(), this); }
+  if (not queryOrc.exec() or not queryOrc.first()) { throw RuntimeException("Erro buscando orçamento: " + queryOrc.lastError().text()); }
 
   QSqlQuery queryPag;
   queryPag.prepare("SELECT pagamento FROM view_pagamento_loja WHERE idLoja = :idLoja AND apenasRepresentacao = :apenasRepresentacao");
   queryPag.bindValue(":idLoja", queryOrc.value("idLoja"));
   queryPag.bindValue(":apenasRepresentacao", representacao);
 
-  if (not queryPag.exec()) { return qApp->enqueueException(false, "Erro lendo formas de pagamentos: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec()) { throw RuntimeException("Erro lendo formas de pagamentos: " + queryPag.lastError().text()); }
 
   const QStringList list([&queryPag]() {
     QStringList temp("ESCOLHA UMA OPÇÃO!");
@@ -192,8 +190,6 @@ bool WidgetPagamentos::comboBoxPgtVenda(QFrame *frame, QHBoxLayout *layout) {
   layout->addWidget(comboBoxPgt);
   connect(comboBoxPgt, &QComboBox::currentTextChanged, this, [=] { on_comboBoxPgt_currentTextChanged(listTipoPgt.indexOf(comboBoxPgt), comboBoxPgt->currentText()); });
   listTipoPgt << comboBoxPgt;
-
-  return true;
 }
 
 void WidgetPagamentos::on_comboBoxPgt_currentTextChanged(const int index, const QString &text) {
@@ -354,11 +350,11 @@ void WidgetPagamentos::on_pushButtonAdicionarPagamento_clicked(const bool addFre
 
   if (tipo == Tipo::Venda) {
     checkBoxRep(frame, layout);
-    if (not comboBoxPgtVenda(frame, layout)) { return; }
+    comboBoxPgtVenda(frame, layout);
   }
 
   if (tipo == Tipo::Compra) {
-    if (not comboBoxPgtCompra(layout)) { return; }
+    comboBoxPgtCompra(layout);
     comboBox = comboBoxData(layout);
   }
 

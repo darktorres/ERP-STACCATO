@@ -11,10 +11,7 @@ SqlQueryModel::SqlQueryModel(QObject *parent) : QSqlQueryModel(parent) {}
 SqlQueryModel::SqlQueryModel() : SqlQueryModel(nullptr) {}
 
 QVariant SqlQueryModel::data(const int row, const int column) const {
-  if (row == -1 or column == -1) {
-    qApp->enqueueException("Erro: linha/coluna -1 SqlQueryModel");
-    return QVariant();
-  }
+  if (row == -1 or column == -1) { throw RuntimeException("Erro: linha/coluna -1 SqlQueryModel"); }
 
   if (proxyModel) { return proxyModel->data(proxyModel->index(row, column)); }
 
@@ -28,35 +25,31 @@ QVariant SqlQueryModel::data(const int row, const QString &column) const { retur
 bool SqlQueryModel::setHeaderData(const QString &column, const QVariant &value) {
   const int field = fieldIndex(column);
 
-  if (field == -1) { return qApp->enqueueException(false, "Coluna '" + column + "' não encontrada na tabela!"); }
+  if (field == -1) { throw RuntimeException("Coluna '" + column + "' não encontrada na tabela!"); }
 
   return QSqlQueryModel::setHeaderData(field, Qt::Horizontal, value);
 }
 
-bool SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
+void SqlQueryModel::setQuery(const QString &query, const QSqlDatabase &db) {
   // TODO: redo places that use this function
 
   m_query = query;
 
   QSqlQueryModel::setQuery(query, db);
 
-  if (lastError().isValid()) { return qApp->enqueueException(false, "Erro lendo dados: " + lastError().text()); }
-
-  return true;
+  if (lastError().isValid()) { throw RuntimeException("Erro lendo dados: " + lastError().text()); }
 }
 
-bool SqlQueryModel::setQuery2(const QString &query, const QSqlDatabase &db) {
+void SqlQueryModel::setQuery2(const QString &query, const QSqlDatabase &db) {
   QSqlQueryModel::setQuery(query, db);
 
-  if (lastError().isValid()) { return qApp->enqueueException(false, "Erro lendo dados: " + lastError().text()); }
-
-  return true;
+  if (lastError().isValid()) { throw RuntimeException("Erro lendo dados: " + lastError().text()); }
 }
 
 int SqlQueryModel::fieldIndex(const QString &fieldName, const bool silent) const {
   const int field = record().indexOf(fieldName);
 
-  if (field == -1 and not silent) { qApp->enqueueException(fieldName + " não encontrado na tabela!"); }
+  if (field == -1 and not silent) { throw RuntimeException(fieldName + " não encontrado na tabela!"); }
 
   return field;
 }

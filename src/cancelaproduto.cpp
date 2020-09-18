@@ -92,11 +92,11 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 
   if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhum produto!", this); }
 
-  if (not qApp->startTransaction("CancelaProduto::on_pushButtonSalvar")) { return; }
+  qApp->startTransaction("CancelaProduto::on_pushButtonSalvar");
 
-  if (not cancelar(list)) { return qApp->rollbackTransaction(); }
+  cancelar(list);
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   qApp->enqueueInformation("Itens cancelados!", this);
 
@@ -105,7 +105,7 @@ void CancelaProduto::on_pushButtonSalvar_clicked() {
 
 void CancelaProduto::on_pushButtonVoltar_clicked() { close(); }
 
-bool CancelaProduto::cancelar(const QModelIndexList &list) {
+void CancelaProduto::cancelar(const QModelIndexList &list) {
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'CANCELADO', idVenda = NULL, idVendaProduto2 = NULL WHERE `idPedido2` = :idPedido2");
 
@@ -124,24 +124,22 @@ bool CancelaProduto::cancelar(const QModelIndexList &list) {
 
     queryCompra.bindValue(":idPedido2", model.data(row, "idPedido2"));
 
-    if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando compra: " + queryCompra.lastError().text()); }
 
     queryVenda.bindValue(":idVendaProduto2", model.data(row, "idVendaProduto2"));
 
-    if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando venda: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando venda: " + queryVenda.lastError().text()); }
 
     idVendas << model.data(row, "idVenda").toString();
 
     QSqlQuery query;
 
     if (not query.exec("CALL update_pedido_fornecedor_status(" + model.data(row, "idPedidoFK").toString() + ")")) {
-      return qApp->enqueueException(false, "Erro atualizando status compra: " + query.lastError().text(), this);
+      throw RuntimeException("Erro atualizando status compra: " + query.lastError().text());
     }
   }
 
-  if (not Sql::updateVendaStatus(idVendas)) { return false; }
-
-  return true;
+  Sql::updateVendaStatus(idVendas);
 }
 
 // TODO: 5verificar como tratar conta_a_pagar_has_pagamento

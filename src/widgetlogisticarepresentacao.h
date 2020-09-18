@@ -27,7 +27,7 @@ private:
   // methods
   auto on_lineEditBusca_textChanged(const QString &text) -> void;
   auto on_pushButtonMarcarEntregue_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) -> bool;
+  auto processRows(const QModelIndexList &list, const QDate &dataEntrega, const QString &recebeu) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

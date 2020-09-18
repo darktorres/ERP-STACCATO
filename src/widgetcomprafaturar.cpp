@@ -77,7 +77,7 @@ void WidgetCompraFaturar::updateTables() {
 
 void WidgetCompraFaturar::resetTables() { modelIsSet = false; }
 
-bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
+void WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStringList &idsCompra) {
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET status = 'EM ENTREGA', dataRealFat = :dataRealFat WHERE status = 'EM FATURAMENTO' AND idCompra = :idCompra");
 
@@ -88,14 +88,12 @@ bool WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStr
     queryCompra.bindValue(":dataRealFat", dataReal);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando status da compra: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando status da compra: " + queryCompra.lastError().text()); }
 
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando status do produto da venda: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando status do produto da venda: " + queryVenda.lastError().text()); }
   }
-
-  return true;
 }
 
 void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
@@ -118,7 +116,8 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!", this); }
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento, this);
-  if (not inputDlg.setFilter(idsCompra)) { return; }
+  inputDlg.setFilter(idsCompra);
+
   if (inputDlg.exec() != InputDialogProduto::Accepted) { return; }
 
   const QDate dataFaturamento = inputDlg.getDate();
@@ -126,9 +125,9 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const bool pularNota = ui->checkBoxRepresentacao->isChecked() or fornecedores.first() == "ATELIER STACCATO";
 
   if (pularNota) {
-    if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota")) { return; }
-    if (not faturarRepresentacao(dataFaturamento, idsCompra)) { return qApp->rollbackTransaction(); }
-    if (not qApp->endTransaction()) { return; }
+    qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado_pularNota");
+    faturarRepresentacao(dataFaturamento, idsCompra);
+    qApp->endTransaction();
   } else {
     auto *import = new ImportarXML(idsCompra, dataFaturamento, this);
     import->setAttribute(Qt::WA_DeleteOnClose);
@@ -137,9 +136,9 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
     if (import->exec() != QDialog::Accepted) { return; }
   }
 
-  if (not qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado")) { return; }
-  if (not Sql::updateVendaStatus(idVendas)) { return qApp->rollbackTransaction(); }
-  if (not qApp->endTransaction()) { return; }
+  qApp->startTransaction("WidgetCompraFaturar::on_pushButtonMarcarFaturado");
+  Sql::updateVendaStatus(idVendas);
+  qApp->endTransaction();
 
   updateTables();
   qApp->enqueueInformation("Confirmado faturamento!", this);

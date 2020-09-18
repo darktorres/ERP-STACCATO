@@ -23,7 +23,7 @@ private:
   SqlTableModel model;
   Ui::CancelaProduto *ui;
   // methods
-  auto cancelar(const QModelIndexList &list) -> bool;
+  auto cancelar(const QModelIndexList &list) -> void;
   auto on_pushButtonVoltar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;

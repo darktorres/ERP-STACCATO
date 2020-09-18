@@ -24,9 +24,9 @@ private:
   SqlTableModel modelViewNFeSaida;
   Ui::WidgetNfeSaida *ui;
   // methods
-  auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> bool;
-  auto cancelarNFe(const QString &chaveAcesso, const int row) -> bool;
-  auto gravarArquivo(const QString &resposta, const QString &chaveAcesso) -> bool;
+  auto atualizarNFe(const QString &resposta, const int idNFe, const QString &xml) -> void;
+  auto cancelarNFe(const QString &chaveAcesso, const int row) -> void;
+  auto gravarArquivo(const QString &resposta, const QString &chaveAcesso) -> void;
   auto montaFiltro() -> void;
   auto on_groupBoxStatus_toggled(const bool enabled) -> void;
   auto on_pushButtonCancelarNFe_clicked() -> void;

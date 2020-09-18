@@ -566,8 +566,8 @@ void InputDialogFinanceiro::setTreeView() {
   ui->treeView->setItemDelegateForColumn("quant", new EditDelegate(this));
 }
 
-bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
-  if (idCompra.isEmpty()) { return qApp->enqueueException(false, "IdCompra vazio!", this); }
+void InputDialogFinanceiro::setFilter(const QString &idCompra) {
+  if (idCompra.isEmpty()) { throw RuntimeException("IdCompra vazio!"); }
 
   QString filtro = "idCompra IN (" + idCompra + ")";
 
@@ -601,7 +601,7 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   query.prepare("SELECT v.representacao FROM pedido_fornecedor_has_produto pf LEFT JOIN venda v ON pf.idVenda = v.idVenda WHERE pf.idCompra = :idCompra");
   query.bindValue(":idCompra", idCompra);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando se é representacao: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando se é representacao: " + query.lastError().text()); }
 
   representacao = query.value("representacao").toBool();
 
@@ -626,8 +626,6 @@ bool InputDialogFinanceiro::setFilter(const QString &idCompra) {
   calcularTotal();
 
   adjustSize();
-
-  return true;
 }
 
 void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
@@ -636,11 +634,11 @@ void InputDialogFinanceiro::on_pushButtonSalvar_clicked() {
   [=] {
     if (not verifyFields()) { return; }
 
-    if (not qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar")) { return; }
+    qApp->startTransaction("InputDialogFinanceiro::on_pushButtonSalvar");
 
-    if (not cadastrar()) { return qApp->rollbackTransaction(); }
+    cadastrar();
 
-    if (not qApp->endTransaction()) { return; }
+    qApp->endTransaction();
 
     qApp->enqueueInformation("Dados salvos com sucesso!", this);
 
@@ -679,7 +677,7 @@ bool InputDialogFinanceiro::verifyFields() {
   return true;
 }
 
-bool InputDialogFinanceiro::cadastrar() {
+void InputDialogFinanceiro::cadastrar() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
   if (tipo == Tipo::ConfirmarCompra) {
@@ -695,8 +693,6 @@ bool InputDialogFinanceiro::cadastrar() {
   modelPedidoFornecedor2.submitAll();
 
   modelFluxoCaixa.submitAll();
-
-  return true;
 }
 
 void InputDialogFinanceiro::on_dateEditEvento_dateChanged(const QDate &date) {

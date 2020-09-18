@@ -30,8 +30,8 @@ private:
   auto on_radioButtonFiltroDevolvido_clicked(const bool) -> void;
   auto on_radioButtonFiltroPendente_clicked(const bool) -> void;
   auto on_table_selectionChanged() -> void;
-  auto retornarEstoque(const QModelIndexList &list) -> bool;
-  auto retornarFornecedor(const QModelIndexList &list) -> bool;
+  auto retornarEstoque(const QModelIndexList &list) -> void;
+  auto retornarFornecedor(const QModelIndexList &list) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

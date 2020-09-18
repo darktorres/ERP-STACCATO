@@ -25,7 +25,7 @@ private:
   SqlTableModel modelViewRecebimento;
   Ui::WidgetLogisticaRecebimento *ui;
   // methods
-  auto cancelar(const QModelIndexList &list) -> bool;
+  auto cancelar(const QModelIndexList &list) -> void;
   auto montaFiltro() -> void;
   auto on_checkBoxMarcarTodos_clicked(const bool checked) -> void;
   auto on_lineEditBusca_textChanged(const QString &) -> void;
@@ -33,8 +33,8 @@ private:
   auto on_pushButtonMarcarRecebido_clicked() -> void;
   auto on_pushButtonReagendar_clicked() -> void;
   auto on_pushButtonVenda_clicked() -> void;
-  auto processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) -> bool;
-  auto reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) -> bool;
+  auto processRows(const QModelIndexList &list, const QDate &dataReceb, const QString &recebidoPor) -> void;
+  auto reagendar(const QModelIndexList &list, const QDate &dataPrevReceb) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

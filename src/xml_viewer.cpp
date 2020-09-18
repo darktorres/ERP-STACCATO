@@ -19,6 +19,6 @@ XML_Viewer::XML_Viewer(const QByteArray &content, QWidget *parent) : QDialog(par
 XML_Viewer::~XML_Viewer() { delete ui; }
 
 void XML_Viewer::on_pushButtonDanfe_clicked() {
-  ACBr acbrLocal(this);
+  ACBr acbrLocal;
   acbrLocal.gerarDanfe(fileContent);
 }

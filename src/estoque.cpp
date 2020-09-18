@@ -183,16 +183,16 @@ void Estoque::exibirNota() {
   }
 }
 
-bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
+void Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   // TODO: verificar se as divisões de linha batem com a outra função criarConsumo
 
-  if (modelEstoque.filter().isEmpty()) { return qApp->enqueueException(false, "Não setou idEstoque!", this); }
+  if (modelEstoque.filter().isEmpty()) { throw RuntimeException("Não setou idEstoque!"); }
 
-  if (quant > ui->doubleSpinBoxRestante->value()) { return qApp->enqueueException(false, "Quantidade insuficiente!", this); }
+  if (quant > ui->doubleSpinBoxRestante->value()) { throw RuntimeException("Quantidade insuficiente!"); }
 
   // -------------------------------------------------------------------------
 
-  if (not dividirCompra(idVendaProduto2, quant)) { return false; }
+  dividirCompra(idVendaProduto2, quant);
 
   // -------------------------------------------------------------------------
 
@@ -217,7 +217,7 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
   query.prepare("SELECT quantCaixa FROM produto WHERE idProduto = :idProduto");
   query.bindValue(":idProduto", modelEstoque.data(rowEstoque, "idProduto"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando dados do produto: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados do produto: " + query.lastError().text()); }
 
   const double quantCaixa = query.value("quantCaixa").toDouble();
   const double caixas = quant / quantCaixa;
@@ -244,15 +244,11 @@ bool Estoque::criarConsumo(const int idVendaProduto2, const double quant) {
     queryProduto.bindValue(":lote", modelEstoque.data(rowEstoque, "lote"));
     queryProduto.bindValue(":idVendaProduto2", idVendaProduto2);
 
-    if (not queryProduto.exec()) { return qApp->enqueueException(false, "Erro salvando lote: " + queryProduto.lastError().text(), this); }
+    if (not queryProduto.exec()) { throw RuntimeException("Erro salvando lote: " + queryProduto.lastError().text()); }
   }
-
-  // -------------------------------------------------------------------------
-
-  return true;
 }
 
-bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
+void Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   // se quant a consumir for igual a quant da compra apenas alterar idVenda/produto
   // senao fazer a quebra
 
@@ -264,7 +260,7 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
 
   modelCompra.select();
 
-  if (modelCompra.rowCount() == 0) { return true; }
+  if (modelCompra.rowCount() == 0) { return; }
 
   //--------------------------------------------------------------------
 
@@ -272,12 +268,12 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   query.prepare("SELECT idVenda FROM venda_has_produto2 WHERE idVendaProduto2 = :idVendaProduto2");
   query.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException(false, "Erro buscando idVenda: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando idVenda: " + query.lastError().text()); }
 
   const int row = 0;
   const double quantCompra = modelCompra.data(row, "quant").toDouble();
 
-  if (quant > quantCompra) { return qApp->enqueueException(false, "Erro quant > quantCompra", this); }
+  if (quant > quantCompra) { throw RuntimeException("Erro quant > quantCompra"); }
 
   if (qFuzzyCompare(quant, quantCompra)) {
     modelCompra.setData(row, "idVenda", query.value("idVenda"));
@@ -326,11 +322,9 @@ bool Estoque::dividirCompra(const int idVendaProduto2, const double quant) {
   }
 
   modelCompra.submitAll();
-
-  return true;
 }
 
-bool Estoque::desfazerConsumo(const int idVendaProduto2, QWidget *parent) {
+void Estoque::desfazerConsumo(const int idVendaProduto2) {
   // there is one implementation in InputDialogConfirmacao
   // TODO: juntar as lógicas
   // TODO: se houver agendamento de estoque remover
@@ -340,14 +334,14 @@ bool Estoque::desfazerConsumo(const int idVendaProduto2, QWidget *parent) {
   queryDelete.prepare("DELETE FROM estoque_has_consumo WHERE idVendaProduto2 = :idVendaProduto2");
   queryDelete.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryDelete.exec()) { return qApp->enqueueException(false, "Erro removendo consumo estoque: " + queryDelete.lastError().text(), parent); }
+  if (not queryDelete.exec()) { throw RuntimeException("Erro removendo consumo estoque: " + queryDelete.lastError().text()); }
 
   // TODO: juntar linhas sem consumo do mesmo tipo? (usar idRelacionado)
   QSqlQuery queryCompra;
   queryCompra.prepare("UPDATE pedido_fornecedor_has_produto2 SET idVenda = NULL, idVendaProduto2 = NULL WHERE idVendaProduto2 = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO')");
   queryCompra.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryCompra.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido compra: " + queryCompra.lastError().text(), parent); }
+  if (not queryCompra.exec()) { throw RuntimeException("Erro atualizando pedido compra: " + queryCompra.lastError().text()); }
 
   QSqlQuery queryVenda;
   queryVenda.prepare(
@@ -356,9 +350,7 @@ bool Estoque::desfazerConsumo(const int idVendaProduto2, QWidget *parent) {
       "NULL, dataRealReceb = NULL, dataPrevEnt = NULL, dataRealEnt = NULL WHERE `idVendaProduto2` = :idVendaProduto2 AND status NOT IN ('CANCELADO', 'DEVOLVIDO', 'QUEBRADO')");
   queryVenda.bindValue(":idVendaProduto2", idVendaProduto2);
 
-  if (not queryVenda.exec()) { return qApp->enqueueException(false, "Erro atualizando pedido venda: " + queryVenda.lastError().text(), parent); }
-
-  return true;
+  if (not queryVenda.exec()) { throw RuntimeException("Erro atualizando pedido venda: " + queryVenda.lastError().text()); }
 }
 
 // TODO: 1colocar o botao de desvincular consumo nesta tela

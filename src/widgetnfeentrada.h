@@ -29,7 +29,7 @@ private:
   auto on_pushButtonExportar_clicked() -> void;
   auto on_pushButtonRemoverNFe_clicked() -> void;
   auto on_table_activated(const QModelIndex &index) -> void;
-  auto remover(const int row) -> bool;
+  auto remover(const int row) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;
 };

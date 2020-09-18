@@ -75,11 +75,11 @@ void ImportaTabelaIBPT::importar() {
     progressDialog.setValue(size - remains);
   }
 
-  if (not qApp->startTransaction("ImportaTabelaIBPT::importar")) { return; }
+  qApp->startTransaction("ImportaTabelaIBPT::importar");
 
   model.submitAll();
 
-  if (not qApp->endTransaction()) { return; }
+  qApp->endTransaction();
 
   progressDialog.cancel();
 

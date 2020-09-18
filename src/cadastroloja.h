@@ -24,7 +24,7 @@ private:
   SqlTableModel modelConta;
   Ui::CadastroLoja *ui;
   // methods
-  auto cadastrar() -> bool final;
+  auto cadastrar() -> void final;
   auto cadastrarConta(const Tipo tipoConta = Tipo::Cadastrar) -> bool;
   auto cadastrarEndereco(const Tipo tipoEndereco = Tipo::Cadastrar) -> bool;
   auto clearConta() -> void;
@@ -51,7 +51,7 @@ private:
   auto on_tableConta_clicked(const QModelIndex &index) -> void;
   auto on_tableEndereco_clicked(const QModelIndex &index) -> void;
   auto registerMode() -> void final;
-  auto savingProcedures() -> bool final;
+  auto savingProcedures() -> void final;
   auto setupMapper() -> void final;
   auto setupTables() -> void;
   auto setupUi() -> void;

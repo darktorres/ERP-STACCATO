@@ -25,7 +25,7 @@ CadastroFornecedor::CadastroFornecedor(QWidget *parent) : RegisterAddressDialog(
   sdFornecedor = SearchDialog::fornecedor(this);
   connect(sdFornecedor, &SearchDialog::itemSelected, this, &CadastroFornecedor::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
@@ -95,16 +95,12 @@ void CadastroFornecedor::novoEndereco() {
   clearEndereco();
 }
 
-bool CadastroFornecedor::verifyFields() {
+void CadastroFornecedor::verifyFields() {
   const auto children = ui->frameCadastro->findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
-
-  return true;
+  if (ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CNPJ inválido!"); }
 }
 
 void CadastroFornecedor::savingProcedures() {
@@ -268,7 +264,7 @@ void CadastroFornecedor::on_pushButtonAdicionarEnd_clicked() {
 
 bool CadastroFornecedor::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
-    qApp->enqueueError("CEP inválido!", this);
+    throw RuntimeError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }

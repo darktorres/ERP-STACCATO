@@ -41,8 +41,8 @@ void FollowUp::on_pushButtonSalvar_clicked() {
                   ":idLoja, :idUsuario, :semaforo, :observacao, :dataFollowup, :dataProxFollowup)");
     query.bindValue(":idOrcamento", id);
     query.bindValue(":idOrcamentoBase", id.left(11));
-    query.bindValue(":idLoja", UserSession::idLoja());
-    query.bindValue(":idUsuario", UserSession::idUsuario());
+    query.bindValue(":idLoja", UserSession::idLoja);
+    query.bindValue(":idUsuario", UserSession::idUsuario);
     query.bindValue(":semaforo", ui->radioButtonQuente->isChecked() ? 1 : ui->radioButtonMorno->isChecked() ? 2 : ui->radioButtonFrio->isChecked() ? 3 : 0);
     query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
@@ -54,13 +54,13 @@ void FollowUp::on_pushButtonSalvar_clicked() {
         "INSERT INTO venda_has_followup (idVenda, idVendaBase, idLoja, idUsuario, observacao, dataFollowup) VALUES (:idVenda, :idVendaBase, :idLoja, :idUsuario, :observacao, :dataFollowup)");
     query.bindValue(":idVenda", id);
     query.bindValue(":idVendaBase", id.left(11));
-    query.bindValue(":idLoja", UserSession::idLoja());
-    query.bindValue(":idUsuario", UserSession::idUsuario());
+    query.bindValue(":idLoja", UserSession::idLoja);
+    query.bindValue(":idUsuario", UserSession::idUsuario);
     query.bindValue(":observacao", ui->plainTextEdit->toPlainText());
     query.bindValue(":dataFollowup", ui->dateFollowup->dateTime());
   }
 
-  if (not query.exec()) { return qApp->enqueueException("Erro salvando followup: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro salvando followup: " + query.lastError().text(), this); }
 
   qApp->enqueueInformation("Followup salvo com sucesso!", this);
   close();
@@ -68,10 +68,10 @@ void FollowUp::on_pushButtonSalvar_clicked() {
 
 bool FollowUp::verifyFields() {
   if (tipo == Tipo::Orcamento and not ui->radioButtonQuente->isChecked() and not ui->radioButtonMorno->isChecked() and not ui->radioButtonFrio->isChecked()) {
-    return qApp->enqueueError(false, "Deve selecionar uma temperatura!", this);
+    throw RuntimeError("Deve selecionar uma temperatura!", this);
   }
 
-  if (ui->plainTextEdit->toPlainText().isEmpty()) { return qApp->enqueueError(false, "Deve escrever uma observação!", this); }
+  if (ui->plainTextEdit->toPlainText().isEmpty()) { throw RuntimeError("Deve escrever uma observação!", this); }
 
   return true;
 }

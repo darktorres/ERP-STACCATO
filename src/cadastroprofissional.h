@@ -50,6 +50,6 @@ private:
   auto successMessage() -> void final;
   auto updateMode() -> void final;
   auto verificaVinculo() -> bool;
-  auto verifyFields() -> bool final;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

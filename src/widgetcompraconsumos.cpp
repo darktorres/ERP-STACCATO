@@ -81,7 +81,7 @@ void WidgetCompraConsumos::on_tablePedido_clicked(const QModelIndex &index) {
 void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
   const auto list = ui->tableProduto->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //------------------------------------
 
@@ -89,11 +89,11 @@ void WidgetCompraConsumos::on_pushButtonDesfazerConsumo_clicked() {
 
   const QString status = modelProduto.data(row, "status").toString();
 
-  if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { return qApp->enqueueError("Produto ainda não foi comprado!", this); }
+  if (status == "PENDENTE" or status == "REPO. ENTREGA" or status == "CANCELADO") { throw RuntimeError("Produto ainda não foi comprado!", this); }
 
-  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { return qApp->enqueueError("Produto está em entrega/entregue!", this); }
+  if (status == "ENTREGA AGEND." or status == "EM ENTREGA" or status == "ENTREGUE") { throw RuntimeError("Produto está em entrega/entregue!", this); }
 
-  if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { return qApp->enqueueError("Não permitido!", this); }
+  if (status == "DEVOLVIDO" or status == "QUEBRADO" or status == "CANCELADO") { throw RuntimeError("Não permitido!", this); }
   //------------------------------------
 
   QMessageBox msgBox(QMessageBox::Question, "Desfazer consumo/Desvincular da compra?", "Tem certeza?", QMessageBox::Yes | QMessageBox::No, this);

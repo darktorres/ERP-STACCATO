@@ -44,7 +44,7 @@ CadastroTransportadora::CadastroTransportadora(QWidget *parent) : RegisterAddres
   sdTransportadora = SearchDialog::transportadora(this);
   connect(sdTransportadora, &SearchDialog::itemSelected, this, &CadastroTransportadora::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
@@ -90,14 +90,10 @@ void CadastroTransportadora::clearFields() {
   setupUi();
 }
 
-bool CadastroTransportadora::verifyFields() {
+void CadastroTransportadora::verifyFields() {
   const auto children = ui->groupBox_7->findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
-
-  return true;
+  for (const auto &line : children) { verifyRequiredField(*line); }
 }
 
 void CadastroTransportadora::savingProcedures() {
@@ -196,7 +192,7 @@ void CadastroTransportadora::on_checkBoxMostrarInativos_clicked(const bool check
 
 bool CadastroTransportadora::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
-    qApp->enqueueError("CEP inválido!", this);
+    throw RuntimeError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }

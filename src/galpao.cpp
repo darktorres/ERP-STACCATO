@@ -97,7 +97,7 @@ void Galpao::carregarPallets() {
 
   if (not query.exec("SELECT g.*, v.id, v.tipo, CAST(v.caixas AS DECIMAL(15, 2)) AS caixas, REPLACE(v.descricao, '-', '') AS descricao, v.idVendaProduto2 FROM galpao g LEFT JOIN view_galpao v ON "
                      "g.bloco = v.bloco ORDER BY CAST(g.bloco AS UNSIGNED) ASC, id ASC")) {
-    return qApp->enqueueError("Erro buscando dados do galpão: " + query.lastError().text(), this);
+    throw RuntimeError("Erro buscando dados do galpão: " + query.lastError().text(), this);
   }
 
   QHash<QString, QString> blocos;
@@ -163,7 +163,7 @@ void Galpao::salvarPallets() {
       QSqlQuery query;
 
       if (not query.exec("UPDATE galpao SET posicao = '" + pos + "' WHERE bloco = '" + pallet->getLabel() + "'")) {
-        return qApp->enqueueError("Erro salvando dados do galpão: " + query.lastError().text(), this);
+        throw RuntimeError("Erro salvando dados do galpão: " + query.lastError().text(), this);
       }
     }
   }

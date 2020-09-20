@@ -99,7 +99,7 @@ void WidgetCompraFaturar::faturarRepresentacao(const QDate &dataReal, const QStr
 void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma compra!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma compra!", this); }
 
   QStringList idsCompra;
   QStringList fornecedores;
@@ -113,7 +113,7 @@ void WidgetCompraFaturar::on_pushButtonMarcarFaturado_clicked() {
 
   const int size = fornecedores.size();
 
-  if (fornecedores.removeDuplicates() != size - 1) { return qApp->enqueueError("Fornecedores diferentes!", this); }
+  if (fornecedores.removeDuplicates() != size - 1) { throw RuntimeError("Fornecedores diferentes!", this); }
 
   InputDialogProduto inputDlg(InputDialogProduto::Tipo::Faturamento, this);
   inputDlg.setFilter(idsCompra);
@@ -153,9 +153,9 @@ void WidgetCompraFaturar::montaFiltro() {
 void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
+  if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
   auto cancelaProduto = new CancelaProduto(CancelaProduto::Tipo::CompraFaturamento, this);
   cancelaProduto->setAttribute(Qt::WA_DeleteOnClose);
@@ -165,7 +165,7 @@ void WidgetCompraFaturar::on_pushButtonCancelarCompra_clicked() {
 void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::Faturamento, this);
   if (input.exec() != InputDialog::Accepted) { return; }
@@ -184,12 +184,12 @@ void WidgetCompraFaturar::on_pushButtonReagendar_clicked() {
     queryCompra.bindValue(":dataPrevFat", dataPrevista);
     queryCompra.bindValue(":idCompra", idCompra);
 
-    if (not queryCompra.exec()) { return qApp->enqueueException("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
+    if (not queryCompra.exec()) { throw RuntimeException("Erro query pedido_fornecedor: " + queryCompra.lastError().text(), this); }
 
     queryVenda.bindValue(":dataPrevFat", dataPrevista);
     queryVenda.bindValue(":idCompra", idCompra);
 
-    if (not queryVenda.exec()) { return qApp->enqueueException("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro query venda_has_produto2: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

@@ -33,7 +33,7 @@ UserConfig::UserConfig(QWidget *parent) : QDialog(parent), ui(new Ui::UserConfig
   ui->lineEditEntregasXmlFolder->setText(UserSession::getSetting("User/EntregasXmlFolder").toString());
   ui->lineEditEntregasPdfFolder->setText(UserSession::getSetting("User/EntregasPdfFolder").toString());
 
-  if (UserSession::tipoUsuario() == "VENDEDOR" or UserSession::tipoUsuario() == "VENDEDOR ESPECIAL") {
+  if (UserSession::tipoUsuario == "VENDEDOR" or UserSession::tipoUsuario == "VENDEDOR ESPECIAL") {
     ui->groupBoxAcbr->hide();
     ui->groupBoxEmail->hide();
     ui->labelCompras->hide();
@@ -96,7 +96,7 @@ void UserConfig::on_pushButtonSalvar_clicked() {
 
 void UserConfig::on_pushButtonAlterarDados_clicked() {
   auto *usuario = new CadastroUsuario(this);
-  usuario->viewRegisterById(UserSession::idUsuario());
+  usuario->viewRegisterById(UserSession::idUsuario);
   usuario->modificarUsuario();
 
   usuario->show();
@@ -136,7 +136,7 @@ void UserConfig::on_pushButtonEntregasPdfFolder_clicked() {
 
 void UserConfig::on_pushButtonEmailTeste_clicked() {
   if (ui->lineEditServidorSMTP->text().isEmpty() or ui->lineEditPortaSMTP->text().isEmpty() or ui->lineEditEmail->text().isEmpty() or ui->lineEditEmailSenha->text().isEmpty()) {
-    return qApp->enqueueError("Preencha os dados do email!", this);
+    throw RuntimeError("Preencha os dados do email!", this);
   }
 
   UserSession::setSetting("User/servidorSMTP", ui->lineEditServidorSMTP->text());

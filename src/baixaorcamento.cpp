@@ -27,7 +27,7 @@ void BaixaOrcamento::setupTables(const QString &idOrcamento) {
 void BaixaOrcamento::on_pushButtonCancelar_clicked() { close(); }
 
 void BaixaOrcamento::on_pushButtonSalvar_clicked() {
-  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { return qApp->enqueueError("Deve preencher a observação!", this); }
+  if (ui->plainTextEditObservacao->toPlainText().isEmpty()) { throw RuntimeError("Deve preencher a observação!", this); }
 
   const auto children = ui->groupBox->findChildren<QRadioButton *>();
   QString motivo;
@@ -36,7 +36,7 @@ void BaixaOrcamento::on_pushButtonSalvar_clicked() {
     if (child->isChecked()) { motivo = child->text(); }
   }
 
-  if (motivo.isEmpty()) { return qApp->enqueueError("Deve escolher um motivo!", this); }
+  if (motivo.isEmpty()) { throw RuntimeError("Deve escolher um motivo!", this); }
 
   modelOrcamento.setData(0, "status", "PERDIDO");
   modelOrcamento.setData(0, "motivoCancelamento", motivo);

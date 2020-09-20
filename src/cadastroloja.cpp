@@ -24,7 +24,7 @@ CadastroLoja::CadastroLoja(QWidget *parent) : RegisterAddressDialog("loja", "idL
   sdLoja = SearchDialog::loja(this);
   connect(sdLoja, &SearchDialog::itemSelected, this, &CadastroLoja::viewRegisterById);
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
     ui->pushButtonRemover->setDisabled(true);
     ui->pushButtonRemoverEnd->setDisabled(true);
   }
@@ -94,14 +94,10 @@ void CadastroLoja::clearFields() {
   setupUi();
 }
 
-bool CadastroLoja::verifyFields() {
+void CadastroLoja::verifyFields() {
   const auto children = ui->groupBoxCadastro->findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
-
-  return true;
+  for (const auto &line : children) { verifyRequiredField(*line); }
 }
 
 void CadastroLoja::savingProcedures() {
@@ -218,7 +214,7 @@ void CadastroLoja::on_checkBoxMostrarInativos_clicked(const bool checked) {
 
 bool CadastroLoja::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
-    qApp->enqueueError("CEP inválido!", this);
+    throw RuntimeError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }
@@ -380,7 +376,7 @@ bool CadastroLoja::newRegister() {
 
 bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
   if (ui->lineEditBanco->text().isEmpty()) {
-    qApp->enqueueError("Banco inválido!", this);
+    throw RuntimeError("Banco inválido!", this);
     ui->lineEditBanco->setFocus();
     return false;
   }

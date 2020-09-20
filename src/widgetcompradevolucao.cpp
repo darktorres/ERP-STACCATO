@@ -107,7 +107,7 @@ void WidgetCompraDevolucao::on_pushButtonDevolucaoFornecedor_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 
@@ -188,7 +188,7 @@ void WidgetCompraDevolucao::retornarFornecedor(const QModelIndexList &list) {
 void WidgetCompraDevolucao::on_pushButtonRetornarEstoque_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
 
   const QString idVenda = modelVendaProduto.data(list.first().row(), "idVenda").toString();
 

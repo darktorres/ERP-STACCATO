@@ -944,6 +944,9 @@ color: rgb(0, 0, 0);</string>
               <property name="text">
                <string>Adicionar End.</string>
               </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -951,12 +954,18 @@ color: rgb(0, 0, 0);</string>
               <property name="text">
                <string>Atualizar End.</string>
               </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButtonRemoverEnd">
               <property name="text">
                <string>Remover End.</string>
+              </property>
+              <property name="autoDefault">
+               <bool>false</bool>
               </property>
              </widget>
             </item>

@@ -56,12 +56,12 @@ void NFeDistribuicao::updateTables() {
 void NFeDistribuicao::buscarNSU() {
   const QString idLoja = UserSession::getSetting("User/lojaACBr").toString();
 
-  if (idLoja == "0") { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
+  if (idLoja == "0") { throw RuntimeError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
   QSqlQuery queryLoja;
 
   if (not queryLoja.exec("SELECT cnpj, ultimoNSU, maximoNSU FROM loja WHERE idLoja = " + idLoja) or not queryLoja.first()) {
-    return qApp->enqueueException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this);
+    throw RuntimeException("Erro buscando CNPJ da loja: " + queryLoja.lastError().text(), this);
   }
 
   ui->spinBoxMaxNSU->setValue(queryLoja.value("maximoNSU").toInt());
@@ -152,7 +152,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   const QString idLoja = UserSession::getSetting("User/lojaACBr").toString();
 
-  if (idLoja == "0") { return qApp->enqueueError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
+  if (idLoja == "0") { throw RuntimeError("Não está configurado qual loja usar no ACBr! Escolher em Configurações!", this); }
 
   //----------------------------------------------------------
 
@@ -166,14 +166,14 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   //  qDebug() << "size: " << resposta.length();
 
-  //  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
+  //  if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
 
   //----------------------------------------------------------
 
   qDebug() << "pesquisar nsu: " << ui->spinBoxUltNSU->value();
   const QString resposta = acbrRemoto.enviarComando("NFe.DistribuicaoDFePorUltNSU(\"35\", \"" + ui->lineEditCNPJ->text() + "\", " + QString::number(ui->spinBoxUltNSU->value()) + ")");
 
-  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(resposta, this); }
+  if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
 
   //----------------------------------------------------------
 
@@ -196,7 +196,7 @@ void NFeDistribuicao::on_pushButtonPesquisar_clicked() {
 
   QSqlQuery queryMaintenance;
 
-  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { return qApp->enqueueException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
+  if (not queryMaintenance.exec("UPDATE maintenance SET lastDistribuicao = NOW()")) { throw RuntimeException("Erro guardando lastDistribuicao:" + queryMaintenance.lastError().text(), this); }
 
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
@@ -444,7 +444,7 @@ void NFeDistribuicao::pesquisarNFes(const QString &resposta, const QString &idLo
 void NFeDistribuicao::on_pushButtonCiencia_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -462,7 +462,7 @@ void NFeDistribuicao::on_pushButtonCiencia_clicked() {
 void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -480,7 +480,7 @@ void NFeDistribuicao::on_pushButtonConfirmacao_clicked() {
 void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -498,7 +498,7 @@ void NFeDistribuicao::on_pushButtonDesconhecimento_clicked() {
 void NFeDistribuicao::on_pushButtonNaoRealizada_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (auto &index : selection) {
     const QString statusDistribuicao = model.data(index.row(), "statusDistribuicao").toString();
@@ -551,7 +551,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
   if (operacao == "NÃO REALIZADA") {
     justificativa = QInputDialog::getText(this, "Justificativa", "Entre 15 e 255 caracteres: ");
-    if (justificativa.size() < 15 or justificativa.size() > 255) { return qApp->enqueueError(false, "Justificativa fora do tamanho!", this); }
+    if (justificativa.size() < 15 or justificativa.size() > 255) { throw RuntimeError("Justificativa fora do tamanho!", this); }
   }
 
   QString comando;
@@ -587,7 +587,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 
   const QString resposta = acbrRemoto.enviarComando(comando);
 
-  if (resposta.contains("ERRO: ")) { return qApp->enqueueException(false, resposta, this); }
+  if (resposta.contains("ERRO: ")) { throw RuntimeException(resposta, this); }
 
   //----------------------------------------------------------
 
@@ -639,7 +639,7 @@ bool NFeDistribuicao::enviarEvento(const QString &operacao, const QVector<int> &
 void NFeDistribuicao::on_table_activated(const QModelIndex &index) {
   const QByteArray xml = model.data(index.row(), "xml").toByteArray();
 
-  if (xml.isEmpty()) { return qApp->enqueueException("XML vazio!", this); }
+  if (xml.isEmpty()) { throw RuntimeException("XML vazio!", this); }
 
   auto *viewer = new XML_Viewer(xml, this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);

@@ -148,7 +148,7 @@ void PalletItem::dropEvent(QGraphicsSceneDragDropEvent *event) {
 
   if (not query.exec("UPDATE " + table + " SET bloco = '" + label + "' WHERE " + idName + " = " + id)) {
     event->ignore();
-    return qApp->enqueueError("Erro movendo estoque: " + query.lastError().text());
+    throw RuntimeError("Erro movendo estoque: " + query.lastError().text());
   }
 
   EstoqueItem *item = dynamic_cast<EstoqueItem *>(event->mimeData()->parent());

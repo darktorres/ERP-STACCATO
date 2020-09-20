@@ -155,7 +155,7 @@ void CadastroPagamento::on_pushButtonAdicionarPagamento_clicked() {
   // TODO: nao deixar cadastrar pagamento com nome já existente pois dá erro depois no montarFluxo()
 
   if (ui->lineEditPagamento->text().isEmpty()) {
-    qApp->enqueueError("Digite um nome para o pagamento!", this);
+    throw RuntimeError("Digite um nome para o pagamento!", this);
     ui->lineEditPagamento->setFocus();
     return;
   }
@@ -257,7 +257,7 @@ void CadastroPagamento::atualizarPagamento() {
 void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
   const auto list = ui->tablePagamentos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   //--------------------------------------
 
@@ -276,7 +276,7 @@ void CadastroPagamento::on_pushButtonRemoverPagamento_clicked() {
 void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
   const auto list = ui->tableAssocia1->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -287,7 +287,7 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia1.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", ui->itemBoxLoja->getId());
 
-    if (not query.exec()) { qApp->enqueueException("Erro cadastrando associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro cadastrando associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------
@@ -300,7 +300,7 @@ void CadastroPagamento::on_pushButtonAdicionaAssociacao_clicked() {
 void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
   const auto list = ui->tableAssocia2->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -311,7 +311,7 @@ void CadastroPagamento::on_pushButtonRemoveAssociacao_clicked() {
     query.bindValue(":idPagamento", modelAssocia2.data(index.row(), "idPagamento"));
     query.bindValue(":idLoja", modelAssocia2.data(index.row(), "idLoja"));
 
-    if (not query.exec()) { qApp->enqueueException("Erro removendo associacao: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro removendo associacao: " + query.lastError().text(), this); }
   }
 
   // -------------------------------------------------------------------------

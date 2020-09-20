@@ -115,12 +115,12 @@ void CadastroStaccatoOff::on_radioButtonEstoque_toggled(bool checked) {
 void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
   auto list = ui->tableView->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxDesconto->value())) { return qApp->enqueueError("Selecione um desconto!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxDesconto->value())) { throw RuntimeError("Selecione um desconto!", this); }
 
   for (auto index : list) {
-    if (model.data(index.row(), "promocao").toInt() == 2) { return qApp->enqueueError("Linha com promoção selecionada!", this); }
+    if (model.data(index.row(), "promocao").toInt() == 2) { throw RuntimeError("Linha com promoção selecionada!", this); }
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja cadastrar promoção?", QMessageBox::Yes | QMessageBox::Cancel, this);
@@ -141,7 +141,7 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
     if (not query.exec("UPDATE produto SET oldPrecoVenda = precoVenda, precoVenda = precoVenda * " + QString::number(1 - (ui->doubleSpinBoxDesconto->value() / 100)) +
                        ", promocao = 2, descricao = CONCAT(descricao, ' (PROMOÇÃO STACCATO OFF " + QString::number(ui->doubleSpinBoxDesconto->value()) + "%)'), validade = '" +
                        ui->dateEditValidade->date().toString("yyyy-MM-dd") + "' WHERE idProduto = " + idProduto)) {
-      return qApp->enqueueError("Erro alterando estoque: " + query.lastError().text(), this);
+      throw RuntimeError("Erro alterando estoque: " + query.lastError().text(), this);
     }
   }
 
@@ -152,10 +152,10 @@ void CadastroStaccatoOff::on_pushButtonCadastrar_clicked() {
 void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
   auto list = ui->tableView->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (auto index : list) {
-    if (model.data(index.row(), "promocao").toInt() != 2) { return qApp->enqueueError("Linha sem promoção selecionada!", this); }
+    if (model.data(index.row(), "promocao").toInt() != 2) { throw RuntimeError("Linha sem promoção selecionada!", this); }
   }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja descadastrar promoção?", QMessageBox::Yes | QMessageBox::Cancel, this);
@@ -176,7 +176,7 @@ void CadastroStaccatoOff::on_pushButtonDescadastrar_clicked() {
     if (not query.exec(
             "UPDATE produto SET precoVenda = oldPrecoVenda, oldPrecoVenda = NULL, promocao = 0, descricao = LEFT(descricao, CHAR_LENGTH(descricao) - 28), validade = NULL WHERE idProduto = " +
             idProduto)) {
-      return qApp->enqueueError("Erro alterando estoque: " + query.lastError().text(), this);
+      throw RuntimeError("Erro alterando estoque: " + query.lastError().text(), this);
     }
   }
 

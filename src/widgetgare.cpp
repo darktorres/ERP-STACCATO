@@ -81,7 +81,7 @@ void WidgetGare::montaFiltro() {
 void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
   auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QStringList ids;
 
@@ -91,7 +91,7 @@ void WidgetGare::on_pushButtonDarBaixaItau_clicked() {
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET valorReal = valor, status = 'PAGO GARE', idConta = 33, dataRealizado = '" + ui->dateEdit->date().toString("yyyy-MM-dd") +
                      "' WHERE idNFe IN (" + ids.join(", ") + ")")) {
-    return qApp->enqueueException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
+    throw RuntimeException("Erro dando baixa nas GAREs: " + query.lastError().text(), this);
   }
 
   model.select();
@@ -127,10 +127,10 @@ void WidgetGare::setupTables() {
 void WidgetGare::on_pushButtonRemessaItau_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (const auto index : selection) {
-    if (model.data(index.row(), "status").toString() == "PAGO GARE") { return qApp->enqueueError("GARE já paga!", this); }
+    if (model.data(index.row(), "status").toString() == "PAGO GARE") { throw RuntimeError("GARE já paga!", this); }
   }
 
   CNAB cnab(this);
@@ -144,7 +144,7 @@ void WidgetGare::on_pushButtonRemessaItau_clicked() {
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'GERADO GARE', idConta = 33, dataRealizado = '" + qApp->serverDate().toString("yyyy-MM-dd") + "', idCnab = " + idCnab +
                      " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
+    throw RuntimeException("Erro alterando GARE: " + query.lastError().text(), this);
   }
 
   updateTables();
@@ -190,7 +190,7 @@ void WidgetGare::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", model.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);

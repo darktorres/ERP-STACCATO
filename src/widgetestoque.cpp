@@ -109,7 +109,7 @@ void WidgetEstoque::updateTables() {
     ui->dateEditMes->setDate(qApp->serverDate());
     setConnections();
 
-    const QString tipoUsuario = UserSession::tipoUsuario();
+    const QString tipoUsuario = UserSession::tipoUsuario;
 
     if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") {
       ui->groupBoxFiltros->hide();
@@ -156,7 +156,7 @@ void WidgetEstoque::montaFiltro() {
       "ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
       getMatch() + " GROUP BY e.idEstoque HAVING " + having);
 
-  if (model.lastError().isValid()) { qApp->enqueueException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   setHeaderData();
 }
@@ -173,7 +173,7 @@ void WidgetEstoque::montaFiltroContabil() {
       "pf.idPedido2 = ehc2.idPedido2 LEFT JOIN nfe n ON e.idNFe = n.idNFe LEFT JOIN produto p ON e.idProduto = p.idProduto WHERE e.status NOT IN ('CANCELADO', 'QUEBRADO')" +
       getMatch() + " GROUP BY e.idEstoque HAVING contabil > 0");
 
-  if (model.lastError().isValid()) { qApp->enqueueException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela estoque: " + model.lastError().text(), this); }
 
   setHeaderData();
 }

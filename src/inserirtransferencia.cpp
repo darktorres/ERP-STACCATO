@@ -86,13 +86,13 @@ void InserirTransferencia::cadastrar() {
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
 
 bool InserirTransferencia::verifyFields() {
-  if (ui->itemBoxDe->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'De' não preenchido!", this); }
+  if (ui->itemBoxDe->text().isEmpty()) { throw RuntimeError("Conta 'De' não preenchido!", this); }
 
-  if (ui->itemBoxPara->text().isEmpty()) { return qApp->enqueueError(false, "Conta 'Para' não preenchido!", this); }
+  if (ui->itemBoxPara->text().isEmpty()) { throw RuntimeError("Conta 'Para' não preenchido!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { return qApp->enqueueError(false, "Valor não preenchido!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { throw RuntimeError("Valor não preenchido!", this); }
 
-  if (ui->lineEditObservacao->text().isEmpty()) { return qApp->enqueueError(false, "Preencha a observação!", this); }
+  if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Preencha a observação!", this); }
 
   return true;
 }

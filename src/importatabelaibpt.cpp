@@ -17,19 +17,19 @@ void ImportaTabelaIBPT::importar() {
 
   QFileInfo fileInfo(filePath);
 
-  if (not fileInfo.completeBaseName().contains("SP")) { return qApp->enqueueError("Tabela escolhida não é de SP!", this); }
+  if (not fileInfo.completeBaseName().contains("SP")) { throw RuntimeError("Tabela escolhida não é de SP!", this); }
 
   const QString versao = fileInfo.completeBaseName().right(6);
 
   QSqlQuery queryVersao;
 
-  if (not queryVersao.exec("SELECT versao FROM ibpt WHERE versao = '" + versao + "' LIMIT 1")) { return qApp->enqueueException("Erro verificando versão: " + queryVersao.lastError().text(), this); }
+  if (not queryVersao.exec("SELECT versao FROM ibpt WHERE versao = '" + versao + "' LIMIT 1")) { throw RuntimeException("Erro verificando versão: " + queryVersao.lastError().text(), this); }
 
   if (queryVersao.size() == 1) { return qApp->enqueueInformation("Tabela já cadastrada!", this); }
 
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro abrindo arquivo para leitura: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro abrindo arquivo para leitura: " + file.errorString(), this); }
 
   QProgressDialog progressDialog;
   progressDialog.reset();
@@ -47,7 +47,7 @@ void ImportaTabelaIBPT::importar() {
   const QString line1 = stream.readLine();
 
   if (line1 != "codigo;ex;tipo;descricao;nacionalfederal;importadosfederal;estadual;municipal;vigenciainicio;vigenciafim;chave;versao;fonte") {
-    return qApp->enqueueError("Arquivo incompatível!", this);
+    throw RuntimeError("Arquivo incompatível!", this);
   }
 
   const auto size = file.size();

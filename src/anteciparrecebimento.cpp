@@ -30,7 +30,7 @@ AnteciparRecebimento::AnteciparRecebimento(QWidget *parent) : QDialog(parent), u
 
   QSqlQuery query;
 
-  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { qApp->enqueueException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
+  if (not query.exec("SELECT DISTINCT pagamento AS tipo FROM view_pagamento_loja")) { throw RuntimeException("Erro comunicando com banco de dados: " + query.lastError().text(), this); }
 
   while (query.next()) { ui->comboBox->addItem(query.value("tipo").toString()); }
 
@@ -260,7 +260,7 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   if (not verifyFields(list)) { return; }
 
@@ -277,9 +277,9 @@ bool AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
   for (const auto &index : list) {
     const int row = index.row();
 
-    if (modelContaReceber.data(row, "centroCusto").isNull()) { return qApp->enqueueError(false, "Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
+    if (modelContaReceber.data(row, "centroCusto").isNull()) { throw RuntimeError("Item sem Centro de Custo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
 
-    if (modelContaReceber.data(row, "grupo").isNull()) { return qApp->enqueueError(false, "Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
+    if (modelContaReceber.data(row, "grupo").isNull()) { throw RuntimeError("Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
   }
 
   return true;

@@ -444,7 +444,7 @@ void Devolucao::criarContas() {
   modelPagamentos.setData(newRow, "contraParte", modelCliente.data(0, "nome_razao"));
   modelPagamentos.setData(newRow, "dataEmissao", qApp->serverDate());
   modelPagamentos.setData(newRow, "idVenda", idDevolucao);
-  modelPagamentos.setData(newRow, "idLoja", UserSession::idLoja());
+  modelPagamentos.setData(newRow, "idLoja", UserSession::idLoja);
   modelPagamentos.setData(newRow, "valor", ui->doubleSpinBoxCredito->value() * -1);
   modelPagamentos.setData(newRow, "tipo", "1. Conta Cliente");
   modelPagamentos.setData(newRow, "parcela", 1);
@@ -509,9 +509,9 @@ void Devolucao::on_pushButtonDevolverItem_clicked() {
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { return qApp->enqueueError("Não selecionou quantidade!", this); }
+  if (qFuzzyIsNull(ui->doubleSpinBoxQuant->value())) { throw RuntimeError("Não selecionou quantidade!", this); }
 
   // -------------------------------------------------------------------------
 

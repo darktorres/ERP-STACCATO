@@ -62,11 +62,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   const QString hostnameText = qApp->getMapLojas().key(hostname);
 
-  setWindowTitle(windowTitle() + " - " + UserSession::nome() + " - " + UserSession::tipoUsuario() + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
+  setWindowTitle(windowTitle() + " - " + UserSession::nome + " - " + UserSession::tipoUsuario + " - " + (hostnameText.isEmpty() ? hostname : hostnameText));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
+  if (UserSession::tipoUsuario != "ADMINISTRADOR") { ui->actionCadastrarUsuario->setDisabled(true); }
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") {
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") {
     ui->actionGerenciar_Lojas->setDisabled(true);
     ui->actionGerenciar_pagamentos->setDisabled(true);
     ui->actionGerenciar_Transportadoras->setDisabled(true);
@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   QSqlQuery query;
   query.prepare("SELECT * FROM usuario_has_permissao WHERE idUsuario = :idUsuario");
-  query.bindValue(":idUsuario", UserSession::idUsuario());
+  query.bindValue(":idUsuario", UserSession::idUsuario);
 
   if (query.exec() and query.first()) {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabOrcamentos), query.value("view_tab_orcamento").toBool());
@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRelatorios), query.value("view_tab_relatorio").toBool());
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabRh), query.value("view_tab_rh").toBool());
   } else {
-    qApp->enqueueException("Erro lendo permissões: " + query.lastError().text(), this);
+    throw RuntimeException("Erro lendo permissões: " + query.lastError().text(), this);
   }
 
   // -------------------------------------------------------------------------
@@ -118,9 +118,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), false);
 
-  const QString nomeUsuario = UserSession::nome();
+  const QString nomeUsuario = UserSession::nome;
 
-  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or nomeUsuario == "RODRIGO TORRES" or UserSession::tipoUsuario() == "GERENTE LOJA") {
+  if (nomeUsuario == "ADMINISTRADOR" or nomeUsuario == "EDUARDO OLIVEIRA" or nomeUsuario == "GISELY OLIVEIRA" or nomeUsuario == "RODRIGO TORRES" or UserSession::tipoUsuario == "GERENTE LOJA") {
     ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabGraficos), true);
   }
 

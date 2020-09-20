@@ -75,6 +75,6 @@ private:
   auto unsetConnections() -> void;
   auto updateMode() -> void final;
   auto verificaDisponibilidadeEstoque() -> void;
-  auto verifyFields() -> bool final;
+  auto verifyFields() -> void final;
   auto viewRegister() -> bool final;
 };

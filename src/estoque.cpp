@@ -24,7 +24,7 @@ Estoque::Estoque(const QString &idEstoque, const bool showWindow, QWidget *paren
 
   viewRegisterById(showWindow);
 
-  const QString tipoUsuario = UserSession::tipoUsuario();
+  const QString tipoUsuario = UserSession::tipoUsuario;
 
   if (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") { ui->pushButtonExibirNfe->hide(); }
 }
@@ -145,7 +145,7 @@ void Estoque::buscarRestante() {
 }
 
 bool Estoque::viewRegisterById(const bool showWindow) {
-  if (idEstoque.isEmpty()) { return qApp->enqueueException(false, "Estoque não encontrado!", this); }
+  if (idEstoque.isEmpty()) { throw RuntimeException("Estoque não encontrado!", this); }
 
   modelEstoque.setFilter("idEstoque = " + idEstoque);
 
@@ -173,7 +173,7 @@ void Estoque::exibirNota() {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelEstoque.data(0, "idNFe"));
 
-  if (not query.exec()) { return qApp->enqueueException("Erro buscando NFe: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro buscando NFe: " + query.lastError().text(), this); }
 
   if (query.size() == 0) { return qApp->enqueueWarning("Não encontrou NFe associada!", this); }
 

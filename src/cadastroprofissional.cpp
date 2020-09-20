@@ -49,7 +49,7 @@ CadastroProfissional::CadastroProfissional(QWidget *parent) : RegisterAddressDia
   ui->itemBoxVendedor->setSearchDialog(SearchDialog::vendedor(this));
   ui->itemBoxLoja->setSearchDialog(SearchDialog::loja(this));
 
-  if (UserSession::tipoUsuario() != "ADMINISTRADOR" and UserSession::tipoUsuario() != "ADMINISTRATIVO") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false); }
+  if (UserSession::tipoUsuario != "ADMINISTRADOR" and UserSession::tipoUsuario != "ADMINISTRATIVO") { ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->tabBancario), false); }
 }
 
 CadastroProfissional::~CadastroProfissional() { delete ui; }
@@ -170,7 +170,7 @@ bool CadastroProfissional::viewRegister() {
 
   const bool existeVinculo = verificaVinculo();
 
-  const bool administrativo = UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO" or UserSession::tipoUsuario() == "DIRETOR";
+  const bool administrativo = UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO" or UserSession::tipoUsuario == "DIRETOR";
 
   const bool bloquear = (existeVinculo and not administrativo);
 
@@ -220,18 +220,14 @@ void CadastroProfissional::cadastrar() {
   }
 }
 
-bool CadastroProfissional::verifyFields() {
+void CadastroProfissional::verifyFields() {
   const auto children = ui->frame->findChildren<QLineEdit *>();
 
-  for (const auto &line : children) {
-    if (not verifyRequiredField(*line)) { return false; }
-  }
+  for (const auto &line : children) { verifyRequiredField(*line); }
 
-  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CPF inválido!", this); }
+  if (ui->radioButtonPF->isChecked() and ui->lineEditCPF->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CPF inválido!"); }
 
-  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { return qApp->enqueueError(false, "CNPJ inválido!", this); }
-
-  return true;
+  if (ui->radioButtonPJ->isChecked() and ui->lineEditCNPJ->styleSheet().contains("color: rgb(255, 0, 0)")) { throw RuntimeError("CNPJ inválido!"); }
 }
 
 void CadastroProfissional::savingProcedures() {
@@ -328,7 +324,7 @@ void CadastroProfissional::on_lineEditCNPJ_textEdited(const QString &text) {
 
 bool CadastroProfissional::cadastrarEndereco(const Tipo tipoEndereco) {
   if (not ui->lineEditCEP->isValid()) {
-    qApp->enqueueError("CEP inválido!", this);
+    throw RuntimeError("CEP inválido!", this);
     ui->lineEditCEP->setFocus();
     return false;
   }

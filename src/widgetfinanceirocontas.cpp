@@ -23,12 +23,12 @@ WidgetFinanceiroContas::WidgetFinanceiroContas(QWidget *parent) : QWidget(parent
 WidgetFinanceiroContas::~WidgetFinanceiroContas() { delete ui; }
 
 void WidgetFinanceiroContas::setupTables() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   if (tipo == Tipo::Receber) { modelVencidos.setQuery(Sql::view_a_receber_vencidos()); }
   if (tipo == Tipo::Pagar) { modelVencidos.setQuery(Sql::view_a_pagar_vencidos()); }
 
-  if (modelVencidos.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
+  if (modelVencidos.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   ui->tableVencidos->setModel(&modelVencidos);
 
@@ -39,7 +39,7 @@ void WidgetFinanceiroContas::setupTables() {
   if (tipo == Tipo::Receber) { modelVencer.setQuery(Sql::view_a_receber_vencer()); }
   if (tipo == Tipo::Pagar) { modelVencer.setQuery(Sql::view_a_pagar_vencer()); }
 
-  if (modelVencer.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
+  if (modelVencer.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 
   ui->tableVencer->setModel(&modelVencer);
 
@@ -96,25 +96,25 @@ void WidgetFinanceiroContas::updateTables() {
 
   model.setQuery(model.query().executedQuery());
 
-  if (model.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela resumo: " + model.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
   modelVencidos.setQuery(modelVencidos.query().executedQuery());
 
-  if (modelVencidos.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
+  if (modelVencidos.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencidos: " + modelVencidos.lastError().text(), this); }
 
   // -------------------------------------------------------------------------
 
   modelVencer.setQuery(modelVencer.query().executedQuery());
 
-  if (modelVencer.lastError().isValid()) { return qApp->enqueueException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
+  if (modelVencer.lastError().isValid()) { throw RuntimeException("Erro atualizando tabela vencer: " + modelVencer.lastError().text(), this); }
 }
 
 void WidgetFinanceiroContas::resetTables() { modelIsSet = false; }
 
 void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   if (tipo == Tipo::Receber) {
     auto *contas = new Contas(Contas::Tipo::Receber, this);
@@ -130,7 +130,7 @@ void WidgetFinanceiroContas::on_table_activated(const QModelIndex &index) {
 }
 
 void WidgetFinanceiroContas::montaFiltro() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   if (tipo == Tipo::Pagar) {
     QStringList filtros;
@@ -249,7 +249,7 @@ void WidgetFinanceiroContas::montaFiltro() {
                    filtros.join(" AND ") + " GROUP BY `cr`.`idPagamento` ORDER BY `cr`.`dataPagamento`, `cr`.`idVenda`, `cr`.`tipo`, `cr`.`parcela` DESC");
   }
 
-  if (model.lastError().isValid()) { return qApp->enqueueException("Erro lendo tabela: " + model.lastError().text(), this); }
+  if (model.lastError().isValid()) { throw RuntimeException("Erro lendo tabela: " + model.lastError().text(), this); }
 
   model.setHeaderData("dataEmissao", "Data Emissão");
 
@@ -285,7 +285,7 @@ void WidgetFinanceiroContas::montaFiltro() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonInserirLancamento_clicked() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   auto *lancamento = new InserirLancamento((tipo == Tipo::Receber) ? InserirLancamento::Tipo::Receber : InserirLancamento::Tipo::Pagar, this);
   lancamento->setAttribute(Qt::WA_DeleteOnClose);
@@ -303,7 +303,7 @@ void WidgetFinanceiroContas::on_doubleSpinBoxDe_valueChanged(const double value)
 void WidgetFinanceiroContas::on_dateEditDe_dateChanged(const QDate &date) { ui->dateEditAte->setDate(date); }
 
 void WidgetFinanceiroContas::setTipo(const Tipo &novoTipo) {
-  if (novoTipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (novoTipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   tipo = novoTipo;
 
@@ -357,14 +357,14 @@ void WidgetFinanceiroContas::on_pushButtonInserirTransferencia_clicked() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   // TODO: se o grupo for 'Transferencia' procurar a outra metade e cancelar tambem
   // usar 'grupo', 'data', 'valor'
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja excluir?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Excluir");
@@ -375,7 +375,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET desativado = TRUE WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { return qApp->enqueueException("Erro excluindo lançamento: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro excluindo lançamento: " + query.lastError().text(), this); }
 
     montaFiltro();
 
@@ -384,7 +384,7 @@ void WidgetFinanceiroContas::on_pushButtonExcluirLancamento_clicked() {
 }
 
 void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
-  if (tipo == Tipo::Nulo) { return qApp->enqueueException("Erro Tipo::Nulo!", this); }
+  if (tipo == Tipo::Nulo) { throw RuntimeException("Erro Tipo::Nulo!", this); }
 
   // TODO: bloquear se o pagamento já estiver PENDENTE
 
@@ -392,17 +392,17 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   QSqlQuery queryPagamento;
   queryPagamento.prepare("SELECT dataPagamento, grupo FROM " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " WHERE idPagamento = :idPagamento");
   queryPagamento.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-  if (not queryPagamento.exec() or not queryPagamento.first()) { return qApp->enqueueException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
+  if (not queryPagamento.exec() or not queryPagamento.first()) { throw RuntimeException("Erro buscando pagamento: " + queryPagamento.lastError().text(), this); }
 
-  if (queryPagamento.value("dataPagamento").toDate().daysTo(qApp->serverDate()) > 5) { return qApp->enqueueError("No máximo 5 dias para reverter!", this); }
+  if (queryPagamento.value("dataPagamento").toDate().daysTo(qApp->serverDate()) > 5) { throw RuntimeError("No máximo 5 dias para reverter!", this); }
 
-  if (queryPagamento.value("grupo").toString() == "Transferência") { return qApp->enqueueError("Não pode reverter transferência!", this); }
+  if (queryPagamento.value("grupo").toString() == "Transferência") { throw RuntimeError("Não pode reverter transferência!", this); }
 
   QMessageBox msgBox(QMessageBox::Question, "Atenção!", "Tem certeza que deseja reverter?", QMessageBox::Yes | QMessageBox::No, this);
   msgBox.setButtonText(QMessageBox::Yes, "Reverter");
@@ -413,7 +413,7 @@ void WidgetFinanceiroContas::on_pushButtonReverterPagamento_clicked() {
     query.prepare("UPDATE " + QString((tipo == Tipo::Pagar) ? "conta_a_pagar_has_pagamento" : "conta_a_receber_has_pagamento") + " SET status = 'PENDENTE' WHERE idPagamento = :idPagamento");
     query.bindValue(":idPagamento", model.data(list.first().row(), "idPagamento"));
 
-    if (not query.exec()) { return qApp->enqueueException("Erro revertendo lançamento: " + query.lastError().text(), this); }
+    if (not query.exec()) { throw RuntimeException("Erro revertendo lançamento: " + query.lastError().text(), this); }
 
     updateTables();
 
@@ -443,7 +443,7 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
 
   QXlsx::Document xlsx(file, this);
 
-  if (not xlsx.selectSheet("Planilha1")) { return qApp->enqueueException("Não encontrou 'Planilha1' na tabela!", this); }
+  if (not xlsx.selectSheet("Planilha1")) { throw RuntimeException("Não encontrou 'Planilha1' na tabela!", this); }
 
   verificaCabecalho(xlsx);
 
@@ -495,12 +495,12 @@ void WidgetFinanceiroContas::on_pushButtonImportarFolhaPag_clicked() {
 void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   const auto selection = ui->table->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   for (const auto index : selection) {
-    if (model.data(index.row(), "status").toString() == "PAGO") { return qApp->enqueueError("Linha selecionada já paga!", this); }
-    if (model.data(index.row(), "ContraParte").toString() != "PORTINARI") { return qApp->enqueueError("Linha selecionada não é da PORTINARI!", this); }
-    if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { return qApp->enqueueError("Pagamento selecionado não é transferência ITAÚ!", this); }
+    if (model.data(index.row(), "status").toString() == "PAGO") { throw RuntimeError("Linha selecionada já paga!", this); }
+    if (model.data(index.row(), "ContraParte").toString() != "PORTINARI") { throw RuntimeError("Linha selecionada não é da PORTINARI!", this); }
+    if (not model.data(index.row(), "tipo").toString().contains("TRANSF. ITAÚ")) { throw RuntimeError("Pagamento selecionado não é transferência ITAÚ!", this); }
     // TODO: se linha já estiver como agendado confirmar com usuario antes de gerar outro arquivo
   }
 
@@ -514,7 +514,7 @@ void WidgetFinanceiroContas::on_pushButtonRemessaItau_clicked() {
   QSqlQuery query;
 
   if (not query.exec("UPDATE conta_a_pagar_has_pagamento SET status = 'AGENDADO', idCnab = " + idCnab + " WHERE idPagamento IN (" + ids.join(",") + ")")) {
-    return qApp->enqueueException("Erro alterando GARE: " + query.lastError().text(), this);
+    throw RuntimeException("Erro alterando GARE: " + query.lastError().text(), this);
   }
 
   updateTables();

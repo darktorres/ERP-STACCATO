@@ -49,7 +49,7 @@ Venda::Venda(QWidget *parent) : RegisterDialog("venda", "idVenda", parent), ui(n
   setupMapper();
   newRegister();
 
-  if (UserSession::tipoUsuario() == "ADMINISTRADOR" or UserSession::tipoUsuario() == "ADMINISTRATIVO") {
+  if (UserSession::tipoUsuario == "ADMINISTRADOR" or UserSession::tipoUsuario == "ADMINISTRATIVO") {
     ui->dateTimeEdit->setReadOnly(false);
     ui->dateTimeEdit->setCalendarPopup(true);
   }
@@ -365,7 +365,7 @@ void Venda::prepararVenda(const QString &idOrcamento) {
   setConnections();
 }
 
-bool Venda::verifyFields() {
+void Venda::verifyFields() {
   // TODO: pintar campos errados de vermelho
   // TODO: pintar campos necessarios de amarelo
   // TODO: pintar campos certos de verde
@@ -374,33 +374,21 @@ bool Venda::verifyFields() {
   if (not financeiro) { verificaDisponibilidadeEstoque(); }
 
   if (ui->widgetPgts->isVisible()) {
-    if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { return qApp->enqueueError(false, "Total dos pagamentos difere do total do pedido!", this); }
+    if (not qFuzzyCompare(ui->widgetPgts->getTotalPag(), ui->doubleSpinBoxTotal->value())) { throw RuntimeError("Total dos pagamentos difere do total do pedido!"); }
 
-    if (not ui->widgetPgts->verifyFields()) { return false; }
+    ui->widgetPgts->verifyFields();
 
-    if (modelFluxoCaixa.rowCount() == 0) { return qApp->enqueueError(false, "Sem linhas de pagamento!", this); }
+    if (modelFluxoCaixa.rowCount() == 0) { throw RuntimeError("Sem linhas de pagamento!"); }
   }
 
-  if (ui->spinBoxPrazoEntrega->value() == 0) {
-    qApp->enqueueError("Por favor preencha o prazo de entrega!", this);
-    ui->spinBoxPrazoEntrega->setFocus();
-    return false;
-  }
+  if (ui->spinBoxPrazoEntrega->value() == 0) { throw RuntimeError("Por favor preencha o prazo de entrega!"); }
 
-  if (ui->itemBoxEnderecoFat->text().isEmpty()) {
-    qApp->enqueueError("Deve selecionar um endereço de faturamento!", this);
-    ui->itemBoxEnderecoFat->setFocus();
-    return false;
-  }
+  if (ui->itemBoxEnderecoFat->text().isEmpty()) { throw RuntimeError("Deve selecionar um endereço de faturamento!"); }
 
   if (not financeiro and ui->itemBoxProfissional->getId() != 1 and not ui->checkBoxPontuacaoIsento->isChecked() and not ui->checkBoxPontuacaoPadrao->isChecked()) {
-    qApp->enqueueError("Por favor preencha a pontuação!", this);
     ui->checkBoxRT->setChecked(true);
-    ui->doubleSpinBoxPontuacao->setFocus();
-    return false;
+    throw RuntimeError("Por favor preencha a pontuação!");
   }
-
-  return true;
 }
 
 void Venda::calcPrecoGlobalTotal() {
@@ -614,7 +602,7 @@ bool Venda::viewRegister() {
       ui->pushButtonDevolucao->hide();
     }
 
-    const QString tipoUsuario = UserSession::tipoUsuario();
+    const QString tipoUsuario = UserSession::tipoUsuario;
 
     if (not tipoUsuario.contains("GERENTE") and tipoUsuario != "DIRETOR" and tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO") {
       ui->pushButtonDevolucao->hide();
@@ -725,7 +713,7 @@ void Venda::montarFluxoCaixa() {
   query1.prepare("SELECT comissaoLoja FROM fornecedor WHERE razaoSocial = :razaoSocial");
   query1.bindValue(":razaoSocial", fornecedor);
 
-  if (not query1.exec() or not query1.first()) { return qApp->enqueueException("Erro buscando comissão: " + query1.lastError().text(), this); }
+  if (not query1.exec() or not query1.first()) { throw RuntimeException("Erro buscando comissão: " + query1.lastError().text(), this); }
 
   const double taxaComissao = query1.value("comissaoLoja").toDouble() / 100;
 
@@ -771,7 +759,7 @@ void Venda::montarFluxoCaixa() {
     query2.bindValue(":pagamento", tipoPgt);
     query2.bindValue(":parcela", parcelas);
 
-    if (not query2.exec() or not query2.first()) { return qApp->enqueueException("Erro buscando taxa: " + query2.lastError().text(), this); }
+    if (not query2.exec() or not query2.first()) { throw RuntimeException("Erro buscando taxa: " + query2.lastError().text(), this); }
 
     const int idConta = query2.value("idConta").toInt();
     const bool pula1Mes = query2.value("pula1Mes").toInt();
@@ -1044,7 +1032,7 @@ void Venda::cadastrar() {
   try {
     qApp->startTransaction("Venda::cadastrar");
 
-    if (tipo == Tipo::Cadastrar) { // TODO: como sempre é cadastro, verificar se esse if pode ser removido
+    if (tipo == Tipo::Cadastrar) { // TODO: como sempre é cadastro, verificar se esse if pode ser removido (quando é tipo financeiro não é cadastrar e sim atualizar)
       generateId();
 
       currentRow = model.insertRowAtEnd();
@@ -1221,7 +1209,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
     if (dia == 1) { allowed = true; }
     if (diaSemana == 1 and dia < 4) { allowed = true; }
 
-    if (not allowed) { return qApp->enqueueError("Não está no primeiro dia útil do mês!", this); }
+    if (not allowed) { throw RuntimeError("Não está no primeiro dia útil do mês!", this); }
   }
 
   // -------------------------------------------------------------------------
@@ -1237,7 +1225,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
     }
   }
 
-  if (not ok) { return qApp->enqueueError("Um ou mais produtos não estão pendentes!", this); }
+  if (not ok) { throw RuntimeError("Um ou mais produtos não estão pendentes!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -1246,7 +1234,7 @@ void Venda::on_pushButtonCancelamento_clicked() {
   //    const QString status = modelFluxoCaixa.data(row, "status").toString();
 
   //    if (status == "RECEBIDO") {
-  //      return qApp->enqueueError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this);
+  //      throw RuntimeError("Um ou mais pagamentos foram recebidos!\nPedir para o financeiro cancelar esses pagamentos para dar continuidade ao cancelamento da venda!", this);
   //    }
   //  }
 
@@ -1311,7 +1299,7 @@ void Venda::setFinanceiro() {
   ui->groupBoxFinanceiro->show();
   ui->tableFluxoCaixa2->show();
 
-  const QString tipoUsuario = UserSession::tipoUsuario();
+  const QString tipoUsuario = UserSession::tipoUsuario;
 
   if (tipoUsuario != "ADMINISTRADOR" and tipoUsuario != "ADMINISTRATIVO" and tipoUsuario != "GERENTE DEPARTAMENTO") { ui->pushButtonCorrigirFluxo->hide(); }
 
@@ -1346,7 +1334,7 @@ void Venda::financeiroSalvar() {
 }
 
 void Venda::on_pushButtonFinanceiroSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
   qApp->startTransaction("Venda::on_pushButtonFinanceiroSalvar");
 
@@ -1355,6 +1343,7 @@ void Venda::on_pushButtonFinanceiroSalvar_clicked() {
   qApp->endTransaction();
 
   qApp->enqueueInformation("Dados salvos com sucesso!", this);
+
   close();
 }
 
@@ -1365,7 +1354,7 @@ void Venda::on_pushButtonCorrigirFluxo_clicked() {
   queryPag.prepare("SELECT credito FROM cliente WHERE idCliente = :idCliente");
   queryPag.bindValue(":idCliente", data("idCliente"));
 
-  if (not queryPag.exec() or not queryPag.first()) { return qApp->enqueueException("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
+  if (not queryPag.exec() or not queryPag.first()) { throw RuntimeException("Erro lendo credito cliente: " + queryPag.lastError().text(), this); }
 
   double credito = queryPag.value("credito").toDouble();
 
@@ -1392,7 +1381,7 @@ void Venda::on_checkBoxPontuacaoPadrao_toggled(bool checked) {
     query.prepare("SELECT comissao FROM profissional WHERE idProfissional = :idProfissional");
     query.bindValue(":idProfissional", ui->itemBoxProfissional->getId());
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando pontuação: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando pontuação: " + query.lastError().text(), this); }
 
     double comissao = query.value("comissao").toDouble();
 
@@ -1471,12 +1460,12 @@ void Venda::on_pushButtonComprovantes_clicked() {
 void Venda::on_pushButtonAdicionarObservacao_clicked() {
   const auto selection = ui->treeView->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   //------------------------------------------------------
 
   for (const auto &index : selection) {
-    if (not index.parent().isValid()) { return qApp->enqueueError("Deve selecionar apenas sublinhas!", this); }
+    if (not index.parent().isValid()) { throw RuntimeError("Deve selecionar apenas sublinhas!", this); }
   }
 
   const QString observacao = QInputDialog::getText(this, "Observação", "Obs: ");

@@ -8,8 +8,8 @@ QVariant UserSession::getSetting(const QString &key) { return settings->value(ke
 
 void UserSession::setSetting(const QString &key, const QVariant &value) { settings->setValue(key, value); }
 
-bool UserSession::login(const QString &user, const QString &password) {
-  if (not query) { query = new QSqlQuery(); }
+void UserSession::login(const QString &user, const QString &password) {
+  if (not query) { query = new SqlQuery(); }
 
   query->prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE");
   query->bindValue(":user", user);
@@ -17,18 +17,15 @@ bool UserSession::login(const QString &user, const QString &password) {
 
   if (not query->exec()) { throw RuntimeException("Erro no login: " + query->lastError().text()); }
 
-  return query->first();
+  if (not query->first()) { throw RuntimeError("Login inválido!"); }
+
+  idLoja = query->value("idLoja").toInt();
+  idUsuario = query->value("idUsuario").toInt();
+  nome = query->value("nome").toString();
+  tipoUsuario = query->value("tipo").toString();
 }
 
-int UserSession::idLoja() { return query->value("idLoja").toInt(); }
-
-int UserSession::idUsuario() { return query->value("idUsuario").toInt(); }
-
-QString UserSession::nome() { return query->value("nome").toString(); }
-
-QString UserSession::tipoUsuario() { return query->value("tipo").toString(); }
-
-bool UserSession::autorizacao(const QString &user, const QString &password) {
+void UserSession::autorizacao(const QString &user, const QString &password) {
   QSqlQuery queryAutorizar;
   queryAutorizar.prepare("SELECT idLoja, idUsuario, nome, tipo FROM usuario WHERE user = :user AND passwd = PASSWORD(:password) AND desativado = FALSE AND "
                          "(tipo IN ('ADMINISTRADOR', 'ADMINISTRATIVO', 'DIRETOR', 'GERENTE DEPARTAMENTO', 'GERENTE LOJA'))");
@@ -37,7 +34,7 @@ bool UserSession::autorizacao(const QString &user, const QString &password) {
 
   if (not queryAutorizar.exec()) { throw RuntimeException("Erro no login: " + queryAutorizar.lastError().text()); }
 
-  return queryAutorizar.first();
+  if (not queryAutorizar.first()) { throw RuntimeError("Login inválido!"); }
 }
 
 QVariant UserSession::fromLoja(const QString &parameter, const QString &user) {

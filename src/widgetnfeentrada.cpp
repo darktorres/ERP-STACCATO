@@ -70,7 +70,7 @@ void WidgetNfeEntrada::on_table_activated(const QModelIndex &index) {
   query.prepare("SELECT xml FROM nfe WHERE idNFe = :idNFe");
   query.bindValue(":idNFe", modelViewNFeEntrada.data(index.row(), "idNFe"));
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando xml da nota: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando xml da nota: " + query.lastError().text(), this); }
 
   auto *viewer = new XML_Viewer(query.value("xml").toByteArray(), this);
   viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -87,9 +87,9 @@ void WidgetNfeEntrada::montaFiltro() {
 void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
-  if (list.size() > 1) { return qApp->enqueueError("Selecione apenas uma linha!", this); }
+  if (list.size() > 1) { throw RuntimeError("Selecione apenas uma linha!", this); }
 
   const int row = list.first().row();
 
@@ -99,13 +99,13 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
   queryGare.prepare("SELECT status, valor FROM conta_a_pagar_has_pagamento WHERE contraParte = 'GARE' AND idNFe = :idNFe");
   queryGare.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not queryGare.exec()) { return qApp->enqueueError("Erro verificando GARE: " + queryGare.lastError().text(), this); }
+  if (not queryGare.exec()) { throw RuntimeError("Erro verificando GARE: " + queryGare.lastError().text(), this); }
 
   if (queryGare.first()) {
     const QString status = queryGare.value("status").toString();
     const double valor = queryGare.value("valor").toDouble();
 
-    if ((status == "GERADO GARE" or status == "PAGO GARE") and valor > 0) { return qApp->enqueueError("GARE 'em pagamento/pago'!", this); }
+    if ((status == "GERADO GARE" or status == "PAGO GARE") and valor > 0) { throw RuntimeError("GARE 'em pagamento/pago'!", this); }
   }
 
   //--------------------------------------------------------------
@@ -115,13 +115,13 @@ void WidgetNfeEntrada::on_pushButtonRemoverNFe_clicked() {
                 "idEstoque IN (SELECT idEstoque FROM estoque WHERE idNFe = :idNFe))");
   query.bindValue(":idNFe", modelViewNFeEntrada.data(row, "idNFe"));
 
-  if (not query.exec()) { return qApp->enqueueException("Erro verificando pedidos: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro verificando pedidos: " + query.lastError().text(), this); }
 
-  if (query.size() > 0) { return qApp->enqueueError("NFe possui itens 'EM ENTREGA/ENTREGUE'!", this); }
+  if (query.size() > 0) { throw RuntimeError("NFe possui itens 'EM ENTREGA/ENTREGUE'!", this); }
 
   //--------------------------------------------------------------
 
-  if (modelViewNFeEntrada.data(row, "nsu") > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { return qApp->enqueueError("NFe não utilizada!", this); }
+  if (modelViewNFeEntrada.data(row, "nsu") > 0 and modelViewNFeEntrada.data(row, "utilizada").toBool() == false) { throw RuntimeError("NFe não utilizada!", this); }
 
   //--------------------------------------------------------------
 
@@ -233,7 +233,7 @@ void WidgetNfeEntrada::on_pushButtonExportar_clicked() {
 
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   QSqlQuery query;
   query.prepare("SELECT xml FROM nfe WHERE chaveAcesso = :chaveAcesso");

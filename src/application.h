@@ -12,12 +12,12 @@
 
 class RuntimeException : public std::runtime_error {
 public:
-  explicit RuntimeException(const QString &message);
+  explicit RuntimeException(const QString &message, QWidget *parent = nullptr);
 };
 
 class RuntimeError : public std::runtime_error {
 public:
-  explicit RuntimeError(const QString &message);
+  explicit RuntimeError(const QString &message, QWidget *parent = nullptr);
 };
 
 class Application : public QApplication {
@@ -35,8 +35,8 @@ public:
   auto endTransaction() -> void;
   auto enqueueError(const QString &error, QWidget *parent = nullptr) -> void;
   auto enqueueError(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
-  auto enqueueException(const QString &error, QWidget *parent = nullptr) -> void;
-  auto enqueueException(const bool boolean, const QString &error, QWidget *parent = nullptr) -> bool;
+  auto enqueueException(const QString &exception, QWidget *parent = nullptr) -> void;
+  auto enqueueException(const bool boolean, const QString &exception, QWidget *parent = nullptr) -> bool;
   auto enqueueInformation(const QString &information, QWidget *parent = nullptr) -> void;
   auto enqueueWarning(const QString &warning, QWidget *parent = nullptr) -> void;
   auto getInTransaction() const -> bool;
@@ -88,13 +88,13 @@ private:
   QDateTime serverDateCache;
   QDate systemDate = QDate::currentDate();
   // methods
-  auto genericLogin(const QString &hostname) -> bool;
+  auto genericLogin(const QString &hostname) -> void;
   auto loginError() -> void;
   auto readSettingsFile() -> void;
-  auto runSqlJobs() -> bool;
+  auto runSqlJobs() -> void;
   auto showMessages() -> void;
   auto startSqlPing() -> void;
   auto startUpdaterPing() -> void;
   auto storeSelection() -> void;
-  auto userLogin(const QString &user) -> bool;
+  auto userLogin(const QString &user) -> void;
 };

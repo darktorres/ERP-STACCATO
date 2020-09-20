@@ -145,7 +145,7 @@ void WidgetLogisticaAgendarEntrega::calcularPeso() {
   for (const auto &index : selectedRows) {
     query.bindValue(":idProduto", modelProdutos.data(index.row(), "idProduto"));
 
-    if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando peso do produto: " + query.lastError().text(), this); }
+    if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando peso do produto: " + query.lastError().text(), this); }
 
     const double kg = query.value("kgcx").toDouble();
     const double caixas = modelProdutos.data(index.row(), "caixas").toDouble();
@@ -246,7 +246,7 @@ void WidgetLogisticaAgendarEntrega::on_groupBoxStatus_toggled(const bool enabled
 
 void WidgetLogisticaAgendarEntrega::updateTables() {
   if (not isSet) {
-    if (UserSession::tipoUsuario() == "VENDEDOR") {
+    if (UserSession::tipoUsuario == "VENDEDOR") {
       ui->tableVendas->hide();
       ui->labelEntregasCliente->hide();
     }
@@ -346,7 +346,7 @@ void WidgetLogisticaAgendarEntrega::filtroProdutos() {
 void WidgetLogisticaAgendarEntrega::on_pushButtonAgendarCarga_clicked() {
   // TODO: não deixar agendar carga com mistura de produtos com e sem nfe futura
 
-  if (modelTranspAtual.rowCount() == 0) { return qApp->enqueueError("Carga vazia!", this); }
+  if (modelTranspAtual.rowCount() == 0) { throw RuntimeError("Carga vazia!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -451,11 +451,11 @@ void WidgetLogisticaAgendarEntrega::adicionaProdutoNoModel(const int row, const 
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
-  if (ui->itemBoxVeiculo->getId().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!", this); }
+  if (ui->itemBoxVeiculo->getId().isNull()) { throw RuntimeError("Deve escolher uma transportadora antes!", this); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
@@ -464,13 +464,13 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 
     const auto listMatch = modelTranspAtual.match("idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"), 1, Qt::MatchExactly);
 
-    if (not listMatch.isEmpty()) { return qApp->enqueueError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
+    if (not listMatch.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
-    if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { return qApp->enqueueError("Produto não está em estoque!", this); }
+    if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { throw RuntimeError("Produto não está em estoque!", this); }
 
-    if (modelProdutos.data(row, "idConsumo").toString().isEmpty()) { return qApp->enqueueError("Produto ainda não possui nota de entrada!", this); }
+    if (modelProdutos.data(row, "idConsumo").toString().isEmpty()) { throw RuntimeError("Produto ainda não possui nota de entrada!", this); }
 
-    if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
+    if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
   }
 
   adicionarProduto(list);
@@ -481,7 +481,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarProduto_clicked() {
 void WidgetLogisticaAgendarEntrega::on_pushButtonRemoverProduto_clicked() {
   const auto list = ui->tableTranspAtual->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) { modelTranspAtual.removeRow(index.row()); }
 }
@@ -491,7 +491,7 @@ void WidgetLogisticaAgendarEntrega::on_itemBoxVeiculo_textChanged(const QString 
   query.prepare("SELECT capacidade FROM transportadora_has_veiculo WHERE idVeiculo = :idVeiculo");
   query.bindValue(":idVeiculo", ui->itemBoxVeiculo->getId());
 
-  if (not query.exec() or not query.first()) { return qApp->enqueueException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
+  if (not query.exec() or not query.first()) { throw RuntimeException("Erro buscando dados veiculo: " + query.lastError().text(), this); }
 
   ui->doubleSpinBoxCapacidade->setValue(query.value("capacidade").toDouble());
 
@@ -531,30 +531,30 @@ void WidgetLogisticaAgendarEntrega::on_dateTimeEdit_dateChanged(const QDate &dat
 }
 
 void WidgetLogisticaAgendarEntrega::on_pushButtonAdicionarParcial_clicked() {
-  if (ui->itemBoxVeiculo->getId().isNull()) { return qApp->enqueueError("Deve escolher uma transportadora antes!", this); }
+  if (ui->itemBoxVeiculo->getId().isNull()) { throw RuntimeError("Deve escolher uma transportadora antes!", this); }
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  if (list.size() > 1) { return qApp->enqueueError("Deve selecionar apenas um item para agendamento parcial!", this); }
+  if (list.size() > 1) { throw RuntimeError("Deve selecionar apenas um item para agendamento parcial!", this); }
 
   const int row = list.first().row();
 
   const auto list2 = modelTranspAtual.match("idVendaProduto2", modelProdutos.data(row, "idVendaProduto2"), 1, Qt::MatchExactly);
 
-  if (not list2.isEmpty()) { return qApp->enqueueError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
+  if (not list2.isEmpty()) { throw RuntimeError("Item '" + modelProdutos.data(row, "produto").toString() + "' já inserido!", this); }
 
-  if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { return qApp->enqueueError("Produto não está em estoque!", this); }
+  if (modelProdutos.data(row, "status").toString() != "ESTOQUE") { throw RuntimeError("Produto não está em estoque!", this); }
 
   // TODO: calcular o peso parcial e não o total para comparar
   if (ui->doubleSpinBoxPeso->value() > ui->doubleSpinBoxDisponivel->value()) { qApp->enqueueWarning("Peso maior que capacidade do veículo!", this); }
 
-  if (modelProdutos.data(row, "idConsumo").toString().isEmpty()) { return qApp->enqueueError("Produto ainda não possui nota de entrada!", this); }
+  if (modelProdutos.data(row, "idConsumo").toString().isEmpty()) { throw RuntimeError("Produto ainda não possui nota de entrada!", this); }
 
-  if (modelProdutos.data(row, "caixas").toInt() == 1) { return qApp->enqueueError("Produto tem apenas uma caixa!", this); }
+  if (modelProdutos.data(row, "caixas").toInt() == 1) { throw RuntimeError("Produto tem apenas uma caixa!", this); }
 
-  if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { return qApp->enqueueError("Produto já agendado!", this); }
+  if (not modelProdutos.data(row, "dataPrevEnt").isNull()) { throw RuntimeError("Produto já agendado!", this); }
 
   // -------------------------------------------------------------------------
 
@@ -781,7 +781,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonReagendarPedido_clicked() {
 
   const auto list = ui->tableVendas->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   InputDialog input(InputDialog::Tipo::ReagendarPedido, this);
 
@@ -815,8 +815,8 @@ void WidgetLogisticaAgendarEntrega::reagendar(const QModelIndexList &list, const
 
     query2.bindValue(":idVenda", modelVendas.data(row, "idVenda"));
     query2.bindValue(":idVendaBase", modelVendas.data(row, "idVenda").toString().left(11));
-    query2.bindValue(":idLoja", UserSession::idLoja());
-    query2.bindValue(":idUsuario", UserSession::idUsuario());
+    query2.bindValue(":idLoja", UserSession::idLoja);
+    query2.bindValue(":idUsuario", UserSession::idUsuario);
     query2.bindValue(":tipoOperacao", "Alteração do prazo de entrega");
     query2.bindValue(":observacao", observacao);
     query2.bindValue(":dataFollowup", qApp->serverDate());
@@ -831,7 +831,7 @@ void WidgetLogisticaAgendarEntrega::on_tableVendas_doubleClicked(const QModelInd
   if (index.column() == modelVendas.record().indexOf("novoPrazoEntrega")) {
     const auto list = ui->tableVendas->selectionModel()->selectedRows();
 
-    if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+    if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
     FollowUp *followup = new FollowUp(modelVendas.data(list.first().row(), "idVenda").toString(), FollowUp::Tipo::Venda, this);
     followup->setAttribute(Qt::WA_DeleteOnClose);
@@ -846,17 +846,17 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 
   const auto list = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhum item selecionado!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
   for (const auto &index : list) {
-    if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { return qApp->enqueueError("Produto já possui nota futura!", this); }
+    if (not modelProdutos.data(index.row(), "idNFeFutura").isNull()) { throw RuntimeError("Produto já possui nota futura!", this); }
 
-    if (modelProdutos.data(index.row(), "idConsumo").toInt() == 0) { return qApp->enqueueError("Nem todos os produtos selecionados possuem nota de entrada!", this); }
+    if (modelProdutos.data(index.row(), "idConsumo").toInt() == 0) { throw RuntimeError("Nem todos os produtos selecionados possuem nota de entrada!", this); }
   }
 
   const QString idVenda = modelProdutos.data(list.first().row(), "idVenda").toString();
 
-  if (idVenda.isEmpty()) { return qApp->enqueueException("Erro buscando 'Venda'!", this); }
+  if (idVenda.isEmpty()) { throw RuntimeException("Erro buscando 'Venda'!", this); }
 
   QStringList lista;
 
@@ -873,10 +873,10 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonGerarNFeFutura_clicked() {
 void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   const auto selection = ui->tableProdutos->selectionModel()->selectedRows();
 
-  if (selection.isEmpty()) { return qApp->enqueueError("Não selecionou nenhuma linha!", this); }
+  if (selection.isEmpty()) { throw RuntimeError("Não selecionou nenhuma linha!", this); }
 
   for (const auto &index : selection) {
-    if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { return qApp->enqueueError("Pelo menos uma linha selecionada já possui nota!", this); }
+    if (modelProdutos.data(index.row(), "idNFeSaida").toInt() > 0) { throw RuntimeError("Pelo menos uma linha selecionada já possui nota!", this); }
   }
 
   const QString filePath = QFileDialog::getOpenFileName(this, "Arquivo XML", QDir::currentPath(), "XML (*.xml)");
@@ -885,7 +885,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   QFile file(filePath);
 
-  if (not file.open(QFile::ReadOnly)) { return qApp->enqueueException("Erro lendo arquivo: " + file.errorString(), this); }
+  if (not file.open(QFile::ReadOnly)) { throw RuntimeException("Erro lendo arquivo: " + file.errorString(), this); }
 
   XML xml(file.readAll(), XML::Tipo::Saida, this);
 
@@ -895,9 +895,9 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
   query.bindValue(":chaveAcesso", xml.chaveAcesso);
 
-  if (not query.exec()) { return qApp->enqueueException("Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
+  if (not query.exec()) { throw RuntimeException("Erro verificando se nota já cadastrada: " + query.lastError().text(), this); }
 
-  if (query.first()) { return qApp->enqueueError("Nota já cadastrada!", this); }
+  if (query.first()) { throw RuntimeError("Nota já cadastrada!", this); }
 
   QSqlQuery queryNFe;
   queryNFe.prepare("INSERT INTO nfe (idVenda, numeroNFe, tipo, xml, status, chaveAcesso, cnpjOrig, cnpjDest, valor) "
@@ -910,7 +910,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   queryNFe.bindValue(":cnpjDest", xml.cnpjDest);
   queryNFe.bindValue(":valor", xml.vNF_Total);
 
-  if (not queryNFe.exec()) { return qApp->enqueueException("Erro importando NFe: " + queryNFe.lastError().text(), this); }
+  if (not queryNFe.exec()) { throw RuntimeException("Erro importando NFe: " + queryNFe.lastError().text(), this); }
 
   const QVariant id = queryNFe.lastInsertId();
 
@@ -923,7 +923,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
     queryVenda.bindValue(":idNFeSaida", id);
     queryVenda.bindValue(":idVendaProduto2", modelProdutos.data(index.row(), "idVendaProduto2"));
 
-    if (not queryVenda.exec()) { return qApp->enqueueException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text(), this); }
+    if (not queryVenda.exec()) { throw RuntimeException("Erro salvando NFe nos produtos: " + queryVenda.lastError().text(), this); }
   }
 
   updateTables();

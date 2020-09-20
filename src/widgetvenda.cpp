@@ -42,7 +42,7 @@ void WidgetVenda::montaFiltro() {
 
   QString filtroLoja;
 
-  if (const auto tipoUsuario = UserSession::tipoUsuario(); not ui->comboBoxLojas->currentText().isEmpty()) {
+  if (const auto tipoUsuario = UserSession::tipoUsuario; not ui->comboBoxLojas->currentText().isEmpty()) {
     filtroLoja = "idLoja = " + ui->comboBoxLojas->getCurrentValue().toString();
   } else if (tipoUsuario == "GERENTE LOJA") {
     filtroLoja = "(Código LIKE '%" + UserSession::fromLoja("sigla").toString() + "%')";
@@ -76,8 +76,7 @@ void WidgetVenda::montaFiltro() {
 
   //-------------------------------------
 
-  const QString filtroRadio =
-      ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + qApp->sanitizeSQL(UserSession::nome()) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(UserSession::nome()) + "')";
+  const QString filtroRadio = ui->radioButtonTodos->isChecked() ? "" : "(Vendedor = '" + qApp->sanitizeSQL(UserSession::nome) + "'" + " OR Consultor = '" + qApp->sanitizeSQL(UserSession::nome) + "')";
   if (not filtroRadio.isEmpty()) { filtros << filtroRadio; }
 
   //-------------------------------------
@@ -138,7 +137,7 @@ void WidgetVenda::setPermissions() {
   [&] {
     listarLojas();
 
-    const QString tipoUsuario = UserSession::tipoUsuario();
+    const QString tipoUsuario = UserSession::tipoUsuario;
 
     if (tipoUsuario == "GERENTE LOJA") { ui->groupBoxLojas->hide(); }
 
@@ -146,7 +145,7 @@ void WidgetVenda::setPermissions() {
 
     (tipoUsuario == "VENDEDOR" or tipoUsuario == "VENDEDOR ESPECIAL") ? ui->radioButtonProprios->setChecked(true) : ui->radioButtonTodos->setChecked(true);
 
-    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja());
+    ui->comboBoxLojas->setCurrentValue(UserSession::idLoja);
 
     on_comboBoxLojas_currentIndexChanged();
 
@@ -255,7 +254,7 @@ void WidgetVenda::setComboBoxFornecedores() {
 
     QSqlQuery query;
 
-    if (not query.exec("SELECT razaoSocial FROM fornecedor")) { return qApp->enqueueException("Erro buscando fornecedores: " + query.lastError().text(), this); }
+    if (not query.exec("SELECT razaoSocial FROM fornecedor")) { throw RuntimeException("Erro buscando fornecedores: " + query.lastError().text(), this); }
 
     ui->comboBoxFornecedores->addItem("");
 
@@ -285,7 +284,7 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
     QSqlQuery query;
 
     if (not query.exec("SELECT idUsuario, nome FROM usuario WHERE desativado = FALSE AND tipo IN ('VENDEDOR', 'VENDEDOR ESPECIAL')" + filtroLoja + " ORDER BY nome")) {
-      return qApp->enqueueException("Erro: " + query.lastError().text(), this);
+      throw RuntimeException("Erro: " + query.lastError().text(), this);
     }
 
     ui->comboBoxVendedores->addItem("");
@@ -294,10 +293,10 @@ void WidgetVenda::on_comboBoxLojas_currentIndexChanged() {
 
     // -------------------------------------------------------------------------
 
-    const QString tipoUsuario = UserSession::tipoUsuario();
+    const QString tipoUsuario = UserSession::tipoUsuario;
 
     if (tipoUsuario == "VENDEDOR") {
-      if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja()) {
+      if (ui->comboBoxLojas->getCurrentValue() != UserSession::idLoja) {
         ui->radioButtonTodos->setDisabled(true);
         ui->radioButtonProprios->setChecked(true);
       } else {
@@ -321,7 +320,7 @@ void WidgetVenda::resetTables() { modelIsSet = false; }
 void WidgetVenda::on_pushButtonFollowup_clicked() {
   const auto list = ui->table->selectionModel()->selectedRows();
 
-  if (list.isEmpty()) { return qApp->enqueueError("Nenhuma linha selecionada!", this); }
+  if (list.isEmpty()) { throw RuntimeError("Nenhuma linha selecionada!", this); }
 
   const QString codigo = modelViewVenda.data(list.first().row(), "Código").toString();
 

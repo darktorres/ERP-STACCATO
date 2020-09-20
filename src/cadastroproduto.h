@@ -33,5 +33,5 @@ private:
   auto setupMapper() -> void final;
   auto successMessage() -> void final;
   auto updateMode() -> void final;
-  auto verifyFields() -> bool final;
+  auto verifyFields() -> void final;
 };

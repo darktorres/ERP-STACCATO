@@ -29,5 +29,5 @@ private:
   auto setConnections() -> void;
   auto setupTables() -> void;
   auto unsetConnections() -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

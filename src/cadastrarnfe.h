@@ -51,7 +51,7 @@ private:
   auto clearStr(const QString &str) const -> QString;
   auto criarChaveAcesso() -> void;
   auto gerarNota() -> QString;
-  auto listarCfop() -> bool;
+  auto listarCfop() -> void;
   auto on_checkBoxFrete_toggled(bool checked) -> void;
   auto on_comboBoxCOFINScst_currentTextChanged(const QString &text) -> void;
   auto on_comboBoxCfop_currentTextChanged(const QString &text) -> void;
@@ -85,9 +85,9 @@ private:
   auto on_tableItens_clicked(const QModelIndex &index) -> void;
   auto on_tableItens_dataChanged(const QModelIndex index) -> void;
   auto preCadastrarNota() -> int;
-  auto preencherNumeroNFe() -> bool;
+  auto preencherNumeroNFe() -> void;
   auto prepararNFe(const QStringList &items) -> void;
-  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> bool;
+  auto processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) -> void;
   auto removerNota(const int idNFe) -> void;
   auto setConnections() -> void;
   auto setupTables() -> void;

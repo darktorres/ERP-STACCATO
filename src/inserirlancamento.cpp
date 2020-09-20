@@ -104,15 +104,16 @@ void InserirLancamento::on_pushButtonCriarLancamento_clicked() {
 }
 
 void InserirLancamento::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
   modelContaPagamento.submitAll();
 
   qApp->enqueueInformation("Lançamento salvo com sucesso!", this);
+
   close();
 }
 
-bool InserirLancamento::verifyFields() {
+void InserirLancamento::verifyFields() {
   for (int row = 0; row < modelContaPagamento.rowCount(); ++row) {
     if (modelContaPagamento.data(row, "dataEmissao").toDate().isNull()) { throw RuntimeError("Faltou preencher 'Data Emissão' na linha: " + QString::number(row + 1), this); }
 
@@ -128,8 +129,6 @@ bool InserirLancamento::verifyFields() {
 
     if (modelContaPagamento.data(row, "grupo").toString().isEmpty()) { throw RuntimeError("Faltou preencher 'Grupo' na linha: " + QString::number(row + 1), this); }
   }
-
-  return true;
 }
 
 void InserirLancamento::setConnections() {

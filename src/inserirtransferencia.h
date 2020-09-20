@@ -25,5 +25,5 @@ private:
   auto on_pushButtonCancelar_clicked() -> void;
   auto on_pushButtonSalvar_clicked() -> void;
   auto setupTables() -> void;
-  auto verifyFields() -> bool;
+  auto verifyFields() -> void;
 };

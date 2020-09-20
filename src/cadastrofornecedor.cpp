@@ -295,12 +295,13 @@ void CadastroFornecedor::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
 
-  if (CepCompleter cc; cc.buscaCEP(cep, this)) {
-    ui->lineEditUF->setText(cc.getUf());
-    ui->lineEditCidade->setText(cc.getCidade());
-    ui->lineEditEndereco->setText(cc.getEndereco());
-    ui->lineEditBairro->setText(cc.getBairro());
-  }
+  CepCompleter cc;
+  cc.buscaCEP(cep, this);
+
+  ui->lineEditUF->setText(cc.getUf());
+  ui->lineEditCidade->setText(cc.getCidade());
+  ui->lineEditEndereco->setText(cc.getEndereco());
+  ui->lineEditBairro->setText(cc.getBairro());
 }
 
 void CadastroFornecedor::on_pushButtonAtualizarEnd_clicked() {

@@ -58,10 +58,8 @@ bool RegisterDialog::viewRegister() {
   return true;
 }
 
-bool RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
+void RegisterDialog::verifyFields(const QList<QLineEdit *> &list) {
   for (const auto &line : list) { verifyRequiredField(*line); }
-
-  return true;
 }
 
 void RegisterDialog::setForeignKey(SqlTableModel &secondaryModel) {

@@ -889,7 +889,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
 
   XML xml(file.readAll(), XML::Tipo::Saida, this);
 
-  if (not xml.validar()) { return; }
+  xml.validar();
 
   QSqlQuery query;
   query.prepare("SELECT 0 FROM nfe WHERE chaveAcesso = :chaveAcesso");
@@ -927,6 +927,7 @@ void WidgetLogisticaAgendarEntrega::on_pushButtonImportarNFe_clicked() {
   }
 
   updateTables();
+
   qApp->enqueueInformation("Nota importada com sucesso!", this);
 }
 

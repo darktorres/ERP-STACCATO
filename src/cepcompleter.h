@@ -8,7 +8,7 @@ class CepCompleter final {
 public:
   CepCompleter() = default;
   ~CepCompleter() = default;
-  auto buscaCEP(const QString &cep, QWidget *parent) -> bool;
+  auto buscaCEP(const QString &cep, QWidget *parent) -> void;
   auto getBairro() const -> QString;
   auto getCidade() const -> QString;
   auto getEndereco() const -> QString;

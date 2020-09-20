@@ -262,7 +262,7 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
 
   if (list.isEmpty()) { throw RuntimeError("Nenhum item selecionado!", this); }
 
-  if (not verifyFields(list)) { return; }
+  verifyFields(list);
 
   qApp->startTransaction("AnteciparRecebimento::on_pushButtonGerar");
 
@@ -273,7 +273,7 @@ void AnteciparRecebimento::on_pushButtonGerar_clicked() {
   qApp->enqueueInformation("Operação realizada com sucesso!", this);
 }
 
-bool AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
+void AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
   for (const auto &index : list) {
     const int row = index.row();
 
@@ -281,8 +281,6 @@ bool AnteciparRecebimento::verifyFields(const QModelIndexList &list) {
 
     if (modelContaReceber.data(row, "grupo").isNull()) { throw RuntimeError("Item sem Grupo identificado: " + modelContaReceber.data(row, "idVenda").toString(), this); }
   }
-
-  return true;
 }
 
 // TODO: 0implementar antecipacao

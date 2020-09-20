@@ -24,7 +24,7 @@ InserirTransferencia::InserirTransferencia(QWidget *parent) : QDialog(parent), u
 InserirTransferencia::~InserirTransferencia() { delete ui; }
 
 void InserirTransferencia::on_pushButtonSalvar_clicked() {
-  if (not verifyFields()) { return; }
+  verifyFields();
 
   qApp->startTransaction("InserirTransferencia::on_pushButtonSalvar");
 
@@ -85,7 +85,7 @@ void InserirTransferencia::cadastrar() {
 
 void InserirTransferencia::on_pushButtonCancelar_clicked() { close(); }
 
-bool InserirTransferencia::verifyFields() {
+void InserirTransferencia::verifyFields() {
   if (ui->itemBoxDe->text().isEmpty()) { throw RuntimeError("Conta 'De' não preenchido!", this); }
 
   if (ui->itemBoxPara->text().isEmpty()) { throw RuntimeError("Conta 'Para' não preenchido!", this); }
@@ -93,8 +93,6 @@ bool InserirTransferencia::verifyFields() {
   if (qFuzzyIsNull(ui->doubleSpinBoxValor->value())) { throw RuntimeError("Valor não preenchido!", this); }
 
   if (ui->lineEditObservacao->text().isEmpty()) { throw RuntimeError("Preencha a observação!", this); }
-
-  return true;
 }
 
 void InserirTransferencia::setupTables() {

@@ -69,8 +69,8 @@ public:
   explicit XML(const QByteArray &fileContent, const Tipo tipo, QWidget *parent);
   explicit XML(const QByteArray &fileContent);
 
-  auto validar() -> bool;
-  auto verificaNCMs() -> bool;
+  auto validar() -> void;
+  auto verificaNCMs() -> void;
 
   QVector<Produto> produtos;
 
@@ -125,6 +125,6 @@ private:
   auto limparValores() -> void;
   auto montarArvore() -> void;
   auto readChild(const QDomElement &element, QStandardItem *elementItem) -> void;
-  auto verificaCNPJ() -> bool;
-  auto verificaValido() -> bool;
+  auto verificaCNPJ() -> void;
+  auto verificaValido() -> void;
 };

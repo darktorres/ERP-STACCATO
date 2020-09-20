@@ -226,7 +226,7 @@ void CadastrarNFe::removerNota(const int idNFe) {
   qApp->endTransaction();
 }
 
-bool CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
+void CadastrarNFe::processarResposta(const QString &resposta, const QString &filePath, const int &idNFe, ACBr &acbrRemoto) {
   // erro de comunicacao/rejeicao
   qDebug() << "resposta: " << resposta;
   if (not resposta.contains("Autorizado o uso da NF-e")) {
@@ -239,17 +239,18 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
       // diferentes. o acbr substitui a primeira nota pela segunda na pasta de logs então enquanto não for feita a consulta com a sefaz dizendo se a nota existe ou não, não permitir gerar outra nota.
 
       removerNota(idNFe);
+
       throw RuntimeException("Resposta EnviarNFe: " + resposta, this);
     }
 
     const QString respostaConsultar = acbrRemoto.enviarComando("NFE.ConsultarNFe(" + filePath + ")");
 
-    if (respostaConsultar.isEmpty()) { return false; }
-
     // erro de comunicacao/rejeicao
     if (not respostaConsultar.contains("Autorizado o uso da NF-e")) {
       qDebug() << "!consulta";
+
       removerNota(idNFe);
+
       throw RuntimeException("Resposta ConsultarNFe: " + respostaConsultar, this);
     }
   }
@@ -258,8 +259,6 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
   // reread the file now authorized
   if (resposta.contains("Autorizado o uso da NF-e")) {
     QString resposta2 = acbrRemoto.enviarComando("NFe.LoadFromFile(" + filePath + ")");
-
-    if (resposta2.isEmpty()) { return false; }
 
     xml = resposta2.remove("OK: ");
 
@@ -271,8 +270,6 @@ bool CadastrarNFe::processarResposta(const QString &resposta, const QString &fil
 
     file.close();
   }
-
-  return true;
 }
 
 void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
@@ -330,11 +327,9 @@ void CadastrarNFe::on_pushButtonEnviarNFE_clicked() {
 
   const QString resposta2 = acbrRemoto.enviarComando("NFE.EnviarNFe(" + filePath + ", 1, 1, 0, 1)"); // lote, assina, imprime, sincrono
 
-  if (resposta2.isEmpty()) { return; }
-
   qDebug() << "enviar nfe: " << resposta2;
 
-  if (not processarResposta(resposta2, filePath, idNFe, acbrRemoto)) { return; }
+  processarResposta(resposta2, filePath, idNFe, acbrRemoto);
 
   qApp->startTransaction("CadastrarNFe::on_pushButtonEnviarNFe_cadastrar");
 
@@ -423,8 +418,8 @@ void CadastrarNFe::updateComplemento() {
   ui->infCompSistema->setPlainText(texto);
 }
 
-bool CadastrarNFe::preencherNumeroNFe() {
-  if (ui->itemBoxLoja->text().isEmpty()) { return true; }
+void CadastrarNFe::preencherNumeroNFe() {
+  if (ui->itemBoxLoja->text().isEmpty()) { return; }
 
   QSqlQuery queryCnpj;
   queryCnpj.prepare("SELECT cnpj FROM loja WHERE idLoja = :idLoja");
@@ -447,8 +442,6 @@ bool CadastrarNFe::preencherNumeroNFe() {
 
   ui->lineEditNumero->setText(QString("%1").arg(numeroNFe, 9, 10, QChar('0')));
   ui->lineEditCodigo->setText("12121212");
-
-  return true;
 }
 
 void CadastrarNFe::prepararNFe(const QStringList &items) {
@@ -1039,7 +1032,7 @@ void CadastrarNFe::on_tableItens_clicked(const QModelIndex &index) {
     ui->framePIS->setEnabled(true);
     ui->frameCOFINS->setEnabled(true);
 
-    if (not listarCfop()) { return; }
+    listarCfop();
 
     ui->comboBoxCfop->setCurrentIndex(ui->comboBoxCfop->findText(modelViewProdutoEstoque.data(row, "cfop").toString(), Qt::MatchStartsWith));
     ui->comboBoxICMSOrig->setCurrentIndex(ui->comboBoxICMSOrig->findText(modelViewProdutoEstoque.data(row, "orig").toString(), Qt::MatchStartsWith));
@@ -1481,29 +1474,29 @@ bool CadastrarNFe::validar() {
 
   if (ui->itemBoxLoja->text().isEmpty()) {
     // assume no certificate in acbr
-    throw RuntimeError("Escolha um certificado para o ACBr!", this);
+    qApp->enqueueError("Escolha um certificado para o ACBr!", this);
     ok = false;
   }
 
   // [Emitente]
 
   if (clearStr(modelLoja.data(0, "cnpj").toString()).isEmpty()) {
-    throw RuntimeError("CNPJ emitente vazio!", this);
+    qApp->enqueueError("CNPJ emitente vazio!", this);
     ok = false;
   }
 
   if (modelLoja.data(0, "razaoSocial").toString().isEmpty()) {
-    throw RuntimeError("Razão Social emitente vazio!", this);
+    qApp->enqueueError("Razão Social emitente vazio!", this);
     ok = false;
   }
 
   if (modelLoja.data(0, "nomeFantasia").toString().isEmpty()) {
-    throw RuntimeError("Nome Fantasia emitente vazio!", this);
+    qApp->enqueueError("Nome Fantasia emitente vazio!", this);
     ok = false;
   }
 
   if (modelLoja.data(0, "tel").toString().isEmpty()) {
-    throw RuntimeError("Telefone emitente vazio!", this);
+    qApp->enqueueError("Telefone emitente vazio!", this);
     ok = false;
   }
 
@@ -1518,32 +1511,32 @@ bool CadastrarNFe::validar() {
   }
 
   if (clearStr(queryLojaEnd.value("CEP").toString()).isEmpty()) {
-    throw RuntimeError("CEP vazio!", this);
+    qApp->enqueueError("CEP vazio!", this);
     ok = false;
   }
 
   if (queryLojaEnd.value("logradouro").toString().isEmpty()) {
-    throw RuntimeError("Logradouro vazio!", this);
+    qApp->enqueueError("Logradouro vazio!", this);
     ok = false;
   }
 
   if (queryLojaEnd.value("numero").toString().isEmpty()) {
-    throw RuntimeError("Número vazio!", this);
+    qApp->enqueueError("Número vazio!", this);
     ok = false;
   }
 
   if (queryLojaEnd.value("bairro").toString().isEmpty()) {
-    throw RuntimeError("Bairro vazio!", this);
+    qApp->enqueueError("Bairro vazio!", this);
     ok = false;
   }
 
   if (queryLojaEnd.value("cidade").toString().isEmpty()) {
-    throw RuntimeError("Cidade vazio!", this);
+    qApp->enqueueError("Cidade vazio!", this);
     ok = false;
   }
 
   if (queryLojaEnd.value("uf").toString().isEmpty()) {
-    throw RuntimeError("UF vazio!", this);
+    qApp->enqueueError("UF vazio!", this);
     ok = false;
   }
 
@@ -1565,20 +1558,20 @@ bool CadastrarNFe::validar() {
   }
 
   if (queryCliente.value("nome_razao").toString().isEmpty()) {
-    throw RuntimeError("Nome/Razão vazio!", this);
+    qApp->enqueueError("Nome/Razão vazio!", this);
     ok = false;
   }
 
   if (queryCliente.value("pfpj").toString() == "PF") {
     if (clearStr(queryCliente.value("cpf").toString()).isEmpty()) {
-      throw RuntimeError("CPF destinatário vazio!", this);
+      qApp->enqueueError("CPF destinatário vazio!", this);
       ok = false;
     }
   }
 
   if (queryCliente.value("pfpj").toString() == "PJ") {
     if (clearStr(queryCliente.value("cnpj").toString()).isEmpty()) {
-      throw RuntimeError("CNPJ destinatário vazio!", this);
+      qApp->enqueueError("CNPJ destinatário vazio!", this);
       ok = false;
     }
   }
@@ -1594,22 +1587,22 @@ bool CadastrarNFe::validar() {
   }
 
   if (queryEndereco.value("cep").toString().isEmpty()) {
-    throw RuntimeError("CEP cliente vazio!", this);
+    qApp->enqueueError("CEP cliente vazio!", this);
     ok = false;
   }
 
   if (queryEndereco.value("logradouro").toString().isEmpty()) {
-    throw RuntimeError("Logradouro cliente vazio!", this);
+    qApp->enqueueError("Logradouro cliente vazio!", this);
     ok = false;
   }
 
   if (queryEndereco.value("numero").toString().isEmpty()) {
-    throw RuntimeError("Número endereço do cliente vazio!", this);
+    qApp->enqueueError("Número endereço do cliente vazio!", this);
     ok = false;
   }
 
   if (queryEndereco.value("bairro").toString().isEmpty()) {
-    throw RuntimeError("Bairro do cliente vazio!", this);
+    qApp->enqueueError("Bairro do cliente vazio!", this);
     ok = false;
   }
 
@@ -1638,12 +1631,12 @@ bool CadastrarNFe::validar() {
   // -------------------------------------------------------------------------
 
   if (queryEndereco.value("cidade").toString().isEmpty()) {
-    throw RuntimeError("Cidade cliente vazio!", this);
+    qApp->enqueueError("Cidade cliente vazio!", this);
     ok = false;
   }
 
   if (queryEndereco.value("uf").toString().isEmpty()) {
-    throw RuntimeError("UF cliente vazio!", this);
+    qApp->enqueueError("UF cliente vazio!", this);
     ok = false;
   }
 
@@ -1733,12 +1726,12 @@ void CadastrarNFe::alterarCertificado(const QString &text) {
 
   const QString resposta = acbrRemoto.enviarComando("NFE.SetCertificado(" + query.value("certificadoSerie").toString() + "," + query.value("certificadoSenha").toString() + ")");
 
-  if (resposta.isEmpty() or not resposta.contains("OK")) {
+  if (not resposta.contains("OK")) {
     ui->itemBoxLoja->clear();
     throw RuntimeException(resposta);
   }
 
-  if (not preencherNumeroNFe()) { return; }
+  preencherNumeroNFe();
 
   // TODO: refactor this code with the one in prepararNFe
   QSqlQuery queryEmitente;
@@ -1843,7 +1836,7 @@ void CadastrarNFe::unsetConnections() {
   disconnect(ui->tableItens->model(), &QAbstractItemModel::dataChanged, this, &CadastrarNFe::on_tableItens_dataChanged);
 }
 
-bool CadastrarNFe::listarCfop() {
+void CadastrarNFe::listarCfop() {
   const bool mesmaUF = (ui->lineEditEmitenteUF->text() == ui->lineEditDestinatarioUF->text());
   const bool entrada = (ui->comboBoxTipo->currentText() == "0 Entrada");
 
@@ -1860,8 +1853,6 @@ bool CadastrarNFe::listarCfop() {
   ui->comboBoxCfop->addItem("");
 
   while (queryCfop.next()) { ui->comboBoxCfop->addItem(queryCfop.value(stringUF).toString() + " - " + queryCfop.value("NAT").toString()); }
-
-  return true;
 }
 
 void CadastrarNFe::on_comboBoxDestinoOperacao_currentTextChanged(const QString &text) { ui->tabWidget_4->setTabEnabled(4, text == "2 Operação interestadual"); }

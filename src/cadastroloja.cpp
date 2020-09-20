@@ -263,12 +263,13 @@ void CadastroLoja::on_lineEditCEP_textChanged(const QString &cep) {
   ui->lineEditNro->clear();
   ui->lineEditComp->clear();
 
-  if (CepCompleter cc; cc.buscaCEP(cep, this)) {
-    ui->lineEditUF->setText(cc.getUf());
-    ui->lineEditCidade->setText(cc.getCidade());
-    ui->lineEditLogradouro->setText(cc.getEndereco());
-    ui->lineEditBairro->setText(cc.getBairro());
-  }
+  CepCompleter cc;
+  cc.buscaCEP(cep, this);
+
+  ui->lineEditUF->setText(cc.getUf());
+  ui->lineEditCidade->setText(cc.getCidade());
+  ui->lineEditLogradouro->setText(cc.getEndereco());
+  ui->lineEditBairro->setText(cc.getBairro());
 }
 
 void CadastroLoja::on_tableEndereco_clicked(const QModelIndex &index) {
@@ -375,11 +376,7 @@ bool CadastroLoja::newRegister() {
 }
 
 bool CadastroLoja::cadastrarConta(const Tipo tipoConta) {
-  if (ui->lineEditBanco->text().isEmpty()) {
-    throw RuntimeError("Banco inválido!", this);
-    ui->lineEditBanco->setFocus();
-    return false;
-  }
+  if (ui->lineEditBanco->text().isEmpty()) { throw RuntimeError("Banco inválido!", this); }
 
   if (tipoConta == Tipo::Cadastrar) { currentRowConta = modelConta.insertRowAtEnd(); }
 

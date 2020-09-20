@@ -13,6 +13,7 @@ class Venda final : public RegisterDialog {
 public:
   explicit Venda(QWidget *parent);
   ~Venda();
+
   auto prepararVenda(const QString &idOrcamento) -> void;
   auto setFinanceiro() -> void;
   auto show() -> void;
@@ -34,11 +35,19 @@ private:
   SqlTreeModel modelTree;
   Ui::Venda *ui;
   // methods
-  auto atualizarCredito() -> void;
   auto cadastrar() -> void final;
+  auto clearFields() -> void final;
+  auto registerMode() -> void final;
+  auto savingProcedures() -> void final;
+  auto setupMapper() -> void final;
+  auto successMessage() -> void final;
+  auto updateMode() -> void final;
+  auto verifyFields() -> void final;
+  auto viewRegister() -> bool final;
+
+  auto atualizarCredito() -> void;
   auto calcPrecoGlobalTotal() -> void;
   auto cancelamento() -> void;
-  auto clearFields() -> void final;
   auto copiaProdutosOrcamento() -> void;
   auto criarComissaoProfissional() -> void;
   auto criarConsumos() -> void;
@@ -65,16 +74,9 @@ private:
   auto on_pushButtonGerarExcel_clicked() -> void;
   auto on_pushButtonGerarPdf_clicked() -> void;
   auto on_pushButtonVoltar_clicked() -> void;
-  auto registerMode() -> void final;
-  auto savingProcedures() -> void final;
   auto setConnections() -> void;
   auto setTreeView() -> void;
-  auto setupMapper() -> void final;
   auto setupTables() -> void;
-  auto successMessage() -> void final;
   auto unsetConnections() -> void;
-  auto updateMode() -> void final;
   auto verificaDisponibilidadeEstoque() -> void;
-  auto verifyFields() -> void final;
-  auto viewRegister() -> bool final;
 };
